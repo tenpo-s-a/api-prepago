@@ -1,0 +1,107 @@
+pipeline {
+  agent any
+  stages {
+    stage('Copy files into workspace'){
+      steps {
+        echo 'Cleaning folder'
+        sh 'rm -rf *'
+        echo 'Copying files into workspace folder'
+        sh "cp -r ${env.PROJECT_FOLDER_PATH}/* ."
+      }
+    }
+    stage('Init database') {
+      steps {
+        echo 'Init database'
+        dir(path: 'scripts/') {
+          sh './db-init.sh'
+        }
+      }
+    }
+    stage('Migrate database') {
+      steps {
+        echo 'Migrating database'
+        dir(path: 'pg/') {
+          sh './migrate-status.sh --env=jenkins'
+          sh './migrate-up.sh --env=jenkins'
+          sh './migrate-status.sh --env=jenkins'
+        }
+      }
+    }
+    stage('Test database migrations') {
+      steps {
+        dir(path: 'pg/') {
+          sh './test.sh -Denv=jenkins'
+        }
+      }
+      post {
+        always {
+          dir(path: 'pg/') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+          }
+        }
+      }
+    }
+    stage('Test API App') {
+      steps {
+        dir(path: 'app/') {
+          sh './test.sh -Denv=jenkins'
+        }
+      }
+      post {
+        always {
+          dir(path: 'app/') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+          }
+        }
+      }
+    }
+    stage('Deploy API App') {
+      steps {
+        dir(path: 'app/') {
+          sh './deploy.sh'
+        }
+      }
+    }
+    stage('Migrate Kong') {
+      steps {
+        dir(path: 'kong/') {
+          sh './migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:8080 -silence true'
+        }
+      }
+    }
+    stage('Test kong migrations') {
+      steps {
+        dir(path: 'kong/') {
+          sh './test.sh -Dkong_host=http://localhost:8000'
+        }
+      }
+      post {
+        always {
+          dir(path: 'kong/') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+          }
+        }
+      }
+    }
+    stage('Archive artifact') {
+      steps {
+        echo 'Archive artifacts'
+        dir(path: 'app/') {
+          archiveArtifacts 'target/*.war'
+        }
+      }
+    }
+    stage('Drop database') {
+      steps {
+        echo 'Drop database'
+        dir(path: 'scripts/') {
+          sh './db-drop.sh'
+        }
+      }
+    }
+  }
+  tools {
+    jdk 'Java 8'
+    maven 'maven-3.5.3'
+  }
+}

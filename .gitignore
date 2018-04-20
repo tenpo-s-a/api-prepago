@@ -1,0 +1,21 @@
+# Local development
+*.env
+*.dev
+.DS_Store
+.classpath
+.project
+.idea
+.settings
+
+target/
+
+db-id.txt
+jenkins.properties
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Logs
+logs
+*.log

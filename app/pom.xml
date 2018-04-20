@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+	<groupId>cl.multicaja.prepago</groupId>
+	<artifactId>api-prepaid</artifactId>
+	<packaging>war</packaging>
+	<version>1.0.0</version>
+
+  <properties>
+    <war.version>1.0</war.version>
+    <classifier>client</classifier>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <skipTests>true</skipTests>
+    <junit.version>4.12</junit.version>
+    <jersey.version>2.26</jersey.version>
+    <javaee-api.version>8.0</javaee-api.version>
+    <postgresql.version>42.2.1</postgresql.version>
+  </properties>
+
+	<repositories>
+
+    <repository>
+      <id>mvnrepository.com</id>
+      <url>https://mvnrepository.com/</url>
+    </repository>
+
+    <repository>
+      <id>download.java.net</id>
+      <url>http://download.java.net/maven/2/</url>
+      <layout>default</layout>
+    </repository>
+
+	</repositories>
+
+	<dependencies>
+
+    <dependency>
+      <groupId>cl.multicaja.prepago</groupId>
+      <artifactId>api-core</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cl.multicaja.prepago</groupId>
+      <artifactId>api-users</artifactId>
+      <version>1.0.0</version>
+      <classifier>${classifier}</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>cl.multicaja.prepago</groupId>
+      <artifactId>api-helpers</artifactId>
+      <version>1.0.0</version>
+      <classifier>${classifier}</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>${javaee-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+	</dependencies>
+
+	<build>
+
+    <finalName>${project.artifactId}-${war.version}</finalName>
+
+		<plugins>
+
+      <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.4</version>
+        <configuration>
+          <skipTests>${skipTests}</skipTests>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <finalName>${project.artifactId}-${project.version}</finalName>
+              <classifier>${classifier}</classifier>
+              <excludes>
+                <exclude>cl/multicaja/prepago/resources/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+		</plugins>
+	</build>
+
+</project>
