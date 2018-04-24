@@ -1,10 +1,11 @@
 package cl.multicaja.prepago.test.db;
 
+import cl.multicaja.prepago.test.TestDbBase;
 import cl.multicaja.prepago.utils.db.ColumnInfo;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class Test_20180402193618_create_changelog extends TestBase {
+public class Test_20180402193618_create_changelog extends TestDbBase {
 
   @Test
   public void checkTableChangelog() {

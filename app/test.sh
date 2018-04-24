@@ -1,3 +1,4 @@
 #!/bin/bash
 
-mvn clean compile test -DskipTests=false $1 $2 $3
+mvn clean package
+mvn test -DskipTests=false $1 $2 $3

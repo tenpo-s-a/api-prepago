@@ -13,18 +13,17 @@
 
         NOTA: Este modo continua ejecutando todas las migraciones si una de ellas falla
 
-        > ./migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:3100 -silence true
+        > ./migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:8080 -silence true
 
     ## Ejecutar migraciones en modo no silecioso
 
         NOTA: Este modo falla completamente si una de las migraciones falla
 
-        > ./migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:3100 -silence false
+        > ./migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:8080 -silence false
 
     ## Probar apis desde kong
 
-        > curl -i -X GET 'http://localhost:8000/users/ping' --header 'Host: users-1-0-0'
-        > curl -i -X GET 'http://localhost:8000/users/ping' --header 'Host: users-1-0-1'
+        > curl -i -X GET 'http://localhost:8000/prepaid/ping' --header 'Host: api-prepaid-1.0'
 
 # Ejecución de test
 

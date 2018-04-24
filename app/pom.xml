@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-	<groupId>cl.multicaja.prepago</groupId>
-	<artifactId>api-prepaid</artifactId>
-	<packaging>war</packaging>
-	<version>1.0.0</version>
+  <groupId>cl.multicaja.prepago</groupId>
+  <artifactId>api-prepaid</artifactId>
+  <packaging>war</packaging>
+  <version>1.0.0</version>
 
   <properties>
     <war.version>1.0</war.version>
@@ -20,7 +20,7 @@
     <postgresql.version>42.2.1</postgresql.version>
   </properties>
 
-	<repositories>
+  <repositories>
 
     <repository>
       <id>mvnrepository.com</id>
@@ -33,9 +33,9 @@
       <layout>default</layout>
     </repository>
 
-	</repositories>
+  </repositories>
 
-	<dependencies>
+  <dependencies>
 
     <dependency>
       <groupId>cl.multicaja.prepago</groupId>
@@ -79,6 +79,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
@@ -86,29 +92,37 @@
     </dependency>
 
     <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>${postgresql.version}</version>
+      <groupId>fish.payara.extras</groupId>
+      <artifactId>payara-embedded-web</artifactId>
+      <version>5.181</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
 
-	</dependencies>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.1.0.Final</version>
+      <scope>test</scope>
+    </dependency>
 
-	<build>
+  </dependencies>
+
+  <build>
 
     <finalName>${project.artifactId}-${war.version}</finalName>
 
-		<plugins>
+    <plugins>
 
       <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -116,6 +130,9 @@
         <version>2.12.4</version>
         <configuration>
           <skipTests>${skipTests}</skipTests>
+          <includes>
+            <include>**/TestSuite.class</include>
+          </includes>
         </configuration>
       </plugin>
 
@@ -140,7 +157,7 @@
         </executions>
       </plugin>
 
-		</plugins>
-	</build>
+    </plugins>
+  </build>
 
 </project>
