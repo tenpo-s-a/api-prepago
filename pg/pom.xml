@@ -75,6 +75,9 @@
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 					<skipTests>${skipTests}</skipTests>
+          <includes>
+            <include>**/TestSuite.class</include>
+          </includes>
 				</configuration>
 			</plugin>
 

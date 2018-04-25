@@ -1,4 +1,4 @@
-package cl.multicaja.prepago.test.api;
+package cl.multicaja.prepago.test.db;
 
 import cl.multicaja.prepago.test.TestSuiteBase;
 import org.apache.commons.logging.Log;
@@ -15,16 +15,12 @@ public class TestSuite extends TestSuiteBase {
 
   private static Log log = LogFactory.getLog(TestSuite.class);
 
-  private static TestServer testServer = new TestServer();
-
   @BeforeClass
   public static void setUp() throws Exception {
-    testServer.start();
   }
 
   @AfterClass
   public static void tearDown() {
-    testServer.stop();
   }
 
   public static Class<?>[] suite() throws Exception {
@@ -38,3 +34,5 @@ public class TestSuite extends TestSuiteBase {
     return  classList;
   }
 }
+
+
