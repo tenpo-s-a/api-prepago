@@ -11,6 +11,14 @@ target/
 
 db-id.txt
 jenkins.properties
+test-*.properties
+test_*.properties
+development-*.properties
+development_*.properties
+qa-*.properties
+qa_*.properties
+production-*.properties
+production_*.properties
 
 # Docker
 Dockerfile
