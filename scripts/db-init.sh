@@ -8,6 +8,7 @@
 ##########################################################
 
 id=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+id="CI_${id}"
 
 cat <<EOF >./db-id.txt
 $id
