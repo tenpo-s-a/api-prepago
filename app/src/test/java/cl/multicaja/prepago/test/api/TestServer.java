@@ -48,7 +48,7 @@ public class TestServer {
     //se establecen los datos de conexion http al TestApiBase
     TestApiBase.PORT_HTTP = port;
     TestApiBase.PORT_HTTPS = port + 1;
-    TestApiBase.CONTEXT_PATH = ConfigUtils.getInstance().getProperty("context.path");
+    TestApiBase.CONTEXT_PATH = ConfigUtils.getInstance().getModuleProperty("context.path");
 
     //en caso que sea development* o production* lo puertos por defecto son 8080 y 8181 dado que son los puertos
     //del servidor externo
@@ -61,6 +61,7 @@ public class TestServer {
 
     log.info("============================================");
     log.info("Suite env: " + env);
+    log.info("Suite context path: " + TestApiBase.CONTEXT_PATH);
     log.info("Suite host: " + testApiBase.getApiHost().get("host"));
     log.info("Suite port: " + testApiBase.getApiHost().get("port"));
     log.info("============================================");
