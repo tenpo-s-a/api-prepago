@@ -1,5 +1,8 @@
 package cl.multicaja.prepago.ejb.v10;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.ejb.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +15,8 @@ import java.util.Map;
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
 public class PrepaidEJBBean10 implements PrepaidEJB10 {
+
+  private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
 
   @EJB
   private UsersEJB10 usersEJB10;

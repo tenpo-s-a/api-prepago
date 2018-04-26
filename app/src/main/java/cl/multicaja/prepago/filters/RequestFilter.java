@@ -2,6 +2,8 @@ package cl.multicaja.prepago.filters;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestFilter implements Filter {
+
+  private static Log log = LogFactory.getLog(RequestFilter.class);
 
   private String[] requireHeaders = {
     //"user-lang",
@@ -37,7 +41,7 @@ public class RequestFilter implements Filter {
         mapHeaders.put(key, httpServletRequest.getHeader(key));
       }
 
-      System.out.println("RequestFilter headers: " + mapHeaders);
+      log.info("RequestFilter headers: " + mapHeaders);
 
       for (String requireHeader : requireHeaders) {
         if (StringUtils.isBlank(mapHeaders.get(requireHeader))) {
@@ -50,7 +54,7 @@ public class RequestFilter implements Filter {
     try {
       filterChain.doFilter(servletRequest, servletResponse);
     } catch(Exception ex) {
-      ex.printStackTrace();
+      log.error("Error al procesar filtro", ex);
     }
   }
 

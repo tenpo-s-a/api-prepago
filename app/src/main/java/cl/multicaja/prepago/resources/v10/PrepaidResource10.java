@@ -1,9 +1,14 @@
 package cl.multicaja.prepago.resources.v10;
 
 import cl.multicaja.prepago.ejb.v10.PrepaidEJB10;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -18,6 +23,8 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public final class PrepaidResource10 {
+
+  private static Log log = LogFactory.getLog(PrepaidResource10.class);
 
   @EJB
   private PrepaidEJB10 ejb;
