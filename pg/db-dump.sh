@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ##########################################################
 #
 # Script que permite hacer un dump de una base de datos
