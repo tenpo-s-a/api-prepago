@@ -5,6 +5,22 @@
   Algunos script soportan el envio del ambiente de ejecución mediante el parametro --env, o -Denv
   Ambientes disponibles: test, development, production, jenkins
 
+## Crear base de datos
+
+  > ./db-create.sh [--env]
+
+  Ejemplo: Creará la base de datos definida para el ambiente definido en el parametro "development"
+
+  > ./db-create.sh --env=development
+
+## Borrar base de datos
+
+  > ./db-drop.sh [--env]
+
+  Ejemplo: Borrará la bade de datos definida para el ambiente definido en el parametro "development"
+
+  > ./db-drop.sh --env=development
+
 ## Ver estado de migraciones
 
   > ./migrate-status.sh [--env]
