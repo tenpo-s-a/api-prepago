@@ -14,7 +14,7 @@ pipeline {
         echo 'Init database'
         dir(path: 'pg/') {
           sh './db-init.sh'
-          sh './db-create.sh'
+          sh './db-create.sh --env=jenkins'
         }
       }
     }
@@ -97,7 +97,7 @@ pipeline {
       steps {
         echo 'Drop database'
         dir(path: 'pg/') {
-          sh './db-drop.sh'
+          sh './db-drop.sh --env=jenkins'
         }
       }
     }

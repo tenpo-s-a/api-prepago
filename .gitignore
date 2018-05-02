@@ -19,6 +19,7 @@ qa-*.properties
 qa_*.properties
 production-*.properties
 production_*.properties
+pg/dump.sql
 
 # Docker
 Dockerfile

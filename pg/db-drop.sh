@@ -6,15 +6,7 @@
 #
 ##########################################################
 
-if [ -f "db-id.txt" ]
-then
-    id=$(cat db-id.txt)
-    echo "Borrando base de datos: $id"
-    dropdb $id -U postgres
-    rm db-id.txt
-else
-	echo "No existe el archivo db-id.txt"
-fi
+mvn exec:java -Dexec.mainClass="cl.multicaja.prepago.apps.MainDropDatabase" -Dexec.args="$1 $2 $3 $4 $5 $6 $7 $8 $9"
 
 pg_jenkins_properties="./environments/jenkins.properties"
 app_jenkins_properties="../app/src/main/resources/jenkins.properties"
