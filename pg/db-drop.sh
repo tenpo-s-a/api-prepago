@@ -16,7 +16,7 @@ else
 	echo "No existe el archivo db-id.txt"
 fi
 
-pg_jenkins_properties="../pg/environments/jenkins.properties"
+pg_jenkins_properties="./environments/jenkins.properties"
 app_jenkins_properties="../app/src/main/resources/jenkins.properties"
 echo "Borrando archivo de test en jenkins: $pg_jenkins_properties"
 rm $pg_jenkins_properties

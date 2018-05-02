@@ -17,11 +17,11 @@ EOF
 #lee el archivo ci.properies como plantilla y para crear uno nuevo llamado jenkins.properties estableciendo en
 #el el id de la base de datos nueva
 IFS=
-text=$(cat ../pg/environments/ci.properties) #lee el archivo ci.properties
+text=$(cat ./environments/ci.properties) #lee el archivo ci.properties
 text=$(echo $text | sed -e "s/{BD_ID}/$id/") #reemplaza {BD_ID} por el contenido de la variable $id
 
 #crea un nuevo archivo jenkins.properties a partir de $text
-pg_jenkins_properties="../pg/environments/jenkins.properties"
+pg_jenkins_properties="./environments/jenkins.properties"
 echo "Creando archivo: $pg_jenkins_properties"
 cat <<EOF >$pg_jenkins_properties
 $text
@@ -39,15 +39,3 @@ echo "Creando archivo: $app_jenkins_properties"
 cat <<EOF >$app_jenkins_properties
 $text
 EOF
-
-echo "Creando base de datos: $id"
-createdb $id -U postgres -W postgres -O postgres -w
-
-#si existe un archivo dump.sql lo ejecuta sobre la base de datos nueva
-if [ -f "dump.sql" ]
-then
-	echo "Cargando datos en la base de datos: $id"
-    psql -U postgres -W postgres -w -d $id -a -f dump.sql
-else
-	echo "No existe el archivo dump.sql"
-fi

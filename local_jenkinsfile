@@ -12,8 +12,9 @@ pipeline {
     stage('Init database') {
       steps {
         echo 'Init database'
-        dir(path: 'scripts/') {
+        dir(path: 'pg/') {
           sh './db-init.sh'
+          sh './db-create.sh'
         }
       }
     }
@@ -21,6 +22,7 @@ pipeline {
       steps {
         echo 'Migrating database'
         dir(path: 'pg/') {
+          sh './migrate-bootstrap.sh --env=jenkins'
           sh './migrate-status.sh --env=jenkins'
           sh './migrate-up.sh --env=jenkins'
           sh './migrate-status.sh --env=jenkins'
@@ -94,7 +96,7 @@ pipeline {
     stage('Drop database') {
       steps {
         echo 'Drop database'
-        dir(path: 'scripts/') {
+        dir(path: 'pg/') {
           sh './db-drop.sh'
         }
       }
