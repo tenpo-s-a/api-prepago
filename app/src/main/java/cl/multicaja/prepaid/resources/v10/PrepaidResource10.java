@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.prepaid.dto.NewRawTransactionDTO;
+import cl.multicaja.prepaid.dto.NewPrepaidTransactionDTO;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJB10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +39,7 @@ public final class PrepaidResource10 {
 
   @POST
   @Path("/prepaid/processor/notification")
-  public Response processorNotification(){
+  public Response processorNotification(NewRawTransactionDTO trx){
     return Response.ok().build();
   }
 
@@ -55,13 +57,13 @@ public final class PrepaidResource10 {
 
   @POST
   @Path("/prepaid/{userId}/balance/topup")
-  public Response topupBalance(@PathParam("userId") String userId){
+  public Response topupBalance(@PathParam("userId") String userId, NewPrepaidTransactionDTO trx){
     return Response.ok().build();
   }
 
   @POST
   @Path("/prepaid/{userId}/balance/widthdraw")
-  public Response widthdrawBalance(@PathParam("userId") String userId){
+  public Response widthdrawBalance(@PathParam("userId") String userId, NewPrepaidTransactionDTO trx){
     return Response.ok().build();
   }
 
