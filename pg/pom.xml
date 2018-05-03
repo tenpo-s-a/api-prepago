@@ -47,6 +47,18 @@
     </dependency>
 
     <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-migrations</artifactId>
+        <version>3.3.3</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>3.4.6</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
