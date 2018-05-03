@@ -7,15 +7,15 @@ import java.math.BigDecimal;
  */
 public class NewAmount {
 
-  private Integer currency_code;
+  private Integer currencyCode;
   private BigDecimal amount;
 
-  public Integer getCurrency_code() {
-    return currency_code;
+  public Integer getCurrencyCode() {
+    return currencyCode;
   }
 
-  public void setCurrency_code(Integer currency_code) {
-    this.currency_code = currency_code;
+  public void setCurrencyCode(Integer currencyCode) {
+    this.currencyCode = currencyCode;
   }
 
   public BigDecimal getAmount() {

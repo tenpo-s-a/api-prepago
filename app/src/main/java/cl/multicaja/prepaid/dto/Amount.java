@@ -6,16 +6,16 @@ package cl.multicaja.prepaid.dto;
 import java.math.BigDecimal;
 
 public class Amount{
-  private Integer currency_code;
+  private Integer currencyCode;
   private BigDecimal amount;
-  private String currency_description;
+  private String currencyDescription;
 
-  public Integer getCurrency_code() {
-    return currency_code;
+  public Integer getCurrencyCode() {
+    return currencyCode;
   }
 
-  public void setCurrency_code(Integer currency_code) {
-    this.currency_code = currency_code;
+  public void setCurrencyCode(Integer currencyCode) {
+    this.currencyCode = currencyCode;
   }
 
   public BigDecimal getAmount() {
@@ -27,10 +27,10 @@ public class Amount{
   }
 
   public String getCurrencyDescription() {
-    return currency_description;
+    return currencyDescription;
   }
 
-  public void setCurrencyDescription(String currency_description) {
-    this.currency_description = currency_description;
+  public void setCurrencyDescription(String currencyDescription) {
+    this.currencyDescription = currencyDescription;
   }
 }

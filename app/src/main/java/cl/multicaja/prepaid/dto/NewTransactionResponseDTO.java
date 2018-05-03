@@ -16,11 +16,11 @@ public class NewTransactionResponseDTO {
     this.balance = balance;
   }
 
-  public String getProcessor_transaction_id() {
+  public String getProcessorTransactionId() {
     return processor_transaction_id;
   }
 
-  public void setProcessor_transaction_id(String processor_transaction_id) {
+  public void setProcessorTransactionId(String processor_transaction_id) {
     this.processor_transaction_id = processor_transaction_id;
   }
 }

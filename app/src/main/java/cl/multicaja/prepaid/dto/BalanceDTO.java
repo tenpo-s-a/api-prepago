@@ -5,22 +5,22 @@ package cl.multicaja.prepaid.dto;
  */
 public class BalanceDTO {
 
-  private Amount primary_balance;
-  private Amount secondary_balance;
+  private Amount primaryBalance;
+  private Amount secondaryBalance;
 
   public Amount getPrimaryBalance() {
-    return primary_balance;
+    return primaryBalance;
   }
 
-  public void setPrimaryBalance(Amount primary_balance) {
-    this.primary_balance = primary_balance;
+  public void setPrimaryBalance(Amount primaryBalance) {
+    this.primaryBalance = primaryBalance;
   }
 
   public Amount getSecondaryBalance() {
-    return secondary_balance;
+    return secondaryBalance;
   }
 
-  public void setSecondaryBalance(Amount secondary_balance) {
-    this.secondary_balance = secondary_balance;
+  public void setSecondaryBalance(Amount secondaryBalance) {
+    this.secondaryBalance = secondaryBalance;
   }
 }

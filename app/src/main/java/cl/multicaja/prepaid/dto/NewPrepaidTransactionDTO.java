@@ -6,7 +6,7 @@ package cl.multicaja.prepaid.dto;
 public class NewPrepaidTransactionDTO {
 
   private NewAmount amount;
-  private Integer new_transaction_id;
+  private Integer newTransactionId;
 
   public NewAmount getAmount() {
     return amount;
@@ -17,10 +17,10 @@ public class NewPrepaidTransactionDTO {
   }
 
   public Integer getNewTransactionId() {
-    return new_transaction_id;
+    return newTransactionId;
   }
 
-  public void setNewTransactionId(Integer new_transaction_id) {
-    this.new_transaction_id = new_transaction_id;
+  public void setNewTransactionId(Integer newTransactionId) {
+    this.newTransactionId = newTransactionId;
   }
 }

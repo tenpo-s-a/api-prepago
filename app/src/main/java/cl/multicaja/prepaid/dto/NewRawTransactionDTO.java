@@ -36,7 +36,7 @@ public class NewRawTransactionDTO {
 
 class NewRawTransactionHeader {
   private String entidad;
-  private String centro_alta;
+  private String centroAlta;
   private String cuenta;
   private String pan;
 
@@ -48,12 +48,12 @@ class NewRawTransactionHeader {
     this.entidad = entidad;
   }
 
-  public String getCentro_alta() {
-    return centro_alta;
+  public String getcentroAlta() {
+    return centroAlta;
   }
 
-  public void setCentro_alta(String centro_alta) {
-    this.centro_alta = centro_alta;
+  public void setcentroAlta(String centroAlta) {
+    this.centroAlta = centroAlta;
   }
 
   public String getCuenta() {
@@ -75,53 +75,53 @@ class NewRawTransactionHeader {
 
 class NewRawTransactionBody {
 
-  private Amount saldo_disponible;
-  private Amount importe_local;
-  private Amount importe_divisa;
-  private Integer tipo_tx;
-  private Integer id_mensaje;
+  private Amount saldoDisponible;
+  private Amount importeLocal;
+  private Amount importeDivisa;
+  private Integer tipoTx;
+  private Integer idMensaje;
   private Place lugar;
   private Merchant merchant;
-  private Integer resolucion_tx;
+  private Integer resolucionTx;
 
-  public Amount getSaldo_disponible() {
-    return saldo_disponible;
+  public Amount getSaldoDisponible() {
+    return saldoDisponible;
   }
 
-  public void setSaldo_disponible(Amount saldo_disponible) {
-    this.saldo_disponible = saldo_disponible;
+  public void setSaldoDisponible(Amount saldoDisponible) {
+    this.saldoDisponible = saldoDisponible;
   }
 
-  public Amount getImporte_local() {
-    return importe_local;
+  public Amount getImporteLocal() {
+    return importeLocal;
   }
 
-  public void setImporte_local(Amount importe_local) {
-    this.importe_local = importe_local;
+  public void setImporteLocal(Amount importeLocal) {
+    this.importeLocal = importeLocal;
   }
 
-  public Amount getImporte_divisa() {
-    return importe_divisa;
+  public Amount getImporteDivisa() {
+    return importeDivisa;
   }
 
-  public void setImporte_divisa(Amount importe_divisa) {
-    this.importe_divisa = importe_divisa;
+  public void setImporteDivisa(Amount importeDivisa) {
+    this.importeDivisa = importeDivisa;
   }
 
-  public Integer getTipo_tx() {
-    return tipo_tx;
+  public Integer getTipoTx() {
+    return tipoTx;
   }
 
-  public void setTipo_tx(Integer tipo_tx) {
-    this.tipo_tx = tipo_tx;
+  public void setTipoTx(Integer tipoTx) {
+    this.tipoTx = tipoTx;
   }
 
-  public Integer getId_mensaje() {
-    return id_mensaje;
+  public Integer getIdMensaje() {
+    return idMensaje;
   }
 
-  public void setId_mensaje(Integer id_mensaje) {
-    this.id_mensaje = id_mensaje;
+  public void setIdMensaje(Integer idMensaje) {
+    this.idMensaje = idMensaje;
   }
 
   public Place getLugar() {
@@ -140,11 +140,11 @@ class NewRawTransactionBody {
     this.merchant = merchant;
   }
 
-  public Integer getResolucion_tx() {
-    return resolucion_tx;
+  public Integer getResolucionTx() {
+    return resolucionTx;
   }
 
-  public void setResolucion_tx(Integer resolucion_tx) {
-    this.resolucion_tx = resolucion_tx;
+  public void setResolucionTx(Integer resolucionTx) {
+    this.resolucionTx = resolucionTx;
   }
 }

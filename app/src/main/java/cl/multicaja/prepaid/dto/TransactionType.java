@@ -4,40 +4,41 @@ package cl.multicaja.prepaid.dto;
  * @author abarazarte
  */
 public class TransactionType {
-  private String type_code;
-  private String type_description;
-  private Boolean is_ammendment;
-  private Boolean is_positive;
 
-  public String getType_code() {
-    return type_code;
+  private String typeCode;
+  private String typeDescription;
+  private Boolean isAmmendment;
+  private Boolean isPositive;
+
+  public String getTypeCode() {
+    return typeCode;
   }
 
-  public void setType_code(String type_code) {
-    this.type_code = type_code;
+  public void setTypeCode(String typeCode) {
+    this.typeCode = typeCode;
   }
 
-  public String getType_description() {
-    return type_description;
+  public String getTypeDescription() {
+    return typeDescription;
   }
 
-  public void setType_description(String type_description) {
-    this.type_description = type_description;
+  public void setTypeDescription(String typeDescription) {
+    this.typeDescription = typeDescription;
   }
 
-  public Boolean getIs_ammendment() {
-    return is_ammendment;
+  public Boolean IsAmmendment() {
+    return isAmmendment;
   }
 
-  public void setIs_ammendment(Boolean is_ammendment) {
-    this.is_ammendment = is_ammendment;
+  public void setIsAmmendment(Boolean isAmmendment) {
+    this.isAmmendment = isAmmendment;
   }
 
-  public Boolean getIs_positive() {
-    return is_positive;
+  public Boolean IsPositive() {
+    return isPositive;
   }
 
-  public void setIs_positive(Boolean is_positive) {
-    this.is_positive = is_positive;
+  public void setIsPositive(Boolean isPositive) {
+    this.isPositive = isPositive;
   }
 }

@@ -5,40 +5,40 @@ package cl.multicaja.prepaid.dto;
  */
 public class PrepaidTransactionDTO {
 
-  private TransactionType transaction_type;
-  private String auth_code;
-  private String processor_transaction_id;
+  private TransactionType transactionType;
+  private String authCode;
+  private String processorTransactionId;
   private String pan;
-  private String real_date;
-  private String accounting_date;
-  private String processing_date;
-  private Amount amount_primary;
-  private Amount amount_foreign;
+  private String realDate;
+  private String accountingDate;
+  private String processingDate;
+  private Amount amountPrimary;
+  private Amount amountForeign;
   private Place place;
   private Merchant merchant;
 
-  public TransactionType getTransaction_type() {
-    return transaction_type;
+  public TransactionType getTransactionType() {
+    return transactionType;
   }
 
-  public void setTransaction_type(TransactionType transaction_type) {
-    this.transaction_type = transaction_type;
+  public void setTransactionType(TransactionType transactionType) {
+    this.transactionType = transactionType;
   }
 
-  public String getAuth_code() {
-    return auth_code;
+  public String getAuthCode() {
+    return authCode;
   }
 
-  public void setAuth_code(String auth_code) {
-    this.auth_code = auth_code;
+  public void setAuthCode(String authCode) {
+    this.authCode = authCode;
   }
 
-  public String getProcessor_transaction_id() {
-    return processor_transaction_id;
+  public String getProcessorTransactionId() {
+    return processorTransactionId;
   }
 
-  public void setProcessor_transaction_id(String processor_transaction_id) {
-    this.processor_transaction_id = processor_transaction_id;
+  public void setProcessorTransactionId(String processorTransactionId) {
+    this.processorTransactionId = processorTransactionId;
   }
 
   public String getPan() {
@@ -49,44 +49,44 @@ public class PrepaidTransactionDTO {
     this.pan = pan;
   }
 
-  public String getReal_date() {
-    return real_date;
+  public String getRealDate() {
+    return realDate;
   }
 
-  public void setReal_date(String real_date) {
-    this.real_date = real_date;
+  public void setRealDate(String realDate) {
+    this.realDate = realDate;
   }
 
-  public String getAccounting_date() {
-    return accounting_date;
+  public String getAccountingDate() {
+    return accountingDate;
   }
 
-  public void setAccounting_date(String accounting_date) {
-    this.accounting_date = accounting_date;
+  public void setAccountingDate(String accountingDate) {
+    this.accountingDate = accountingDate;
   }
 
-  public String getProcessing_date() {
-    return processing_date;
+  public String getProcessingDate() {
+    return processingDate;
   }
 
-  public void setProcessing_date(String processing_date) {
-    this.processing_date = processing_date;
+  public void setProcessingDate(String processingDate) {
+    this.processingDate = processingDate;
   }
 
-  public Amount getAmount_primary() {
-    return amount_primary;
+  public Amount getAmountPrimary() {
+    return amountPrimary;
   }
 
-  public void setAmount_primary(Amount amount_primary) {
-    this.amount_primary = amount_primary;
+  public void setAmountPrimary(Amount amountPrimary) {
+    this.amountPrimary = amountPrimary;
   }
 
-  public Amount getAmount_foreign() {
-    return amount_foreign;
+  public Amount getAmountForeign() {
+    return amountForeign;
   }
 
-  public void setAmount_foreign(Amount amount_foreign) {
-    this.amount_foreign = amount_foreign;
+  public void setAmountForeign(Amount amountForeign) {
+    this.amountForeign = amountForeign;
   }
 
   public Place getPlace() {

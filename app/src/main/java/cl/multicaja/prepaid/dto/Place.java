@@ -4,31 +4,31 @@ package cl.multicaja.prepaid.dto;
  * @author abarazarte
  */
 public class Place {
-  private Integer country_iso_3266_code;
-  private String country_description;
-  private String place_name;
+  private Integer countryIso3266Code;
+  private String countryDescription;
+  private String placeName;
 
-  public Integer getCountry_iso_3266_code() {
-    return country_iso_3266_code;
+  public Integer getCountryIso3266Code() {
+    return countryIso3266Code;
   }
 
-  public void setCountry_iso_3266_code(Integer country_iso_3266_code) {
-    this.country_iso_3266_code = country_iso_3266_code;
+  public void setCountryIso3266Code(Integer countryIso3266Code) {
+    this.countryIso3266Code = countryIso3266Code;
   }
 
-  public String getCountry_description() {
-    return country_description;
+  public String getCountryDescription() {
+    return countryDescription;
   }
 
-  public void setCountry_description(String country_description) {
-    this.country_description = country_description;
+  public void setCountryDescription(String countryDescription) {
+    this.countryDescription = countryDescription;
   }
 
-  public String getPlace_name() {
-    return place_name;
+  public String getPlaceName() {
+    return placeName;
   }
 
-  public void setPlace_name(String place_name) {
-    this.place_name = place_name;
+  public void setPlaceName(String placeName) {
+    this.placeName = placeName;
   }
 }

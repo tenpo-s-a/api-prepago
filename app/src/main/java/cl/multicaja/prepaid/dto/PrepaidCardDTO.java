@@ -6,10 +6,10 @@ package cl.multicaja.prepaid.dto;
 public class PrepaidCardDTO {
 
   private Integer id;
-  private String processor_user_id;
+  private String processorUserId;
   private String pan;
   private String expiration;
-  private String name_on_card;
+  private String nameOnCard;
   private String status;
 
   public Integer getId() {
@@ -20,12 +20,12 @@ public class PrepaidCardDTO {
     this.id = id;
   }
 
-  public String getProcessor_user_id() {
-    return processor_user_id;
+  public String getProcessorUserId() {
+    return processorUserId;
   }
 
-  public void setProcessor_user_id(String processor_user_id) {
-    this.processor_user_id = processor_user_id;
+  public void setProcessorUserId(String processorUserId) {
+    this.processorUserId = processorUserId;
   }
 
   public String getPan() {
@@ -44,12 +44,12 @@ public class PrepaidCardDTO {
     this.expiration = expiration;
   }
 
-  public String getName_on_card() {
-    return name_on_card;
+  public String getNameOnCard() {
+    return nameOnCard;
   }
 
-  public void setName_on_card(String name_on_card) {
-    this.name_on_card = name_on_card;
+  public void setNameOnCard(String nameOnCard) {
+    this.nameOnCard = nameOnCard;
   }
 
   public String getStatus() {
