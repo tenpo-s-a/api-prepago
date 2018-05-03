@@ -1,8 +1,3 @@
 #!/bin/bash
 
-export MIGRATIONS="./mybatis-migrations-3.3.3"
-export PATH=$PATH:$MIGRATIONS/bin
-
-echo "MyIbatis migrations: $MIGRATIONS"
-
-migrate up $1 $2 $3
+mvn exec:java -Dapp.pid="$$" -Dexec.mainClass="cl.multicaja.core.apps.MigratorWrapper" -Dexec.args="up $1 $2 $3 $4 $5 $6 $7 $8 $9"

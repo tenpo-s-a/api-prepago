@@ -39,11 +39,7 @@ public class TestServer {
 
     //se genera un port aleatorio
     int port = NumberUtils.getInstance().random(3200, 7200);
-    String env = System.getProperty("env");
-
-    if (StringUtils.isBlank(env)) {
-      throw new IllegalArgumentException("Falta la definicion del parametro env con los valores: test, development, production, jenkins");
-    }
+    String env = System.getProperty("env", "test");
 
     //se establecen los datos de conexion http al TestApiBase
     TestApiBase.PORT_HTTP = port;
