@@ -34,4 +34,54 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     map.put("ejb_helpers", this.helpersEJB10.info());
     return map;
   }
+
+  @Override
+  public void processorNotification() throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void emitPrepaid(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void getPrepaid(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void getBalance(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void getTransactions(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void topupBalance(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void withdrawBalance(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void lockCard(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void unlockCard(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void sendPrepaidCard(String userId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
 }

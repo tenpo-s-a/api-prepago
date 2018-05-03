@@ -5,10 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -37,5 +34,60 @@ public final class PrepaidResource10 {
     map.put("implementation", this.ejb.info());
     return Response.status(200).entity(map).build();
   }
+
+  @POST
+  @Path("/prepaid/processor/notification")
+  public Response processorNotification(){
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/{userId}")
+  public Response getPrepaid(@PathParam("userId") String userId) {
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/{userId}/balance")
+  public Response getBalance(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/prepaid/{userId}/balance/topup")
+  public Response topupBalance(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/prepaid/{userId}/balance/widthdraw")
+  public Response widthdrawBalance(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/prepaid/{userId}/status/lock")
+  public Response lockCard(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/prepaid/{userId}/status/unlock")
+  public Response unlockCard(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/{userId}/transactions")
+  public Response getTransactions(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/prepaid/{userId}/mail")
+  public Response sendCardEmail(@PathParam("userId") String userId){
+    return Response.ok().build();
+  }
+
 
 }
