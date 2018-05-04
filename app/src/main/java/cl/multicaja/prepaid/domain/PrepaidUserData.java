@@ -1,20 +1,20 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 import java.util.List;
 
 /**
  * @author abarazarte
  */
-public class PrepaidUserDataDTO {
+public class PrepaidUserData {
 
-  private PrepaidCardDTO card;
+  private PrepaidCard card;
   private List<PrepaidCardLimit> limits;
 
-  public PrepaidCardDTO getCard() {
+  public PrepaidCard getCard() {
     return card;
   }
 
-  public void setCard(PrepaidCardDTO card) {
+  public void setCard(PrepaidCard card) {
     this.card = card;
   }
 
@@ -30,7 +30,7 @@ public class PrepaidUserDataDTO {
 class PrepaidCardLimit {
   private String id;
   private String name;
-  private Amount amount;
+  private AmountAndCurrency amount;
 
   public String getId() {
     return id;
@@ -48,11 +48,11 @@ class PrepaidCardLimit {
     this.name = name;
   }
 
-  public Amount getAmount() {
+  public AmountAndCurrency getAmount() {
     return amount;
   }
 
-  public void setAmount(Amount amount) {
+  public void setAmount(AmountAndCurrency amount) {
     this.amount = amount;
   }
 }

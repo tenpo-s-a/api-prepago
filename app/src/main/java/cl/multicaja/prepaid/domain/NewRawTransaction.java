@@ -1,9 +1,9 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
  */
-public class NewRawTransactionDTO {
+public class NewRawTransaction {
 
   private NewRawTransactionHeader header;
   private NewRawTransactionBody body;
@@ -75,36 +75,36 @@ class NewRawTransactionHeader {
 
 class NewRawTransactionBody {
 
-  private Amount saldoDisponible;
-  private Amount importeLocal;
-  private Amount importeDivisa;
+  private NewAmountAndCurrency saldoDisponible;
+  private NewAmountAndCurrency importeLocal;
+  private NewAmountAndCurrency importeDivisa;
   private Integer tipoTx;
   private Integer idMensaje;
   private Place lugar;
   private Merchant merchant;
   private Integer resolucionTx;
 
-  public Amount getSaldoDisponible() {
+  public NewAmountAndCurrency getSaldoDisponible() {
     return saldoDisponible;
   }
 
-  public void setSaldoDisponible(Amount saldoDisponible) {
+  public void setSaldoDisponible(NewAmountAndCurrency saldoDisponible) {
     this.saldoDisponible = saldoDisponible;
   }
 
-  public Amount getImporteLocal() {
+  public NewAmountAndCurrency getImporteLocal() {
     return importeLocal;
   }
 
-  public void setImporteLocal(Amount importeLocal) {
+  public void setImporteLocal(NewAmountAndCurrency importeLocal) {
     this.importeLocal = importeLocal;
   }
 
-  public Amount getImporteDivisa() {
+  public NewAmountAndCurrency getImporteDivisa() {
     return importeDivisa;
   }
 
-  public void setImporteDivisa(Amount importeDivisa) {
+  public void setImporteDivisa(NewAmountAndCurrency importeDivisa) {
     this.importeDivisa = importeDivisa;
   }
 

@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.helpers.ejb.v10.HelpersEJB10;
-import cl.multicaja.prepaid.dto.*;
+import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.users.ejb.v10.UsersEJB10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,47 +38,47 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public void processorNotification() throws Exception {
+  public void processorNotification(NewRawTransaction trx) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public PrepaidCardDTO emitPrepaid(String userId, NewPrepaidTransactionDTO trx) throws Exception {
+  public PrepaidCard emitPrepaid(String userId, NewPrepaidTransaction trx) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public PrepaidUserDataDTO getPrepaid(String userId) throws Exception {
+  public PrepaidUserData getPrepaid(String userId) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public BalanceDTO getBalance(String userId) throws Exception {
+  public PrepaidCardBalance getBalance(String userId) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public List<PrepaidTransactionDTO> getTransactions(String userId) throws Exception {
+  public List<PrepaidTransaction> getTransactions(String userId) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public NewTransactionResponseDTO topupBalance(String userId, NewPrepaidTransactionDTO trx) throws Exception {
+  public NewPrepaidTransactionResponse topupBalance(String userId, NewPrepaidTransaction trx) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public NewTransactionResponseDTO withdrawBalance(String userId, NewPrepaidTransactionDTO trx) throws Exception {
+  public NewPrepaidTransactionResponse withdrawBalance(String userId, NewPrepaidTransaction trx) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public PrepaidCardDTO lockCard(String userId) throws Exception {
+  public PrepaidCard lockCard(String userId) throws Exception {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public PrepaidCardDTO unlockCard(String userId) throws Exception {
+  public PrepaidCard unlockCard(String userId) throws Exception {
     throw new UnsupportedOperationException();
   }
 

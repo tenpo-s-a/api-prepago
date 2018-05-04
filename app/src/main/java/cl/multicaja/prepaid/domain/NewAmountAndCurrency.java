@@ -1,11 +1,11 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 import java.math.BigDecimal;
 
 /**
  * @author abarazarte
  */
-public class NewAmount {
+public class NewAmountAndCurrency {
 
   private Integer currencyCode;
   private BigDecimal amount;

@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
@@ -7,8 +7,8 @@ public class TransactionType {
 
   private String typeCode;
   private String typeDescription;
-  private Boolean isAmmendment;
-  private Boolean isPositive;
+  private String isAmmendment;
+  private String isPositive;
 
   public String getTypeCode() {
     return typeCode;
@@ -26,19 +26,19 @@ public class TransactionType {
     this.typeDescription = typeDescription;
   }
 
-  public Boolean IsAmmendment() {
+  public String getIsAmmendment() {
     return isAmmendment;
   }
 
-  public void setIsAmmendment(Boolean isAmmendment) {
+  public void setIsAmmendment(String isAmmendment) {
     this.isAmmendment = isAmmendment;
   }
 
-  public Boolean IsPositive() {
+  public String getIsPositive() {
     return isPositive;
   }
 
-  public void setIsPositive(Boolean isPositive) {
+  public void setIsPositive(String isPositive) {
     this.isPositive = isPositive;
   }
 }

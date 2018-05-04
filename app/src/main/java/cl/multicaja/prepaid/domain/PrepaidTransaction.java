@@ -1,9 +1,9 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
  */
-public class PrepaidTransactionDTO {
+public class PrepaidTransaction {
 
   private TransactionType transactionType;
   private String authCode;
@@ -12,8 +12,8 @@ public class PrepaidTransactionDTO {
   private String realDate;
   private String accountingDate;
   private String processingDate;
-  private Amount amountPrimary;
-  private Amount amountForeign;
+  private AmountAndCurrency amountPrimary;
+  private AmountAndCurrency amountForeign;
   private Place place;
   private Merchant merchant;
 
@@ -73,19 +73,19 @@ public class PrepaidTransactionDTO {
     this.processingDate = processingDate;
   }
 
-  public Amount getAmountPrimary() {
+  public AmountAndCurrency getAmountPrimary() {
     return amountPrimary;
   }
 
-  public void setAmountPrimary(Amount amountPrimary) {
+  public void setAmountPrimary(AmountAndCurrency amountPrimary) {
     this.amountPrimary = amountPrimary;
   }
 
-  public Amount getAmountForeign() {
+  public AmountAndCurrency getAmountForeign() {
     return amountForeign;
   }
 
-  public void setAmountForeign(Amount amountForeign) {
+  public void setAmountForeign(AmountAndCurrency amountForeign) {
     this.amountForeign = amountForeign;
   }
 

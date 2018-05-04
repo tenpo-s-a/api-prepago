@@ -1,18 +1,18 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
  */
-public class NewTransactionResponseDTO {
+public class NewPrepaidTransactionResponse {
 
-  private BalanceDTO balance;
+  private PrepaidCardBalance balance;
   private String processor_transaction_id;
 
-  public BalanceDTO getBalance() {
+  public PrepaidCardBalance getBalance() {
     return balance;
   }
 
-  public void setBalance(BalanceDTO balance) {
+  public void setBalance(PrepaidCardBalance balance) {
     this.balance = balance;
   }
 

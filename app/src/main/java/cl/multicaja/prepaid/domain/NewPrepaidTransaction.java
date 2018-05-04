@@ -1,18 +1,18 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
  */
-public class NewPrepaidTransactionDTO {
+public class NewPrepaidTransaction {
 
-  private NewAmount amount;
+  private NewAmountAndCurrency amount;
   private Integer newTransactionId;
 
-  public NewAmount getAmount() {
+  public NewAmountAndCurrency getAmount() {
     return amount;
   }
 
-  public void setAmount(NewAmount amount) {
+  public void setAmount(NewAmountAndCurrency amount) {
     this.amount = amount;
   }
 

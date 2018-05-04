@@ -1,9 +1,9 @@
-package cl.multicaja.prepaid.dto;
+package cl.multicaja.prepaid.domain;
 
 /**
  * @author abarazarte
  */
-public class PrepaidCardDTO {
+public class PrepaidCard {
 
   private Integer id;
   private String processorUserId;
@@ -11,6 +11,7 @@ public class PrepaidCardDTO {
   private String expiration;
   private String nameOnCard;
   private String status;
+  private Timestamps timestamps;
 
   public Integer getId() {
     return id;
@@ -58,5 +59,13 @@ public class PrepaidCardDTO {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public Timestamps getTimestamps() {
+    return timestamps;
+  }
+
+  public void setTimestamps(Timestamps timestamps) {
+    this.timestamps = timestamps;
   }
 }
