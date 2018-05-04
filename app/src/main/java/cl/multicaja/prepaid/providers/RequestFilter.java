@@ -19,8 +19,8 @@ public class RequestFilter implements ContainerRequestFilter {
 
   //lista de headers requeridos por el api
   private String[] requireHeaders = {
-    //"user-lang",
-    //"user-timezone"
+    //Constants.HEADER_USER_LOCALE,
+    //Constants.HEADER_USER_TIMEZONE
   };
 
   @Override
