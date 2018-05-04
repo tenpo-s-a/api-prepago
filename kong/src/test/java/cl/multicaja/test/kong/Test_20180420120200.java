@@ -8,7 +8,7 @@ import org.junit.Test;
 public class Test_20180420120200 extends TestKongBase {
 
   @Test
-  public void check_usersfake_1_0() {
+  public void ping_1_0() {
 
     HttpResponse resp = kongGET("/prepaid/ping", "api-prepaid-1.0");
 

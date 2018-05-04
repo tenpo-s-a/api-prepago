@@ -79,6 +79,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>2.27</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
@@ -157,11 +164,28 @@
               <finalName>${project.artifactId}-${project.version}</finalName>
               <classifier>${classifier}</classifier>
               <excludes>
-                <exclude>cl/multicaja/prepago/resources/**</exclude>
+                <exclude>cl/multicaja/prepaid/resources/**</exclude>
+                <exclude>cl/multicaja/prepaid/web/**</exclude>
+                <exclude>cl/multicaja/prepaid/providers/**</exclude>
               </excludes>
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+          <packagingExcludes>
+            WEB-INF/lib/geronimo-*.jar,
+            WEB-INF/lib/activemq-spring-*.jar,
+            WEB-INF/lib/camel-spring-*.jar,
+            WEB-INF/lib/javax*.jar
+          </packagingExcludes>
+        </configuration>
       </plugin>
 
     </plugins>
