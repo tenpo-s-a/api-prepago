@@ -12,7 +12,7 @@ public class Test_reverseTopup_v10 extends TestApiBase {
 
   @Test
   public void reverseTopupUserBalance(){
-    HttpResponse resp = apiDELETE("/1.0/prepaid/topup");
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup/reverse", "{}");
     System.out.println("RESP:::" + resp.toMap());
     Assert.assertEquals("status 200", 200, resp.getStatus());
   }

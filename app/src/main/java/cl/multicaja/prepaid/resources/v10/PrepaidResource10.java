@@ -36,8 +36,8 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().build();
   }
 
-  @DELETE
-  @Path("/prepaid/topup")
+  @POST
+  @Path("/prepaid/topup/reverse")
   public Response reverseTopupUserBalance(NewPrepaidTopup topupRequest) {
     return Response.ok().build();
   }
@@ -80,7 +80,5 @@ public final class PrepaidResource10 extends BaseResource {
   public Response getPrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
-
-
 
 }
