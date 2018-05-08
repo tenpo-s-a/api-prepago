@@ -1,19 +1,23 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class PrepaidCard {
+public class PrepaidCard extends BaseModel {
 
   private Long id;
   private String processorUserId;
   private String pan;
   private String expiration;
   private String nameOnCard;
-
   // TODO: manejar el status de la tarjeta como enum?
   private String status;
 
+  public PrepaidCard() {
+    super();
+  }
 
   public Long getId() {
     return id;

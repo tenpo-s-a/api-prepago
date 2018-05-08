@@ -1,14 +1,20 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 import java.util.List;
 
 /**
  * @author abarazarte
  */
-public class PrepaidUserData {
+public class PrepaidUserData extends BaseModel {
 
   private PrepaidCard card;
   private List<PrepaidCardLimit> limits;
+
+  public PrepaidUserData() {
+    super();
+  }
 
   public PrepaidCard getCard() {
     return card;

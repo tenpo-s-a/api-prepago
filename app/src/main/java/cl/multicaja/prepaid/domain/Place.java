@@ -1,13 +1,19 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class Place {
+public class Place extends BaseModel {
 
   private Integer countryIso3266Code;
   private String countryDescription;
   private String placeName;
+
+  public Place() {
+    super();
+  }
 
   public Integer getCountryIso3266Code() {
     return countryIso3266Code;

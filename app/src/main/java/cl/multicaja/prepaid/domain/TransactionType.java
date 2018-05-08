@@ -1,14 +1,20 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class TransactionType {
+public class TransactionType extends BaseModel {
 
   private String typeCode;
   private String typeDescription;
   private String isAmmendment;
   private String isPositive;
+
+  public TransactionType() {
+    super();
+  }
 
   public String getTypeCode() {
     return typeCode;

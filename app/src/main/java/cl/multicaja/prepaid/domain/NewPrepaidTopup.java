@@ -1,14 +1,20 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class NewPrepaidTopup {
+public class NewPrepaidTopup extends BaseModel {
 
   private NewAmountAndCurrency amount;
   private String transactionId;
   private Integer rut;
   private String merchantCode;
+
+  public NewPrepaidTopup() {
+    super();
+  }
 
   public NewAmountAndCurrency getAmount() {
     return amount;

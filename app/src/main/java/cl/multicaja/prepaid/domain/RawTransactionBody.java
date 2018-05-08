@@ -1,9 +1,11 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class RawTransactionBody {
+public class RawTransactionBody extends BaseModel {
 
   private NewAmountAndCurrency saldoDisponible;
   private NewAmountAndCurrency importeLocal;
@@ -13,6 +15,10 @@ public class RawTransactionBody {
   private Merchant merchant;
   private Place place;
   private Integer resolucionTx;
+
+  public RawTransactionBody() {
+    super();
+  }
 
   public NewAmountAndCurrency getSaldoDisponible() {
     return saldoDisponible;

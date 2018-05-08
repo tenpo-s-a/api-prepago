@@ -1,9 +1,11 @@
 package cl.multicaja.prepaid.domain;
 
+import cl.multicaja.core.model.BaseModel;
+
 /**
  * @author abarazarte
  */
-public class PrepaidTransaction {
+public class PrepaidTransaction extends BaseModel {
 
   private TransactionType transactionType;
   private String authCode;
@@ -16,6 +18,10 @@ public class PrepaidTransaction {
   private AmountAndCurrency amountForeign;
   private Place place;
   private Merchant merchant;
+
+  public PrepaidTransaction() {
+    super();
+  }
 
   public TransactionType getTransactionType() {
     return transactionType;
