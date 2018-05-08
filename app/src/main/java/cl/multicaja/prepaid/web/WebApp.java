@@ -1,12 +1,14 @@
 package cl.multicaja.prepaid.web;
 
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.util.Locale;
 
 /**
  * @autor vutreras
@@ -22,6 +24,7 @@ public class WebApp implements ServletContextListener  {
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
+    Locale.setDefault(Constants.DEFAULT_LOCALE);
     log.info("Init app: " + ConfigUtils.getInstance().getModuleProperties());
   }
 

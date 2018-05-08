@@ -167,6 +167,7 @@
                 <exclude>cl/multicaja/prepaid/resources/**</exclude>
                 <exclude>cl/multicaja/prepaid/web/**</exclude>
                 <exclude>cl/multicaja/prepaid/providers/**</exclude>
+                <exclude>cl/multicaja/prepaid/ejb/**/**EJBBeanRemote**</exclude>
               </excludes>
             </configuration>
           </execution>
