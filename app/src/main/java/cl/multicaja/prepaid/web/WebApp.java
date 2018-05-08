@@ -25,7 +25,7 @@ public class WebApp implements ServletContextListener  {
   private CamelFactory camelFactory = CamelFactory.getInstance();
 
   @Inject
-  private TopUpAmountRoute10 topUpAmountRoute;
+  private TopUpAmountRoute10 topUpAmountRoute10;
 
   private BrokerService brokerService;
 
@@ -52,7 +52,7 @@ public class WebApp implements ServletContextListener  {
     }
     try {
       if (!camelFactory.isCamelRunning()) {
-        camelFactory.startCamelContextWithRoutes(true, topUpAmountRoute);
+        camelFactory.startCamelContextWithRoutes(true, topUpAmountRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {
