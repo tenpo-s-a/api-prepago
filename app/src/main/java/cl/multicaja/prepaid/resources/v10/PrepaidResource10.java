@@ -1,21 +1,17 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.prepaid.domain.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.NewPrepaidUserSignup;
 import cl.multicaja.core.resources.BaseResource;
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJB10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author vutreras
@@ -29,5 +25,62 @@ public final class PrepaidResource10 extends BaseResource {
 
   @EJB
   private PrepaidEJBBean10 ejb;
+
+  /*
+    Prepaid
+   */
+
+  @POST
+  @Path("/prepaid/topup")
+  public Response topupUserBalance(NewPrepaidTopup topupRequest) {
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("/prepaid/topup")
+  public Response reverseTopupUserBalance(NewPrepaidTopup topupRequest) {
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/{userId}/topup")
+  public Response getUserTopups(@PathParam("userId") Long userId) {
+    return Response.ok().build();
+  }
+
+
+  /*
+    Prepaid Signup
+   */
+
+  @POST
+  @Path("/prepaid/signup")
+  public Response initSignup(NewPrepaidUserSignup signupRequest) {
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/signup/{signupId}")
+  public Response getSignupStatus(@PathParam("signupId") Long signupId) {
+    return Response.ok().build();
+  }
+
+  /*
+    Prepaid protected
+   */
+
+  @POST
+  @Path("/prepaid/{userId}/card")
+  public Response issuePrepaidCard(@PathParam("userId") Long userId) {
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/prepaid/{userId}/card")
+  public Response getPrepaidCard(@PathParam("userId") Long userId) {
+    return Response.ok().build();
+  }
+
+
 
 }
