@@ -31,15 +31,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     map.put("class", this.getClass().getSimpleName());
     map.put("ejb_users", this.usersEJB10.info());
     map.put("ejb_helpers", this.helpersEJB10.info());
-
-    /*
-    InitialContext in = new InitialContext();
-    Object obj = in.lookup("java:global/api-users-1.0/UsersEJBBeanRemote10");
-    System.out.println("Ejb Remoto: " + ((UsersEJB10)obj).info());
-
-    Object obj2 = in.lookup("java:global/api-helpers-1.0/HelpersEJBBeanRemote10");
-    System.out.println("Ejb Remoto: " + ((HelpersEJB10)obj2).info());
-*/
     return map;
   }
 }
