@@ -4,6 +4,7 @@ package cl.multicaja.prepaid.domain;
  * @author abarazarte
  */
 public class Place {
+
   private Integer countryIso3266Code;
   private String countryDescription;
   private String placeName;

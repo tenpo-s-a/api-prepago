@@ -41,4 +41,5 @@ public class TransactionType {
   public void setIsPositive(String isPositive) {
     this.isPositive = isPositive;
   }
+
 }

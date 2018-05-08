@@ -12,21 +12,18 @@ public interface PrepaidEJB10 {
 
   Map<String, Object> info() throws Exception;
 
-  void processorNotification(NewRawTransaction trx) throws Exception;
+  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
 
-  PrepaidCard emitPrepaid(String userId, NewPrepaidTransaction trx) throws Exception;
+  void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
 
-  PrepaidUserData getPrepaid(String userId) throws Exception;
+  List<PrepaidTopup> getUserTopups(Map<String, Object> headers, Long userId);
 
-  PrepaidCardBalance getBalance(String userId) throws Exception;
+  PrepaidUserSignup initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup signupRequest);
 
-  List<PrepaidTransaction> getTransactions(String userId) throws Exception;
+  PrepaidUserSignup getUserSignup(Map<String, Object> headers, Long signupId);
 
-  NewPrepaidTransactionResponse topupBalance(String userId, NewPrepaidTransaction trx) throws Exception;
-  NewPrepaidTransactionResponse withdrawBalance(String userId, NewPrepaidTransaction trx) throws Exception;
+  PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId);
 
-  PrepaidCard lockCard(String userId) throws Exception;
-  PrepaidCard unlockCard(String userId) throws Exception;
+  PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
 
-  void sendPrepaidCard(String userId) throws Exception;
 }

@@ -6,13 +6,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @autor abarazarte
+ * @author abarazarte
  */
-public class Test_widthdrawBalance_v10 extends TestApiBase {
+public class Test_reverseTopup_v10 extends TestApiBase {
 
   @Test
-  public void widthdrawBalance(){
-    HttpResponse resp = apiPOST("/1.0/prepaid/1/balance/widthdraw", "{}");
+  public void reverseTopupUserBalance(){
+    HttpResponse resp = apiDELETE("/1.0/prepaid/topup");
     System.out.println("RESP:::" + resp.toMap());
     Assert.assertEquals("status 200", 200, resp.getStatus());
   }

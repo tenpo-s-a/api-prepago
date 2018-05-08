@@ -1,7 +1,8 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.prepaid.domain.NewRawTransaction;
-import cl.multicaja.prepaid.domain.NewPrepaidTransaction;
+
+import cl.multicaja.prepaid.domain.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.NewPrepaidUserSignup;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJB10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,59 +38,61 @@ public final class PrepaidResource10 {
     return Response.status(200).entity(map).build();
   }
 
+  /*
+    Prepaid
+   */
+
   @POST
-  @Path("/prepaid/processor/notification")
-  public Response processorNotification(NewRawTransaction trx){
+  @Path("/prepaid/topup")
+  public Response topupUserBalance(NewPrepaidTopup topupRequest) {
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("/prepaid/topup")
+  public Response reverseTopupUserBalance(NewPrepaidTopup topupRequest) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/{userId}")
-  public Response getPrepaid(@PathParam("userId") String userId) {
+  @Path("/prepaid/{userId}/topup")
+  public Response getUserTopups(@PathParam("userId") Long userId) {
+    return Response.ok().build();
+  }
+
+
+  /*
+    Prepaid Signup
+   */
+
+  @POST
+  @Path("/prepaid/signup")
+  public Response initSignup(NewPrepaidUserSignup signupRequest) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/{userId}/balance")
-  public Response getBalance(@PathParam("userId") String userId){
+  @Path("/prepaid/signup/{signupId}")
+  public Response getSignupStatus(@PathParam("signupId") Long signupId) {
     return Response.ok().build();
   }
 
-  @POST
-  @Path("/prepaid/{userId}/balance/topup")
-  public Response topupBalance(@PathParam("userId") String userId, NewPrepaidTransaction trx){
-    return Response.ok().build();
-  }
+  /*
+    Prepaid protected
+   */
 
   @POST
-  @Path("/prepaid/{userId}/balance/widthdraw")
-  public Response widthdrawBalance(@PathParam("userId") String userId, NewPrepaidTransaction trx){
-    return Response.ok().build();
-  }
-
-  @POST
-  @Path("/prepaid/{userId}/status/lock")
-  public Response lockCard(@PathParam("userId") String userId){
-    return Response.ok().build();
-  }
-
-  @POST
-  @Path("/prepaid/{userId}/status/unlock")
-  public Response unlockCard(@PathParam("userId") String userId){
+  @Path("/prepaid/{userId}/card")
+  public Response issuePrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/{userId}/transactions")
-  public Response getTransactions(@PathParam("userId") String userId){
+  @Path("/prepaid/{userId}/card")
+  public Response getPrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
 
-  @POST
-  @Path("/prepaid/{userId}/mail")
-  public Response sendCardEmail(@PathParam("userId") String userId){
-    return Response.ok().build();
-  }
 
 
 }

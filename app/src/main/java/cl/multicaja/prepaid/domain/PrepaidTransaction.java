@@ -104,5 +104,5 @@ public class PrepaidTransaction {
   public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
   }
-}
 
+}

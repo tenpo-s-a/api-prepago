@@ -5,14 +5,14 @@ package cl.multicaja.prepaid.domain;
  */
 public class NewPrepaidTransaction {
 
-  private NewAmountAndCurrency amount;
+  private AmountAndCurrency amount;
   private Integer newTransactionId;
 
-  public NewAmountAndCurrency getAmount() {
+  public AmountAndCurrency getAmount() {
     return amount;
   }
 
-  public void setAmount(NewAmountAndCurrency amount) {
+  public void setAmount(AmountAndCurrency amount) {
     this.amount = amount;
   }
 
@@ -23,4 +23,5 @@ public class NewPrepaidTransaction {
   public void setNewTransactionId(Integer newTransactionId) {
     this.newTransactionId = newTransactionId;
   }
+
 }

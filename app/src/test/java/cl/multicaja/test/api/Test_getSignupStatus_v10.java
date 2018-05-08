@@ -6,13 +6,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @autor abarazarte
+ * @author abarazarte
  */
-public class Test_processorNotification_v10 extends TestApiBase {
+public class Test_getSignupStatus_v10 extends TestApiBase {
 
   @Test
-  public void processorNotification(){
-    HttpResponse resp = apiGET("/1.0/prepaid/notification");
+  public void getSignupStatus(){
+    HttpResponse resp = apiGET("/1.0/prepaid/signup/1");
     System.out.println("RESP:::" + resp.toMap());
     Assert.assertEquals("status 200", 200, resp.getStatus());
   }

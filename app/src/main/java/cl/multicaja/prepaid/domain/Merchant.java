@@ -4,6 +4,7 @@ package cl.multicaja.prepaid.domain;
  * @author abarazarte
  */
 public class Merchant {
+
   private String code;
   private String name;
 
@@ -22,4 +23,5 @@ public class Merchant {
   public void setName(String name) {
     this.name = name;
   }
+
 }

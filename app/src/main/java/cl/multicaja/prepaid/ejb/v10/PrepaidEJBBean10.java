@@ -38,52 +38,37 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public void processorNotification(NewRawTransaction trx) throws Exception {
-    throw new UnsupportedOperationException();
+  public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) {
+    return null;
   }
 
   @Override
-  public PrepaidCard emitPrepaid(String userId, NewPrepaidTransaction trx) throws Exception {
-    throw new UnsupportedOperationException();
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) {
+
   }
 
   @Override
-  public PrepaidUserData getPrepaid(String userId) throws Exception {
-    throw new UnsupportedOperationException();
+  public List<PrepaidTopup> getUserTopups(Map<String, Object> headers, Long userId) {
+    return null;
   }
 
   @Override
-  public PrepaidCardBalance getBalance(String userId) throws Exception {
-    throw new UnsupportedOperationException();
+  public PrepaidUserSignup initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup signupRequest) {
+    return null;
   }
 
   @Override
-  public List<PrepaidTransaction> getTransactions(String userId) throws Exception {
-    throw new UnsupportedOperationException();
+  public PrepaidUserSignup getUserSignup(Map<String, Object> headers, Long signupId) {
+    return null;
   }
 
   @Override
-  public NewPrepaidTransactionResponse topupBalance(String userId, NewPrepaidTransaction trx) throws Exception {
-    throw new UnsupportedOperationException();
+  public PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId) {
+    return null;
   }
 
   @Override
-  public NewPrepaidTransactionResponse withdrawBalance(String userId, NewPrepaidTransaction trx) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public PrepaidCard lockCard(String userId) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public PrepaidCard unlockCard(String userId) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void sendPrepaidCard(String userId) throws Exception {
-    throw new UnsupportedOperationException();
+  public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) {
+    return null;
   }
 }

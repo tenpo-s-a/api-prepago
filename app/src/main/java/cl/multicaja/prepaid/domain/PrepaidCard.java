@@ -5,19 +5,21 @@ package cl.multicaja.prepaid.domain;
  */
 public class PrepaidCard {
 
-  private Integer id;
+  private Long id;
   private String processorUserId;
   private String pan;
   private String expiration;
   private String nameOnCard;
-  private String status;
-  private Timestamps timestamps;
 
-  public Integer getId() {
+  // TODO: manejar el status de la tarjeta como enum?
+  private String status;
+
+
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -61,11 +63,4 @@ public class PrepaidCard {
     this.status = status;
   }
 
-  public Timestamps getTimestamps() {
-    return timestamps;
-  }
-
-  public void setTimestamps(Timestamps timestamps) {
-    this.timestamps = timestamps;
-  }
 }

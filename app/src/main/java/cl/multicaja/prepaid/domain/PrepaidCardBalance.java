@@ -23,4 +23,5 @@ public class PrepaidCardBalance {
   public void setSecondaryBalance(AmountAndCurrency secondaryBalance) {
     this.secondaryBalance = secondaryBalance;
   }
+
 }

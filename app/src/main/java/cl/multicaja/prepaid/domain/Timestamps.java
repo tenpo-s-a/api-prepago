@@ -1,23 +1,29 @@
 package cl.multicaja.prepaid.domain;
 
+import java.time.LocalDateTime;
+
+/**
+ * @author abarazarte
+ */
 public class Timestamps {
 
-  private String createdAt;
-  private String updatedAt;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
-  public String getCreatedAt() {
+  public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(String createdAt) {
+  public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
 
-  public String getUpdatedAt() {
+  public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
 
-  public void setUpdatedAt(String updatedAt) {
+  public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
+
 }
