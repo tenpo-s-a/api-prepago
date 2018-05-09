@@ -28,15 +28,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   protected NumberUtils numberUtils = NumberUtils.getInstance();
 
-  protected ConfigUtils configUtils;
+  private ConfigUtils configUtils;
 
-  protected DBUtils dbUtils;
+  private DBUtils dbUtils;
 
   /**
    *
    * @return
    */
-  protected ConfigUtils getConfigUtils() {
+  public ConfigUtils getConfigUtils() {
     if (this.configUtils == null) {
       this.configUtils = new ConfigUtils("api-prepaid");
     }
@@ -47,7 +47,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
    *
    * @return
    */
-  protected DBUtils getDbUtils() {
+  public DBUtils getDbUtils() {
     if (this.dbUtils == null) {
       this.dbUtils = new DBUtils(this.getConfigUtils());
     }
