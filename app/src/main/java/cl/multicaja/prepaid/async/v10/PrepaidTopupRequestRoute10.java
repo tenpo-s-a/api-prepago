@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.async.v10;
 
-import cl.multicaja.prepaid.domain.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.PrepaidTopup;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -12,24 +12,24 @@ import java.io.Serializable;
  */
 public class PrepaidTopupRequestRoute10 implements Serializable {
 
-  private NewPrepaidTopup newPrepaidTopup;
+  private PrepaidTopup prepaidTopup;
   private User user;
 
   public PrepaidTopupRequestRoute10() {
     super();
   }
 
-  public PrepaidTopupRequestRoute10(NewPrepaidTopup newPrepaidTopup, User user) {
-    this.newPrepaidTopup = newPrepaidTopup;
+  public PrepaidTopupRequestRoute10(PrepaidTopup prepaidTopup, User user) {
+    this.prepaidTopup = prepaidTopup;
     this.user = user;
   }
 
-  public NewPrepaidTopup getNewPrepaidTopup() {
-    return newPrepaidTopup;
+  public PrepaidTopup getPrepaidTopup() {
+    return prepaidTopup;
   }
 
-  public void setNewPrepaidTopup(NewPrepaidTopup newPrepaidTopup) {
-    this.newPrepaidTopup = newPrepaidTopup;
+  public void setPrepaidTopup(PrepaidTopup prepaidTopup) {
+    this.prepaidTopup = prepaidTopup;
   }
 
   public User getUser() {

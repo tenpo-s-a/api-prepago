@@ -1,5 +1,7 @@
 package cl.multicaja.test.api;
 
+import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
@@ -11,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -20,7 +23,8 @@ import java.util.Map;
 public class Test_topupBalance_v10 extends TestApiBase {
 
   @Test
-  public void shouldReturn200_OnTopupUserBalance(){
+  public void shouldReturn200_OnTopupUserBalance() {
+
     final String transactionId = "123456789";
     final Integer rut = 11111111;
     final String merchantCode = "987654321";
@@ -54,6 +58,15 @@ public class Test_topupBalance_v10 extends TestApiBase {
     Assert.assertNotNull("Deberia tener amount", topup.getAmount());
     Assert.assertEquals(String.format("Deberia tener amount.currencyCode = %d", currencyCode), currencyCode, topup.getAmount().getCurrencyCode());
     Assert.assertEquals(String.format("Deberia tener amount.value = %s", value.toString()), value, topup.getAmount().getValue());
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
+    CamelFactory camelFactory = CamelFactory.getInstance();
+    Queue qResp = camelFactory.createJMSQueue("PrepaidTopupRoute10.topUp.resp");
+    ResponseRoute remoteTopup = (ResponseRoute)camelFactory.createJMSMessenger().getMessage(qResp, String.valueOf(topup.getId()));
+
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertEquals("Deberia ser igual al enviado por el api rest", topup.getId(), ((PrepaidTopup)remoteTopup.getData()).getId());
   }
 
   @Test

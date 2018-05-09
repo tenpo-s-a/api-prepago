@@ -33,7 +33,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
     //consume un mensaje desde una cola de requerimientos y lo envia a una cola de respuestas
     from(createJMSEndpoint(String.format("PrepaidTopupRoute10.topUp.req?concurrentConsumers=%s", concurrentConsumers)))
-      .process(this.processPrepaidTopupRequestRoute()).end();
+      .process(this.processPrepaidTopupRequestRoute())
+      .to(createJMSEndpoint("PrepaidTopupRoute10.topUp.resp")).end();
   }
 
   private ProcessorRoute processPrepaidTopupRequestRoute() {
@@ -44,7 +45,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
         System.out.println("REQ::::" + req);
 
-        return new ResponseRoute(req.getNewPrepaidTopup());
+        return new ResponseRoute(req.getPrepaidTopup());
       }
     };
   }

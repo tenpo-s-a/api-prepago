@@ -104,10 +104,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setRut(topupRequest.getRut());
     topup.setMerchantCode(topupRequest.getMerchantCode());
 
-    topup.setId(1);
+    topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
     topup.setUserId(1);
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
+
+    User user = new User(); //TODO este user es el que retorna el ejb de users
+
+    delegate.sendTopUp(topup, user);
 
     return topup;
   }
