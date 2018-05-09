@@ -18,6 +18,9 @@
     <jersey.version>2.26</jersey.version>
     <javaee-api.version>8.0</javaee-api.version>
     <postgresql.version>42.2.1</postgresql.version>
+    <camel.version>2.15.1</camel.version>
+    <activemq.version>5.11.0</activemq.version>
+    <spring.version>5.0.0.RELEASE</spring.version>
   </properties>
 
   <repositories>
@@ -89,6 +92,50 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
+    </dependency>
+
+    <!-- apache activemq -->
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-camel</artifactId>
+      <version>${activemq.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-amqp</artifactId>
+      <version>${activemq.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-kahadb-store</artifactId>
+      <version>${activemq.version}</version>
+    </dependency>
+
+    <!-- apache camel -->
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-core</artifactId>
+      <version>${camel.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.activemq</groupId>
+          <artifactId>client</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- spring-jms para envio y recepcion de mensajes mq -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jms</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.10</version>
     </dependency>
 
     <dependency>
