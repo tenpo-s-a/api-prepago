@@ -60,6 +60,7 @@ pipeline {
     stage('Deploy API App') {
       steps {
         dir(path: 'app/') {
+          sh './install.sh'
           sh './deploy.sh'
         }
       }

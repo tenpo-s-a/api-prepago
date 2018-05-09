@@ -31,11 +31,11 @@ EOF
 #lee el archivo ci.properies como plantilla y para crear uno nuevo llamado jenkins.properties estableciendo en
 #el el id de la base de datos nueva
 IFS=
-text=$(cat ../app/src/main/resources/ci.properties) #lee el archivo ci.properties
+text=$(cat ../app/src/main/resources/api-prepaid/ci.properties) #lee el archivo ci.properties
 text=$(echo $text | sed -e "s/{BD_ID}/$id/") #reemplaza {BD_ID} por el contenido de la variable $id
 
 #crea un nuevo archivo jenkins.properties a partir de $text
-app_jenkins_properties="../app/src/main/resources/jenkins.properties"
+app_jenkins_properties="../app/src/main/resources/api-prepaid/jenkins.properties"
 echo "Creando archivo: $app_jenkins_properties"
 cat <<EOF >$app_jenkins_properties
 $text

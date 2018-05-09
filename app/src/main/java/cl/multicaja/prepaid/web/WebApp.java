@@ -58,6 +58,15 @@ public class WebApp implements ServletContextListener  {
     } catch (Exception e) {
       log.error("Error al inicializar apache camel", e);
     }
+
+    System.out.println("------------ Configuraciones del modulo --------------");
+    ConfigUtils.getInstance().printList();
+
+    System.out.println("------------ Configuraciones del modulo api-users --------------");
+    new ConfigUtils("api-users").printList();
+
+    System.out.println("------------ Configuraciones del modulo api-helpers --------------");
+    new ConfigUtils("api-helpers").printList();
   }
 
   @Override
