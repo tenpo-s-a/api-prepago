@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.domain.*;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface PrepaidEJB10 {
 
   Map<String, Object> info() throws Exception;
 
-  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
+  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws ValidationException;
 
   void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
 

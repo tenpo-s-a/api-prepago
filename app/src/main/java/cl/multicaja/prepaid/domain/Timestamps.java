@@ -14,22 +14,30 @@ public class Timestamps extends BaseModel {
 
   public Timestamps() {
     super();
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
+  public String getCreatedAt() {
+    return createdAt.toString();
   }
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
+  public void setCreatedAt(String createdAt) {
+    this.createdAt = LocalDateTime.parse(createdAt);
+  }
 
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
+  public String getUpdatedAt() {
+    return updatedAt.toString();
   }
 
   public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
+  }
+  public void setUpdatedAt(String updatedAt) {
+    this.updatedAt = LocalDateTime.parse(updatedAt);;
   }
 
 }
