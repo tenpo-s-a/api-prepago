@@ -12,6 +12,8 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,8 +36,8 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/prepaid/topup")
-  public Response topupUserBalance(NewPrepaidTopup topupRequest) throws ValidationException {
-    PrepaidTopup prepaidTopup = this.ejb.topupUserBalance(null, topupRequest);
+  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws ValidationException {
+    PrepaidTopup prepaidTopup = this.ejb.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
 

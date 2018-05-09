@@ -4,14 +4,17 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @EJB
   private HelpersEJBBean10 helpersEJB10;
 
+  @Inject
+  private PrepaidTopupDelegate10 delegate;
+
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -71,6 +77,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws ValidationException {
+
     if(topupRequest == null || topupRequest.getAmount() == null){
         throw new ValidationException(1024, "El cliente no pasó la validación", 422);
     }
@@ -97,10 +104,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setRut(topupRequest.getRut());
     topup.setMerchantCode(topupRequest.getMerchantCode());
 
-    topup.setId(1);
+    topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
     topup.setUserId(1);
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
+
+    User user = new User(); //TODO este user es el que retorna el ejb de users
+
+    delegate.sendTopUp(topup, user);
 
     return topup;
   }
