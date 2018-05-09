@@ -1,8 +1,10 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,8 +39,39 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) {
-    return null;
+  public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws ValidationException {
+    if(topupRequest == null || topupRequest.getAmount() == null){
+        throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+    if(topupRequest.getRut() == null){
+      throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+    if(StringUtils.isBlank(topupRequest.getMerchantCode())){
+      throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+    if(StringUtils.isBlank(topupRequest.getTransactionId())){
+      throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+    if(topupRequest.getAmount().getValue() == null){
+      throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+    if(topupRequest.getAmount().getCurrencyCode() == null){
+      throw new ValidationException(1024, "El cliente no pasó la validación", 422);
+    }
+
+    PrepaidTopup topup = new PrepaidTopup();
+
+    topup.setAmount(topupRequest.getAmount());
+    topup.setTransactionId(topupRequest.getTransactionId());
+    topup.setRut(topupRequest.getRut());
+    topup.setMerchantCode(topupRequest.getMerchantCode());
+
+    topup.setId(1);
+    topup.setUserId(1);
+    topup.setStatus("exitoso");
+    topup.setTimestamps(new Timestamps());
+
+    return topup;
   }
 
   @Override

@@ -1,9 +1,18 @@
 package cl.multicaja.test.api;
 
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.domain.NewAmountAndCurrency;
+import cl.multicaja.prepaid.domain.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.PrepaidTopup;
+import cl.multicaja.prepaid.domain.Timestamps;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * @author abarazarte
@@ -11,9 +20,179 @@ import org.junit.Test;
 public class Test_topupBalance_v10 extends TestApiBase {
 
   @Test
-  public void topupUserBalance(){
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", "{}");
-    System.out.println("RESP:::" + resp.toMap());
+  public void shouldReturn200_OnTopupUserBalance(){
+    final String transactionId = "123456789";
+    final Integer rut = 11111111;
+    final String merchantCode = "987654321";
+    final Integer currencyCode = 152;
+    final BigDecimal value = new BigDecimal("9999.99");
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId(transactionId);
+    topupRequest.setRut(rut);
+    topupRequest.setMerchantCode(merchantCode);
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setCurrencyCode(currencyCode);
+    amount.setValue(value);
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
     Assert.assertEquals("status 200", 200, resp.getStatus());
+    PrepaidTopup topup = resp.toObject(PrepaidTopup.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidTopup",topup);
+    Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", topup.getId());
+    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
+    Assert.assertEquals(String.format("Deberia tener transactionId = %s", transactionId), transactionId, topup.getTransactionId());
+    Assert.assertEquals(String.format("Deberia tener rut = %d", rut), rut, topup.getRut());
+    Assert.assertEquals(String.format("Deberia tener merchantCode = %s", merchantCode), merchantCode, topup.getMerchantCode());
+    Assert.assertNotNull("Deberia tener amount", topup.getAmount());
+    Assert.assertEquals(String.format("Deberia tener amount.currencyCode = %d", currencyCode), currencyCode, topup.getAmount().getCurrencyCode());
+    Assert.assertEquals(String.format("Deberia tener amount.value = %s", value.toString()), value, topup.getAmount().getValue());
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingBody() {
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", "{}");
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingRut() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId("123456789");
+    topupRequest.setMerchantCode("987654321");
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setCurrencyCode(152);
+    amount.setValue(new BigDecimal("9999.90"));
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingTransactionId() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setRut(11111111);
+    topupRequest.setMerchantCode("987654321");
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setCurrencyCode(152);
+    amount.setValue(new BigDecimal("9999.90"));
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingMerchantCode() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId("123456789");
+    topupRequest.setRut(11111111);
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setCurrencyCode(152);
+    amount.setValue(new BigDecimal("9999.90"));
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingAmount() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId("123456789");
+    topupRequest.setRut(11111111);
+    topupRequest.setMerchantCode("987654321");
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingAmountCurrencyCode() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId("123456789");
+    topupRequest.setRut(11111111);
+    topupRequest.setMerchantCode("987654321");
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setValue(new BigDecimal("9999.90"));
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+  }
+
+  @Test
+  public void shouldReturn422_OnMissingAmountValue() {
+
+    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    topupRequest.setTransactionId("123456789");
+    topupRequest.setRut(11111111);
+    topupRequest.setMerchantCode("987654321");
+    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    amount.setCurrencyCode(152);
+    topupRequest.setAmount(amount);
+
+    String json = toJson(topupRequest);
+
+    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
   }
 }
