@@ -16,6 +16,15 @@ public class NewPrepaidTopup extends BaseModel {
     super();
   }
 
+  public NewPrepaidTopup(NewAmountAndCurrency amount, String transactionId, Integer rut, String merchantCode) {
+    super();
+
+    this.amount = amount;
+    this.transactionId = transactionId;
+    this.rut = rut;
+    this.merchantCode = merchantCode;
+  }
+
   public NewAmountAndCurrency getAmount() {
     return amount;
   }

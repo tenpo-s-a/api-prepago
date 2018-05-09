@@ -13,7 +13,7 @@ public interface PrepaidEJB10 {
 
   Map<String, Object> info() throws Exception;
 
-  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws ValidationException;
+  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception;
 
   void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
 
