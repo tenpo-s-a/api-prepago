@@ -1,6 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
@@ -22,6 +25,34 @@ import java.util.Map;
 public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
+
+  protected NumberUtils numberUtils = NumberUtils.getInstance();
+
+  protected ConfigUtils configUtils;
+
+  protected DBUtils dbUtils;
+
+  /**
+   *
+   * @return
+   */
+  protected ConfigUtils getConfigUtils() {
+    if (this.configUtils == null) {
+      this.configUtils = new ConfigUtils("api-prepaid");
+    }
+    return this.configUtils;
+  }
+
+  /**
+   *
+   * @return
+   */
+  protected DBUtils getDbUtils() {
+    if (this.dbUtils == null) {
+      this.dbUtils = new DBUtils(this.getConfigUtils());
+    }
+    return this.dbUtils;
+  }
 
   @EJB
   private UsersEJBBean10 usersEJB10;
