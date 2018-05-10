@@ -36,7 +36,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/prepaid/topup")
-  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws ValidationException {
+  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidTopup prepaidTopup = this.ejb.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
