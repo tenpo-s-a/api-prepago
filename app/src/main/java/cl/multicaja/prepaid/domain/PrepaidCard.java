@@ -25,7 +25,7 @@ public class PrepaidCard extends BaseModel {
   private LocalDate expiration;
   private String nameOnCard;
   // TODO: manejar el status de la tarjeta como enum?
-  private String status;
+  private PrepaidCardStatus status;
   private Timestamps timestamps;
 
   public PrepaidCard() {
@@ -87,11 +87,11 @@ public class PrepaidCard extends BaseModel {
     this.nameOnCard = nameOnCard;
   }
 
-  public String getStatus() {
+  public PrepaidCardStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(PrepaidCardStatus status) {
     this.status = status;
   }
 
