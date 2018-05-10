@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.web;
 
 import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.prepaid.async.v10.TopUpAmountRoute10;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
 import org.apache.activemq.broker.BrokerService;
@@ -25,7 +25,7 @@ public class WebApp implements ServletContextListener  {
   private CamelFactory camelFactory = CamelFactory.getInstance();
 
   @Inject
-  private TopUpAmountRoute10 topUpAmountRoute10;
+  private PrepaidTopupRoute10 prepaidTopupRoute10;
 
   private BrokerService brokerService;
 
@@ -52,7 +52,7 @@ public class WebApp implements ServletContextListener  {
     }
     try {
       if (!camelFactory.isCamelRunning()) {
-        camelFactory.startCamelContextWithRoutes(true, topUpAmountRoute10);
+        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {
