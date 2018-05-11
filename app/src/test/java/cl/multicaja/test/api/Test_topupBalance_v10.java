@@ -76,8 +76,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -94,12 +94,14 @@ public class Test_topupBalance_v10 extends TestApiBase {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    System.out.println(resp);
+    System.out.println(resp.getResp());
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -120,8 +122,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -142,8 +144,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -161,8 +163,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -183,8 +185,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 
   @Test
@@ -205,7 +207,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 1024", 1024, errorObj.get("code"));
-    Assert.assertEquals("Deberia tener error message = El cliente no pasó la validación", "El cliente no pasó la validación", errorObj.get("message"));
+    Assert.assertEquals("Deberia tener error code = 2", 2, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error message = Parametros invalidos", "Parametros invalidos", errorObj.get("message"));
   }
 }

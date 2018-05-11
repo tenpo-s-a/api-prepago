@@ -9,6 +9,22 @@
 
 target/
 
+app/activemq-data-prepaid
+app/.idea
+app/.settings
+app/.classpath
+app/.project
+
+pg/.idea
+pg/.settings
+pg/.classpath
+pg/.project
+
+kong/.idea
+kong/.settings
+kong/.classpath
+kong/.project
+
 db-id.txt
 jenkins.properties
 test-*.properties
