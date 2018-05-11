@@ -10,8 +10,7 @@ public class PrepaidUser extends BaseModel {
   private Long id;
   private Long idUser;
   private Integer rut;
-  // TODO manejar el status como enum?
-  private String status;
+  private PrepaidUserStatus status;
   private Timestamps timestamps;
 
   public PrepaidUser() {
@@ -42,11 +41,11 @@ public class PrepaidUser extends BaseModel {
     this.rut = rut;
   }
 
-  public String getStatus() {
+  public PrepaidUserStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(PrepaidUserStatus status) {
     this.status = status;
   }
 
