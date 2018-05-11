@@ -8,7 +8,7 @@ import org.junit.Test;
 public class Test_20180402193618_create_changelog extends TestDbBase {
 
   @Test
-  public void checkTableChangelog() {
+  public void checkIfExistsTable_changelog() {
     boolean exists = dbUtils.tableExists("public", "changelog_prepago_api_prepaid", true,
       new ColumnInfo("id", "numeric", 20),
       new ColumnInfo("applied_at", "varchar", 25),
