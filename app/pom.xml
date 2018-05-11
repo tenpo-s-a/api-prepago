@@ -54,13 +54,6 @@
     </dependency>
 
     <dependency>
-      <groupId>cl.multicaja.prepago</groupId>
-      <artifactId>api-helpers</artifactId>
-      <version>1.0.0</version>
-      <classifier>${classifier}</classifier>
-    </dependency>
-
-    <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
       <version>${jersey.version}</version>

@@ -2,11 +2,11 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.domain.*;
-import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
@@ -60,9 +60,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @EJB
   private UsersEJBBean10 usersEJB10;
 
-  @EJB
-  private HelpersEJBBean10 helpersEJB10;
-
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -71,7 +68,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     Map<String, Object> map = new HashMap<>();
     map.put("class", this.getClass().getSimpleName());
     map.put("ejb_users", this.usersEJB10.info());
-    map.put("ejb_helpers", this.helpersEJB10.info());
     return map;
   }
 
@@ -142,7 +138,23 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) {
-    return null;
+  public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception {
+
+    if (userId == null || userId.longValue() <= 0) {
+      throw new ValidationException(3).setData(new KeyValue("params", "userId"));
+    }
+
+    PrepaidCard card = (PrepaidCard) this.getDbUtils().executeAndGetFirst("prepago.mc_prepago_buscar_tarjeta_por_usuario", (Map<String, Object> row) -> {
+        PrepaidCard c = new PrepaidCard();
+        c.setId(numberUtils.toLong(row.get("id"), 0));
+        c.setExpiration(String.valueOf(row.get("expiration")));
+        c.setNameOnCard(String.valueOf(row.get("name_on_card")));
+        c.setPan(String.valueOf(row.get("pan")));
+        c.setProcessorUserId(String.valueOf(row.get("processor_user_id")));
+        c.setStatus(String.valueOf(row.get("status")));
+        return c;
+    }, userId);
+
+    return card;
   }
 }

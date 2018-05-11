@@ -25,6 +25,6 @@ public interface PrepaidEJB10 {
 
   PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId);
 
-  PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
+  PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception;
 
 }
