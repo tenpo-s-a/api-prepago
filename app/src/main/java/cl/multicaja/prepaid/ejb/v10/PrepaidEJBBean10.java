@@ -81,22 +81,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
     if(topupRequest.getRut() == null){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
     if(StringUtils.isBlank(topupRequest.getMerchantCode())){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
     if(StringUtils.isBlank(topupRequest.getTransactionId())){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
     if(topupRequest.getAmount().getValue() == null){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
     if(topupRequest.getAmount().getCurrencyCode() == null){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
 
     // Obtener Usuario
@@ -146,7 +146,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
      */
       // TODO: Iniciar proceo de devolucion
 
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+      throw new ValidationException(2);
     }
 
     /*
