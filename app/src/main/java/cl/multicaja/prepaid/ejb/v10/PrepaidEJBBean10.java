@@ -78,8 +78,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception {
-    Boolean isPosTransaction = Boolean.FALSE;
-
     //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
@@ -110,15 +108,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
     /*
       Validar nivel del usuario
-        - N > 0
+        - N = 0 Usuario MC null, Prepaid user null o usuario bloqueado
         - N = 1 Primera carga
         - N > 1 Carga
      */
-    //TODO: Validar nivel de usuario
-
-    // Si N = 0 -> No cliente, No cliente prepago  o Cliente bloqueado
-    if(false){
-      throw new ValidationException(1024, "El cliente no pasó la validación");
+    // Buscar usuario local de prepago
+    PrepaidUser prepaidUser = new PrepaidUser();
+    /*
+      if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
+        // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
+        throw new ValidationException(1024, "El cliente no pasó la validación");
+      }
+    */
+    //if(user.getRut().getStatus().equals("VALIDADO_FOTO")){
+    if(true){
+      // Si el usuario tiene validacion de foto, es N = 2
+      topupRequest.setFirstTopup(Boolean.FALSE);
     }
 
     /*
@@ -127,7 +132,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - CodCom = WEB -> Carga WEB
         - CodCom != WEB -> Carga POS
      */
-    //TODO: Identificar tipo de movimiento
+    CdtTransactionType cdtTpe = topupRequest.getCdtTransactionType();
 
     /*
       Validar movimiento en CDT, en caso de error lanzar exception
