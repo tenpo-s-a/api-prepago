@@ -27,4 +27,13 @@ public interface PrepaidEJB10 {
 
   PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception;
 
+  PrepaidUser createPrepaidUser(Map<String, Object> headers, PrepaidUser prepaidUser) throws Exception;
+
+  List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, String status) throws Exception;
+
+  PrepaidUser getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception;
+
+  PrepaidUser getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception;
+
+  PrepaidUser getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception;
 }

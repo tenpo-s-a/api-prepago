@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.domain;
 
 import cl.multicaja.core.model.BaseModel;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 /**
@@ -9,35 +10,26 @@ import java.time.LocalDateTime;
  */
 public class Timestamps extends BaseModel {
 
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+  private Timestamp createdAt;
+  private Timestamp updatedAt;
 
   public Timestamps() {
     super();
-    this.createdAt = LocalDateTime.now();
-    this.updatedAt = LocalDateTime.now();
   }
 
-  public String getCreatedAt() {
-    return createdAt.toString();
+  public Timestamp getCreatedAt() {
+    return createdAt;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
+  public void setCreatedAt(Timestamp createdAt) {
     this.createdAt = createdAt;
   }
-  public void setCreatedAt(String createdAt) {
-    this.createdAt = LocalDateTime.parse(createdAt);
+
+  public Timestamp getUpdatedAt() {
+    return updatedAt;
   }
 
-  public String getUpdatedAt() {
-    return updatedAt.toString();
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
+  public void setUpdatedAt(Timestamp updatedAt) {
     this.updatedAt = updatedAt;
   }
-  public void setUpdatedAt(String updatedAt) {
-    this.updatedAt = LocalDateTime.parse(updatedAt);;
-  }
-
 }

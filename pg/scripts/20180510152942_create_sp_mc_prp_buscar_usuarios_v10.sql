@@ -43,10 +43,10 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
       FROM
         ${schema}.prp_usuario
       WHERE
-          (COALESCE(_id, 0) = 0 OR id = _id) AND
-          (COALESCE(_id_usuario_mc, 0) = 0 OR id_usuario_mc = _id_usuario_mc) AND
-          (COALESCE(_rut, 0) = 0 OR rut = _rut) AND
-          (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado);
+        (COALESCE(_id, 0) = 0 OR id = _id) AND
+        (COALESCE(_id_usuario_mc, 0) = 0 OR id_usuario_mc = _id_usuario_mc) AND
+        (COALESCE(_rut, 0) = 0 OR rut = _rut) AND
+        (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado);
 
    EXCEPTION
      WHEN OTHERS THEN
