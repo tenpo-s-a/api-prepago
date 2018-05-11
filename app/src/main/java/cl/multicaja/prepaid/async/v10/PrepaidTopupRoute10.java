@@ -4,9 +4,12 @@ import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.ejb.EJB;
 
 /**
  * Implementacion personalizada de rutas camel
@@ -16,6 +19,9 @@ import org.apache.commons.logging.LogFactory;
 public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   private static Log log = LogFactory.getLog(PrepaidTopupRoute10.class);
+
+  @EJB
+  private PrepaidEJBBean10 prepaidEJBBean10;
 
   public PrepaidTopupRoute10() {
     super();

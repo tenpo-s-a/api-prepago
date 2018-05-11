@@ -47,7 +47,7 @@ public final class PrepaidTopupDelegate10 {
    * @return
    */
   public String sendTopUp(PrepaidTopup prepaidTopup, User user) {
-    String messageId = String.valueOf(prepaidTopup.getId());
+    String messageId = String.format("%s%s%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId());
     System.out.println("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
