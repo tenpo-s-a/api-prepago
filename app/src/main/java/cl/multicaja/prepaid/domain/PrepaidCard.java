@@ -1,19 +1,32 @@
 package cl.multicaja.prepaid.domain;
 
 import cl.multicaja.core.model.BaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author abarazarte
  */
 public class PrepaidCard extends BaseModel {
 
+  private final DateTimeFormatter expirationDateFormatter = DateTimeFormatter.ofPattern("MM/YY");
+
   private Long id;
+  //Id Interno de prepago
+  @JsonIgnore
+  private Long userId;
+  //Contrato - Tecnocom
   private String processorUserId;
   private String pan;
-  private String expiration;
+  @JsonIgnore
+  private String encryptedPan;
+  private LocalDate expiration;
   private String nameOnCard;
   // TODO: manejar el status de la tarjeta como enum?
-  private String status;
+  private PrepaidCardStatus status;
+  private Timestamps timestamps;
 
   public PrepaidCard() {
     super();
@@ -25,6 +38,14 @@ public class PrepaidCard extends BaseModel {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
   public String getProcessorUserId() {
@@ -43,11 +64,18 @@ public class PrepaidCard extends BaseModel {
     this.pan = pan;
   }
 
-  public String getExpiration() {
-    return expiration;
+  public String getEncryptedPan() {
+    return encryptedPan;
   }
 
-  public void setExpiration(String expiration) {
+  public void setEncryptedPan(String encryptedPan) {
+    this.encryptedPan = encryptedPan;
+  }
+  public String getExpiration() {
+    return expirationDateFormatter.format(this.expiration);
+  }
+
+  public void setExpiration(LocalDate expiration) {
     this.expiration = expiration;
   }
 
@@ -59,12 +87,19 @@ public class PrepaidCard extends BaseModel {
     this.nameOnCard = nameOnCard;
   }
 
-  public String getStatus() {
+  public PrepaidCardStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(PrepaidCardStatus status) {
     this.status = status;
   }
 
+  public Timestamps getTimestamps() {
+    return timestamps;
+  }
+
+  public void setTimestamps(Timestamps timestamps) {
+    this.timestamps = timestamps;
+  }
 }

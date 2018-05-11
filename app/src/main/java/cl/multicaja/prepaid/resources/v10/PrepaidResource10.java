@@ -1,11 +1,9 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.domain.NewPrepaidTopup;
 import cl.multicaja.prepaid.domain.NewPrepaidUserSignup;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.domain.PrepaidTopup;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJB10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +34,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/prepaid/topup")
-  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws ValidationException {
+  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidTopup prepaidTopup = this.ejb.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
