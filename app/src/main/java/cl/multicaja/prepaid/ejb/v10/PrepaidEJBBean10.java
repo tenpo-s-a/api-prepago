@@ -210,6 +210,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     return null;
   }
 
+  /**
+   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
+   *
+   * @param topup al que se le calculara la comision y total
+   * @throws IllegalStateException si el topup es null
+   * @throws IllegalStateException si el topup.amount es null
+   * @throws IllegalStateException si el topup.amount.value es null
+   * @throws IllegalStateException si el topup.merchantCode es null o vacio
+   */
   @Override
   public void calculateTopupFeeAndTotal(PrepaidTopup topup) throws Exception {
 

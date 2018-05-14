@@ -26,5 +26,14 @@ public interface PrepaidEJB10 {
 
   PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
 
+  /**
+   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
+   *
+   * @param topup con el cual se calculara la comision y total
+   * @throws IllegalStateException cuando el topup es null
+   * @throws IllegalStateException cuando el topup.amount es null
+   * @throws IllegalStateException cuando el topup.amount.value es null
+   * @throws IllegalStateException cuando el topup.merchantCode es null o vacio
+   */
   void calculateTopupFeeAndTotal(PrepaidTopup topup) throws Exception;
 }
