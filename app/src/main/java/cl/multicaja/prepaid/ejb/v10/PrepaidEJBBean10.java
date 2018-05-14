@@ -254,11 +254,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   public List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, String status) throws Exception {
 
     Object[] params = {
-      userId != null ? userId : new NullParam(Types.BIGINT),
-      userIdMc != null ? userIdMc : new NullParam(Types.BIGINT),
-      rut != null ? rut : new NullParam(Types.INTEGER),
-      status != null ? status : new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
+      userId != null ? userId : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
+      userIdMc != null ? userIdMc : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
+      rut != null ? rut : new NullParam(Types.INTEGER), //si biene parametro se envia, si no se envia NullParam
+      status != null ? status : new NullParam(Types.VARCHAR), //si biene parametro se envia, si no se envia NullParam
+
+      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> { //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row en ell objeto necesario
         PrepaidUser u = new PrepaidUser();
         u.setId(numberUtils.toLong(row.get("id"), 0));
         u.setIdUser(numberUtils.toLong(row.get("id_usuario_mc"), 0));
@@ -269,6 +270,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
         return u;
       }),
+
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -279,18 +281,27 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public PrepaidUser getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
+    if(userId == null){
+      throw new ValidationException(2);
+    }
     List<PrepaidUser> lst = this.getPrepaidUsers(headers, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
   @Override
   public PrepaidUser getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null){
+      throw new ValidationException(2);
+    }
     List<PrepaidUser> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
   @Override
   public PrepaidUser getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
+    if(rut == null){
+      throw new ValidationException(2);
+    }
     List<PrepaidUser> lst = this.getPrepaidUsers(headers, null, null, rut, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
