@@ -168,7 +168,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateTopupCommissionAndTotal(topup);
+    this.calculateTopupFeeAndTotal(topup);
 
     /*
       Enviar mensaje a cosa de carga
@@ -211,7 +211,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public void calculateTopupCommissionAndTotal(PrepaidTopup topup) throws Exception {
+  public void calculateTopupFeeAndTotal(PrepaidTopup topup) throws Exception {
 
     if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
       throw  new IllegalStateException();
@@ -219,28 +219,28 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
     AmountAndCurrency total = new AmountAndCurrency();
     total.setCurrencyCode(152);
-    AmountAndCurrency commission = new AmountAndCurrency();
-    commission.setCurrencyCode(152);
+    AmountAndCurrency fee = new AmountAndCurrency();
+    fee.setCurrencyCode(152);
 
     // Calcula las comisiones segun el tipo de carga (WEB o POS)
     switch (topup.getType()) {
       case WEB:
-        commission.setValue(new BigDecimal(0));
+        fee.setValue(new BigDecimal(0));
         break;
       case POS:
-        // MAX ( 100; 0,5% * prepaid_topup_new_amount_value ) + IVA
+        // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
 
         BigDecimal com = topup.getAmount().getValue().multiply(POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
         // Calcula el max
         BigDecimal max = com.max(new BigDecimal(100));
         // Suma IVA
-        commission.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
+        fee.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
         break;
     }
     // Calculo el total
-    total.setValue(topup.getAmount().getValue().subtract(commission.getValue()));
+    total.setValue(topup.getAmount().getValue().subtract(fee.getValue()));
 
-    topup.setCommission(commission);
+    topup.setFee(fee);
     topup.setTotal(total);
   }
 }

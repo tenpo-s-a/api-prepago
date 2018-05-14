@@ -26,5 +26,5 @@ public interface PrepaidEJB10 {
 
   PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
 
-  void calculateTopupCommissionAndTotal(PrepaidTopup topup) throws Exception;
+  void calculateTopupFeeAndTotal(PrepaidTopup topup) throws Exception;
 }
