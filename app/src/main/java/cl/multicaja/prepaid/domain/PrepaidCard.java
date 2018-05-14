@@ -24,7 +24,6 @@ public class PrepaidCard extends BaseModel {
   private String encryptedPan;
   private LocalDate expiration;
   private String nameOnCard;
-  // TODO: manejar el status de la tarjeta como enum?
   private PrepaidCardStatus status;
   private Timestamps timestamps;
 
