@@ -14,14 +14,14 @@
 --    limitations under the License.
 --
 
--- // create_sp_mc_prp_buscar_usuarios
+-- // create_sp_mc_prp_buscar_tarjetas_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
 (
  IN _id              BIGINT,
- IN _id_usuario_mc   BIGINT,
- IN _rut             INTEGER,
+ IN _id_usuario      BIGINT,
+ IN _fecha_expiracion INTEGER,
  IN _estado          VARCHAR,
  IN _contrato        VARCHAR,
  OUT _result         REFCURSOR,
@@ -36,24 +36,28 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
     OPEN _result FOR
       SELECT
         id,
-        id_usuario_mc,
-        rut,
+        id_usuario,
+        pan,
+        pan_encriptado,
+        contrato,
+        fecha_expiracion,
         estado,
+        nombre_tarjeta,
         fecha_creacion,
         fecha_actualizacion
       FROM
-        ${schema}.prp_usuario
+        ${schema}.prp_tarjeta
       WHERE
         (COALESCE(_id, 0) = 0 OR id = _id) AND
-        (COALESCE(_id_usuario_mc, 0) = 0 OR id_usuario_mc = _id_usuario_mc) AND
-        (COALESCE(_rut, 0) = 0 OR rut = _rut) AND
+        (COALESCE(_id_usuario, 0) = 0 OR id_usuario = _id_usuario) AND
+        (COALESCE(_fecha_expiracion, 0) = 0 OR fecha_expiracion = _fecha_expiracion) AND
         (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado) AND
         (TRIM(COALESCE(_contrato,'')) = '' OR contrato = _contrato);
 
    EXCEPTION
      WHEN OTHERS THEN
          _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_buscar_usuarios_v10] Error al buscar usuarios. CAUSA ('|| SQLERRM ||')';
+         _error_msg := '[mc_prp_buscar_tarjetas_v10] Error al buscar tarjetas. CAUSA ('|| SQLERRM ||')';
      RETURN;
 END;
 $$ LANGUAGE plpgsql;
@@ -61,6 +65,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_usuarios_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
-
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_tarjetas_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
 
