@@ -162,7 +162,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     /*
       Calcular monto a cargar y comisiones
      */
-    //TODO: Calcular monto y comisiones
+    this.calculateTopupCommissionAndTotal(topup);
 
     /*
       Enviar mensaje a cosa de carga
