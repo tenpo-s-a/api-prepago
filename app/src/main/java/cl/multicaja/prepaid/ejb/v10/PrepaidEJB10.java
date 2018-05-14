@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.domain.*;
 
 import java.util.List;
@@ -27,4 +26,5 @@ public interface PrepaidEJB10 {
 
   PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
 
+  void calculateTopupCommissionAndTotal(PrepaidTopup topup) throws Exception;
 }

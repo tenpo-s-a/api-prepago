@@ -10,6 +10,9 @@ public class PrepaidTopup extends NewPrepaidTopup {
   private Integer userId;
   private Timestamps timestamps;
 
+  private NewAmountAndCurrency commission;
+  private NewAmountAndCurrency total;
+
   public PrepaidTopup() {
     super();
   }
@@ -50,4 +53,19 @@ public class PrepaidTopup extends NewPrepaidTopup {
     this.timestamps = timestamps;
   }
 
+  public NewAmountAndCurrency getCommission() {
+    return commission;
+  }
+
+  public void setCommission(AmountAndCurrency commission) {
+    this.commission = commission;
+  }
+
+  public NewAmountAndCurrency getTotal() {
+    return total;
+  }
+
+  public void setTotal(AmountAndCurrency total) {
+    this.total = total;
+  }
 }

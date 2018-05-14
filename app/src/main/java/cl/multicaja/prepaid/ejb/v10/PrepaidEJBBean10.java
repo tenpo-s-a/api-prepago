@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,11 +150,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    /*
-      Calcular monto a cargar y comisiones
-     */
-    //TODO: Calcular monto y comisiones
-
     PrepaidTopup topup = new PrepaidTopup(topupRequest);
     // Id Solicitud de carga devuelto por CDT
     topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
@@ -162,6 +158,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setUserId(1);
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
+
+    /*
+      Calcular monto a cargar y comisiones
+     */
+    //TODO: Calcular monto y comisiones
 
     /*
       Enviar mensaje a cosa de carga
@@ -201,5 +202,39 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Override
   public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) {
     return null;
+  }
+
+  @Override
+  public void calculateTopupCommissionAndTotal(PrepaidTopup topup) throws Exception {
+
+    if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
+      throw  new IllegalStateException();
+    }
+
+    AmountAndCurrency total = new AmountAndCurrency();
+    total.setCurrencyCode(152);
+    AmountAndCurrency commission = new AmountAndCurrency();
+    commission.setCurrencyCode(152);
+
+    // Calcula las comisiones segun el tipo de carga (WEB o POS)
+    switch (topup.getType()) {
+      case WEB:
+        commission.setValue(new BigDecimal(0));
+        break;
+      case POS:
+        // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
+
+        BigDecimal com = topup.getAmount().getValue().multiply(new BigDecimal(0.5)).divide(new BigDecimal(100));
+        // Calcula el max
+        BigDecimal max = com.max(new BigDecimal(100));
+        // Suma IVA
+        commission.setValue(max.add(max.multiply(new BigDecimal(19)).divide(new BigDecimal(100))));
+        break;
+    }
+    // Calculo el total
+    total.setValue(topup.getAmount().getValue().subtract(commission.getValue()));
+
+    topup.setCommission(commission);
+    topup.setTotal(total);
   }
 }
