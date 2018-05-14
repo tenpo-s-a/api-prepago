@@ -18,7 +18,7 @@ public class Test_NewPrepaidTopup {
     NewPrepaidTopup topup = new NewPrepaidTopup();
     topup.setMerchantCode("999999999999991");
 
-    Assert.assertEquals("Deberia ser de tipo WEB", topup.getType(), TopupType.WEB);
+    Assert.assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
   }
 
   @Test
@@ -26,7 +26,7 @@ public class Test_NewPrepaidTopup {
     NewPrepaidTopup topup = new NewPrepaidTopup();
     topup.setMerchantCode("111111111111111");
 
-    assertEquals("Deberia ser de tipo POS", topup.getType(), TopupType.POS);
+    assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
   }
 
   @Test
@@ -40,15 +40,15 @@ public class Test_NewPrepaidTopup {
   public void shouldBeCdtType_FirstTopup() {
     NewPrepaidTopup topup = new NewPrepaidTopup();
 
-    Assert.assertEquals("Deberia ser tipo cdt 1era carga por defecto", topup.getCdtTransactionType(), CdtTransactionType.SOL_1_CARGA);
+    Assert.assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
 
     topup.setMerchantCode("999999999999991");
-    assertEquals("Deberia ser de tipo WEB", topup.getType(), TopupType.WEB);
-    assertEquals("Deberia ser tipo cdt 1era carga", topup.getCdtTransactionType(), CdtTransactionType.SOL_1_CARGA);
+    assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
+    assertEquals("Deberia ser tipo cdt 1era carga", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
 
     topup.setMerchantCode("111111111111111");
-    assertEquals("Deberia ser de tipo POS", topup.getType(), TopupType.POS);
-    assertEquals("Deberia ser tipo cdt 1era carga por defecto", topup.getCdtTransactionType(), CdtTransactionType.SOL_1_CARGA);
+    assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
+    assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
   }
 
   @Test
@@ -57,8 +57,8 @@ public class Test_NewPrepaidTopup {
     topup.setMerchantCode("999999999999991");
     topup.setFirstTopup(Boolean.FALSE);
 
-    assertEquals("Deberia ser de tipo WEB", topup.getType(), TopupType.WEB);
-    assertEquals("Deberia ser tipo cdt sol carga WEB", topup.getCdtTransactionType(), CdtTransactionType.SOL_CARGA_WEB);
+    assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
+    assertEquals("Deberia ser tipo cdt sol carga WEB", CdtTransactionType.SOL_CARGA_WEB, topup.getCdtTransactionType());
   }
 
   @Test
@@ -67,8 +67,8 @@ public class Test_NewPrepaidTopup {
     topup.setMerchantCode("111111111111111");
     topup.setFirstTopup(Boolean.FALSE);
 
-    assertEquals("Deberia ser de tipo POS", topup.getType(), TopupType.POS);
-    assertEquals("Deberia ser tipo cdt sol carga POS", topup.getCdtTransactionType(), CdtTransactionType.SOL_CARGA_POS);
+    assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
+    assertEquals("Deberia ser tipo cdt sol carga POS", CdtTransactionType.SOL_CARGA_POS, topup.getCdtTransactionType());
   }
 
 }
