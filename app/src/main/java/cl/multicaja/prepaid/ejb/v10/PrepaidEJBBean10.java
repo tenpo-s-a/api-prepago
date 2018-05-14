@@ -37,6 +37,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   private DBUtils dbUtils;
 
+  private final BigDecimal ONE_HUNDRED = new BigDecimal(100);
+
+  // TODO: externalizar estos porcentajes?
+  private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
+
   /**
    *
    * @return
@@ -222,13 +228,13 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         commission.setValue(new BigDecimal(0));
         break;
       case POS:
-        // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
+        // MAX ( 100; 0,5% * prepaid_topup_new_amount_value ) + IVA
 
-        BigDecimal com = topup.getAmount().getValue().multiply(new BigDecimal(0.5)).divide(new BigDecimal(100));
+        BigDecimal com = topup.getAmount().getValue().multiply(POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
         // Calcula el max
         BigDecimal max = com.max(new BigDecimal(100));
         // Suma IVA
-        commission.setValue(max.add(max.multiply(new BigDecimal(19)).divide(new BigDecimal(100))));
+        commission.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
         break;
     }
     // Calculo el total
