@@ -1,8 +1,8 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.prepaid.domain.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.domain.v10.TopupType;
+import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.TopupType;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.junit.BeforeClass;
 import org.junit.Test;

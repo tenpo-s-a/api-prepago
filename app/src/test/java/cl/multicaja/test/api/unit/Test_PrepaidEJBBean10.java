@@ -1,8 +1,8 @@
 package cl.multicaja.test.api.unit;
 
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.prepaid.domain.v10.PrepaidUser10;
-import cl.multicaja.prepaid.domain.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.junit.Assert;
 import org.junit.Test;

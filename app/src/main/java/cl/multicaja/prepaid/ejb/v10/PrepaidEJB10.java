@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.domain.v10.*;
+import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,8 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.prepaid.domain.v10.CdtTransactionType;
-import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.domain.v10.TopupType;
+import cl.multicaja.prepaid.model.v10.CdtTransactionType;
+import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.TopupType;
 import org.junit.Assert;
 import org.junit.Test;
 
