@@ -19,6 +19,7 @@ public class TestSuite extends TestSuiteBase {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    System.setProperty("project.artifactId", "api-prepaid");
     testServer.start();
   }
 

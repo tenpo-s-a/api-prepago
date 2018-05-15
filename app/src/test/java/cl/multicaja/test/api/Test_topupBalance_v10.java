@@ -58,9 +58,10 @@ public class Test_topupBalance_v10 extends TestApiBase {
     Assert.assertEquals(String.format("Deberia tener amount.value = %s", value.toString()), value, topup.getAmount().getValue());
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
+    String messageId = String.format("%s%s%s", topup.getMerchantCode(), topup.getTransactionId(), topup.getId());
     CamelFactory camelFactory = CamelFactory.getInstance();
     Queue qResp = camelFactory.createJMSQueue("PrepaidTopupRoute10.topUp.resp");
-    ResponseRoute remoteTopup = (ResponseRoute)camelFactory.createJMSMessenger().getMessage(qResp, String.valueOf(topup.getId()));
+    ResponseRoute remoteTopup = (ResponseRoute)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
