@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
 (
  IN _id              BIGINT,
  IN _id_usuario      BIGINT,
- IN _fecha_expiracion INTEGER,
+ IN _expiracion INTEGER,
  IN _estado          VARCHAR,
  IN _contrato        VARCHAR,
  OUT _result         REFCURSOR,
@@ -40,7 +40,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
         pan,
         pan_encriptado,
         contrato,
-        fecha_expiracion,
+        expiracion,
         estado,
         nombre_tarjeta,
         fecha_creacion,
@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
       WHERE
         (COALESCE(_id, 0) = 0 OR id = _id) AND
         (COALESCE(_id_usuario, 0) = 0 OR id_usuario = _id_usuario) AND
-        (COALESCE(_fecha_expiracion, 0) = 0 OR fecha_expiracion = _fecha_expiracion) AND
+        (COALESCE(_expiracion, 0) = 0 OR expiracion = _expiracion) AND
         (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado) AND
         (TRIM(COALESCE(_contrato,'')) = '' OR contrato = _contrato);
 

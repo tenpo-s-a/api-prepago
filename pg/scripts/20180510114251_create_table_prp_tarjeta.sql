@@ -23,7 +23,7 @@ CREATE TABLE ${schema}.prp_tarjeta (
   pan                 VARCHAR(16) NOT NULL,
   pan_encriptado      VARCHAR(100) NOT NULL,
   contrato            VARCHAR(20) NOT NULL,
-  fecha_expiracion    INTEGER NOT NULL,
+  expiracion          INTEGER NOT NULL,
   estado              VARCHAR(10) NOT NULL,
   nombre_tarjeta      VARCHAR(100) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,

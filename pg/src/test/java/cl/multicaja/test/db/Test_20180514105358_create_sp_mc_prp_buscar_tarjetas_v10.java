@@ -26,17 +26,17 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
    *
    * @param id
    * @param idUsuario
-   * @param fechaExpiracion
+   * @param expiracion
    * @param estado
    * @param contrato
    * @return
    * @throws SQLException
    */
-  protected Map<String, Object> searchCards(Long id, Long idUsuario, Integer fechaExpiracion, String estado, String contrato) throws SQLException {
+  protected Map<String, Object> searchCards(Long id, Long idUsuario, Integer expiracion, String estado, String contrato) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idUsuario != null ? idUsuario : new NullParam(Types.BIGINT),
-      fechaExpiracion != null ? fechaExpiracion : new NullParam(Types.INTEGER),
+      expiracion != null ? expiracion : new NullParam(Types.INTEGER),
       estado != null ? estado : new NullParam(Types.VARCHAR),
       contrato != null ? contrato : new NullParam(Types.VARCHAR),
       new OutParam("_result", Types.OTHER),
@@ -51,7 +51,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("fecha_expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"));
+    Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"));
 
     List result = (List)resp.get("_result");
 
@@ -121,11 +121,11 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
   }
 
   @Test
-  public void searchUserBy_fecha_expiracion() throws SQLException {
+  public void searchUserBy_expiracion() throws SQLException {
 
     Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Map<String, Object> resp = searchCards(null, null, (int) obj1.get("fecha_expiracion"), null, null);
+    Map<String, Object> resp = searchCards(null, null, (int) obj1.get("expiracion"), null, null);
 
     List result = (List)resp.get("_result");
 
@@ -141,7 +141,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("fecha_expiracion")) + 1, null, null);
+    Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("expiracion")) + 1, null, null);
 
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));

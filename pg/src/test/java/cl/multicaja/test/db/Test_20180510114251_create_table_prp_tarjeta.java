@@ -17,7 +17,7 @@ public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBasePg {
       new ColumnInfo("pan", "varchar", 16),
       new ColumnInfo("pan_encriptado", "varchar", 100),
       new ColumnInfo("contrato", "varchar", 20),
-      new ColumnInfo("fecha_expiracion", "int4", 10),
+      new ColumnInfo("expiracion", "int4", 10),
       new ColumnInfo("estado", "varchar", 10),
       new ColumnInfo("nombre_tarjeta", "varchar", 100),
       new ColumnInfo("fecha_creacion", "timestamp", 29),

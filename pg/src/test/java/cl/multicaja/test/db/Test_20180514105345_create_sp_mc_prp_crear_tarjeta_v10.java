@@ -44,7 +44,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
       RandomStringUtils.randomNumeric(16), //_pan
       RandomStringUtils.randomAlphabetic(50), //_pan_encriptado
       RandomStringUtils.randomAlphabetic(20), //_contrato
-      expiryDate, //_fecha_expiracion
+      expiryDate, //_expiracion
       status, //_estado
       "Tarjeta de: " + RandomStringUtils.randomAlphabetic(5), //_nombre_tarjeta
       new OutParam("_r_id", Types.BIGINT),
@@ -76,7 +76,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
     map.put("pan", String.valueOf(params[1]));
     map.put("pan_encriptado", String.valueOf(params[2]));
     map.put("contrato", String.valueOf(params[3]));
-    map.put("fecha_expiracion", numberUtils.toInt(params[4]));
+    map.put("expiracion", numberUtils.toInt(params[4]));
     map.put("estado", String.valueOf(params[5]));
     map.put("nombre_tarjeta", String.valueOf(params[6]));
 
@@ -152,7 +152,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
     {
       Object[] params = buildCard("ACTIVA");
 
-      params[4] = new NullParam(Types.INTEGER); //_fecha_expiracion
+      params[4] = new NullParam(Types.INTEGER); //_expiracion
 
       Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 

@@ -4,15 +4,14 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
 import cl.multicaja.prepaid.domain.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -42,8 +41,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   private DBUtils dbUtils;
 
-  private static final String SCHEMA = "prepago";
-
   /**
    *
    * @return
@@ -64,6 +61,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       this.dbUtils = new DBUtils(this.getConfigUtils());
     }
     return this.dbUtils;
+  }
+
+  /**
+   *
+   * @return
+   */
+  private String getSchema() {
+    return this.getConfigUtils().getProperty("schema");
   }
 
   @EJB
@@ -165,7 +170,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     // topup.setUserId(user.getId());
     topup.setUserId(1);
     topup.setStatus("exitoso");
-    topup.setTimestamps(new Timestamps10());
+    topup.setTimestamps(new Timestamps());
 
     /*
       Enviar mensaje a cosa de carga
@@ -203,12 +208,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) {
-    return null;
-  }
-
-  @Override
-  public PrepaidUser createPrepaidUser(Map<String, Object> headers, PrepaidUser prepaidUser) throws Exception {
+  public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     if(prepaidUser == null){
       throw new ValidationException(2);
@@ -235,7 +235,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(SCHEMA + ".mc_prp_crear_usuario_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_usuario_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
       prepaidUser.setId(numberUtils.toLong(resp.get("_r_id"), 0));
@@ -247,58 +247,167 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception {
-
+  public List<PrepaidUser10> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception {
+    //si viene algun parametro en null se establece NullParam
     Object[] params = {
-      userId != null ? userId : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
-      userIdMc != null ? userIdMc : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
-      rut != null ? rut : new NullParam(Types.INTEGER), //si biene parametro se envia, si no se envia NullParam
-      status != null ? status.toString() : new NullParam(Types.VARCHAR), //si biene parametro se envia, si no se envia NullParam
-
-      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> { //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row en ell objeto necesario
-        PrepaidUser u = new PrepaidUser();
-        u.setId(numberUtils.toLong(row.get("id"), 0));
-        u.setIdUser(numberUtils.toLong(row.get("id_usuario_mc"), 0));
-        u.setRut(numberUtils.toInt(row.get("rut"), 0));
+      userId != null ? userId : new NullParam(Types.BIGINT),
+      userIdMc != null ? userIdMc : new NullParam(Types.BIGINT),
+      rut != null ? rut : new NullParam(Types.INTEGER),
+      status != null ? status.toString() : new NullParam(Types.VARCHAR),
+      //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
+      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
+        PrepaidUser10 u = new PrepaidUser10();
+        u.setId(numberUtils.toLong(row.get("id")));
+        u.setIdUser(numberUtils.toLong(row.get("id_usuario_mc")));
+        u.setRut(numberUtils.toInt(row.get("rut")));
+        u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
         Timestamps timestamps = new Timestamps();
         timestamps.setCreatedAt((Timestamp)row.get("fecha_creacion"));
         timestamps.setUpdatedAt((Timestamp)row.get("fecha_actualizacion"));
-        u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
         return u;
       }),
-
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(SCHEMA + ".mc_prp_buscar_usuarios_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", params);
     return (List)resp.get("_result");
   }
 
   @Override
-  public PrepaidUser getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
+  public PrepaidUser10 getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
     if(userId == null){
       throw new ValidationException(2);
     }
-    List<PrepaidUser> lst = this.getPrepaidUsers(headers, userId, null, null, null);
+    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
   @Override
-  public PrepaidUser getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
+  public PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null){
       throw new ValidationException(2);
     }
-    List<PrepaidUser> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
+    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
   @Override
-  public PrepaidUser getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
+  public PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     if(rut == null){
       throw new ValidationException(2);
     }
-    List<PrepaidUser> lst = this.getPrepaidUsers(headers, null, null, rut, null);
+    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, null, rut, null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  @Override
+  public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
+
+    if(prepaidCard == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getUserId() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getPan() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getEncryptedPan() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getProcessorUserId() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getExpiration() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getStatus() == null){
+      throw new ValidationException(2);
+    }
+
+    if(prepaidCard.getNameOnCard() == null){
+      throw new ValidationException(2);
+    }
+
+    Object[] params = {
+      prepaidCard.getUserId(),
+      prepaidCard.getPan(),
+      prepaidCard.getEncryptedPan(),
+      prepaidCard.getProcessorUserId(),
+      prepaidCard.getExpiration(),
+      prepaidCard.getStatus().toString(),
+      prepaidCard.getNameOnCard(),
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_tarjeta_v10", params);
+
+    if ("0".equals(resp.get("_error_code"))) {
+      prepaidCard.setId(numberUtils.toLong(resp.get("_r_id"), 0));
+      return prepaidCard;
+    } else {
+      log.error("Error en invocacion a SP: " + resp);
+      throw new BaseException(1);
+    }
+  }
+
+  @Override
+  public List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
+    //si viene algun parametro en null se establece NullParam
+    Object[] params = {
+      id != null ? id : new NullParam(Types.BIGINT),
+      userId != null ? userId : new NullParam(Types.BIGINT),
+      expiration != null ? expiration : new NullParam(Types.INTEGER),
+      status != null ? status.toString() : new NullParam(Types.VARCHAR),
+      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR),
+      //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
+      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
+        PrepaidCard10 c = new PrepaidCard10();
+        c.setId(numberUtils.toLong(row.get("id")));
+        c.setUserId(numberUtils.toLong(row.get("id_usuario")));
+        c.setPan(String.valueOf(row.get("pan")));
+        c.setEncryptedPan(String.valueOf(row.get("pan_encriptado")));
+        c.setProcessorUserId(String.valueOf(row.get("contrato")));
+        c.setExpiration(numberUtils.toInt(row.get("expiracion")));
+        c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("estado").toString().trim()));
+        c.setNameOnCard(String.valueOf(row.get("nombre_tarjeta")));
+        Timestamps timestamps = new Timestamps();
+        timestamps.setCreatedAt((Timestamp)row.get("fecha_creacion"));
+        timestamps.setUpdatedAt((Timestamp)row.get("fecha_actualizacion"));
+        return c;
+      }),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", params);
+    return (List)resp.get("_result");
+  }
+
+  @Override
+  public PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception {
+    if(id == null){
+      throw new ValidationException(2);
+    }
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, id, null, null, null, null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  @Override
+  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
+    if(userId == null){
+      throw new ValidationException(2);
+    }
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 }
