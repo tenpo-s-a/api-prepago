@@ -1,8 +1,8 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.prepaid.domain.NewAmountAndCurrency;
-import cl.multicaja.prepaid.domain.PrepaidTopup;
-import cl.multicaja.prepaid.domain.TopupType;
+import cl.multicaja.prepaid.domain.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.domain.v10.TopupType;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,14 +31,14 @@ public class Test_PrepaidTopupFee {
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
-    PrepaidTopup topup = new PrepaidTopup();
+    PrepaidTopup10 topup = new PrepaidTopup10();
     bean.calculateTopupFeeAndTotal(topup);
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupAmountValueNull() throws Exception {
-    PrepaidTopup topup = new PrepaidTopup();
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    PrepaidTopup10 topup = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     topup.setAmount(amount);
 
     bean.calculateTopupFeeAndTotal(topup);
@@ -46,8 +46,8 @@ public class Test_PrepaidTopupFee {
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupMerchantCodeNull() throws Exception {
-    PrepaidTopup topup = new PrepaidTopup();
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    PrepaidTopup10 topup = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal(100));
     topup.setAmount(amount);
 
@@ -59,8 +59,8 @@ public class Test_PrepaidTopupFee {
    */
   @Test
   public void shouldCalculateWebFee()  throws Exception{
-    PrepaidTopup topup = new PrepaidTopup();
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    PrepaidTopup10 topup = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal(5000));
     topup.setAmount(amount);
@@ -80,8 +80,8 @@ public class Test_PrepaidTopupFee {
    */
   @Test
   public void shouldCalculatePosFee_100() throws Exception {
-    PrepaidTopup topup = new PrepaidTopup();
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    PrepaidTopup10 topup = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal(5000));
     topup.setAmount(amount);
@@ -101,8 +101,8 @@ public class Test_PrepaidTopupFee {
    */
   @Test
   public void shouldCalculatePosFee() throws Exception{
-    PrepaidTopup topup = new PrepaidTopup();
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    PrepaidTopup10 topup = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal(50000));
     topup.setAmount(amount);
