@@ -1,16 +1,16 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class Merchant extends BaseModel {
+public class Merchant10 extends BaseModel {
 
   private String code;
   private String name;
 
-  public Merchant() {
+  public Merchant10() {
     super();
   }
 

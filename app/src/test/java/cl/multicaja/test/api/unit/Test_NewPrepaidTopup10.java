@@ -1,8 +1,8 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.prepaid.domain.CdtTransactionType;
-import cl.multicaja.prepaid.domain.NewPrepaidTopup;
-import cl.multicaja.prepaid.domain.TopupType;
+import cl.multicaja.prepaid.domain.v10.CdtTransactionType;
+import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.v10.TopupType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 /**
  * @author abarazarte
  */
-public class Test_NewPrepaidTopup {
+public class Test_NewPrepaidTopup10 {
 
   @Test
   public void shouldBeTypeWeb() {

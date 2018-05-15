@@ -6,8 +6,8 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
+import cl.multicaja.prepaid.domain.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
@@ -77,7 +77,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception {
     //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
@@ -113,7 +113,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - N > 1 Carga
      */
     // Buscar usuario local de prepago
-    PrepaidUser prepaidUser = new PrepaidUser();
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
     /*
       if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
         // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
@@ -154,14 +154,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
      */
     //TODO: Calcular monto y comisiones
 
-    PrepaidTopup topup = new PrepaidTopup(topupRequest);
+    PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
     // Id Solicitud de carga devuelto por CDT
     topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
     // UserId
     // topup.setUserId(user.getId());
     topup.setUserId(1);
     topup.setStatus("exitoso");
-    topup.setTimestamps(new Timestamps());
+    topup.setTimestamps(new Timestamps10());
 
     /*
       Enviar mensaje a cosa de carga
@@ -179,27 +179,27 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public List<PrepaidTopup> getUserTopups(Map<String, Object> headers, Long userId) {
+  public List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId) {
     return null;
   }
 
   @Override
-  public PrepaidUserSignup initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup signupRequest) {
+  public PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) {
     return null;
   }
 
   @Override
-  public PrepaidUserSignup getUserSignup(Map<String, Object> headers, Long signupId) {
+  public PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId) {
     return null;
   }
 
   @Override
-  public PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId) {
+  public PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId) {
     return null;
   }
 
   @Override
-  public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) {
+  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) {
     return null;
   }
 }
