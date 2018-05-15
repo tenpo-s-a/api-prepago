@@ -5,12 +5,12 @@ import cl.multicaja.core.model.BaseModel;
 /**
  * @author abarazarte
  */
-public class PrepaidCardBalance extends BaseModel {
+public class PrepaidCardBalance10 extends BaseModel {
 
   private AmountAndCurrency10 primaryBalance;
   private AmountAndCurrency10 secondaryBalance;
 
-  public PrepaidCardBalance() {
+  public PrepaidCardBalance10() {
     super();
   }
 

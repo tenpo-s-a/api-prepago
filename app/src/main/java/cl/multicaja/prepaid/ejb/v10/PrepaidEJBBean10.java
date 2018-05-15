@@ -77,7 +77,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
     //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
@@ -174,7 +174,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) {
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) {
 
   }
 

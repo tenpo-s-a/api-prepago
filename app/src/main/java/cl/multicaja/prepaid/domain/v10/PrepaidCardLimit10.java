@@ -5,13 +5,13 @@ import cl.multicaja.core.model.BaseModel;
 /**
  * @author abarazarte
  */
-public class PrepaidCardLimit extends BaseModel {
+public class PrepaidCardLimit10 extends BaseModel {
 
   private String id;
   private String name;
   private AmountAndCurrency10 amount;
 
-  public PrepaidCardLimit() {
+  public PrepaidCardLimit10() {
     super();
   }
 

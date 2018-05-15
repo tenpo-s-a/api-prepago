@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * @author abarazarte
  */
-public class PrepaidUserData extends BaseModel {
+public class PrepaidUserData10 extends BaseModel {
 
   private PrepaidCard10 card;
-  private List<PrepaidCardLimit> limits;
+  private List<PrepaidCardLimit10> limits;
 
-  public PrepaidUserData() {
+  public PrepaidUserData10() {
     super();
   }
 
@@ -24,11 +24,11 @@ public class PrepaidUserData extends BaseModel {
     this.card = card;
   }
 
-  public List<PrepaidCardLimit> getLimits() {
+  public List<PrepaidCardLimit10> getLimits() {
     return limits;
   }
 
-  public void setLimits(List<PrepaidCardLimit> limits) {
+  public void setLimits(List<PrepaidCardLimit10> limits) {
     this.limits = limits;
   }
 

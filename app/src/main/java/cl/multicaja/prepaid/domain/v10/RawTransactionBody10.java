@@ -5,7 +5,7 @@ import cl.multicaja.core.model.BaseModel;
 /**
  * @author abarazarte
  */
-public class RawTransactionBody extends BaseModel {
+public class RawTransactionBody10 extends BaseModel {
 
   private NewAmountAndCurrency10 saldoDisponible;
   private NewAmountAndCurrency10 importeLocal;
@@ -16,7 +16,7 @@ public class RawTransactionBody extends BaseModel {
   private Place10 place;
   private Integer resolucionTx;
 
-  public RawTransactionBody() {
+  public RawTransactionBody10() {
     super();
   }
 

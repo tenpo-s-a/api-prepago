@@ -5,7 +5,7 @@ import cl.multicaja.core.model.BaseModel;
 /**
  * @author abarazarte
  */
-public class PrepaidTransaction extends BaseModel {
+public class PrepaidTransaction10 extends BaseModel {
 
   private TransactionType10 transactionType;
   private String authCode;
@@ -19,7 +19,7 @@ public class PrepaidTransaction extends BaseModel {
   private Place10 place;
   private Merchant10 merchant;
 
-  public PrepaidTransaction() {
+  public PrepaidTransaction10() {
     super();
   }
 

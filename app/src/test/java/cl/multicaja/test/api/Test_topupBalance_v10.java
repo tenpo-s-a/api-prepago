@@ -5,7 +5,7 @@ import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.domain.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -29,7 +29,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     final Integer currencyCode = 152;
     final BigDecimal value = new BigDecimal("9999.99");
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId(transactionId);
     topupRequest.setRut(rut);
     topupRequest.setMerchantCode(merchantCode);
@@ -81,7 +81,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingRut() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
     topupRequest.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -105,7 +105,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingTransactionId() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -127,7 +127,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingMerchantCode() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -149,7 +149,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingAmount() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
@@ -168,7 +168,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingAmountCurrencyCode() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
@@ -190,7 +190,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn422_OnMissingAmountValue() {
 
-    NewPrepaidTopup topupRequest = new NewPrepaidTopup();
+    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");

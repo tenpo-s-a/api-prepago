@@ -12,9 +12,9 @@ public interface PrepaidEJB10 {
 
   Map<String, Object> info() throws Exception;
 
-  PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception;
+  PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception;
 
-  void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
+  void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest);
 
   List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
 

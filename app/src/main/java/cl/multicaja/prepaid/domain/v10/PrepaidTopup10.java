@@ -3,7 +3,7 @@ package cl.multicaja.prepaid.domain.v10;
 /**
  * @author abarazarte
  */
-public class PrepaidTopup10 extends NewPrepaidTopup {
+public class PrepaidTopup10 extends NewPrepaidTopup10 {
 
   private Integer id;
   private String status;
@@ -14,7 +14,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup {
     super();
   }
 
-  public PrepaidTopup10(NewPrepaidTopup topupRequest) {
+  public PrepaidTopup10(NewPrepaidTopup10 topupRequest) {
     super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(), topupRequest.getMerchantCode());
   }
 

@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.domain.v10.NewPrepaidUserSignup10;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
@@ -34,14 +34,14 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/prepaid/topup")
-  public Response topupUserBalance(NewPrepaidTopup topupRequest, @Context HttpHeaders headers) throws Exception {
+  public Response topupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidTopup10 prepaidTopup = this.ejb.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
 
   @POST
   @Path("/prepaid/topup/reverse")
-  public Response reverseTopupUserBalance(NewPrepaidTopup topupRequest) {
+  public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest) {
     return Response.ok().build();
   }
 

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * @author abarazarte
  */
-public class NewPrepaidTopup extends BaseModel {
+public class NewPrepaidTopup10 extends BaseModel {
 
   //TODO: externalizar este numero?
   @JsonIgnore
@@ -20,11 +20,11 @@ public class NewPrepaidTopup extends BaseModel {
   @JsonIgnore
   private Boolean isFirstTopup = Boolean.TRUE;
 
-  public NewPrepaidTopup() {
+  public NewPrepaidTopup10() {
     super();
   }
 
-  public NewPrepaidTopup(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode) {
+  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode) {
     super();
 
     this.amount = amount;

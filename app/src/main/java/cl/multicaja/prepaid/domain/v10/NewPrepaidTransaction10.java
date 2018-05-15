@@ -5,12 +5,12 @@ import cl.multicaja.core.model.BaseModel;
 /**
  * @author abarazarte
  */
-public class NewPrepaidTransaction extends BaseModel {
+public class NewPrepaidTransaction10 extends BaseModel {
 
   private AmountAndCurrency10 amount;
   private Integer newTransactionId;
 
-  public NewPrepaidTransaction() {
+  public NewPrepaidTransaction10() {
     super();
   }
 

@@ -8,7 +8,7 @@ import cl.multicaja.core.model.BaseModel;
 public class NewRawTransaction10 extends BaseModel {
 
   private RawTransactionHeader10 header;
-  private RawTransactionBody body;
+  private RawTransactionBody10 body;
   private String base64Data;
 
   public NewRawTransaction10() {
@@ -23,11 +23,11 @@ public class NewRawTransaction10 extends BaseModel {
     this.header = header;
   }
 
-  public RawTransactionBody getBody() {
+  public RawTransactionBody10 getBody() {
     return body;
   }
 
-  public void setBody(RawTransactionBody body) {
+  public void setBody(RawTransactionBody10 body) {
     this.body = body;
   }
 
