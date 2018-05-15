@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.domain.v10.*;
+import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -41,4 +41,15 @@ public interface PrepaidEJB10 {
   PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception;
 
   PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception;
+
+  /**
+   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
+   *
+   * @param topup con el cual se calculara la comision y total
+   * @throws IllegalStateException cuando el topup es null
+   * @throws IllegalStateException cuando el topup.amount es null
+   * @throws IllegalStateException cuando el topup.amount.value es null
+   * @throws IllegalStateException cuando el topup.merchantCode es null o vacio
+   */
+  void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception;
 }

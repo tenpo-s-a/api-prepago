@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain.v10;
+package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;

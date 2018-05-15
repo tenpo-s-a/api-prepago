@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.ProducerTemplate;
 

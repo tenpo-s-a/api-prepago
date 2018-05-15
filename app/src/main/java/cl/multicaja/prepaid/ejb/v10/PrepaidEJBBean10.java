@@ -9,7 +9,7 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.domain.v10.*;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.HashMap;
@@ -40,6 +41,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private ConfigUtils configUtils;
 
   private DBUtils dbUtils;
+
+  private final BigDecimal ONE_HUNDRED = new BigDecimal(100);
+
+  // TODO: externalizar estos porcentajes?
+  private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
   /**
    *
@@ -158,11 +165,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    /*
-      Calcular monto a cargar y comisiones
-     */
-    //TODO: Calcular monto y comisiones
-
     PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
     // Id Solicitud de carga devuelto por CDT
     topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
@@ -171,6 +173,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setUserId(1);
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
+
+    /*
+      Calcular monto a cargar y comisiones
+     */
+    this.calculateTopupFeeAndTotal(topup);
 
     /*
       Enviar mensaje a cosa de carga
@@ -409,5 +416,48 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  /**
+   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
+   *
+   * @param topup al que se le calculara la comision y total
+   * @throws IllegalStateException si el topup es null
+   * @throws IllegalStateException si el topup.amount es null
+   * @throws IllegalStateException si el topup.amount.value es null
+   * @throws IllegalStateException si el topup.merchantCode es null o vacio
+   */
+  @Override
+  public void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception {
+
+    if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
+      throw  new IllegalStateException();
+    }
+
+    NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
+    total.setCurrencyCode(152);
+    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
+    fee.setCurrencyCode(152);
+
+    // Calcula las comisiones segun el tipo de carga (WEB o POS)
+    switch (topup.getType()) {
+      case WEB:
+        fee.setValue(new BigDecimal(0));
+        break;
+      case POS:
+        // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
+
+        BigDecimal com = topup.getAmount().getValue().multiply(POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
+        // Calcula el max
+        BigDecimal max = com.max(new BigDecimal(100));
+        // Suma IVA
+        fee.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
+        break;
+    }
+    // Calculo el total
+    total.setValue(topup.getAmount().getValue().subtract(fee.getValue()));
+
+    topup.setFee(fee);
+    topup.setTotal(total);
   }
 }
