@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * @author abarazarte
  */
-public class NewPrepaidTopup extends BaseModel {
+public class NewPrepaidTopup10 extends BaseModel {
 
   //TODO: externalizar este numero?
   @JsonIgnore
   private final String WEB_MERCHANT_CODE = "999999999999991";
 
-  private NewAmountAndCurrency amount;
+  private NewAmountAndCurrency10 amount;
   private String transactionId;
   private Integer rut;
   private String merchantCode;
@@ -20,11 +20,11 @@ public class NewPrepaidTopup extends BaseModel {
   @JsonIgnore
   private Boolean isFirstTopup = Boolean.TRUE;
 
-  public NewPrepaidTopup() {
+  public NewPrepaidTopup10() {
     super();
   }
 
-  public NewPrepaidTopup(NewAmountAndCurrency amount, String transactionId, Integer rut, String merchantCode) {
+  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode) {
     super();
 
     this.amount = amount;
@@ -33,11 +33,11 @@ public class NewPrepaidTopup extends BaseModel {
     this.merchantCode = merchantCode;
   }
 
-  public NewAmountAndCurrency getAmount() {
+  public NewAmountAndCurrency10 getAmount() {
     return amount;
   }
 
-  public void setAmount(NewAmountAndCurrency amount) {
+  public void setAmount(NewAmountAndCurrency10 amount) {
     this.amount = amount;
   }
 

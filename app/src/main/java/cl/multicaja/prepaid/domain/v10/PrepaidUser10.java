@@ -1,19 +1,19 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class PrepaidUser extends BaseModel {
+public class PrepaidUser10 extends BaseModel {
 
   private Long id;
   private Long idUser;
   private Integer rut;
   private PrepaidUserStatus status;
-  private Timestamps timestamps;
+  private Timestamps10 timestamps;
 
-  public PrepaidUser() {
+  public PrepaidUser10() {
     super();
   }
 
@@ -49,11 +49,11 @@ public class PrepaidUser extends BaseModel {
     this.status = status;
   }
 
-  public Timestamps getTimestamps() {
+  public Timestamps10 getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps timestamps) {
+  public void setTimestamps(Timestamps10 timestamps) {
     this.timestamps = timestamps;
   }
 }

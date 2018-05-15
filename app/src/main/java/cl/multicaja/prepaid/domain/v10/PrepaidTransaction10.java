@@ -1,33 +1,33 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class PrepaidTransaction extends BaseModel {
+public class PrepaidTransaction10 extends BaseModel {
 
-  private TransactionType transactionType;
+  private TransactionType10 transactionType;
   private String authCode;
   private String processorTransactionId;
   private String pan;
   private String realDate;
   private String accountingDate;
   private String processingDate;
-  private AmountAndCurrency amountPrimary;
-  private AmountAndCurrency amountForeign;
-  private Place place;
-  private Merchant merchant;
+  private AmountAndCurrency10 amountPrimary;
+  private AmountAndCurrency10 amountForeign;
+  private Place10 place;
+  private Merchant10 merchant;
 
-  public PrepaidTransaction() {
+  public PrepaidTransaction10() {
     super();
   }
 
-  public TransactionType getTransactionType() {
+  public TransactionType10 getTransactionType() {
     return transactionType;
   }
 
-  public void setTransactionType(TransactionType transactionType) {
+  public void setTransactionType(TransactionType10 transactionType) {
     this.transactionType = transactionType;
   }
 
@@ -79,35 +79,35 @@ public class PrepaidTransaction extends BaseModel {
     this.processingDate = processingDate;
   }
 
-  public AmountAndCurrency getAmountPrimary() {
+  public AmountAndCurrency10 getAmountPrimary() {
     return amountPrimary;
   }
 
-  public void setAmountPrimary(AmountAndCurrency amountPrimary) {
+  public void setAmountPrimary(AmountAndCurrency10 amountPrimary) {
     this.amountPrimary = amountPrimary;
   }
 
-  public AmountAndCurrency getAmountForeign() {
+  public AmountAndCurrency10 getAmountForeign() {
     return amountForeign;
   }
 
-  public void setAmountForeign(AmountAndCurrency amountForeign) {
+  public void setAmountForeign(AmountAndCurrency10 amountForeign) {
     this.amountForeign = amountForeign;
   }
 
-  public Place getPlace() {
+  public Place10 getPlace() {
     return place;
   }
 
-  public void setPlace(Place place) {
+  public void setPlace(Place10 place) {
     this.place = place;
   }
 
-  public Merchant getMerchant() {
+  public Merchant10 getMerchant() {
     return merchant;
   }
 
-  public void setMerchant(Merchant merchant) {
+  public void setMerchant(Merchant10 merchant) {
     this.merchant = merchant;
   }
 

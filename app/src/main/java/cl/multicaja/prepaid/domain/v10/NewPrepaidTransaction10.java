@@ -1,24 +1,24 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class NewPrepaidTransaction extends BaseModel {
+public class NewPrepaidTransaction10 extends BaseModel {
 
-  private AmountAndCurrency amount;
+  private AmountAndCurrency10 amount;
   private Integer newTransactionId;
 
-  public NewPrepaidTransaction() {
+  public NewPrepaidTransaction10() {
     super();
   }
 
-  public AmountAndCurrency getAmount() {
+  public AmountAndCurrency10 getAmount() {
     return amount;
   }
 
-  public void setAmount(AmountAndCurrency amount) {
+  public void setAmount(AmountAndCurrency10 amount) {
     this.amount = amount;
   }
 

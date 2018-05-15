@@ -1,15 +1,10 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.prepaid.domain.NewPrepaidTopup;
-import cl.multicaja.prepaid.domain.PrepaidTopup;
+import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.jms.Queue;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +41,7 @@ public final class PrepaidTopupDelegate10 {
    * @param user
    * @return
    */
-  public String sendTopUp(PrepaidTopup prepaidTopup, User user) {
+  public String sendTopUp(PrepaidTopup10 prepaidTopup, User user) {
     String messageId = String.valueOf(prepaidTopup.getId());
     System.out.println("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();

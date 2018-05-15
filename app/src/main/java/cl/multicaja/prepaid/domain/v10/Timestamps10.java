@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 /**
  * @author abarazarte
  */
-public class Timestamps extends BaseModel {
+public class Timestamps10 extends BaseModel {
 
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-  public Timestamps() {
+  public Timestamps10() {
     super();
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now();

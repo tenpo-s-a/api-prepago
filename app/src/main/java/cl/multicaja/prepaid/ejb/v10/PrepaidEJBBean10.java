@@ -6,8 +6,8 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.domain.*;
 import cl.multicaja.helpers.ejb.v10.HelpersEJBBean10;
+import cl.multicaja.prepaid.domain.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
@@ -84,7 +84,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
     //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
@@ -120,7 +120,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - N > 1 Carga
      */
     // Buscar usuario local de prepago
-    PrepaidUser prepaidUser = new PrepaidUser();
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
     /*
       if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
         // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
@@ -156,14 +156,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    PrepaidTopup topup = new PrepaidTopup(topupRequest);
+    PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
     // Id Solicitud de carga devuelto por CDT
     topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
     // UserId
     // topup.setUserId(user.getId());
     topup.setUserId(1);
     topup.setStatus("exitoso");
-    topup.setTimestamps(new Timestamps());
+    topup.setTimestamps(new Timestamps10());
 
     /*
       Calcular monto a cargar y comisiones
@@ -181,32 +181,32 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) {
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) {
 
   }
 
   @Override
-  public List<PrepaidTopup> getUserTopups(Map<String, Object> headers, Long userId) {
+  public List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId) {
     return null;
   }
 
   @Override
-  public PrepaidUserSignup initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup signupRequest) {
+  public PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) {
     return null;
   }
 
   @Override
-  public PrepaidUserSignup getUserSignup(Map<String, Object> headers, Long signupId) {
+  public PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId) {
     return null;
   }
 
   @Override
-  public PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId) {
+  public PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId) {
     return null;
   }
 
   @Override
-  public PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId) {
+  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) {
     return null;
   }
 
@@ -220,15 +220,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
    * @throws IllegalStateException si el topup.merchantCode es null o vacio
    */
   @Override
-  public void calculateTopupFeeAndTotal(PrepaidTopup topup) throws Exception {
+  public void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception {
 
     if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
       throw  new IllegalStateException();
     }
 
-    AmountAndCurrency total = new AmountAndCurrency();
+    NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(152);
-    AmountAndCurrency fee = new AmountAndCurrency();
+    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
     fee.setCurrencyCode(152);
 
     // Calcula las comisiones segun el tipo de carga (WEB o POS)
