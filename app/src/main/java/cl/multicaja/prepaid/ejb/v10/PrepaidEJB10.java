@@ -29,11 +29,17 @@ public interface PrepaidEJB10 {
 
   PrepaidUser createPrepaidUser(Map<String, Object> headers, PrepaidUser prepaidUser) throws Exception;
 
-  List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, String status) throws Exception;
+  List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception;
 
   PrepaidUser getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception;
 
   PrepaidUser getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   PrepaidUser getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception;
+
+
+  PrepaidCard createPrepaidCard(Map<String, Object> headers, PrepaidCard prepaidCard) throws Exception;
+
+  List<PrepaidCard> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception;
+  
 }

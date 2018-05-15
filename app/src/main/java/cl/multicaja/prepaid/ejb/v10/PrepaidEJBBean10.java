@@ -251,13 +251,13 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, String status) throws Exception {
+  public List<PrepaidUser> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception {
 
     Object[] params = {
       userId != null ? userId : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
       userIdMc != null ? userIdMc : new NullParam(Types.BIGINT), //si biene parametro se envia, si no se envia NullParam
       rut != null ? rut : new NullParam(Types.INTEGER), //si biene parametro se envia, si no se envia NullParam
-      status != null ? status : new NullParam(Types.VARCHAR), //si biene parametro se envia, si no se envia NullParam
+      status != null ? status.toString() : new NullParam(Types.VARCHAR), //si biene parametro se envia, si no se envia NullParam
 
       new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> { //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row en ell objeto necesario
         PrepaidUser u = new PrepaidUser();
