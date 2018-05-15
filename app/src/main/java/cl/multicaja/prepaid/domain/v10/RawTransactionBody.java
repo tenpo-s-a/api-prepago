@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
@@ -7,40 +7,40 @@ import cl.multicaja.core.model.BaseModel;
  */
 public class RawTransactionBody extends BaseModel {
 
-  private NewAmountAndCurrency saldoDisponible;
-  private NewAmountAndCurrency importeLocal;
-  private NewAmountAndCurrency importeDivisa;
+  private NewAmountAndCurrency10 saldoDisponible;
+  private NewAmountAndCurrency10 importeLocal;
+  private NewAmountAndCurrency10 importeDivisa;
   private Integer tipoTx;
   private Integer idMensaje;
-  private Merchant merchant;
-  private Place place;
+  private Merchant10 merchant;
+  private Place10 place;
   private Integer resolucionTx;
 
   public RawTransactionBody() {
     super();
   }
 
-  public NewAmountAndCurrency getSaldoDisponible() {
+  public NewAmountAndCurrency10 getSaldoDisponible() {
     return saldoDisponible;
   }
 
-  public void setSaldoDisponible(NewAmountAndCurrency saldoDisponible) {
+  public void setSaldoDisponible(NewAmountAndCurrency10 saldoDisponible) {
     this.saldoDisponible = saldoDisponible;
   }
 
-  public NewAmountAndCurrency getImporteLocal() {
+  public NewAmountAndCurrency10 getImporteLocal() {
     return importeLocal;
   }
 
-  public void setImporteLocal(NewAmountAndCurrency importeLocal) {
+  public void setImporteLocal(NewAmountAndCurrency10 importeLocal) {
     this.importeLocal = importeLocal;
   }
 
-  public NewAmountAndCurrency getImporteDivisa() {
+  public NewAmountAndCurrency10 getImporteDivisa() {
     return importeDivisa;
   }
 
-  public void setImporteDivisa(NewAmountAndCurrency importeDivisa) {
+  public void setImporteDivisa(NewAmountAndCurrency10 importeDivisa) {
     this.importeDivisa = importeDivisa;
   }
 
@@ -60,19 +60,19 @@ public class RawTransactionBody extends BaseModel {
     this.idMensaje = idMensaje;
   }
 
-  public Merchant getMerchant() {
+  public Merchant10 getMerchant() {
     return merchant;
   }
 
-  public void setMerchant(Merchant merchant) {
+  public void setMerchant(Merchant10 merchant) {
     this.merchant = merchant;
   }
 
-  public Place getPlace() {
+  public Place10 getPlace() {
     return place;
   }
 
-  public void setPlace(Place place) {
+  public void setPlace(Place10 place) {
     this.place = place;
   }
 

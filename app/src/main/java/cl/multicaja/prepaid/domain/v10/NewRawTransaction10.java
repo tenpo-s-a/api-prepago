@@ -1,25 +1,25 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class NewRawTransaction extends BaseModel {
+public class NewRawTransaction10 extends BaseModel {
 
-  private RawTransactionHeader header;
+  private RawTransactionHeader10 header;
   private RawTransactionBody body;
   private String base64Data;
 
-  public NewRawTransaction() {
+  public NewRawTransaction10() {
     super();
   }
 
-  public RawTransactionHeader getHeader() {
+  public RawTransactionHeader10 getHeader() {
     return header;
   }
 
-  public void setHeader(RawTransactionHeader header) {
+  public void setHeader(RawTransactionHeader10 header) {
     this.header = header;
   }
 

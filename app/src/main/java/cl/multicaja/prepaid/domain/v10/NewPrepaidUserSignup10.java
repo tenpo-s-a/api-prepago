@@ -1,16 +1,16 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class NewPrepaidUserSignup extends BaseModel {
+public class NewPrepaidUserSignup10 extends BaseModel {
 
   private String email;
   private Integer rut;
 
-  public NewPrepaidUserSignup() {
+  public NewPrepaidUserSignup10() {
     super();
   }
 

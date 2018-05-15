@@ -1,20 +1,20 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 /**
  * @author abarazarte
  */
-public class PrepaidTopup extends NewPrepaidTopup {
+public class PrepaidTopup10 extends NewPrepaidTopup {
 
   private Integer id;
   private String status;
   private Integer userId;
-  private Timestamps timestamps;
+  private Timestamps10 timestamps;
 
-  public PrepaidTopup() {
+  public PrepaidTopup10() {
     super();
   }
 
-  public PrepaidTopup(NewPrepaidTopup topupRequest) {
+  public PrepaidTopup10(NewPrepaidTopup topupRequest) {
     super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(), topupRequest.getMerchantCode());
   }
 
@@ -42,11 +42,11 @@ public class PrepaidTopup extends NewPrepaidTopup {
     this.userId = userId;
   }
 
-  public Timestamps getTimestamps() {
+  public Timestamps10 getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps timestamps) {
+  public void setTimestamps(Timestamps10 timestamps) {
     this.timestamps = timestamps;
   }
 

@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 /**
  * @author abarazarte

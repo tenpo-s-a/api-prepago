@@ -1,17 +1,17 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class Place extends BaseModel {
+public class Place10 extends BaseModel {
 
   private Integer countryIso3266Code;
   private String countryDescription;
   private String placeName;
 
-  public Place() {
+  public Place10() {
     super();
   }
 

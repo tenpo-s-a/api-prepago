@@ -1,13 +1,13 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 /**
  * @author abarazarte
  */
-public class AmountAndCurrency extends NewAmountAndCurrency {
+public class AmountAndCurrency10 extends NewAmountAndCurrency10 {
 
   private String currencyDescription;
 
-  public AmountAndCurrency() {
+  public AmountAndCurrency10() {
     super();
   }
 

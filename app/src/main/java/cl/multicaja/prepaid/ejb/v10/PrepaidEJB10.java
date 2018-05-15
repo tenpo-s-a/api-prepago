@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.domain.*;
+import cl.multicaja.prepaid.domain.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -13,18 +12,18 @@ public interface PrepaidEJB10 {
 
   Map<String, Object> info() throws Exception;
 
-  PrepaidTopup topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception;
+  PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest) throws Exception;
 
   void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup topupRequest);
 
-  List<PrepaidTopup> getUserTopups(Map<String, Object> headers, Long userId);
+  List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
 
-  PrepaidUserSignup initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup signupRequest);
+  PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest);
 
-  PrepaidUserSignup getUserSignup(Map<String, Object> headers, Long signupId);
+  PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId);
 
-  PrepaidCard issuePrepaidCard(Map<String, Object> headers, Long userId);
+  PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId);
 
-  PrepaidCard getPrepaidCard(Map<String, Object> headers, Long userId);
+  PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId);
 
 }
