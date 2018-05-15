@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.domain.v10;
 
+import cl.multicaja.users.model.v10.Timestamps;
+
 /**
  * @author abarazarte
  */
@@ -8,7 +10,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
   private Integer id;
   private String status;
   private Integer userId;
-  private Timestamps10 timestamps;
+  private Timestamps timestamps;
 
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
@@ -45,11 +47,11 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
     this.userId = userId;
   }
 
-  public Timestamps10 getTimestamps() {
+  public Timestamps getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps10 timestamps) {
+  public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
   }
 

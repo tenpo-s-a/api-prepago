@@ -41,7 +41,7 @@
   <dependencies>
 
     <dependency>
-      <groupId>cl.multicaja.prepago</groupId>
+      <groupId>cl.multicaja</groupId>
       <artifactId>api-core</artifactId>
       <version>1.0.0</version>
     </dependency>
@@ -49,13 +49,6 @@
     <dependency>
       <groupId>cl.multicaja.prepago</groupId>
       <artifactId>api-users</artifactId>
-      <version>1.0.0</version>
-      <classifier>${classifier}</classifier>
-    </dependency>
-
-    <dependency>
-      <groupId>cl.multicaja.prepago</groupId>
-      <artifactId>api-helpers</artifactId>
       <version>1.0.0</version>
       <classifier>${classifier}</classifier>
     </dependency>

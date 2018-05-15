@@ -5,5 +5,13 @@ package cl.multicaja.prepaid.domain.v10;
  */
 public enum PrepaidUserStatus {
   ACTIVE,
-  DISABLED
+  DISABLED;
+
+  public static PrepaidUserStatus valueOfEnum(String name) {
+    try {
+      return PrepaidUserStatus.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
+  }
 }

@@ -35,7 +35,7 @@
 	<dependencies>
 
     <dependency>
-      <groupId>cl.multicaja.prepago</groupId>
+      <groupId>cl.multicaja</groupId>
       <artifactId>api-core</artifactId>
       <version>1.0.0</version>
     </dependency>

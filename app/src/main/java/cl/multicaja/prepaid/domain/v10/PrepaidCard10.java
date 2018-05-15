@@ -1,17 +1,13 @@
 package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
+import cl.multicaja.users.model.v10.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 /**
  * @author abarazarte
  */
 public class PrepaidCard10 extends BaseModel {
-
-  private final DateTimeFormatter expirationDateFormatter = DateTimeFormatter.ofPattern("MM/YY");
 
   private Long id;
   //Id Interno de prepago
@@ -22,10 +18,10 @@ public class PrepaidCard10 extends BaseModel {
   private String pan;
   @JsonIgnore
   private String encryptedPan;
-  private LocalDate expiration;
+  private Integer expiration;
   private String nameOnCard;
   private PrepaidCardStatus status;
-  private Timestamps10 timestamps;
+  private Timestamps timestamps;
 
   public PrepaidCard10() {
     super();
@@ -70,11 +66,12 @@ public class PrepaidCard10 extends BaseModel {
   public void setEncryptedPan(String encryptedPan) {
     this.encryptedPan = encryptedPan;
   }
-  public String getExpiration() {
-    return expirationDateFormatter.format(this.expiration);
+
+  public Integer getExpiration() {
+    return expiration;
   }
 
-  public void setExpiration(LocalDate expiration) {
+  public void setExpiration(Integer expiration) {
     this.expiration = expiration;
   }
 
@@ -94,11 +91,11 @@ public class PrepaidCard10 extends BaseModel {
     this.status = status;
   }
 
-  public Timestamps10 getTimestamps() {
+  public Timestamps getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps10 timestamps) {
+  public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
   }
 }

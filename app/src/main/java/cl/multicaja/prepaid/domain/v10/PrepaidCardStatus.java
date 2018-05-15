@@ -22,4 +22,12 @@ public enum PrepaidCardStatus implements Serializable {
   public String getValue() {
     return value;
   }
+
+  public static PrepaidCardStatus valueOfEnum(String name) {
+    try {
+      return PrepaidCardStatus.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
+  }
 }

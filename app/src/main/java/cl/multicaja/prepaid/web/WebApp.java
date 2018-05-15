@@ -64,9 +64,6 @@ public class WebApp implements ServletContextListener  {
 
     System.out.println("------------ Configuraciones del modulo api-users --------------");
     new ConfigUtils("api-users").printList();
-
-    System.out.println("------------ Configuraciones del modulo api-helpers --------------");
-    new ConfigUtils("api-helpers").printList();
   }
 
   @Override

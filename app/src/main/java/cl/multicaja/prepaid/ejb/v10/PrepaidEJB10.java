@@ -24,7 +24,23 @@ public interface PrepaidEJB10 {
 
   PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId);
 
-  PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId);
+  PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
+
+  List<PrepaidUser10> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception;
+
+  PrepaidUser10 getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception;
+
+  PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception;
+
+  PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception;
+
+  PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception;
+
+  List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception;
+
+  PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception;
+
+  PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception;
 
   /**
    *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
