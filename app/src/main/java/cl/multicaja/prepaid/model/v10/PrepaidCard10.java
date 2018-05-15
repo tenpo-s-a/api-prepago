@@ -4,6 +4,8 @@ import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.Objects;
+
 /**
  * @author abarazarte
  */
@@ -12,7 +14,7 @@ public class PrepaidCard10 extends BaseModel {
   private Long id;
   //Id Interno de prepago
   @JsonIgnore
-  private Long userId;
+  private Long idUser;
   //Contrato - Tecnocom
   private String processorUserId;
   private String pan;
@@ -35,12 +37,12 @@ public class PrepaidCard10 extends BaseModel {
     this.id = id;
   }
 
-  public Long getUserId() {
-    return userId;
+  public Long getIdUser() {
+    return idUser;
   }
 
-  public void setUserId(Long userId) {
-    this.userId = userId;
+  public void setIdUser(Long idUser) {
+    this.idUser = idUser;
   }
 
   public String getProcessorUserId() {
@@ -97,5 +99,25 @@ public class PrepaidCard10 extends BaseModel {
 
   public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof PrepaidCard10)) return false;
+    PrepaidCard10 that = (PrepaidCard10) o;
+    return Objects.equals(getId(), that.getId()) &&
+      Objects.equals(getIdUser(), that.getIdUser()) &&
+      Objects.equals(getProcessorUserId(), that.getProcessorUserId()) &&
+      Objects.equals(getPan(), that.getPan()) &&
+      Objects.equals(getEncryptedPan(), that.getEncryptedPan()) &&
+      Objects.equals(getExpiration(), that.getExpiration()) &&
+      Objects.equals(getNameOnCard(), that.getNameOnCard()) &&
+      getStatus() == that.getStatus();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId(), getIdUser(), getProcessorUserId(), getPan(), getEncryptedPan(), getExpiration(), getNameOnCard(), getStatus());
   }
 }
