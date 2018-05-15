@@ -1,9 +1,9 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.domain.v10.NewPrepaidUserSignup10;
+import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.NewPrepaidUserSignup10;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
