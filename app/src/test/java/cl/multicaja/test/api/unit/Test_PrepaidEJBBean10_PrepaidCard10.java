@@ -38,8 +38,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     PrepaidUser10 u = buildUser();
     u = createUser(u);
 
-    int expiryYear = numberUtils.random(2018, 2025);
-    int expiryMonth = numberUtils.random(1, 12);
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"), 0);
     PrepaidCard10 c = new PrepaidCard10();
     c.setIdUser(u.getId());

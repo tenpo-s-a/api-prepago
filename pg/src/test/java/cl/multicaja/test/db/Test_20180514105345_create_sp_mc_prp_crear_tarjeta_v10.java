@@ -32,8 +32,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
    */
   protected Object[] buildCard(String status) throws SQLException {
 
-    int expiryYear = numberUtils.random(2018, 2025);
-    int expiryMonth = numberUtils.random(1, 12);
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"), 0);
 
     //la tarjeta requiere de la existencia de un usuario en la BD
