@@ -22,23 +22,36 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
   }
 
-  @Test
-  public void searchCardByAllFields() throws SQLException {
-
-    Map<String, Object> obj1 = insertCardOk("ACTIVA");
-
+  /**
+   *
+   * @param id
+   * @param idUsuario
+   * @param fechaExpiracion
+   * @param estado
+   * @param contrato
+   * @return
+   * @throws SQLException
+   */
+  protected Map<String, Object> searchCards(Long id, Long idUsuario, Integer fechaExpiracion, String estado, String contrato) throws SQLException {
     Object[] params = {
-      numberUtils.toLong(obj1.get("id"), 0),
-      numberUtils.toLong(obj1.get("id_usuario"), 0),
-      numberUtils.toInt(obj1.get("fecha_expiracion"), 0),
-      String.valueOf(obj1.get("estado")),
-      String.valueOf(obj1.get("contrato")),
+      id != null ? id : new NullParam(Types.BIGINT),
+      idUsuario != null ? idUsuario : new NullParam(Types.BIGINT),
+      fechaExpiracion != null ? fechaExpiracion : new NullParam(Types.INTEGER),
+      estado != null ? estado : new NullParam(Types.VARCHAR),
+      contrato != null ? contrato : new NullParam(Types.VARCHAR),
       new OutParam("_result", Types.OTHER),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
+    return dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+  }
 
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+  @Test
+  public void searchCardByAllFields() throws SQLException {
+
+    Map<String, Object> obj1 = insertCard("ACTIVA");
+
+    Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("fecha_expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"));
 
     List result = (List)resp.get("_result");
 
@@ -56,20 +69,9 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
   @Test
   public void searchUserBy_id() throws SQLException {
 
-    Map<String, Object> obj1 = insertCardOk("ACTIVA");
+    Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Object[] params = {
-      numberUtils.toLong(obj1.get("id"), 0),
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    Map<String, Object> resp = searchCards((long) obj1.get("id"), null, null, null, null);
 
     List result = (List)resp.get("_result");
 
@@ -85,18 +87,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Object[] params2 = {
-      numberUtils.toLong(obj1.get("id"), 0) + 1,
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp2 = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params2);
+    Map<String, Object> resp2 = searchCards(((long) obj1.get("id")) + 1, null, null, null, null);
 
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
@@ -105,20 +96,9 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
   @Test
   public void searchUserBy_id_usuario() throws SQLException {
 
-    Map<String, Object> obj1 = insertCardOk("ACTIVA");
+    Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Object[] params = {
-      new NullParam(Types.BIGINT),
-      numberUtils.toLong(obj1.get("id_usuario"), 0),
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    Map<String, Object> resp = searchCards(null, (long) obj1.get("id_usuario"), null, null, null);
 
     List result = (List)resp.get("_result");
 
@@ -134,18 +114,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Object[] params2 = {
-      new NullParam(Types.BIGINT),
-      numberUtils.toLong(obj1.get("id_usuario"), 0) + 1,
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp2 = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params2);
+    Map<String, Object> resp2 = searchCards(null, ((long) obj1.get("id_usuario")) + 1, null, null, null);
 
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
@@ -154,20 +123,9 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
   @Test
   public void searchUserBy_fecha_expiracion() throws SQLException {
 
-    Map<String, Object> obj1 = insertCardOk("ACTIVA");
+    Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Object[] params = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      numberUtils.toInt(obj1.get("fecha_expiracion"), 0),
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    Map<String, Object> resp = searchCards(null, null, (int) obj1.get("fecha_expiracion"), null, null);
 
     List result = (List)resp.get("_result");
 
@@ -183,19 +141,8 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Object[] params2 = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      numberUtils.toInt(obj1.get("fecha_expiracion"), 0) + 100,
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
+    Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("fecha_expiracion")) + 1, null, null);
 
-    Map<String, Object> resp2 = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params2);
-    System.out.println("RESP2:::::::::::::::::::" + resp2);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
   }
@@ -209,21 +156,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     String status = "ACTIVA" + numberUtils.random(1111,9999);
 
-    Map<String, Object> obj1 = insertCardOk(status);
-    Map<String, Object> obj2 = insertCardOk(status);
+    Map<String, Object> obj1 = insertCard(status);
+    Map<String, Object> obj2 = insertCard(status);
 
-    Object[] params = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      String.valueOf(obj1.get("estado")),
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    Map<String, Object> resp = searchCards(null, null, null, (String) obj1.get("estado"), null);
 
     List result = (List)resp.get("_result");
 
@@ -245,18 +181,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Object[] params2 = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      String.valueOf(obj1.get("estado")) + "1",
-      new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp2 = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params2);
+    Map<String, Object> resp2 = searchCards(null, null, null, (String) obj1.get("estado") + 1, null);
 
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
@@ -265,20 +190,9 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
   @Test
   public void searchUserBy_contrato() throws SQLException {
 
-    Map<String, Object> obj1 = insertCardOk("ACTIVA");
+    Map<String, Object> obj1 = insertCard("ACTIVA");
 
-    Object[] params = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      String.valueOf(obj1.get("contrato")),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
+    Map<String, Object> resp = searchCards(null, null, null, null, (String) obj1.get("contrato"));
 
     List result = (List)resp.get("_result");
 
@@ -294,18 +208,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     //Caso en donde no deberia encontrar un registro
 
-    Object[] params2 = {
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.BIGINT),
-      new NullParam(Types.INTEGER),
-      new NullParam(Types.VARCHAR),
-      String.valueOf(obj1.get("contrato")) + "1",
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp2 = dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params2);
+    Map<String, Object> resp2 = searchCards(null, null, null, null, (String) obj1.get("contrato") + 1);
 
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNull("no debe retornar una lista", resp2.get("_result"));

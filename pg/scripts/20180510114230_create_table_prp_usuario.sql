@@ -24,7 +24,6 @@ CREATE TABLE ${schema}.prp_usuario (
   id_usuario_mc       BIGINT NOT NULL,
   rut                 INTEGER NOT NULL,
   estado              VARCHAR(10) NOT NULL,
-  contrato            VARCHAR(20) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
   CONSTRAINT prp_usuario_u1 UNIQUE(id),

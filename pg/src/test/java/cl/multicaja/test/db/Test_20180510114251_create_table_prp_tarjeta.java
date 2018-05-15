@@ -1,6 +1,5 @@
 package cl.multicaja.test.db;
 
-import cl.multicaja.core.test.TestDbBase;
 import cl.multicaja.core.utils.db.ColumnInfo;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,11 +7,11 @@ import org.junit.Test;
 /**
  * @autor vutreras
  */
-public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBase {
+public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBasePg {
 
   @Test
   public void checkIfExistsTable_prp_tarjeta() {
-    boolean exists = dbUtils.tableExists("prepago", "prp_tarjeta", true,
+    boolean exists = dbUtils.tableExists(SCHEMA, "prp_tarjeta", true,
       new ColumnInfo("id", "bigserial", 19),
       new ColumnInfo("id_usuario", "int8", 19),
       new ColumnInfo("pan", "varchar", 16),
@@ -24,6 +23,6 @@ public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBase {
       new ColumnInfo("fecha_creacion", "timestamp", 29),
       new ColumnInfo("fecha_actualizacion", "timestamp", 29)
     );
-    Assert.assertEquals("Existe tabla changelog", true, exists);
+    Assert.assertEquals("Existe tabla prp_tarjeta", true, exists);
   }
 }

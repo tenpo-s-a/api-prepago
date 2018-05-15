@@ -23,7 +23,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
  IN _id_usuario_mc   BIGINT,
  IN _rut             INTEGER,
  IN _estado          VARCHAR,
- IN _contrato        VARCHAR,
  OUT _result         REFCURSOR,
  OUT _error_code     VARCHAR,
  OUT _error_msg      VARCHAR
@@ -47,8 +46,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
         (COALESCE(_id, 0) = 0 OR id = _id) AND
         (COALESCE(_id_usuario_mc, 0) = 0 OR id_usuario_mc = _id_usuario_mc) AND
         (COALESCE(_rut, 0) = 0 OR rut = _rut) AND
-        (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado) AND
-        (TRIM(COALESCE(_contrato,'')) = '' OR contrato = _contrato);
+        (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado);
 
    EXCEPTION
      WHEN OTHERS THEN
@@ -61,6 +59,6 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_usuarios_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_usuarios_v10(BIGINT, BIGINT, INTEGER, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
 
 

@@ -19,7 +19,7 @@
 
 CREATE TABLE ${schema}.prp_tarjeta (
   id                  BIGSERIAL NOT NULL,
-  id_usuario          BIGINT NOT NULL,
+  id_usuario          BIGINT REFERENCES ${schema}.prp_usuario(id),
   pan                 VARCHAR(16) NOT NULL,
   pan_encriptado      VARCHAR(100) NOT NULL,
   contrato            VARCHAR(20) NOT NULL,

@@ -22,7 +22,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
  IN _id_usuario_mc   BIGINT,
  IN _rut             INTEGER,
  IN _estado          VARCHAR,
- IN _contrato        VARCHAR,
  OUT _r_id           BIGINT,
  OUT _error_code     VARCHAR,
  OUT _error_msg      VARCHAR
@@ -50,18 +49,11 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_contrato, '')) = '' THEN
-      _error_code := 'MC004';
-      _error_msg := 'El _contrato es obligatorio';
-      RETURN;
-    END IF;
-
      INSERT INTO ${schema}.prp_usuario
      (
        id_usuario_mc,
        rut,
        estado,
-       contrato,
        fecha_creacion,
        fecha_actualizacion
      )
@@ -70,7 +62,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
         _id_usuario_mc,
         _rut,
         _estado,
-        _contrato,
         timezone('utc', now()),
         timezone('utc', now())
      )
@@ -87,5 +78,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_usuario_v10(BIGINT, INTEGER, VARCHAR, VARCHAR, BIGINT, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_usuario_v10(BIGINT, INTEGER, VARCHAR, BIGINT, VARCHAR, VARCHAR);
 
