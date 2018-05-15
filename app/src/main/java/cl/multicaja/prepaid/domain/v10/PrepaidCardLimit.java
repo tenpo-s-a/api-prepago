@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
@@ -9,7 +9,7 @@ public class PrepaidCardLimit extends BaseModel {
 
   private String id;
   private String name;
-  private AmountAndCurrency amount;
+  private AmountAndCurrency10 amount;
 
   public PrepaidCardLimit() {
     super();
@@ -31,11 +31,11 @@ public class PrepaidCardLimit extends BaseModel {
     this.name = name;
   }
 
-  public AmountAndCurrency getAmount() {
+  public AmountAndCurrency10 getAmount() {
     return amount;
   }
 
-  public void setAmount(AmountAndCurrency amount) {
+  public void setAmount(AmountAndCurrency10 amount) {
     this.amount = amount;
   }
 

@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 /**
  * @author abarazarte
  */
-public class Timestamps extends BaseModel {
+public class Timestamps10 extends BaseModel {
 
   private Timestamp createdAt;
   private Timestamp updatedAt;
 
-  public Timestamps() {
+  public Timestamps10() {
     super();
   }
 

@@ -1,18 +1,18 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
 /**
  * @author abarazarte
  */
-public class RawTransactionHeader extends BaseModel {
+public class RawTransactionHeader10 extends BaseModel {
 
   private String endidad;
   private String centroAlta;
   private String cuenta;
   private String pan;
 
-  public RawTransactionHeader() {
+  public RawTransactionHeader10() {
     super();
   }
 

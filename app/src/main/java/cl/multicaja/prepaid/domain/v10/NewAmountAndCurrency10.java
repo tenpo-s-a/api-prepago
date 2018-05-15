@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
@@ -7,12 +7,12 @@ import java.math.BigDecimal;
 /**
  * @author abarazarte
  */
-public class NewAmountAndCurrency extends BaseModel {
+public class NewAmountAndCurrency10 extends BaseModel {
 
   private Integer currencyCode;
   private BigDecimal value;
 
-  public NewAmountAndCurrency() {
+  public NewAmountAndCurrency10() {
     super();
   }
 

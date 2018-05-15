@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * @author abarazarte
  */
-public class PrepaidCard extends BaseModel {
+public class PrepaidCard10 extends BaseModel {
 
   private final DateTimeFormatter expirationDateFormatter = DateTimeFormatter.ofPattern("MM/YY");
 
@@ -26,9 +26,9 @@ public class PrepaidCard extends BaseModel {
   private String nameOnCard;
   // TODO: manejar el status de la tarjeta como enum?
   private PrepaidCardStatus status;
-  private Timestamps timestamps;
+  private Timestamps10 timestamps;
 
-  public PrepaidCard() {
+  public PrepaidCard10() {
     super();
   }
 
@@ -95,11 +95,11 @@ public class PrepaidCard extends BaseModel {
     this.status = status;
   }
 
-  public Timestamps getTimestamps() {
+  public Timestamps10 getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps timestamps) {
+  public void setTimestamps(Timestamps10 timestamps) {
     this.timestamps = timestamps;
   }
 }

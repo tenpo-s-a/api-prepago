@@ -2,13 +2,11 @@ package cl.multicaja.test.api;
 
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.domain.NewAmountAndCurrency;
-import cl.multicaja.prepaid.domain.NewPrepaidTopup;
-import cl.multicaja.prepaid.domain.PrepaidTopup;
-import cl.multicaja.prepaid.domain.Timestamps;
+import cl.multicaja.prepaid.domain.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.domain.v10.NewPrepaidTopup;
+import cl.multicaja.prepaid.domain.v10.PrepaidTopup10;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +33,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setTransactionId(transactionId);
     topupRequest.setRut(rut);
     topupRequest.setMerchantCode(merchantCode);
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(currencyCode);
     amount.setValue(value);
     topupRequest.setAmount(amount);
@@ -44,9 +42,9 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
     Assert.assertEquals("status 200", 200, resp.getStatus());
-    PrepaidTopup topup = resp.toObject(PrepaidTopup.class);
+    PrepaidTopup10 topup = resp.toObject(PrepaidTopup10.class);
 
-    Assert.assertNotNull("Deberia ser un PrepaidTopup",topup);
+    Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
     Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
     Assert.assertNotNull("Deberia tener id", topup.getId());
     Assert.assertNotNull("Deberia tener userId", topup.getUserId());
@@ -67,7 +65,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado por el api rest", topup.getId(), ((PrepaidTopup)remoteTopup.getData()).getId());
+    Assert.assertEquals("Deberia ser igual al enviado por el api rest", topup.getId(), ((PrepaidTopup10)remoteTopup.getData()).getId());
   }
 
   @Test
@@ -87,7 +85,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     NewPrepaidTopup topupRequest = new NewPrepaidTopup();
     topupRequest.setTransactionId("123456789");
     topupRequest.setMerchantCode("987654321");
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
@@ -111,7 +109,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     NewPrepaidTopup topupRequest = new NewPrepaidTopup();
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
@@ -133,7 +131,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     NewPrepaidTopup topupRequest = new NewPrepaidTopup();
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
@@ -175,7 +173,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
 
@@ -197,7 +195,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
-    NewAmountAndCurrency amount = new NewAmountAndCurrency();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(152);
     topupRequest.setAmount(amount);
 

@@ -1,11 +1,11 @@
-package cl.multicaja.prepaid.domain;
+package cl.multicaja.prepaid.domain.v10;
 
 import java.util.List;
 
 /**
  * @author abarazarte
  */
-public class PrepaidUserSignup extends NewPrepaidUserSignup{
+public class PrepaidUserSignup10 extends NewPrepaidUserSignup10 {
 
   private Long id;
   private Long userId;
@@ -17,9 +17,9 @@ public class PrepaidUserSignup extends NewPrepaidUserSignup{
   private Boolean mustValidateCellphone;
   private Boolean mustAcceptTermsAndConditions;
   private Boolean mustChoosePassword;
-  private Timestamps timestamps;
+  private Timestamps10 timestamps;
 
-  public PrepaidUserSignup() {
+  public PrepaidUserSignup10() {
     super();
   }
 
@@ -103,11 +103,11 @@ public class PrepaidUserSignup extends NewPrepaidUserSignup{
     this.mustChoosePassword = mustChoosePassword;
   }
 
-  public Timestamps getTimestamps() {
+  public Timestamps10 getTimestamps() {
     return timestamps;
   }
 
-  public void setTimestamps(Timestamps timestamps) {
+  public void setTimestamps(Timestamps10 timestamps) {
     this.timestamps = timestamps;
   }
 
