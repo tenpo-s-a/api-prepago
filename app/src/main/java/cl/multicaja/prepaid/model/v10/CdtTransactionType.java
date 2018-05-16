@@ -4,17 +4,33 @@ package cl.multicaja.prepaid.model.v10;
  * @author abarazarte
  */
 public enum CdtTransactionType {
-  SOL_1_CARGA,
-  CONF_1_CARGA,
-  SOL_CARGA_WEB,
-  CONF_CARGA_WEB,
-  SOL_CARGA_POS,
-  CONF_CARGA_POS,
-  REVERSA_CARGA,
-  SOL_RETIRO_WEB,
-  CONF_RETIRO_WEB,
-  SOL_RETIRO_POS,
-  CONF_RETIRO_POS,
-  SOL_REVERSA_RETIRO,
-  CONF_REVERSA_RETIRO
+
+  PRIMERA_CARGA("Solicitud Primera Carga"),
+  PRIMERA_CARGA_CONF("Confirmación Primera Carga"),
+
+  CARGA_WEB("Solicitud Carga Web"),
+  CARGA_WEB_CONF("Confirmación Carga Web"),
+
+  CARGA_POS("Solicitud Carga POS"),
+  CARGA_POS_CONF("Confirmación Carga POS"),
+
+  REVERSA_CARGA("Reversa de Carga"),
+
+  RETIRO_WEB("Solicitud Retiro Web"),
+  RETIRO_WEB_CONF("Confirmación Retiro Web"),
+
+  RETIRO_POS("Solicitud Retiro POS"),
+  RETIRO_POS_CONF("Confirmación Retiro POS"),
+
+  REVERSA_RETIRO("Solicitud Reversa de Retiro"),
+  REVERSA_RETIRO_CONF("Confirmación Reversa de Retiro");
+
+  private String name;
+
+  CdtTransactionType(String name) {
+    this.name = name;
+  }
+  public String getName() {
+    return name;
+  }
 }
