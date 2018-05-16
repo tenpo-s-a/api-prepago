@@ -13,10 +13,12 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cl.multicaja.test.db.Test_20180510152848_create_sp_mc_prp_crear_usuario_v10.insertUser;
+
 /**
  * @autor vutreras
  */
-public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 {
+public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_crear_tarjeta_v10";
 
@@ -30,7 +32,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
    * @param status
    * @return
    */
-  protected Object[] buildCard(String status) throws SQLException {
+  public static Object[] buildCard(String status) throws SQLException {
 
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
@@ -60,7 +62,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
    * @return
    * @throws SQLException
    */
-  protected Map<String, Object> insertCard(String status) throws SQLException {
+  public static Map<String, Object> insertCard(String status) throws SQLException {
 
     Object[] params = buildCard(status);
 
