@@ -29,7 +29,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
    * @param status
    * @return
    */
-  protected Object[] buildUser(String status) {
+  public static Object[] buildUser(String status) {
     Object[] params = {
       new Long(getUniqueInteger()), //id_usuario_mc
       getUniqueRutNumber(), //rut
@@ -47,7 +47,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
    * @return
    * @throws SQLException
    */
-  protected Map<String, Object> insertUser(String status) throws SQLException {
+  public static Map<String, Object> insertUser(String status) throws SQLException {
 
     Object[] params = buildUser(status);
 
