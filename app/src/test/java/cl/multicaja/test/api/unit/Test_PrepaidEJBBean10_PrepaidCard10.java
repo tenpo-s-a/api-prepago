@@ -120,4 +120,18 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     Assert.assertEquals("deben ser 2", 2 , lstFind.size());
     Assert.assertEquals("debe contener id", true, lstFind.contains(card1.getId()) && lstFind.contains(card2.getId()));
   }
+
+  @Test
+  public void updateStatusOk() throws Exception {
+
+    PrepaidCard10 card = buildCard();
+    card = createCard(card);
+
+    prepaidEJBBean10.updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
+
+    PrepaidCard10 c1 = prepaidEJBBean10.getPrepaidCardById(null, card.getId());
+
+    Assert.assertNotNull("debe retornar un usuario", c1);
+    Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.EXPIRED, c1.getStatus());
+  }
 }

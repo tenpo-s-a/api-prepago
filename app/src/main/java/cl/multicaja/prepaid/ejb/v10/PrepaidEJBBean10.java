@@ -309,6 +309,29 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
+  public void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception {
+    if(id == null){
+      throw new ValidationException(2);
+    }
+    if(status == null){
+      throw new ValidationException(2);
+    }
+
+    Object[] params = {
+      id, //id
+      status.toString(), //estado
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("Error en invocacion a SP: " + resp);
+      throw new BaseException(1);
+    }
+  }
+
+  @Override
   public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
 
     if(prepaidCard == null){
@@ -416,6 +439,29 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  @Override
+  public void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception {
+    if(id == null){
+      throw new ValidationException(2);
+    }
+    if(status == null){
+      throw new ValidationException(2);
+    }
+
+    Object[] params = {
+      id, //id
+      status.toString(), //estado
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_tarjeta_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("Error en invocacion a SP: " + resp);
+      throw new BaseException(1);
+    }
   }
 
   /**

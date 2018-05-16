@@ -116,4 +116,18 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
     Assert.assertEquals("deben ser 2", 2 , lstFind.size());
     Assert.assertEquals("debe contener id", true, lstFind.contains(user1.getId()) && lstFind.contains(user2.getId()));
   }
+
+  @Test
+  public void updateStatusOk() throws Exception {
+
+    PrepaidUser10 user = buildUser();
+    user = createUser(user);
+
+    prepaidEJBBean10.updatePrepaidUserStatus(null, user.getId(), PrepaidUserStatus.DISABLED);
+
+    PrepaidUser10 u1 = prepaidEJBBean10.getPrepaidUserById(null, user.getId());
+
+    Assert.assertNotNull("debe retornar un usuario", u1);
+    Assert.assertEquals("el estado debe estar actualizado", PrepaidUserStatus.DISABLED, u1.getStatus());
+  }
 }
