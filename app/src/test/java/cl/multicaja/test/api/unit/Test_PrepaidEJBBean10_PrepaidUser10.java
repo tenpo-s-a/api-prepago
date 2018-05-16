@@ -17,9 +17,9 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
 
   private PrepaidEJBBean10 prepaidEJBBean10 = new PrepaidEJBBean10();
 
-  private PrepaidUser10 buildUser() {
+  public static PrepaidUser10 buildUser() {
     PrepaidUser10 user = new PrepaidUser10();
-    user.setIdUserMc(new Long(getUniqueInteger()));
+    user.setIdUserMc(getUniqueLong());
     user.setRut(getUniqueRutNumber());
     user.setStatus(PrepaidUserStatus.ACTIVE);
     return user;
