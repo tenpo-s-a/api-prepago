@@ -221,7 +221,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    if(prepaidUser.getIdUser() == null){
+    if(prepaidUser.getIdUserMc() == null){
       throw new ValidationException(2);
     }
 
@@ -234,7 +234,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     Object[] params = {
-      prepaidUser.getIdUser(),
+      prepaidUser.getIdUserMc(),
       prepaidUser.getRut(),
       prepaidUser.getStatus().toString(),
       new OutParam("_r_id", Types.BIGINT),
@@ -245,7 +245,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_usuario_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      prepaidUser.setId(numberUtils.toLong(resp.get("_r_id"), 0));
+      prepaidUser.setId(numberUtils.toLong(resp.get("_r_id")));
       return prepaidUser;
     } else {
       log.error("Error en invocacion a SP: " + resp);
@@ -265,7 +265,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
         PrepaidUser10 u = new PrepaidUser10();
         u.setId(numberUtils.toLong(row.get("id")));
-        u.setIdUser(numberUtils.toLong(row.get("id_usuario_mc")));
+        u.setIdUserMc(numberUtils.toLong(row.get("id_usuario_mc")));
         u.setRut(numberUtils.toInt(row.get("rut")));
         u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
         Timestamps timestamps = new Timestamps();
@@ -315,7 +315,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    if(prepaidCard.getUserId() == null){
+    if(prepaidCard.getIdUser() == null){
       throw new ValidationException(2);
     }
 
@@ -344,7 +344,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     Object[] params = {
-      prepaidCard.getUserId(),
+      prepaidCard.getIdUser(),
       prepaidCard.getPan(),
       prepaidCard.getEncryptedPan(),
       prepaidCard.getProcessorUserId(),
@@ -359,7 +359,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_tarjeta_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      prepaidCard.setId(numberUtils.toLong(resp.get("_r_id"), 0));
+      prepaidCard.setId(numberUtils.toLong(resp.get("_r_id")));
       return prepaidCard;
     } else {
       log.error("Error en invocacion a SP: " + resp);
@@ -380,7 +380,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
         PrepaidCard10 c = new PrepaidCard10();
         c.setId(numberUtils.toLong(row.get("id")));
-        c.setUserId(numberUtils.toLong(row.get("id_usuario")));
+        c.setIdUser(numberUtils.toLong(row.get("id_usuario")));
         c.setPan(String.valueOf(row.get("pan")));
         c.setEncryptedPan(String.valueOf(row.get("pan_encriptado")));
         c.setProcessorUserId(String.valueOf(row.get("contrato")));
@@ -396,7 +396,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", params);
     return (List)resp.get("_result");
   }
 

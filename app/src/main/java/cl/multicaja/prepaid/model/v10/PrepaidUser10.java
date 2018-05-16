@@ -3,13 +3,15 @@ package cl.multicaja.prepaid.model.v10;
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
 
+import java.util.Objects;
+
 /**
  * @author abarazarte
  */
 public class PrepaidUser10 extends BaseModel {
 
   private Long id;
-  private Long idUser;
+  private Long idUserMc;
   private Integer rut;
   private PrepaidUserStatus status;
   private Timestamps timestamps;
@@ -26,12 +28,12 @@ public class PrepaidUser10 extends BaseModel {
     this.id = id;
   }
 
-  public Long getIdUser() {
-    return idUser;
+  public Long getIdUserMc() {
+    return idUserMc;
   }
 
-  public void setIdUser(Long idUser) {
-    this.idUser = idUser;
+  public void setIdUserMc(Long idUserMc) {
+    this.idUserMc = idUserMc;
   }
 
   public Integer getRut() {
@@ -56,5 +58,22 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof PrepaidUser10)) return false;
+    PrepaidUser10 that = (PrepaidUser10) o;
+    return Objects.equals(getId(), that.getId()) &&
+      Objects.equals(getIdUserMc(), that.getIdUserMc()) &&
+      Objects.equals(getRut(), that.getRut()) &&
+      getStatus() == that.getStatus();
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus());
   }
 }
