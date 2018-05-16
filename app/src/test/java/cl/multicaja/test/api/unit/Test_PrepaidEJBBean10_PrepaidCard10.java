@@ -5,7 +5,6 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -14,6 +13,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cl.multicaja.test.api.unit.Test_PrepaidEJBBean10_PrepaidUser10.buildUser;
+
 /**
  * @autor vutreras
  */
@@ -21,26 +22,14 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
 
   private PrepaidEJBBean10 prepaidEJBBean10 = new PrepaidEJBBean10();
 
-  private PrepaidUser10 buildUser() throws Exception {
-    PrepaidUser10 user = new PrepaidUser10();
-    user.setIdUserMc(new Long(getUniqueInteger()));
-    user.setRut(getUniqueRutNumber());
-    user.setStatus(PrepaidUserStatus.ACTIVE);
-    return user;
-  }
-
-  private PrepaidUser10 createUser(PrepaidUser10 user) throws Exception {
-    return prepaidEJBBean10.createPrepaidUser(null, user);
-  }
-
   private PrepaidCard10 buildCard() throws Exception {
 
     PrepaidUser10 u = buildUser();
-    u = createUser(u);
+    u = prepaidEJBBean10.createPrepaidUser(null, u);
 
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
-    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"), 0);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
     PrepaidCard10 c = new PrepaidCard10();
     c.setIdUser(u.getId());
     c.setPan(RandomStringUtils.randomNumeric(16));
@@ -119,5 +108,19 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
 
     Assert.assertEquals("deben ser 2", 2 , lstFind.size());
     Assert.assertEquals("debe contener id", true, lstFind.contains(card1.getId()) && lstFind.contains(card2.getId()));
+  }
+
+  @Test
+  public void updateStatusOk() throws Exception {
+
+    PrepaidCard10 card = buildCard();
+    card = createCard(card);
+
+    prepaidEJBBean10.updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
+
+    PrepaidCard10 c1 = prepaidEJBBean10.getPrepaidCardById(null, card.getId());
+
+    Assert.assertNotNull("debe retornar un usuario", c1);
+    Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.EXPIRED, c1.getStatus());
   }
 }

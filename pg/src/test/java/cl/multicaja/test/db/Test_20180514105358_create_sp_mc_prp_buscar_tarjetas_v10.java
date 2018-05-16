@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
+
 /**
  * @autor vutreras
  */
-public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 {
+public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends TestDbBasePg {
 
   @BeforeClass
   public static void beforeClass() {
@@ -32,7 +34,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
    * @return
    * @throws SQLException
    */
-  protected Map<String, Object> searchCards(Long id, Long idUsuario, Integer expiracion, String estado, String contrato) throws SQLException {
+  public static Map<String, Object> searchCards(Long id, Long idUsuario, Integer expiracion, String estado, String contrato) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idUsuario != null ? idUsuario : new NullParam(Types.BIGINT),

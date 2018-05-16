@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static cl.multicaja.test.db.Test_20180510152848_create_sp_mc_prp_crear_usuario_v10.insertUser;
+
 /**
  * @autor vutreras
  */
-public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 {
+public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends TestDbBasePg {
 
   @BeforeClass
   public static void beforeClass() {
@@ -31,7 +33,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
    * @return
    * @throws SQLException
    */
-  protected Map<String, Object> searchUsers(Long id, Long idUsuarioMc, Integer rut, String estado) throws SQLException {
+  public static Map<String, Object> searchUsers(Long id, Long idUsuarioMc, Integer rut, String estado) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idUsuarioMc != null ? idUsuarioMc : new NullParam(Types.BIGINT),

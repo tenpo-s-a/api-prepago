@@ -106,7 +106,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
    EXCEPTION
      WHEN OTHERS THEN
          _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_crear_usuario_v10] Error al insertar tarjeta. CAUSA ('|| SQLERRM ||')';
+         _error_msg := '[mc_prp_crear_tarjeta_v10] Error al insertar tarjeta. CAUSA ('|| SQLERRM ||')';
      RETURN;
 END;
 $$ LANGUAGE plpgsql;

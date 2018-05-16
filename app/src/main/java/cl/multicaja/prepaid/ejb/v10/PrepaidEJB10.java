@@ -78,6 +78,16 @@ public interface PrepaidEJB10 {
   PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception;
 
   /**
+   * actualiza el estado del usuario prepago
+   *
+   * @param headers
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception;
+
+  /**
    * permite crear una tarjeta prepago
    *
    * @param headers
@@ -120,6 +130,16 @@ public interface PrepaidEJB10 {
    * @throws Exception
    */
   PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception;
+
+  /**
+   * actualiza el estado de la tarjeta
+   *
+   * @param headers
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception;
 
   /**
    *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)

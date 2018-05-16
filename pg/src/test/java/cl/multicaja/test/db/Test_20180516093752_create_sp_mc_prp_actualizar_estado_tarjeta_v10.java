@@ -1,0 +1,85 @@
+package cl.multicaja.test.db;
+
+import cl.multicaja.core.utils.db.NullParam;
+import cl.multicaja.core.utils.db.OutParam;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+import java.util.Map;
+
+import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
+import static cl.multicaja.test.db.Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10.searchCards;
+
+/**
+ * @autor vutreras
+ */
+@Ignore
+public class Test_20180516093752_create_sp_mc_prp_actualizar_estado_tarjeta_v10 extends TestDbBasePg {
+
+  private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_estado_tarjeta_v10";
+
+  @Test
+  public void updateStatusOk() throws SQLException {
+
+    Map<String, Object> obj1 = insertCard("ACTIVA");
+
+    String newStatus = "INACTIVA";
+
+    Object[] params = {
+      obj1.get("id"), //id
+      newStatus, //estado
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+    Assert.assertNotNull("Debe retornar respuesta", resp);
+    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+
+    Map<String, Object> resp2 = searchCards((long) obj1.get("id"), null, null, null, null);
+
+    List result = (List)resp2.get("_result");
+
+    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
+    Assert.assertNotNull("debe retornar una lista", result);
+    Assert.assertEquals("Debe contener un elemento", 1 , result.size());
+    Assert.assertEquals("Debe contener ser el nuevo estado",  newStatus, ((Map)result.get(0)).get("estado"));
+  }
+
+  @Test
+  public void updateStatusNoOk() throws SQLException {
+
+    {
+      Object[] params = {
+        new NullParam(Types.BIGINT), //id
+        "INACTIVO", //estado
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser 0", "MC001", resp.get("_error_code"));
+    }
+
+    {
+      Object[] params = {
+        new Long(1), //id
+        new NullParam(Types.VARCHAR), //estado
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser 0", "MC002", resp.get("_error_code"));
+    }
+  }
+}
