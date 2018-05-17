@@ -5,6 +5,8 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,11 +36,11 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     int sedaSize = 1000;
 
     //consume un mensaje desde un componente seda de alta velocidad y lo envia a una cola de requerimientos
-    from(String.format("seda:PrepaidTopupRoute10.topUp?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
-      .to(createJMSEndpoint("PrepaidTopupRoute10.topUp.req"));
+    from(String.format("seda:PrepaidTopupRoute10.cargasPendientes?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint("PrepaidTopupRoute10.cargasPendientes.req"));
 
     //consume un mensaje desde una cola de requerimientos y lo envia a una cola de respuestas
-    from(createJMSEndpoint(String.format("PrepaidTopupRoute10.topUp.req?concurrentConsumers=%s", concurrentConsumers)))
+    from(createJMSEndpoint(String.format("PrepaidTopupRoute10.cargasPendientes.req?concurrentConsumers=%s", concurrentConsumers)))
       .process(this.processPrepaidTopupRequestRoute())
       .to(createJMSEndpoint("PrepaidTopupRoute10.topUp.resp")).end();
   }
@@ -50,6 +52,12 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
         //TODO implementar logica
 
         System.out.println("REQ::::" + req);
+
+        Integer rut = req.getUser().getRut().getValue();
+
+        PrepaidUser10 user = prepaidEJBBean10.getPrepaidUserByRut(null, rut);
+
+        PrepaidCard10 card = prepaidEJBBean10.getPrepaidCardByUserId(null, user.getIdUserMc());
 
         return new ResponseRoute(req.getPrepaidTopup());
       }

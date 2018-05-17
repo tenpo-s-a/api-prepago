@@ -264,9 +264,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
       new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
         PrepaidUser10 u = new PrepaidUser10();
-        u.setId(numberUtils.toLong(row.get("id")));
-        u.setIdUserMc(numberUtils.toLong(row.get("id_usuario_mc")));
-        u.setRut(numberUtils.toInt(row.get("rut")));
+        u.setId(numberUtils.toLong(row.get("id"), null));
+        u.setIdUserMc(numberUtils.toLong(row.get("id_usuario_mc"), null));
+        u.setRut(numberUtils.toInteger(row.get("rut"), null));
         u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
         Timestamps timestamps = new Timestamps();
         timestamps.setCreatedAt((Timestamp)row.get("fecha_creacion"));
@@ -402,12 +402,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
       new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
         PrepaidCard10 c = new PrepaidCard10();
-        c.setId(numberUtils.toLong(row.get("id")));
-        c.setIdUser(numberUtils.toLong(row.get("id_usuario")));
+        c.setId(numberUtils.toLong(row.get("id"), null));
+        c.setIdUser(numberUtils.toLong(row.get("id_usuario"), null));
         c.setPan(String.valueOf(row.get("pan")));
         c.setEncryptedPan(String.valueOf(row.get("pan_encriptado")));
         c.setProcessorUserId(String.valueOf(row.get("contrato")));
-        c.setExpiration(numberUtils.toInt(row.get("expiracion")));
+        c.setExpiration(numberUtils.toInteger(row.get("expiracion"), null));
         c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("estado").toString().trim()));
         c.setNameOnCard(String.valueOf(row.get("nombre_tarjeta")));
         Timestamps timestamps = new Timestamps();
