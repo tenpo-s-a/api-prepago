@@ -83,11 +83,11 @@ public class NewPrepaidTopup10 extends BaseModel {
   public CdtTransactionType getCdtTransactionType() {
     //Si es N = 1 -> Solicitud primera carga
     if(this.isFirstTopup()){
-      return CdtTransactionType.SOL_1_CARGA;
+      return CdtTransactionType.PRIMERA_CARGA;
     }
     else {
       // es N = 2
-      return this.getType().equals(TopupType.WEB) ? CdtTransactionType.SOL_CARGA_WEB : CdtTransactionType.SOL_CARGA_POS;
+      return this.getType().equals(TopupType.WEB) ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS;
     }
   }
 
