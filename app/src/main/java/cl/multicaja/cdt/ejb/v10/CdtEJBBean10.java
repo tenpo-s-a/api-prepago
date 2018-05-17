@@ -36,7 +36,9 @@ public class CdtEJBBean10 implements CdtEJB10{
   private final String SP_CREA_MOVIMIENTO_CUENTA = "mc_cdt_crea_movimiento_cuenta_v10";
 
   @Override
-  public CdtTransaction10 addCdtTransaction(CdtTransaction10 cdtTransaction10) throws Exception {
+  public CdtTransaction10 addCdtTransaction(Map<String, Object> headers, CdtTransaction10 cdtTransaction10) throws Exception {
+    dbUtils = getDbUtils();
+    configUtils = getConfigUtils();
 
     if(StringUtils.isAllBlank(cdtTransaction10.getAccountId().trim())) {
      throw new ValidationException(2);
@@ -60,8 +62,7 @@ public class CdtEJBBean10 implements CdtEJB10{
     }
     HashMap<String,Object> mapFase = (HashMap<String, Object>) lstFases.get(0);
     Long faseId = (Long) mapFase.get("id");
-
-     params = new Object[]{
+     params = new Object[] {
         cdtTransaction10.getAccountId(),
         faseId,
         cdtTransaction10.getTransactionReference(),
@@ -72,7 +73,6 @@ public class CdtEJBBean10 implements CdtEJB10{
         new OutParam("NumError", Types.VARCHAR),
         new OutParam("MsjError", Types.VARCHAR)
      };
-
     outputData = dbUtils.execute( getSchema() +"."+ SP_CREA_MOVIMIENTO_CUENTA, params);
 
     String numError = (String) outputData.get("NumError");
@@ -80,6 +80,7 @@ public class CdtEJBBean10 implements CdtEJB10{
     if(numError.equals("0")){
       cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
     } else {
+      log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
       long lNumError = numberUtils.toLong(numError,-1);
       if(lNumError != -1 && lNumError > 10000)
         throw new ValidationException(4).setData(new KeyValue("value",msjError));
@@ -88,7 +89,6 @@ public class CdtEJBBean10 implements CdtEJB10{
     }
     return cdtTransaction10;
   }
-
 
   /**
    *
@@ -117,6 +117,6 @@ public class CdtEJBBean10 implements CdtEJB10{
    * @return
    */
   private String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
+    return this.getConfigUtils().getProperty("schema.cdt");
   }
 }

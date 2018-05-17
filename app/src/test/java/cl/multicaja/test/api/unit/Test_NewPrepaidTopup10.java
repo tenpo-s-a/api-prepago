@@ -40,15 +40,15 @@ public class Test_NewPrepaidTopup10 {
   public void shouldBeCdtType_FirstTopup() {
     NewPrepaidTopup10 topup = new NewPrepaidTopup10();
 
-    Assert.assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
+    Assert.assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.PRIMERA_CARGA, topup.getCdtTransactionType());
 
     topup.setMerchantCode("999999999999991");
     assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
-    assertEquals("Deberia ser tipo cdt 1era carga", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
+    assertEquals("Deberia ser tipo cdt 1era carga", CdtTransactionType.PRIMERA_CARGA, topup.getCdtTransactionType());
 
     topup.setMerchantCode("111111111111111");
     assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
-    assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.SOL_1_CARGA, topup.getCdtTransactionType());
+    assertEquals("Deberia ser tipo cdt 1era carga por defecto", CdtTransactionType.PRIMERA_CARGA, topup.getCdtTransactionType());
   }
 
   @Test
@@ -58,7 +58,7 @@ public class Test_NewPrepaidTopup10 {
     topup.setFirstTopup(Boolean.FALSE);
 
     assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
-    assertEquals("Deberia ser tipo cdt sol carga WEB", CdtTransactionType.SOL_CARGA_WEB, topup.getCdtTransactionType());
+    assertEquals("Deberia ser tipo cdt sol carga WEB", CdtTransactionType.CARGA_WEB, topup.getCdtTransactionType());
   }
 
   @Test
@@ -68,7 +68,7 @@ public class Test_NewPrepaidTopup10 {
     topup.setFirstTopup(Boolean.FALSE);
 
     assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
-    assertEquals("Deberia ser tipo cdt sol carga POS", CdtTransactionType.SOL_CARGA_POS, topup.getCdtTransactionType());
+    assertEquals("Deberia ser tipo cdt sol carga POS", CdtTransactionType.CARGA_POS, topup.getCdtTransactionType());
   }
 
 }
