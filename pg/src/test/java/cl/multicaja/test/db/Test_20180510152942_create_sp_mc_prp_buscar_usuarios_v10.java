@@ -21,6 +21,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
   @BeforeClass
   public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
   }
 
@@ -38,10 +39,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
       id != null ? id : new NullParam(Types.BIGINT),
       idUsuarioMc != null ? idUsuarioMc : new NullParam(Types.BIGINT),
       rut != null ? rut : new NullParam(Types.INTEGER),
-      estado != null ? estado : new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
+      estado != null ? estado : new NullParam(Types.VARCHAR)
     };
     return dbUtils.execute(SCHEMA + ".mc_prp_buscar_usuarios_v10", params);
   }
@@ -53,16 +51,15 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Map<String, Object> resp = searchUsers((long) obj1.get("id"), (long) obj1.get("id_usuario_mc"), (int)obj1.get("rut"), (String) obj1.get("estado"));
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mUsu1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
   }
 
@@ -73,24 +70,22 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Map<String, Object> resp = searchUsers((long) obj1.get("id"), null, null, null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mUsu1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchUsers(((long) obj1.get("id")) + 1, null, null, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -100,24 +95,22 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Map<String, Object> resp = searchUsers(null, (long) obj1.get("id_usuario_mc"), null, null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mUsu1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchUsers(null, ((long) obj1.get("id_usuario_mc")) + 1, null, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -127,24 +120,22 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Map<String, Object> resp = searchUsers(null, null, (int)obj1.get("rut"), null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mUsu1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchUsers(null, null, ((int)obj1.get("rut")) + 1, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -157,29 +148,27 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Map<String, Object> resp = searchUsers(null, null, null, status);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 2 , result.size());
 
     Map mUsu1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
 
     Map mUsu2 = (Map)result.get(1);
     Set<String> keys2 = obj2.keySet();
     for (String k : keys2) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj2.get(k), mUsu2.get(k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj2.get(k), mUsu2.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchUsers(null, null, null, status + 1);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 }

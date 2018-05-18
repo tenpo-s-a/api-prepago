@@ -40,10 +40,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
       idUsuario != null ? idUsuario : new NullParam(Types.BIGINT),
       expiracion != null ? expiracion : new NullParam(Types.INTEGER),
       estado != null ? estado : new NullParam(Types.VARCHAR),
-      contrato != null ? contrato : new NullParam(Types.VARCHAR),
-      new OutParam("_result", Types.OTHER),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
+      contrato != null ? contrato : new NullParam(Types.VARCHAR)
     };
     return dbUtils.execute(SCHEMA + ".mc_prp_buscar_tarjetas_v10", params);
   }
@@ -55,16 +52,15 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards((long) obj1.get("id"), (long) obj1.get("id_usuario"), (int) obj1.get("expiracion"), (String) obj1.get("estado"), (String) obj1.get("contrato"));
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
   }
 
@@ -75,24 +71,22 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards((long) obj1.get("id"), null, null, null, null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchCards(((long) obj1.get("id")) + 1, null, null, null, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -102,24 +96,22 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards(null, (long) obj1.get("id_usuario"), null, null, null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchCards(null, ((long) obj1.get("id_usuario")) + 1, null, null, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -129,24 +121,22 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards(null, null, (int) obj1.get("expiracion"), null, null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchCards(null, null, ((int) obj1.get("expiracion")) + 1, null, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -163,30 +153,28 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards(null, null, null, (String) obj1.get("estado"), null);
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 2 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
     Map mCard2 = (Map)result.get(1);
     Set<String> keys2 = obj2.keySet();
     for (String k : keys2) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj2.get(k), mCard2.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj2.get(k), mCard2.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchCards(null, null, null, (String) obj1.get("estado") + 1, null);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 
   @Test
@@ -196,23 +184,21 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
     Map<String, Object> resp = searchCards(null, null, null, null, (String) obj1.get("contrato"));
 
-    List result = (List)resp.get("_result");
+    List result = (List)resp.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
     Map mCard1 = (Map)result.get(0);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
-      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get(k));
+      Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
 
     Map<String, Object> resp2 = searchCards(null, null, null, null, (String) obj1.get("contrato") + 1);
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
-    Assert.assertNull("no debe retornar una lista", resp2.get("_result"));
+    Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }
 }

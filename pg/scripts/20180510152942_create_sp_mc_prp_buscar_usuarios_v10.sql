@@ -19,46 +19,41 @@
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
 (
- IN _id              BIGINT,
- IN _id_usuario_mc   BIGINT,
- IN _rut             INTEGER,
- IN _estado          VARCHAR,
- OUT _result         REFCURSOR,
- OUT _error_code     VARCHAR,
- OUT _error_msg      VARCHAR
-) AS $$
- DECLARE
- BEGIN
-    _error_code := '0';
-    _error_msg := '';
-
-    OPEN _result FOR
-      SELECT
-        id,
-        id_usuario_mc,
-        rut,
-        estado,
-        fecha_creacion,
-        fecha_actualizacion
-      FROM
-        ${schema}.prp_usuario
-      WHERE
-        (COALESCE(_id, 0) = 0 OR id = _id) AND
-        (COALESCE(_id_usuario_mc, 0) = 0 OR id_usuario_mc = _id_usuario_mc) AND
-        (COALESCE(_rut, 0) = 0 OR rut = _rut) AND
-        (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado);
-
-   EXCEPTION
-     WHEN OTHERS THEN
-         _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_buscar_usuarios_v10] Error al buscar usuarios. CAUSA ('|| SQLERRM ||')';
-     RETURN;
+  IN _in_id              BIGINT,
+  IN _in_id_usuario_mc   BIGINT,
+  IN _in_rut             INTEGER,
+  IN _in_estado          VARCHAR,
+  OUT _id BIGINT,
+  OUT _id_usuario_mc BIGINT,
+  OUT _rut INTEGER,
+  OUT _estado VARCHAR,
+  OUT _fecha_creacion TIMESTAMP,
+  OUT _fecha_actualizacion TIMESTAMP
+)
+RETURNS SETOF RECORD AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    id,
+    id_usuario_mc,
+    rut,
+    estado,
+    fecha_creacion,
+    fecha_actualizacion
+  FROM
+    ${schema}.prp_usuario
+  WHERE
+    (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
+    (COALESCE(_in_id_usuario_mc, 0) = 0 OR id_usuario_mc = _in_id_usuario_mc) AND
+    (COALESCE(_in_rut, 0) = 0 OR rut = _in_rut) AND
+    (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado);
+   RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_usuarios_v10(BIGINT, BIGINT, INTEGER, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_usuarios_v10(BIGINT, BIGINT, INTEGER, VARCHAR);
 
 

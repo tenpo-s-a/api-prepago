@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
@@ -260,25 +261,24 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       userId != null ? userId : new NullParam(Types.BIGINT),
       userIdMc != null ? userIdMc : new NullParam(Types.BIGINT),
       rut != null ? rut : new NullParam(Types.INTEGER),
-      status != null ? status.toString() : new NullParam(Types.VARCHAR),
-      //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
-        PrepaidUser10 u = new PrepaidUser10();
-        u.setId(numberUtils.toLong(row.get("id")));
-        u.setIdUserMc(numberUtils.toLong(row.get("id_usuario_mc")));
-        u.setRut(numberUtils.toInt(row.get("rut")));
-        u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("estado").toString().trim()));
-        Timestamps timestamps = new Timestamps();
-        timestamps.setCreatedAt((Timestamp)row.get("fecha_creacion"));
-        timestamps.setUpdatedAt((Timestamp)row.get("fecha_actualizacion"));
-        return u;
-      }),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
+      status != null ? status.toString() : new NullParam(Types.VARCHAR)
+    };
+    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
+    RowMapper rm = (Map<String, Object> row) -> {
+      PrepaidUser10 u = new PrepaidUser10();
+      u.setId(numberUtils.toLong(row.get("_id"), null));
+      u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
+      u.setRut(numberUtils.toInteger(row.get("_rut"), null));
+      u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
+      u.setTimestamps(timestamps);
+      return u;
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", params);
-    return (List)resp.get("_result");
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", rm, params);
+    return (List)resp.get("result");
   }
 
   @Override
@@ -398,29 +398,29 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       userId != null ? userId : new NullParam(Types.BIGINT),
       expiration != null ? expiration : new NullParam(Types.INTEGER),
       status != null ? status.toString() : new NullParam(Types.VARCHAR),
-      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR),
-      //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-      new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
-        PrepaidCard10 c = new PrepaidCard10();
-        c.setId(numberUtils.toLong(row.get("id")));
-        c.setIdUser(numberUtils.toLong(row.get("id_usuario")));
-        c.setPan(String.valueOf(row.get("pan")));
-        c.setEncryptedPan(String.valueOf(row.get("pan_encriptado")));
-        c.setProcessorUserId(String.valueOf(row.get("contrato")));
-        c.setExpiration(numberUtils.toInt(row.get("expiracion")));
-        c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("estado").toString().trim()));
-        c.setNameOnCard(String.valueOf(row.get("nombre_tarjeta")));
-        Timestamps timestamps = new Timestamps();
-        timestamps.setCreatedAt((Timestamp)row.get("fecha_creacion"));
-        timestamps.setUpdatedAt((Timestamp)row.get("fecha_actualizacion"));
-        return c;
-      }),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
+      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", params);
-    return (List)resp.get("_result");
+    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
+    RowMapper rm = (Map<String, Object> row) -> {
+      PrepaidCard10 c = new PrepaidCard10();
+      c.setId(numberUtils.toLong(row.get("_id"), null));
+      c.setIdUser(numberUtils.toLong(row.get("_id_usuario"), null));
+      c.setPan(String.valueOf(row.get("_pan")));
+      c.setEncryptedPan(String.valueOf(row.get("_pan_encriptado")));
+      c.setProcessorUserId(String.valueOf(row.get("_contrato")));
+      c.setExpiration(numberUtils.toInteger(row.get("_expiracion"), null));
+      c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("_estado").toString().trim()));
+      c.setNameOnCard(String.valueOf(row.get("_nombre_tarjeta")));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
+      c.setTimestamps(timestamps);
+      return c;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", rm, params);
+    return (List)resp.get("result");
   }
 
   @Override

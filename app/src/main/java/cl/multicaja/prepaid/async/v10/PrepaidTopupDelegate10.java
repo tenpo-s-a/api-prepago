@@ -46,7 +46,7 @@ public final class PrepaidTopupDelegate10 {
     System.out.println("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
-    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.topUp", new PrepaidTopupRequestRoute10(prepaidTopup, user), headers);
+    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.cargasPendientes", new PrepaidTopupRequestRoute10(prepaidTopup, user), headers);
     return messageId;
   }
 }
