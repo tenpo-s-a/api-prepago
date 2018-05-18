@@ -433,11 +433,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
+  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
     if(userId == null){
       throw new ValidationException(2);
     }
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, null, null);
+    if(status == null){
+      throw new ValidationException(2);
+    }
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, status, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
