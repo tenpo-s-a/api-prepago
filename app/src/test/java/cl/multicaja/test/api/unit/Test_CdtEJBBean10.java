@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class Test_CdtEJBBean10 extends TestBaseUnit {
   private CdtEJBBean10 oEjbCdt = new CdtEJBBean10();
   private RutUtils rutUtils = RutUtils.getInstance();
+
   @Test
   public void addCdtTx() throws Exception {
 
@@ -31,4 +32,5 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     Assert.assertNotNull("debe tener External Tx Id", oCdtTx10.getExternalTransactionId());
 
   }
+
 }

@@ -37,6 +37,7 @@ public class CdtEJBBean10 implements CdtEJB10{
 
   @Override
   public CdtTransaction10 addCdtTransaction(Map<String, Object> headers, CdtTransaction10 cdtTransaction10) throws Exception {
+
     dbUtils = getDbUtils();
     configUtils = getConfigUtils();
 
@@ -81,13 +82,14 @@ public class CdtEJBBean10 implements CdtEJB10{
       cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
     } else {
       log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
-      long lNumError = numberUtils.toLong(numError,-1);
+      long lNumError = numberUtils.toLong(numError,-1L);
       if(lNumError != -1 && lNumError > 10000)
         throw new ValidationException(4).setData(new KeyValue("value",msjError));
       else
         throw new ValidationException(2);
     }
     return cdtTransaction10;
+
   }
 
   /**
