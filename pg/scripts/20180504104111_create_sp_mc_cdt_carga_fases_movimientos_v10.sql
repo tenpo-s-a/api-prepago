@@ -19,19 +19,16 @@
 
 CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_carga_fases_movimientos_v10
 (
-    IN  _nombre         VARCHAR,
-    IN  _id_fase        NUMERIC,
-    OUT _movimientos    REFCURSOR,
-    OUT _num_error       VARCHAR,
-    OUT _msj_error       VARCHAR
-)AS $$
-DECLARE
+    IN  _in_nombre      VARCHAR,
+    IN  _in_id_fase     NUMERIC,
+    OUT _id             BIGINT,
+    OUT _nombre         VARCHAR,
+    OUT _descripcion    VARCHAR,
+    OUT _signo          DECIMAL
+)RETURNS SETOF RECORD AS $$
 
 BEGIN
-    _num_error = '0';
-    _msj_error = '';
-
-    OPEN _movimientos FOR
+    RETURN QUERY
         SELECT
             id,
             nombre,
@@ -41,14 +38,9 @@ BEGIN
              ${schema.cdt}.cdt_fase_movimiento
         WHERE
             estado = 'ACTIVO' AND
-            (TRIM(COALESCE(_NOMBRE,'')) = '' OR LOWER(nombre) LIKE '%'||LOWER(_NOMBRE)||'%') AND
-            (COALESCE(_id_fase,0) = 0 OR id = _id_fase);
-
-EXCEPTION
-    WHEN OTHERS THEN
-        _num_error := SQLSTATE;
-        _msj_error := '[mc_cdt_carga_fases_movimientos] Error al buscar fases movimientos CAUSA ('|| SQLERRM ||')';
-    RETURN;
+            (TRIM(COALESCE(_in_nombre,'')) = '' OR LOWER(nombre) LIKE '%'||LOWER(_in_nombre)||'%') AND
+            (COALESCE(_in_id_fase,0) = 0 OR id = _in_id_fase );
+     RETURN;
 END;
 $$
 LANGUAGE 'plpgsql';
