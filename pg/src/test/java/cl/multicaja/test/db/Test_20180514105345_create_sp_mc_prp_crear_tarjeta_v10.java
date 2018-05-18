@@ -70,7 +70,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
 
     Map<String, Object> map = new HashMap<>();
     map.put("id", numberUtils.toLong(resp.get("_r_id") ));
@@ -98,7 +98,7 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
   }
 
   @Test

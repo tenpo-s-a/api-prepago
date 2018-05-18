@@ -20,8 +20,8 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
   @BeforeClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+    //dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+    //dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
   }
 
   /**
@@ -55,7 +55,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
 
     Map<String, Object> map = new HashMap<>();
     map.put("id", numberUtils.toLong(resp.get("_r_id")));
@@ -79,7 +79,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
 
     /**
      * se intenta registrar exactamente el mismo usuario y debe fallar
@@ -104,7 +104,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertEquals("debe retornar un id 0", 0,numberUtils.toLong(resp.get("_r_id"), 0));
+    Assert.assertEquals("debe retornar un id 0", Long.valueOf(0),numberUtils.toLong(resp.get("_r_id")));
   }
 
   @Test
@@ -166,7 +166,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser distinto de 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
 
     /**
      * se intenta registrar un nuevo usuario pero con el mismo id_usuario_multiaja, debe fallar
@@ -180,7 +180,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser distinto de 0", "0", resp.get("_error_code"));
-    Assert.assertEquals("debe retornar un id 0", 0,numberUtils.toLong(resp.get("_r_id"), 0));
+    Assert.assertEquals("debe retornar un id 0", Long.valueOf(0),numberUtils.toLong(resp.get("_r_id")));
   }
 
   @Test
@@ -201,7 +201,7 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser distinto de 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id"), 0) > 0);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
 
     /**
      * se intenta registrar un nuevo usuario pero con el mismo rut, debe fallar
@@ -215,6 +215,6 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser distinto de 0", "0", resp.get("_error_code"));
-    Assert.assertEquals("debe retornar un id 0", 0,numberUtils.toLong(resp.get("_r_id"), 0));
+    Assert.assertEquals("debe retornar un id 0", Long.valueOf(0),numberUtils.toLong(resp.get("_r_id")));
   }
 }
