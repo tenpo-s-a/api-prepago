@@ -54,10 +54,10 @@ public class CdtEJBBean10 implements CdtEJB10{
       throw new ValidationException(2);
     }
 
-    Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC),new OutParam("fase",Types.OTHER),new OutParam("numerror",Types.VARCHAR),new OutParam("msjerror",Types.VARCHAR)};
+    Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC)};
     Map<String,Object> outputData = dbUtils.execute(getSchema()+"."+SP_CARGA_FASES_MOVIMIENTOS,params);
 
-    List lstFases = (List) outputData.get("fase");
+    List lstFases = (List) outputData.get("result");
     if(lstFases == null || lstFases.size()== 0) {
       throw new ValidationException(2);
     }
@@ -80,13 +80,17 @@ public class CdtEJBBean10 implements CdtEJB10{
     String msjError = (String) outputData.get("MsjError");
     if(numError.equals("0")){
       cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
-    } else {
+    }
+    else {
       log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
-      long lNumError = numberUtils.toLong(numError,-1L);
+      /*long lNumError = numberUtils.toLong(numError,-1L);
       if(lNumError != -1 && lNumError > 10000)
         throw new ValidationException(4).setData(new KeyValue("value",msjError));
       else
         throw new ValidationException(2);
+        */
+      cdtTransaction10.setNumError(numError);
+      cdtTransaction10.setMsjError(msjError);
     }
     return cdtTransaction10;
 
