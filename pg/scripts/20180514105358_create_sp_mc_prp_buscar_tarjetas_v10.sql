@@ -19,51 +19,50 @@
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
 (
- IN _id              BIGINT,
- IN _id_usuario      BIGINT,
- IN _expiracion INTEGER,
- IN _estado          VARCHAR,
- IN _contrato        VARCHAR,
- OUT _result         REFCURSOR,
- OUT _error_code     VARCHAR,
- OUT _error_msg      VARCHAR
-) AS $$
- DECLARE
- BEGIN
-    _error_code := '0';
-    _error_msg := '';
-
-    OPEN _result FOR
-      SELECT
-        id,
-        id_usuario,
-        pan,
-        pan_encriptado,
-        contrato,
-        expiracion,
-        estado,
-        nombre_tarjeta,
-        fecha_creacion,
-        fecha_actualizacion
-      FROM
-        ${schema}.prp_tarjeta
-      WHERE
-        (COALESCE(_id, 0) = 0 OR id = _id) AND
-        (COALESCE(_id_usuario, 0) = 0 OR id_usuario = _id_usuario) AND
-        (COALESCE(_expiracion, 0) = 0 OR expiracion = _expiracion) AND
-        (TRIM(COALESCE(_estado,'')) = '' OR estado = _estado) AND
-        (TRIM(COALESCE(_contrato,'')) = '' OR contrato = _contrato);
-
-   EXCEPTION
-     WHEN OTHERS THEN
-         _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_buscar_tarjetas_v10] Error al buscar tarjetas. CAUSA ('|| SQLERRM ||')';
-     RETURN;
+  IN _in_id              BIGINT,
+  IN _in_id_usuario      BIGINT,
+  IN _in_expiracion      INTEGER,
+  IN _in_estado          VARCHAR,
+  IN _in_contrato        VARCHAR,
+  OUT _id BIGINT,
+  OUT _id_usuario BIGINT,
+  OUT _pan VARCHAR,
+  OUT _pan_encriptado VARCHAR,
+  OUT _contrato VARCHAR,
+  OUT _expiracion INTEGER,
+  OUT _estado VARCHAR,
+  OUT _nombre_tarjeta VARCHAR,
+  OUT _fecha_creacion TIMESTAMP,
+  OUT _fecha_actualizacion TIMESTAMP
+)
+RETURNS SETOF RECORD AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    id,
+    id_usuario,
+    pan,
+    pan_encriptado,
+    contrato,
+    expiracion,
+    estado,
+    nombre_tarjeta,
+    fecha_creacion,
+    fecha_actualizacion
+  FROM
+    ${schema}.prp_tarjeta
+  WHERE
+    (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
+    (COALESCE(_in_id_usuario, 0) = 0 OR id_usuario = _in_id_usuario) AND
+    (COALESCE(_in_expiracion, 0) = 0 OR expiracion = _in_expiracion) AND
+    (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado) AND
+    (TRIM(COALESCE(_in_contrato,'')) = '' OR contrato = _in_contrato);
+  RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_tarjetas_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR, REFCURSOR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_tarjetas_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR);
 
