@@ -75,7 +75,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     createCard(card);
 
     PrepaidCard10 c1 = prepaidEJBBean10.getPrepaidCardById(null, card.getId());
-
+    ;
     Assert.assertNotNull("debe retornar una tarjeta", c1);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", card, c1);
 

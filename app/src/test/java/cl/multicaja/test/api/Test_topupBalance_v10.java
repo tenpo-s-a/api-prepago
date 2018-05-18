@@ -23,8 +23,8 @@ public class Test_topupBalance_v10 extends TestApiBase {
   @Test
   public void shouldReturn200_OnTopupUserBalance() {
 
-    final String transactionId = "123456789";
-    final Integer rut = 11111111;
+    final String transactionId = getUniqueInteger().toString();
+    final Integer rut = getUniqueRutNumber();
     final String merchantCode = "987654321";
     final Integer currencyCode = 152;
     final BigDecimal value = new BigDecimal("9999.99");
@@ -60,7 +60,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     String messageId = String.format("%s%s%s", topup.getMerchantCode(), topup.getTransactionId(), topup.getId());
     CamelFactory camelFactory = CamelFactory.getInstance();
-    Queue qResp = camelFactory.createJMSQueue("PrepaidTopupRoute10.topUp.resp");
+    Queue qResp = camelFactory.createJMSQueue("PrepaidTopupRoute10.cargasPendientes.resp");
     ResponseRoute remoteTopup = (ResponseRoute)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
