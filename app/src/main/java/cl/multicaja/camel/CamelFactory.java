@@ -368,6 +368,10 @@ public final class CamelFactory {
         broker.addConnector(config.getProperty("activemq.broker.embedded.tcpConnector", "tcp://localhost:61616"));
       }
 
+      log.info("broker persistent: " + persistent);
+      log.info("broker deleteAllMessagesOnStartup: " + deleteAllMessagesOnStartup);
+      log.info("broker addTcpConnector: " + addTcpConnector);
+      log.info("broker useJmx: " + useJmx);
       log.info("broker dataDirectoryFile: " + (broker.getDataDirectoryFile() != null ? broker.getDataDirectoryFile().getAbsolutePath() : "no definido"));
       log.info("broker brokerDataDirectory: " + (broker.getBrokerDataDirectory() != null ? broker.getBrokerDataDirectory().getAbsolutePath() : "no definido"));
       log.info("broker tmpDataDirectory: " + (broker.getTmpDataDirectory() != null ? broker.getTmpDataDirectory().getAbsolutePath() : "no definido"));

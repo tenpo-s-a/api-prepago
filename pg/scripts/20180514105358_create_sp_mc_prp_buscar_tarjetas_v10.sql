@@ -56,7 +56,8 @@ BEGIN
     (COALESCE(_in_id_usuario, 0) = 0 OR id_usuario = _in_id_usuario) AND
     (COALESCE(_in_expiracion, 0) = 0 OR expiracion = _in_expiracion) AND
     (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado) AND
-    (TRIM(COALESCE(_in_contrato,'')) = '' OR contrato = _in_contrato);
+    (TRIM(COALESCE(_in_contrato,'')) = '' OR contrato = _in_contrato)
+    ORDER BY id DESC;
   RETURN;
 END;
 $$ LANGUAGE plpgsql;

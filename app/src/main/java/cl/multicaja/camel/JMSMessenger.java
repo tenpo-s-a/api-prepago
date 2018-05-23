@@ -1,15 +1,13 @@
 package cl.multicaja.camel;
 
-import org.apache.activemq.command.ActiveMQBytesMessage;
-import org.apache.activemq.command.ActiveMQMapMessage;
-import org.apache.activemq.command.ActiveMQObjectMessage;
-import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.activemq.command.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.*;
+import javax.jms.Message;
 import java.io.Serializable;
 
 /**
@@ -174,7 +172,9 @@ public final class JMSMessenger {
 				} else if(msg instanceof ActiveMQObjectMessage) {
 					msgObj = ((ActiveMQObjectMessage)msg).getObject();
 				} else if(msg instanceof ActiveMQMapMessage) {
-					msgObj = ((ActiveMQMapMessage)msg).getContentMap();
+          msgObj = ((ActiveMQMapMessage) msg).getContentMap();
+        } else if(msg instanceof ActiveMQMessage) {
+          msgObj = ((ActiveMQMessage) msg).getContent();
 				} else {
 					msgObj = ((TextMessage)msg).getText();
 				}

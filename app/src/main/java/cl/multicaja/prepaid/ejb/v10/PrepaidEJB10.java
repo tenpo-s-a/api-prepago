@@ -126,10 +126,11 @@ public interface PrepaidEJB10 {
    *
    * @param headers
    * @param userId
+   * @param status
    * @return
    * @throws Exception
    */
-  PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception;
+  PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception;
 
   /**
    * actualiza el estado de la tarjeta

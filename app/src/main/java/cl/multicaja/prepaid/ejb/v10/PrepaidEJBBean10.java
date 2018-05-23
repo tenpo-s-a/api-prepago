@@ -85,14 +85,38 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     return this.getConfigUtils().getProperty("schema");
   }
 
-  @EJB
-  private UsersEJBBean10 usersEJB10;
-
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
   @EJB
+  private UsersEJBBean10 usersEJB10;
+
+  @EJB
   private CdtEJBBean10 cdtEJB10;
+
+  public PrepaidTopupDelegate10 getDelegate() {
+    return delegate;
+  }
+
+  public void setDelegate(PrepaidTopupDelegate10 delegate) {
+    this.delegate = delegate;
+  }
+
+  public UsersEJBBean10 getUsersEJB10() {
+    return usersEJB10;
+  }
+
+  public void setUsersEJB10(UsersEJBBean10 usersEJB10) {
+    this.usersEJB10 = usersEJB10;
+  }
+
+  public CdtEJBBean10 getCdtEJB10() {
+    return cdtEJB10;
+  }
+
+  public void setCdtEJB10(CdtEJBBean10 cdtEJB10) {
+    this.cdtEJB10 = cdtEJB10;
+  }
 
   @Override
   public Map<String, Object> info() throws Exception{
@@ -196,11 +220,10 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     this.calculateTopupFeeAndTotal(topup);
 
     /*
-      Enviar mensaje a cosa de carga
+      Enviar mensaje al proceso asincrono
      */
-    // TODO: Enviar mensaje a cola de carga
-
-    delegate.sendTopUp(topup, user);
+    String messageId = delegate.sendTopUp(topup, user);
+    topup.setMessageId(messageId);
 
     return topup;
   }
@@ -448,11 +471,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
+  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
     if(userId == null){
       throw new ValidationException(2);
     }
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, null, null);
+    if(status == null){
+      throw new ValidationException(2);
+    }
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, status, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 

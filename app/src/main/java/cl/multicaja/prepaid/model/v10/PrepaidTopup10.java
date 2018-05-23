@@ -13,6 +13,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
   private Timestamps timestamps;
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
+  private String messageId;
 
   public PrepaidTopup10() {
     super();
@@ -68,5 +69,13 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
 
   public void setTotal(NewAmountAndCurrency10 total) {
     this.total = total;
+  }
+
+  public String getMessageId() {
+    return messageId;
+  }
+
+  public void setMessageId(String messageId) {
+    this.messageId = messageId;
   }
 }

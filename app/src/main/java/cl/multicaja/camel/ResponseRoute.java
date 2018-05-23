@@ -10,9 +10,9 @@ import java.io.Serializable;
  *
  * @autor vutreras
  */
-public class ResponseRoute implements Serializable {
+public class ResponseRoute<E extends Serializable> implements Serializable {
 
-  private Object data;
+  private E data;
 
   private ExchangeContext exchangeContext;
 
@@ -20,22 +20,22 @@ public class ResponseRoute implements Serializable {
     super();
   }
 
-  public ResponseRoute(Object data) {
+  public ResponseRoute(E data) {
     super();
     this.data = data;
   }
 
-  public ResponseRoute(Object data, ExchangeContext exchangeContext) {
+  public ResponseRoute(E data, ExchangeContext exchangeContext) {
     super();
     this.data = data;
     this.exchangeContext = exchangeContext;
   }
 
-  public Object getData() {
+  public E getData() {
     return data;
   }
 
-  public void setData(Object data) {
+  public void setData(E data) {
     this.data = data;
   }
 

@@ -62,32 +62,30 @@ public class CdtEJBBean10 implements CdtEJB10{
       throw new ValidationException(2);
     }
     HashMap<String,Object> mapFase = (HashMap<String, Object>) lstFases.get(0);
-    Long faseId = (Long) mapFase.get("id");
-     params = new Object[] {
-        cdtTransaction10.getAccountId(),
-        faseId,
-        cdtTransaction10.getTransactionReference(),
-        cdtTransaction10.getExternalTransactionId(),
-        cdtTransaction10.getGloss(),
-        cdtTransaction10.getAmount(),
-        new OutParam("IdMovimiento", Types.NUMERIC),
-        new OutParam("NumError", Types.VARCHAR),
-        new OutParam("MsjError", Types.VARCHAR)
-     };
+    Long faseId = (Long) mapFase.get("_id");
+    params = new Object[] {
+      cdtTransaction10.getAccountId(),
+      faseId,
+      cdtTransaction10.getTransactionReference(),
+      cdtTransaction10.getExternalTransactionId(),
+      cdtTransaction10.getGloss(),
+      cdtTransaction10.getAmount(),
+      new OutParam("IdMovimiento", Types.NUMERIC),
+      new OutParam("NumError", Types.VARCHAR),
+      new OutParam("MsjError", Types.VARCHAR)
+    };
     outputData = dbUtils.execute( getSchema() +"."+ SP_CREA_MOVIMIENTO_CUENTA, params);
 
     String numError = (String) outputData.get("NumError");
     String msjError = (String) outputData.get("MsjError");
     if(numError.equals("0")){
       cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
-    }
-    else {
+    } else {
       log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
       cdtTransaction10.setNumError(numError);
       cdtTransaction10.setMsjError(msjError);
     }
     return cdtTransaction10;
-
   }
 
   /**

@@ -33,6 +33,14 @@ public class WebApp implements ServletContextListener  {
     super();
   }
 
+  public PrepaidTopupRoute10 getPrepaidTopupRoute10() {
+    return prepaidTopupRoute10;
+  }
+
+  public void setPrepaidTopupRoute10(PrepaidTopupRoute10 prepaidTopupRoute10) {
+    this.prepaidTopupRoute10 = prepaidTopupRoute10;
+  }
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     Locale.setDefault(Constants.DEFAULT_LOCALE);

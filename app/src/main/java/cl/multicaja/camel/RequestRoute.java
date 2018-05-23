@@ -10,25 +10,39 @@ import java.io.Serializable;
  *
  * @autor vutreras
  */
-public class RequestRoute implements Serializable {
+public class RequestRoute<E extends Serializable> implements Serializable {
 
-  private Serializable data;
+  private E data;
+
+  private int retryCount = 0;
 
   public RequestRoute() {
     super();
   }
 
-  public RequestRoute(Serializable data) {
+  public RequestRoute(E data) {
     super();
     this.data = data;
   }
 
-  public Serializable getData() {
+  public E getData() {
     return data;
   }
 
-  public void setData(Serializable data) {
+  public void setData(E data) {
     this.data = data;
+  }
+
+  public int getRetryCount() {
+    return retryCount;
+  }
+
+  public void setRetryCount(int retryCount) {
+    this.retryCount = retryCount;
+  }
+
+  public void retryCountNext() {
+    this.retryCount++;
   }
 
   @Override
