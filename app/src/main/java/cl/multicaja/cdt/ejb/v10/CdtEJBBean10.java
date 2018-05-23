@@ -83,12 +83,6 @@ public class CdtEJBBean10 implements CdtEJB10{
     }
     else {
       log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
-      /*long lNumError = numberUtils.toLong(numError,-1L);
-      if(lNumError != -1 && lNumError > 10000)
-        throw new ValidationException(4).setData(new KeyValue("value",msjError));
-      else
-        throw new ValidationException(2);
-        */
       cdtTransaction10.setNumError(numError);
       cdtTransaction10.setMsjError(msjError);
     }
