@@ -18,6 +18,7 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private User user;
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
+  private String tecnocomCodEntity;
 
   public PrepaidTopupDataRoute10() {
     super();
@@ -58,6 +59,14 @@ public class PrepaidTopupDataRoute10 implements Serializable {
 
   public void setPrepaidCard10(PrepaidCard10 prepaidCard10) {
     this.prepaidCard10 = prepaidCard10;
+  }
+
+  public String getTecnocomCodEntity() {
+    return tecnocomCodEntity;
+  }
+
+  public void setTecnocomCodEntity(String tecnocomCodEntity) {
+    this.tecnocomCodEntity = tecnocomCodEntity;
   }
 
   @Override
