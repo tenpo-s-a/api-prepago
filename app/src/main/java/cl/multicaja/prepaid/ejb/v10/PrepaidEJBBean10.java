@@ -85,6 +85,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
+  public UsersEJBBean10 getUsersEJB10() {
+    return usersEJB10;
+  }
+
+  public void setUsersEJB10(UsersEJBBean10 usersEJB10) {
+    this.usersEJB10 = usersEJB10;
+  }
+
+  public PrepaidTopupDelegate10 getDelegate() {
+    return delegate;
+  }
+
+  public void setDelegate(PrepaidTopupDelegate10 delegate) {
+    this.delegate = delegate;
+  }
+
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -185,7 +201,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
      */
     // TODO: Enviar mensaje a cola de carga
 
-    delegate.sendTopUp(topup, user);
+    String messageId = delegate.sendTopUp(topup, user);
+    topup.setMessageId(messageId);
 
     return topup;
   }

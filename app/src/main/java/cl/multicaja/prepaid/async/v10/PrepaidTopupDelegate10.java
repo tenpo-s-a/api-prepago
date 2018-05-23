@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.RequestRoute;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.ProducerTemplate;
@@ -42,11 +44,12 @@ public final class PrepaidTopupDelegate10 {
    * @return
    */
   public String sendTopUp(PrepaidTopup10 prepaidTopup, User user) {
-    String messageId = String.format("%s%s%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId());
+    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
     System.out.println("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
-    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.cargasPendientes", new PrepaidTopupRequestRoute10(prepaidTopup, user), headers);
+    prepaidTopup.setMessageId(messageId);
+    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.pendingTopup", new RequestRoute<>(new PrepaidTopupDataRoute10(prepaidTopup, user)), headers);
     return messageId;
   }
 }

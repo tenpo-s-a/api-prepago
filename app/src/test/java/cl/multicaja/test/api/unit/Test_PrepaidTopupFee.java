@@ -1,5 +1,6 @@
 package cl.multicaja.test.api.unit;
 
+import cl.multicaja.core.test.TestBase;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.TopupType;
@@ -15,24 +16,22 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author abarazarte
  */
-public class Test_PrepaidTopupFee {
-
-  private static PrepaidEJBBean10 bean;
+public class Test_PrepaidTopupFee extends TestBaseUnit {
 
   @BeforeClass
   public static void setup(){
-    bean = new PrepaidEJBBean10();
+
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupNull() throws Exception {
-    bean.calculateTopupFeeAndTotal(null);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(null);
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -41,7 +40,7 @@ public class Test_PrepaidTopupFee {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     topup.setAmount(amount);
 
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -51,7 +50,7 @@ public class Test_PrepaidTopupFee {
     amount.setValue(new BigDecimal(100));
     topup.setAmount(amount);
 
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
   }
 
   /*
@@ -66,7 +65,7 @@ public class Test_PrepaidTopupFee {
     topup.setAmount(amount);
     topup.setMerchantCode("999999999999991");
 
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
     assertNotNull("Deberia tener comision", topup.getFee());
@@ -87,7 +86,7 @@ public class Test_PrepaidTopupFee {
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
     assertNotNull("Deberia tener comision", topup.getFee());
@@ -108,7 +107,7 @@ public class Test_PrepaidTopupFee {
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
-    bean.calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
     assertNotNull("Deberia tener comision", topup.getFee());

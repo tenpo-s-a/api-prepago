@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 /**
  * @author abarazarte
  */
-public class Test_NewPrepaidTopup10 {
+public class Test_NewPrepaidTopup10 extends TestBaseUnit {
 
   @Test
   public void shouldBeTypeWeb() {
