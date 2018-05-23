@@ -3,7 +3,6 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
@@ -28,8 +27,6 @@ import javax.naming.spi.NamingManager;
 @SuppressWarnings("unchecked")
 public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
-  private static PrepaidTopupDelegate10 delegate = new PrepaidTopupDelegate10();
-
   private static CamelFactory camelFactory = CamelFactory.getInstance();
 
   private static BrokerService brokerService;
@@ -46,50 +43,54 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
     //independiente de la configuración obliga a que el activemq no sea persistente en disco
     ConfigUtils.getInstance().setProperty("activemq.broker.embedded.persistent","false");
 
-    //crea e inicia el activemq
-    brokerService = camelFactory.createBrokerService();
-    brokerService.start();
-
-    //Inicializa las rutas camel
-    Test_PrepaidTopupDelegate10 t = new Test_PrepaidTopupDelegate10();
-    PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
-    prepaidTopupRoute10.setPrepaidEJBBean10(t.getPrepaidEJBBean10());
-    prepaidTopupRoute10.setUsersEJBBean10(t.getUsersEJBBean10());
-
     //crea e inicia apache camel con las rutas creadas anteriormente
-    camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
+    if (!camelFactory.isCamelRunning()) {
+
+      //crea e inicia el activemq
+      brokerService = camelFactory.createBrokerService();
+      brokerService.start();
+
+      //Inicializa las rutas camel
+      Test_PrepaidTopupDelegate10 t = new Test_PrepaidTopupDelegate10();
+      PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
+      prepaidTopupRoute10.setPrepaidEJBBean10(t.getPrepaidEJBBean10());
+      prepaidTopupRoute10.setUsersEJBBean10(t.getUsersEJBBean10());
+
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
+    }
 
     simpleNamingContextBuilder.deactivate();
   }
 
   @AfterClass
   public static void afterClass() throws Exception {
-    camelFactory.releaseCamelContext();
-    brokerService.stop();
+    if (brokerService != null) {
+      camelFactory.releaseCamelContext();
+      brokerService.stop();
+    }
   }
 
-  private User registerUser() throws Exception {
+  private User registerRandomUser() throws Exception {
     Integer rut = getUniqueRutNumber();
     String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
     SingUP singUP = getUsersEJBBean10().singUpUser(null, rut, email);
-    User user = getUsersEJBBean10().getUserById(null, singUP.getUserId());
-    return user;
+    return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
 
   @Test
   public void pendingTopup_RutIsNull() throws Exception {
 
-    User user = registerUser();
+    User user = registerRandomUser();
 
     user.setRut(null);
 
     PrepaidTopup10 topup = new PrepaidTopup10();
-    topup.setId(getUniqueInteger());
-    topup.setUserId(user.getId().intValue());
+    topup.setId(getUniqueLong());
+    topup.setUserId(user.getId());
     topup.setMerchantCode(RandomStringUtils.randomAlphabetic(10));
     topup.setTransactionId(getUniqueInteger().toString());
 
-    String messageId = delegate.sendTopUp(topup, user);
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -101,15 +102,15 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
   @Test
   public void pendingTopup_PrepaidUserIsNull() throws Exception {
 
-    User user = registerUser();
+    User user = registerRandomUser();
 
     PrepaidTopup10 topup = new PrepaidTopup10();
-    topup.setId(getUniqueInteger());
-    topup.setUserId(user.getId().intValue());
+    topup.setId(getUniqueLong());
+    topup.setUserId(user.getId());
     topup.setMerchantCode(RandomStringUtils.randomAlphabetic(10));
     topup.setTransactionId(getUniqueInteger().toString());
 
-    String messageId = delegate.sendTopUp(topup, user);
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -121,7 +122,7 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
   @Test
   public void pendingTopup_PendingEmission() throws Exception {
 
-    User user = registerUser();
+    User user = registerRandomUser();
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setRut(user.getRut().getValue());
@@ -134,12 +135,12 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     PrepaidTopup10 topup = new PrepaidTopup10();
 
-    topup.setId(getUniqueInteger());
-    topup.setUserId(user.getId().intValue());
+    topup.setId(getUniqueLong());
+    topup.setUserId(user.getId());
     topup.setMerchantCode(RandomStringUtils.randomAlphabetic(10));
     topup.setTransactionId(getUniqueInteger().toString());
 
-    String messageId = delegate.sendTopUp(topup, user);
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);

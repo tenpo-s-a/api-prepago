@@ -3,6 +3,7 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.RutUtils;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 
@@ -16,6 +17,15 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   private RutUtils rutUtils = RutUtils.getInstance();
+
+  private PrepaidTopupDelegate10 prepaidTopupDelegate10;
+
+  protected PrepaidTopupDelegate10 getPrepaidTopupDelegate10() {
+    if (prepaidTopupDelegate10 == null) {
+      prepaidTopupDelegate10 = new PrepaidTopupDelegate10();
+    }
+    return prepaidTopupDelegate10;
+  }
 
   private CdtEJBBean10 cdtEJBBean10;
 
@@ -40,7 +50,9 @@ public class TestBaseUnit extends TestApiBase {
   protected PrepaidEJBBean10 getPrepaidEJBBean10() {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
+      prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
       prepaidEJBBean10.setUsersEJB10(getUsersEJBBean10());
+      prepaidEJBBean10.setCdtEJB10(this.getCdtEJBBean10());
     }
     return prepaidEJBBean10;
   }

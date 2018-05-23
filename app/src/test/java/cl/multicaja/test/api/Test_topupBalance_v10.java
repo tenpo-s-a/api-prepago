@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 public class Test_topupBalance_v10 extends TestApiBase {
 
+  @Ignore
   @Test
   public void shouldReturn200_OnTopupUserBalance() {
 

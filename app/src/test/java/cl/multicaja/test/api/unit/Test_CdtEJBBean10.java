@@ -1,18 +1,15 @@
 package cl.multicaja.test.api.unit;
 
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 
-@Ignore
 public class Test_CdtEJBBean10 extends TestBaseUnit {
 
-  //@Test
+  @Test
   public void addCdtTx() throws Exception {
 
     CdtTransaction10 oCdtTx10 = new CdtTransaction10();
