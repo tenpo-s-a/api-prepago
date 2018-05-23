@@ -7,11 +7,10 @@ import cl.multicaja.users.model.v10.Timestamps;
  */
 public class PrepaidTopup10 extends NewPrepaidTopup10 {
 
-  private Integer id;
+  private Long id;
   private String status;
-  private Integer userId;
+  private Long userId;
   private Timestamps timestamps;
-
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
 
@@ -23,11 +22,11 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
     super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(), topupRequest.getMerchantCode());
   }
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -39,11 +38,11 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
     this.status = status;
   }
 
-  public Integer getUserId() {
+  public Long getUserId() {
     return userId;
   }
 
-  public void setUserId(Integer userId) {
+  public void setUserId(Long userId) {
     this.userId = userId;
   }
 

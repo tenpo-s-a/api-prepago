@@ -14,6 +14,9 @@ public class CdtTransaction10 {
   private String gloss;
   private BigDecimal amount;
 
+  private String numError = "0";
+  private String msjError = "";
+
   public String getAccountId() {
     return accountId;
   }
@@ -60,6 +63,22 @@ public class CdtTransaction10 {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public String getNumError() {
+    return numError;
+  }
+
+  public void setNumError(String numError) {
+    this.numError = numError;
+  }
+
+  public String getMsjError() {
+    return msjError;
+  }
+
+  public void setMsjError(String msjError) {
+    this.msjError = msjError;
   }
 }
 

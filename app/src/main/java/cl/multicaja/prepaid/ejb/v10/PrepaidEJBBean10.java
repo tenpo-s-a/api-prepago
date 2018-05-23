@@ -1,9 +1,12 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
@@ -49,6 +52,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
+  private final static String APP_NAME = "app.appname";
+
+
   /**
    *
    * @return
@@ -85,6 +91,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
+  @EJB
+  private CdtEJBBean10 cdtEJB10;
+
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -117,8 +126,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     // Obtener Usuario
-    //User user = this.usersEJB10.getUserByRut(headers, topupRequest.getRut());
-    User user = new User();
+    User user = this.usersEJB10.getUserByRut(headers, topupRequest.getRut());
     if(user == null){
       throw new NotFoundException(1);
     }
@@ -130,15 +138,17 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - N > 1 Carga
      */
     // Buscar usuario local de prepago
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null,user.getRut().getValue());
     /*
       if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
         // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
         throw new ValidationException(1024, "El cliente no pasó la validación");
       }
     */
-    //if(user.getRut().getStatus().equals("VALIDADO_FOTO")){
-    if(true){
+
+    PrepaidUserLevel userLevel = getUserLevel(user,prepaidUser);
+
+    if(userLevel != PrepaidUserLevel.LEVEL_1) {
       // Si el usuario tiene validacion de foto, es N = 2
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
@@ -149,29 +159,34 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - CodCom = WEB -> Carga WEB
         - CodCom != WEB -> Carga POS
      */
-    CdtTransactionType cdtTpe = topupRequest.getCdtTransactionType();
-
     /*
       Validar movimiento en CDT, en caso de error lanzar exception
      */
     // TODO: Validar movimiento en CDT
 
-    // Si no cumple con los limites
-    if(false){
-     /*
-      En caso de ser TEF, iniciar proceso de devolucion
-     */
-      // TODO: Iniciar proceo de devolucion
+    CdtTransaction10 oCdtTransaction10 = new CdtTransaction10();
+    oCdtTransaction10.setAmount(topupRequest.getAmount().getValue());
+    oCdtTransaction10.setTransactionType(topupRequest.getCdtTransactionType());
+    oCdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut());
+    oCdtTransaction10.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
+    oCdtTransaction10.setTransactionReference(0L);
+    oCdtTransaction10.setExternalTransactionId(topupRequest.getTransactionId());
 
-      throw new ValidationException(2);
+    oCdtTransaction10 = cdtEJB10.addCdtTransaction(null,oCdtTransaction10);
+
+    // Si no cumple con los limites
+    if(!oCdtTransaction10.getNumError().equals("0")){
+      long lNumError = numberUtils.toLong(oCdtTransaction10.getNumError(),-1L);
+      if(lNumError != -1 && lNumError > 10000)
+        throw new ValidationException(4).setData(new KeyValue("value",oCdtTransaction10.getMsjError()));
+      else
+        throw new ValidationException(2);
     }
 
+
     PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
-    // Id Solicitud de carga devuelto por CDT
-    topup.setId(numberUtils.random(1, Integer.MAX_VALUE));
-    // UserId
-    // topup.setUserId(user.getId());
-    topup.setUserId(1);
+    topup.setId(oCdtTransaction10.getTransactionReference());
+    topup.setUserId(user.getId());
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
 
@@ -505,5 +520,20 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
     topup.setFee(fee);
     topup.setTotal(total);
+  }
+
+  private PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) {
+
+    switch(oUser.getRut().getStatus()+"|"+oUser.getGlobalStatus()) {
+      case "N0":
+        return PrepaidUserLevel.LEVEL_1;
+      case "N1":
+        return PrepaidUserLevel.LEVEL_2;
+      case "N2":
+        return PrepaidUserLevel.LEVEL_3;
+      default:
+        return PrepaidUserLevel.LEVEL_1;
+    }
+
   }
 }
