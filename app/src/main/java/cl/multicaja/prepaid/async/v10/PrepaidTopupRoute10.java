@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +24,8 @@ import javax.ejb.EJB;
 public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   private static Log log = LogFactory.getLog(PrepaidTopupRoute10.class);
+
+  private ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
@@ -118,15 +121,17 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
         req.getData().setPrepaidUser10(prepaidUser);
 
-        PrepaidCard10 card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getIdUserMc(), PrepaidCardStatus.ACTIVE);
+        PrepaidCard10 card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
         if (card == null) {
-          card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getIdUserMc(), PrepaidCardStatus.LOCKED);
+          card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
         if (card == null) {
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
         } else {
+          String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+          req.getData().setTecnocomCodEntity(codEntity);
           req.getData().setPrepaidCard10(card);
         }
 

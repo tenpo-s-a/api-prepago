@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.utils.ParametersUtil;
 
 /**
  * @autor vutreras
@@ -16,7 +17,9 @@ public class TestBaseUnit extends TestApiBase {
     System.setProperty("project.artifactId", "api-prepaid");
   }
 
-  private RutUtils rutUtils = RutUtils.getInstance();
+  protected RutUtils rutUtils = RutUtils.getInstance();
+
+  protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private PrepaidTopupDelegate10 prepaidTopupDelegate10;
 
