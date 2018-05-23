@@ -150,5 +150,6 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+    Assert.assertNull("No Deberia contener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
   }
 }
