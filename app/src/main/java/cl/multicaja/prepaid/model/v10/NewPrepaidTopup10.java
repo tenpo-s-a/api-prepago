@@ -10,7 +10,7 @@ public class NewPrepaidTopup10 extends BaseModel {
 
   //TODO: externalizar este numero?
   @JsonIgnore
-  private final String WEB_MERCHANT_CODE = "999999999999991";
+  public static final String WEB_MERCHANT_CODE = "999999999999991";
 
   private NewAmountAndCurrency10 amount;
   private String transactionId;

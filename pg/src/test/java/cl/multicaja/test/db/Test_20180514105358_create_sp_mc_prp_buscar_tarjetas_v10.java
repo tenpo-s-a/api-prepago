@@ -158,13 +158,13 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 2 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map mCard1 = (Map)result.get(1);
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
-    Map mCard2 = (Map)result.get(1);
+    Map mCard2 = (Map)result.get(0);
     Set<String> keys2 = obj2.keySet();
     for (String k : keys2) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj2.get(k), mCard2.get("_" + k));

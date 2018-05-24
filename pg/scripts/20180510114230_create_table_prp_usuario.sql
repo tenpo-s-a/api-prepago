@@ -23,19 +23,17 @@ CREATE TABLE ${schema}.prp_usuario (
   id                  BIGSERIAL NOT NULL,
   id_usuario_mc       BIGINT NOT NULL,
   rut                 INTEGER NOT NULL,
-  estado              VARCHAR(10) NOT NULL,
+  estado              VARCHAR(20) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
-  CONSTRAINT prp_usuario_u1 UNIQUE(id),
-  CONSTRAINT prp_usuario_u2 UNIQUE(id_usuario_mc),
-  CONSTRAINT prp_usuario_u3 UNIQUE(rut),
-  CONSTRAINT prp_usuario_u4 UNIQUE(id_usuario_mc, rut)
+  CONSTRAINT prp_usuario_pk PRIMARY KEY(id),
+  CONSTRAINT prp_usuario_u1 UNIQUE(id_usuario_mc),
+  CONSTRAINT prp_usuario_u2 UNIQUE(rut),
+  CONSTRAINT prp_usuario_u3 UNIQUE(id_usuario_mc, rut)
 );
-
-COMMENT ON CONSTRAINT prp_usuario_u1 ON ${schema}.prp_usuario IS 'El id no puede repetirse';
-COMMENT ON CONSTRAINT prp_usuario_u2 ON ${schema}.prp_usuario IS 'El id_usuario_mc no puede repetirse';
-COMMENT ON CONSTRAINT prp_usuario_u3 ON ${schema}.prp_usuario IS 'El rut no puede repetirse';
-COMMENT ON CONSTRAINT prp_usuario_u4 ON ${schema}.prp_usuario IS 'El id_usuario_mc junto al rut no puede repetirse';
+COMMENT ON CONSTRAINT prp_usuario_u1 ON ${schema}.prp_usuario IS 'id_usuario_mc no puede repetirse';
+COMMENT ON CONSTRAINT prp_usuario_u2 ON ${schema}.prp_usuario IS 'El rut no puede repetirse';
+COMMENT ON CONSTRAINT prp_usuario_u2 ON ${schema}.prp_usuario IS 'El id_usuario_mc junto al rut no puede repetirse';
 
 CREATE INDEX prp_usuario_i1 ON ${schema}.prp_usuario (id);
 --COMMENT ON INDEX prp_usuario_u2_i1 IS 'Permite realizar la busqueda por id';
@@ -44,7 +42,10 @@ CREATE INDEX prp_usuario_i2 ON ${schema}.prp_usuario (id_usuario_mc);
 --COMMENT ON INDEX prp_usuario_i2 IS 'Permite realizar la busqueda por id_usuario_mc';
 
 CREATE INDEX prp_usuario_i3 ON ${schema}.prp_usuario (rut);
+
 --COMMENT ON INDEX prp_usuario_i2 IS 'Permite realizar la busqueda por id_usuario_mc';
+CREATE INDEX prp_usuario_i4 ON ${schema}.prp_usuario (estado);
+
 
 -- //@UNDO
 -- SQL to undo the change goes here.

@@ -24,16 +24,14 @@ CREATE TABLE ${schema}.prp_tarjeta (
   pan_encriptado      VARCHAR(100) NOT NULL,
   contrato            VARCHAR(20) NOT NULL,
   expiracion          INTEGER NOT NULL,
-  estado              VARCHAR(10) NOT NULL,
+  estado              VARCHAR(20) NOT NULL,
   nombre_tarjeta      VARCHAR(100) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
-  CONSTRAINT prp_tarjeta_u1 UNIQUE(id),
-  CONSTRAINT prp_tarjeta_u2 UNIQUE(id, id_usuario)
+  CONSTRAINT prp_tarjeta_pk PRIMARY KEY(id),
+  CONSTRAINT prp_tarjeta_u1 UNIQUE(id, id_usuario)
 );
-
-COMMENT ON CONSTRAINT prp_tarjeta_u1 ON ${schema}.prp_tarjeta IS 'El id no puede repetirse';
-COMMENT ON CONSTRAINT prp_tarjeta_u2 ON ${schema}.prp_tarjeta IS 'El id junto al id_usuario no puede repetirse';
+COMMENT ON CONSTRAINT prp_tarjeta_u1 ON ${schema}.prp_tarjeta IS 'El id junto al id_usuario no puede repetirse';
 
 CREATE INDEX prp_tarjeta_i1 ON ${schema}.prp_tarjeta (id);
 --COMMENT ON INDEX prp_tarjeta_i1 IS 'Permite realizar la busqueda por id';
@@ -41,6 +39,7 @@ CREATE INDEX prp_tarjeta_i1 ON ${schema}.prp_tarjeta (id);
 CREATE INDEX prp_tarjeta_i2 ON ${schema}.prp_tarjeta (id_usuario);
 --COMMENT ON INDEX prp_tarjeta_i2 IS 'Permite realizar la busqueda por id_usuario';
 
+CREATE INDEX prp_tarjeta_i3 ON ${schema}.prp_tarjeta (estado);
 -- //@UNDO
 -- SQL to undo the change goes here.
 
