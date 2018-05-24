@@ -223,4 +223,70 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
       Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA, remoteTopup.getData().getTecnocomInvoiceType());
     }
   }
+
+  @Test
+  public void pendingTopup_WithCardLockedhard() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setIdUserMc(user.getId());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildCard(prepaidUser);
+
+    prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
+
+    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 topup = buildTopup(user);
+
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNull("No deberia existir un topup", remoteTopup);
+  }
+
+  @Test
+  public void pendingTopup_WithCardExpired() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setIdUserMc(user.getId());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildCard(prepaidUser);
+
+    prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
+
+    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 topup = buildTopup(user);
+
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNull("No deberia existir un topup", remoteTopup);
+  }
 }
