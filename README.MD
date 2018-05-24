@@ -29,7 +29,7 @@ $ sudo apt-get install postgresql-9.6
 ## Cambiar clave de usuario postgres:
 
 1. conectarse
-    
+
     ```sh
     $ sudo -u postgres psql postgres
     ```
@@ -86,7 +86,7 @@ $ sudo dpkg -i kong-community-edition-0.13.0.*.deb
 
 2. Descomentar y editar las siguientes configuraciones en el archivo /etc/kong/kong.conf
 
-        database = postgres             
+        database = postgres
         pg_host = 127.0.0.1
         pg_port = 5432
         pg_user = kong
@@ -129,7 +129,7 @@ $ curl -i http://localhost:8001/
 
 1. Descargar e instalar jenkins
     ```sh
-    $ wget https://pkg.jenkins.io/debian-stable/binary/jenkins_2.89.4_all.deb        
+    $ wget https://pkg.jenkins.io/debian-stable/binary/jenkins_2.89.4_all.deb
     $ sudo dpkg -i jenkins_2.89.4_all.deb
     ```
 2. Establecer puerto 8090
@@ -142,7 +142,7 @@ $ curl -i http://localhost:8001/
     ```
 # Configuracion de jenkins
 
-## Cuando se ejecuta por primera vez jenkins dará por consola un password de administración el cual se deberá
+## Cuando se ejecuta por primera vez jenkins dará por consola un password de administración el cual se deberá:
     ingresar la primera vez que se visite jenkins
 
 1. Acceder a jenkins
@@ -157,14 +157,14 @@ $ curl -i http://localhost:8001/
 
     - Ingresar los datos:
 
-                Username: jenkins 
+                Username: jenkins
                 Password: jenkins
                 Confirm Password: jenkins
                 E-amil address: tu_email
 
 4. Presionar el boton: Save and Finish
 
-# Configuración y ejecición de pipeline local
+## Configuración y ejecición de pipeline local
 
 1. Acceder a jenkins
 
@@ -176,11 +176,10 @@ $ curl -i http://localhost:8001/
 
     - Ingresar el nombre del pipeline
 
-    - Seleccionar el tipo __`Pipeline`__ 
+    - Seleccionar el tipo __`Pipeline`__
 
     - Hacer click en el boton __`Ok`__
 
-    
 3. Configurar el pipeline
 
     - General
@@ -188,18 +187,33 @@ $ curl -i http://localhost:8001/
         - Seleccionar `This project is parameterized` y agregar el parametro __PROJECT_FOLDER_PATH__, en la que se colocara como valor por defecto el path absoluto de la carpeta en la cual se encuentra el proyecto
 
     - Pipeline
-        
+
         - Copiar el contenido del archivo __local_jenkinsfile__ en el input _Script_.
 
         - Salvar los cambios haciendo click en el boton `Save`
-    
+
 4. Ejecutar el pipeline de forma manual
-        
+
     - hacer click en `Build with Parameters`
-    
+
     - de ser necesario, podemos cambiar el path de la carpeta
 
     - hacer click en el boton `Build`
+
+## Configiguracion de las variables de entorno a utilizar en el pipeline
+  Dentro del pipeline definido en el archivo `Jenkinsfile` se utilizan las variables de entorno __KONG_HOST__ y __API_HOST__ las cuales deben ser configuradas de la siguiente manera:
+
+1. Acceder al home de Jenkins.
+2. Hacer click en la opción `Manage Jenkins`.
+3. Hacer click n la opción `Configure System`.
+4. En la sección `Global properties`, seleccionar la opción `Environment variables`.
+5. Hacer click en el botón `Add`.
+6. Ingresar el nombre y valor de la variable.
+
+      Ej:
+
+        Name: API_HOST
+        Value: http://localhost:9090
 
 # Creación de las base de datos
 

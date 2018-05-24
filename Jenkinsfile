@@ -126,8 +126,16 @@ pipeline {
         branch 'master'
       }
       steps {
+        script {
+          if(!env.KONG_HOST){
+            env.KONG_HOST = "http://localhost:8001"
+          }
+          if(!env.API_HOST){
+            env.API_HOST = "http://localhost:8080"
+          }
+        }
         dir(path: 'kong/') {
-          sh './migrate-up.sh -kong_host http://localhost:8001 -api_host http://localhost:8080 -silence true'
+          sh "./migrate-up.sh -kong_host $KONG_HOST -api_host $API_HOST -silence true"
         }
       }
     }
