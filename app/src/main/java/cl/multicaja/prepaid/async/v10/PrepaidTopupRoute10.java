@@ -5,10 +5,7 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.TopupType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
@@ -135,9 +132,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           req.getData().setTecnocomCodEntity(codEntity);
           req.getData().setPrepaidCard10(card);
           if (TopupType.WEB.equals(req.getData().getPrepaidTopup().getType())) {
-            log.info("Es carga WEB");
+            req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_TRANSFERENCIA);
           } else {
-            log.info("Es carga POS");
+            req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
           }
         }
 

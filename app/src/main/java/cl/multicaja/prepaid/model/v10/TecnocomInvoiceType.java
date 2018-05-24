@@ -10,9 +10,9 @@ public enum TecnocomInvoiceType {
 
   COMISION_APERTURA(3000, 0, "+"),
   ANULA_COMISION_APERTURA(3000, 1, "-"),
-  CARGA_TRANSFERENCIA(3001, 0, "-"),
+  CARGA_TRANSFERENCIA(3001, 0, "-"), //--web
   ANULA_CARGA_TRANSFERENCIA(3001, 1, "+"),
-  CARGA_EFECTIVO_COMERCIO_MULTICAJA(3002, 0, "-"),
+  CARGA_EFECTIVO_COMERCIO_MULTICAJA(3002, 0, "-"), //--pos
   ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA(3002, 1, "+"),
   RETIRO_TRANSFERENCIA(3003, 0, "+"),
   ANULA_RETIRO_TRANSFERENCIA(3003, 1, "-"),
@@ -85,5 +85,19 @@ public enum TecnocomInvoiceType {
       }
     }
     return lst.isEmpty() ? null : lst;
+  }
+
+  /**
+   * Retorna el enum por su codigo
+   * @param code
+   * @return
+   */
+  public static TecnocomInvoiceType valueOfEnumByCodeAndCorrector(int code, int corrector) {
+    for (TecnocomInvoiceType t : values()) {
+      if (t.getCode() == code && t.getCorrector() == corrector) {
+        return t;
+      }
+    }
+    return null;
   }
 }
