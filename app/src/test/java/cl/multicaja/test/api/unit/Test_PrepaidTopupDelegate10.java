@@ -108,10 +108,11 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
    * @return
    */
   private PrepaidTopup10 buildTopup(User user) {
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
     PrepaidTopup10 topup = new PrepaidTopup10();
     topup.setId(getUniqueLong());
     topup.setUserId(user.getId());
-    topup.setMerchantCode(RandomStringUtils.randomAlphabetic(10));
+    topup.setMerchantCode(merchantCode);
     topup.setTransactionId(getUniqueInteger().toString());
     return topup;
   }
