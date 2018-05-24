@@ -71,9 +71,10 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    user.setRut(null);
-
     PrepaidTopup10 topup = buildPrepaidTopup(user);
+
+    topup.setRut(null);
+    user.setRut(null);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 

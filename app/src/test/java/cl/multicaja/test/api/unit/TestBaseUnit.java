@@ -14,6 +14,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
+import java.math.BigDecimal;
+
 /**
  * @autor vutreras
  */
@@ -84,8 +86,8 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 buildPrepaidUser(User user) {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setIdUserMc(user.getId());
-    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setIdUserMc(user != null ? user.getId() : null);
+    prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     return prepaidUser;
   }
@@ -113,7 +115,7 @@ public class TestBaseUnit extends TestApiBase {
     int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser.getId());
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(RandomStringUtils.randomNumeric(16));
     prepaidCard.setEncryptedPan(RandomStringUtils.randomAlphabetic(50));
     prepaidCard.setExpiration(expiryDate);
@@ -142,10 +144,17 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidTopup10 buildPrepaidTopup(User user) {
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
     prepaidTopup.setId(getUniqueLong());
-    prepaidTopup.setUserId(user.getId());
+    prepaidTopup.setUserId(user != null ? user.getId() : null);
     prepaidTopup.setMerchantCode(merchantCode);
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(numberUtils.random(1000, 10000)));
+    newAmountAndCurrency.setCurrencyCode(0);
+
+    prepaidTopup.setAmount(newAmountAndCurrency);
     return prepaidTopup;
   }
 
