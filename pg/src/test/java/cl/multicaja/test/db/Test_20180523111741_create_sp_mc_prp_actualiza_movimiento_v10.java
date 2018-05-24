@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertaMovimiento;
 
+import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import org.junit.AfterClass;
@@ -34,11 +35,15 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
     Map<String,Object> mapMovimiento = insertaMovimiento();
     Object[] params = {
       mapMovimiento.get("_id"), //id
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
       "PROCE",
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
     Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+    System.out.println(resp);
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
   }
@@ -48,6 +53,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
   {
     Object[] params = {
       new NullParam(Types.NUMERIC), //id
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
       "PROCE",
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -61,6 +69,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
     Map<String,Object> mapMovimiento = insertaMovimiento();
     Object[] params = {
       mapMovimiento.get("_id"), //id
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
+      new InParam(1,Types.NUMERIC),
       new NullParam(Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -70,6 +81,22 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
   }
 
+  @Test
+  public void actualizaMovimientoOkEstadoError()throws SQLException {
+    Map<String,Object> mapMovimiento = insertaMovimiento();
+    Object[] params = {
+      mapMovimiento.get("_id"), //id
+      new InParam(0,Types.NUMERIC),
+      new InParam(0,Types.NUMERIC),
+      new InParam(0,Types.NUMERIC),
+      "ERRORENV",
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+    Assert.assertNotNull("Debe retornar respuesta", resp);
+    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+  }
 
 
 }

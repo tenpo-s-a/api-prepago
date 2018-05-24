@@ -19,10 +19,13 @@
 
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
-  IN  _id            NUMERIC,
-  IN  _estado        VARCHAR,
-  OUT _error_code    VARCHAR,
-  OUT _error_msg     VARCHAR
+  IN _id               NUMERIC,
+  IN _num_extracto     NUMERIC,
+  IN _num_mov_extracto NUMERIC,
+  IN _clave_moneda     NUMERIC,
+  IN _estado           VARCHAR,
+  OUT _error_code      VARCHAR,
+  OUT _error_msg       VARCHAR
 )AS $$
  DECLARE
 
@@ -45,7 +48,28 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
     UPDATE
       ${schema}.prp_movimiento
     SET
-        estado = _estado,
+       estado = _estado,
+       num_extracto =   (
+                           CASE WHEN COALESCE(_num_extracto,0) != 0 THEN
+                            _num_extracto
+                           ELSE
+                              0
+                           END
+                       ),
+       num_mov_extracto = (
+                            CASE WHEN COALESCE(_num_mov_extracto,0) != 0 THEN
+                              _num_mov_extracto
+                             ELSE
+                                0
+                             END
+                          ),
+       clave_moneda = (
+                            CASE WHEN COALESCE(_clave_moneda,0) != 0 THEN
+                              _clave_moneda
+                             ELSE
+                                0
+                             END
+                          ),
         fecha_actualizacion = timezone('utc', now())
      WHERE
         id = _id;
