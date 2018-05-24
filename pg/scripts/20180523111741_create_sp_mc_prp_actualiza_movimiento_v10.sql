@@ -84,5 +84,5 @@ $$
 LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC,VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC,NUMERIC,NUMERIC,NUMERIC,VARCHAR);
 
