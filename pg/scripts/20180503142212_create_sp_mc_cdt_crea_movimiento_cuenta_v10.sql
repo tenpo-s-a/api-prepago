@@ -116,7 +116,8 @@ BEGIN
                 monto,
                 fecha_registro,
                 estado,
-                fecha_estado
+                fecha_estado,
+                fecha_tx
             )
         VALUES
             (
@@ -128,7 +129,8 @@ BEGIN
                 _monto,
                 timezone('utc', now()),
                 'PEND',
-                timezone('utc', now())
+                timezone('utc', now()),
+                current_date
             )
         RETURNING id INTO _id_movimiento_cuenta;
 
