@@ -67,7 +67,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
                             CASE WHEN _clave_moneda IS NOT NULL THEN
                               _clave_moneda
                              ELSE
-                                num_mov_extracto
+                                clave_moneda
                              END
                           ),
         fecha_actualizacion = timezone('utc', now())
