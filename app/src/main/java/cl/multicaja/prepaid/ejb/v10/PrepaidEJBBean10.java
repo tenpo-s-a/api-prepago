@@ -150,9 +150,10 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     // Obtener Usuario
-    User user = this.usersEJB10.getUserByRut(headers, topupRequest.getRut());
+    User user = this.getUsersEJB10().getUserByRut(headers, topupRequest.getRut());
+
     if(user == null){
-      throw new NotFoundException(1);
+      throw new NotFoundException(102001); //cliente no existe
     }
 
     /*
@@ -162,7 +163,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - N > 1 Carga
      */
     // Buscar usuario local de prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null,user.getRut().getValue());
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
+
+    if(prepaidUser == null){
+      throw new NotFoundException(102003); //cliente no tiene prepago
+    }
+
     /*
       if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
         // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
@@ -183,6 +189,33 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         - CodCom = WEB -> Carga WEB
         - CodCom != WEB -> Carga POS
      */
+
+    /*
+    1- La API deberá ir a consultar el estado de la tarjeta a cargar. Para esto se deberá ir a la BBDD de prepago a la tabla tarjetas y consultar el estado.
+    2- Si el estado es fecha expirada o bloqueada dura se deberá responder un mensaje de error al switch o POS Tarjeta inválida
+    3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
+     */
+
+    PrepaidCard10 card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+
+    if (card == null) {
+
+      card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+
+      if (card == null) {
+
+        card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+
+        if (card == null) {
+          card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+        }
+
+        if (card != null) {
+          throw new ValidationException(106000); //tarjeta invalida
+        }
+      }
+    }
+
     /*
       Validar movimiento en CDT, en caso de error lanzar exception
      */
@@ -196,7 +229,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     oCdtTransaction10.setTransactionReference(0L);
     oCdtTransaction10.setExternalTransactionId(topupRequest.getTransactionId());
 
-    oCdtTransaction10 = cdtEJB10.addCdtTransaction(null,oCdtTransaction10);
+    oCdtTransaction10 = this.getCdtEJB10().addCdtTransaction(null,oCdtTransaction10);
 
     // Si no cumple con los limites
     if(!oCdtTransaction10.getNumError().equals("0")){
@@ -206,7 +239,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       else
         throw new ValidationException(2);
     }
-
 
     PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
     topup.setId(oCdtTransaction10.getTransactionReference());
@@ -222,7 +254,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     /*
       Enviar mensaje al proceso asincrono
      */
-    String messageId = delegate.sendTopUp(topup, user);
+    String messageId = this.getDelegate().sendTopUp(topup, user);
     topup.setMessageId(messageId);
 
     return topup;
