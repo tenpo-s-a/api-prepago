@@ -50,24 +50,24 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
     SET
        estado = _estado,
        num_extracto =   (
-                           CASE WHEN COALESCE(_num_extracto,0) != 0 THEN
+                           CASE WHEN _num_extracto IS NOT NULL  THEN
                             _num_extracto
                            ELSE
-                              0
+                              num_extracto
                            END
                        ),
        num_mov_extracto = (
-                            CASE WHEN COALESCE(_num_mov_extracto,0) != 0 THEN
+                            CASE WHEN _num_mov_extracto IS NOT NULL THEN
                               _num_mov_extracto
                              ELSE
-                                0
+                                num_mov_extracto
                              END
                           ),
        clave_moneda = (
-                            CASE WHEN COALESCE(_clave_moneda,0) != 0 THEN
+                            CASE WHEN _clave_moneda IS NOT NULL THEN
                               _clave_moneda
                              ELSE
-                                0
+                                num_mov_extracto
                              END
                           ),
         fecha_actualizacion = timezone('utc', now())
