@@ -42,8 +42,8 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   {
     Map<String, Object> mapCard = insertCard("ACTIVA");
     Object[] params = {
-      setInParam(mapCard.get("id_usuario")), //id_usuario_mc
-      setInParam(mapCard.get("id_usuario")), //rut
+      setInParam(mapCard.get("id_usuario")), //id_mov_ref
+      setInParam(mapCard.get("id_usuario")), //id_usuario
       "CARGA", //estado
       setInParam(getUniqueLong()),
       "USD",
@@ -89,8 +89,8 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   public static Map<String, Object> insertaMovimiento() throws SQLException {
     Map<String, Object> mapCard = insertCard("ACTIVA");
     Object[] params = {
-      setInParam(mapCard.get("id_usuario")), //id_usuario_mc
-      setInParam(mapCard.get("id_usuario")), //rut
+      setInParam(mapCard.get("id_usuario")), //id_mov_ref
+      setInParam(mapCard.get("id_usuario")), //id_usuario
       "CARGA", //estado
       setInParam(getUniqueLong()),
       "USD",
