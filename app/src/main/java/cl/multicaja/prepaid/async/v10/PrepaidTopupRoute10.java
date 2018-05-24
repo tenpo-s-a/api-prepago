@@ -4,8 +4,12 @@ import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.TecnocomService;
+import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
+import cl.multicaja.tecnocom.constants.Constants;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
@@ -13,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import java.sql.SQLException;
 
 /**
  * Implementacion personalizada de rutas camel
@@ -31,8 +36,23 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   @EJB
   private UsersEJBBean10 usersEJBBean10;
 
+  private TecnocomService tecnocomService;
+
+  private ConfigUtils configUtils ;
+
   public PrepaidTopupRoute10() {
     super();
+  }
+
+  /**
+   *
+   * @return
+   */
+  public ConfigUtils getConfigUtils() {
+    if (this.configUtils == null) {
+      this.configUtils = new ConfigUtils("api-prepaid");
+    }
+    return this.configUtils;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
@@ -49,6 +69,28 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public void setUsersEJBBean10(UsersEJBBean10 usersEJBBean10) {
     this.usersEJBBean10 = usersEJBBean10;
+  }
+
+  public TecnocomService getTecnocomService() {
+    //TODO se usa la version mock mientras, se debe implementar como resolver que instancia usar la mock o la real de acuerdo al ambiente
+    if (this.tecnocomService == null) {
+      String apiKey = getConfigUtils().getProperty("tecnocom.apiKey");
+      String apiUrl = getConfigUtils().getProperty("tecnocom.apiUrl");
+      String channel = getConfigUtils().getProperty("tecnocom.channel");
+      String codEntity = null;
+      try {
+        codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+      } catch (SQLException e) {
+        log.error("Error al cargar parametro cod_entidad");
+        codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
+      }
+      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codEntity, Constants.HashOrder.ASC);
+    }
+    return tecnocomService;
+  }
+
+  public void setTecnocomService(TecnocomService tecnocomService) {
+    this.tecnocomService = tecnocomService;
   }
 
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
