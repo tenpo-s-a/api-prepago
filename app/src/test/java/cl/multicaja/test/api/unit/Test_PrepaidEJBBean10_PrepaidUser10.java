@@ -14,31 +14,10 @@ import java.util.List;
  */
 public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
 
-  public static PrepaidUser10 buildUser() {
-    PrepaidUser10 user = new PrepaidUser10();
-    user.setIdUserMc(getUniqueLong());
-    user.setRut(getUniqueRutNumber());
-    user.setStatus(PrepaidUserStatus.ACTIVE);
-    return user;
-  }
-
-  private PrepaidUser10 createUser(PrepaidUser10 user) throws Exception {
-
-    user = getPrepaidEJBBean10().createPrepaidUser(null, user);
-
-    Assert.assertNotNull("debe retornar un usuario", user);
-    Assert.assertEquals("debe tener id", true, user.getId() > 0);
-    Assert.assertEquals("debe tener idUserMc", true, user.getIdUserMc() > 0);
-    Assert.assertEquals("debe tener rut", true, user.getRut() > 0);
-    Assert.assertNotNull("debe tener status", user.getStatus());
-
-    return user;
-  }
-
   @Test
   public void insertUserOk() throws Exception {
-    PrepaidUser10 user = buildUser();
-    createUser(user);
+    PrepaidUser10 user = buildPrepaidUser();
+    createPrepaidUser(user);
   }
 
   @Test
@@ -48,8 +27,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso de registro de un nuevo usuario, pero que luego se intenta registrar el mismo y deberia fallar
      */
 
-    PrepaidUser10 user = buildUser();
-    user = createUser(user);
+    PrepaidUser10 user = buildPrepaidUser();
+    user = createPrepaidUser(user);
 
     //se intenta registrar exactamente el mismo usuario
     try {
@@ -66,8 +45,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso en que se registra un nuevo usuario y luego se busca por su id, id_usuario_mc y rut
      */
 
-    PrepaidUser10 user = buildUser();
-    user = createUser(user);
+    PrepaidUser10 user = buildPrepaidUser();
+    user = createPrepaidUser(user);
 
     PrepaidUser10 u1 = getPrepaidEJBBean10().getPrepaidUserById(null, user.getId());
 
@@ -92,13 +71,13 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso en que se registra un nuevo usuario y luego se busca por su id, id_usuario_mc y rut
      */
 
-    PrepaidUser10 user1 = buildUser();
+    PrepaidUser10 user1 = buildPrepaidUser();
     user1.setStatus(PrepaidUserStatus.DISABLED);
-    user1 = createUser(user1);
+    user1 = createPrepaidUser(user1);
 
-    PrepaidUser10 user2 = buildUser();
+    PrepaidUser10 user2 = buildPrepaidUser();
     user2.setStatus(PrepaidUserStatus.DISABLED);
-    user2 = createUser(user2);
+    user2 = createPrepaidUser(user2);
 
     List<PrepaidUser10> lst = getPrepaidEJBBean10().getPrepaidUsers(null, null, null, null, PrepaidUserStatus.DISABLED);
 
@@ -117,8 +96,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
   @Test
   public void updateStatusOk() throws Exception {
 
-    PrepaidUser10 user = buildUser();
-    user = createUser(user);
+    PrepaidUser10 user = buildPrepaidUser();
+    user = createPrepaidUser(user);
 
     getPrepaidEJBBean10().updatePrepaidUserStatus(null, user.getId(), PrepaidUserStatus.DISABLED);
 

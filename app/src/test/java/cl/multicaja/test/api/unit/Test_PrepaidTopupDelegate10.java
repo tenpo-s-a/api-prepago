@@ -6,11 +6,8 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.users.model.v10.SingUP;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -69,62 +66,15 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
     }
   }
 
-  /**
-   *
-   * @return
-   * @throws Exception
-   */
-  private User registerUser() throws Exception {
-    Integer rut = getUniqueRutNumber();
-    String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
-    SingUP singUP = getUsersEJBBean10().singUpUser(null, rut, email);
-    return getUsersEJBBean10().getUserById(null, singUP.getUserId());
-  }
-
-  /**
-   *
-   * @param u
-   * @return
-   * @throws Exception
-   */
-  private PrepaidCard10 buildCard(PrepaidUser10 u) throws Exception {
-    int expiryYear = numberUtils.random(1000, 9999);
-    int expiryMonth = numberUtils.random(1, 99);
-    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
-    PrepaidCard10 c = new PrepaidCard10();
-    c.setIdUser(u.getId());
-    c.setPan(RandomStringUtils.randomNumeric(16));
-    c.setEncryptedPan(RandomStringUtils.randomAlphabetic(50));
-    c.setExpiration(expiryDate);
-    c.setStatus(PrepaidCardStatus.ACTIVE);
-    c.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
-    c.setNameOnCard("Tarjeta de: " + RandomStringUtils.randomAlphabetic(5));
-    return c;
-  }
-
-  /**
-   *
-   * @param user
-   * @return
-   */
-  private PrepaidTopup10 buildTopup(User user) {
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-    PrepaidTopup10 topup = new PrepaidTopup10();
-    topup.setId(getUniqueLong());
-    topup.setUserId(user.getId());
-    topup.setMerchantCode(merchantCode);
-    topup.setTransactionId(getUniqueInteger().toString());
-    return topup;
-  }
-
   @Test
   public void pendingTopup_RutIsNull() throws Exception {
 
     User user = registerUser();
 
-    user.setRut(null);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    PrepaidTopup10 topup = buildTopup(user);
+    topup.setRut(null);
+    user.setRut(null);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
@@ -140,7 +90,7 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    PrepaidTopup10 topup = buildTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
@@ -156,16 +106,13 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setIdUserMc(user.getId());
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
 
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidTopup10 topup = buildTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
@@ -185,21 +132,19 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setIdUserMc(user.getId());
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
 
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCard(prepaidUser);
-    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+
+    prepaidCard = createPrepaidCard(prepaidCard);
 
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 topup = buildTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
@@ -229,24 +174,21 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setIdUserMc(user.getId());
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
 
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
-    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+    prepaidCard = createPrepaidCard(prepaidCard);
 
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 topup = buildTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
@@ -262,24 +204,21 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setIdUserMc(user.getId());
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
 
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
-    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+    prepaidCard = createPrepaidCard(prepaidCard);
 
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 topup = buildTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup(user);
 
     String messageId = getPrepaidTopupDelegate10().sendTopUp(topup, user);
 
