@@ -5,8 +5,14 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.model.v10.SingUP;
+import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.utils.ParametersUtil;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 
 /**
  * @autor vutreras
@@ -58,5 +64,130 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setCdtEJB10(this.getCdtEJBBean10());
     }
     return prepaidEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   * @throws Exception
+   */
+  public User registerUser() throws Exception {
+    Integer rut = getUniqueRutNumber();
+    String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
+    SingUP singUP = getUsersEJBBean10().singUpUser(null, rut, email);
+    return getUsersEJBBean10().getUserById(null, singUP.getUserId());
+  }
+
+  /**
+   *
+   * @return
+   */
+  public PrepaidUser10 buildPrepaidUser(User user) {
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setIdUserMc(user.getId());
+    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    return prepaidUser;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public PrepaidUser10 buildPrepaidUser() {
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setIdUserMc(getUniqueLong());
+    prepaidUser.setRut(getUniqueRutNumber());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    return prepaidUser;
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCard(PrepaidUser10 prepaidUser) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser.getId());
+    prepaidCard.setPan(RandomStringUtils.randomNumeric(16));
+    prepaidCard.setEncryptedPan(RandomStringUtils.randomAlphabetic(50));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + RandomStringUtils.randomAlphabetic(5));
+    return prepaidCard;
+  }
+
+  /**
+   *
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCard() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    return buildPrepaidCard(prepaidUser);
+  }
+
+  /**
+   *
+   * @param user
+   * @return
+   */
+  public PrepaidTopup10 buildPrepaidTopup(User user) {
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setId(getUniqueLong());
+    prepaidTopup.setUserId(user.getId());
+    prepaidTopup.setMerchantCode(merchantCode);
+    prepaidTopup.setTransactionId(getUniqueInteger().toString());
+    return prepaidTopup;
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
+  public PrepaidUser10 createPrepaidUser(PrepaidUser10 prepaidUser) throws Exception {
+
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+
+    Assert.assertNotNull("debe retornar un usuario", prepaidUser);
+    Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
+    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getIdUserMc() > 0);
+    Assert.assertEquals("debe tener rut", true, prepaidUser.getRut() > 0);
+    Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
+
+    return prepaidUser;
+  }
+
+  /**
+   *
+   * @param prepaidCard
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 createPrepaidCard(PrepaidCard10 prepaidCard) throws Exception {
+
+    prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
+
+    Assert.assertNotNull("debe retornar un usuario", prepaidCard);
+    Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
+    Assert.assertEquals("debe tener idUser", true, prepaidCard.getIdUser() > 0);
+    Assert.assertNotNull("debe tener pan", prepaidCard.getPan());
+    Assert.assertNotNull("debe tener encryptedPan", prepaidCard.getEncryptedPan());
+    Assert.assertNotNull("debe tener expiration", prepaidCard.getExpiration());
+    Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
+    Assert.assertNotNull("debe tener processorUserId", prepaidCard.getProcessorUserId());
+    Assert.assertNotNull("debe tener nameOnCard", prepaidCard.getNameOnCard());
+
+    return prepaidCard;
   }
 }
