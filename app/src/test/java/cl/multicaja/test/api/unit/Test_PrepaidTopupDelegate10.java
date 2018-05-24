@@ -216,5 +216,11 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
     String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
 
     Assert.assertEquals("Deberia contener una codEntity", codEntity, remoteTopup.getData().getTecnocomCodEntity());
+
+    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup().getType())) {
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TecnocomInvoiceType.CARGA_TRANSFERENCIA, remoteTopup.getData().getTecnocomInvoiceType());
+    } else {
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA, remoteTopup.getData().getTecnocomInvoiceType());
+    }
   }
 }
