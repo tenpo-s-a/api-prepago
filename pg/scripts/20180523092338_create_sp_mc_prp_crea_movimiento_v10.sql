@@ -16,17 +16,13 @@
 
 -- // create_sp_mc_prp_crea_movimiento
 -- Migration SQL that makes the change goes here.
-
-
-CREATE OR REPLACE FUNCTION mc_prp_crea_movimiento(
-
-  _id_movimiento_ref   BIGINT,
-  _id_usuario          BIGINT,
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
+  _id_movimiento_ref   NUMERIC,
+  _id_usuario          NUMERIC,
   _tipo_movimiento     VARCHAR,
   _monto               NUMERIC,
   _moneda              VARCHAR,
   _estado              VARCHAR,
-  _fecha_movimiento    TIMESTAMP,
   _cod_entidad         VARCHAR,
   _cen_alta            VARCHAR,
   _cuenta              VARCHAR,
@@ -55,9 +51,10 @@ CREATE OR REPLACE FUNCTION mc_prp_crea_movimiento(
   _referencia_linea    NUMERIC,
   _num_benef_cta       NUMERIC,
   _numero_plastico     NUMERIC,
+  OUT _r_id            NUMERIC,
   OUT _error_code      VARCHAR,
   OUT _error_msg       VARCHAR
-) AS $$
+)AS $$
   DECLARE
 
   BEGIN
@@ -72,8 +69,8 @@ CREATE OR REPLACE FUNCTION mc_prp_crea_movimiento(
           monto,
           moneda,
           estado,
-          fecha_movimiento,
           fecha_creacion,
+          fecha_actualizacion,
           cod_entidad,
           cen_alta,
           cuenta,
@@ -110,7 +107,7 @@ CREATE OR REPLACE FUNCTION mc_prp_crea_movimiento(
           _monto,
           _moneda,
           _estado,
-          _fecha_movimiento,
+          timezone('utc', now()),
           timezone('utc', now()),
           _cod_entidad,
           _cen_alta,
@@ -140,16 +137,16 @@ CREATE OR REPLACE FUNCTION mc_prp_crea_movimiento(
           _referencia_linea,
           _num_benef_cta,
           _numero_plastico
-        );
+        ) RETURNING id INTO _r_id;
 
   EXCEPTION
    WHEN OTHERS THEN
        _error_code := SQLSTATE;
-       _error_msg := '[mc_prp_actualizar_estado_usuario_v10] Error al actualizar estado de usuario. CAUSA ('|| SQLERRM ||')';
+       _error_msg := '[mc_prp_crea_movimiento_v10] Error al insertar movimiento. CAUSA ('|| SQLERRM ||')';
    RETURN;
   END;
 $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_v10(NUMERIC, NUMERIC, VARCHAR, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, TIMESTAMP, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC);
