@@ -21,6 +21,8 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
   @BeforeClass
   public static void beforeClass() {
+
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
   }

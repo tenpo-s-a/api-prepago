@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,6 +19,10 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
 
   @BeforeClass
   public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
+  }
+  @AfterClass
+  public static void afterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
   }
 
@@ -57,7 +62,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(10),//_imp_fac           NUMERIC,
       setInParam(10),//_cmp_apli            NUMERIC,
       "1231",//_num_autorizacion    VARCHAR,
-      "ADDDDDD",//_ind_proaje          VARCHAR,
+      "AD",//_ind_proaje          VARCHAR,
       "123",//_cod_comercio        VARCHAR,
       "AFQ",//_cod_actividad       VARCHAR,
       setInParam(1),//_imp_liq             NUMERIC,
@@ -71,7 +76,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam( 2),//_referencia_linea    NUMERIC,
       setInParam(2),//_num_benef_cta       NUMERIC,
       setInParam(2),//_numero_plastico     NUMERIC,
-      new OutParam("_id", Types.VARCHAR),
+      new OutParam("_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -104,7 +109,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(10),//_imp_fac           NUMERIC,
       setInParam(10),//_cmp_apli            NUMERIC,
       "1231",//_num_autorizacion    VARCHAR,
-      "ADDDDDD",//_ind_proaje          VARCHAR,
+      "A",//_ind_proaje          VARCHAR,
       "123",//_cod_comercio        VARCHAR,
       "AFQ",//_cod_actividad       VARCHAR,
       setInParam(1),//_imp_liq             NUMERIC,
@@ -118,11 +123,12 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam( 2),//_referencia_linea    NUMERIC,
       setInParam(2),//_num_benef_cta       NUMERIC,
       setInParam(2),//_numero_plastico     NUMERIC,
-      new OutParam("_id", Types.VARCHAR),
+      new OutParam("_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+    System.out.println(resp);
     return resp;
   }
 
