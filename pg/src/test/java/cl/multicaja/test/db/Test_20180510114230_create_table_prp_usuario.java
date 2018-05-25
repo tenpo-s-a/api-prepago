@@ -16,7 +16,7 @@ public class Test_20180510114230_create_table_prp_usuario extends TestDbBasePg {
       new ColumnInfo("id", "bigserial", 19),
       new ColumnInfo("id_usuario_mc", "int8", 19),
       new ColumnInfo("rut", "int4", 10),
-      new ColumnInfo("estado", "varchar", 10),
+      new ColumnInfo("estado", "varchar", 20),
       new ColumnInfo("fecha_creacion", "timestamp", 29),
       new ColumnInfo("fecha_actualizacion", "timestamp", 29)
     );

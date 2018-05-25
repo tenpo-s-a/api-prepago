@@ -125,9 +125,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
-        if (card == null) {
-          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
-        } else {
+        if (card != null) {
           String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
           req.getData().setTecnocomCodEntity(codEntity);
           req.getData().setPrepaidCard10(card);
@@ -135,6 +133,22 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
             req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_TRANSFERENCIA);
           } else {
             req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+          }
+        } else {
+
+          //https://www.pivotaltracker.com/story/show/157816408
+          //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
+
+          card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+
+          if (card == null) {
+            card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+          }
+
+          if (card == null) {
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
+          } else {
+            return null;
           }
         }
 
