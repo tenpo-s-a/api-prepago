@@ -77,7 +77,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     Map<String, Object> resp =  getDbUtils().execute(SP_CREATE_MOV, params);
     if(resp == null){
       // TODO: Modificar por lo correspondiente
-      throw new ValidationException(1111);
+      throw new ValidationException(100000);
     }
     String numError = (String)resp.get("_error_code");
     String msjError = (String)resp.get("_error_msg");
@@ -85,11 +85,11 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     if(StringUtils.isBlank(numError) || !numError.equals("0") ){
       // TODO: Modificar por lo correspondiente
       log.error("Num Error: "+numError+ " MsjError: "+msjError);
-      throw new ValidationException(1111);
+      throw new ValidationException(101000);
     }
     BigDecimal id = (BigDecimal) resp.get("_id");
     if(id == null  || id.longValue() == 0 ) {
-      throw new ValidationException(1111);
+      throw new ValidationException(101000);
     }
 
     data.setId(id.longValue());
@@ -120,13 +120,13 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     Map<String,Object> resp =  getDbUtils().execute(SP_UPDATE_MOV,params);
     if(resp == null){
       // TODO: Modificar por lo correspondiente
-      throw new ValidationException(1111);
+      throw new ValidationException(100000);
     }
 
     String sNumError = (String)resp.get("_error_code");
     if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
       // TODO: Modificar por lo correspondiente
-      throw new ValidationException(1111);
+      throw new ValidationException(101000);
     }
 
   }
