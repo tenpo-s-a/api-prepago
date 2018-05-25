@@ -32,7 +32,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {
     String SP_CREATE_MOV = getSchema()+".mc_prp_crea_movimiento_v10";
-    //TODO: REVISAR QUE DATOS SON OBLIGATORIOS Y CUALES NO
+
     Object[] params = {
       new InParam(data.getIdMovimientoRef(),Types.NUMERIC), //id_mov_ref
       new InParam(data.getIdUsuario(),Types.NUMERIC), //id_usuario
@@ -75,14 +75,12 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     };
     Map<String, Object> resp =  getDbUtils().execute(SP_CREATE_MOV, params);
     if(resp == null){
-      // TODO: Modificar por lo correspondiente
       throw new ValidationException(100000);
     }
     String numError = (String)resp.get("_error_code");
     String msjError = (String)resp.get("_error_msg");
 
     if(StringUtils.isBlank(numError) || !numError.equals("0") ){
-      // TODO: Modificar por lo correspondiente
       log.error("Num Error: "+numError+ " MsjError: "+msjError);
       throw new ValidationException(101000);
     }
@@ -118,13 +116,11 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
 
     Map<String,Object> resp =  getDbUtils().execute(SP_UPDATE_MOV,params);
     if(resp == null){
-      // TODO: Modificar por lo correspondiente
       throw new ValidationException(100000);
     }
 
     String sNumError = (String)resp.get("_error_code");
     if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
-      // TODO: Modificar por lo correspondiente
       throw new ValidationException(101000);
     }
 
