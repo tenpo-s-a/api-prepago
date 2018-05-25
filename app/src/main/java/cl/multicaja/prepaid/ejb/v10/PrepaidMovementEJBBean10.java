@@ -3,7 +3,6 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -18,6 +17,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.Map;
 
@@ -26,22 +26,20 @@ import java.util.Map;
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
 public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
 
-  private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
+  private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
   private ConfigUtils configUtils;
   private DBUtils dbUtils;
-  private NumberUtils numberUtils = NumberUtils.getInstance();
-  private final String SP_UPDATE_MOV = getSchema()+".mc_prp_actualiza_movimiento_v10";
-  private final String SP_CREATE_MOV = getSchema()+".mc_prp_crea_movimiento_v10";
 
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {
-
+    String SP_CREATE_MOV = getSchema()+".mc_prp_crea_movimiento_v10";
     //TODO: REVISAR QUE DATOS SON OBLIGATORIOS Y CUALES NO
     Object[] params = {
-      data.getIdMovimientoRef(), //id_mov_ref
-      data.getIdUsuario(), //id_usuario
+      new InParam(data.getIdMovimientoRef(),Types.NUMERIC), //id_mov_ref
+      new InParam(data.getIdUsuario(),Types.NUMERIC), //id_usuario
+      data.getIdTxExterno(),
       data.getTipoMovimiento(), //Movimiento
-      data.getMonto(),
+      new InParam(data.getMonto(),Types.NUMERIC),
       data.getMoneda(),
       data.getEstado().getState(),
       data.getCodEntidad(),//_cod_entidad
@@ -77,54 +75,60 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
     Map<String, Object> resp =  getDbUtils().execute(SP_CREATE_MOV, params);
-
     if(resp == null){
       // TODO: Modificar por lo correspondiente
       throw new ValidationException(1111);
     }
-    String sNumError = (String)resp.get("_error_code");
-    if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
+    String numError = (String)resp.get("_error_code");
+    String msjError = (String)resp.get("_error_msg");
+
+    if(StringUtils.isBlank(numError) || !numError.equals("0") ){
       // TODO: Modificar por lo correspondiente
+      log.error("Num Error: "+numError+ " MsjError: "+msjError);
       throw new ValidationException(1111);
     }
-    Long id = (Long) resp.get("_id");
-    if(id == null  || id == 0 ){
+    BigDecimal id = (BigDecimal) resp.get("_id");
+    if(id == null  || id.longValue() == 0 ) {
       throw new ValidationException(1111);
     }
-    data.setId(id);
+
+    data.setId(id.longValue());
 
     return data;
   }
 
   @Override
   public void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numExtracto, Integer numMovExtracto, Integer claveMoneda, PrepaidMovementStateType state) throws Exception {
-
+    String SP_UPDATE_MOV = getSchema()+".mc_prp_actualiza_movimiento_v10";
     if(id == null){
       throw  new ValidationException(1111);
     }
     if(state == null){
       throw  new ValidationException(1111);
     }
-    //TODO: Implementar llamada al SP
+
     Object[] params = {
       new InParam(id,Types.NUMERIC),
       numExtracto == null ? new NullParam(Types.NUMERIC):new InParam(numExtracto, Types.NUMERIC),
       numMovExtracto == null ? new NullParam(Types.NUMERIC):new InParam(numMovExtracto, Types.NUMERIC),
       claveMoneda == null ? new NullParam(Types.NUMERIC):new InParam(claveMoneda, Types.NUMERIC),
-      state,
+      state.getState(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
+
     Map<String,Object> resp =  getDbUtils().execute(SP_UPDATE_MOV,params);
     if(resp == null){
       // TODO: Modificar por lo correspondiente
       throw new ValidationException(1111);
     }
+
     String sNumError = (String)resp.get("_error_code");
     if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
       // TODO: Modificar por lo correspondiente
       throw new ValidationException(1111);
     }
+
   }
 
   public ConfigUtils getConfigUtils() {

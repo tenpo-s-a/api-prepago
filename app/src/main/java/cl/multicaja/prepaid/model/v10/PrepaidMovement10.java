@@ -1,9 +1,9 @@
 package cl.multicaja.prepaid.model.v10;
 
-import org.apache.commons.net.ntp.TimeStamp;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 public class PrepaidMovement10 implements Serializable {
 
@@ -15,15 +15,15 @@ public class PrepaidMovement10 implements Serializable {
   private BigDecimal monto;
   private String moneda;
   private PrepaidMovementStateType estado;
-  private TimeStamp fechaCreacion;
-  private TimeStamp fechaActualizacion;
+  private Timestamp fechaCreacion;
+  private Timestamp fechaActualizacion;
   private String codEntidad;
   private String cenAlta;
   private String cuenta;
   private Integer codMoneda;
   private Integer indNorcor;
   private Integer tipoFactura;
-  private TimeStamp fechaFactura;
+  private Timestamp fechaFactura;
   private String numFacturaRef;
   private String pan;
   private Integer codMondiv;
@@ -110,19 +110,19 @@ public class PrepaidMovement10 implements Serializable {
     this.estado = estado;
   }
 
-  public TimeStamp getFechaCreacion() {
+  public Timestamp getFechaCreacion() {
     return fechaCreacion;
   }
 
-  public void setFechaCreacion(TimeStamp fechaCreacion) {
+  public void setFechaCreacion(Timestamp fechaCreacion) {
     this.fechaCreacion = fechaCreacion;
   }
 
-  public TimeStamp getFechaActualizacion() {
+  public Timestamp getFechaActualizacion() {
     return fechaActualizacion;
   }
 
-  public void setFechaActualizacion(TimeStamp fechaActualizacion) {
+  public void setFechaActualizacion(Timestamp fechaActualizacion) {
     this.fechaActualizacion = fechaActualizacion;
   }
 
@@ -174,11 +174,11 @@ public class PrepaidMovement10 implements Serializable {
     this.tipoFactura = tipoFactura;
   }
 
-  public TimeStamp getFechaFactura() {
+  public Timestamp getFechaFactura() {
     return fechaFactura;
   }
 
-  public void setFechaFactura(TimeStamp fechaFactura) {
+  public void setFechaFactura(Timestamp fechaFactura) {
     this.fechaFactura = fechaFactura;
   }
 
