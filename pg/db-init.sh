@@ -9,7 +9,7 @@
 ##########################################################
 
 id=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-id="ci_${id,,}"
+id="ci_prepaid_${id,,}"
 
 cat <<EOF >./db-id.txt
 $id

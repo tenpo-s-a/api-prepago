@@ -44,6 +44,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Object[] params = {
       setInParam(mapCard.get("id_usuario")), //id_mov_ref
       setInParam(mapCard.get("id_usuario")), //id_usuario
+      ""+getUniqueLong(),
       "CARGA", //estado
       setInParam(getUniqueLong()),
       "USD",
@@ -91,6 +92,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Object[] params = {
       setInParam(mapCard.get("id_usuario")), //id_mov_ref
       setInParam(mapCard.get("id_usuario")), //id_usuario
+      ""+getUniqueLong(),
       "CARGA", //estado
       setInParam(getUniqueLong()),
       "USD",
