@@ -16,6 +16,8 @@ public class NewPrepaidTopup10 extends BaseModel {
   private String transactionId;
   private Integer rut;
   private String merchantCode;
+  private String merchantName;
+  private Integer activityCode;
 
   @JsonIgnore
   private Boolean isFirstTopup = Boolean.TRUE;
@@ -63,6 +65,22 @@ public class NewPrepaidTopup10 extends BaseModel {
 
   public void setMerchantCode(String merchantCode) {
     this.merchantCode = merchantCode;
+  }
+
+  public String getMerchantName() {
+    return merchantName;
+  }
+
+  public void setMerchantName(String merchantName) {
+    this.merchantName = merchantName;
+  }
+
+  public Integer getActivityCode() {
+    return activityCode;
+  }
+
+  public void setActivityCode(Integer activityCode) {
+    this.activityCode = activityCode;
   }
 
   @JsonIgnore
