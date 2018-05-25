@@ -9,7 +9,8 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
-import cl.multicaja.tecnocom.constants.Constants;
+import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
@@ -17,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 
 /**
@@ -84,7 +86,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
         log.error("Error al cargar parametro cod_entidad");
         codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
       }
-      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codEntity, Constants.HashOrder.ASC);
+      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codEntity, HashOrder.ASC);
     }
     return tecnocomService;
   }
@@ -176,6 +178,24 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           } else {
             req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
           }
+
+          PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup();
+
+          String contrato = card.getProcessorUserId();
+          String pan = card.getEncryptedPan(); // se debe desencriptar
+          CodigoMoneda clamon = CodigoMoneda.DEFAULT;
+          IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+          Integer tipofac = req.getData().getTecnocomInvoiceType().getCode();
+          BigDecimal impfac = prepaidTopup.getAmount().getValue();
+          String codcom = prepaidTopup.getMerchantCode();
+          Integer codact = prepaidTopup.getActivityCode();
+          CodigoPais codpais = CodigoPais.CHILE;
+          String numaut = prepaidTopup.getTransactionId(); //solamente los 6 primeros digitos de numreffac
+          String nomcomred = prepaidTopup.getMerchantName();
+          String numreffac = prepaidTopup.getTransactionId(); //este cambiara por el id de la tabla de inclusion de movimientos
+
+          InclusionMovimientosDTO dto = tecnocomService.inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+
         } else {
 
           //https://www.pivotaltracker.com/story/show/157816408
