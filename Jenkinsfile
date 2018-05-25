@@ -158,18 +158,10 @@ pipeline {
     }
   }
   post {
-    success {
+    aborted {
       script {
-        if(params.BRANCH_NAME != 'master') {
-          dir(path: 'pg/') {
-            echo 'Deleting CI database'
-            sh './db-drop.sh -Denv=jenkins'
-          }
-        }
-      }
-    }
-    unstable {
-      script {
+        echo env.BRANCH_NAME
+        echo env.CHANGE_ID
         dir(path: 'pg/') {
           echo 'Deleting CI database'
           sh './db-drop.sh -Denv=jenkins'
@@ -178,9 +170,23 @@ pipeline {
     }
     failure {
       script {
+        echo env.BRANCH_NAME
+        echo env.CHANGE_ID
         dir(path: 'pg/') {
           echo 'Deleting CI database'
           sh './db-drop.sh -Denv=jenkins'
+        }
+      }
+    }
+    success {
+      script {
+        echo env.BRANCH_NAME
+        echo env.CHANGE_ID
+        if(env.BRANCH_NAME != 'master') {
+          echo 'Deleting CI database'
+          dir(path: 'pg/') {
+            sh './db-drop.sh -Denv=jenkins'
+          }
         }
       }
     }
