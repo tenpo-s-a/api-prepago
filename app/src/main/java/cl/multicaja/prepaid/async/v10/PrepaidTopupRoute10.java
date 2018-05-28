@@ -10,7 +10,6 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
@@ -188,7 +187,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           Integer tipofac = req.getData().getTecnocomInvoiceType().getCode();
           BigDecimal impfac = prepaidTopup.getAmount().getValue();
           String codcom = prepaidTopup.getMerchantCode();
-          Integer codact = prepaidTopup.getActivityCode();
+          Integer codact = prepaidTopup.getMerchantCategory();
           CodigoPais codpais = CodigoPais.CHILE;
           String numaut = prepaidTopup.getTransactionId(); //solamente los 6 primeros digitos de numreffac
           String nomcomred = prepaidTopup.getMerchantName();
