@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.SingUP;
 import cl.multicaja.users.model.v10.User;
@@ -158,7 +159,7 @@ public class TestBaseUnit extends TestApiBase {
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(numberUtils.random(1000, 10000)));
-    newAmountAndCurrency.setCurrencyCode(CurrencyCodes.CHILE_CLP);
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
 
     prepaidTopup.setAmount(newAmountAndCurrency);
     return prepaidTopup;

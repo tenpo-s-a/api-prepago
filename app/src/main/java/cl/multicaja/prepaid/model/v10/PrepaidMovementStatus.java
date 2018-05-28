@@ -1,18 +1,20 @@
 package cl.multicaja.prepaid.model.v10;
 
-public enum PrepaidMovementStateType {
+public enum PrepaidMovementStatus {
+
   PENDING("PENDING"),
   INPROCESS("INPROCESS"),
   PROCESSOK("PROCESSOK"),
   ERRORINPROCESS("ERRORPROC"),
   PROCESSEDWHITERROR("PROCWERROR");
-  private String state;
 
-  PrepaidMovementStateType(String state) {
-    this.state = state;
+  private String value;
+
+  PrepaidMovementStatus(String value) {
+    this.value = value;
   }
 
-  public String getState() {
-    return state;
+  public String getValue() {
+    return value;
   }
 }
