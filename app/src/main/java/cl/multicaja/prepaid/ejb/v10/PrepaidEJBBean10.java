@@ -14,9 +14,10 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.Timestamps;
-import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.*;
+import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,8 +25,10 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
 
   protected NumberUtils numberUtils = NumberUtils.getInstance();
+
+  protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private ConfigUtils configUtils;
 
@@ -153,33 +158,25 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     User user = this.getUsersEJB10().getUserByRut(headers, topupRequest.getRut());
 
     if(user == null){
-      throw new NotFoundException(102001); //cliente no existe
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+    if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
-    /*
-      Validar nivel del usuario
-        - N = 0 Usuario MC null, Prepaid user null o usuario bloqueado
-        - N = 1 Primera carga
-        - N > 1 Carga
-     */
-    // Buscar usuario local de prepago
+    // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(102003); //cliente no tiene prepago
+      throw new NotFoundException(302003); // Usuario no tiene prepago
     }
 
-    /*
-      if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
-        // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
-        throw new ValidationException(1024, "El cliente no pasó la validación");
-      }
-    */
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(302002); // Usuario prepago bloqueado o borrado
+    }
 
-    PrepaidUserLevel userLevel = getUserLevel(user,prepaidUser);
-
-    if(userLevel != PrepaidUserLevel.LEVEL_1) {
-      // Si el usuario tiene validacion de foto, es N = 2
+    if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {
+      // Si el usuario tiene validacion > N1, no aplica restriccion de primera carga
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
 
@@ -553,7 +550,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new IllegalStateException();
     }
 
-    CurrencyCodes currencyCodeClp = CurrencyCodes.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -582,18 +579,94 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setTotal(total);
   }
 
-  private PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) {
-
-    switch(oUser.getRut().getStatus()+"|"+oUser.getGlobalStatus()) {
-      case "N0":
-        return PrepaidUserLevel.LEVEL_1;
-      case "N1":
-        return PrepaidUserLevel.LEVEL_2;
-      case "N2":
-        return PrepaidUserLevel.LEVEL_3;
-      default:
-        return PrepaidUserLevel.LEVEL_1;
+  /**
+   *  Verifica el nivel del usuario
+   * @param oUser usuario multicaja
+   * @param prepaidUser10 usuario prepago
+   * @return el nivel del usuario
+   */
+  public PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception {
+    if(oUser == null) {
+      throw new NotFoundException(102001);
+    }
+    if(oUser.getRut() == null || oUser.getRut().getStatus() == null){
+      throw new ValidationException(101000);
+    }
+    if(prepaidUser10 == null) {
+      throw new NotFoundException(302003);
     }
 
+    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && UserNameStatus.VERIFIED.equals(oUser.getNameStatus())) {
+      return PrepaidUserLevel.LEVEL_2;
+    }
+    else {
+      return PrepaidUserLevel.LEVEL_1;
+    }
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param prepaidUser
+   * @param prepaidCard
+   * @param cdtTransaction
+   * @return
+   */
+  private PrepaidMovement10 buildPrepaidMovement(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
+
+    String codEntity = null;
+    try {
+      codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      log.error("Error al cargar parametro cod_entidad");
+      codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura = null;
+
+    if (TopupType.WEB.equals(prepaidTopup.getType())) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+
+    prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
+    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(codEntity);
+    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
+    prepaidMovement.setCodact(String.valueOf(prepaidTopup.getMerchantCategory()));
+    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(1); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(123L); // se debe actualizar despues
+
+    return prepaidMovement;
   }
 }

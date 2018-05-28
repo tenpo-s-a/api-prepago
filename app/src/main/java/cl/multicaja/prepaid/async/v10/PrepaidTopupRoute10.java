@@ -196,16 +196,16 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           req.getData().setTecnocomCodEntity(codEntity);
           req.getData().setPrepaidCard10(card);
           if (TopupType.WEB.equals(req.getData().getPrepaidTopup().getType())) {
-            req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_TRANSFERENCIA);
+            req.getData().setTecnocomInvoiceType(TipoFactura.CARGA_TRANSFERENCIA);
           } else {
-            req.getData().setTecnocomInvoiceType(TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+            req.getData().setTecnocomInvoiceType(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
           }
 
           PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup();
 
           String contrato = card.getProcessorUserId();
           String pan = card.getEncryptedPan(); // se debe desencriptar
-          CodigoMoneda clamon = CodigoMoneda.DEFAULT;
+          CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
           IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
           Integer tipofac = req.getData().getTecnocomInvoiceType().getCode();
           BigDecimal impfac = prepaidTopup.getAmount().getValue();

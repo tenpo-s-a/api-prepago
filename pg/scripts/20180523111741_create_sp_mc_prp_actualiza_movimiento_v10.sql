@@ -19,13 +19,13 @@
 
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
-  IN _id               NUMERIC,
-  IN _num_extracto     NUMERIC,
-  IN _num_mov_extracto NUMERIC,
-  IN _clave_moneda     NUMERIC,
-  IN _estado           VARCHAR,
-  OUT _error_code      VARCHAR,
-  OUT _error_msg       VARCHAR
+  IN _id            NUMERIC,
+  IN _numextcta     NUMERIC,
+  IN _nummovext     NUMERIC,
+  IN _clamone       NUMERIC,
+  IN _estado        VARCHAR,
+  OUT _error_code   VARCHAR,
+  OUT _error_msg    VARCHAR
 )AS $$
  DECLARE
 
@@ -49,27 +49,27 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
       ${schema}.prp_movimiento
     SET
        estado = _estado,
-       num_extracto =   (
-                           CASE WHEN _num_extracto IS NOT NULL  THEN
-                            _num_extracto
-                           ELSE
-                              num_extracto
-                           END
-                       ),
-       num_mov_extracto = (
-                            CASE WHEN _num_mov_extracto IS NOT NULL THEN
-                              _num_mov_extracto
-                             ELSE
-                                num_mov_extracto
-                             END
-                          ),
-       clave_moneda = (
-                            CASE WHEN _clave_moneda IS NOT NULL THEN
-                              _clave_moneda
-                             ELSE
-                                clave_moneda
-                             END
-                          ),
+       numextcta = (
+                   CASE WHEN _numextcta IS NOT NULL THEN
+                       _numextcta
+                    ELSE
+                       numextcta
+                    END
+                  ),
+       nummovext = (
+                   CASE WHEN _nummovext IS NOT NULL  THEN
+                      _nummovext
+                   ELSE
+                      nummovext
+                   END
+                  ),
+       clamone = (
+                  CASE WHEN _clamone IS NOT NULL THEN
+                      _clamone
+                   ELSE
+                      clamone
+                   END
+                  ),
         fecha_actualizacion = timezone('utc', now())
      WHERE
         id = _id;
