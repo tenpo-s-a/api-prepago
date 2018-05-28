@@ -8,7 +8,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.SingUP;
+import cl.multicaja.users.model.v10.SignUp;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -82,10 +82,9 @@ public class TestBaseUnit extends TestApiBase {
   public User registerUser() throws Exception {
     Integer rut = getUniqueRutNumber();
     String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
-    SingUP singUP = getUsersEJBBean10().singUpUser(null, rut, email);
+    SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
-
   /**
    *
    * @return

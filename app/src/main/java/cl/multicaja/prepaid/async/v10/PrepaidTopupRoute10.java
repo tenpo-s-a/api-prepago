@@ -5,6 +5,7 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -20,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
@@ -42,8 +44,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   private TecnocomService tecnocomService;
 
-  private ConfigUtils configUtils ;
-
+  private ConfigUtils configUtils;
+  private EncryptUtil encryptUtil;
 
   public PrepaidTopupRoute10() {
     super();
@@ -58,6 +60,12 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       this.configUtils = new ConfigUtils("api-prepaid");
     }
     return this.configUtils;
+  }
+  public EncryptUtil getEncryptUtil(){
+    if(this.encryptUtil == null){
+      this.encryptUtil = new EncryptUtil();
+    }
+    return this.encryptUtil;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
@@ -104,6 +112,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
 
+  public static final String PENDING_CREATECARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
+  public static final String PENDING_CREATECARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
+
   @Override
   public void configure() {
 
@@ -129,6 +140,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_EMISSION_REQ, concurrentConsumers)))
       .process(this.processPendingEmission())
       .to(createJMSEndpoint(PENDING_EMISSION_RESP)).end();
+
+    /**
+     * Obtener Datos Tarjeta
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CREATECARD_REQ, concurrentConsumers)))
+      .process(this.processPendingCreateCard())
+      .to(createJMSEndpoint(PENDING_CREATECARD_RESP)).end();
+
   }
 
   private ProcessorRoute processPendingTopup() {
@@ -226,35 +245,71 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+        req.retryCountNext();
 
+        if(req.getRetryCount()<= 3) {
 
-        PrepaidTopupDataRoute10 prepaidTopup10 = req.getData();
-        User user = prepaidTopup10.getUser();
+          PrepaidTopupDataRoute10 prepaidTopup10 = req.getData();
+          User user = prepaidTopup10.getUser();
+          System.out.println(user);
+          AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), "" + user.getRut().getValue(), TipoDocumento.RUT);
 
-        AltaClienteDTO altaClienteDTO = tecnocomService.altaClientes(user.getName(),user.getLastname_1(),user.getLastname_2(),""+user.getRut().getValue(),TipoDocumento.RUT);
-        if(altaClienteDTO != null) {
-          if(altaClienteDTO.getRetorno().equals("")){// Verificar cual es el codigo de no error
-            DatosTarjetaDTO datosTarjetaDTO = tecnocomService.datosTarjeta(altaClienteDTO.getContrato());
-            // CREA OBJETO Y SETEA LOS DATOS
-            PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-            prepaidCard10.setIdUser(user.getId());
-            prepaidCard10.setNameOnCard(datosTarjetaDTO);
-            prepaidCard10.setPan(altaClienteDTO.get);
-            prepaidCard10.setEncryptedPan();
-            prepaidCard10.setProcessorUserId(prepaidTopup10.getPrepaidTopup().getTransactionId());
-
-
-            getPrepaidEJBBean10().createPrepaidCard(null,)
-          }else {
-
+          if (altaClienteDTO.getRetorno().equals(CodigoRetorno._000)) {
+            if (req.getData().getPrepaidCard10() == null) {
+              req.getData().setPrepaidCard10(new PrepaidCard10());
+              req.getData().getPrepaidCard10().setProcessorUserId(altaClienteDTO.getContrato());
+            } else {
+              req.getData().getPrepaidCard10().setProcessorUserId(altaClienteDTO.getContrato());
+            }
+            req.setRetryCount(0);
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+          } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
           }
-        }else{
-
+          else {
+            //TODO: Implementar Cola Error
+          }
         }
-
         log.info("processPendingEmission - REQ: " + req);
         return new ResponseRoute<>(req.getData());
       }
     };
   }
+
+  private ProcessorRoute processPendingCreateCard(){
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+        req.retryCountNext();
+        if(req.getRetryCount() <= 3) {
+
+          DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(req.getData().getPrepaidCard10().getProcessorUserId());
+
+          if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
+            PrepaidCard10 prepaidCard10 = new PrepaidCard10();
+            prepaidCard10.setIdUser(req.getData().getPrepaidUser10().getId());
+            prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());
+            prepaidCard10.setPan(datosTarjetaDTO.getPan());
+            prepaidCard10.setEncryptedPan(getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
+            prepaidCard10.setProcessorUserId(req.getData().getPrepaidCard10().getProcessorUserId());
+            prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
+            prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
+            prepaidCard10 = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard10);
+            req.getData().setPrepaidCard10(prepaidCard10);
+          }
+          else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+          }
+          else {
+
+            //TODO: Implementar Cola Error
+          }
+        }
+        return new ResponseRoute<>(req.getData());
+      }
+    };
+
+  }
+
+
 }
