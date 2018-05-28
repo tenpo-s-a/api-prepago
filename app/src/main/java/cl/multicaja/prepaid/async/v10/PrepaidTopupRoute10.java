@@ -4,7 +4,12 @@ import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -37,9 +42,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   @EJB
   private UsersEJBBean10 usersEJBBean10;
 
+  @EJB
+  private CdtEJBBean10 cdtEJBBean10;
+
   private TecnocomService tecnocomService;
 
   private ConfigUtils configUtils ;
+
+  private NumberUtils numberUtils;
 
   public PrepaidTopupRoute10() {
     super();
@@ -54,6 +64,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       this.configUtils = new ConfigUtils("api-prepaid");
     }
     return this.configUtils;
+  }
+
+  public NumberUtils getNumberUtils() {
+    if (this.numberUtils == null) {
+      this.numberUtils = NumberUtils.getInstance();
+    }
+    return this.numberUtils;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
@@ -94,11 +111,22 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     this.tecnocomService = tecnocomService;
   }
 
+  public CdtEJBBean10 getCdtEJBBean10() {
+    return cdtEJBBean10;
+  }
+
+  public void setCdtEJBBean10(CdtEJBBean10 cdtEJBBean10) {
+    this.cdtEJBBean10 = cdtEJBBean10;
+  }
+
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
+
+  public static final String PENDING_TOPUP_REVERSE_REQ = "PrepaidTopupRoute10.pendingTopupReverse.req";
+  public static final String PENDING_TOPUP_REVERSE_RESP = "PrepaidTopupRoute10.pendingTopupReverse.resp";
 
   @Override
   public void configure() {
@@ -125,6 +153,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_EMISSION_REQ, concurrentConsumers)))
       .process(this.processPendingEmission())
       .to(createJMSEndpoint(PENDING_EMISSION_RESP)).end();
+
+    /**
+     * Resersa de carga pendiente
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_REQ, concurrentConsumers)))
+      .process(this.processPendingEmission())
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_RESP)).end();
   }
 
   private ProcessorRoute processPendingTopup() {
@@ -224,6 +259,52 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
         //TODO implementar logica
         log.info("processPendingEmission - REQ: " + req);
+        return new ResponseRoute<>(req.getData());
+      }
+    };
+  }
+
+  private ProcessorRoute processPendingTopupReverse() {
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+
+        PrepaidTopupDataRoute10 data = req.getData();
+
+        if (data.getUser() == null) {
+          log.error("Error req.getUser() es null");
+          return null;
+        }
+
+        if (data.getUser().getRut() == null) {
+          log.error("Error req.getUser().getRut() es null");
+          return null;
+        }
+
+        Integer rut = data.getUser().getRut().getValue();
+
+        if (rut == null){
+          log.error("Error req.getUser().getRut().getValue() es null");
+          return null;
+        }
+
+        PrepaidTopup10 topupRequest = data.getPrepaidTopup();
+
+        CdtTransaction10 cdtTransaction = new CdtTransaction10();
+        cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
+        cdtTransaction.setGloss(CdtTransactionType.REVERSA_CARGA.getName() + " " + topupRequest.getAmount().getValue());
+
+        cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+        // Si no cumple con los limites
+        if(!cdtTransaction.getNumError().equals("0")){
+          long lNumError = getNumberUtils().toLong(cdtTransaction.getNumError(),-1L);
+          if(lNumError != -1 && lNumError > 10000)
+            throw new ValidationException(4).setData(new KeyValue("value",cdtTransaction.getMsjError()));
+          else
+            throw new ValidationException(2);
+        }
+
         return new ResponseRoute<>(req.getData());
       }
     };
