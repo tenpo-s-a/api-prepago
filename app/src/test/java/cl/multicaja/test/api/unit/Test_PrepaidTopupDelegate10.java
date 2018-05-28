@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.AfterClass;
@@ -163,9 +164,9 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
     Assert.assertEquals("Deberia contener una codEntity", codEntity, remoteTopup.getData().getTecnocomCodEntity());
 
     if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup().getType())) {
-      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TecnocomInvoiceType.CARGA_TRANSFERENCIA, remoteTopup.getData().getTecnocomInvoiceType());
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, remoteTopup.getData().getTecnocomInvoiceType());
     } else {
-      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TecnocomInvoiceType.CARGA_EFECTIVO_COMERCIO_MULTICAJA, remoteTopup.getData().getTecnocomInvoiceType());
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, remoteTopup.getData().getTecnocomInvoiceType());
     }
   }
 

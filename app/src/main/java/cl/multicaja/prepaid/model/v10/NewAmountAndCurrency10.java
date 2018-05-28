@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 
 import java.math.BigDecimal;
 
@@ -9,18 +10,18 @@ import java.math.BigDecimal;
  */
 public class NewAmountAndCurrency10 extends BaseModel {
 
-  private CurrencyCodes currencyCode;
+  private CodigoMoneda currencyCode;
   private BigDecimal value;
 
   public NewAmountAndCurrency10() {
     super();
   }
 
-  public CurrencyCodes getCurrencyCode() {
+  public CodigoMoneda getCurrencyCode() {
     return currencyCode;
   }
 
-  public void setCurrencyCode(CurrencyCodes currencyCode) {
+  public void setCurrencyCode(CodigoMoneda currencyCode) {
     this.currencyCode = currencyCode;
   }
 

@@ -1,72 +1,68 @@
 package cl.multicaja.test.api.unit;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.tecnocom.constants.CodigoPais;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
+import cl.multicaja.tecnocom.constants.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
-  private PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 oUser) {
-    PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
-    prepaidMovement10.setIdMovimientoRef(getUniqueLong());
-    prepaidMovement10.setIdUsuario(oUser.getId());
-    prepaidMovement10.setIdTxExterno(""+getUniqueLong());
-    prepaidMovement10.setTipoMovimiento("CARGA");
-    prepaidMovement10.setMonto(BigDecimal.valueOf(getUniqueInteger()));
-    prepaidMovement10.setMoneda("USD");
-    prepaidMovement10.setEstado(PrepaidMovementStateType.PENDING);
-    prepaidMovement10.setCodEntidad("AA");
-    prepaidMovement10.setCenAlta("A");
-    prepaidMovement10.setCuenta(""+getUniqueInteger());
-    prepaidMovement10.setCodMoneda(CodigoMoneda.DEFAULT);
-    prepaidMovement10.setIndNorcor(IndicadorNormalCorrector.CORRECTORA);
-    prepaidMovement10.setTipoFactura(TecnocomInvoiceType.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
-    prepaidMovement10.setFechaFactura(new Timestamp(System.currentTimeMillis()));
-    prepaidMovement10.setNumFacturaRef("123");
-    prepaidMovement10.setPan("123");
-    prepaidMovement10.setCodMondiv(1);
-    prepaidMovement10.setImpDiv(1L);
-    prepaidMovement10.setImpFac(1L);
-    prepaidMovement10.setCmpApli(1);
-    prepaidMovement10.setNumAutorizacion("123456");
-    prepaidMovement10.setIndProaje(IndicadorPropiaAjena.AJENA);
-    prepaidMovement10.setCodComercio("A");
-    prepaidMovement10.setCodActividad("A");
-    prepaidMovement10.setImpLiq(1L);
-    prepaidMovement10.setCodMonliq(1);
-    prepaidMovement10.setCodPais(CodigoPais.CHILE);
-    prepaidMovement10.setNomPoblacion("POB");
-    prepaidMovement10.setNumExtracto(1);
-    prepaidMovement10.setNumMovExtracto(1);
-    prepaidMovement10.setClaveMoneda(1);
-    prepaidMovement10.setTipoLinea("1");
-    prepaidMovement10.setReferenciaLinea(1);
-    prepaidMovement10.setNumBenefCta(1);
-    prepaidMovement10.setNumeroPlastico(123L);
-    return prepaidMovement10;
+  private PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser) {
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent("AA");
+    prepaidMovement.setCentalta("A");
+    prepaidMovement.setCuenta(getUniqueInteger().toString());
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setTipofac(TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac("123");
+    prepaidMovement.setPan("123");
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(BigDecimal.valueOf(1000));
+    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setNumaut("123456");
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom("ABC");
+    prepaidMovement.setCodact("XYZ");
+    prepaidMovement.setImpliq(1L);
+    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob("POB");
+    prepaidMovement.setNumextcta(0);
+    prepaidMovement.setNummovext(0);
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setTipolin("1234");
+    prepaidMovement.setLinref(1);
+    prepaidMovement.setNumbencta(1);
+    prepaidMovement.setNumplastico(123L);
+    return prepaidMovement;
   }
 
   @Test
   public void testeEjbAddMovement() throws Exception {
 
-      PrepaidUser10 oUser = buildPrepaidUser();
+    PrepaidUser10 oUser = buildPrepaidUser();
 
-      oUser = getPrepaidEJBBean10().createPrepaidUser(null, oUser);
+    oUser = getPrepaidEJBBean10().createPrepaidUser(null, oUser);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(oUser);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(oUser);
 
-      prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
-      Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
-      Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+    Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
+    Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);
   }
 
   @Test
@@ -84,17 +80,18 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStateType.INPROCESS);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStatus.IN_PROCESS);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 
     Assert.assertNotNull("La lista debe ser not null",lstMov);
     Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
-    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStateType.INPROCESS.getState(), PrepaidMovementStateType.INPROCESS.getState(), fila.get("estado"));
 
-
+    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.IN_PROCESS.getValue(), PrepaidMovementStatus.IN_PROCESS.getValue(), fila.get("estado"));
   }
+
   @Test
   public void testeEjbUpdate2() throws Exception {
 
@@ -110,17 +107,19 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),1,2,152,PrepaidMovementStateType.PROCESSOK);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP, PrepaidMovementStatus.PROCESS_OK);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 
     Assert.assertNotNull("La lista debe ser not null",lstMov);
     Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
-    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStateType.PROCESSOK.getState(), PrepaidMovementStateType.PROCESSOK.getState(), fila.get("estado"));
-    Assert.assertEquals("El Num Extracto debe ser 1",1,((BigDecimal)fila.get("num_extracto")).intValue());
-    Assert.assertEquals("El Num Extracto debe ser 1",2,((BigDecimal)fila.get("num_mov_extracto")).intValue());
-    Assert.assertEquals("El Num Extracto debe ser 1",152,((BigDecimal)fila.get("clave_moneda")).intValue());
+
+    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESS_OK.getValue(), PrepaidMovementStatus.PROCESS_OK.getValue(), fila.get("estado"));
+    Assert.assertEquals("El Num Extracto debe ser 1",1,((BigDecimal)fila.get("numextcta")).intValue());
+    Assert.assertEquals("El Num Extracto debe ser 1",2,((BigDecimal)fila.get("nummovext")).intValue());
+    Assert.assertEquals("El Num Extracto debe ser 1", CodigoMoneda.CHILE_CLP.getValue().intValue(),((BigDecimal)fila.get("clamone")).intValue());
   }
 
   public List buscaMovimiento(Object idMovimiento)  {
