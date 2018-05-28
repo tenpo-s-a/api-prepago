@@ -3,11 +3,14 @@ package cl.multicaja.test.api;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author abarazarte
  */
+//TODO Implementar test
+@Ignore
 public class Test_getPrepaidCard_v10 extends TestApiBase {
 
   @Test
