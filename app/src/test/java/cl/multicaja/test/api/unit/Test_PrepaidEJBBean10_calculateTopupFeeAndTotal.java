@@ -1,10 +1,8 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.core.test.TestBase;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.TopupType;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,7 +14,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author abarazarte
  */
-public class Test_PrepaidTopupFee extends TestBaseUnit {
+public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUnit {
 
   @BeforeClass
   public static void setup(){
