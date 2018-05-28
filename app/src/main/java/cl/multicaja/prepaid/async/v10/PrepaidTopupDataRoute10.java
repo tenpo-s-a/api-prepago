@@ -3,7 +3,7 @@ package cl.multicaja.prepaid.async.v10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.TecnocomInvoiceType;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -20,7 +20,7 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
   private String tecnocomCodEntity;
-  private TecnocomInvoiceType tecnocomInvoiceType;
+  private TipoFactura tecnocomInvoiceType;
 
   public PrepaidTopupDataRoute10() {
     super();
@@ -71,11 +71,11 @@ public class PrepaidTopupDataRoute10 implements Serializable {
     this.tecnocomCodEntity = tecnocomCodEntity;
   }
 
-  public TecnocomInvoiceType getTecnocomInvoiceType() {
+  public TipoFactura getTecnocomInvoiceType() {
     return tecnocomInvoiceType;
   }
 
-  public void setTecnocomInvoiceType(TecnocomInvoiceType tecnocomInvoiceType) {
+  public void setTecnocomInvoiceType(TipoFactura tecnocomInvoiceType) {
     this.tecnocomInvoiceType = tecnocomInvoiceType;
   }
 

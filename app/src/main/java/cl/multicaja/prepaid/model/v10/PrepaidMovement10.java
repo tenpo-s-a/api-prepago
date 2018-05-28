@@ -1,55 +1,55 @@
 package cl.multicaja.prepaid.model.v10;
 
 
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.tecnocom.constants.CodigoPais;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
+import cl.multicaja.tecnocom.constants.*;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class PrepaidMovement10 implements Serializable {
 
   private Long id;
   private Long idMovimientoRef;
   private String idTxExterno;
-  private Long idUsuario;
-  private String tipoMovimiento;
+  private Long idPrepaidUser;
+  private PrepaidMovementType tipoMovimiento;
   private BigDecimal monto;
-  private String moneda;
-  private PrepaidMovementStateType estado;
+  private PrepaidMovementStatus estado;
   private Timestamp fechaCreacion;
   private Timestamp fechaActualizacion;
-  private String codEntidad;
-  private String cenAlta;
+
+  private String codent;
+  private String centalta;
   private String cuenta;
-  private CodigoMoneda codMoneda;
-  private IndicadorNormalCorrector indNorcor;
-  private TecnocomInvoiceType tipoFactura;
-  private Timestamp fechaFactura;
-  private String numFacturaRef;
+  private CodigoMoneda clamon;
+  private IndicadorNormalCorrector indnorcor;
+  private TipoFactura tipofac;
+  private Date fecfac;
+  private String numreffac;
   private String pan;
-  private Integer codMondiv;
-  private Long impDiv;
-  private Long impFac;
-  private Integer cmpApli;
-  private String numAutorizacion;
-  private IndicadorPropiaAjena indProaje;
-  private String codComercio;
-  private String codActividad;
-  private Long impLiq;
-  private Integer codMonliq;
-  private CodigoPais codPais;
-  private String nomPoblacion;
-  private Integer numExtracto;
-  private Integer numMovExtracto;
-  private Integer claveMoneda;
-  private String tipoLinea;
-  private Integer referenciaLinea;
-  private Integer numBenefCta;
-  private Long numeroPlastico;
+  private Integer clamondiv;
+  private Long impdiv;
+  private BigDecimal impfac;
+  private Integer cmbapli;
+  private String numaut;
+  private IndicadorPropiaAjena indproaje;
+  private String codcom;
+  private String codact;
+  private Long impliq;
+  private Integer clamonliq;
+  private CodigoPais codpais;
+  private String nompob;
+  private Integer numextcta;
+  private Integer nummovext;
+  private CodigoMoneda clamone;
+  private String tipolin;
+  private Integer linref;
+  private Integer numbencta;
+  private Long numplastico;
 
   public Long getId() {
     return id;
@@ -75,19 +75,19 @@ public class PrepaidMovement10 implements Serializable {
     this.idTxExterno = idTxExterno;
   }
 
-  public Long getIdUsuario() {
-    return idUsuario;
+  public Long getIdPrepaidUser() {
+    return idPrepaidUser;
   }
 
-  public void setIdUsuario(Long idUsuario) {
-    this.idUsuario = idUsuario;
+  public void setIdPrepaidUser(Long idPrepaidUser) {
+    this.idPrepaidUser = idPrepaidUser;
   }
 
-  public String getTipoMovimiento() {
+  public PrepaidMovementType getTipoMovimiento() {
     return tipoMovimiento;
   }
 
-  public void setTipoMovimiento(String tipoMovimiento) {
+  public void setTipoMovimiento(PrepaidMovementType tipoMovimiento) {
     this.tipoMovimiento = tipoMovimiento;
   }
 
@@ -99,19 +99,11 @@ public class PrepaidMovement10 implements Serializable {
     this.monto = monto;
   }
 
-  public String getMoneda() {
-    return moneda;
-  }
-
-  public void setMoneda(String moneda) {
-    this.moneda = moneda;
-  }
-
-  public PrepaidMovementStateType getEstado() {
+  public PrepaidMovementStatus getEstado() {
     return estado;
   }
 
-  public void setEstado(PrepaidMovementStateType estado) {
+  public void setEstado(PrepaidMovementStatus estado) {
     this.estado = estado;
   }
 
@@ -131,20 +123,20 @@ public class PrepaidMovement10 implements Serializable {
     this.fechaActualizacion = fechaActualizacion;
   }
 
-  public String getCodEntidad() {
-    return codEntidad;
+  public String getCodent() {
+    return codent;
   }
 
-  public void setCodEntidad(String codEntidad) {
-    this.codEntidad = codEntidad;
+  public void setCodent(String codent) {
+    this.codent = codent;
   }
 
-  public String getCenAlta() {
-    return cenAlta;
+  public String getCentalta() {
+    return centalta;
   }
 
-  public void setCenAlta(String cenAlta) {
-    this.cenAlta = cenAlta;
+  public void setCentalta(String centalta) {
+    this.centalta = centalta;
   }
 
   public String getCuenta() {
@@ -155,44 +147,44 @@ public class PrepaidMovement10 implements Serializable {
     this.cuenta = cuenta;
   }
 
-  public CodigoMoneda getCodMoneda() {
-    return codMoneda;
+  public CodigoMoneda getClamon() {
+    return clamon;
   }
 
-  public void setCodMoneda(CodigoMoneda codMoneda) {
-    this.codMoneda = codMoneda;
+  public void setClamon(CodigoMoneda clamon) {
+    this.clamon = clamon;
   }
 
-  public IndicadorNormalCorrector getIndNorcor() {
-    return indNorcor;
+  public IndicadorNormalCorrector getIndnorcor() {
+    return indnorcor;
   }
 
-  public void setIndNorcor(IndicadorNormalCorrector indNorcor) {
-    this.indNorcor = indNorcor;
+  public void setIndnorcor(IndicadorNormalCorrector indnorcor) {
+    this.indnorcor = indnorcor;
   }
 
-  public TecnocomInvoiceType getTipoFactura() {
-    return tipoFactura;
+  public TipoFactura getTipofac() {
+    return tipofac;
   }
 
-  public void setTipoFactura(TecnocomInvoiceType tipoFactura) {
-    this.tipoFactura = tipoFactura;
+  public void setTipofac(TipoFactura tipofac) {
+    this.tipofac = tipofac;
   }
 
-  public Timestamp getFechaFactura() {
-    return fechaFactura;
+  public Date getFecfac() {
+    return fecfac;
   }
 
-  public void setFechaFactura(Timestamp fechaFactura) {
-    this.fechaFactura = fechaFactura;
+  public void setFecfac(Date fecfac) {
+    this.fecfac = fecfac;
   }
 
-  public String getNumFacturaRef() {
-    return numFacturaRef;
+  public String getNumreffac() {
+    return numreffac;
   }
 
-  public void setNumFacturaRef(String numFacturaRef) {
-    this.numFacturaRef = numFacturaRef;
+  public void setNumreffac(String numreffac) {
+    this.numreffac = numreffac;
   }
 
   public String getPan() {
@@ -203,155 +195,160 @@ public class PrepaidMovement10 implements Serializable {
     this.pan = pan;
   }
 
-  public Integer getCodMondiv() {
-    return codMondiv;
+  public Integer getClamondiv() {
+    return clamondiv;
   }
 
-  public void setCodMondiv(Integer codMondiv) {
-    this.codMondiv = codMondiv;
+  public void setClamondiv(Integer clamondiv) {
+    this.clamondiv = clamondiv;
   }
 
-  public Long getImpDiv() {
-    return impDiv;
+  public Long getImpdiv() {
+    return impdiv;
   }
 
-  public void setImpDiv(Long impDiv) {
-    this.impDiv = impDiv;
+  public void setImpdiv(Long impdiv) {
+    this.impdiv = impdiv;
   }
 
-  public Long getImpFac() {
-    return impFac;
+  public BigDecimal getImpfac() {
+    return impfac;
   }
 
-  public void setImpFac(Long impFac) {
-    this.impFac = impFac;
+  public void setImpfac(BigDecimal impfac) {
+    this.impfac = impfac;
   }
 
-  public Integer getCmpApli() {
-    return cmpApli;
+  public Integer getCmbapli() {
+    return cmbapli;
   }
 
-  public void setCmpApli(Integer cmpApli) {
-    this.cmpApli = cmpApli;
+  public void setCmbapli(Integer cmbapli) {
+    this.cmbapli = cmbapli;
   }
 
-  public String getNumAutorizacion() {
-    return numAutorizacion;
+  public String getNumaut() {
+    return numaut;
   }
 
-  public void setNumAutorizacion(String numAutorizacion) {
-    this.numAutorizacion = numAutorizacion;
+  public void setNumaut(String numaut) {
+    this.numaut = numaut;
   }
 
-  public IndicadorPropiaAjena getIndProaje() {
-    return indProaje;
+  public IndicadorPropiaAjena getIndproaje() {
+    return indproaje;
   }
 
-  public void setIndProaje(IndicadorPropiaAjena indProaje) {
-    this.indProaje = indProaje;
+  public void setIndproaje(IndicadorPropiaAjena indproaje) {
+    this.indproaje = indproaje;
   }
 
-  public String getCodComercio() {
-    return codComercio;
+  public String getCodcom() {
+    return codcom;
   }
 
-  public void setCodComercio(String codComercio) {
-    this.codComercio = codComercio;
+  public void setCodcom(String codcom) {
+    this.codcom = codcom;
   }
 
-  public String getCodActividad() {
-    return codActividad;
+  public String getCodact() {
+    return codact;
   }
 
-  public void setCodActividad(String codActividad) {
-    this.codActividad = codActividad;
+  public void setCodact(String codact) {
+    this.codact = codact;
   }
 
-  public Long getImpLiq() {
-    return impLiq;
+  public Long getImpliq() {
+    return impliq;
   }
 
-  public void setImpLiq(Long impLiq) {
-    this.impLiq = impLiq;
+  public void setImpliq(Long impliq) {
+    this.impliq = impliq;
   }
 
-  public Integer getCodMonliq() {
-    return codMonliq;
+  public Integer getClamonliq() {
+    return clamonliq;
   }
 
-  public void setCodMonliq(Integer codMonliq) {
-    this.codMonliq = codMonliq;
+  public void setClamonliq(Integer clamonliq) {
+    this.clamonliq = clamonliq;
   }
 
-  public CodigoPais getCodPais() {
-    return codPais;
+  public CodigoPais getCodpais() {
+    return codpais;
   }
 
-  public void setCodPais(CodigoPais codPais) {
-    this.codPais = codPais;
+  public void setCodpais(CodigoPais codpais) {
+    this.codpais = codpais;
   }
 
-  public String getNomPoblacion() {
-    return nomPoblacion;
+  public String getNompob() {
+    return nompob;
   }
 
-  public void setNomPoblacion(String nomPoblacion) {
-    this.nomPoblacion = nomPoblacion;
+  public void setNompob(String nompob) {
+    this.nompob = nompob;
   }
 
-  public Integer getNumExtracto() {
-    return numExtracto;
+  public Integer getNumextcta() {
+    return numextcta;
   }
 
-  public void setNumExtracto(Integer numExtracto) {
-    this.numExtracto = numExtracto;
+  public void setNumextcta(Integer numextcta) {
+    this.numextcta = numextcta;
   }
 
-  public Integer getNumMovExtracto() {
-    return numMovExtracto;
+  public Integer getNummovext() {
+    return nummovext;
   }
 
-  public void setNumMovExtracto(Integer numMovExtracto) {
-    this.numMovExtracto = numMovExtracto;
+  public void setNummovext(Integer nummovext) {
+    this.nummovext = nummovext;
   }
 
-  public Integer getClaveMoneda() {
-    return claveMoneda;
+  public CodigoMoneda getClamone() {
+    return clamone;
   }
 
-  public void setClaveMoneda(Integer claveMoneda) {
-    this.claveMoneda = claveMoneda;
+  public void setClamone(CodigoMoneda clamone) {
+    this.clamone = clamone;
   }
 
-  public String getTipoLinea() {
-    return tipoLinea;
+  public String getTipolin() {
+    return tipolin;
   }
 
-  public void setTipoLinea(String tipoLinea) {
-    this.tipoLinea = tipoLinea;
+  public void setTipolin(String tipolin) {
+    this.tipolin = tipolin;
   }
 
-  public Integer getReferenciaLinea() {
-    return referenciaLinea;
+  public Integer getLinref() {
+    return linref;
   }
 
-  public void setReferenciaLinea(Integer referenciaLinea) {
-    this.referenciaLinea = referenciaLinea;
+  public void setLinref(Integer linref) {
+    this.linref = linref;
   }
 
-  public Integer getNumBenefCta() {
-    return numBenefCta;
+  public Integer getNumbencta() {
+    return numbencta;
   }
 
-  public void setNumBenefCta(Integer numBenefCta) {
-    this.numBenefCta = numBenefCta;
+  public void setNumbencta(Integer numbencta) {
+    this.numbencta = numbencta;
   }
 
-  public Long getNumeroPlastico() {
-    return numeroPlastico;
+  public Long getNumplastico() {
+    return numplastico;
   }
 
-  public void setNumeroPlastico(Long numeroPlastico) {
-    this.numeroPlastico = numeroPlastico;
+  public void setNumplastico(Long numplastico) {
+    this.numplastico = numplastico;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 }

@@ -14,8 +14,10 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
+import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,12 +25,17 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author vutreras
@@ -41,6 +48,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
 
   protected NumberUtils numberUtils = NumberUtils.getInstance();
+
+  protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private ConfigUtils configUtils;
 
@@ -550,7 +559,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new IllegalStateException();
     }
 
-    CurrencyCodes currencyCodeClp = CurrencyCodes.CHILE_CLP;
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
@@ -638,5 +647,71 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     mcVoucherData.add(data);
 
     topup.setMcVoucherData(mcVoucherData);
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param prepaidUser
+   * @param prepaidCard
+   * @param cdtTransaction
+   * @return
+   */
+  private PrepaidMovement10 buildPrepaidMovement(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
+
+    String codEntity = null;
+    try {
+      codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      log.error("Error al cargar parametro cod_entidad");
+      codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura = null;
+
+    if (TopupType.WEB.equals(prepaidTopup.getType())) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+
+    prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
+    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(codEntity);
+    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
+    prepaidMovement.setCodact(String.valueOf(prepaidTopup.getMerchantCategory()));
+    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(1); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(123L); // se debe actualizar despues
+
+    return prepaidMovement;
   }
 }
