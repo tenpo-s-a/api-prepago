@@ -10,7 +10,10 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -40,6 +43,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   private TecnocomService tecnocomService;
 
   private ConfigUtils configUtils ;
+
 
   public PrepaidTopupRoute10() {
     super();
@@ -222,7 +226,32 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
-        //TODO implementar logica
+
+
+        PrepaidTopupDataRoute10 prepaidTopup10 = req.getData();
+        User user = prepaidTopup10.getUser();
+
+        AltaClienteDTO altaClienteDTO = tecnocomService.altaClientes(user.getName(),user.getLastname_1(),user.getLastname_2(),""+user.getRut().getValue(),TipoDocumento.RUT);
+        if(altaClienteDTO != null) {
+          if(altaClienteDTO.getRetorno().equals("")){// Verificar cual es el codigo de no error
+            DatosTarjetaDTO datosTarjetaDTO = tecnocomService.datosTarjeta(altaClienteDTO.getContrato());
+            // CREA OBJETO Y SETEA LOS DATOS
+            PrepaidCard10 prepaidCard10 = new PrepaidCard10();
+            prepaidCard10.setIdUser(user.getId());
+            prepaidCard10.setNameOnCard(datosTarjetaDTO);
+            prepaidCard10.setPan(altaClienteDTO.get);
+            prepaidCard10.setEncryptedPan();
+            prepaidCard10.setProcessorUserId(prepaidTopup10.getPrepaidTopup().getTransactionId());
+
+
+            getPrepaidEJBBean10().createPrepaidCard(null,)
+          }else {
+
+          }
+        }else{
+
+        }
+
         log.info("processPendingEmission - REQ: " + req);
         return new ResponseRoute<>(req.getData());
       }
