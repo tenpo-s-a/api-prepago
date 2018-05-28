@@ -1,15 +1,15 @@
 package cl.multicaja.test.api.unit;
 
+import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.math.BigDecimal;
 
 /**
  * @autor vutreras
@@ -100,6 +100,31 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
 
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", Integer.valueOf(106000), vex.getCode());
+    }
+  }
+
+  @Test
+  public void topupUserBalance_validateIdCDT() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+
+    //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
+
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+
+    Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
+
+    if (CamelFactory.getInstance().isCamelRunning()) {
+      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", prepaidTopup.getMessageId());
+    } else {
+      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", prepaidTopup.getMessageId());
     }
   }
 }

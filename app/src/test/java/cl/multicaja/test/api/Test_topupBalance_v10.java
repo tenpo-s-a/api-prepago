@@ -4,6 +4,7 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.model.v10.CurrencyCodes;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
@@ -28,7 +29,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     final String transactionId = getUniqueInteger().toString();
     final Integer rut = getUniqueRutNumber();
     final String merchantCode = "987654321";
-    final Integer currencyCode = 152;
+    final CurrencyCodes currencyCode = CurrencyCodes.CHILE_CLP;
     final BigDecimal value = new BigDecimal("9999.99");
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
@@ -78,7 +79,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setTransactionId("123456789");
     topupRequest.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(152);
+    amount.setCurrencyCode(CurrencyCodes.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
 
@@ -102,7 +103,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(152);
+    amount.setCurrencyCode(CurrencyCodes.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
 
@@ -124,7 +125,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setTransactionId("123456789");
     topupRequest.setRut(11111111);
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(152);
+    amount.setCurrencyCode(CurrencyCodes.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     topupRequest.setAmount(amount);
 
@@ -188,7 +189,7 @@ public class Test_topupBalance_v10 extends TestApiBase {
     topupRequest.setRut(11111111);
     topupRequest.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(152);
+    amount.setCurrencyCode(CurrencyCodes.CHILE_CLP);
     topupRequest.setAmount(amount);
 
     String json = toJson(topupRequest);
