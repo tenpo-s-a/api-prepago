@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.async.v10;
 
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -21,14 +23,18 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private PrepaidCard10 prepaidCard10;
   private String tecnocomCodEntity;
   private TipoFactura tecnocomInvoiceType;
+  private CdtTransaction10 cdtTransaction;
+  private PrepaidMovement10 prepaidMovement;
 
   public PrepaidTopupDataRoute10() {
     super();
   }
 
-  public PrepaidTopupDataRoute10(PrepaidTopup10 prepaidTopup, User user) {
+  public PrepaidTopupDataRoute10(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
     this.prepaidTopup = prepaidTopup;
     this.user = user;
+    this.cdtTransaction = cdtTransaction;
+    this.prepaidMovement = prepaidMovement;
   }
 
   public PrepaidTopup10 getPrepaidTopup() {
@@ -77,6 +83,22 @@ public class PrepaidTopupDataRoute10 implements Serializable {
 
   public void setTecnocomInvoiceType(TipoFactura tecnocomInvoiceType) {
     this.tecnocomInvoiceType = tecnocomInvoiceType;
+  }
+
+  public CdtTransaction10 getCdtTransaction() {
+    return cdtTransaction;
+  }
+
+  public void setCdtTransaction(CdtTransaction10 cdtTransaction) {
+    this.cdtTransaction = cdtTransaction;
+  }
+
+  public PrepaidMovement10 getPrepaidMovement() {
+    return prepaidMovement;
+  }
+
+  public void setPrepaidMovement(PrepaidMovement10 prepaidMovement) {
+    this.prepaidMovement = prepaidMovement;
   }
 
   @Override

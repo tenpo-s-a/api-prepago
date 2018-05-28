@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
+//TODO Implementar test
 @Ignore
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
 

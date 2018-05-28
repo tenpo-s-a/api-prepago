@@ -61,9 +61,10 @@ public class TestBaseUnit extends TestApiBase {
   protected PrepaidEJBBean10 getPrepaidEJBBean10() {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
-      prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
-      prepaidEJBBean10.setUsersEJB10(getUsersEJBBean10());
+      prepaidEJBBean10.setDelegate(this.getPrepaidTopupDelegate10());
+      prepaidEJBBean10.setUsersEJB10(this.getUsersEJBBean10());
       prepaidEJBBean10.setCdtEJB10(this.getCdtEJBBean10());
+      prepaidEJBBean10.setPrepaidMovementEJB10(this.getPrepaidMovementEJBBean10());
     }
     return prepaidEJBBean10;
   }
