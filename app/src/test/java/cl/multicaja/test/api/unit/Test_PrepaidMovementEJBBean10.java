@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +80,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStatus.INPROCESS);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStatus.IN_PROCESS);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 
@@ -90,7 +89,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
-    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.INPROCESS.getValue(), PrepaidMovementStatus.INPROCESS.getValue(), fila.get("estado"));
+    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.IN_PROCESS.getValue(), PrepaidMovementStatus.IN_PROCESS.getValue(), fila.get("estado"));
   }
 
   @Test
@@ -108,7 +107,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP, PrepaidMovementStatus.PROCESSOK);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP, PrepaidMovementStatus.PROCESS_OK);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 
@@ -117,7 +116,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
-    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESSOK.getValue(), PrepaidMovementStatus.PROCESSOK.getValue(), fila.get("estado"));
+    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESS_OK.getValue(), PrepaidMovementStatus.PROCESS_OK.getValue(), fila.get("estado"));
     Assert.assertEquals("El Num Extracto debe ser 1",1,((BigDecimal)fila.get("numextcta")).intValue());
     Assert.assertEquals("El Num Extracto debe ser 1",2,((BigDecimal)fila.get("nummovext")).intValue());
     Assert.assertEquals("El Num Extracto debe ser 1", CodigoMoneda.CHILE_CLP.getValue().intValue(),((BigDecimal)fila.get("clamone")).intValue());
