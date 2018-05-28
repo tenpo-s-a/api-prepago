@@ -550,13 +550,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   public void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception {
 
     if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
-      throw  new IllegalStateException();
+      throw new IllegalStateException();
     }
 
+    CurrencyCodes currencyCodeClp = CurrencyCodes.CHILE_CLP;
+
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
-    total.setCurrencyCode(152);
+    total.setCurrencyCode(currencyCodeClp);
     NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
-    fee.setCurrencyCode(152);
+    fee.setCurrencyCode(currencyCodeClp);
 
     // Calcula las comisiones segun el tipo de carga (WEB o POS)
     switch (topup.getType()) {
