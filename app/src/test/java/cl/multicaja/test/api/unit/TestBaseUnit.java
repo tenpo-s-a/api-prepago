@@ -158,7 +158,7 @@ public class TestBaseUnit extends TestApiBase {
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(numberUtils.random(1000, 10000)));
-    newAmountAndCurrency.setCurrencyCode(0);
+    newAmountAndCurrency.setCurrencyCode(CurrencyCodes.CHILE_CLP);
 
     prepaidTopup.setAmount(newAmountAndCurrency);
     return prepaidTopup;

@@ -9,18 +9,18 @@ import java.math.BigDecimal;
  */
 public class NewAmountAndCurrency10 extends BaseModel {
 
-  private Integer currencyCode;
+  private CurrencyCodes currencyCode;
   private BigDecimal value;
 
   public NewAmountAndCurrency10() {
     super();
   }
 
-  public Integer getCurrencyCode() {
+  public CurrencyCodes getCurrencyCode() {
     return currencyCode;
   }
 
-  public void setCurrencyCode(Integer currencyCode) {
+  public void setCurrencyCode(CurrencyCodes currencyCode) {
     this.currencyCode = currencyCode;
   }
 

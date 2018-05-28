@@ -44,9 +44,9 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       data.getCodEntidad(),//_cod_entidad
       data.getCenAlta(),//_cen_alta
       data.getCuenta(),//_cuenta
-      new InParam(data.getCodMoneda(),Types.NUMERIC),//_cod_moneda NUMERIC
-      new InParam(data.getIndNorcor(),Types.NUMERIC),//_ind_norcor NUMERIC
-      new InParam(data.getTipoFactura(),Types.NUMERIC),//_tipo_factura NUMERIC
+      new InParam(data.getCodMoneda().getValue(),Types.NUMERIC),//_cod_moneda NUMERIC
+      new InParam(data.getIndNorcor().getValue(),Types.NUMERIC),//_ind_norcor NUMERIC
+      new InParam(data.getTipoFactura().getCode(),Types.NUMERIC),//_tipo_factura NUMERIC
       data.getFechaFactura(),//_fecha_factura
       data.getNumFacturaRef(),//_num_factura_ref VARCHAR
       data.getPan(),// _pan            VARCHAR,
@@ -55,12 +55,12 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       new InParam(data.getImpFac(),Types.NUMERIC),//_imp_fac           NUMERIC,
       new InParam(data.getCmpApli(),Types.NUMERIC),//_cmp_apli            NUMERIC,
       data.getNumAutorizacion(),//_num_autorizacion    VARCHAR,
-      data.getIndProaje(),//_ind_proaje          VARCHAR,
+      data.getIndProaje().getValue(),//_ind_proaje          VARCHAR,
       data.getCodComercio(),//_cod_comercio        VARCHAR,
       data.getCodActividad(),//_cod_actividad       VARCHAR,
       new InParam(data.getImpLiq(),Types.NUMERIC),//_imp_liq             NUMERIC,
       new InParam(data.getCodMonliq(),Types.NUMERIC), //_cod_monliq          NUMERIC,
-      new InParam(data.getCodPais(),Types.NUMERIC), //_cod_pais            NUMERIC,
+      new InParam(data.getCodPais().getValue(),Types.NUMERIC), //_cod_pais            NUMERIC,
       data.getNomPoblacion(),//_nom_poblacion       VARCHAR,
       new InParam(data.getNumExtracto(),Types.NUMERIC),//_num_extracto        NUMERIC,
       new InParam(data.getNumMovExtracto(),Types.NUMERIC),//_num_mov_extracto    NUMERIC,

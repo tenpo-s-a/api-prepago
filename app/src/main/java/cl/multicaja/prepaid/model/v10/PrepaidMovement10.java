@@ -1,6 +1,11 @@
 package cl.multicaja.prepaid.model.v10;
 
 
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.CodigoPais;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -20,9 +25,9 @@ public class PrepaidMovement10 implements Serializable {
   private String codEntidad;
   private String cenAlta;
   private String cuenta;
-  private Integer codMoneda;
-  private Integer indNorcor;
-  private Integer tipoFactura;
+  private CodigoMoneda codMoneda;
+  private IndicadorNormalCorrector indNorcor;
+  private TecnocomInvoiceType tipoFactura;
   private Timestamp fechaFactura;
   private String numFacturaRef;
   private String pan;
@@ -31,12 +36,12 @@ public class PrepaidMovement10 implements Serializable {
   private Long impFac;
   private Integer cmpApli;
   private String numAutorizacion;
-  private String indProaje;
+  private IndicadorPropiaAjena indProaje;
   private String codComercio;
   private String codActividad;
   private Long impLiq;
   private Integer codMonliq;
-  private Integer codPais;
+  private CodigoPais codPais;
   private String nomPoblacion;
   private Integer numExtracto;
   private Integer numMovExtracto;
@@ -150,27 +155,27 @@ public class PrepaidMovement10 implements Serializable {
     this.cuenta = cuenta;
   }
 
-  public Integer getCodMoneda() {
+  public CodigoMoneda getCodMoneda() {
     return codMoneda;
   }
 
-  public void setCodMoneda(Integer codMoneda) {
+  public void setCodMoneda(CodigoMoneda codMoneda) {
     this.codMoneda = codMoneda;
   }
 
-  public Integer getIndNorcor() {
+  public IndicadorNormalCorrector getIndNorcor() {
     return indNorcor;
   }
 
-  public void setIndNorcor(Integer indNorcor) {
+  public void setIndNorcor(IndicadorNormalCorrector indNorcor) {
     this.indNorcor = indNorcor;
   }
 
-  public Integer getTipoFactura() {
+  public TecnocomInvoiceType getTipoFactura() {
     return tipoFactura;
   }
 
-  public void setTipoFactura(Integer tipoFactura) {
+  public void setTipoFactura(TecnocomInvoiceType tipoFactura) {
     this.tipoFactura = tipoFactura;
   }
 
@@ -238,11 +243,11 @@ public class PrepaidMovement10 implements Serializable {
     this.numAutorizacion = numAutorizacion;
   }
 
-  public String getIndProaje() {
+  public IndicadorPropiaAjena getIndProaje() {
     return indProaje;
   }
 
-  public void setIndProaje(String indProaje) {
+  public void setIndProaje(IndicadorPropiaAjena indProaje) {
     this.indProaje = indProaje;
   }
 
@@ -278,11 +283,11 @@ public class PrepaidMovement10 implements Serializable {
     this.codMonliq = codMonliq;
   }
 
-  public Integer getCodPais() {
+  public CodigoPais getCodPais() {
     return codPais;
   }
 
-  public void setCodPais(Integer codPais) {
+  public void setCodPais(CodigoPais codPais) {
     this.codPais = codPais;
   }
 
