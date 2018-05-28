@@ -6,10 +6,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
+import java.sql.Date;
 import java.util.Map;
+
 import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
 
 public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends TestDbBasePg {
@@ -21,6 +23,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   public static void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
   }
+
   @AfterClass
   public static void afterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
@@ -29,25 +32,26 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   public static InParam setInParam(Object o){
     return new InParam(o,Types.NUMERIC);
   }
+
   @Test
-  public void llamadaSpCreaMovimientoOk() throws SQLException
-  {
+  public void llamadaSpCreaMovimientoOk() throws SQLException {
     Map<String, Object> resp = insertaMovimiento();
     Assert.assertNotNull("Debe retornar respuesta", resp);
+    Assert.assertEquals("Debe retornar un id", true, numberUtils.toLong(resp.get("_id")) > 0);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
   }
 
   @Test
-  public void llamadaSpCreaMovimientoNoOk() throws SQLException
-  {
+  public void llamadaSpCreaMovimientoNoOk() throws SQLException {
+
     Map<String, Object> mapCard = insertCard("ACTIVA");
+
     Object[] params = {
       setInParam(mapCard.get("id_usuario")), //id_mov_ref
       setInParam(mapCard.get("id_usuario")), //id_usuario
       ""+getUniqueLong(),
       "CARGA", //estado
       setInParam(getUniqueLong()),
-      "USD",
       "ENPRO",
       "AA",//_cod_entidad
       "CA",//_cen_alta
@@ -55,7 +59,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(152),//_cod_moneda NUMERIC
       setInParam(1),//_ind_norcor NUMERIC
       setInParam(2),//_tipo_factura NUMERIC
-      new Timestamp(System.currentTimeMillis()),//_fecha_factura
+      new Date(System.currentTimeMillis()),//_fecha_factura
       "123",//_num_factura_ref VARCHAR
       mapCard.get("pan"),// _pan            VARCHAR,
       setInParam(90),//_cod_mondiv      NUMERIC,
@@ -63,7 +67,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(10),//_imp_fac           NUMERIC,
       setInParam(10),//_cmp_apli            NUMERIC,
       "1231",//_num_autorizacion    VARCHAR,
-      "AD",//_ind_proaje          VARCHAR,
+      "AR",//_ind_proaje          VARCHAR,
       "123",//_cod_comercio        VARCHAR,
       "AFQ",//_cod_actividad       VARCHAR,
       setInParam(1),//_imp_liq             NUMERIC,
@@ -92,10 +96,9 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Object[] params = {
       setInParam(mapCard.get("id_usuario")), //id_mov_ref
       setInParam(mapCard.get("id_usuario")), //id_usuario
-      ""+getUniqueLong(),
+      getUniqueLong().toString(),
       "CARGA", //estado
       setInParam(getUniqueLong()),
-      "USD",
       "ENPRO",
       "AA",//_cod_entidad
       "CA",//_cen_alta
@@ -103,7 +106,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(152),//_cod_moneda NUMERIC
       setInParam(1),//_ind_norcor NUMERIC
       setInParam(2),//_tipo_factura NUMERIC
-      new Timestamp(System.currentTimeMillis()),//_fecha_factura
+      new Date(System.currentTimeMillis()),//_fecha_factura
       "123",//_num_factura_ref VARCHAR
       mapCard.get("pan"),// _pan            VARCHAR,
       setInParam(90),//_cod_mondiv      NUMERIC,
