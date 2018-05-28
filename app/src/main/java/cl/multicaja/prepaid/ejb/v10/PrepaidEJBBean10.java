@@ -28,6 +28,10 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -247,6 +251,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       Calcular monto a cargar y comisiones
      */
     this.calculateTopupFeeAndTotal(topup);
+
+    /*
+      Agrega la informacion par el voucher
+     */
+    this.addVoucherData(topup);
 
     /*
       Enviar mensaje al proceso asincrono
@@ -583,8 +592,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
    *  Verifica el nivel del usuario
    * @param oUser usuario multicaja
    * @param prepaidUser10 usuario prepago
+   * @throws NotFoundException 102001 si el usuario MC es null
+   * @throws ValidationException 101000 si el rut o status del rut es null
+   * @throws NotFoundException 302003 si el usuario prepago es null
    * @return el nivel del usuario
    */
+  @Override
   public PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception {
     if(oUser == null) {
       throw new NotFoundException(102001);
@@ -602,6 +615,38 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     else {
       return PrepaidUserLevel.LEVEL_1;
     }
+  }
+
+  /**
+   *  Agrega la informacion para el voucher requerida por el POS/Switch
+   *
+   * @param topup al que se le agregara el voucher
+   * @throws IllegalStateException si el topup es null
+   * @throws IllegalStateException si el topup.amount es null
+   * @throws IllegalStateException si el topup.amount.value es null
+   */
+  @Override
+  public void addVoucherData(PrepaidTopup10 topup) throws Exception {
+    if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null) {
+      throw new IllegalStateException();
+    }
+
+    DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(new Locale("es_CL"));
+    DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+
+    symbols.setGroupingSeparator('.');
+    formatter.setDecimalFormatSymbols(symbols);
+
+    topup.setMcVoucherType("A");
+
+    Map<String, String> data = new HashMap<>();
+    data.put("name", "amount_paid");
+    data.put("value", formatter.format(topup.getAmount().getValue().longValue()));
+
+    List<Map<String, String>> mcVoucherData = new ArrayList<>();
+    mcVoucherData.add(data);
+
+    topup.setMcVoucherData(mcVoucherData);
   }
 
   /**

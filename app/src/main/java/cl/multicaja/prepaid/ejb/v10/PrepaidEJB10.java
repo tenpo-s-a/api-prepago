@@ -1,6 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.users.model.v10.User;
 
 import java.util.List;
 import java.util.Map;
@@ -152,4 +155,25 @@ public interface PrepaidEJB10 {
    * @throws IllegalStateException cuando el topup.merchantCode es null o vacio
    */
   void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception;
+
+  /**
+   *  Verifica el nivel del usuario
+   * @param oUser usuario multicaja
+   * @param prepaidUser10 usuario prepago
+   * @throws NotFoundException 102001 si el usuario MC es null
+   * @throws ValidationException 101000 si el rut o status del rut es null
+   * @throws NotFoundException 302003 si el usuario prepago es null
+   * @return el nivel del usuario
+   */
+  PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
+
+  /**
+   *  Agrega la informacion para el voucher requerida por el POS/Switch
+   *
+   * @param topup al que se le agregara el voucher
+   * @throws IllegalStateException si el topup es null
+   * @throws IllegalStateException si el topup.amount es null
+   * @throws IllegalStateException si el topup.amount.value es null
+   */
+  void addVoucherData(PrepaidTopup10 topup) throws Exception;
 }

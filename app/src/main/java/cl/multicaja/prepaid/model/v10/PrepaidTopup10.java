@@ -2,18 +2,25 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.users.model.v10.Timestamps;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author abarazarte
  */
 public class PrepaidTopup10 extends NewPrepaidTopup10 {
 
-  private Long id;
   private String status;
-  private Long userId;
   private Timestamps timestamps;
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
   private String messageId;
+
+  // Utilizados para la respuesta al POS/switch
+  private Long id;
+  private Long userId;
+  private String mcVoucherType;
+  private List<Map<String, String>> mcVoucherData;
 
   public PrepaidTopup10() {
     super();
@@ -77,5 +84,21 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
 
   public void setMessageId(String messageId) {
     this.messageId = messageId;
+  }
+
+  public String getMcVoucherType() {
+    return mcVoucherType;
+  }
+
+  public void setMcVoucherType(String mcVoucherType) {
+    this.mcVoucherType = mcVoucherType;
+  }
+
+  public List<Map<String, String>> getMcVoucherData() {
+    return mcVoucherData;
+  }
+
+  public void setMcVoucherData(List<Map<String, String>> mcVoucherData) {
+    this.mcVoucherData = mcVoucherData;
   }
 }
