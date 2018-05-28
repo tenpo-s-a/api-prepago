@@ -52,7 +52,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
-  private final static String APP_NAME = "app.appname";
+  private final static String APP_NAME = "prepaid.appname";
 
 
   /**
@@ -219,12 +219,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     /*
       Validar movimiento en CDT, en caso de error lanzar exception
      */
-    // TODO: Validar movimiento en CDT
 
     CdtTransaction10 oCdtTransaction10 = new CdtTransaction10();
     oCdtTransaction10.setAmount(topupRequest.getAmount().getValue());
     oCdtTransaction10.setTransactionType(topupRequest.getCdtTransactionType());
-    oCdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut());
+    oCdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
     oCdtTransaction10.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
     oCdtTransaction10.setTransactionReference(0L);
     oCdtTransaction10.setExternalTransactionId(topupRequest.getTransactionId());
@@ -239,6 +238,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       else
         throw new ValidationException(2);
     }
+
 
     PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
     topup.setId(oCdtTransaction10.getTransactionReference());
