@@ -17,6 +17,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -153,28 +154,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     User user = this.getUsersEJB10().getUserByRut(headers, topupRequest.getRut());
 
     if(user == null){
-      throw new NotFoundException(102001); //cliente no existe
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+    if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
+      throw new NotFoundException(102002); // Usuario MC bloqueado o borrado
     }
 
-    /*
-      Validar nivel del usuario
-        - N = 0 Usuario MC null, Prepaid user null o usuario bloqueado
-        - N = 1 Primera carga
-        - N > 1 Carga
-     */
-    // Buscar usuario local de prepago
+    // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(102003); //cliente no tiene prepago
+      throw new NotFoundException(302003); // Usuario no tiene prepago
     }
 
-    /*
-      if(user.getGlobalStatus().equals("BLOQUEADO") || prepaidUser == null || prepaidUser.getStatus() == PrepaidUserStatus.DISABLED){
-        // Si el usuario MC esta bloqueado o si no existe usuario local o el usuario local esta bloqueado, es N = 0
-        throw new ValidationException(1024, "El cliente no pasó la validación");
-      }
-    */
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new NotFoundException(302002); // Usuario prepago bloqueado o borrado
+    }
 
     PrepaidUserLevel userLevel = getUserLevel(user,prepaidUser);
 
