@@ -269,6 +269,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           else {
             //TODO: Implementar Cola Error
           }
+        } else {
+          //TODO: Error x reintentos
         }
         log.info("processPendingEmission - REQ: " + req);
         return new ResponseRoute<>(req.getData());
@@ -282,14 +284,12 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
         req.retryCountNext();
         if(req.getRetryCount() <= 3) {
-
           DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(req.getData().getPrepaidCard10().getProcessorUserId());
-
           if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
             PrepaidCard10 prepaidCard10 = new PrepaidCard10();
             prepaidCard10.setIdUser(req.getData().getPrepaidUser10().getId());
-            prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());
-            prepaidCard10.setPan(datosTarjetaDTO.getPan());
+            prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());//TODO: Verificar que va aca (Felipe)
+            prepaidCard10.setPan(datosTarjetaDTO.getPan());//TODO: Reemplazar por x Digitos
             prepaidCard10.setEncryptedPan(getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
             prepaidCard10.setProcessorUserId(req.getData().getPrepaidCard10().getProcessorUserId());
             prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
@@ -304,6 +304,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
             //TODO: Implementar Cola Error
           }
+        } else {
+          //TODO: Error x reintentos
         }
         return new ResponseRoute<>(req.getData());
       }
