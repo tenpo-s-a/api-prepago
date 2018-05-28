@@ -15,9 +15,7 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.Timestamps;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
+import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,7 +155,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new NotFoundException(102001); // Usuario MC no existe
     }
     if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
-      throw new NotFoundException(102002); // Usuario MC bloqueado o borrado
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
     // Obtener usuario prepago
@@ -168,13 +166,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new NotFoundException(302002); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(302002); // Usuario prepago bloqueado o borrado
     }
 
-    PrepaidUserLevel userLevel = getUserLevel(user,prepaidUser);
-
-    if(userLevel != PrepaidUserLevel.LEVEL_1) {
-      // Si el usuario tiene validacion de foto, es N = 2
+    if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {
+      // Si el usuario tiene validacion > N1, no aplica restriccion de primera carga
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
 
@@ -575,18 +571,28 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setTotal(total);
   }
 
-  private PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) {
-
-    switch(oUser.getRut().getStatus()+"|"+oUser.getGlobalStatus()) {
-      case "N0":
-        return PrepaidUserLevel.LEVEL_1;
-      case "N1":
-        return PrepaidUserLevel.LEVEL_2;
-      case "N2":
-        return PrepaidUserLevel.LEVEL_3;
-      default:
-        return PrepaidUserLevel.LEVEL_1;
+  /**
+   *  Verifica el nivel del usuario
+   * @param oUser usuario multicaja
+   * @param prepaidUser10 usuario prepago
+   * @return el nivel del usuario
+   */
+  public PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception {
+    if(oUser == null) {
+      throw new NotFoundException(102001);
+    }
+    if(oUser.getRut() == null || oUser.getRut().getStatus() == null){
+      throw new ValidationException(101000);
+    }
+    if(prepaidUser10 == null) {
+      throw new NotFoundException(302003);
     }
 
+    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && UserNameStatus.VERIFIED.equals(oUser.getNameStatus())) {
+      return PrepaidUserLevel.LEVEL_2;
+    }
+    else {
+      return PrepaidUserLevel.LEVEL_1;
+    }
   }
 }
