@@ -1,6 +1,8 @@
 package cl.multicaja.cdt.model.v10;
 
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.math.BigDecimal;
 
@@ -79,6 +81,11 @@ public class CdtTransaction10 {
 
   public void setMsjError(String msjError) {
     this.msjError = msjError;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 }
 
