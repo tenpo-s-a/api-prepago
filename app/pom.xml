@@ -54,6 +54,12 @@
     </dependency>
 
     <dependency>
+      <groupId>cl.multicaja</groupId>
+      <artifactId>tecnocom-gateway</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
       <version>${jersey.version}</version>
