@@ -8,6 +8,7 @@
 .settings
 app/api-prepaid.iml
 pg/pg-prepaid.iml
+app/datos-mock.cache
 
 target/
 

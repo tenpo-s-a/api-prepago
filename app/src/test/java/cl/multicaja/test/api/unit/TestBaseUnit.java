@@ -86,7 +86,6 @@ public class TestBaseUnit extends TestApiBase {
     SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
-
   /**
    *
    * @return
