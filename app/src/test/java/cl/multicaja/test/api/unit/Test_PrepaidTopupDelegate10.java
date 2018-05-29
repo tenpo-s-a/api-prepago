@@ -71,8 +71,21 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
    * @param user
    * @return
    */
-  private String sendTopup(PrepaidTopup10 prepaidTopup, User user) {
+  private String sendTopup(PrepaidTopup10 prepaidTopup, User user) throws Exception {
+
     String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, null, null);
+    return messageId;
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param user
+   * @return
+   */
+  private String sendTopup(PrepaidTopup10 prepaidTopup, User user, PrepaidMovement10 prepaidMovement) throws Exception {
+
+    String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, null, prepaidMovement);
     return messageId;
   }
 
@@ -129,9 +142,15 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
 
-    String messageId = sendTopup(topup, user);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    prepaidMovement = createPrepaidMovement(prepaidMovement);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -139,15 +158,13 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
 
-    String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
-
     PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
 
-    Assert.assertEquals("Deberia contener una codEntity", codEntity, prepaidMovement10.getCodent());
+    Assert.assertEquals("Deberia contener una codEntity", prepaidMovement.getCodent(), prepaidMovement10.getCodent());
 
     if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
       Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovement10.getTipofac());
