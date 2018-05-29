@@ -48,10 +48,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
       if(req.getRetryCount()<= 3) {
 
         //TODO: Verificar de donde sacar el monto de la comision de apertura
-        BigDecimal issuanceFee = prepaidMovement10.getMonto();
 
         //InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", "", CodigoMoneda.CHILE_CLP,
-        //  IndicadorNormalCorrector.NORMAL, TipoFactura.COMISION_APERTURA, "", issuanceFee, "", "", "", 0, CodigoPais.CHILE);
+        //  IndicadorNormalCorrector.NORMAL, TipoFactura.COMISION_APERTURA, "", prepaidMovement10.getMonto(), "", "", "", 0, CodigoPais.CHILE);
 
         if (CodigoRetorno._000.equals(CodigoRetorno._000)) {
         //if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
@@ -65,14 +64,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             */
         } else if (CodigoRetorno._000.equals(CodigoRetorno._1000)) {
         //} else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-          /*
-          getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-            prepaidMovement10.getId(),
-            inclusionMovimientosDTO.getNumextcta(),
-            inclusionMovimientosDTO.getNummovext(),
-            inclusionMovimientosDTO.getClamone(),
-            PrepaidMovementStatus.PENDING);
-          */
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
         }
         else {
