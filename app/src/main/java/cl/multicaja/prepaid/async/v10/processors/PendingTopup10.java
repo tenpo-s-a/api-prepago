@@ -113,6 +113,11 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           //InclusionMovimientosDTO dto = tecnocomService.inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
 
+          // Si es 1era carga enviar a cola de cobro de emision
+          if(prepaidTopup.isFirstTopup()){
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+          }
+
         } else {
 
           //https://www.pivotaltracker.com/story/show/157816408
