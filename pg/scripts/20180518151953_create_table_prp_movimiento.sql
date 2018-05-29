@@ -43,7 +43,7 @@ CREATE TABLE ${schema}.prp_movimiento (
   numaut            VARCHAR(6) NOT NULL,
   indproaje          VARCHAR(1) NOT NULL,
   codcom            VARCHAR(15) NOT NULL,
-  codact            VARCHAR(4) NOT NULL,
+  codact            NUMERIC(4) NOT NULL,
   impliq             NUMERIC(17) NOT NULL,
   clamonliq          NUMERIC(3) NOT NULL,
   codpais            NUMERIC(3) NOT NULL,
