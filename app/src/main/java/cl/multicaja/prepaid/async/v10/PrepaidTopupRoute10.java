@@ -90,14 +90,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       String apiKey = getConfigUtils().getProperty("tecnocom.apiKey");
       String apiUrl = getConfigUtils().getProperty("tecnocom.apiUrl");
       String channel = getConfigUtils().getProperty("tecnocom.channel");
-      String codEntity = null;
+      String codent = null;
       try {
-        codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+        codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
       } catch (SQLException e) {
         log.error("Error al cargar parametro cod_entidad");
-        codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
+        codent = getConfigUtils().getProperty("tecnocom.codEntity");
       }
-      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codEntity, HashOrder.ASC);
+      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, HashOrder.ASC);
     }
     return tecnocomService;
   }
@@ -192,22 +192,39 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
         }
 
         if (card != null) {
-          String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
-          req.getData().setTecnocomCodEntity(codEntity);
+
           req.getData().setPrepaidCard10(card);
-          if (TopupType.WEB.equals(req.getData().getPrepaidTopup().getType())) {
-            req.getData().setTecnocomInvoiceType(TipoFactura.CARGA_TRANSFERENCIA);
-          } else {
-            req.getData().setTecnocomInvoiceType(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+          PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
+          PrepaidMovement10 prepaidMovement = req.getData().getPrepaidMovement10();
+
+          String codent = null;
+          try {
+            codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+          } catch (SQLException e) {
+            log.error("Error al cargar parametro cod_entidad");
+            codent = getConfigUtils().getProperty("tecnocom.codEntity");
           }
 
-          PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup();
+          TipoFactura tipoFactura = null;
+
+          if (TopupType.WEB.equals(prepaidTopup.getType())) {
+            tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+          } else {
+            tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+          }
+
+          if (prepaidMovement == null) {
+            prepaidMovement = new PrepaidMovement10();
+            prepaidMovement.setTipofac(tipoFactura);
+            prepaidMovement.setCodent(codent);
+            req.getData().setPrepaidMovement10(prepaidMovement);
+          }
 
           String contrato = card.getProcessorUserId();
           String pan = card.getEncryptedPan(); // se debe desencriptar
           CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
           IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
-          Integer tipofac = req.getData().getTecnocomInvoiceType().getCode();
+          TipoFactura tipofac = prepaidMovement.getTipofac();
           BigDecimal impfac = prepaidTopup.getAmount().getValue();
           String codcom = prepaidTopup.getMerchantCode();
           Integer codact = prepaidTopup.getMerchantCategory();

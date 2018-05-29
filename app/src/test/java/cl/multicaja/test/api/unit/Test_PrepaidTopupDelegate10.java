@@ -10,10 +10,7 @@ import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import javax.jms.Queue;
@@ -142,18 +139,20 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
 
     String codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
 
-    Assert.assertEquals("Deberia contener una codEntity", codEntity, remoteTopup.getData().getTecnocomCodEntity());
+    PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
 
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup().getType())) {
-      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, remoteTopup.getData().getTecnocomInvoiceType());
+    Assert.assertEquals("Deberia contener una codEntity", codEntity, prepaidMovement10.getCodent());
+
+    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovement10.getTipofac());
     } else {
-      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, remoteTopup.getData().getTecnocomInvoiceType());
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovement10.getTipofac());
     }
   }
 
@@ -240,7 +239,7 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
     Assert.assertNotNull("Deberia tener una PrepaidCard ProcessorUserId", remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
@@ -282,7 +281,7 @@ public class Test_PrepaidTopupDelegate10 extends TestBaseUnit {
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", topup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
 
