@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
+public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
   @Test
   public void topupUserBalance_userNotFound() throws Exception {

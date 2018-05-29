@@ -229,10 +229,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       }
     }
 
-    /*
-      Validar movimiento en CDT, en caso de error lanzar exception
-     */
-
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
@@ -251,7 +247,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       else
         throw new ValidationException(2);
     }
-
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
     prepaidTopup.setId(cdtTransaction.getTransactionReference());
