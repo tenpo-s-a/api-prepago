@@ -4,10 +4,11 @@ import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 
-public class CdtTransaction10 {
+public class CdtTransaction10 implements Serializable {
 
   private String accountId;
   private CdtTransactionType transactionType;
