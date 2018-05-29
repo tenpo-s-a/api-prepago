@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
+import com.oracle.wls.shaded.org.apache.xpath.operations.Bool;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ import javax.jms.Queue;
 /**
  * @autor abarazarte
  */
-public class Test_PendingTopupReverseConfirmation extends TestBaseRouteUnit {
+public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
 
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {
@@ -39,6 +40,8 @@ public class Test_PendingTopupReverseConfirmation extends TestBaseRouteUnit {
     User user = registerUser();
 
     PrepaidTopup10 topup10 = buildPrepaidTopup(user);
+
+    topup10.setFirstTopup(Boolean.FALSE);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(topup10.getAmount().getValue());
