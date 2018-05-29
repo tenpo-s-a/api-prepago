@@ -38,7 +38,7 @@ public class PrepaidMovement10 implements Serializable {
   private String numaut;
   private IndicadorPropiaAjena indproaje;
   private String codcom;
-  private String codact;
+  private Integer codact;
   private Long impliq;
   private Integer clamonliq;
   private CodigoPais codpais;
@@ -251,11 +251,11 @@ public class PrepaidMovement10 implements Serializable {
     this.codcom = codcom;
   }
 
-  public String getCodact() {
+  public Integer getCodact() {
     return codact;
   }
 
-  public void setCodact(String codact) {
+  public void setCodact(Integer codact) {
     this.codact = codact;
   }
 

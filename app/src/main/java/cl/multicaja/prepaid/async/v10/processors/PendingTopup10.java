@@ -6,10 +6,8 @@ import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.tecnocom.constants.CodigoPais;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,19 +97,30 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           String contrato = card.getProcessorUserId();
-          String pan = card.getEncryptedPan(); // se debe desencriptar
+          String pan = getEncryptUtil().decrypt(card.getEncryptedPan());
           CodigoMoneda clamon = prepaidMovement.getClamon();
           IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
-          BigDecimal impfac = prepaidTopup.getAmount().getValue();
-          String codcom = prepaidTopup.getMerchantCode();
-          Integer codact = prepaidTopup.getMerchantCategory();
+          BigDecimal impfac = prepaidMovement.getImpfac();
+          String codcom = prepaidMovement.getCodcom();
+          Integer codact = prepaidMovement.getCodact();
           CodigoPais codpais = prepaidMovement.getCodpais();
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString();
-          String numaut = prepaidTopup.getTransactionId(); //solamente los 6 primeros digitos de numreffac
+          String numaut = numreffac;
 
-          //InclusionMovimientosDTO dto = tecnocomService.inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+          //solamente los 6 primeros digitos de numreffac
+          if (numaut.length() > 6) {
+            numaut = numaut.substring(numaut.length()-6);
+          }
+
+          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+
+          if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+
+          } else {
+
+          }
 
         } else {
 

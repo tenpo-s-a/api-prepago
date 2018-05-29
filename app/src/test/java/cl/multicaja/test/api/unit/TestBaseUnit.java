@@ -3,6 +3,7 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -146,7 +147,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(RandomStringUtils.randomNumeric(16));
-    prepaidCard.setEncryptedPan(RandomStringUtils.randomAlphabetic(50));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
@@ -280,7 +281,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setNumaut("");
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(getUniqueInteger().toString());
-    prepaidMovement.setCodact(String.valueOf(numberUtils.random(1111,9999)));
+    prepaidMovement.setCodact(numberUtils.random(1111,9999));
     prepaidMovement.setImpliq(getUniqueLong());
     prepaidMovement.setClamonliq(0);
     prepaidMovement.setCodpais(CodigoPais.CHILE);

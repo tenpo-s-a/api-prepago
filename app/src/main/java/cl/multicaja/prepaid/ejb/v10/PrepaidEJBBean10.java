@@ -252,33 +252,35 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
 
-    PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
-    topup.setId(cdtTransaction.getTransactionReference());
-    topup.setUserId(user.getId());
-    topup.setStatus("exitoso");
-    topup.setTimestamps(new Timestamps());
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
+    prepaidTopup.setId(cdtTransaction.getTransactionReference());
+    prepaidTopup.setUserId(user.getId());
+    prepaidTopup.setStatus("exitoso");
+    prepaidTopup.setTimestamps(new Timestamps());
 
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateTopupFeeAndTotal(topup);
+    this.calculateTopupFeeAndTotal(prepaidTopup);
 
     /*
       Agrega la informacion par el voucher
      */
-    this.addVoucherData(topup);
+    this.addVoucherData(prepaidTopup);
 
-    //TODO falta el registro de prepaidMovement
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(topup, prepaidUser, prepaidCard, cdtTransaction);
+    /*
+      Registra el movimiento en estado pendiente
+     */
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
     /*
       Enviar mensaje al proceso asincrono
      */
-    String messageId = this.getDelegate().sendTopUp(topup, user, cdtTransaction, prepaidMovement);
-    topup.setMessageId(messageId);
+    String messageId = this.getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    prepaidTopup.setMessageId(messageId);
 
-    return topup;
+    return prepaidTopup;
   }
 
   @Override
@@ -714,7 +716,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
-    prepaidMovement.setCodact(String.valueOf(prepaidTopup.getMerchantCategory()));
+    prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
