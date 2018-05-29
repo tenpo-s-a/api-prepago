@@ -27,7 +27,7 @@ public abstract class CamelRouteBuilder extends RouteBuilder {
    * @param queueName
    * @return
    */
-  protected Endpoint createJMSEndpoint(String queueName) {
+  public Endpoint createJMSEndpoint(String queueName) {
     return this.camelFactory.createJMSEndpoint(queueName);
   }
 
@@ -37,7 +37,7 @@ public abstract class CamelRouteBuilder extends RouteBuilder {
    * @param queueName
    * @return
    */
-  protected Queue createJMSQueue(String queueName) {
+  public Queue createJMSQueue(String queueName) {
     return this.camelFactory.createJMSQueue(queueName);
   }
 
