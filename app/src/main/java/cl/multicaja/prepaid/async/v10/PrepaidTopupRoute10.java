@@ -140,8 +140,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_CREATECARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
   public static final String PENDING_CREATECARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
 
-  public static final String PENDING_TOPUP_REVERSE_REQ = "PrepaidTopupRoute10.pendingTopupReverse.req";
-  public static final String PENDING_TOPUP_REVERSE_RESP = "PrepaidTopupRoute10.pendingTopupReverse.resp";
+  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_REQ = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.req";
+  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_RESP = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.resp";
 
   @Override
   public void configure() {
@@ -177,11 +177,11 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       .to(createJMSEndpoint(PENDING_CREATECARD_RESP)).end();
 
     /**
-     * Resersa de carga pendiente
+     * Confirmar resersa de carga pendiente
      */
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_REQ, concurrentConsumers)))
-      .process(this.processPendingTopupReverse())
-      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_RESP)).end();
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_CONFIRMATION_REQ, concurrentConsumers)))
+      .process(this.processPendingTopupReverseConfirmation())
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP)).end();
   }
 
   private ProcessorRoute processPendingTopup() {
@@ -347,7 +347,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   }
 
-	private ProcessorRoute processPendingTopupReverse() {
+	private ProcessorRoute processPendingTopupReverseConfirmation() {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
@@ -379,13 +379,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
         cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
 
-        // Si no cumple con los limites
+        // Si hay error
         if(!cdtTransaction.getNumError().equals("0")){
-          long lNumError = getNumberUtils().toLong(cdtTransaction.getNumError(),-1L);
-          if(lNumError != -1 && lNumError > 10000)
-            throw new ValidationException(4).setData(new KeyValue("value",cdtTransaction.getMsjError()));
-          else
-            throw new ValidationException(2);
+          //TODO: enviar a cola de error
         }
 
         return new ResponseRoute<>(req.getData());
