@@ -92,7 +92,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       data.getNompob(),//_nompob       VARCHAR,
       new InParam(data.getNumextcta(),Types.NUMERIC),//_numextcta        NUMERIC,
       new InParam(data.getNummovext(),Types.NUMERIC),//_nummovext    NUMERIC,
-      new InParam(data.getClamone().getValue(),Types.NUMERIC),// _clamone        NUMERIC,
+      new InParam(data.getClamone(),Types.NUMERIC),// _clamone        NUMERIC,
       data.getTipolin(),//_tipolin         VARCHAR,
       new InParam(data.getLinref(), Types.NUMERIC),//_linref    NUMERIC,
       new InParam(data.getNumbencta(),Types.NUMERIC),//_numbencta       NUMERIC,
@@ -126,7 +126,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
   }
 
   @Override
-  public void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, CodigoMoneda clamone, PrepaidMovementStatus status) throws Exception {
+  public void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception {
 
     String SP_UPDATE_MOV = getSchema()+".mc_prp_actualiza_movimiento_v10";
 
@@ -142,7 +142,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       new InParam(id,Types.NUMERIC),
       numextcta == null ? new NullParam(Types.NUMERIC) : new InParam(numextcta, Types.NUMERIC),
       nummovext == null ? new NullParam(Types.NUMERIC) : new InParam(nummovext, Types.NUMERIC),
-      clamone == null ? new NullParam(Types.NUMERIC) : new InParam(clamone.getValue(), Types.NUMERIC),
+      clamone == null ? new NullParam(Types.NUMERIC) : new InParam(clamone, Types.NUMERIC),
       status.getValue(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

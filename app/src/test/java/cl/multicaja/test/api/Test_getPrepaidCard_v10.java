@@ -9,8 +9,6 @@ import org.junit.Test;
 /**
  * @author abarazarte
  */
-//TODO Implementar test
-@Ignore
 public class Test_getPrepaidCard_v10 extends TestApiBase {
 
   @Test

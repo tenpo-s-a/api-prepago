@@ -45,7 +45,7 @@ public class PrepaidMovement10 implements Serializable {
   private String nompob;
   private Integer numextcta;
   private Integer nummovext;
-  private CodigoMoneda clamone;
+  private Integer clamone;
   private String tipolin;
   private Integer linref;
   private Integer numbencta;
@@ -307,11 +307,11 @@ public class PrepaidMovement10 implements Serializable {
     this.nummovext = nummovext;
   }
 
-  public CodigoMoneda getClamone() {
+  public Integer getClamone() {
     return clamone;
   }
 
-  public void setClamone(CodigoMoneda clamone) {
+  public void setClamone(Integer clamone) {
     this.clamone = clamone;
   }
 
