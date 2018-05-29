@@ -61,7 +61,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
-  private final static String APP_NAME = "prepaid.appname";
+  public final static String APP_NAME = "prepaid.appname";
 
 
   /**

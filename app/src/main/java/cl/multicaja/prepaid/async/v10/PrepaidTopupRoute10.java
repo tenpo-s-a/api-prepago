@@ -1,10 +1,11 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelRouteBuilder;
+import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.prepaid.async.v10.processors.PendingCard10;
-import cl.multicaja.prepaid.async.v10.processors.PendingTopup10;
+import cl.multicaja.prepaid.async.v10.processors.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -36,10 +37,15 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
+  @EJB
+  private CdtEJBBean10 cdtEJBBean10;
+
   private TecnocomService tecnocomService;
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
+
+  private NumberUtils numberUtils;
 
   public PrepaidTopupRoute10() {
     super();
@@ -61,6 +67,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       this.encryptUtil = new EncryptUtil();
     }
     return this.encryptUtil;
+  }
+
+  public NumberUtils getNumberUtils() {
+    if (this.numberUtils == null) {
+      this.numberUtils = NumberUtils.getInstance();
+    }
+    return this.numberUtils;
   }
 
   public ParametersUtil getParametersUtil() {
@@ -116,6 +129,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     this.tecnocomService = tecnocomService;
   }
 
+  public CdtEJBBean10 getCdtEJBBean10() {
+    return cdtEJBBean10;
+  }
+
+  public void setCdtEJBBean10(CdtEJBBean10 cdtEJBBean10) {
+    this.cdtEJBBean10 = cdtEJBBean10;
+  }
+
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 
@@ -125,12 +146,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_CREATECARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
   public static final String PENDING_CREATECARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
 
+  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_REQ = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.req";
+  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_RESP = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.resp";
+
   public static final String ERROR_EMISSION_REQ = "PrepaidTopupRoute10.errorEmission.req";
   public static final String ERROR_EMISSION_RESP = "PrepaidTopupRoute10.errorEmission.resp";
 
   public static final String ERROR_CREATECARD_REQ = "PrepaidTopupRoute10.errorCreateCard.req";
   public static final String ERROR_CREATECARD_RESP = "PrepaidTopupRoute10.errorCreateCard.resp";
-
 
   @Override
   public void configure() {
@@ -179,5 +202,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       .process(new PendingCard10(this).processErrorCreateCard())
       .to(createJMSEndpoint(ERROR_CREATECARD_RESP)).end();
 
+    /**
+     * Confirmacion reversa de topup pendientes
+     */
+    from(String.format("seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_CONFIRMATION_REQ, concurrentConsumers)))
+      .process(new PendingTopupReverseConfirmation10(this).processPendingTopupReverseConfirmation())
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP)).end();
   }
 }
