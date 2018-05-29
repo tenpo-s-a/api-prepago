@@ -721,7 +721,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNompob(""); // se debe actualizar despues
     prepaidMovement.setNumextcta(0); // se debe actualizar despues
     prepaidMovement.setNummovext(0); // se debe actualizar despues
-    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
     prepaidMovement.setTipolin(""); // se debe actualizar despues
     prepaidMovement.setLinref(1); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues

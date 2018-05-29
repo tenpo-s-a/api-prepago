@@ -43,7 +43,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     prepaidMovement.setNompob("POB");
     prepaidMovement.setNumextcta(0);
     prepaidMovement.setNummovext(0);
-    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
     prepaidMovement.setTipolin("1234");
     prepaidMovement.setLinref(1);
     prepaidMovement.setNumbencta(1);
@@ -107,7 +107,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId()>0);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP, PrepaidMovementStatus.PROCESS_OK);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP.getValue(), PrepaidMovementStatus.PROCESS_OK);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 

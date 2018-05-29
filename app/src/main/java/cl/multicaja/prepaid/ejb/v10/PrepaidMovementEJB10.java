@@ -27,5 +27,5 @@ public interface PrepaidMovementEJB10 {
    * @param status
    * @throws Exception
    */
-  void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, CodigoMoneda clamone, PrepaidMovementStatus status) throws Exception;
+  void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
 }
