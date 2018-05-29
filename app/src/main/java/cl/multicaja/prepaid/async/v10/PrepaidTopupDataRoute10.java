@@ -17,32 +17,30 @@ import java.io.Serializable;
  */
 public class PrepaidTopupDataRoute10 implements Serializable {
 
-  private PrepaidTopup10 prepaidTopup;
+  private PrepaidTopup10 prepaidTopup10;
   private User user;
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
-  private String tecnocomCodEntity;
-  private TipoFactura tecnocomInvoiceType;
-  private CdtTransaction10 cdtTransaction;
-  private PrepaidMovement10 prepaidMovement;
+  private CdtTransaction10 cdtTransaction10;
+  private PrepaidMovement10 prepaidMovement10;
 
   public PrepaidTopupDataRoute10() {
     super();
   }
 
   public PrepaidTopupDataRoute10(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
-    this.prepaidTopup = prepaidTopup;
+    this.prepaidTopup10 = prepaidTopup;
     this.user = user;
-    this.cdtTransaction = cdtTransaction;
-    this.prepaidMovement = prepaidMovement;
+    this.cdtTransaction10 = cdtTransaction;
+    this.prepaidMovement10 = prepaidMovement;
   }
 
-  public PrepaidTopup10 getPrepaidTopup() {
-    return prepaidTopup;
+  public PrepaidTopup10 getPrepaidTopup10() {
+    return prepaidTopup10;
   }
 
-  public void setPrepaidTopup(PrepaidTopup10 prepaidTopup) {
-    this.prepaidTopup = prepaidTopup;
+  public void setPrepaidTopup10(PrepaidTopup10 prepaidTopup10) {
+    this.prepaidTopup10 = prepaidTopup10;
   }
 
   public User getUser() {
@@ -69,36 +67,20 @@ public class PrepaidTopupDataRoute10 implements Serializable {
     this.prepaidCard10 = prepaidCard10;
   }
 
-  public String getTecnocomCodEntity() {
-    return tecnocomCodEntity;
+  public CdtTransaction10 getCdtTransaction10() {
+    return cdtTransaction10;
   }
 
-  public void setTecnocomCodEntity(String tecnocomCodEntity) {
-    this.tecnocomCodEntity = tecnocomCodEntity;
+  public void setCdtTransaction10(CdtTransaction10 cdtTransaction10) {
+    this.cdtTransaction10 = cdtTransaction10;
   }
 
-  public TipoFactura getTecnocomInvoiceType() {
-    return tecnocomInvoiceType;
+  public PrepaidMovement10 getPrepaidMovement10() {
+    return prepaidMovement10;
   }
 
-  public void setTecnocomInvoiceType(TipoFactura tecnocomInvoiceType) {
-    this.tecnocomInvoiceType = tecnocomInvoiceType;
-  }
-
-  public CdtTransaction10 getCdtTransaction() {
-    return cdtTransaction;
-  }
-
-  public void setCdtTransaction(CdtTransaction10 cdtTransaction) {
-    this.cdtTransaction = cdtTransaction;
-  }
-
-  public PrepaidMovement10 getPrepaidMovement() {
-    return prepaidMovement;
-  }
-
-  public void setPrepaidMovement(PrepaidMovement10 prepaidMovement) {
-    this.prepaidMovement = prepaidMovement;
+  public void setPrepaidMovement10(PrepaidMovement10 prepaidMovement10) {
+    this.prepaidMovement10 = prepaidMovement10;
   }
 
   @Override
