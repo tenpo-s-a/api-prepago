@@ -26,13 +26,14 @@ public class NewPrepaidTopup10 extends BaseModel {
     super();
   }
 
-  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode) {
+  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory) {
     super();
-
     this.amount = amount;
     this.transactionId = transactionId;
     this.rut = rut;
     this.merchantCode = merchantCode;
+    this.merchantName = merchantName;
+    this.merchantCategory = merchantCategory;
   }
 
   public NewAmountAndCurrency10 getAmount() {

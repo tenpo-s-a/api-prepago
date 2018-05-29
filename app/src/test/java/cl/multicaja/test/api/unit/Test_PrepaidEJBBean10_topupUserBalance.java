@@ -5,8 +5,9 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -14,14 +15,12 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-//TODO habilitar test luego que se pueda establecer el status del User
-@Ignore
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
 
   @Test
   public void topupUserBalance_userNotFound() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
 
@@ -49,6 +48,28 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
 
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario prepago", Integer.valueOf(102003), nfex.getCode());
+    }
+  }
+
+  @Test
+  public void topupUserBalance_prepaidUserNotActive() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
+    prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+
+    try {
+
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+
+    } catch(ValidationException nfex) {
+      Assert.assertEquals("el usuario prepago esta bloqueado", Integer.valueOf(102002), nfex.getCode());
     }
   }
 

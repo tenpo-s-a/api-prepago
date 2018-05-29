@@ -22,7 +22,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
   @Test
   public void pendingEmissionCard() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
     user.setName(RandomStringUtils.randomAlphabetic(5,10));
     user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
 
@@ -51,7 +51,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
   @Test
   public void pendingEmissionCardPrepaidUserIsNull() throws Exception {
-    User user = registerUser();
+    User user = preRegisterUser();
     PrepaidTopup10 topup = buildPrepaidTopup(user);
     String messageId = sendTopup(topup, user);
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
@@ -64,7 +64,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
   @Test
   public void pendingCreateCard() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
     user.setName(RandomStringUtils.randomAlphabetic(5,10));
     user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
 
@@ -103,7 +103,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
   @Test
   public void pendingCreateCardPrepaidUserIsNull() throws Exception {
-    User user = registerUser();
+    User user = preRegisterUser();
     PrepaidTopup10 topup = buildPrepaidTopup(user);
     String messageId = sendTopup(topup, user);
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados

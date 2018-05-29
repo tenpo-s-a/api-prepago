@@ -175,6 +175,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     if(user == null){
       throw new NotFoundException(102001); // Usuario MC no existe
     }
+
     if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
@@ -183,11 +184,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(302003); // Usuario no tiene prepago
+      throw new NotFoundException(102003); // Usuario no tiene prepago
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(302002); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(102002); // Usuario prepago bloqueado o borrado
     }
 
     if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {

@@ -11,8 +11,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.SignUp;
-import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -100,16 +99,34 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   *
+   * pre-registra a un usuario (solo rut e email)
    * @return
    * @throws Exception
    */
-  public User registerUser() throws Exception {
+  public User preRegisterUser() throws Exception {
     Integer rut = getUniqueRutNumber();
     String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
     SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
+
+  /**
+   * pre-registra un usuario y además lo deja habilitado completamente
+   * @return
+   * @throws Exception
+   */
+  public User registerUser() throws Exception {
+    User user = preRegisterUser();
+    user = getUsersEJBBean10().fillUser(user);
+    user.setGlobalStatus(UserStatus.ENABLED.toString());
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.setNameStatus(UserNameStatus.VERIFIED);
+    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+    user = getUsersEJBBean10().updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), null);
+    return user;
+  }
+
   /**
    *
    * @return
@@ -183,8 +200,11 @@ public class TestBaseUnit extends TestApiBase {
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(numberUtils.random(1000, 10000)));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-
     prepaidTopup.setAmount(newAmountAndCurrency);
+
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(RandomStringUtils.randomAlphabetic(6));
+
     return prepaidTopup;
   }
 
