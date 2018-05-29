@@ -64,4 +64,29 @@ public final class PrepaidTopupDelegate10 {
     this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.pendingTopup", new RequestRoute<>(new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement)), headers);
     return messageId;
   }
+
+  /**
+   * Envia un registro de confirmacion de reversa de topup al proceso asincrono
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param cdtTransaction
+   * @param prepaidMovement
+   * @return id del mensaje
+   */
+  //TODO: Verificar donde sera invocado este metodo
+  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
+    System.out.println("Enviando mensaje por messageId: " + messageId);
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+    prepaidTopup.setMessageId(messageId);
+    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation", new RequestRoute<>(new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement)), headers);
+    return messageId;
+  }
 }
