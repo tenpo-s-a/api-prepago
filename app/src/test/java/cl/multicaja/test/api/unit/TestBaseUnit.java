@@ -29,9 +29,9 @@ public class TestBaseUnit extends TestApiBase {
     System.setProperty("project.artifactId", "api-prepaid");
   }
 
-  protected static RutUtils rutUtils = RutUtils.getInstance();
+  public static RutUtils rutUtils = RutUtils.getInstance();
 
-  protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
+  public static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
@@ -39,28 +39,55 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
-  protected static PrepaidTopupDelegate10 getPrepaidTopupDelegate10() {
+  /**
+   *
+   * @return
+   */
+  public static PrepaidTopupDelegate10 getPrepaidTopupDelegate10() {
     if (prepaidTopupDelegate10 == null) {
       prepaidTopupDelegate10 = new PrepaidTopupDelegate10();
     }
     return prepaidTopupDelegate10;
   }
 
-  protected static CdtEJBBean10 getCdtEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static CdtEJBBean10 getCdtEJBBean10() {
     if (cdtEJBBean10 == null) {
       cdtEJBBean10 = new CdtEJBBean10();
     }
     return cdtEJBBean10;
   }
 
-  protected static UsersEJBBean10 getUsersEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static UsersEJBBean10 getUsersEJBBean10() {
     if (usersEJBBean10 == null) {
       usersEJBBean10 = new UsersEJBBean10();
     }
     return usersEJBBean10;
   }
 
-  protected static PrepaidEJBBean10 getPrepaidEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
+    if (prepaidMovementEJBBean10 == null) {
+      prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+    }
+    return prepaidMovementEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static PrepaidEJBBean10 getPrepaidEJBBean10() {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
@@ -69,13 +96,6 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
     }
     return prepaidEJBBean10;
-  }
-
-  protected static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
-    if (prepaidMovementEJBBean10 == null) {
-      prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
-    }
-    return prepaidMovementEJBBean10;
   }
 
   /**
