@@ -2,12 +2,13 @@ package cl.multicaja.test.api.unit;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.test.TestApiBase;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.SignUp;
 import cl.multicaja.users.model.v10.User;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @autor vutreras
@@ -27,9 +29,9 @@ public class TestBaseUnit extends TestApiBase {
     System.setProperty("project.artifactId", "api-prepaid");
   }
 
-  protected static RutUtils rutUtils = RutUtils.getInstance();
+  public static RutUtils rutUtils = RutUtils.getInstance();
 
-  protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
+  public static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
@@ -37,28 +39,55 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
-  protected static PrepaidTopupDelegate10 getPrepaidTopupDelegate10() {
+  /**
+   *
+   * @return
+   */
+  public static PrepaidTopupDelegate10 getPrepaidTopupDelegate10() {
     if (prepaidTopupDelegate10 == null) {
       prepaidTopupDelegate10 = new PrepaidTopupDelegate10();
     }
     return prepaidTopupDelegate10;
   }
 
-  protected static CdtEJBBean10 getCdtEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static CdtEJBBean10 getCdtEJBBean10() {
     if (cdtEJBBean10 == null) {
       cdtEJBBean10 = new CdtEJBBean10();
     }
     return cdtEJBBean10;
   }
 
-  protected static UsersEJBBean10 getUsersEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static UsersEJBBean10 getUsersEJBBean10() {
     if (usersEJBBean10 == null) {
       usersEJBBean10 = new UsersEJBBean10();
     }
     return usersEJBBean10;
   }
 
-  protected static PrepaidEJBBean10 getPrepaidEJBBean10() {
+  /**
+   *
+   * @return
+   */
+  public static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
+    if (prepaidMovementEJBBean10 == null) {
+      prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+    }
+    return prepaidMovementEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static PrepaidEJBBean10 getPrepaidEJBBean10() {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
@@ -67,13 +96,6 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
     }
     return prepaidEJBBean10;
-  }
-
-  protected static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
-    if (prepaidMovementEJBBean10 == null) {
-      prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
-    }
-    return prepaidMovementEJBBean10;
   }
 
   /**
@@ -205,5 +227,87 @@ public class TestBaseUnit extends TestApiBase {
     Assert.assertNotNull("debe tener nameOnCard", prepaidCard.getNameOnCard());
 
     return prepaidCard;
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   */
+  protected PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser) {
+    return buildPrepaidMovement(prepaidUser, null);
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   */
+  protected PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) {
+
+    String codent = ConfigUtils.getInstance().getProperty("tecnocom.codEntity");
+
+    TipoFactura tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+
+    if (prepaidTopup != null) {
+      if (TopupType.WEB.equals(prepaidTopup.getType())) {
+        tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+      } else {
+        tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+      }
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta("1234");
+    prepaidMovement.setCuenta(getUniqueInteger().toString());
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac("");
+    prepaidMovement.setPan(RandomStringUtils.randomNumeric(16));
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(BigDecimal.valueOf(1000));
+    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setNumaut("");
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom(getUniqueInteger().toString());
+    prepaidMovement.setCodact(String.valueOf(numberUtils.random(1111,9999)));
+    prepaidMovement.setImpliq(getUniqueLong());
+    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(RandomStringUtils.randomAlphabetic(6));
+    prepaidMovement.setNumextcta(0);
+    prepaidMovement.setNummovext(0);
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
+    prepaidMovement.setTipolin("1234");
+    prepaidMovement.setLinref(1);
+    prepaidMovement.setNumbencta(1);
+    prepaidMovement.setNumplastico(numberUtils.toLong(RandomStringUtils.randomNumeric(12)));
+    return prepaidMovement;
+  }
+
+  /**
+   *
+   * @param prepaidMovement10
+   * @return
+   * @throws Exception
+   */
+  public PrepaidMovement10 createPrepaidMovement(PrepaidMovement10 prepaidMovement10) throws Exception {
+
+    prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+
+    Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
+    Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);
+
+    return prepaidMovement10;
   }
 }
