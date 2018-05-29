@@ -1,18 +1,11 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelRouteBuilder;
-import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.prepaid.async.v10.processors.PendingCard10;
-import cl.multicaja.prepaid.async.v10.processors.PendingTopup10;
+import cl.multicaja.prepaid.async.v10.processors.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -46,6 +39,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
+
   private TecnocomService tecnocomService;
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -80,6 +74,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       this.numberUtils = NumberUtils.getInstance();
     }
     return this.numberUtils;
+  }
 
   public ParametersUtil getParametersUtil() {
     if (parametersUtil == null) {
@@ -207,48 +202,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       .process(new PendingCard10(this).processErrorCreateCard())
       .to(createJMSEndpoint(ERROR_CREATECARD_RESP)).end();
 
-  }
+    /**
+     * Confirmacion reversa de topup pendientes
+     */
+    from(String.format("seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_REQ));
 
-
-	private ProcessorRoute processPendingTopupReverseConfirmation() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
-      @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
-
-        PrepaidTopupDataRoute10 data = req.getData();
-
-        if (data.getUser() == null) {
-          log.error("Error req.getUser() es null");
-          return null;
-        }
-
-        if (data.getUser().getRut() == null) {
-          log.error("Error req.getUser().getRut() es null");
-          return null;
-        }
-
-        Integer rut = data.getUser().getRut().getValue();
-
-        if (rut == null){
-          log.error("Error req.getUser().getRut().getValue() es null");
-          return null;
-        }
-
-        PrepaidTopup10 topupRequest = data.getPrepaidTopup();
-
-        CdtTransaction10 cdtTransaction = new CdtTransaction10();
-        cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
-        cdtTransaction.setGloss(CdtTransactionType.REVERSA_CARGA.getName() + " " + topupRequest.getAmount().getValue());
-
-        cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
-
-        // Si hay error
-        if(!cdtTransaction.getNumError().equals("0")){
-          //TODO: enviar a cola de error
-        }
-
-        return new ResponseRoute<>(req.getData());
-      }
-    };
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_CONFIRMATION_REQ, concurrentConsumers)))
+      .process(new PendingTopupReverseConfirmation10(this).processPendingTopupReverseConfirmation())
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP)).end();
   }
 }

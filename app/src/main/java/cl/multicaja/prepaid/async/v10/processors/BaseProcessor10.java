@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.JMSMessenger;
+import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
@@ -63,6 +64,10 @@ public abstract class BaseProcessor10 {
 
   public TecnocomService getTecnocomService() {
     return this.getRoute().getTecnocomService();
+  }
+
+  public CdtEJBBean10 getCdtEJBBean10() {
+    return this.getRoute().getCdtEJBBean10();
   }
 
   /**

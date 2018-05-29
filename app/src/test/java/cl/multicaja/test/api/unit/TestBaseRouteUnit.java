@@ -48,6 +48,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
       prepaidTopupRoute10.setPrepaidEJBBean10(t.getPrepaidEJBBean10());
       prepaidTopupRoute10.setUsersEJBBean10(t.getUsersEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(t.getPrepaidMovementEJBBean10());
+      prepaidTopupRoute10.setCdtEJBBean10(t.getCdtEJBBean10());
 
       camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
     }
@@ -96,6 +97,45 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    */
   protected String sendTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    return messageId;
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user) throws Exception {
+    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, null, null);
+    return messageId;
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param cdtTransaction
+   * @return
+   * @throws Exception
+   */
+  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction) throws Exception {
+    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, null);
+    return messageId;
+  }
+
+  /**
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param cdtTransaction
+   * @param prepaidMovement
+   * @return
+   * @throws Exception
+   */
+  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
+    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, prepaidMovement);
     return messageId;
   }
 }
