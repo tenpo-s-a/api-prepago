@@ -674,12 +674,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
    */
   private PrepaidMovement10 buildPrepaidMovement(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
 
-    String codEntity = null;
+    String codent = null;
     try {
-      codEntity = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
     } catch (SQLException e) {
       log.error("Error al cargar parametro cod_entidad");
-      codEntity = getConfigUtils().getProperty("tecnocom.codEntity");
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
     }
 
     TipoFactura tipoFactura = null;
@@ -698,7 +698,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
     prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setCodent(codEntity);
+    prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
