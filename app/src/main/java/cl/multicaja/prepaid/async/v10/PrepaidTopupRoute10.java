@@ -6,7 +6,9 @@ import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
@@ -42,6 +44,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   @EJB
   private UsersEJBBean10 usersEJBBean10;
 
+  @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
   private TecnocomService tecnocomService;
 
   private ConfigUtils configUtils;
@@ -66,6 +71,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
       this.encryptUtil = new EncryptUtil();
     }
     return this.encryptUtil;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
+    return prepaidMovementEJBBean10;
+  }
+
+  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
+    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
@@ -115,6 +128,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_CREATECARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
   public static final String PENDING_CREATECARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
 
+  public static final String ERROR_EMISSION_REQ = "PrepaidTopupRoute10.errorEmission.req";
+  public static final String ERROR_EMISSION_RESP = "PrepaidTopupRoute10.errorEmission.resp";
+
+  public static final String ERROR_CREATECARD_REQ = "PrepaidTopupRoute10.errorCreateCard.req";
+  public static final String ERROR_CREATECARD_RESP = "PrepaidTopupRoute10.errorCreateCard.resp";
+
+
   @Override
   public void configure() {
 
@@ -147,6 +167,20 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CREATECARD_REQ, concurrentConsumers)))
       .process(this.processPendingCreateCard())
       .to(createJMSEndpoint(PENDING_CREATECARD_RESP)).end();
+
+    /**
+     * Error Emisiones
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_EMISSION_REQ, concurrentConsumers)))
+      .process(this.processErrorEmission())
+      .to(createJMSEndpoint(ERROR_EMISSION_RESP)).end();
+
+    /**
+     * Error Obtener Datos Tarjeta
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CREATECARD_REQ, concurrentConsumers)))
+      .process(this.processErrorCreateCard())
+      .to(createJMSEndpoint(ERROR_CREATECARD_RESP)).end();
 
   }
 
@@ -284,10 +318,11 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
           }
           else {
-            //TODO: Implementar Cola Error
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
+
           }
         } else {
-          //TODO: Error x reintentos
+          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
         }
         log.info("processPendingEmission - REQ: " + req);
         return new ResponseRoute<>(req.getData());
@@ -305,8 +340,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
           if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
             PrepaidCard10 prepaidCard10 = new PrepaidCard10();
             prepaidCard10.setIdUser(req.getData().getPrepaidUser10().getId());
-            prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());//TODO: Verificar que va aca (Felipe)
-            prepaidCard10.setPan(datosTarjetaDTO.getPan());//TODO: Reemplazar por x Digitos
+            prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());
+            prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
             prepaidCard10.setEncryptedPan(getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
             prepaidCard10.setProcessorUserId(req.getData().getPrepaidCard10().getProcessorUserId());
             prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
@@ -318,11 +353,11 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
           }
           else {
-
-            //TODO: Implementar Cola Error
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
           }
-        } else {
-          //TODO: Error x reintentos
+        }
+        else {
+          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
         }
         return new ResponseRoute<>(req.getData());
       }
@@ -330,5 +365,28 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   }
 
+  /* Cola Errores */
+  private ProcessorRoute processErrorEmission() {
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+        log.info("processPendingEmission - REQ: " + req);
+        prepaidMovementEJBBean10.updatePrepaidMovement(null,req.getData().getPrepaidMovement().getId(),null,null,null,PrepaidMovementStatus.ERROR_IN_PROCESS);
+        return new ResponseRoute<>(req.getData());
+      }
+    };
+  }
+
+  private ProcessorRoute processErrorCreateCard() {
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+        log.info("processPendingEmission - REQ: " + req);
+        prepaidMovementEJBBean10.updatePrepaidMovement(null,req.getData().getPrepaidMovement().getId(),null,null,null,PrepaidMovementStatus.ERROR_IN_PROCESS);
+        return new ResponseRoute<>(req.getData());
+      }
+    };
+
+  }
 
 }
