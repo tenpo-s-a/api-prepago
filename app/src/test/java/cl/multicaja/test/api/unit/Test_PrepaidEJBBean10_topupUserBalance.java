@@ -1,8 +1,11 @@
 package cl.multicaja.test.api.unit;
 
 import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
@@ -10,6 +13,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.jms.Queue;
 import java.math.BigDecimal;
 
 /**
@@ -126,7 +130,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
   }
 
   @Test
-  public void topupUserBalance_validateIdCDT() throws Exception {
+  public void topupUserBalance_validate_cdt() throws Exception {
 
     User user = registerUser();
 
@@ -143,10 +147,63 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
+    String messageId = prepaidTopup.getMessageId();
+
     if (CamelFactory.getInstance().isCamelRunning()) {
-      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", prepaidTopup.getMessageId());
+      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
+
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+
+      Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
+      Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
+
     } else {
-      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", prepaidTopup.getMessageId());
+      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
+    }
+  }
+
+  @Test
+  public void topupUserBalance_validate_prepaidMovement() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+
+    //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
+
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+
+    Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
+
+    String messageId = prepaidTopup.getMessageId();
+
+    if (CamelFactory.getInstance().isCamelRunning()) {
+      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
+
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+
+      Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
+      Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
+
+    } else {
+      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
     }
   }
 }
