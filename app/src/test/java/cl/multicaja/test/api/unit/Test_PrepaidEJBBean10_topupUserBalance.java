@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
+//TODO habilitar test luego que se pueda establecer el status del User
 @Ignore
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnit {
 

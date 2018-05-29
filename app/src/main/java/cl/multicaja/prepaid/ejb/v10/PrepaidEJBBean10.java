@@ -103,6 +103,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @EJB
   private CdtEJBBean10 cdtEJB10;
 
+  @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJB10;
+
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
   }
@@ -125,6 +128,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   public void setCdtEJB10(CdtEJBBean10 cdtEJB10) {
     this.cdtEJB10 = cdtEJB10;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJB10() {
+    return prepaidMovementEJB10;
+  }
+
+  public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
+    this.prepaidMovementEJB10 = prepaidMovementEJB10;
   }
 
   @Override
@@ -197,21 +208,21 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-    if (card == null) {
+    if (prepaidCard == null) {
 
-      card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+      prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
 
-      if (card == null) {
+      if (prepaidCard == null) {
 
-        card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+        prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
 
-        if (card == null) {
-          card = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+        if (prepaidCard == null) {
+          prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
         }
 
-        if (card != null) {
+        if (prepaidCard != null) {
           throw new ValidationException(106000); //tarjeta invalida
         }
       }
@@ -221,28 +232,28 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       Validar movimiento en CDT, en caso de error lanzar exception
      */
 
-    CdtTransaction10 oCdtTransaction10 = new CdtTransaction10();
-    oCdtTransaction10.setAmount(topupRequest.getAmount().getValue());
-    oCdtTransaction10.setTransactionType(topupRequest.getCdtTransactionType());
-    oCdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
-    oCdtTransaction10.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
-    oCdtTransaction10.setTransactionReference(0L);
-    oCdtTransaction10.setExternalTransactionId(topupRequest.getTransactionId());
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(topupRequest.getAmount().getValue());
+    cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
+    cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
 
-    oCdtTransaction10 = this.getCdtEJB10().addCdtTransaction(null,oCdtTransaction10);
+    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null,cdtTransaction);
 
     // Si no cumple con los limites
-    if(!oCdtTransaction10.getNumError().equals("0")){
-      long lNumError = numberUtils.toLong(oCdtTransaction10.getNumError(),-1L);
+    if(!cdtTransaction.getNumError().equals("0")){
+      long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000)
-        throw new ValidationException(4).setData(new KeyValue("value",oCdtTransaction10.getMsjError()));
+        throw new ValidationException(4).setData(new KeyValue("value",cdtTransaction.getMsjError()));
       else
         throw new ValidationException(2);
     }
 
 
     PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
-    topup.setId(oCdtTransaction10.getTransactionReference());
+    topup.setId(cdtTransaction.getTransactionReference());
     topup.setUserId(user.getId());
     topup.setStatus("exitoso");
     topup.setTimestamps(new Timestamps());
@@ -257,10 +268,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
      */
     this.addVoucherData(topup);
 
+    //TODO falta el registro de prepaidMovement
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(topup, prepaidUser, prepaidCard, cdtTransaction);
+    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+
     /*
       Enviar mensaje al proceso asincrono
      */
-    String messageId = this.getDelegate().sendTopUp(topup, user);
+    String messageId = this.getDelegate().sendTopUp(topup, user, cdtTransaction, prepaidMovement);
     topup.setMessageId(messageId);
 
     return topup;
@@ -706,7 +721,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNompob(""); // se debe actualizar despues
     prepaidMovement.setNumextcta(0); // se debe actualizar despues
     prepaidMovement.setNummovext(0); // se debe actualizar despues
-    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
     prepaidMovement.setTipolin(""); // se debe actualizar despues
     prepaidMovement.setLinref(1); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
