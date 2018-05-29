@@ -222,16 +222,16 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
           String contrato = card.getProcessorUserId();
           String pan = card.getEncryptedPan(); // se debe desencriptar
-          CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
-          IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+          CodigoMoneda clamon = prepaidMovement.getClamon();
+          IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
           BigDecimal impfac = prepaidTopup.getAmount().getValue();
           String codcom = prepaidTopup.getMerchantCode();
           Integer codact = prepaidTopup.getMerchantCategory();
-          CodigoPais codpais = CodigoPais.CHILE;
-          String numaut = prepaidTopup.getTransactionId(); //solamente los 6 primeros digitos de numreffac
+          CodigoPais codpais = prepaidMovement.getCodpais();
           String nomcomred = prepaidTopup.getMerchantName();
-          String numreffac = prepaidTopup.getTransactionId(); //este cambiara por el id de la tabla de inclusion de movimientos
+          String numreffac = prepaidMovement.getId().toString();
+          String numaut = prepaidTopup.getTransactionId(); //solamente los 6 primeros digitos de numreffac
 
           //InclusionMovimientosDTO dto = tecnocomService.inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
 
