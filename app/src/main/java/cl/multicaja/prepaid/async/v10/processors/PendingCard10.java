@@ -58,9 +58,11 @@ public class PendingCard10 extends BaseProcessor10 {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
           }
           else {
+            req.setRetryCount(0);
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
           }
         } else {
+          req.setRetryCount(0);
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
         }
         log.info("processPendingEmission - REQ: " + req);
@@ -93,6 +95,7 @@ public class PendingCard10 extends BaseProcessor10 {
               req.getData().getPrepaidCard10().getStatus(),prepaidCard10);
 
             if (!bUpdate) {
+              req.setRetryCount(0);
               exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
             }
             req.getData().setPrepaidCard10(prepaidCard10);
@@ -102,10 +105,12 @@ public class PendingCard10 extends BaseProcessor10 {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
           }
           else {
+            req.setRetryCount(0);
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
           }
         }
         else {
+          req.setRetryCount(0);
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
         }
         return new ResponseRoute<>(req.getData());
