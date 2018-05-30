@@ -102,7 +102,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
     System.out.println(c1);
     Assert.assertNotNull("debe retornar un tarjeta", c1);
-    Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.ACTIVE, c1.getStatus());
+    Assert.assertEquals("el estado debe estar actualizado", card, c1);
 
   }
 
