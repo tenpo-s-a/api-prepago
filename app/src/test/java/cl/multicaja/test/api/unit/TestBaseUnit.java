@@ -33,6 +33,8 @@ public class TestBaseUnit extends TestApiBase {
 
   public static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
+  public static EncryptUtil encryptUtil = EncryptUtil.getInstance();
+
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
   private static UsersEJBBean10 usersEJBBean10;
@@ -177,7 +179,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
+    prepaidCard.setProcessorUserId(RandomStringUtils.randomNumeric(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + RandomStringUtils.randomAlphabetic(5));
     return prepaidCard;
   }
@@ -194,7 +196,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
+    prepaidCard.setProcessorUserId(RandomStringUtils.randomNumeric(20));
 
     return prepaidCard;
   }
