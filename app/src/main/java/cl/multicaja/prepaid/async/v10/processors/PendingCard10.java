@@ -99,6 +99,7 @@ public class PendingCard10 extends BaseProcessor10 {
               exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
             }
             req.getData().setPrepaidCard10(prepaidCard10);
+            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), req, exchange.getIn().getHeaders());
 
           }
           else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -113,6 +114,7 @@ public class PendingCard10 extends BaseProcessor10 {
           req.setRetryCount(0);
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
         }
+
         return new ResponseRoute<>(req.getData());
       }
     };
