@@ -98,7 +98,6 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     Assert.assertEquals("Status Igual a",PrepaidCardStatus.ACTIVE, remoteTopup.getData().getPrepaidCard10().getStatus());
     Assert.assertNotNull("Deberia Tener Nombre",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
 
-    System.out.println("Contrato: "+remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
   }
 
   @Test
