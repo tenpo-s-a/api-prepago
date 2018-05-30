@@ -643,8 +643,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setMcVoucherData(mcVoucherData);
   }
 
-
-
   /**
    *
    * @param prepaidTopup
@@ -683,7 +681,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
@@ -693,7 +691,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
-    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
     prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
@@ -702,11 +700,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNompob(""); // se debe actualizar despues
     prepaidMovement.setNumextcta(0); // se debe actualizar despues
     prepaidMovement.setNummovext(0); // se debe actualizar despues
-    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
+    prepaidMovement.setClamone(0); // se debe actualizar despues
     prepaidMovement.setTipolin(""); // se debe actualizar despues
-    prepaidMovement.setLinref(1); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
-    prepaidMovement.setNumplastico(123L); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
 
     return prepaidMovement;
   }
@@ -714,7 +712,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Override
   public boolean updateCard(Map<String, Object> headers,Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
 
-  final String SP_NAME = getSchema() + ".mc_prp_actualiza_tarjeta_v10";
+    final String SP_NAME = getSchema() + ".mc_prp_actualiza_tarjeta_v10";
 
     Object[] params = {
       cardId == null ? new NullParam(Types.BIGINT): cardId,
@@ -729,17 +727,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
+
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 
+    log.info("resp update card: " + resp);
+
     if(resp.get("_error_code").equals("0")){
-      System.out.println(resp.get("_error_msg"));
       return true;
-    }
-    else {
-      System.out.println(resp.get("_error_msg"));
+    } else {
       return false;
     }
   }
-
-
 }

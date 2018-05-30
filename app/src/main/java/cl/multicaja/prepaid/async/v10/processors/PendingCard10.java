@@ -40,8 +40,8 @@ public class PendingCard10 extends BaseProcessor10 {
 
           PrepaidTopupDataRoute10 prepaidTopup10 = req.getData();
           User user = prepaidTopup10.getUser();
-          System.out.println(user);
-          AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), "" + user.getRut().getValue(), TipoDocumento.RUT);
+
+          AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
 
           if (altaClienteDTO.getRetorno().equals(CodigoRetorno._000)) {
 
@@ -49,7 +49,7 @@ public class PendingCard10 extends BaseProcessor10 {
             prepaidCard.setIdUser(prepaidTopup10.getPrepaidUser10().getId());
             prepaidCard.setStatus(PrepaidCardStatus.PENDING);
             prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-            prepaidCard =getPrepaidEJBBean10().createPrepaidCard(null,prepaidCard);
+            prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null,prepaidCard);
             req.getData().setPrepaidCard10(prepaidCard);
             req.setRetryCount(0);
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
@@ -91,6 +91,7 @@ public class PendingCard10 extends BaseProcessor10 {
             prepaidCard10.setEncryptedPan(getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
             prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
             prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
+
             boolean bUpdate = getPrepaidEJBBean10().updateCard(null, req.getData().getPrepaidCard10().getId(),req.getData().getPrepaidCard10().getIdUser(),
               req.getData().getPrepaidCard10().getStatus(),prepaidCard10);
 

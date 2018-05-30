@@ -4,9 +4,13 @@ import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -18,9 +22,9 @@ import javax.jms.Queue;
 public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
   @Test
-  public void pendingTopup_RutIsNull() throws Exception {
+  public void pendingTopup_rut_is_Null() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -37,9 +41,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   }
 
   @Test
-  public void pendingTopup_PrepaidUserIsNull() throws Exception {
+  public void pendingTopup_prepaidUser_is_null() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -54,9 +58,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
 
   @Test
-  public void pendingTopup_Get_CodEntity() throws Exception {
+  public void pendingTopup_with_codent_and_tipofac() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
@@ -102,9 +106,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   }
 
   @Test
-  public void pendingTopup_WithCardLockedhard() throws Exception {
+  public void pendingTopup_with_card_lockedhard() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
@@ -132,9 +136,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   }
 
   @Test
-  public void pendingTopup_WithCardExpired() throws Exception {
+  public void pendingTopup_with_card_expired() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
@@ -159,5 +163,69 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNull("No deberia existir un topup", remoteTopup);
+  }
+
+  @Ignore
+  @Test
+  public void pendingTopup_with_prepaidMovement_PROCESS_OK() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser.getId());
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setPan(datosTarjetaDTO.getPan());
+    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+
+    prepaidCard = createPrepaidCard(prepaidCard);
+
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    prepaidMovement = createPrepaidMovement(prepaidMovement);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
+
+    //Alta de cliente
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+    PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
+
+    Assert.assertEquals("Deberia contener una codEntity", prepaidMovement.getCodent(), prepaidMovement10.getCodent());
+
+    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovement10.getTipofac());
+    } else {
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovement10.getTipofac());
+    }
+
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, prepaidMovement.getEstado());
   }
 }

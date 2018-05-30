@@ -118,6 +118,17 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
+            prepaidMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
+            prepaidMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
+            prepaidMovement.setClamone(inclusionMovimientosDTO.getClamone());
+            prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK); //realizado
+
+            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(),
+                                                                        prepaidMovement.getNumextcta(),
+                                                                        prepaidMovement.getNummovext(),
+                                                                        prepaidMovement.getClamone(),
+                                                                        prepaidMovement.getEstado());
+
           } else {
 
           }

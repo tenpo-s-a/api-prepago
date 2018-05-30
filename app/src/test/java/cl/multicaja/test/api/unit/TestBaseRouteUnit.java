@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.AfterClass;
@@ -22,6 +23,8 @@ public class TestBaseRouteUnit extends TestBaseUnit {
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
 
   private static BrokerService brokerService;
+
+  private static PrepaidTopupRoute10 prepaidTopupRoute10;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -44,7 +47,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
 
       //Inicializa las rutas camel
       Test_PendingTopup10 t = new Test_PendingTopup10();
-      PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
+      prepaidTopupRoute10 = new PrepaidTopupRoute10();
       prepaidTopupRoute10.setPrepaidEJBBean10(t.getPrepaidEJBBean10());
       prepaidTopupRoute10.setUsersEJBBean10(t.getUsersEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(t.getPrepaidMovementEJBBean10());
@@ -62,6 +65,22 @@ public class TestBaseRouteUnit extends TestBaseUnit {
       camelFactory.releaseCamelContext();
       brokerService.stop();
     }
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static PrepaidTopupRoute10 getPrepaidTopupRoute10() {
+    return prepaidTopupRoute10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static TecnocomService getTecnocomService() {
+    return getPrepaidTopupRoute10().getTecnocomService();
   }
 
   /**
