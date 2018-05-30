@@ -63,7 +63,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             req.setRetryCount(0);
           } else if (CodigoRetorno._000.equals(CodigoRetorno._1000)) {
           //} else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            req.setRetryCount(0);
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
           }
           else {
