@@ -3,6 +3,7 @@ package cl.multicaja.test.api.unit;
 
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,6 +80,32 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     Assert.assertNotNull("debe retornar un usuario", c1);
     Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.EXPIRED, c1.getStatus());
   }
+
+  @Test
+  public void updateCard() throws Exception {
+
+    PrepaidCard10 card = buildPrepaidCardPending();
+    card = createPrepaidCard(card);
+    Long cardId = card.getId();
+    Long userId = card.getIdUser();
+    PrepaidCardStatus state = card.getStatus();
+
+    card.setStatus(PrepaidCardStatus.ACTIVE);
+    card.setExpiration(1023);
+    card.setNameOnCard(RandomStringUtils.randomAlphabetic(20));
+    card.setPan(RandomStringUtils.randomAlphabetic(16));
+    card.setEncryptedPan(RandomStringUtils.randomAlphabetic(20));
+
+    boolean bUpdate = getPrepaidEJBBean10().updateCard(null,cardId,userId,state,card);
+    Assert.assertTrue("Debe ser true", bUpdate);
+
+    PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
+    System.out.println(c1);
+    Assert.assertNotNull("debe retornar un tarjeta", c1);
+    Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.ACTIVE, c1.getStatus());
+
+  }
+
 
   @Test
   public void checkOrderDesc() throws Exception {

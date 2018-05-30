@@ -44,20 +44,21 @@ public class PendingCard10 extends BaseProcessor10 {
           AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), "" + user.getRut().getValue(), TipoDocumento.RUT);
 
           if (altaClienteDTO.getRetorno().equals(CodigoRetorno._000)) {
-            if (req.getData().getPrepaidCard10() == null) {
-              req.getData().setPrepaidCard10(new PrepaidCard10());
-              req.getData().getPrepaidCard10().setProcessorUserId(altaClienteDTO.getContrato());
-            } else {
-              req.getData().getPrepaidCard10().setProcessorUserId(altaClienteDTO.getContrato());
-            }
+
+            PrepaidCard10 prepaidCard =  new PrepaidCard10();
+            prepaidCard.setIdUser(prepaidTopup10.getPrepaidUser10().getId());
+            prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+            prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+            prepaidCard =getPrepaidEJBBean10().createPrepaidCard(null,prepaidCard);
+            req.getData().setPrepaidCard10(prepaidCard);
             req.setRetryCount(0);
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+
           } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
           }
           else {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
-
           }
         } else {
           exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
@@ -80,16 +81,22 @@ public class PendingCard10 extends BaseProcessor10 {
         if(req.getRetryCount() <= 3) {
           DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(req.getData().getPrepaidCard10().getProcessorUserId());
           if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
-            PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-            prepaidCard10.setIdUser(req.getData().getPrepaidUser10().getId());
+
+            PrepaidCard10 prepaidCard10 = getPrepaidEJBBean10().getPrepaidCardById(null,req.getData().getPrepaidCard10().getId());
+
             prepaidCard10.setNameOnCard(req.getData().getUser().getName() + " " + req.getData().getUser().getLastname_1());
             prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
             prepaidCard10.setEncryptedPan(getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
-            prepaidCard10.setProcessorUserId(req.getData().getPrepaidCard10().getProcessorUserId());
             prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
             prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
-            prepaidCard10 = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard10);
+            boolean bUpdate = getPrepaidEJBBean10().updateCard(null, req.getData().getPrepaidCard10().getId(),req.getData().getPrepaidCard10().getIdUser(),
+              req.getData().getPrepaidCard10().getStatus(),prepaidCard10);
+
+            if (!bUpdate) {
+              exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+            }
             req.getData().setPrepaidCard10(prepaidCard10);
+
           }
           else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
