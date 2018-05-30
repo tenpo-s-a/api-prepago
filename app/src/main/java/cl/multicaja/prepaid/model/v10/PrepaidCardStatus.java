@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author abarazarte
  */
 public enum PrepaidCardStatus implements Serializable {
-
+  PENDING,
   ACTIVE,
   LOCKED,
   LOCKED_HARD,
