@@ -154,6 +154,33 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard;
   }
 
+
+  /**
+   * CREA TARJETA ESTADO PENDIENTE
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCardPending(PrepaidUser10 prepaidUser) throws Exception {
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
+
+    return prepaidCard;
+  }
+  /**
+   *CREA TARJETA ESTADO PENDIENTE
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCardPending() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    return buildPrepaidCardPending(prepaidUser);
+  }
+
   /**
    *
    * @return
@@ -219,12 +246,7 @@ public class TestBaseUnit extends TestApiBase {
     Assert.assertNotNull("debe retornar un usuario", prepaidCard);
     Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
     Assert.assertEquals("debe tener idUser", true, prepaidCard.getIdUser() > 0);
-    Assert.assertNotNull("debe tener pan", prepaidCard.getPan());
-    Assert.assertNotNull("debe tener encryptedPan", prepaidCard.getEncryptedPan());
-    Assert.assertNotNull("debe tener expiration", prepaidCard.getExpiration());
     Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
-    Assert.assertNotNull("debe tener processorUserId", prepaidCard.getProcessorUserId());
-    Assert.assertNotNull("debe tener nameOnCard", prepaidCard.getNameOnCard());
 
     return prepaidCard;
   }

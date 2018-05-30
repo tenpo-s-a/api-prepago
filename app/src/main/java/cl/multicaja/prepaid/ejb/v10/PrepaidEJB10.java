@@ -176,4 +176,11 @@ public interface PrepaidEJB10 {
    * @throws IllegalStateException si el topup.amount.value es null
    */
   void addVoucherData(PrepaidTopup10 topup) throws Exception;
+
+/**
+ *  Permite realizar la actualizacion de los datos de una tarjeta
+ *
+*/
+  boolean updateCard(Map<String, Object> headers,Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception;
+
 }

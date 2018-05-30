@@ -55,7 +55,30 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
     };
     return params;
   }
+  /**
+   * Crea los datos de una tarjeta Pendiente
+   * @param status
+   * @return
+   */
+  public static Object[] buildEmptyCard(String contrato,String status) throws SQLException {
 
+   //la tarjeta requiere de la existencia de un usuario en la BD
+    Map<String, Object> mapUser = insertUser("ACTIVO");
+
+    Object[] params = {
+      mapUser.get("id"), //_id_usuario
+      new NullParam(Types.VARCHAR), //_pan
+      new NullParam(Types.VARCHAR), //_pan_encriptado
+      contrato, //_contrato
+      0, //_expiracion
+      status, //_estado
+      new NullParam(Types.VARCHAR), //_nombre_tarjeta
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    return params;
+  }
   /**
    * inserta una nueva tarjeta
    * @param status
@@ -65,6 +88,36 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
   public static Map<String, Object> insertCard(String status) throws SQLException {
 
     Object[] params = buildCard(status);
+
+    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+    Assert.assertNotNull("Debe retornar respuesta", resp);
+    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", numberUtils.toLong(resp.get("_r_id") ));
+    map.put("id_usuario", numberUtils.toLong(params[0] ));
+    map.put("pan", String.valueOf(params[1]));
+    map.put("pan_encriptado", String.valueOf(params[2]));
+    map.put("contrato", String.valueOf(params[3]));
+    map.put("expiracion", numberUtils.toInt(params[4]));
+    map.put("estado", String.valueOf(params[5]));
+    map.put("nombre_tarjeta", String.valueOf(params[6]));
+
+    return map;
+  }
+
+  /**
+   * inserta una nueva pendiente
+   * @param status
+   * @return
+   * @throws SQLException
+   */
+
+  public static Map<String, Object> insertEmptyCard(String contrato, String status) throws SQLException {
+
+    Object[] params = buildEmptyCard(contrato,status);
 
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 
@@ -118,49 +171,6 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
       Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC001", resp.get("_error_code"));
     }
 
-    {
-      Object[] params = buildCard("ACTIVA");
-
-      params[1] = new NullParam(Types.VARCHAR); //_pan
-
-      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-      Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC002", resp.get("_error_code"));
-    }
-
-    {
-      Object[] params = buildCard("ACTIVA");
-
-      params[2] = new NullParam(Types.VARCHAR); //_pan_encriptado
-
-      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-      Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC003", resp.get("_error_code"));
-    }
-
-    {
-      Object[] params = buildCard("ACTIVA");
-
-      params[3] = new NullParam(Types.VARCHAR); //_contrato
-
-      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-      Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC004", resp.get("_error_code"));
-    }
-
-    {
-      Object[] params = buildCard("ACTIVA");
-
-      params[4] = new NullParam(Types.INTEGER); //_expiracion
-
-      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-      Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC005", resp.get("_error_code"));
-    }
 
     {
       Object[] params = buildCard("ACTIVA");
@@ -170,18 +180,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
       Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 
       Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC006", resp.get("_error_code"));
+      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC002", resp.get("_error_code"));
     }
 
-    {
-      Object[] params = buildCard("ACTIVA");
-
-      params[6] = new NullParam(Types.VARCHAR); //_nombre_tarjeta
-
-      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-      Assert.assertNotNull("Debe retornar respuesta", resp);
-      Assert.assertEquals("Codigo de error debe ser distinto de 0", "MC007", resp.get("_error_code"));
-    }
   }
 }

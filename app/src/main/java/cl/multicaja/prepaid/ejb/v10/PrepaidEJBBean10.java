@@ -18,6 +18,7 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -433,38 +434,18 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(2);
     }
 
-    if(prepaidCard.getPan() == null){
-      throw new ValidationException(2);
-    }
-
-    if(prepaidCard.getEncryptedPan() == null){
-      throw new ValidationException(2);
-    }
-
-    if(prepaidCard.getProcessorUserId() == null){
-      throw new ValidationException(2);
-    }
-
-    if(prepaidCard.getExpiration() == null){
-      throw new ValidationException(2);
-    }
-
     if(prepaidCard.getStatus() == null){
-      throw new ValidationException(2);
-    }
-
-    if(prepaidCard.getNameOnCard() == null){
       throw new ValidationException(2);
     }
 
     Object[] params = {
       prepaidCard.getIdUser(),
-      prepaidCard.getPan(),
-      prepaidCard.getEncryptedPan(),
-      prepaidCard.getProcessorUserId(),
-      prepaidCard.getExpiration(),
+      prepaidCard.getPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getPan(),
+      prepaidCard.getEncryptedPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getEncryptedPan(),
+      prepaidCard.getProcessorUserId()==null ?new NullParam(Types.VARCHAR):prepaidCard.getProcessorUserId(),
+      prepaidCard.getExpiration()==null ?new NullParam(Types.INTEGER):prepaidCard.getExpiration(),
       prepaidCard.getStatus().toString(),
-      prepaidCard.getNameOnCard(),
+      prepaidCard.getNameOnCard()==null ?new NullParam(Types.VARCHAR):prepaidCard.getNameOnCard(),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -664,6 +645,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setMcVoucherData(mcVoucherData);
   }
 
+
+
   /**
    *
    * @param prepaidTopup
@@ -729,4 +712,36 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
     return prepaidMovement;
   }
+
+  @Override
+  public boolean updateCard(Map<String, Object> headers,Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
+
+  final String SP_NAME = getSchema() + ".mc_prp_actualiza_tarjeta_v10";
+
+    Object[] params = {
+      cardId == null ? new NullParam(Types.BIGINT): cardId,
+      userId == null ? new NullParam(Types.BIGINT):userId , //_id_usuario
+      oldState == null ? new NullParam(Types.VARCHAR):oldState.toString() ,
+      prepaidCard.getPan(), //_pan
+      prepaidCard.getEncryptedPan(), //_pan_encriptado
+      prepaidCard.getProcessorUserId(), //_contrato
+      prepaidCard.getExpiration(), //_expiracion
+      prepaidCard.getStatus().toString(), //_estado
+      prepaidCard.getNameOnCard(), //_nombre_tarjeta
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+    if(resp.get("_error_code").equals("0")){
+      System.out.println(resp.get("_error_msg"));
+      return true;
+    }
+    else {
+      System.out.println(resp.get("_error_msg"));
+      return false;
+    }
+  }
+
+
 }

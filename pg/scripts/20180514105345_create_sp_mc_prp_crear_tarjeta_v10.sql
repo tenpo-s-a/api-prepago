@@ -23,12 +23,12 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
  IN _pan                 VARCHAR,
  IN _pan_encriptado      VARCHAR,
  IN _contrato            VARCHAR,
- IN _expiracion    INTEGER,
+ IN _expiracion          INTEGER,
  IN _estado              VARCHAR,
  IN _nombre_tarjeta      VARCHAR,
- OUT _r_id            BIGINT,
- OUT _error_code     VARCHAR,
- OUT _error_msg      VARCHAR
+ OUT _r_id               BIGINT,
+ OUT _error_code         VARCHAR,
+ OUT _error_msg          VARCHAR
 ) AS $$
  DECLARE
  BEGIN
