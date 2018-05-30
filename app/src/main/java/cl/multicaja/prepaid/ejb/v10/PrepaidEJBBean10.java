@@ -176,7 +176,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new NotFoundException(102001); // Usuario MC no existe
     }
 
-    if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
@@ -622,7 +622,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new NotFoundException(302003);
     }
 
-    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && UserNameStatus.VERIFIED.equals(oUser.getNameStatus())) {
+    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && NameStatus.VERIFIED.equals(oUser.getNameStatus())) {
       return PrepaidUserLevel.LEVEL_2;
     }
     else {

@@ -111,6 +111,16 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   *
+   * @param u
+   * @return
+   * @throws Exception
+   */
+  public User updateUser(User u) throws Exception {
+    return getUsersEJBBean10().updateUser(u, u.getRut(), u.getEmail(), u.getCellphone(), u.getNameStatus(), u.getGlobalStatus(), u.getBirthday(), u.getPassword(), u.getCompanyData());
+  }
+
+  /**
    * pre-registra un usuario y además lo deja habilitado completamente
    * @return
    * @throws Exception
@@ -118,12 +128,12 @@ public class TestBaseUnit extends TestApiBase {
   public User registerUser() throws Exception {
     User user = preRegisterUser();
     user = getUsersEJBBean10().fillUser(user);
-    user.setGlobalStatus(UserStatus.ENABLED.toString());
+    user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.setNameStatus(UserNameStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
     user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
-    user = getUsersEJBBean10().updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), null);
+    user = updateUser(user);
     return user;
   }
 

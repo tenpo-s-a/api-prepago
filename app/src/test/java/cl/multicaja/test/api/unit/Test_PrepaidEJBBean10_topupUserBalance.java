@@ -8,8 +8,6 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +22,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
   @Test
   public void topupUserBalance_userNotFound() throws Exception {
 
-    User user = preRegisterUser();
+    User user = registerUser();
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
 
