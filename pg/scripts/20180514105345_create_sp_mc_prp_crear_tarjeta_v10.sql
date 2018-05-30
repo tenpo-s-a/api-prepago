@@ -41,41 +41,13 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_pan, '')) = '' THEN
-      _error_code := 'MC002';
-      _error_msg := 'El _pan es obligatorio';
-      RETURN;
-    END IF;
-
-    IF TRIM(COALESCE(_pan_encriptado, '')) = '' THEN
-      _error_code := 'MC003';
-      _error_msg := 'El _pan_encriptado es obligatorio';
-      RETURN;
-    END IF;
-
-    IF TRIM(COALESCE(_contrato, '')) = '' THEN
-      _error_code := 'MC004';
-      _error_msg := 'El _contrato es obligatorio';
-      RETURN;
-    END IF;
-
-    IF COALESCE(_expiracion, 0) = 0 THEN
-      _error_code := 'MC005';
-      _error_msg := 'El _expiracion es obligatorio';
-      RETURN;
-    END IF;
 
     IF TRIM(COALESCE(_estado, '')) = '' THEN
-      _error_code := 'MC006';
+      _error_code := 'MC002';
       _error_msg := 'El _estado es obligatorio';
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_nombre_tarjeta, '')) = '' THEN
-      _error_code := 'MC007';
-      _error_msg := 'El _nombre_tarjeta es obligatorio';
-      RETURN;
-    END IF;
 
      INSERT INTO ${schema}.prp_tarjeta
      (
@@ -92,12 +64,12 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
      VALUES
      (
         _id_usuario,
-        _pan,
-        _pan_encriptado,
-        _contrato,
-        _expiracion,
+        coalesce(_pan,''),
+        coalesce(_pan_encriptado,''),
+        coalesce(_contrato,''),
+        coalesce(_expiracion,0),
         _estado,
-        _nombre_tarjeta,
+        coalesce(_nombre_tarjeta,''),
         timezone('utc', now()),
         timezone('utc', now())
      )
