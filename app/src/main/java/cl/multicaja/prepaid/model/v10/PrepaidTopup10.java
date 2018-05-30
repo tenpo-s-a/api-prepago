@@ -27,7 +27,8 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 {
   }
 
   public PrepaidTopup10(NewPrepaidTopup10 topupRequest) {
-    super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(), topupRequest.getMerchantCode());
+    super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(),
+          topupRequest.getMerchantCode(), topupRequest.getMerchantName(), topupRequest.getMerchantCategory());
   }
 
   public Long getId() {

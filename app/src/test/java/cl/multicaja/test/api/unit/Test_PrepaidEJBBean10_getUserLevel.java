@@ -7,7 +7,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.users.model.v10.Rut;
 import cl.multicaja.users.model.v10.RutStatus;
 import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserNameStatus;
+import cl.multicaja.users.model.v10.NameStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,13 +49,13 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit  {
     Rut rut = new Rut();
     rut.setStatus(RutStatus.VERIFIED);
     user.setRut(rut);
-    user.setNameStatus(UserNameStatus.UNVERIFIED);
+    user.setNameStatus(NameStatus.UNVERIFIED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, getPrepaidEJBBean10().getUserLevel(user, prepaidUser));
 
     rut.setStatus(RutStatus.UNVERIFIED);
-    user.setNameStatus(UserNameStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
 
     Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, getPrepaidEJBBean10().getUserLevel(user, prepaidUser));
   }
@@ -66,7 +66,7 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit  {
     Rut rut = new Rut();
     rut.setStatus(RutStatus.VERIFIED);
     user.setRut(rut);
-    user.setNameStatus(UserNameStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_2, getPrepaidEJBBean10().getUserLevel(user, prepaidUser));

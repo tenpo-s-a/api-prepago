@@ -3,6 +3,7 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -10,8 +11,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.SignUp;
-import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -99,16 +99,44 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   *
+   * pre-registra a un usuario (solo rut e email)
    * @return
    * @throws Exception
    */
-  public User registerUser() throws Exception {
+  public User preRegisterUser() throws Exception {
     Integer rut = getUniqueRutNumber();
     String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
     SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
+
+  /**
+   *
+   * @param u
+   * @return
+   * @throws Exception
+   */
+  public User updateUser(User u) throws Exception {
+    return getUsersEJBBean10().updateUser(u, u.getRut(), u.getEmail(), u.getCellphone(), u.getNameStatus(), u.getGlobalStatus(), u.getBirthday(), u.getPassword(), u.getCompanyData());
+  }
+
+  /**
+   * pre-registra un usuario y además lo deja habilitado completamente
+   * @return
+   * @throws Exception
+   */
+  public User registerUser() throws Exception {
+    User user = preRegisterUser();
+    user = getUsersEJBBean10().fillUser(user);
+    user.setGlobalStatus(UserStatus.ENABLED);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+    user = updateUser(user);
+    return user;
+  }
+
   /**
    *
    * @return
@@ -146,7 +174,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setPan(RandomStringUtils.randomNumeric(16));
-    prepaidCard.setEncryptedPan(RandomStringUtils.randomAlphabetic(50));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setProcessorUserId(RandomStringUtils.randomAlphabetic(20));
@@ -209,8 +237,11 @@ public class TestBaseUnit extends TestApiBase {
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(numberUtils.random(1000, 10000)));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-
     prepaidTopup.setAmount(newAmountAndCurrency);
+
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(RandomStringUtils.randomAlphabetic(6));
+
     return prepaidTopup;
   }
 
@@ -302,7 +333,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setNumaut("");
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(getUniqueInteger().toString());
-    prepaidMovement.setCodact(String.valueOf(numberUtils.random(1111,9999)));
+    prepaidMovement.setCodact(numberUtils.random(1111,9999));
     prepaidMovement.setImpliq(getUniqueLong());
     prepaidMovement.setClamonliq(0);
     prepaidMovement.setCodpais(CodigoPais.CHILE);

@@ -176,7 +176,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     if(user == null){
       throw new NotFoundException(102001); // Usuario MC no existe
     }
-    if(!UserStatus.ENABLED.toString().equals(user.getGlobalStatus())){
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
@@ -184,11 +185,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(302003); // Usuario no tiene prepago
+      throw new NotFoundException(102003); // Usuario no tiene prepago
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(302002); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(102002); // Usuario prepago bloqueado o borrado
     }
 
     if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {
@@ -229,10 +230,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       }
     }
 
-    /*
-      Validar movimiento en CDT, en caso de error lanzar exception
-     */
-
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
@@ -252,34 +249,35 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         throw new ValidationException(2);
     }
 
-
-    PrepaidTopup10 topup = new PrepaidTopup10(topupRequest);
-    topup.setId(cdtTransaction.getTransactionReference());
-    topup.setUserId(user.getId());
-    topup.setStatus("exitoso");
-    topup.setTimestamps(new Timestamps());
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
+    prepaidTopup.setId(cdtTransaction.getTransactionReference());
+    prepaidTopup.setUserId(user.getId());
+    prepaidTopup.setStatus("exitoso");
+    prepaidTopup.setTimestamps(new Timestamps());
 
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateTopupFeeAndTotal(topup);
+    this.calculateTopupFeeAndTotal(prepaidTopup);
 
     /*
       Agrega la informacion par el voucher
      */
-    this.addVoucherData(topup);
+    this.addVoucherData(prepaidTopup);
 
-    //TODO falta el registro de prepaidMovement
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(topup, prepaidUser, prepaidCard, cdtTransaction);
+    /*
+      Registra el movimiento en estado pendiente
+     */
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
     /*
       Enviar mensaje al proceso asincrono
      */
-    String messageId = this.getDelegate().sendTopUp(topup, user, cdtTransaction, prepaidMovement);
-    topup.setMessageId(messageId);
+    String messageId = this.getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    prepaidTopup.setMessageId(messageId);
 
-    return topup;
+    return prepaidTopup;
   }
 
   @Override
@@ -605,7 +603,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new NotFoundException(302003);
     }
 
-    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && UserNameStatus.VERIFIED.equals(oUser.getNameStatus())) {
+    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && NameStatus.VERIFIED.equals(oUser.getNameStatus())) {
       return PrepaidUserLevel.LEVEL_2;
     }
     else {
@@ -697,7 +695,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
-    prepaidMovement.setCodact(String.valueOf(prepaidTopup.getMerchantCategory()));
+    prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);

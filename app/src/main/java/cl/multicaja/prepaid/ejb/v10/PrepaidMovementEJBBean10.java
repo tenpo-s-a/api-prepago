@@ -103,6 +103,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     };
 
     Map<String, Object> resp =  getDbUtils().execute(SP_CREATE_MOV, params);
+
     if(resp == null){
       throw new ValidationException(100000);
     }

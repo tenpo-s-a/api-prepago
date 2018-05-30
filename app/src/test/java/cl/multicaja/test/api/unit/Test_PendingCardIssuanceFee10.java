@@ -22,7 +22,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
   @Test
   public void pendingCardIssuanceFee() throws Exception {
 
-    User user = registerUser();
+    User user = this.preRegisterUser();
 
     user.setName(RandomStringUtils.randomAlphabetic(5,10));
     user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
@@ -68,7 +68,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
   @Test
   public void shouldNotHavePendingCardIssuanceFee() throws Exception {
 
-    User user = registerUser();
+    User user = this.preRegisterUser();
 
     user.setName(RandomStringUtils.randomAlphabetic(5,10));
     user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));

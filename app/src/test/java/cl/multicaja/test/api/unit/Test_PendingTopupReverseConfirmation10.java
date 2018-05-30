@@ -4,10 +4,8 @@ import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
-import com.oracle.wls.shaded.org.apache.xpath.operations.Bool;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +19,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {
 
-    User user = registerUser();
+    User user = this.preRegisterUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -37,7 +35,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopupReverseConfirmation() throws Exception {
 
-    User user = registerUser();
+    User user = this.preRegisterUser();
 
     PrepaidTopup10 topup10 = buildPrepaidTopup(user);
 

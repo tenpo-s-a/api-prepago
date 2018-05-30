@@ -6,7 +6,6 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.users.model.v10.User;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopup_RutIsNull() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -40,7 +39,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopup_PrepaidUserIsNull() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -57,7 +56,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopup_Get_CodEntity() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
@@ -105,7 +104,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopup_WithCardLockedhard() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
@@ -135,7 +134,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopup_WithCardExpired() throws Exception {
 
-    User user = registerUser();
+    User user = preRegisterUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
