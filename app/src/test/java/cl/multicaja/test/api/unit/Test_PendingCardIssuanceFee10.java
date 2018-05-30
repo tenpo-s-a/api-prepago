@@ -22,7 +22,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
   @Test
   public void pendingCardIssuanceFee() throws Exception {
 
-    User user = this.preRegisterUser();
+    User user = registerUser();
 
     user.setName(RandomStringUtils.randomAlphabetic(5,10));
     user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
@@ -31,7 +31,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     prepaidUser = createPrepaidUser(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard(prepaidCard);
     System.out.println("prepaidCard: " + prepaidCard);
 
@@ -54,7 +54,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
 
-
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
     remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -68,10 +67,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
   @Test
   public void shouldNotHavePendingCardIssuanceFee() throws Exception {
 
-    User user = this.preRegisterUser();
-
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    User user = registerUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
     prepaidUser = createPrepaidUser(prepaidUser);
@@ -99,7 +95,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-
 
     //se verifica que no hay mensaje en la cola de cobro de emision pendiente
     qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ);

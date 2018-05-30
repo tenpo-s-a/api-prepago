@@ -57,18 +57,18 @@ public class PendingCard10 extends BaseProcessor10 {
             data.setPrepaidCard10(prepaidCard);
             req.setRetryCount(0);
 
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), exchange, req);
 
           } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), exchange, req);
           }
           else {
             req.setRetryCount(0);
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), exchange, req);
           }
         } else {
           req.setRetryCount(0);
-          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), req, exchange.getIn().getHeaders());
+          redirectRequest(createJMSEndpoint(getRoute().ERROR_EMISSION_REQ), exchange, req);
         }
 
         return new ResponseRoute<>(data);
@@ -113,24 +113,24 @@ public class PendingCard10 extends BaseProcessor10 {
 
             if (!bUpdate) {
               req.setRetryCount(0);
-              exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+              redirectRequest(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), exchange, req);
             }
 
             data.setPrepaidCard10(prepaidCard10);
 
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
           }
           else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), exchange, req);
           }
           else {
             req.setRetryCount(0);
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), exchange, req);
           }
         }
         else {
           req.setRetryCount(0);
-          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), req, exchange.getIn().getHeaders());
+          redirectRequest(createJMSEndpoint(getRoute().ERROR_CREATECARD_REQ), exchange, req);
         }
 
         return new ResponseRoute<>(data);

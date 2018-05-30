@@ -125,7 +125,9 @@ public class PendingTopup10 extends BaseProcessor10 {
             numaut = numaut.substring(numaut.length()-6);
           }
 
-          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+                                                                                                      numreffac, impfac, numaut, codcom,
+                                                                                                      nomcomred, codact, codpais);
 
           if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
@@ -142,7 +144,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             // Si es 1era carga enviar a cola de cobro de emision
             if(prepaidTopup.isFirstTopup()){
-              exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+              redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
             }
 
           } else {
@@ -161,7 +163,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           if (prepaidCard == null) {
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), exchange, req);
           } else {
             return null;
           }
