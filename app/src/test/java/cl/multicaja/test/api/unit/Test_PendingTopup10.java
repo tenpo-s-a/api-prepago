@@ -56,55 +56,6 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     Assert.assertNull("No deberia existir un topup", remoteTopup);
   }
 
-
-  @Test
-  public void pendingTopup_with_codent_and_tipofac() throws Exception {
-
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-
-    prepaidUser = createPrepaidUser(prepaidUser);
-
-    System.out.println("prepaidUser: " + prepaidUser);
-
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
-
-    prepaidCard = createPrepaidCard(prepaidCard);
-
-    System.out.println("prepaidCard: " + prepaidCard);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
-
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
-
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
-    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
-
-    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-
-    PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
-
-    Assert.assertEquals("Deberia contener una codEntity", prepaidMovement.getCodent(), prepaidMovement10.getCodent());
-
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
-      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovement10.getTipofac());
-    } else {
-      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovement10.getTipofac());
-    }
-  }
-
   @Test
   public void pendingTopup_with_card_lockedhard() throws Exception {
 
@@ -191,6 +142,8 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
+
+    System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
     //Alta de cliente
 
