@@ -66,7 +66,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
    * No es una primera carga
    */
   @Test
-  public void shouldNotHavPendingCardIssuanceFee() throws Exception {
+  public void shouldNotHavePendingCardIssuanceFee() throws Exception {
 
     User user = registerUser();
 
