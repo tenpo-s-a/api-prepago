@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,43 +36,53 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         PrepaidTopupDataRoute10 data = req.getData();
 
-        if (data.getUser() == null) {
-          log.error("Error req.getUser() es null");
+        User user = data.getUser();
+
+        log.info("processPendingTopup user: " + user);
+
+        if (user == null) {
+          log.error("Error user es null");
           return null;
         }
 
-        if (data.getUser().getRut() == null) {
-          log.error("Error req.getUser().getRut() es null");
+        if (user.getRut() == null) {
+          log.error("Error user.getRut() es null");
           return null;
         }
 
-        Integer rut = data.getUser().getRut().getValue();
+        Integer rut = user.getRut().getValue();
 
         if (rut == null){
-          log.error("Error req.getUser().getRut().getValue() es null");
+          log.error("Error rut es null");
           return null;
         }
 
         PrepaidUser10 prepaidUser = getPrepaidEJBBean10().getPrepaidUserByRut(null, rut);
+
+        log.info("processPendingTopup prepaidUser: " + prepaidUser);
 
         if (prepaidUser == null){
           log.error("Error al buscar PrepaidUser10 con rut: " + rut);
           return null;
         }
 
-        req.getData().setPrepaidUser10(prepaidUser);
+        data.setPrepaidUser10(prepaidUser);
 
-        PrepaidCard10 card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+        PrepaidCard10 prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-        if (card == null) {
-          card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+        if (prepaidCard == null) {
+          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
-        if (card != null) {
+        log.info("processPendingTopup prepaidCard10: " + prepaidCard);
 
-          req.getData().setPrepaidCard10(card);
-          PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
-          PrepaidMovement10 prepaidMovement = req.getData().getPrepaidMovement10();
+        if (prepaidCard != null) {
+
+          data.setPrepaidCard10(prepaidCard);
+          PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
+          PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+
+          log.info("processPendingTopup prepaidMovement: " + prepaidMovement);
 
           String codent = null;
           try {
@@ -93,11 +104,11 @@ public class PendingTopup10 extends BaseProcessor10 {
             prepaidMovement = new PrepaidMovement10();
             prepaidMovement.setTipofac(tipoFactura);
             prepaidMovement.setCodent(codent);
-            req.getData().setPrepaidMovement10(prepaidMovement);
+            data.setPrepaidMovement10(prepaidMovement);
           }
 
-          String contrato = card.getProcessorUserId();
-          String pan = getEncryptUtil().decrypt(card.getEncryptedPan());
+          String contrato = prepaidCard.getProcessorUserId();
+          String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
           CodigoMoneda clamon = prepaidMovement.getClamon();
           IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
@@ -129,13 +140,14 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                         prepaidMovement.getClamone(),
                                                                         prepaidMovement.getEstado());
 
+            // Si es 1era carga enviar a cola de cobro de emision
+            if(prepaidTopup.isFirstTopup()){
+              exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+            }
+
           } else {
 
-          }
-
-          // Si es 1era carga enviar a cola de cobro de emision
-          if(prepaidTopup.isFirstTopup()){
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+            throw new IllegalArgumentException("ERROR:::::::::::::::::::::" + inclusionMovimientosDTO.getRetorno());
           }
 
         } else {
@@ -143,20 +155,20 @@ public class PendingTopup10 extends BaseProcessor10 {
           //https://www.pivotaltracker.com/story/show/157816408
           //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
 
-          card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
 
-          if (card == null) {
-            card = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+          if (prepaidCard == null) {
+            prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
           }
 
-          if (card == null) {
+          if (prepaidCard == null) {
             exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
           } else {
             return null;
           }
         }
 
-        return new ResponseRoute<>(req.getData());
+        return new ResponseRoute<>(data);
       }
     };
   }
