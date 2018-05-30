@@ -22,7 +22,7 @@ CREATE TABLE ${schema}.prp_movimiento (
   id_movimiento_ref   BIGINT NOT NULL,
   id_usuario          BIGINT REFERENCES ${schema}.prp_usuario(id),
   id_tx_externo       VARCHAR(50) NOT NULL,
-  tipo_movimiento     VARCHAR(10) NOT NULL,
+  tipo_movimiento     VARCHAR(20) NOT NULL,
   monto               NUMERIC NOT NULL,
   estado              VARCHAR(20) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
