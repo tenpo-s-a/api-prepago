@@ -146,8 +146,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             }
 
           } else {
-
-            throw new IllegalArgumentException("ERROR:::::::::::::::::::::" + inclusionMovimientosDTO.getRetorno());
+            //TODO falta implementar
           }
 
         } else {
