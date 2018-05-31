@@ -1,6 +1,5 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
@@ -28,11 +27,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(null, prepaidMovement, prepaidCard);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(null, prepaidMovement, prepaidCard);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -46,14 +41,10 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     PrepaidCard10 prepaidCard = new PrepaidCard10();
-    PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
-    prepaidTopup10.setFirstTopup(Boolean.FALSE);
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setFirstTopup(Boolean.FALSE);
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(prepaidTopup10, prepaidMovement, prepaidCard);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -68,14 +59,10 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
-    prepaidTopup10.setFirstTopup(Boolean.TRUE);
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(prepaidTopup10, prepaidMovement, null);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -93,11 +80,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(prepaidTopup, null, prepaidCard);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, null, prepaidCard);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -153,12 +136,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-    prepaidTopup.setMessageId(messageId);
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(prepaidTopup, prepaidMovement, prepaidCard);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -210,13 +188,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     prepaidMovement = createPrepaidMovement(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = RandomStringUtils.randomAlphanumeric(5);
-    prepaidTopup.setMessageId(messageId);
-
-
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = getPrepaidTopupDataRoute10(prepaidTopup, prepaidMovement, prepaidCard);
-
-    sendMessage(messageId, prepaidTopupDataRoute10);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -229,17 +201,5 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", remoteTopup);
-  }
-
-  private final Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ);
-
-  private  void sendMessage(String messageId, PrepaidTopupDataRoute10 prepaidTopupDataRoute10){
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId,  new RequestRoute<>(prepaidTopupDataRoute10));
-  }
-
-  private PrepaidTopupDataRoute10 getPrepaidTopupDataRoute10(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard) {
-    PrepaidTopupDataRoute10 prepaidTopupDataRoute10 = new PrepaidTopupDataRoute10(prepaidTopup, null, null, prepaidMovement);
-    prepaidTopupDataRoute10.setPrepaidCard10(prepaidCard);
-    return prepaidTopupDataRoute10;
   }
 }
