@@ -16,7 +16,7 @@ public class Test_20180518151953_create_table_prp_movimiento extends TestDbBaseP
       new ColumnInfo("id_tx_externo",SqlType.VARCHAR.getGetJavaType(),50),
       new ColumnInfo("tipo_movimiento", SqlType.VARCHAR.getGetJavaType(), 50),
       new ColumnInfo("monto", SqlType.NUMERIC.getGetJavaType()),
-      new ColumnInfo("estado", SqlType.VARCHAR.getGetJavaType(), 20),
+      new ColumnInfo("estado", SqlType.VARCHAR.getGetJavaType(), 50),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("codent", SqlType.VARCHAR.getGetJavaType(), 4),
