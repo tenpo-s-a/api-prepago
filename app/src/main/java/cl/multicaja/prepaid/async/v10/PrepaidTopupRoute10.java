@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.processors.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
 import cl.multicaja.tecnocom.constants.*;
@@ -107,28 +108,6 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     this.usersEJBBean10 = usersEJBBean10;
   }
 
-  public TecnocomService getTecnocomService() {
-    //TODO se usa la version mock mientras, se debe implementar como resolver que instancia usar la mock o la real de acuerdo al ambiente
-    if (this.tecnocomService == null) {
-      String apiKey = getConfigUtils().getProperty("tecnocom.apiKey");
-      String apiUrl = getConfigUtils().getProperty("tecnocom.apiUrl");
-      String channel = getConfigUtils().getProperty("tecnocom.channel");
-      String codent = null;
-      try {
-        codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
-      } catch (SQLException e) {
-        log.error("Error al cargar parametro cod_entidad");
-        codent = getConfigUtils().getProperty("tecnocom.codEntity");
-      }
-      this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, HashOrder.ASC);
-    }
-    return tecnocomService;
-  }
-
-  public void setTecnocomService(TecnocomService tecnocomService) {
-    this.tecnocomService = tecnocomService;
-  }
-
   public CdtEJBBean10 getCdtEJBBean10() {
     return cdtEJBBean10;
   }
@@ -137,8 +116,15 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     this.cdtEJBBean10 = cdtEJBBean10;
   }
 
+  public TecnocomService getTecnocomService() {
+    return TecnocomServiceHelper.getInstance().getTecnocomService();
+  }
+
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
+
+  public static final String PENDING_TOPUP_RETURNS_REQ = "PrepaidTopupRoute10.pendingTopupReturns.req";
+  public static final String PENDING_TOPUP_RETURNS_RESP = "PrepaidTopupRoute10.pendingTopupReturns.resp";
 
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
@@ -179,6 +165,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processPendingTopup())
       .to(createJMSEndpoint(PENDING_TOPUP_RESP)).end();
+
+    /**
+     * devoluciones pendientes
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_RETURNS_REQ, concurrentConsumers)))
+      .process(new PendingTopup10(this).processPendingTopupReturns())
+      .to(createJMSEndpoint(PENDING_TOPUP_RETURNS_RESP)).end();
 
     /**
      * Emisiones pendientes

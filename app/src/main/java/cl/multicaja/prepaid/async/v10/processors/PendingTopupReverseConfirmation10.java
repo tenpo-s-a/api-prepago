@@ -28,6 +28,8 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
 
+        log.info("processPendingTopupReverseConfirmation - REQ: " + req);
+
         PrepaidTopupDataRoute10 data = req.getData();
 
         CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
@@ -54,7 +56,7 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
           log.debug(String.format("Error code: %s", cdtTransaction.getNumError()));
           log.debug(String.format("Error msg: %s", cdtTransaction.getMsjError()));
         }
-        return new ResponseRoute<>(req.getData());
+        return new ResponseRoute<>(data);
       }
     };
   }

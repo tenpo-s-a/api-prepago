@@ -8,8 +8,12 @@ import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
@@ -98,6 +102,14 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
     }
     return prepaidEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static TecnocomService getTecnocomService() {
+    return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
   /**
@@ -220,6 +232,30 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidUser10 prepaidUser = buildPrepaidUser();
     prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
     return buildPrepaidCard(prepaidUser);
+  }
+
+  /**
+   * construye una tarjeta desde tecnocom
+   * @param user
+   * @param prepaidUser
+   * @return
+   */
+  protected PrepaidCard10 buildCardFromTecnocom(User user, PrepaidUser10 prepaidUser) {
+
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser.getId());
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setPan(datosTarjetaDTO.getPan());
+    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+
+    return prepaidCard;
   }
 
   /**

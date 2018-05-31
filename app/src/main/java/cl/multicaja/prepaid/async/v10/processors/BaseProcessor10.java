@@ -11,6 +11,7 @@ import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Endpoint;
+import org.apache.camel.Exchange;
 
 import javax.jms.Queue;
 
@@ -110,5 +111,16 @@ public abstract class BaseProcessor10 {
    */
   public JMSMessenger createJMSMessenger(long receiveTimeout, long timeToLive) {
     return this.getRoute().createJMSMessenger(receiveTimeout, timeToLive);
+  }
+
+  /**
+   * permite redirigir el mensaje a otra ruta camel
+   *
+   * @param endpoint
+   * @param exchange
+   * @param req
+   */
+  protected void redirectRequest(Endpoint endpoint, Exchange exchange, Object req) {
+    exchange.getContext().createProducerTemplate().sendBodyAndHeaders(endpoint, req, exchange.getIn().getHeaders());
   }
 }

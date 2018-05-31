@@ -34,7 +34,15 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         log.info("processPendingTopup - REQ: " + req);
 
+        req.retryCountNext();
+
         PrepaidTopupDataRoute10 data = req.getData();
+
+        if(req.getRetryCount() > 3) {
+          req.setRetryCount(0);
+          redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
+          return new ResponseRoute<>(data);
+        }
 
         User user = data.getUser();
 
@@ -125,7 +133,9 @@ public class PendingTopup10 extends BaseProcessor10 {
             numaut = numaut.substring(numaut.length()-6);
           }
 
-          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+                                                                                                      numreffac, impfac, numaut, codcom,
+                                                                                                      nomcomred, codact, codpais);
 
           if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
@@ -142,12 +152,15 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             // Si es 1era carga enviar a cola de cobro de emision
             if(prepaidTopup.isFirstTopup()){
-              exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+              req.setRetryCount(0);
+              redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
             }
 
+          } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
           } else {
-
-            throw new IllegalArgumentException("ERROR:::::::::::::::::::::" + inclusionMovimientosDTO.getRetorno());
+            req.setRetryCount(0);
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
           }
 
         } else {
@@ -162,11 +175,30 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           if (prepaidCard == null) {
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), req, exchange.getIn().getHeaders());
+            req.setRetryCount(0);
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), exchange, req);
           } else {
             return null;
           }
         }
+
+        return new ResponseRoute<>(data);
+      }
+    };
+  }
+
+  public ProcessorRoute processPendingTopupReturns() {
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingTopupReturns - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupDataRoute10 data = req.getData();
+
+        //TODO falta implementar la devolucion
 
         return new ResponseRoute<>(data);
       }
