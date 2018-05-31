@@ -42,27 +42,31 @@ public class CdtEJBBean10 implements CdtEJB10{
     configUtils = getConfigUtils();
 
     if(StringUtils.isAllBlank(cdtTransaction10.getAccountId().trim())) {
-     throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "accountId"));
     }
     if(cdtTransaction10.getTransactionType() == null) {
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "transactionType"));
     }
     if(cdtTransaction10.getExternalTransactionId() == null) {
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "externalTransactionId"));
     }
     if(cdtTransaction10.getAmount() == null || cdtTransaction10.getAmount().doubleValue() == 0){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount o amount == 0"));
     }
 
     Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC)};
     Map<String,Object> outputData = dbUtils.execute(getSchema()+"."+SP_CARGA_FASES_MOVIMIENTOS,params);
 
     List lstFases = (List) outputData.get("result");
-    if(lstFases == null || lstFases.size()== 0) {
-      throw new ValidationException(2);
+
+    if(lstFases == null || lstFases.size() == 0) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "lstFases == null o lstFases.size == 0"));
     }
+
     HashMap<String,Object> mapFase = (HashMap<String, Object>) lstFases.get(0);
+
     Long faseId = (Long) mapFase.get("_id");
+
     params = new Object[] {
       cdtTransaction10.getAccountId(),
       faseId,

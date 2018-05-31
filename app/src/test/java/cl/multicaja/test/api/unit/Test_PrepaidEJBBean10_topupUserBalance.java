@@ -71,7 +71,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
       getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
 
     } catch(ValidationException nfex) {
-      Assert.assertEquals("el usuario prepago esta bloqueado", Integer.valueOf(102002), nfex.getCode());
+      Assert.assertEquals("el usuario prepago esta bloqueado", Integer.valueOf(102004), nfex.getCode());
     }
   }
 

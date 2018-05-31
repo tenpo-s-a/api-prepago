@@ -19,7 +19,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {
 
-    User user = this.preRegisterUser();
+    User user = registerUser();
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -35,7 +35,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
   @Test
   public void pendingTopupReverseConfirmation() throws Exception {
 
-    User user = this.preRegisterUser();
+    User user = registerUser();
 
     PrepaidTopup10 topup10 = buildPrepaidTopup(user);
 

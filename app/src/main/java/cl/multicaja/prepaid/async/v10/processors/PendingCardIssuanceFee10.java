@@ -35,6 +35,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
 
+        log.info("processPendingIssuanceFee - REQ: " + req);
+
         PrepaidTopupDataRoute10 data = req.getData();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
@@ -120,10 +122,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           }
         } else {
           req.setRetryCount(0);
-          exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+          redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
         }
-        log.info("processPendingIssuanceFee - REQ: " + req);
-        return new ResponseRoute<>(req.getData());
+
+        return new ResponseRoute<>(data);
       }
     };
   }
@@ -133,7 +135,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
-        log.info("processPendingEmission - REQ: " + req);
+        log.info("processError - REQ: " + req);
+
+        PrepaidTopupDataRoute10 data = req.getData();
+
         getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
           req.getData().getIssuanceFeeMovement10().getId(),
           null,
@@ -141,7 +146,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           null,
           PrepaidMovementStatus.ERROR_IN_PROCESS);
 
-        return new ResponseRoute<>(req.getData());
+        return new ResponseRoute<>(data);
       }
     };
   }

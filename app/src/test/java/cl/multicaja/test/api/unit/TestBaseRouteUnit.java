@@ -4,11 +4,15 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
@@ -23,8 +27,6 @@ public class TestBaseRouteUnit extends TestBaseUnit {
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
 
   private static BrokerService brokerService;
-
-  private static PrepaidTopupRoute10 prepaidTopupRoute10;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -45,13 +47,13 @@ public class TestBaseRouteUnit extends TestBaseUnit {
       brokerService = camelFactory.createBrokerService();
       brokerService.start();
 
-      //Inicializa las rutas camel
-      Test_PendingTopup10 t = new Test_PendingTopup10();
-      prepaidTopupRoute10 = new PrepaidTopupRoute10();
-      prepaidTopupRoute10.setPrepaidEJBBean10(t.getPrepaidEJBBean10());
-      prepaidTopupRoute10.setUsersEJBBean10(t.getUsersEJBBean10());
-      prepaidTopupRoute10.setPrepaidMovementEJBBean10(t.getPrepaidMovementEJBBean10());
-      prepaidTopupRoute10.setCdtEJBBean10(t.getCdtEJBBean10());
+      //Inicializa las rutas camel, se inicializa aun cuando no se incluya en camel, se crea dado que de
+      // ella depende la instancia de tecnocomService
+      PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
+      prepaidTopupRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
 
       camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
     }
@@ -67,20 +69,17 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
   }
 
-  /**
-   *
-   * @return
-   */
-  public static PrepaidTopupRoute10 getPrepaidTopupRoute10() {
-    return prepaidTopupRoute10;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static TecnocomService getTecnocomService() {
-    return getPrepaidTopupRoute10().getTecnocomService();
+  @After
+  public void after() {
+    //Todos los test que involucren procesos asincronos esperaran 1 segundo despues que terminen para
+    //asegurarse que los mensajes de su test fueron procesado
+    try {
+      Thread.sleep(1000);
+    } catch (Exception e) {
+    }
+    System.out.println("----------------------------------------------------------------");
+    System.out.println("After Test - class: " + this.getClass().getSimpleName() + ", method: " + testName.getMethodName());
+    System.out.println("----------------------------------------------------------------");
   }
 
   /**
