@@ -132,15 +132,12 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
-          return null;
         } else {
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
-          return null;
         }
         return new ResponseRoute<>(data);
       }

@@ -168,7 +168,11 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup.getData());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Deberia tener un Movimiento de carga", remoteTopup.getData().getPrepaidMovement10());
+    PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
+    Assert.assertNotNull("Deberia tener un Movimiento de carga", prepaidMovement10);
+    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getClamone());
     PrepaidMovement10 issuanceFeeMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia tener un Movimiento de cobro de comision de emision", issuanceFeeMovement);
     Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), issuanceFeeMovement.getNumextcta());
@@ -218,7 +222,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNull("No Deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_RESP);
