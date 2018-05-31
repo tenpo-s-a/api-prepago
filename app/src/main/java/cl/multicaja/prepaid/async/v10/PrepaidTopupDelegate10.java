@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.Utils;
@@ -57,11 +58,17 @@ public final class PrepaidTopupDelegate10 {
     }
 
     String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
-    System.out.println("Enviando mensaje por messageId: " + messageId);
+    log.info("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
     prepaidTopup.setMessageId(messageId);
-    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.pendingTopup", new RequestRoute<>(new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement)), headers);
+
+    String endpoint = "seda:PrepaidTopupRoute10.pendingTopup";
+
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    data.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, new RequestRoute<>(data), headers);
     return messageId;
   }
 
@@ -82,11 +89,17 @@ public final class PrepaidTopupDelegate10 {
     }
 
     String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
-    System.out.println("Enviando mensaje por messageId: " + messageId);
+    log.info("Enviando mensaje por messageId: " + messageId);
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
     prepaidTopup.setMessageId(messageId);
-    this.getProducerTemplate().sendBodyAndHeaders("seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation", new RequestRoute<>(new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement)), headers);
+
+    String endpoint = "seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation";
+
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    data.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, new RequestRoute<>(data), headers);
     return messageId;
   }
 }

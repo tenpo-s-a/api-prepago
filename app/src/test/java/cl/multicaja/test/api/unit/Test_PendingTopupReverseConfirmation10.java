@@ -62,6 +62,8 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
 
+    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+
     CdtTransaction10 cdt = remoteTopup.getData().getCdtTransaction10();
 
     Assert.assertEquals("Deberia tener numError = 0", "0",cdt.getNumError());
