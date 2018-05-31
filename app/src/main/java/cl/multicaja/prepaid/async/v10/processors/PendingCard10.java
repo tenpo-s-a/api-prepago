@@ -62,8 +62,8 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
           prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null,prepaidCard);
           data.setPrepaidCard10(prepaidCard);
-          req.setRetryCount(0);
 
+          req.setRetryCount(0);
           redirectRequest(createJMSEndpoint(getRoute().PENDING_CREATECARD_REQ), exchange, req);
 
         } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -124,6 +124,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
           data.setPrepaidCard10(prepaidCard10);
 
+          //TODO verificar si se debe reiniciar el retryCount antes de enviarlo devuelta a cargas pendientes
           redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
 
         } else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
