@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -105,7 +106,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     Map<String, Object> resp =  getDbUtils().execute(SP_CREATE_MOV, params);
 
     if(resp == null){
-      throw new ValidationException(100000);
+      throw new ValidationException(101004).setData(new KeyValue("value", "resp == null"));
     }
 
     String numError = (String)resp.get("_error_code");
@@ -113,13 +114,13 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
 
     if(StringUtils.isBlank(numError) || !numError.equals("0") ){
       log.error("Num Error: "+numError+ " MsjError: "+msjError);
-      throw new ValidationException(101000);
+      throw new ValidationException(101004).setData(new KeyValue("value", "numError: " + numError + ", msjError: " + msjError));
     }
 
     BigDecimal id = (BigDecimal) resp.get("_id");
 
     if(id == null  || id.longValue() == 0 ) {
-      throw new ValidationException(101000);
+      throw new ValidationException(101004).setData(new KeyValue("value", "id == null o id == 0"));
     }
 
     data.setId(id.longValue());
@@ -132,11 +133,11 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     String SP_UPDATE_MOV = getSchema()+".mc_prp_actualiza_movimiento_v10";
 
     if(id == null){
-      throw  new ValidationException(1111);
+      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
     }
 
     if(status == null){
-      throw  new ValidationException(1111);
+      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -154,13 +155,13 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
     log.info("Resp updatePrepaidMovement: " + resp);
 
     if(resp == null){
-      throw new ValidationException(100000);
+      throw new ValidationException(101004).setData(new KeyValue("value", "resp == null"));
     }
 
     String sNumError = (String)resp.get("_error_code");
 
     if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
-      throw new ValidationException(101000);
+      throw new ValidationException(101004).setData(new KeyValue("value", "sNumError: " + sNumError));
     }
   }
 }

@@ -149,25 +149,24 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
-    //TODO: lanzar las excepciones solo con el codigo del error especifico
 
     if(topupRequest == null || topupRequest.getAmount() == null){
-      throw new ValidationException(2);
-    }
-    if(topupRequest.getRut() == null){
-      throw new ValidationException(2);
-    }
-    if(StringUtils.isBlank(topupRequest.getMerchantCode())){
-      throw new ValidationException(2);
-    }
-    if(StringUtils.isBlank(topupRequest.getTransactionId())){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
     }
     if(topupRequest.getAmount().getValue() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
     }
     if(topupRequest.getAmount().getCurrencyCode() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(topupRequest.getRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+    }
+    if(StringUtils.isBlank(topupRequest.getMerchantCode())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(StringUtils.isBlank(topupRequest.getTransactionId())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "transaction_id"));
     }
 
     // Obtener Usuario
@@ -189,7 +188,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(102002); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
     if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {
@@ -225,7 +224,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
         }
 
         if (prepaidCard != null) {
-          throw new ValidationException(106000); //tarjeta invalida
+          throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
         }
       }
     }
@@ -243,10 +242,11 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     // Si no cumple con los limites
     if(!cdtTransaction.getNumError().equals("0")){
       long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
-      if(lNumError != -1 && lNumError > 10000)
-        throw new ValidationException(4).setData(new KeyValue("value",cdtTransaction.getMsjError()));
-      else
-        throw new ValidationException(2);
+      if(lNumError != -1 && lNumError > 10000) {
+        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      } else {
+        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
     }
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
@@ -309,19 +309,19 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     if(prepaidUser == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidUser"));
     }
 
     if(prepaidUser.getIdUserMc() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "idUserMc"));
     }
 
     if(prepaidUser.getRut() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
     }
 
     if(prepaidUser.getStatus() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -400,11 +400,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception {
+
     if(id == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
     }
     if(status == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -425,15 +426,15 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
 
     if(prepaidCard == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard"));
     }
 
     if(prepaidCard.getIdUser() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "idUser"));
     }
 
     if(prepaidCard.getStatus() == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -516,11 +517,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   @Override
   public void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception {
+
     if(id == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
     }
     if(status == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -596,11 +598,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     if(oUser == null) {
       throw new NotFoundException(102001);
     }
-    if(oUser.getRut() == null || oUser.getRut().getStatus() == null){
-      throw new ValidationException(101000);
+    if(oUser.getRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+    }
+    if(oUser.getRut().getStatus() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut.status"));
     }
     if(prepaidUser10 == null) {
-      throw new NotFoundException(302003);
+      throw new NotFoundException(102003);
     }
 
     if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && NameStatus.VERIFIED.equals(oUser.getNameStatus())) {
