@@ -27,7 +27,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    String messageId = sendPendingCardIssuanceFee(null, prepaidMovement, prepaidCard);
+    String messageId = sendPendingCardIssuanceFee(null, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -44,7 +44,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.FALSE);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -62,7 +62,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, null);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -80,7 +80,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, null, prepaidCard);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, null, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -136,7 +136,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -146,16 +146,13 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup.getData());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-    PrepaidMovement10 prepaidMovement10 = remoteTopup.getData().getPrepaidMovement10();
-    Assert.assertNotNull("Deberia tener un Movimiento de carga", prepaidMovement10);
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getNumextcta());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getNummovext());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovement10.getClamone());
+
     PrepaidMovement10 issuanceFeeMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia tener un Movimiento de cobro de comision de emision", issuanceFeeMovement);
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), issuanceFeeMovement.getNumextcta());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), issuanceFeeMovement.getNummovext());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), issuanceFeeMovement.getClamone());
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceFeeMovement.getEstado());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getClamone());
 
   }
 
@@ -188,7 +185,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     prepaidMovement = createPrepaidMovement(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard);
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -196,10 +193,77 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
 
+    PrepaidMovement10 issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESSED_WITH_ERROR, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_RESP);
     remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", remoteTopup);
+    issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_RetryCount4() throws Exception {
+
+    User user = registerUser();
+
+    user.setName(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
+
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    prepaidUser = createPrepaidUser(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    prepaidCard = createPrepaidCard(prepaidCard);
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    prepaidTopup.setFirstTopup(Boolean.TRUE);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 3);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+
+    PrepaidMovement10 issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESSED_WITH_ERROR, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_RESP);
+    remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", remoteTopup);
+
+    issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
   }
 }
