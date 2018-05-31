@@ -210,7 +210,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @param prepaidCard
    * @return
    */
-  protected String sendPendingCardIssuanceFee(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard) {
+  protected String sendPendingCardIssuanceFee(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
@@ -231,7 +231,13 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
     data.setPrepaidCard10(prepaidCard);
 
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, new RequestRoute<>(data), new JMSHeader("JMSCorrelationID", messageId));
+    RequestRoute<PrepaidTopupDataRoute10> requestRoute = new RequestRoute<>(data);
+
+    if (retryCount != null){
+      requestRoute.setRetryCount(retryCount);
+    }
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, requestRoute, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
