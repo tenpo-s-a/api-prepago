@@ -31,7 +31,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     topup.setRut(null);
     user.setRut(null);
 
-    String messageId = sendPendingTopup(topup, user, null, null);
+    String messageId = sendPendingTopup(topup, user, null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -47,7 +47,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendPendingTopup(topup, user, null, null);
+    String messageId = sendPendingTopup(topup, user, null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -77,7 +77,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendPendingTopup(topup, user, null, null);
+    String messageId = sendPendingTopup(topup, user, null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -107,7 +107,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendPendingTopup(topup, user, null, null);
+    String messageId = sendPendingTopup(topup, user, null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -141,7 +141,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement);
+    String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement, 0);
 
     System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
@@ -175,5 +175,66 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNumextcta());
     Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNummovext());
     Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getClamone());
+  }
+
+  @Test
+  public void pendingTopup_with_prepaidMovement_ERROR_IN_PROCESS_PENDING_TOPUP() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
+
+    prepaidCard = createPrepaidCard(prepaidCard);
+
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    prepaidMovement = createPrepaidMovement(prepaidMovement);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement, 4);
+
+    System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
+
+    //Alta de cliente
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+
+    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+    PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
+
+    Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
+    Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
+
+    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
+    } else {
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
+    }
+
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementResp.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getClamone());
   }
 }

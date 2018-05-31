@@ -172,9 +172,10 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @param user
    * @param cdtTransaction
    * @param prepaidMovement
+   * @param retryCount
    * @return
    */
-  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -192,7 +193,10 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
 
     //se envia el mensaje a la cola
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, new RequestRoute<>(data), new JMSHeader("JMSCorrelationID", messageId));
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
