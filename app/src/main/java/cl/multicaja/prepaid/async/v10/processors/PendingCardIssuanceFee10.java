@@ -71,6 +71,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
             issuanceFeeMovement.setId(null);
             issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
+
             issuanceFeeMovement = getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
 
             req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
@@ -115,10 +116,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
             //TODO: Dejar en cola para envio de mail con info de la tarjeta
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
           } else {
             req.setRetryCount(0);
-            exchange.getContext().createProducerTemplate().sendBodyAndHeaders(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), req, exchange.getIn().getHeaders());
+            redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
           }
         } else {
           req.setRetryCount(0);
