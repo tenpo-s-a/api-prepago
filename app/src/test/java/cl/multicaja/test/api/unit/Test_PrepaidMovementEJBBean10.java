@@ -46,7 +46,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
-    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.IN_PROCESS.getValue(), PrepaidMovementStatus.IN_PROCESS.getValue(), fila.get("estado"));
+    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.IN_PROCESS, PrepaidMovementStatus.IN_PROCESS.toString(), fila.get("estado"));
   }
 
   @Test
@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
-    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESS_OK.getValue(), PrepaidMovementStatus.PROCESS_OK.getValue(), fila.get("estado"));
+    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK.toString(), fila.get("estado"));
     Assert.assertEquals("El Num Extracto debe ser 1",1,((BigDecimal)fila.get("numextcta")).intValue());
     Assert.assertEquals("El Num Extracto debe ser 1",2,((BigDecimal)fila.get("nummovext")).intValue());
     Assert.assertEquals("El Num Extracto debe ser 1", CodigoMoneda.CHILE_CLP.getValue().intValue(),((BigDecimal)fila.get("clamone")).intValue());

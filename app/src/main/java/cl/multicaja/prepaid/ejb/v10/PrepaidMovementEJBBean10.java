@@ -69,7 +69,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       data.getIdTxExterno(),
       data.getTipoMovimiento().toString(), //Movimiento
       new InParam(data.getMonto(),Types.NUMERIC),
-      data.getEstado().getValue(),
+      data.getEstado().toString(),
       data.getCodent(),//_codent
       data.getCentalta(),//_centalta
       data.getCuenta(),//_cuenta
@@ -145,7 +145,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       numextcta == null ? new NullParam(Types.NUMERIC) : new InParam(numextcta, Types.NUMERIC),
       nummovext == null ? new NullParam(Types.NUMERIC) : new InParam(nummovext, Types.NUMERIC),
       clamone == null ? new NullParam(Types.NUMERIC) : new InParam(clamone, Types.NUMERIC),
-      status.getValue(),
+      status.toString(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };

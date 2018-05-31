@@ -145,25 +145,20 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
   }
 
   /* Cola Errores */
-  public ProcessorRoute processError() {
+  public ProcessorRoute processErrorPendingIssuanceFee() {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
         log.info("processError - REQ: " + req);
-
         req.retryCountNext();
-
         PrepaidTopupDataRoute10 data = req.getData();
-
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
           req.getData().getIssuanceFeeMovement10().getId(),
           null,
           null,
           null,
-          PrepaidMovementStatus.ERROR_IN_PROCESS);
-
+          PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
         return new ResponseRoute<>(data);
       }
     };

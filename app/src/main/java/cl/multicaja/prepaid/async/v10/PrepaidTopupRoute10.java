@@ -227,7 +227,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
-      .process(new PendingCardIssuanceFee10(this).processError())
+      .process(new PendingCardIssuanceFee10(this).processErrorPendingIssuanceFee())
       .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
 
     /**
@@ -239,7 +239,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processError())
+      .process(new PendingSendMail10(this).processErrorPendingSendMailCard())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP)).end();
   }
 }
