@@ -34,7 +34,16 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         log.info("processPendingTopup - REQ: " + req);
 
+        req.retryCountNext();
+
         PrepaidTopupDataRoute10 data = req.getData();
+
+        if(req.getRetryCount() > 3) {
+          req.setRetryCount(0);
+          //TODO falta ver cual cola es
+          //redirectRequest(createJMSEndpoint(getRoute().ERROR_PENDING_TOPUP_REQ), exchange, req);
+          return new ResponseRoute<>(data);
+        }
 
         User user = data.getUser();
 
@@ -144,11 +153,16 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             // Si es 1era carga enviar a cola de cobro de emision
             if(prepaidTopup.isFirstTopup()){
+              req.setRetryCount(0);
               redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
             }
 
+          } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
           } else {
-            //TODO falta implementar
+            req.setRetryCount(0);
+            //TODO falta ver cual cola es
+            //redirectRequest(createJMSEndpoint(getRoute().ERROR_PENDING_TOPUP_REQ), exchange, req);
           }
 
         } else {

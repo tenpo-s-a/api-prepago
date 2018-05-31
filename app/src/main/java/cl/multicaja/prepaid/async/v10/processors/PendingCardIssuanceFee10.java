@@ -45,32 +45,31 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         req.retryCountNext();
 
-        if(req.getRetryCount()<= 3) {
+        if(req.getRetryCount() > 3) {
+          req.setRetryCount(0);
+          redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
+          return new ResponseRoute<>(data);
+        }
 
-          //TODO: Verificar de donde sacar el monto de la comision de apertura
+        //TODO: Verificar de donde sacar el monto de la comision de apertura
 
-          //InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", "", CodigoMoneda.CHILE_CLP,
-          //  IndicadorNormalCorrector.NORMAL, TipoFactura.COMISION_APERTURA, "", prepaidMovement10.getMonto(), "", "", "", 0, CodigoPais.CHILE);
+        //InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", "", CodigoMoneda.CHILE_CLP,
+        //  IndicadorNormalCorrector.NORMAL, TipoFactura.COMISION_APERTURA, "", prepaidMovement10.getMonto(), "", "", "", 0, CodigoPais.CHILE);
 
-          if (CodigoRetorno._000.equals(CodigoRetorno._000)) {
-          //if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
-            /*
-            getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-              prepaidMovement10.getId(),
-              inclusionMovimientosDTO.getNumextcta(),
-              inclusionMovimientosDTO.getNummovext(),
-              inclusionMovimientosDTO.getClamone(),
-              PrepaidMovementStatus.PROCESS_OK);
-              */
-            req.setRetryCount(0);
-          } else if (CodigoRetorno._000.equals(CodigoRetorno._1000)) {
-          //} else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
-          }
-          else {
-            req.setRetryCount(0);
-            redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
-          }
+        if (CodigoRetorno._000.equals(CodigoRetorno._000)) {
+        //if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+          /*
+          getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+            prepaidMovement10.getId(),
+            inclusionMovimientosDTO.getNumextcta(),
+            inclusionMovimientosDTO.getNummovext(),
+            inclusionMovimientosDTO.getClamone(),
+            PrepaidMovementStatus.PROCESS_OK);
+            */
+          req.setRetryCount(0);
+        } else if (CodigoRetorno._000.equals(CodigoRetorno._1000)) {
+        //} else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+          redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
         } else {
           req.setRetryCount(0);
           redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
