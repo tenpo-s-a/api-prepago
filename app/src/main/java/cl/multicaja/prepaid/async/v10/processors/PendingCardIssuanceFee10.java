@@ -140,7 +140,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);
         } else {
-          
+
           issuanceFeeMovement.setNumextcta(0);
           issuanceFeeMovement.setNummovext(0);
           issuanceFeeMovement.setClamone(0);
