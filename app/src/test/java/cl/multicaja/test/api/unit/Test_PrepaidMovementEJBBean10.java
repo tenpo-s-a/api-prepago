@@ -21,7 +21,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
 
-    prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
+    createPrepaidMovement(prepaidMovement10);
   }
 
   @Test
