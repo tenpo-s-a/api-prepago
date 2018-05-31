@@ -41,7 +41,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         log.info("processPendingIssuanceFee - REQ: " + req);
 
         PrepaidTopupDataRoute10 data = req.getData();
-        PrepaidMovement10 prepaidMovement10 = data.getPrepaidMovement10();
+
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
         PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
         PrepaidCard10 prepaidCard = req.getData().getPrepaidCard10();
