@@ -69,14 +69,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-        if(req.getRetryCount() > 3) {
-          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-          return new ResponseRoute<>(data);
-        }
-
         PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
 
         if (issuanceFeeMovement == null) {
@@ -89,6 +81,19 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement = getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
 
           req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
+        }
+
+        if(req.getRetryCount() > 3) {
+          issuanceFeeMovement.setNumextcta(0);
+          issuanceFeeMovement.setNummovext(0);
+          issuanceFeeMovement.setClamone(0);
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESSED_WITH_ERROR);
+
+          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
+          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+          req.setRetryCount(0);
+          redirectRequest(endpoint, exchange, req);
+          return new ResponseRoute<>(data);
         }
 
         String contrato = prepaidCard.getProcessorUserId();
@@ -124,7 +129,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             inclusionMovimientosDTO.getNumextcta(),
             inclusionMovimientosDTO.getNummovext(),
             inclusionMovimientosDTO.getClamone(),
-            PrepaidMovementStatus.PROCESS_OK);
+            issuanceFeeMovement.getEstado());
 
           req.setRetryCount(0);
 
@@ -134,6 +139,18 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);
         } else {
+          issuanceFeeMovement.setNumextcta(0);
+          issuanceFeeMovement.setNummovext(0);
+          issuanceFeeMovement.setClamone(0);
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESSED_WITH_ERROR);
+
+          getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+            issuanceFeeMovement.getId(),
+            issuanceFeeMovement.getNumextcta(),
+            issuanceFeeMovement.getNummovext(),
+            issuanceFeeMovement.getClamone(),
+            issuanceFeeMovement.getEstado());
+
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
@@ -157,12 +174,18 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
+        PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
+        issuanceFeeMovement.setNumextcta(0);
+        issuanceFeeMovement.setNummovext(0);
+        issuanceFeeMovement.setClamone(0);
+        issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS);
+
         getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          req.getData().getIssuanceFeeMovement10().getId(),
-          null,
-          null,
-          null,
-          PrepaidMovementStatus.ERROR_IN_PROCESS);
+          issuanceFeeMovement.getId(),
+          issuanceFeeMovement.getNumextcta(),
+          issuanceFeeMovement.getNummovext(),
+          issuanceFeeMovement.getClamone(),
+          issuanceFeeMovement.getEstado());
 
         return new ResponseRoute<>(data);
       }
