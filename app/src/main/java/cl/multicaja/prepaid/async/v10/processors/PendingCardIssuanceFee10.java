@@ -43,9 +43,13 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
         PrepaidCard10 prepaidCard = req.getData().getPrepaidCard10();
 
-
         if (prepaidTopup == null) {
           log.error("Error req.getData().getPrepaidTopup10() es null");
+          return null;
+        }
+
+        if(!prepaidTopup.isFirstTopup()){
+          log.error("Error req.getData().getPrepaidTopup10().isFirstTopup() es false");
           return null;
         }
 
@@ -117,13 +121,16 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             //TODO: Dejar en cola para envio de mail con info de la tarjeta
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
             redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
+            return null;
           } else {
             req.setRetryCount(0);
             redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
+            return null;
           }
         } else {
           req.setRetryCount(0);
           redirectRequest(createJMSEndpoint(getRoute().ERROR_CARD_ISSUANCE_FEE_REQ), exchange, req);
+          return null;
         }
 
         return new ResponseRoute<>(data);
