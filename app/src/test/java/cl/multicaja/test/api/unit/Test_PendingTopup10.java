@@ -31,7 +31,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     topup.setRut(null);
     user.setRut(null);
 
-    String messageId = sendTopup(topup, user);
+    String messageId = sendPendingTopup(topup, user, null, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -47,7 +47,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendTopup(topup, user);
+    String messageId = sendPendingTopup(topup, user, null, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -77,7 +77,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendTopup(topup, user);
+    String messageId = sendPendingTopup(topup, user, null, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -107,7 +107,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
-    String messageId = sendTopup(topup, user);
+    String messageId = sendPendingTopup(topup, user, null, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -141,7 +141,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
+    String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement);
 
     System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 

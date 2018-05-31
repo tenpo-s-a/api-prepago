@@ -1,8 +1,10 @@
 package cl.multicaja.test.api.unit;
 
-import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.Utils;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -12,17 +14,23 @@ import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
+import javax.jms.Queue;
 import javax.naming.spi.NamingManager;
 
 /**
  * @autor vutreras
  */
 public class TestBaseRouteUnit extends TestBaseUnit {
+
+  private static Log log = LogFactory.getLog(TestBaseUnit.class);
 
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
 
@@ -154,6 +162,38 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    */
   protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    return messageId;
+  }
+
+  /**
+   * Envia un mensaje directo al proceso PENDING_TOPUP_REQ
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param cdtTransaction
+   * @param prepaidMovement
+   * @return
+   */
+  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = RandomStringUtils.randomAlphabetic(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+
+    //se envia el mensaje a la cola
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, new RequestRoute<>(data), new JMSHeader("JMSCorrelationID", messageId));
+
     return messageId;
   }
 }
