@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class PrepaidMovement10 implements Serializable {
+public class PrepaidMovement10 implements Serializable, Cloneable {
 
   private Long id;
   private Long idMovimientoRef;
@@ -350,5 +350,10 @@ public class PrepaidMovement10 implements Serializable {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+  }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    return super.clone();
   }
 }

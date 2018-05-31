@@ -26,6 +26,7 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private PrepaidCard10 prepaidCard10;
   private CdtTransaction10 cdtTransaction10;
   private PrepaidMovement10 prepaidMovement10;
+  private PrepaidMovement10 issuanceFeeMovement10;
   private List<ProcessorMetadata> processorMetadata = new ArrayList<>();
 
   public PrepaidTopupDataRoute10() {
@@ -87,6 +88,13 @@ public class PrepaidTopupDataRoute10 implements Serializable {
     this.prepaidMovement10 = prepaidMovement10;
   }
 
+  public PrepaidMovement10 getIssuanceFeeMovement10() {
+    return issuanceFeeMovement10;
+  }
+
+  public void setIssuanceFeeMovement10(PrepaidMovement10 issuanceFeeMovement10) {
+    this.issuanceFeeMovement10 = issuanceFeeMovement10;
+  }
   public List<ProcessorMetadata> getProcessorMetadata() {
     return processorMetadata;
   }

@@ -6,14 +6,15 @@ import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.math.BigDecimal;
 import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
 
 /**
@@ -39,18 +40,34 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         log.info("processPendingIssuanceFee - REQ: " + req);
 
-        req.retryCountNext();
-
         PrepaidTopupDataRoute10 data = req.getData();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+        PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
+        PrepaidCard10 prepaidCard = req.getData().getPrepaidCard10();
 
-        PrepaidMovement10 prepaidMovement10 = data.getPrepaidMovement10();
+        if (prepaidTopup == null) {
+          log.error("Error req.getData().getPrepaidTopup10() es null");
+          return null;
+        }
+        if(!prepaidTopup.isFirstTopup()){
+          log.error("Error req.getData().getPrepaidTopup10().isFirstTopup() es false");
+          return null;
+        }
 
-        if (prepaidMovement10 == null) {
+        if (prepaidCard == null) {
+          log.error("Error req.getData().getPrepaidCard10() es null");
+          return null;
+        }
+
+        if (prepaidMovement == null) {
           log.error("Error req.getData().getPrepaidMovement10() es null");
           return null;
         }
+
+        req.retryCountNext();
+
+        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         if(req.getRetryCount() > 3) {
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
@@ -60,24 +77,59 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           return new ResponseRoute<>(data);
         }
 
-        //TODO: Verificar de donde sacar el monto de la comision de apertura
+        PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
 
-        //InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos("", "", CodigoMoneda.CHILE_CLP,
-        //  IndicadorNormalCorrector.NORMAL, TipoFactura.COMISION_APERTURA, "", prepaidMovement10.getMonto(), "", "", "", 0, CodigoPais.CHILE);
+        if (issuanceFeeMovement == null) {
+          issuanceFeeMovement = (PrepaidMovement10) prepaidMovement.clone();
+          issuanceFeeMovement.setTipoMovimiento(PrepaidMovementType.ISSUANCE_FEE);
+          issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
+          issuanceFeeMovement.setId(null);
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
 
-        if (CodigoRetorno._000.equals(CodigoRetorno._000)) {
-        //if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
-          /*
+          issuanceFeeMovement = getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
+
+          req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
+        }
+
+        String contrato = prepaidCard.getProcessorUserId();
+        String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+        CodigoMoneda clamon = prepaidMovement.getClamon();
+        IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
+        TipoFactura tipofac = prepaidMovement.getTipofac();
+        BigDecimal impfac = prepaidMovement.getImpfac();
+        String codcom = prepaidMovement.getCodcom();
+        Integer codact = prepaidMovement.getCodact();
+        CodigoPais codpais = prepaidMovement.getCodpais();
+        String nomcomred = prepaidTopup.getMerchantName();
+        String numreffac = issuanceFeeMovement.getId().toString();
+        String numaut = numreffac;
+
+        //solamente los 6 primeros digitos de numreffac
+        if (numaut.length() > 6) {
+          numaut = numaut.substring(numaut.length()-6);
+        }
+
+        InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato,
+          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+
+        if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+
+          issuanceFeeMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
+          issuanceFeeMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
+          issuanceFeeMovement.setClamone(inclusionMovimientosDTO.getClamone());
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESS_OK); //realizado
+
           getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-            prepaidMovement10.getId(),
+            issuanceFeeMovement.getId(),
             inclusionMovimientosDTO.getNumextcta(),
             inclusionMovimientosDTO.getNummovext(),
             inclusionMovimientosDTO.getClamone(),
             PrepaidMovementStatus.PROCESS_OK);
-            */
+
           req.setRetryCount(0);
-        } else if (CodigoRetorno._000.equals(CodigoRetorno._1000)) {
-        //} else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+
+          //TODO: Dejar en cola para envio de mail con info de la tarjeta
+        } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);
@@ -87,7 +139,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
         }
-
         return new ResponseRoute<>(data);
       }
     };
@@ -107,7 +158,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          data.getPrepaidMovement10().getId(),
+          req.getData().getIssuanceFeeMovement10().getId(),
           null,
           null,
           null,

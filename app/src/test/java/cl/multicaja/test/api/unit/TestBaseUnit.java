@@ -359,7 +359,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setCentalta("1234");
     prepaidMovement.setCuenta(getUniqueInteger().toString());
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
     prepaidMovement.setNumreffac("");
