@@ -14,6 +14,7 @@ import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -166,7 +167,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
 
   /**
    * Envia un mensaje directo al proceso PENDING_TOPUP_REQ
-   * 
+   *
    * @param prepaidTopup
    * @param user
    * @param cdtTransaction
@@ -181,7 +182,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //se crea un messageId unico
-    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
+    String messageId = RandomStringUtils.randomAlphabetic(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
