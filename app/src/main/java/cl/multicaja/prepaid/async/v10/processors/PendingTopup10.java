@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
@@ -9,12 +10,15 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
+import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+
+import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
 
 /**
  * @autor vutreras
@@ -38,9 +42,13 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         PrepaidTopupDataRoute10 data = req.getData();
 
+        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+
         if(req.getRetryCount() > 3) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
+          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
-          redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
+          redirectRequest(endpoint, exchange, req);
           return new ResponseRoute<>(data);
         }
 
@@ -152,15 +160,23 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             // Si es 1era carga enviar a cola de cobro de emision
             if(prepaidTopup.isFirstTopup()){
+              Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
+              data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
               req.setRetryCount(0);
-              redirectRequest(createJMSEndpoint(getRoute().PENDING_CARD_ISSUANCE_FEE_REQ), exchange, req);
+              redirectRequest(endpoint, exchange, req);
+            } else {
+              //TODO que pasa con este caso?
             }
 
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
+            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
+            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+            redirectRequest(endpoint, exchange, req);
           } else {
+            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
+            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
-            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
+            redirectRequest(endpoint, exchange, req);
           }
 
         } else {
@@ -175,8 +191,10 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           if (prepaidCard == null) {
+            Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
+            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
-            redirectRequest(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), exchange, req);
+            redirectRequest(endpoint, exchange, req);
           } else {
             return null;
           }
@@ -197,6 +215,8 @@ public class PendingTopup10 extends BaseProcessor10 {
         req.retryCountNext();
 
         PrepaidTopupDataRoute10 data = req.getData();
+
+        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         //TODO falta implementar la devolucion
 

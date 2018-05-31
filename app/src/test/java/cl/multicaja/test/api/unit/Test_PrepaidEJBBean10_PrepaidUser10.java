@@ -32,7 +32,7 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
 
     //se intenta registrar exactamente el mismo usuario
     try {
-      user = getPrepaidEJBBean10().createPrepaidUser(null, user);
+      getPrepaidEJBBean10().createPrepaidUser(null, user);
     } catch(BaseException bex) {
       Assert.assertEquals("debe retornar excepcion de dato duplicado", Integer.valueOf(1), bex.getCode());
     }

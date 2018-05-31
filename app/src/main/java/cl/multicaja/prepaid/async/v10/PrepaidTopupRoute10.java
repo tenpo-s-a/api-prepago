@@ -147,6 +147,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String ERROR_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.errorCardIssuanceFee.req";
   public static final String ERROR_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.errorCardIssuanceFee.resp";
 
+
+  public static final String PENDING_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.pendingSendMailCard.req";
+  public static final String PENDING_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.pendingSendMailCard.resp";
+
+  public static final String ERROR_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.errorSendMailCard.req";
+  public static final String ERROR_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.errorSendMailCard.resp";
+
   @Override
   public void configure() {
 
@@ -222,5 +229,17 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
       .process(new PendingCardIssuanceFee10(this).processError())
       .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
+
+    /**
+     * Envio Mail Tarjeta
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_CARD_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingSendMailCard())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_CARD_RESP)).end();
+
+    // Errores
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processError())
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP)).end();
   }
 }

@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
@@ -30,7 +31,11 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
 
         log.info("processPendingTopupReverseConfirmation - REQ: " + req);
 
+        req.retryCountNext();
+
         PrepaidTopupDataRoute10 data = req.getData();
+
+        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
