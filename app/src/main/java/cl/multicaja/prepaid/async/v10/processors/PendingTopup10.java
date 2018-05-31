@@ -40,8 +40,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         if(req.getRetryCount() > 3) {
           req.setRetryCount(0);
-          //TODO falta ver cual cola es
-          //redirectRequest(createJMSEndpoint(getRoute().ERROR_PENDING_TOPUP_REQ), exchange, req);
+          redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
           return new ResponseRoute<>(data);
         }
 
@@ -161,8 +160,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_REQ), exchange, req);
           } else {
             req.setRetryCount(0);
-            //TODO falta ver cual cola es
-            //redirectRequest(createJMSEndpoint(getRoute().ERROR_PENDING_TOPUP_REQ), exchange, req);
+            redirectRequest(createJMSEndpoint(getRoute().PENDING_TOPUP_RETURNS_REQ), exchange, req);
           }
 
         } else {
@@ -177,11 +175,30 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           if (prepaidCard == null) {
+            req.setRetryCount(0);
             redirectRequest(createJMSEndpoint(getRoute().PENDING_EMISSION_REQ), exchange, req);
           } else {
             return null;
           }
         }
+
+        return new ResponseRoute<>(data);
+      }
+    };
+  }
+
+  public ProcessorRoute processPendingTopupReturns() {
+    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+      @Override
+      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingTopupReturns - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupDataRoute10 data = req.getData();
+
+        //TODO falta implementar la devolucion
 
         return new ResponseRoute<>(data);
       }

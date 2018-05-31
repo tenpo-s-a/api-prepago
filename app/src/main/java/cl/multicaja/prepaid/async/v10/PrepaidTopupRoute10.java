@@ -123,6 +123,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 
+  public static final String PENDING_TOPUP_RETURNS_REQ = "PrepaidTopupRoute10.pendingTopupReturns.req";
+  public static final String PENDING_TOPUP_RETURNS_RESP = "PrepaidTopupRoute10.pendingTopupReturns.resp";
+
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
 
@@ -162,6 +165,13 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processPendingTopup())
       .to(createJMSEndpoint(PENDING_TOPUP_RESP)).end();
+
+    /**
+     * devoluciones pendientes
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_RETURNS_REQ, concurrentConsumers)))
+      .process(new PendingTopup10(this).processPendingTopupReturns())
+      .to(createJMSEndpoint(PENDING_TOPUP_RETURNS_RESP)).end();
 
     /**
      * Emisiones pendientes
