@@ -164,4 +164,9 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       throw new ValidationException(101004).setData(new KeyValue("value", "sNumError: " + sNumError));
     }
   }
+
+  @Override
+  public void updatePrepaidMovement(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
+    this.updatePrepaidMovement(null, id, null, null, null, status);
+  }
 }

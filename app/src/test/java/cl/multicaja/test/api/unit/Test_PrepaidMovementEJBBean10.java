@@ -37,7 +37,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStatus.IN_PROCESS);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(), PrepaidMovementStatus.IN_PROCESS);
 
     List lstMov = buscaMovimiento(prepaidMovement10.getId());
 

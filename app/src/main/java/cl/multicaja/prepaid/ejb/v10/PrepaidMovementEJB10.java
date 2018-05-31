@@ -28,4 +28,14 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
+
+  /**
+   * Actualiza solo el estado
+   *
+   * @param header
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updatePrepaidMovement(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
 }

@@ -124,7 +124,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             inclusionMovimientosDTO.getNumextcta(),
             inclusionMovimientosDTO.getNummovext(),
             inclusionMovimientosDTO.getClamone(),
-            PrepaidMovementStatus.PROCESS_OK);
+            issuanceFeeMovement.getEstado());
 
           req.setRetryCount(0);
 
@@ -153,12 +153,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         req.retryCountNext();
         PrepaidTopupDataRoute10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-        getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          req.getData().getIssuanceFeeMovement10().getId(),
-          null,
-          null,
-          null,
-          PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
+        PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
+        getPrepaidMovementEJBBean10().updatePrepaidMovement(null, req.getData().getIssuanceFeeMovement10().getId(), status);
+        data.getPrepaidMovement10().setEstado(status);
         return new ResponseRoute<>(data);
       }
     };

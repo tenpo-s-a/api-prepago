@@ -172,9 +172,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     }
 
     Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNumextcta());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNummovext());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getClamone());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getClamone());
   }
 
   @Test
@@ -206,8 +206,6 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
-    //Alta de cliente
-
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -217,24 +215,12 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
 
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-
     PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
 
     Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
-    Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
-
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
-      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
-    } else {
-      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
-    }
-
     Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementResp.getEstado());
-    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNumextcta());
-    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getNummovext());
-    Assert.assertEquals("El movimiento debe ser procesado", Long.valueOf(0), prepaidMovementResp.getClamone());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNumextcta());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNummovext());
+    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getClamone());
   }
 }

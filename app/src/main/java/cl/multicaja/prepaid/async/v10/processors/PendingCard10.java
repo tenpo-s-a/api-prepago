@@ -174,12 +174,9 @@ public class PendingCard10 extends BaseProcessor10 {
         req.retryCountNext();
         PrepaidTopupDataRoute10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-        getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          data.getPrepaidMovement10().getId(),
-          null,
-          null,
-          null,
-          PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
+        PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
+        getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+        data.getPrepaidMovement10().setEstado(status);
         return new ResponseRoute<>(data);
       }
     };
@@ -193,12 +190,9 @@ public class PendingCard10 extends BaseProcessor10 {
         req.retryCountNext();
         PrepaidTopupDataRoute10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-        getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          data.getPrepaidMovement10().getId(),
-          null,
-          null,
-          null,
-          PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
+        PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD;
+        getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+        data.getPrepaidMovement10().setEstado(status);
         return new ResponseRoute<>(data);
       }
     };
