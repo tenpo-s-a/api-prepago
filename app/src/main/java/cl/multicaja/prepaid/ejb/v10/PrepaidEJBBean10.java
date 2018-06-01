@@ -237,7 +237,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
 
-    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null,cdtTransaction);
+    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
     if(!cdtTransaction.getNumError().equals("0")){

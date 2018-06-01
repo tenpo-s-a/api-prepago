@@ -1,6 +1,7 @@
 package cl.multicaja.test.api.unit;
 
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
@@ -39,13 +40,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidTopup: " + prepaidTopup);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);
@@ -83,13 +90,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     System.out.println("prepaidTopup: " + prepaidTopup);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -113,29 +126,48 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     Assert.assertEquals("Status Igual a",PrepaidCardStatus.ACTIVE, remoteTopup.getData().getPrepaidCard10().getStatus());
     Assert.assertNotNull("Deberia Tener Nombre",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
   }
+
   /********************
    * Test directo de alta rapida
    * @throws Exception
    *****/
   @Test
-  public void pendingEmissionCardUnit() throws Exception
-  {
+  public void pendingEmissionCardUnit() throws Exception {
+
     User user = registerUser();
-    user = updateUser(user);
+
+    System.out.println("user: " + user);
+
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
     prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    System.out.println("prepaidTopup: " + prepaidTopup);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-    String messageId = sendPendingEmissionCard(prepaidTopup,prepaidMovement,user,prepaidUser,0);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,0);
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
     Assert.assertNotNull("Debe contener un contrato",remote.getData().getPrepaidCard10().getProcessorUserId());
     Assert.assertNull("Pan Debe ser Nulo",remote.getData().getPrepaidCard10().getPan());
-
   }
 
   /********************
@@ -143,15 +175,33 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
    * @throws Exception
    *****/
   @Test
-  public void pendingCreateCardUnit() throws Exception
-  {
+  public void pendingCreateCardUnit() throws Exception {
+
     User user = registerUser();
-    user = updateUser(user);
+
+    System.out.println("user: " + user);
+
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
     prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    System.out.println("prepaidTopup: " + prepaidTopup);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+
     prepaidMovement = createPrepaidMovement(prepaidMovement);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
@@ -160,7 +210,8 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard(prepaidCard10);
 
-    String messageId = sendPendingCreateCard(prepaidTopup,prepaidMovement,user,prepaidUser ,prepaidCard10,0);
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 0);
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
@@ -177,17 +228,36 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
    * @throws Exception
    *****/
   @Test
-  public void pendingEmissionCardUnitTimeOut() throws Exception
-  {
+  public void pendingEmissionCardUnitTimeOut() throws Exception {
+
     User user = registerUser();
-    user = updateUser(user);
+
+    System.out.println("user: " + user);
+
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
     prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    System.out.println("prepaidTopup: " + prepaidTopup);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-    String messageId = sendPendingEmissionCard(prepaidTopup,prepaidMovement,user,prepaidUser,4);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+
+    String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,4);
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
@@ -200,15 +270,33 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
    * @throws Exception
    *****/
   @Test
-  public void pendingCreateCardUnitTimeOut() throws Exception
-  {
+  public void pendingCreateCardUnitTimeOut() throws Exception {
+
     User user = registerUser();
-    user = updateUser(user);
+
+    System.out.println("user: " + user);
+
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+
     prepaidUser = createPrepaidUser(prepaidUser);
+
+    System.out.println("prepaidUser: " + prepaidUser);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+
+    System.out.println("prepaidTopup: " + prepaidTopup);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction(cdtTransaction);
+
+    System.out.println("cdtTransaction: " + cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+
     prepaidMovement = createPrepaidMovement(prepaidMovement);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
@@ -217,7 +305,8 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard(prepaidCard10);
 
-    String messageId = sendPendingCreateCard(prepaidTopup,prepaidMovement,user,prepaidUser ,prepaidCard10,4);
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 4);
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
