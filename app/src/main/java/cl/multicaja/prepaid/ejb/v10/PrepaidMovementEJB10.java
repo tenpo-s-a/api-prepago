@@ -2,8 +2,12 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import java.util.List;
 import java.util.Map;
 
 public interface PrepaidMovementEJB10 {
@@ -38,4 +42,56 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void updatePrepaidMovement(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
+
+  /**
+   *
+   * @param id
+   * @param idMovimientoRef
+   * @param idPrepaidUser
+   * @param idTxExterno
+   * @param tipoMovimiento
+   * @param estado
+   * @param cuenta
+   * @param clamon
+   * @param indnorcor
+   * @param tipofac
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac) throws Exception;
+
+  /**
+   *
+   * @param id
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getPrepaidMovementById(Long id) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUser(Long idPrepaidUser) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
+   * @param estado
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long idPrepaidUser, PrepaidMovementStatus estado) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
+   * @param tipoMovimiento
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndTipoMovimiento(Long idPrepaidUser, PrepaidMovementType tipoMovimiento) throws Exception;
 }

@@ -8,7 +8,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class PrepaidMovement10 implements Serializable, Cloneable {
 
@@ -355,5 +357,101 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof PrepaidMovement10)) return false;
+    PrepaidMovement10 that = (PrepaidMovement10) o;
+    return eql(getId(), that.getId()) &&
+      eql(getIdMovimientoRef(), that.getIdMovimientoRef()) &&
+      eql(getIdTxExterno(), that.getIdTxExterno()) &&
+      eql(getIdPrepaidUser(), that.getIdPrepaidUser()) &&
+      getTipoMovimiento() == that.getTipoMovimiento() &&
+      eql(getMonto(), that.getMonto()) &&
+      getEstado() == that.getEstado() &&
+      eql(getCodent(), that.getCodent()) &&
+      eql(getCentalta(), that.getCentalta()) &&
+      eql(getCuenta(), that.getCuenta()) &&
+      getClamon() == that.getClamon() &&
+      getIndnorcor() == that.getIndnorcor() &&
+      eql_tipofac(getTipofac(), that.getTipofac()) &&
+      eql_fecfac(getFecfac(), that.getFecfac()) &&
+      eql(getNumreffac(), that.getNumreffac()) &&
+      eql(getPan(), that.getPan()) &&
+      eql(getClamondiv(), that.getClamondiv()) &&
+      eql(getImpdiv(), that.getImpdiv()) &&
+      eql(getImpfac(), that.getImpfac()) &&
+      eql(getCmbapli(), that.getCmbapli()) &&
+      eql(getNumaut(), that.getNumaut()) &&
+      getIndproaje() == that.getIndproaje() &&
+      eql(getCodcom(), that.getCodcom()) &&
+      eql(getCodact(), that.getCodact()) &&
+      eql(getImpliq(), that.getImpliq()) &&
+      eql(getClamonliq(), that.getClamonliq()) &&
+      getCodpais() == that.getCodpais() &&
+      eql(getNompob(), that.getNompob()) &&
+      eql(getNumextcta(), that.getNumextcta()) &&
+      eql(getNummovext(), that.getNummovext()) &&
+      eql(getClamone(), that.getClamone()) &&
+      eql(getTipolin(), that.getTipolin()) &&
+      eql(getLinref(), that.getLinref()) &&
+      eql(getNumbencta(), that.getNumbencta()) &&
+      eql(getNumplastico(), that.getNumplastico());
+  }
+
+  private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+  /**
+   * La fecha factura puede llegar en diferentes formatos, por eso se realiza una comparacion personalizada
+   * @param o1
+   * @param o2
+   * @return
+   */
+  private boolean eql_fecfac(Date o1, Date o2) {
+    boolean eql = Objects.equals(o1, o2);
+    if (!eql) {
+      if (o1 != null && o2 != null) {
+        eql = sdf.format(o1).equals(sdf.format(o2));
+      }
+    }
+    if (!eql) {
+      System.out.println("fecfac del movimiento son distintos: " + o1 + " != " + o2);
+    }
+    return eql;
+  }
+
+  /**
+   * el tipo factura si es distinto importa el code de el
+   *
+   * @param o1
+   * @param o2
+   * @return
+   */
+  private boolean eql_tipofac(TipoFactura o1, TipoFactura o2) {
+    boolean eql = Objects.equals(o1, o2);
+    if (!eql) {
+      if (o1 != null && o2 != null) {
+        eql = o1.getCode() == o2.getCode();
+      }
+    }
+    if (!eql) {
+      System.out.println("tipofac del movimiento son distintos: " + o1 + " != " + o2);
+    }
+    return eql;
+  }
+
+  private boolean eql(Object o1, Object o2) {
+    boolean eql = Objects.equals(o1, o2);
+    if (!eql) {
+      System.out.println("Datos del movimiento son distintos: " + o1 + " != " + o2);
+    }
+    return eql;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId(), getIdMovimientoRef(), getIdTxExterno(), getIdPrepaidUser(), getTipoMovimiento(), getMonto(), getEstado(), getCodent(), getCentalta(), getCuenta(), getClamon(), getIndnorcor(), getTipofac(), getFecfac(), getNumreffac(), getPan(), getClamondiv(), getImpdiv(), getImpfac(), getCmbapli(), getNumaut(), getIndproaje(), getCodcom(), getCodact(), getImpliq(), getClamonliq(), getCodpais(), getNompob(), getNumextcta(), getNummovext(), getClamone(), getTipolin(), getLinref(), getNumbencta(), getNumplastico());
   }
 }
