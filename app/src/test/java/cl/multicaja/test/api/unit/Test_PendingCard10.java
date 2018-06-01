@@ -7,9 +7,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.users.model.v10.User;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -93,7 +91,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     String messageId = sendTopup(prepaidTopup, user, prepaidMovement);
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATECARD_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
@@ -163,7 +161,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     prepaidCard10 = createPrepaidCard(prepaidCard10);
 
     String messageId = sendPendingCreateCard(prepaidTopup,prepaidMovement,user,prepaidUser ,prepaidCard10,0);
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATECARD_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
@@ -220,7 +218,7 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     prepaidCard10 = createPrepaidCard(prepaidCard10);
 
     String messageId = sendPendingCreateCard(prepaidTopup,prepaidMovement,user,prepaidUser ,prepaidCard10,4);
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATECARD_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
