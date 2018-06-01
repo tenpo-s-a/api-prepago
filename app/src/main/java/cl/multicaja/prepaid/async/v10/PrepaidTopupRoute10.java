@@ -5,6 +5,7 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.async.v10.processors.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -42,7 +43,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
-
+  private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
 
   public PrepaidTopupRoute10() {
@@ -80,7 +81,12 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     }
     return parametersUtil;
   }
-
+  public PdfUtils getPdfUtils(){
+    if(pdfUtils == null){
+      pdfUtils = PdfUtils.getInstance();
+    }
+    return pdfUtils;
+  }
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
   }
@@ -143,7 +149,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public static final String ERROR_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.errorCardIssuanceFee.req";
   public static final String ERROR_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.errorCardIssuanceFee.resp";
-  
+
   public static final String PENDING_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.pendingSendMailCard.req";
   public static final String PENDING_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.pendingSendMailCard.resp";
 

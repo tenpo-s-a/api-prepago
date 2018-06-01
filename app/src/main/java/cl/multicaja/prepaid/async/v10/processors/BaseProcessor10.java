@@ -4,6 +4,7 @@ import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -42,6 +43,9 @@ public abstract class BaseProcessor10 {
     return this.getRoute().getParametersUtil();
   }
 
+  public PdfUtils getPdfUtils(){
+    return this.getRoute().getPdfUtils();
+  }
   public PrepaidTopupRoute10 getRoute() {
     return route;
   }

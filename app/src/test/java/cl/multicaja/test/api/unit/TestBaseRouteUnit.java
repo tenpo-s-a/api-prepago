@@ -297,4 +297,35 @@ public class TestBaseRouteUnit extends TestBaseUnit {
 
   }
 
+
+  protected String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10,int retryCount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+    //se crea un messageId unico
+    String messageId = RandomStringUtils.randomAlphabetic(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
+    // Realiza alta en tecnocom para que el usuario exista
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(null, user, null, null);
+    data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getData().setPrepaidCard10(prepaidCard10);
+    req.getData().setPrepaidUser10(prepaidUser10);
+
+    //se envia el mensaje a la cola
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+
+  }
+
+
+
 }
