@@ -26,7 +26,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
 
   private static Log log = LogFactory.getLog(TestBaseUnit.class);
 
-  protected static CamelFactory camelFactory = CamelFactory.getInstance();
+  public static CamelFactory camelFactory = CamelFactory.getInstance();
 
   private static BrokerService brokerService;
 
@@ -93,7 +93,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @return
    * @throws Exception
    */
-  protected String sendTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
+  public String sendTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
     return messageId;
   }

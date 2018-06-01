@@ -259,7 +259,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidUser
    * @return
    */
-  protected PrepaidCard10 buildCardFromTecnocom(User user, PrepaidUser10 prepaidUser) {
+  public PrepaidCard10 buildCardFromTecnocom(User user, PrepaidUser10 prepaidUser) {
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
 
