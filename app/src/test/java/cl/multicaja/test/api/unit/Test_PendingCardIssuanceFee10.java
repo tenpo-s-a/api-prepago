@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.jms.Queue;
+import java.util.List;
 
 /**
  * @autor abarazarte
@@ -21,7 +22,19 @@ import javax.jms.Queue;
 public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
   @Test
-  public void pendingCardIssuanceFee_PrepaidTopupNull() {
+  public void pendingCardIssuanceFee_PrepaidTopupNull() throws Exception {
+
+    User user = registerUser();
+
+    user.setName(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
+
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    prepaidUser = createPrepaidUser(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
 
@@ -34,10 +47,26 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
   }
 
   @Test
-  public void pendingCardIssuanceFee_FirstTopupFalse() {
+  public void pendingCardIssuanceFee_FirstTopupFalse() throws Exception {
+
+    User user = registerUser();
+
+    user.setName(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
+
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    prepaidUser = createPrepaidUser(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     PrepaidCard10 prepaidCard = new PrepaidCard10();
@@ -52,10 +81,26 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
 
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
+
   }
 
   @Test
-  public void pendingCardIssuanceFee_PrepaidCardNull() {
+  public void pendingCardIssuanceFee_PrepaidCardNull() throws Exception {
+
+    User user = registerUser();
+
+    user.setName(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
+
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    prepaidUser = createPrepaidUser(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
@@ -70,10 +115,26 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
 
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
+
   }
 
   @Test
-  public void pendingCardIssuanceFee_PrepaidMovementNull() {
+  public void pendingCardIssuanceFee_PrepaidMovementNull() throws Exception {
+
+    User user = registerUser();
+
+    user.setName(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
+    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
+
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    prepaidUser = createPrepaidUser(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
 
@@ -88,6 +149,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
 
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
   }
 
   /**
@@ -154,6 +218,12 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNummovext());
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getClamone());
 
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
+    Assert.assertEquals("Debe tener un movimiento de comision", issuanceFeeMovement.getId(), dbMovements.get(0).getId());
+    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
+
   }
 
   /**
@@ -211,6 +281,12 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
+    Assert.assertEquals("Debe tener un movimiento de comision", issuanceMovement.getId(), dbMovements.get(0).getId());
+    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
   }
 
   @Test
@@ -265,5 +341,11 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
+    Assert.assertEquals("Debe tener un movimiento de comision", issuanceMovement.getId(), dbMovements.get(0).getId());
+    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
   }
 }
