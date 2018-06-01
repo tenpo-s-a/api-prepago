@@ -131,9 +131,12 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             inclusionMovimientosDTO.getClamone(),
             issuanceFeeMovement.getEstado());
 
+          // Envia a la cola de envio de email con la informacion de la tarjeta
+          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
+          redirectRequest(endpoint, exchange, req);
 
-          //TODO: Dejar en cola para envio de mail con info de la tarjeta
         } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
