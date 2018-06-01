@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -33,9 +34,108 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     return new InParam(o,Types.NUMERIC);
   }
 
+  /**
+   *
+   * @param idMovimientoRef
+   * @param idUsuario
+   * @param idTxExterno
+   * @param tipoMovimiento
+   * @param estado
+   * @param cuenta
+   * @param clamon
+   * @param indnorcor
+   * @param tipofac
+   * @return
+   * @throws SQLException
+   */
+  public static Map<String, Object> insertaMovimiento(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                      String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
+    Object[] params = {
+      setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
+      setInParam(idUsuario), //_id_usuario NUMERIC
+      idTxExterno, //_id_tx_externo VARCHAR
+      tipoMovimiento, //_tipo_movimiento VARCHAR
+      setInParam(getUniqueLong()), //_monto NUMERIC
+      estado, //_estado VARCHAR
+      "AA",//_codent VARCHAR
+      "CA",//_centalta VARCHAR
+      cuenta,//_cuenta VARCHAR
+      setInParam(clamon),//_clamon NUMERIC
+      setInParam(indnorcor),//_indnorcor NUMERIC
+      setInParam(tipofac),//_tipofac NUMERIC
+      new Date(System.currentTimeMillis()),//_fecfac DATE
+      "123",//_numreffac VARCHAR
+      RandomStringUtils.randomNumeric(16),// _pan VARCHAR,
+      setInParam(90),//_clamondiv NUMERIC,
+      setInParam(10),//_impdiv NUMERIC,
+      setInParam(10),//_impfac NUMERIC,
+      setInParam(10),//_cmbapli NUMERIC,
+      "1231",//_numaut VARCHAR,
+      "A",//_indproaje VARCHAR,
+      "123",//_codcom VARCHAR,
+      1234,//_codact NUMERIC,
+      setInParam(1),//_impliq NUMERIC,
+      setInParam(1), //_clamonliq NUMERIC,
+      setInParam(1), //_codpais NUMERIC,
+      "ASDA",//_nompob VARCHAR,
+      setInParam(22),//_numextcta NUMERIC,
+      setInParam(22),//_nummovext NUMERIC,
+      setInParam(123),// _clamone NUMERIC,
+      "V",//_tipolin VARCHAR,
+      setInParam( 2),//_linref NUMERIC,
+      setInParam(2),//_numbencta NUMERIC,
+      setInParam(2),//_numplastico NUMERIC,
+      new OutParam("_id", Types.NUMERIC),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+    System.out.println(resp);
+    return resp;
+  }
+
+  /**
+   *
+   * @return
+   * @throws SQLException
+   */
+  public static Map<String, Object> insertaMovimientoRandom() throws SQLException {
+
+    Map<String, Object> mapCard = insertCard("ACTIVA");
+
+    Long idMovimientoRef = getUniqueLong();
+    Long idUsuario = (Long)mapCard.get("id_usuario");
+
+    String idTxExterno = getUniqueLong().toString();
+    String tipoMovimiento = "CARGA";
+    String estado = "PRUEBA";
+    String cuenta = RandomStringUtils.randomNumeric(10);
+    Integer clamon = 152;
+    Integer indnorcor = 0;
+    Integer tipofac = 3001;
+
+    Map<String, Object> mapMovimiento = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    return mapMovimiento;
+  }
+
   @Test
   public void llamadaSpCreaMovimientoOk() throws SQLException {
-    Map<String, Object> resp = insertaMovimiento();
+
+    Map<String, Object> mapCard = insertCard("ACTIVA");
+
+    Long idMovimientoRef = getUniqueLong();
+    Long idUsuario = (Long)mapCard.get("id_usuario");
+
+    String idTxExterno = getUniqueLong().toString();
+    String tipoMovimiento = "CARGA";
+    String estado = "PRUEBA";
+    String cuenta = RandomStringUtils.randomNumeric(10);
+    Integer clamon = 152;
+    Integer indnorcor = 0;
+    Integer tipofac = 3001;
+
+    Map<String, Object> resp = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Debe retornar un id", true, numberUtils.toLong(resp.get("_id")) > 0);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
@@ -46,95 +146,20 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
-    Object[] params = {
-      setInParam(mapCard.get("id_usuario")), //id_mov_ref
-      setInParam(mapCard.get("id_usuario")), //id_usuario
-      ""+getUniqueLong(),
-      "CARGA", //estado
-      setInParam(getUniqueLong()),
-      "ENPRO",
-      "AA",//_cod_entidad
-      "CA",//_cen_alta
-      "CTA312312312",//_cuenta
-      setInParam(152),//_cod_moneda NUMERIC
-      setInParam(1),//_ind_norcor NUMERIC
-      setInParam(2),//_tipo_factura NUMERIC
-      new Date(System.currentTimeMillis()),//_fecha_factura
-      "123",//_num_factura_ref VARCHAR
-      mapCard.get("pan"),// _pan            VARCHAR,
-      setInParam(90),//_cod_mondiv      NUMERIC,
-      setInParam(10),//_imp_div           NUMERIC,
-      setInParam(10),//_imp_fac           NUMERIC,
-      setInParam(10),//_cmp_apli            NUMERIC,
-      "1231",//_num_autorizacion    VARCHAR,
-      "AR",//_ind_proaje          VARCHAR,
-      "123",//_cod_comercio        VARCHAR,
-      1234,//_cod_actividad       NUMERIC,
-      setInParam(1),//_imp_liq             NUMERIC,
-      setInParam(1), //_cod_monliq          NUMERIC,
-      setInParam(1), //_cod_pais            NUMERIC,
-      "ASDA",//_nom_poblacion       VARCHAR,
-      setInParam(22),//_num_extracto        NUMERIC,
-      setInParam(22),//_num_mov_extracto    NUMERIC,
-      setInParam(123),// _clave_moneda        NUMERIC,
-      "V",//_tipo_linea          VARCHAR,
-      setInParam( 2),//_referencia_linea    NUMERIC,
-      setInParam(2),//_num_benef_cta       NUMERIC,
-      setInParam(2),//_numero_plastico     NUMERIC,
-      new OutParam("_id", Types.NUMERIC),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-    System.out.println(resp);
+    Long idMovimientoRef = getUniqueLong();
+    Long idUsuario = (Long)mapCard.get("id_usuario");
+
+    String idTxExterno = getUniqueLong().toString();
+    String tipoMovimiento = "CARGA";
+    String estado = "PRUEBA";
+    String cuenta = RandomStringUtils.randomNumeric(10);
+    Integer clamon = 15200; //maximo largo 3
+    Integer indnorcor = 0;
+    Integer tipofac = 3001;
+
+    Map<String, Object> resp = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
   }
-
-  public static Map<String, Object> insertaMovimiento() throws SQLException {
-    Map<String, Object> mapCard = insertCard("ACTIVA");
-    Object[] params = {
-      setInParam(mapCard.get("id_usuario")), //id_mov_ref
-      setInParam(mapCard.get("id_usuario")), //id_usuario
-      getUniqueLong().toString(),
-      "CARGA", //estado
-      setInParam(getUniqueLong()),
-      "ENPRO",
-      "AA",//_cod_entidad
-      "CA",//_cen_alta
-      "CTA312312312",//_cuenta
-      setInParam(152),//_cod_moneda NUMERIC
-      setInParam(1),//_ind_norcor NUMERIC
-      setInParam(2),//_tipo_factura NUMERIC
-      new Date(System.currentTimeMillis()),//_fecha_factura
-      "123",//_num_factura_ref VARCHAR
-      mapCard.get("pan"),// _pan            VARCHAR,
-      setInParam(90),//_cod_mondiv      NUMERIC,
-      setInParam(10),//_imp_div           NUMERIC,
-      setInParam(10),//_imp_fac           NUMERIC,
-      setInParam(10),//_cmp_apli            NUMERIC,
-      "1231",//_num_autorizacion    VARCHAR,
-      "A",//_ind_proaje          VARCHAR,
-      "123",//_cod_comercio        VARCHAR,
-      1234,//_cod_actividad       NUMERIC,
-      setInParam(1),//_imp_liq             NUMERIC,
-      setInParam(1), //_cod_monliq          NUMERIC,
-      setInParam(1), //_cod_pais            NUMERIC,
-      "ASDA",//_nom_poblacion       VARCHAR,
-      setInParam(22),//_num_extracto        NUMERIC,
-      setInParam(22),//_num_mov_extracto    NUMERIC,
-      setInParam(123),// _clave_moneda        NUMERIC,
-      "V",//_tipo_linea          VARCHAR,
-      setInParam( 2),//_referencia_linea    NUMERIC,
-      setInParam(2),//_num_benef_cta       NUMERIC,
-      setInParam(2),//_numero_plastico     NUMERIC,
-      new OutParam("_id", Types.NUMERIC),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-    System.out.println(resp);
-    return resp;
-  }
-
 }

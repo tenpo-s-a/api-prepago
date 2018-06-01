@@ -7,4 +7,12 @@ public enum PrepaidMovementType {
   ISSUANCE_FEE,
   TOPUP,
   WITHDRAW;
+
+  public static PrepaidMovementType valueOfEnum(String name) {
+    try {
+      return PrepaidMovementType.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
+  }
 }

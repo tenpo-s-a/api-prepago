@@ -195,7 +195,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESSED_WITH_ERROR, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -207,7 +207,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", remoteTopup);
     issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -249,7 +249,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     PrepaidMovement10 issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESSED_WITH_ERROR, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -261,7 +261,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS, issuanceMovement.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());

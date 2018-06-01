@@ -27,4 +27,12 @@ public enum CdtTransactionType {
   public String getName() {
     return name;
   }
+
+  public static CdtTransactionType valueOfEnum(String name) {
+    try {
+      return CdtTransactionType.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
+  }
 }

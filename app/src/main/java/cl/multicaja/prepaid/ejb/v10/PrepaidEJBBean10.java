@@ -374,7 +374,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Override
   public PrepaidUser10 getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
     if(userId == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -383,7 +383,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Override
   public PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "userIdMc"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -392,7 +392,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   @Override
   public PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     if(rut == null){
-      throw new ValidationException(2);
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, null, rut, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;

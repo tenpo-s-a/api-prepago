@@ -12,6 +12,21 @@ import java.util.Map;
 
 public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
+  private boolean contains(List<PrepaidMovement10> lst, PrepaidMovement10 prepaidMovement) {
+    for (int j = 0; j < lst.size(); j++) {
+      boolean equals = lst.get(j).equals(prepaidMovement);
+      System.out.println("---------------" + j + "---------------");
+      System.out.println("equals: " + equals);
+      System.out.println(lst.get(j));
+      System.out.println(prepaidMovement);
+      System.out.println("--------------------------------");
+      if (equals) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @Test
   public void testeEjbAddMovement() throws Exception {
 
@@ -25,7 +40,7 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   }
 
   @Test
-  public void testeEjbUpdate() throws Exception {
+  public void test_updatePrepaidMovement_estado() throws Exception {
 
     // CREA USUARIOS
     PrepaidUser10 prepaidUser = buildPrepaidUser();
@@ -37,20 +52,17 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,prepaidMovement10.getId(),null,null,null,PrepaidMovementStatus.IN_PROCESS);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(), PrepaidMovementStatus.IN_PROCESS);
 
-    List lstMov = buscaMovimiento(prepaidMovement10.getId());
+    prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
 
-    Assert.assertNotNull("La lista debe ser not null",lstMov);
-    Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
 
-    Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
-
-    Assert.assertEquals("El estado debe ser :"+PrepaidMovementStatus.IN_PROCESS.getValue(), PrepaidMovementStatus.IN_PROCESS.getValue(), fila.get("estado"));
+    Assert.assertEquals("deben ser iguales", prepaidMovement10, prepaidMovement1_1);
   }
 
   @Test
-  public void testeEjbUpdate2() throws Exception {
+  public void test_updatePrepaidMovement() throws Exception {
 
     // CREA USUARIOS
     PrepaidUser10 prepaidUser = buildPrepaidUser();
@@ -62,26 +74,66 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
     prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2,CodigoMoneda.CHILE_CLP.getValue(), PrepaidMovementStatus.PROCESS_OK);
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2, CodigoMoneda.CHILE_CLP.getValue(), PrepaidMovementStatus.PROCESS_OK);
 
-    List lstMov = buscaMovimiento(prepaidMovement10.getId());
+    prepaidMovement10.setNumextcta(1);
+    prepaidMovement10.setNummovext(2);
+    prepaidMovement10.setClamone(CodigoMoneda.CHILE_CLP.getValue());
+    prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
 
-    Assert.assertNotNull("La lista debe ser not null",lstMov);
-    Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
 
-    Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
-
-    Assert.assertEquals("El estado debe ser :" + PrepaidMovementStatus.PROCESS_OK.getValue(), PrepaidMovementStatus.PROCESS_OK.getValue(), fila.get("estado"));
-    Assert.assertEquals("El Num Extracto debe ser 1",1,((BigDecimal)fila.get("numextcta")).intValue());
-    Assert.assertEquals("El Num Extracto debe ser 1",2,((BigDecimal)fila.get("nummovext")).intValue());
-    Assert.assertEquals("El Num Extracto debe ser 1", CodigoMoneda.CHILE_CLP.getValue().intValue(),((BigDecimal)fila.get("clamone")).intValue());
+    Assert.assertEquals("deben ser iguales", prepaidMovement10, prepaidMovement1_1);
   }
 
-  public List buscaMovimiento(Object idMovimiento)  {
-    ConfigUtils configUtils = ConfigUtils.getInstance();
-    String SCHEMA = configUtils.getProperty("schema");
-    String SP_NAME = SCHEMA + ".prp_movimiento";
-    return dbUtils.getJdbcTemplate().queryForList("SELECT * FROM "+SP_NAME+" WHERE ID ="+idMovimiento);
-  }
+  @Test
+  public void teste_getPrepaidMovements() throws Exception {
 
+    // CREA USUARIOS
+    PrepaidUser10 prepaidUser = buildPrepaidUser();
+
+    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+
+    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement(prepaidUser);
+
+    prepaidMovement1 = createPrepaidMovement(prepaidMovement1);
+
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement(prepaidUser);
+
+    prepaidMovement2 = createPrepaidMovement(prepaidMovement2);
+
+    List<PrepaidMovement10> lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
+
+    Assert.assertNotNull("debe retornar una lista", lst);
+    Assert.assertEquals("deben ser 2", 2, lst.size());
+
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement1));
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement2));
+
+    lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndEstado(prepaidUser.getId(), prepaidMovement1.getEstado());
+
+    Assert.assertNotNull("debe retornar una lista", lst);
+    Assert.assertEquals("deben ser 2", 2, lst.size());
+
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement1));
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement2));
+
+    lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento(prepaidUser.getId(), prepaidMovement1.getTipoMovimiento());
+
+    Assert.assertNotNull("debe retornar una lista", lst);
+    Assert.assertEquals("deben ser 2", 2, lst.size());
+
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement1));
+    Assert.assertTrue("debe contener el movimiento", contains(lst, prepaidMovement2));
+
+    lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndEstado(prepaidUser.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP);
+
+    Assert.assertNull("debe retornar una lista", lst);
+
+    PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement1.getId());
+    Assert.assertEquals("deben ser iguales", prepaidMovement1, prepaidMovement1_1);
+
+    PrepaidMovement10 prepaidMovement1_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement2.getId());
+    Assert.assertEquals("deben ser iguales", prepaidMovement2, prepaidMovement1_2);
+  }
 }

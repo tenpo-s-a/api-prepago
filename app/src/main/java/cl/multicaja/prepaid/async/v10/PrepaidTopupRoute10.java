@@ -10,15 +10,12 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
-import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import java.sql.SQLException;
 
 /**
  * Implementacion personalizada de rutas camel
@@ -129,8 +126,8 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
 
-  public static final String PENDING_CREATECARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
-  public static final String PENDING_CREATECARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
+  public static final String PENDING_CREATE_CARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
+  public static final String PENDING_CREATE_CARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
 
   public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_REQ = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.req";
   public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_RESP = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.resp";
@@ -138,16 +135,15 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   public static final String ERROR_EMISSION_REQ = "PrepaidTopupRoute10.errorEmission.req";
   public static final String ERROR_EMISSION_RESP = "PrepaidTopupRoute10.errorEmission.resp";
 
-  public static final String ERROR_CREATECARD_REQ = "PrepaidTopupRoute10.errorCreateCard.req";
-  public static final String ERROR_CREATECARD_RESP = "PrepaidTopupRoute10.errorCreateCard.resp";
+  public static final String ERROR_CREATE_CARD_REQ = "PrepaidTopupRoute10.errorCreateCard.req";
+  public static final String ERROR_CREATE_CARD_RESP = "PrepaidTopupRoute10.errorCreateCard.resp";
 
   public static final String PENDING_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.pendingCardIssuanceFee.req";
   public static final String PENDING_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.pendingCardIssuanceFee.resp";
 
   public static final String ERROR_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.errorCardIssuanceFee.req";
   public static final String ERROR_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.errorCardIssuanceFee.resp";
-
-
+  
   public static final String PENDING_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.pendingSendMailCard.req";
   public static final String PENDING_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.pendingSendMailCard.resp";
 
@@ -190,9 +186,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     /**
      * Obtener Datos Tarjeta
      */
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CREATECARD_REQ, concurrentConsumers)))
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CREATE_CARD_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processPendingCreateCard())
-      .to(createJMSEndpoint(PENDING_CREATECARD_RESP)).end();
+      .to(createJMSEndpoint(PENDING_CREATE_CARD_RESP)).end();
 
     /**
      * Error Emisiones
@@ -204,9 +200,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     /**
      * Error Obtener Datos Tarjeta
      */
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CREATECARD_REQ, concurrentConsumers)))
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CREATE_CARD_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processErrorCreateCard())
-      .to(createJMSEndpoint(ERROR_CREATECARD_RESP)).end();
+      .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP)).end();
 
     /**
      * Confirmacion reversa de topup pendientes
@@ -227,7 +223,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
-      .process(new PendingCardIssuanceFee10(this).processError())
+      .process(new PendingCardIssuanceFee10(this).processErrorPendingIssuanceFee())
       .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
 
     /**
@@ -239,7 +235,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processError())
+      .process(new PendingSendMail10(this).processErrorPendingSendMailCard())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP)).end();
   }
 }

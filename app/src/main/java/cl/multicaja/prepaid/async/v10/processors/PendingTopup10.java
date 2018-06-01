@@ -45,6 +45,12 @@ public class PendingTopup10 extends BaseProcessor10 {
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         if(req.getRetryCount() > 3) {
+
+          //segun la historia: https://www.pivotaltracker.com/story/show/157850744
+          PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
+          getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+          data.getPrepaidMovement10().setEstado(status);
+
           Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
@@ -173,6 +179,11 @@ public class PendingTopup10 extends BaseProcessor10 {
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             redirectRequest(endpoint, exchange, req);
           } else {
+
+            PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
+            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+            data.getPrepaidMovement10().setEstado(status);
+
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
