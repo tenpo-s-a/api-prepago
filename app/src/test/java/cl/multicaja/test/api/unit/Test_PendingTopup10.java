@@ -66,15 +66,11 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
     prepaidCard = createPrepaidCard(prepaidCard);
-
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -98,15 +94,11 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
     prepaidCard = createPrepaidCard(prepaidCard);
-
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 topup = buildPrepaidTopup(user);
 
@@ -130,33 +122,21 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
 
     prepaidCard = createPrepaidCard(prepaidCard);
 
-    System.out.println("prepaidCard: " + prepaidCard);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
-
-    System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
     //Alta de cliente
 
@@ -199,13 +179,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
 
     prepaidCard = createPrepaidCard(prepaidCard);
-
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
 
@@ -213,11 +189,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement, 4);
-
-    System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -246,33 +218,21 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
 
     prepaidCard = createPrepaidCard(prepaidCard);
 
-    System.out.println("prepaidCard: " + prepaidCard);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
-
-    System.out.println("Tecnocom hascode: " + getTecnocomService().hashCode());
 
     //Alta de cliente
 

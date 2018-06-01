@@ -28,29 +28,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -78,29 +68,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -136,38 +116,30 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,0);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remote.getData().getPrepaidCard10().getProcessorUserId());
-    Assert.assertNull("Pan Debe ser Nulo",remote.getData().getPrepaidCard10().getPan());
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
+    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
+    Assert.assertNull("Pan Debe ser Nulo",remoteTopup.getData().getPrepaidCard10().getPan());
   }
 
   /********************
@@ -179,29 +151,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
@@ -213,14 +175,16 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 0);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remote.getData().getPrepaidCard10().getProcessorUserId());
-    Assert.assertNotNull("Debe contener getPan",remote.getData().getPrepaidCard10().getPan());
-    Assert.assertNotNull("Debe contener getNameOnCard",remote.getData().getPrepaidCard10().getNameOnCard());
-    Assert.assertNotNull("Debe contener getExpiration",remote.getData().getPrepaidCard10().getExpiration());
-    Assert.assertNotNull("Debe contener getEncryptedPan",remote.getData().getPrepaidCard10().getEncryptedPan());
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
+    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
+    Assert.assertNotNull("Debe contener getPan",remoteTopup.getData().getPrepaidCard10().getPan());
+    Assert.assertNotNull("Debe contener getNameOnCard",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
+    Assert.assertNotNull("Debe contener getExpiration",remoteTopup.getData().getPrepaidCard10().getExpiration());
+    Assert.assertNotNull("Debe contener getEncryptedPan",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
   }
 
   /********************
@@ -232,37 +196,28 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,4);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNull("La tarjeta debe ser Nula",remote.getData().getPrepaidCard10());
-
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertNull("La tarjeta debe ser Nula", remoteTopup.getData().getPrepaidCard10());
   }
 
   /********************
@@ -274,29 +229,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction(cdtTransaction);
 
-    System.out.println("cdtTransaction: " + cdtTransaction);
-
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement(prepaidMovement);
-
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
@@ -308,14 +253,16 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 4);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remote.getData().getPrepaidCard10().getProcessorUserId());
-    Assert.assertNull("Debe contener getPan",remote.getData().getPrepaidCard10().getPan());
-    Assert.assertNull("Debe contener getNameOnCard",remote.getData().getPrepaidCard10().getNameOnCard());
-    Assert.assertNull("Debe contener getExpiration",remote.getData().getPrepaidCard10().getExpiration());
-    Assert.assertNull("Debe contener getEncryptedPan",remote.getData().getPrepaidCard10().getEncryptedPan());
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+    Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
+    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
+    Assert.assertNull("Debe contener getPan",remoteTopup.getData().getPrepaidCard10().getPan());
+    Assert.assertNull("Debe contener getNameOnCard",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
+    Assert.assertNull("Debe contener getExpiration",remoteTopup.getData().getPrepaidCard10().getExpiration());
+    Assert.assertNull("Debe contener getEncryptedPan",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
   }
 
 

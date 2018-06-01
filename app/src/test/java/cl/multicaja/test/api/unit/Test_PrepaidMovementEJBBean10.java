@@ -33,17 +33,11 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
@@ -55,17 +49,11 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
@@ -86,17 +74,11 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
@@ -120,17 +102,11 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
     User user = registerUser();
 
-    System.out.println("user: " + user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
     prepaidUser = createPrepaidUser(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
-
-    System.out.println("prepaidTopup: " + prepaidTopup);
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
