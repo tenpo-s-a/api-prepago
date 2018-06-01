@@ -9,4 +9,12 @@ public enum PrepaidMovementStatus {
   ERROR_IN_PROCESS_CREATE_CARD,
   ERROR_IN_PROCESS_EMISSION_CARD,
   ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
+
+  public static PrepaidMovementStatus valueOfEnum(String name) {
+    try {
+      return PrepaidMovementStatus.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
+  }
 }
