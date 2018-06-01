@@ -77,7 +77,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
   }
 
   /* Cola Errores */
-  public ProcessorRoute processError() {
+  public ProcessorRoute processErrorPendingSendMailCard() {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {

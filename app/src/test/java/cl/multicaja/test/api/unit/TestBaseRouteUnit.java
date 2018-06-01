@@ -3,15 +3,9 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -172,9 +166,10 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @param user
    * @param cdtTransaction
    * @param prepaidMovement
+   * @param retryCount
    * @return
    */
-  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -192,7 +187,10 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
 
     //se envia el mensaje a la cola
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, new RequestRoute<>(data), new JMSHeader("JMSCorrelationID", messageId));
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
@@ -236,6 +234,67 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, requestRoute, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
+  }
+
+
+
+  /******
+   * Envia un mensaje directo al proceso PENDING_EMISSION_REQ
+   * @param user
+   * @return
+   */
+  protected String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup10, PrepaidMovement10 prepaidMovement10, User user,PrepaidUser10 prepaidUser10,int retryCount){
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+    //se crea un messageId unico
+    String messageId = RandomStringUtils.randomAlphabetic(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup10, user, null, prepaidMovement10);
+    data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getData().setPrepaidUser10(prepaidUser10);
+
+    //se envia el mensaje a la cola
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+
+  }
+
+  protected String sendPendingCreateCard(PrepaidTopup10 prepaidTopup10, PrepaidMovement10 prepaidMovement10, User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10,int retryCount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+    //se crea un messageId unico
+    String messageId = RandomStringUtils.randomAlphabetic(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ);
+    // Realiza alta en tecnocom para que el usuario exista
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup10, user, null, prepaidMovement10);
+    data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getData().setPrepaidCard10(prepaidCard10);
+    req.getData().setPrepaidUser10(prepaidUser10);
+
+    //se envia el mensaje a la cola
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+
   }
 
 }

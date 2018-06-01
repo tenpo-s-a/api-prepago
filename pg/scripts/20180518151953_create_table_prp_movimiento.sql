@@ -24,7 +24,7 @@ CREATE TABLE ${schema}.prp_movimiento (
   id_tx_externo       VARCHAR(50) NOT NULL,
   tipo_movimiento     VARCHAR(50) NOT NULL,
   monto               NUMERIC NOT NULL,
-  estado              VARCHAR(20) NOT NULL,
+  estado              VARCHAR(50) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
   codent              VARCHAR(4) NOT NULL,

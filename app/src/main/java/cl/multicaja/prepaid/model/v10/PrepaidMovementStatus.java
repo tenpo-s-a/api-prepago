@@ -2,19 +2,19 @@ package cl.multicaja.prepaid.model.v10;
 
 public enum PrepaidMovementStatus {
 
-  PENDING("PENDING"),
-  IN_PROCESS("IN_PROCESS"),
-  PROCESS_OK("PROCESS_OK"),
-  ERROR_IN_PROCESS("ERROR_IN_PROCESS"),
-  PROCESSED_WITH_ERROR("PROCESSED_WITH_ERROR");
+  PENDING,
+  IN_PROCESS,
+  PROCESS_OK,
+  ERROR_IN_PROCESS_PENDING_TOPUP,
+  ERROR_IN_PROCESS_CREATE_CARD,
+  ERROR_IN_PROCESS_EMISSION_CARD,
+  ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
 
-  private String value;
-
-  PrepaidMovementStatus(String value) {
-    this.value = value;
-  }
-
-  public String getValue() {
-    return value;
+  public static PrepaidMovementStatus valueOfEnum(String name) {
+    try {
+      return PrepaidMovementStatus.valueOf(name);
+    } catch(Exception ex) {
+      return null;
+    }
   }
 }

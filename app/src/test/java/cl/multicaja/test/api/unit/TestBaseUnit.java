@@ -378,9 +378,9 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setNompob(RandomStringUtils.randomAlphabetic(6));
     prepaidMovement.setNumextcta(0);
     prepaidMovement.setNummovext(0);
-    prepaidMovement.setClamone(CodigoMoneda.CHILE_CLP.getValue());
-    prepaidMovement.setTipolin("1234");
-    prepaidMovement.setLinref(1);
+    prepaidMovement.setClamone(0);
+    prepaidMovement.setTipolin("");
+    prepaidMovement.setLinref(0);
     prepaidMovement.setNumbencta(1);
     prepaidMovement.setNumplastico(numberUtils.toLong(RandomStringUtils.randomNumeric(12)));
     return prepaidMovement;

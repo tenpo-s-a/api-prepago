@@ -84,10 +84,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         }
 
         if(req.getRetryCount() > 3) {
+
           issuanceFeeMovement.setNumextcta(0);
           issuanceFeeMovement.setNummovext(0);
           issuanceFeeMovement.setClamone(0);
-          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESSED_WITH_ERROR);
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -142,10 +143,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);
         } else {
+
           issuanceFeeMovement.setNumextcta(0);
           issuanceFeeMovement.setNummovext(0);
           issuanceFeeMovement.setClamone(0);
-          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESSED_WITH_ERROR);
+          issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
 
           getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
@@ -165,23 +167,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
   }
 
   /* Cola Errores */
-  public ProcessorRoute processError() {
+  public ProcessorRoute processErrorPendingIssuanceFee() {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
-        log.info("processError - REQ: " + req);
+
+        log.info("processErrorPendingIssuanceFee - REQ: " + req);
 
         req.retryCountNext();
-
         PrepaidTopupDataRoute10 data = req.getData();
-
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
         issuanceFeeMovement.setNumextcta(0);
         issuanceFeeMovement.setNummovext(0);
         issuanceFeeMovement.setClamone(0);
-        issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS);
+        issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
 
         getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
           issuanceFeeMovement.getId(),
