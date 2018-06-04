@@ -2,6 +2,7 @@ package cl.multicaja.test.api.unit;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,11 +31,15 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void testeEjbAddMovement() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
     createPrepaidMovement(prepaidMovement10);
   }
@@ -42,12 +47,15 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void test_updatePrepaidMovement_estado() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
     prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
 
@@ -64,12 +72,15 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void test_updatePrepaidMovement() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
     prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
 
@@ -89,16 +100,19 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void teste_getPrepaidMovements() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
 
-    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+
+    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
     prepaidMovement1 = createPrepaidMovement(prepaidMovement1);
 
-    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement(prepaidUser);
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement(prepaidUser, prepaidTopup);
 
     prepaidMovement2 = createPrepaidMovement(prepaidMovement2);
 

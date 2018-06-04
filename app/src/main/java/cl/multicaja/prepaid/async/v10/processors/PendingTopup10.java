@@ -4,6 +4,9 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
@@ -44,12 +47,20 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
+        PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
+
+        log.info("processPendingTopup prepaidTopup: " + prepaidTopup);
+
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+
+        log.info("processPendingTopup prepaidMovement: " + prepaidMovement);
+
         if(req.getRetryCount() > 3) {
 
           //segun la historia: https://www.pivotaltracker.com/story/show/157850744
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-          getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
-          data.getPrepaidMovement10().setEstado(status);
+          getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+          prepaidMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -96,38 +107,9 @@ public class PendingTopup10 extends BaseProcessor10 {
           prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
-        log.info("processPendingTopup prepaidCard10: " + prepaidCard);
-
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
-          PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
-          PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-
-          log.info("processPendingTopup prepaidMovement: " + prepaidMovement);
-
-          String codent = null;
-          try {
-            codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
-          } catch (SQLException e) {
-            log.error("Error al cargar parametro cod_entidad");
-            codent = getConfigUtils().getProperty("tecnocom.codEntity");
-          }
-
-          TipoFactura tipoFactura = null;
-
-          if (TopupType.WEB.equals(prepaidTopup.getType())) {
-            tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
-          } else {
-            tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
-          }
-
-          if (prepaidMovement == null) {
-            prepaidMovement = new PrepaidMovement10();
-            prepaidMovement.setTipofac(tipoFactura);
-            prepaidMovement.setCodent(codent);
-            data.setPrepaidMovement10(prepaidMovement);
-          }
 
           String contrato = prepaidCard.getProcessorUserId();
           String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
@@ -153,17 +135,35 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
-            prepaidMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
-            prepaidMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
-            prepaidMovement.setClamone(inclusionMovimientosDTO.getClamone());
-            prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK); //realizado
+            Integer numextcta = inclusionMovimientosDTO.getNumextcta();
+            Integer nummovext = inclusionMovimientosDTO.getNummovext();
+            Integer clamone = inclusionMovimientosDTO.getClamone();
+            PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK; //realizado
 
-            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(),
-                                                                        prepaidMovement.getNumextcta(),
-                                                                        prepaidMovement.getNummovext(),
-                                                                        prepaidMovement.getClamone(),
-                                                                        prepaidMovement.getEstado());
+            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), numextcta, nummovext, clamone, status);
 
+            prepaidMovement.setNumextcta(numextcta);
+            prepaidMovement.setNummovext(nummovext);
+            prepaidMovement.setClamone(clamone);
+            prepaidMovement.setEstado(status);
+
+            CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
+
+            CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
+            cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
+            cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+            cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
+            cdtTransactionConfirm.setGloss(cdtTransaction.getGloss());
+            cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
+            cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
+
+            cdtTransactionConfirm = getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
+
+            data.setCdtTransactionConfirm10(cdtTransactionConfirm);
+
+            //TODO que pasa si cdt da error?
+
+            //segun la historia: https://www.pivotaltracker.com/story/show/157442267
             // Si es 1era carga enviar a cola de cobro de emision
             if(prepaidTopup.isFirstTopup()){
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
@@ -171,7 +171,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.setRetryCount(0);
               redirectRequest(endpoint, exchange, req);
             } else {
-              //TODO que pasa con este caso?
+              return new ResponseRoute<>(data);
             }
 
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -207,7 +207,8 @@ public class PendingTopup10 extends BaseProcessor10 {
             req.setRetryCount(0);
             redirectRequest(endpoint, exchange, req);
           } else {
-            return null;
+            data.setPrepaidCard10(prepaidCard);
+            return new ResponseRoute<>(data);
           }
         }
 

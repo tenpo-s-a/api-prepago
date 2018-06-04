@@ -26,7 +26,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
 
   private static Log log = LogFactory.getLog(TestBaseUnit.class);
 
-  protected static CamelFactory camelFactory = CamelFactory.getInstance();
+  public static CamelFactory camelFactory = CamelFactory.getInstance();
 
   private static BrokerService brokerService;
 
@@ -40,7 +40,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //independiente de la configuración obliga a que el activemq no sea persistente en disco
-    ConfigUtils.getInstance().setProperty("activemq.broker.embedded.persistent","false");
+    getConfigUtils().setProperty("activemq.broker.embedded.persistent","false");
 
     //crea e inicia apache camel con las rutas creadas anteriormente
     if (!camelFactory.isCamelRunning()) {
@@ -88,34 +88,12 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    *
    * @param prepaidTopup
    * @param user
-   * @return
-   */
-  protected String sendTopup(PrepaidTopup10 prepaidTopup, User user) throws Exception {
-    String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, null, null);
-    return messageId;
-  }
-
-  /**
-   *
-   * @param prepaidTopup
-   * @param user
-   * @return
-   */
-  protected String sendTopup(PrepaidTopup10 prepaidTopup, User user, PrepaidMovement10 prepaidMovement) throws Exception {
-    String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, null, prepaidMovement);
-    return messageId;
-  }
-
-  /**
-   *
-   * @param prepaidTopup
-   * @param user
    * @param cdtTransaction
    * @param prepaidMovement
    * @return
    * @throws Exception
    */
-  protected String sendTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
+  public String sendTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
     return messageId;
   }
@@ -127,7 +105,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @return
    * @throws Exception
    */
-  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user) throws Exception {
+  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, null, null);
     return messageId;
   }
@@ -140,7 +118,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @return
    * @throws Exception
    */
-  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction) throws Exception {
+  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, null);
     return messageId;
   }
@@ -154,7 +132,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @return
    * @throws Exception
    */
-  protected String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
+  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
     String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, prepaidMovement);
     return messageId;
   }
@@ -169,7 +147,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @param retryCount
    * @return
    */
-  protected String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+  public String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -204,7 +182,8 @@ public class TestBaseRouteUnit extends TestBaseUnit {
    * @param prepaidCard
    * @return
    */
-  protected String sendPendingCardIssuanceFee(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+  public String sendPendingCardIssuanceFee(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
@@ -225,30 +204,29 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
     data.setPrepaidCard10(prepaidCard);
 
-    RequestRoute<PrepaidTopupDataRoute10> requestRoute = new RequestRoute<>(data);
+    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
 
     if (retryCount != null){
-      requestRoute.setRetryCount(retryCount);
+      req.setRetryCount(retryCount);
     }
 
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, requestRoute, new JMSHeader("JMSCorrelationID", messageId));
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
-
-
 
   /******
    * Envia un mensaje directo al proceso PENDING_EMISSION_REQ
    * @param user
    * @return
    */
-  protected String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup10, PrepaidMovement10 prepaidMovement10, User user,PrepaidUser10 prepaidUser10,int retryCount){
+  public String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
+
     //se crea un messageId unico
     String messageId = RandomStringUtils.randomAlphabetic(20);
 
@@ -256,25 +234,37 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup10, user, null, prepaidMovement10);
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+
     RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getData().setPrepaidUser10(prepaidUser10);
+    req.getData().setPrepaidUser10(prepaidUser);
 
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
-
   }
 
-  protected String sendPendingCreateCard(PrepaidTopup10 prepaidTopup10, PrepaidMovement10 prepaidMovement10, User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10,int retryCount) {
+  /**
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param prepaidUser
+   * @param prepaidCard
+   * @param cdtTransaction
+   * @param prepaidMovement
+   * @param retryCount
+   * @return
+   */
+  public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
+
     //se crea un messageId unico
     String messageId = RandomStringUtils.randomAlphabetic(20);
 
@@ -283,18 +273,17 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     // Realiza alta en tecnocom para que el usuario exista
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup10, user, null, prepaidMovement10);
+    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+
     RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getData().setPrepaidCard10(prepaidCard10);
-    req.getData().setPrepaidUser10(prepaidUser10);
+    req.getData().setPrepaidCard10(prepaidCard);
+    req.getData().setPrepaidUser10(prepaidUser);
 
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
-
   }
-
 }
