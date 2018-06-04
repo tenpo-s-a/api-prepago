@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -32,6 +33,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
     Assert.assertNull("No deberia existir un topup", remoteTopup);
   }
 
+  @Ignore
   @Test
   public void pendingTopupReverseConfirmation() throws Exception {
 
