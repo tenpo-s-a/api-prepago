@@ -300,7 +300,7 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       return null;
     }
     //se crea un messageId unico
-    String messageId = RandomStringUtils.randomAlphabetic(20);
+    String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);

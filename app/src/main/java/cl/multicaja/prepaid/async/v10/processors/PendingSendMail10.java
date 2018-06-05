@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
+import cl.multicaja.tecnocom.dto.Cvv2DTO;
 import cl.multicaja.users.model.v10.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -57,10 +58,12 @@ public class PendingSendMail10 extends BaseProcessor10 {
           redirectRequest(endpoint, exchange, req);
           return new ResponseRoute<>(data);
         }
-        //TODO: Se debe obtener cvc de tecnocom.
-        if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
+        Cvv2DTO cvv2DTO = getTecnocomService().consultaCvv2(data.getPrepaidCard10().getProcessorUserId(),getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
+
+        if (cvv2DTO.getRetorno().equals(CodigoRetorno._000)) {
 
           MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "PDF_CARD");
+
           if (mailTemplate == null) {
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -68,12 +71,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
             redirectRequest(endpoint, exchange, req);
           }
 
-          String template = replaceDataHTML(mailTemplate.getTemplate(), getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()), "" + data.getPrepaidCard10().getExpiration(), "987");
+          String template = replaceDataHTML(mailTemplate.getTemplate(), getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()), "" + data.getPrepaidCard10().getExpiration(), ""+cvv2DTO.getClavegen());
           String pdfB64 = getPdfUtils().protectedPdfInB64(template, "" + data.getUser().getRut(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Cliente", "Multicaja");
-
           //TODO: se debe llamar al servicio de envio de mail de Users
 
-        } else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
+        } else if (cvv2DTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);

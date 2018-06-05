@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import javax.jms.Queue;
 
-public class Test_PendingSendMail10 extends TestBaseRouteUnit {
+public class Test_PendingSendMail10 extends TestBaseUnitAsync {
 
 
   @Test
@@ -20,15 +20,15 @@ public class Test_PendingSendMail10 extends TestBaseRouteUnit {
 
     User user = registerUser();
     user = updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard(prepaidCard10);
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10,0);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_RESP);
