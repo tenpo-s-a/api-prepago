@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.NewPrepaidUserSignup10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,6 +80,17 @@ public final class PrepaidResource10 extends BaseResource {
   @Path("/prepaid/{userId}/card")
   public Response getPrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
+  }
+
+
+  /****
+   * Calculadora Carga
+   ****/
+  @POST
+  @Path("/prepaid/topup/calculator")
+  public Response topupCalculator(CalculatorRequest10 topupCalculatorRequest, @Context HttpHeaders headers) throws Exception {
+    CalculatorResponse10 calculatorResponse10 = this.prepaidEJBBean10.topupCalculator(headersToMap(headers), topupCalculatorRequest);
+    return Response.ok(calculatorResponse10).build();
   }
 
 }

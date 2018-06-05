@@ -44,4 +44,9 @@ public interface PrepaidEJB10 {
    * @throws IllegalStateException si el topup.amount.value es null
    */
   void addVoucherData(PrepaidTopup10 topup) throws Exception;
+
+  /**
+   *Calculadora para cargas
+   */
+  CalculatorResponse10 topupCalculator(Map<String,Object> header,CalculatorRequest10 req) throws Exception;
 }

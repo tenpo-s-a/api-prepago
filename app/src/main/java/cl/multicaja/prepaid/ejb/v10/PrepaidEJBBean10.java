@@ -398,4 +398,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidMovement;
   }
+  @Override
+  public CalculatorResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
+    CalculatorResponse10 calculatorResponse10  = new CalculatorResponse10();
+    return calculatorResponse10;
+  }
 }
