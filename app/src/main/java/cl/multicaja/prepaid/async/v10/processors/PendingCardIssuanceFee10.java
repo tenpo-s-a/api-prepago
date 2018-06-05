@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+
 import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
 
 /**
@@ -135,7 +136,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           // Activa la tarjeta luego de realizado el cobro de emision
           prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
 
-          getPrepaidEJBBean10().updateCard(null,
+          getPrepaidCardEJBBean10().updatePrepaidCard(null,
             prepaidCard.getId(),
             prepaidCard.getIdUser(),
             PrepaidCardStatus.PENDING,

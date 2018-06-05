@@ -7,8 +7,10 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.async.v10.processors.*;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
@@ -27,6 +29,12 @@ import javax.ejb.EJB;
 public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   private static Log log = LogFactory.getLog(PrepaidTopupRoute10.class);
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
   @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
@@ -91,12 +99,21 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     }
     return pdfUtils;
   }
-  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
-    return prepaidMovementEJBBean10;
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
   }
 
-  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
-    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
@@ -113,6 +130,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public void setUsersEJBBean10(UsersEJBBean10 usersEJBBean10) {
     this.usersEJBBean10 = usersEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
+    return prepaidMovementEJBBean10;
+  }
+
+  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
+    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
   }
 
   public CdtEJBBean10 getCdtEJBBean10() {
