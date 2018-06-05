@@ -159,6 +159,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
             cdtTransactionConfirm.setGloss(cdtTransaction.getGloss());
             cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
+            cdtTransactionConfirm.setIndSimulacion(false);
             //se debe agregar CONFIRM para evitar el constraint unique de esa columna
             cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
 

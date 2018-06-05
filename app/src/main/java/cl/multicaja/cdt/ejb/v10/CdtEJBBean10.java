@@ -53,7 +53,9 @@ public class CdtEJBBean10 implements CdtEJB10{
     if(cdtTransaction10.getAmount() == null || cdtTransaction10.getAmount().doubleValue() == 0){
       throw new ValidationException(101004).setData(new KeyValue("value", "amount o amount == 0"));
     }
-
+    if(cdtTransaction10.getIndSimulacion() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "indSimulacion"));
+    }
     Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC)};
     Map<String,Object> outputData = dbUtils.execute(getSchema()+"."+SP_CARGA_FASES_MOVIMIENTOS,params);
 
@@ -74,6 +76,7 @@ public class CdtEJBBean10 implements CdtEJB10{
       cdtTransaction10.getExternalTransactionId(),
       cdtTransaction10.getGloss(),
       cdtTransaction10.getAmount(),
+      cdtTransaction10.getIndSimulacion()== true?"S":"N",
       new OutParam("IdMovimiento", Types.NUMERIC),
       new OutParam("NumError", Types.VARCHAR),
       new OutParam("MsjError", Types.VARCHAR)

@@ -369,6 +369,7 @@ public class TestBaseUnit extends TestApiBase {
     cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
+    cdtTransaction.setIndSimulacion(false);
     return cdtTransaction;
   }
 
