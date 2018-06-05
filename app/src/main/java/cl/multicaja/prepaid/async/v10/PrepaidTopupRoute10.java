@@ -143,7 +143,7 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public static final String ERROR_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.errorCardIssuanceFee.req";
   public static final String ERROR_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.errorCardIssuanceFee.resp";
-  
+
   public static final String PENDING_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.pendingSendMailCard.req";
   public static final String PENDING_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.pendingSendMailCard.resp";
 

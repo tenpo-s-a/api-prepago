@@ -1,6 +1,5 @@
-package cl.multicaja.test.api;
+package cl.multicaja.test.v10.api;
 
-import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,7 +7,7 @@ import org.junit.Test;
 /**
  * @author abarazarte
  */
-public class Test_getUserTopups_v10 extends TestApiBase {
+public class Test_getUserTopups_v10 extends TestBaseUnitApi {
 
   @Test
   public void getUserTopups(){

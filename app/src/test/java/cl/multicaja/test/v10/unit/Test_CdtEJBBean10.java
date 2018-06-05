@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;

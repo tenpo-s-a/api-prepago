@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -14,7 +14,7 @@ import org.junit.Test;
 /**
  * @author abarazarte
  */
-public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit  {
+public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
 
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_UserNull() throws Exception {

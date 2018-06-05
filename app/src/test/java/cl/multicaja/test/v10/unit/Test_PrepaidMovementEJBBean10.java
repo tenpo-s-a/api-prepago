@@ -1,14 +1,11 @@
-package cl.multicaja.test.api.unit;
-import cl.multicaja.core.utils.ConfigUtils;
+package cl.multicaja.test.v10.unit;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
 
@@ -30,26 +27,33 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void testeEjbAddMovement() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    createPrepaidMovement(prepaidMovement10);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+
+    createPrepaidMovement10(prepaidMovement10);
   }
 
   @Test
   public void test_updatePrepaidMovement_estado() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(), PrepaidMovementStatus.IN_PROCESS);
@@ -64,14 +68,17 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void test_updatePrepaidMovement() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    prepaidMovement10 = createPrepaidMovement(prepaidMovement10);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2, CodigoMoneda.CHILE_CLP.getValue(), PrepaidMovementStatus.PROCESS_OK);
@@ -89,18 +96,21 @@ public class Test_PrepaidMovementEJBBean10 extends TestBaseUnit {
   @Test
   public void teste_getPrepaidMovements() throws Exception {
 
-    // CREA USUARIOS
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+    User user = registerUser();
 
-    prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    prepaidMovement1 = createPrepaidMovement(prepaidMovement1);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement(prepaidUser);
+    PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
 
-    prepaidMovement2 = createPrepaidMovement(prepaidMovement2);
+    prepaidMovement1 = createPrepaidMovement10(prepaidMovement1);
+
+    PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+
+    prepaidMovement2 = createPrepaidMovement10(prepaidMovement2);
 
     List<PrepaidMovement10> lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
 

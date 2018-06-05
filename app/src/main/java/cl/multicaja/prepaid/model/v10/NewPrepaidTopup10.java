@@ -110,4 +110,16 @@ public class NewPrepaidTopup10 extends BaseModel {
     }
   }
 
+  @JsonIgnore
+  public CdtTransactionType getCdtTransactionTypeConfirm() {
+    //Si es N = 1 -> Solicitud primera carga
+    if(this.isFirstTopup()){
+      return CdtTransactionType.PRIMERA_CARGA_CONF;
+    }
+    else {
+      // es N = 2
+      return this.getType().equals(TopupType.WEB) ? CdtTransactionType.CARGA_WEB_CONF : CdtTransactionType.CARGA_POS_CONF;
+    }
+  }
+
 }
