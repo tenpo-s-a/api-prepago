@@ -64,7 +64,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
-    //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_CREATE_CARD_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ;
 
@@ -127,7 +127,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
-    //verifica que la ultima cola por la cual paso el mensaje sea ERROR_CREATE_CARD_REQ
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 
@@ -175,7 +175,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
-    //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_CREATE_CARD_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ;
 
@@ -340,7 +340,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
-    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
+    //verifica que la ultima cola por la cual paso el mensaje sea ERROR_CREATE_CARD_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.ERROR_CREATE_CARD_REQ;
 
