@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -14,14 +14,14 @@ import javax.jms.Queue;
 /**
  * @autor abarazarte
  */
-public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
+public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
 
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {
 
     User user = registerUser();
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
 
     String messageId = sendTopUpReverseConfirmation(topup, user, null);
 
@@ -37,7 +37,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidTopup10 topup10 = buildPrepaidTopup(user);
+    PrepaidTopup10 topup10 = buildPrepaidTopup10(user);
 
     topup10.setFirstTopup(Boolean.FALSE);
 

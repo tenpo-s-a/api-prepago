@@ -1,7 +1,6 @@
 package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -127,7 +126,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = "PRUEBA1";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
@@ -206,7 +205,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = "PRUEBA1";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
@@ -251,7 +250,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = "PRUEBA1";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;

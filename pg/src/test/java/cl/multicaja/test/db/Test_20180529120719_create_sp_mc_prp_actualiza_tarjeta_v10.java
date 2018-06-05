@@ -2,15 +2,15 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
-
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertEmptyCard;
 import static cl.multicaja.test.db.Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10.searchCards;
@@ -31,12 +31,12 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
       idTarjeta == null ? new NullParam(Types.BIGINT): idTarjeta,
       idUsuario == null ? new NullParam(Types.BIGINT):idUsuario , //_id_usuario
       oldState == null ? new NullParam(Types.VARCHAR):oldState ,
-      RandomStringUtils.randomAlphabetic(10), //_pan
-      RandomStringUtils.randomAlphabetic(10), //_pan_encriptado
+      getRandomString(10), //_pan
+      getRandomString(10), //_pan_encriptado
       new NullParam(Types.VARCHAR), //_contrato
       0, //_expiracion
       newState, //_estado
-      RandomStringUtils.randomAlphabetic(10)+" "+RandomStringUtils.randomAlphabetic(10), //_nombre_tarjeta
+      getRandomString(10)+" "+getRandomString(10), //_nombre_tarjeta
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -46,7 +46,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   @Test
   public  void testUpdateOk() throws SQLException {
 
-    Map<String,Object> card = insertEmptyCard(RandomStringUtils.randomAlphabetic(10),"PEND");
+    Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
 
     Object[] params = buildUpdateCard((Long) card.get("id"),(Long) card.get("id_usuario"),(String) card.get("estado"),"CREATED");
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
@@ -62,7 +62,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   @Test
   public  void testUpdateIdTarjetaNull() throws SQLException {
 
-    Map<String,Object> card = insertEmptyCard(RandomStringUtils.randomAlphabetic(10),"PEND");
+    Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard(null,(Long) card.get("id_usuario"),(String) card.get("estado"),"CREATED");
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 
@@ -74,7 +74,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   @Test
   public  void testUpdateIdUsuarioNull() throws SQLException {
 
-    Map<String,Object> card = insertEmptyCard(RandomStringUtils.randomAlphabetic(10),"PEND");
+    Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard((Long) card.get("id"),null,(String) card.get("estado"),"CREATED");
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 
@@ -86,7 +86,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   @Test
   public  void testUpdateEstadoNull() throws SQLException {
 
-    Map<String,Object> card = insertEmptyCard(RandomStringUtils.randomAlphabetic(10),"PEND");
+    Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard((Long) card.get("id"),(Long) card.get("id_usuario"),null,"CREATED");
     Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
 

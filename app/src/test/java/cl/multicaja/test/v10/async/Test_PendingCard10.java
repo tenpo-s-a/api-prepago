@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -17,7 +17,7 @@ import javax.jms.Queue;
  * @autor vutreras
  */
 @SuppressWarnings("unchecked")
-public class Test_PendingCard10 extends TestBaseRouteUnit {
+public class Test_PendingCard10 extends TestBaseUnitAsync {
 
   /********************
    * Test flujo alta rapida
@@ -28,19 +28,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -68,19 +68,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -116,19 +116,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,0);
 
@@ -151,26 +151,26 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard(prepaidCard10);
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 0);
 
@@ -196,19 +196,19 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,4);
 
@@ -229,26 +229,26 @@ public class Test_PendingCard10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard10 = createPrepaidCard(prepaidCard10);
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 4);
 

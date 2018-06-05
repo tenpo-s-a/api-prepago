@@ -6,11 +6,14 @@ import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Endpoint;
@@ -149,19 +152,33 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
+            log.info("CDT ::" + cdtTransaction);
+
             CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
             cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
             cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
             cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
             cdtTransactionConfirm.setGloss(cdtTransaction.getGloss());
             cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
-            cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
+            //se debe agregar CONFIRM para evitar el constraint unique de esa columna
+            cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
 
             cdtTransactionConfirm = getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
 
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
             //TODO que pasa si cdt da error?
+
+            log.info("CDT Confirm:: " + cdtTransactionConfirm);
+
+            if(!cdtTransactionConfirm.getNumError().equals("0")){
+              long lNumError = numberUtils.toLong(cdtTransactionConfirm.getNumError(),-1L);
+              if(lNumError != -1 && lNumError > 10000) {
+                throw new ValidationException(107000).setData(new KeyValue("value", cdtTransactionConfirm.getMsjError()));
+              } else {
+                throw new ValidationException(101006).setData(new KeyValue("value", cdtTransactionConfirm.getMsjError()));
+              }
+            }
 
             //segun la historia: https://www.pivotaltracker.com/story/show/157442267
             // Si es 1era carga enviar a cola de cobro de emision

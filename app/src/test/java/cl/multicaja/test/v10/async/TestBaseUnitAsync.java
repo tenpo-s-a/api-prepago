@@ -1,14 +1,19 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
-import cl.multicaja.camel.*;
+import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.JMSHeader;
+import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -22,7 +27,7 @@ import javax.naming.spi.NamingManager;
 /**
  * @autor vutreras
  */
-public class TestBaseRouteUnit extends TestBaseUnit {
+public class TestBaseUnitAsync extends TestBaseUnit {
 
   private static Log log = LogFactory.getLog(TestBaseUnit.class);
 
@@ -155,7 +160,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //se crea un messageId unico
-    String messageId = RandomStringUtils.randomAlphabetic(20);
+    String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
@@ -190,7 +195,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //se crea un messageId unico
-    String messageId = RandomStringUtils.randomAlphabetic(20);
+    String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ);
@@ -228,7 +233,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //se crea un messageId unico
-    String messageId = RandomStringUtils.randomAlphabetic(20);
+    String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
@@ -266,7 +271,7 @@ public class TestBaseRouteUnit extends TestBaseUnit {
     }
 
     //se crea un messageId unico
-    String messageId = RandomStringUtils.randomAlphabetic(20);
+    String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ);

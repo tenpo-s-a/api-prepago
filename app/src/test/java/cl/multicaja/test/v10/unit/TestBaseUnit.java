@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -8,7 +8,6 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -21,7 +20,6 @@ import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
@@ -38,11 +36,7 @@ public class TestBaseUnit extends TestApiBase {
     System.setProperty("project.artifactId", "api-prepaid");
   }
 
-  public static RutUtils rutUtils = RutUtils.getInstance();
-
-  public static ParametersUtil parametersUtil = ParametersUtil.getInstance();
-
-  public static EncryptUtil encryptUtil = EncryptUtil.getInstance();
+  public ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   public final static String APP_NAME = "prepaid.appname";
 
@@ -138,7 +132,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public User preRegisterUser() throws Exception {
     Integer rut = getUniqueRutNumber();
-    String email = String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(20));
+    String email = getUniqueEmail();
     SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
@@ -174,7 +168,7 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
-  public PrepaidUser10 buildPrepaidUser(User user) {
+  public PrepaidUser10 buildPrepaidUser10(User user) {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setIdUserMc(user != null ? user.getId() : null);
     prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
@@ -186,7 +180,7 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
-  public PrepaidUser10 buildPrepaidUser() {
+  public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setIdUserMc(getUniqueLong());
     prepaidUser.setRut(getUniqueRutNumber());
@@ -200,18 +194,18 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 buildPrepaidCard(PrepaidUser10 prepaidUser) throws Exception {
+  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
-    prepaidCard.setPan(RandomStringUtils.randomNumeric(16));
+    prepaidCard.setPan(getRandomNumericString(16));
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setProcessorUserId(RandomStringUtils.randomNumeric(20));
-    prepaidCard.setNameOnCard("Tarjeta de: " + RandomStringUtils.randomAlphabetic(5));
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     return prepaidCard;
   }
 
@@ -222,24 +216,23 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 buildPrepaidCardPending(PrepaidUser10 prepaidUser) throws Exception {
-
+  public PrepaidCard10 buildPrepaidCard10Pending(PrepaidUser10 prepaidUser) throws Exception {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard.setProcessorUserId(RandomStringUtils.randomNumeric(20));
-
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
     return prepaidCard;
   }
+
   /**
-   *CREA TARJETA ESTADO PENDIENTE
+   * CREA TARJETA ESTADO PENDIENTE
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 buildPrepaidCardPending() throws Exception {
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+  public PrepaidCard10 buildPrepaidCard10Pending() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
-    return buildPrepaidCardPending(prepaidUser);
+    return buildPrepaidCard10Pending(prepaidUser);
   }
 
   /**
@@ -247,10 +240,10 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 buildPrepaidCard() throws Exception {
-    PrepaidUser10 prepaidUser = buildPrepaidUser();
+  public PrepaidCard10 buildPrepaidCard10() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
-    return buildPrepaidCard(prepaidUser);
+    return buildPrepaidCard10(prepaidUser);
   }
 
   /**
@@ -259,7 +252,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidUser
    * @return
    */
-  public PrepaidCard10 buildCardFromTecnocom(User user, PrepaidUser10 prepaidUser) {
+  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) {
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
 
@@ -282,12 +275,12 @@ public class TestBaseUnit extends TestApiBase {
    * @param user
    * @return
    */
-  public PrepaidTopup10 buildPrepaidTopup(User user) {
+  public PrepaidTopup10 buildPrepaidTopup10(User user) {
+
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidTopup.setId(getUniqueLong());
-    prepaidTopup.setUserId(user != null ? user.getId() : null);
     prepaidTopup.setMerchantCode(merchantCode);
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
@@ -297,10 +290,37 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setAmount(newAmountAndCurrency);
 
     prepaidTopup.setMerchantCategory(1);
-    prepaidTopup.setMerchantName(RandomStringUtils.randomAlphabetic(6));
+    prepaidTopup.setMerchantName(getRandomString(6));
 
     return prepaidTopup;
   }
+
+  /**
+   *
+   * @param user
+   * @return
+   */
+  public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
+    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidTopup.setMerchantCode(merchantCode);
+    prepaidTopup.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidTopup.setAmount(newAmountAndCurrency);
+
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(getRandomString(6));
+
+    return prepaidTopup;
+  }
+
+
 
   /**
    *
@@ -309,7 +329,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws BaseException
    */
-  public CdtTransaction10 buildCdtTransaction(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
+  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
     cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
@@ -326,7 +346,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public CdtTransaction10 createCdtTransaction(CdtTransaction10 cdtTransaction) throws Exception {
+  public CdtTransaction10 createCdtTransaction10(CdtTransaction10 cdtTransaction) throws Exception {
 
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
 
@@ -349,7 +369,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidUser10 createPrepaidUser(PrepaidUser10 prepaidUser) throws Exception {
+  public PrepaidUser10 createPrepaidUser10(PrepaidUser10 prepaidUser) throws Exception {
 
     prepaidUser = getPrepaidEJBBean10().createPrepaidUser(null, prepaidUser);
 
@@ -368,7 +388,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 createPrepaidCard(PrepaidCard10 prepaidCard) throws Exception {
+  public PrepaidCard10 createPrepaidCard10(PrepaidCard10 prepaidCard) throws Exception {
 
     prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null, prepaidCard);
 
@@ -386,8 +406,8 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidTopup
    * @return
    */
-  public PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) {
-    return buildPrepaidMovement(prepaidUser, prepaidTopup, null, null);
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup) {
+    return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null);
   }
 
   /**
@@ -397,8 +417,8 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidCard
    * @return
    */
-  public PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard) {
-    return buildPrepaidMovement(prepaidUser, prepaidTopup, prepaidCard, null);
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard) {
+    return buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, null);
   }
 
   /**
@@ -408,8 +428,8 @@ public class TestBaseUnit extends TestApiBase {
    * @param cdtTransaction
    * @return
    */
-  public PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction) {
-    return buildPrepaidMovement(prepaidUser, prepaidTopup, null, cdtTransaction);
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction) {
+    return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction);
   }
 
   /**
@@ -420,7 +440,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param cdtTransaction
    * @return
    */
-  public PrepaidMovement10 buildPrepaidMovement(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
 
     String codent = null;
     try {
@@ -484,7 +504,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidMovement10 createPrepaidMovement(PrepaidMovement10 prepaidMovement10) throws Exception {
+  public PrepaidMovement10 createPrepaidMovement10(PrepaidMovement10 prepaidMovement10) throws Exception {
 
     prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
