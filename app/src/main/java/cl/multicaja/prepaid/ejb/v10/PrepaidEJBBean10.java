@@ -59,7 +59,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   public final static String APP_NAME = "prepaid.appname";
 
-
   /**
    *
    * @return
@@ -94,6 +93,12 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private PrepaidTopupDelegate10 delegate;
 
   @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+  @EJB
   private UsersEJBBean10 usersEJB10;
 
   @EJB
@@ -108,6 +113,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   public void setDelegate(PrepaidTopupDelegate10 delegate) {
     this.delegate = delegate;
+  }
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
   public UsersEJBBean10 getUsersEJB10() {

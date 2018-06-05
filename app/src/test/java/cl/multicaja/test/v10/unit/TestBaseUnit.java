@@ -9,8 +9,10 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -44,6 +46,8 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
   private static UsersEJBBean10 usersEJBBean10;
+  private static PrepaidUserEJBBean10 prepaidUserEJBBean10;
+  private static PrepaidCardEJBBean10 prepaidCardEJBBean10;
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
@@ -106,6 +110,28 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
+  public static PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    if (prepaidUserEJBBean10 == null) {
+      prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+    }
+    return prepaidUserEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    if (prepaidCardEJBBean10 == null) {
+      prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
+    }
+    return prepaidCardEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
   public static PrepaidEJBBean10 getPrepaidEJBBean10() {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
@@ -113,6 +139,8 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setUsersEJB10(getUsersEJBBean10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
+      prepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      prepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
     }
     return prepaidEJBBean10;
   }
