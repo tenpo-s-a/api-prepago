@@ -26,6 +26,8 @@ CREATE TABLE ${schema}.prp_tarjeta (
   expiracion          INTEGER NOT NULL,
   estado              VARCHAR(20) NOT NULL,
   nombre_tarjeta      VARCHAR(100) NOT NULL,
+  producto            VARCHAR(2) NOT NULL,
+  numero_unico        VARCHAR(8) NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
   CONSTRAINT prp_tarjeta_pk PRIMARY KEY(id),

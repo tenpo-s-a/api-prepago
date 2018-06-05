@@ -26,6 +26,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
  IN _expiracion          INTEGER,
  IN _estado              VARCHAR,
  IN _nombre_tarjeta      VARCHAR,
+ IN _producto            VARCHAR,
+ IN _numero_unico        VARCHAR,
  OUT _r_id               BIGINT,
  OUT _error_code         VARCHAR,
  OUT _error_msg          VARCHAR
@@ -58,6 +60,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
        expiracion,
        estado,
        nombre_tarjeta,
+       producto,
+       numero_unico,
        fecha_creacion,
        fecha_actualizacion
      )
@@ -70,6 +74,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_tarjeta_v10
         coalesce(_expiracion,0),
         _estado,
         coalesce(_nombre_tarjeta,''),
+        coalesce(_producto, ''),
+        coalesce(_numero_unico, ''),
         timezone('utc', now()),
         timezone('utc', now())
      )
@@ -86,4 +92,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_tarjeta_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, INTEGER, VARCHAR, VARCHAR, BIGINT, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_tarjeta_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, INTEGER, VARCHAR, VARCHAR, VARCHAR, VARCHAR);
