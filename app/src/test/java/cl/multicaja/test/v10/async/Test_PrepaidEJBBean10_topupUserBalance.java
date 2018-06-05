@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ResponseRoute;
@@ -17,14 +17,14 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
+public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
   @Test
   public void topupUserBalance_userNotFound() throws Exception {
 
     User user = registerUser();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     newPrepaidTopup.setRut(1);
 
@@ -42,7 +42,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     try {
 
@@ -58,13 +58,13 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     try {
 
@@ -80,17 +80,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
     try {
 
@@ -106,17 +106,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
     try {
 
@@ -132,11 +132,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
@@ -171,11 +171,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));

@@ -1,14 +1,14 @@
-package cl.multicaja.test.api;
+package cl.multicaja.test.v10.api;
 
-import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -17,30 +17,31 @@ import java.util.Map;
 /**
  * @author abarazarte
  */
-public class Test_topupBalance_v10 extends TestApiBase {
+public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
-  @Ignore
   @Test
-  public void shouldReturn200_OnTopupUserBalance() {
+  public void shouldReturn200_OnTopupUserBalance() throws Exception {
 
-    final String transactionId = getUniqueInteger().toString();
-    final Integer rut = getUniqueRutNumber();
-    final String merchantCode = "987654321";
-    final CodigoMoneda currencyCode = CodigoMoneda.CHILE_CLP;
-    final BigDecimal value = new BigDecimal("9999.99");
+    User user = registerUser();
 
-    NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
-    topupRequest.setTransactionId(transactionId);
-    topupRequest.setRut(rut);
-    topupRequest.setMerchantCode(merchantCode);
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(currencyCode);
-    amount.setValue(value);
-    topupRequest.setAmount(amount);
+    System.out.println(user);
 
-    String json = toJson(topupRequest);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    System.out.println(prepaidUser);
+
+    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
+
+    String json = toJson(prepaidTopup);
+
+    System.out.println(json);
 
     HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+
+    System.out.println("resp:: " + resp);
+
     Assert.assertEquals("status 200", 200, resp.getStatus());
     PrepaidTopup10 topup = resp.toObject(PrepaidTopup10.class);
 
@@ -50,12 +51,6 @@ public class Test_topupBalance_v10 extends TestApiBase {
     Assert.assertNotNull("Deberia tener userId", topup.getUserId());
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
-    Assert.assertEquals(String.format("Deberia tener transactionId = %s", transactionId), transactionId, topup.getTransactionId());
-    Assert.assertEquals(String.format("Deberia tener rut = %d", rut), rut, topup.getRut());
-    Assert.assertEquals(String.format("Deberia tener merchantCode = %s", merchantCode), merchantCode, topup.getMerchantCode());
-    Assert.assertNotNull("Deberia tener amount", topup.getAmount());
-    Assert.assertEquals(String.format("Deberia tener amount.currencyCode = %d", currencyCode), currencyCode, topup.getAmount().getCurrencyCode());
-    Assert.assertEquals(String.format("Deberia tener amount.value = %s", value.toString()), value, topup.getAmount().getValue());
   }
 
   @Test

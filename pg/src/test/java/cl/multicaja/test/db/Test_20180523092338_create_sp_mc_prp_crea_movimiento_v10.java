@@ -2,15 +2,14 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.sql.Date;
 import java.util.Map;
 
 import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
@@ -65,7 +64,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(tipofac),//_tipofac NUMERIC
       new Date(System.currentTimeMillis()),//_fecfac DATE
       "123",//_numreffac VARCHAR
-      RandomStringUtils.randomNumeric(16),// _pan VARCHAR,
+      getRandomNumericString(16),// _pan VARCHAR,
       setInParam(90),//_clamondiv NUMERIC,
       setInParam(10),//_impdiv NUMERIC,
       setInParam(10),//_impfac NUMERIC,
@@ -109,7 +108,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
@@ -129,7 +128,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
@@ -152,7 +151,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
-    String cuenta = RandomStringUtils.randomNumeric(10);
+    String cuenta = getRandomNumericString(10);
     Integer clamon = 15200; //maximo largo 3
     Integer indnorcor = 0;
     Integer tipofac = 3001;

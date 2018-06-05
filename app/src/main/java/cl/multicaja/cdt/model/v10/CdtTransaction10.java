@@ -44,6 +44,14 @@ public class CdtTransaction10 implements Serializable {
     this.transactionReference = transactionReference;
   }
 
+  public String getExternalTransactionIdConfirm() {
+    if (externalTransactionId != null && !externalTransactionId.startsWith("Confirm_")) {
+      return "Confirm_" + externalTransactionId;
+    } else {
+      return externalTransactionId;
+    }
+  }
+
   public String getExternalTransactionId() {
     return externalTransactionId;
   }

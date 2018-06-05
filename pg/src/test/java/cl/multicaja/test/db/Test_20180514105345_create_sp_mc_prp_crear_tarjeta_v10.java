@@ -2,7 +2,6 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -43,12 +42,12 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
 
     Object[] params = {
       mapUser.get("id"), //_id_usuario
-      RandomStringUtils.randomNumeric(16), //_pan
-      RandomStringUtils.randomAlphabetic(50), //_pan_encriptado
-      RandomStringUtils.randomAlphabetic(20), //_contrato
+      getRandomNumericString(16), //_pan
+      getRandomString(50), //_pan_encriptado
+      getRandomString(20), //_contrato
       expiryDate, //_expiracion
       status, //_estado
-      "Tarjeta de: " + RandomStringUtils.randomAlphabetic(5), //_nombre_tarjeta
+      "Tarjeta de: " + getRandomString(5), //_nombre_tarjeta
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

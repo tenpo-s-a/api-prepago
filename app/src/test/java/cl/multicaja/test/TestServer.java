@@ -1,9 +1,8 @@
-package cl.multicaja.test.api;
+package cl.multicaja.test;
 
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.glassfish.embeddable.BootstrapProperties;

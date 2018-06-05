@@ -1,9 +1,8 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.unit;
 
 
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,8 +16,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
 
   @Test
   public void insertCardOk() throws Exception {
-    PrepaidCard10 card = buildPrepaidCard();
-    createPrepaidCard(card);
+    PrepaidCard10 card = buildPrepaidCard10();
+    createPrepaidCard10(card);
   }
 
   @Test
@@ -28,8 +27,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
      * Caso en que se registra una nueva tarjet y luego se busca por su id y idUser
      */
 
-    PrepaidCard10 card = buildPrepaidCard();
-    createPrepaidCard(card);
+    PrepaidCard10 card = buildPrepaidCard10();
+    createPrepaidCard10(card);
 
     PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
 
@@ -45,13 +44,13 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   @Test
   public void searchCarsOkByStatus() throws Exception {
 
-    PrepaidCard10 card1 = buildPrepaidCard();
+    PrepaidCard10 card1 = buildPrepaidCard10();
     card1.setStatus(PrepaidCardStatus.EXPIRED);
-    createPrepaidCard(card1);
+    createPrepaidCard10(card1);
 
-    PrepaidCard10 card2 = buildPrepaidCard();
+    PrepaidCard10 card2 = buildPrepaidCard10();
     card2.setStatus(PrepaidCardStatus.EXPIRED);
-    createPrepaidCard(card2);
+    createPrepaidCard10(card2);
 
     List<Long> lstFind = new ArrayList<>();
     List<PrepaidCard10> lst = getPrepaidEJBBean10().getPrepaidCards(null, null, null, null, PrepaidCardStatus.EXPIRED, null);
@@ -68,8 +67,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   @Test
   public void updateStatusOk() throws Exception {
 
-    PrepaidCard10 card = buildPrepaidCard();
-    card = createPrepaidCard(card);
+    PrepaidCard10 card = buildPrepaidCard10();
+    card = createPrepaidCard10(card);
 
     getPrepaidEJBBean10().updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
 
@@ -82,17 +81,17 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   @Test
   public void updateCard() throws Exception {
 
-    PrepaidCard10 card = buildPrepaidCardPending();
-    card = createPrepaidCard(card);
+    PrepaidCard10 card = buildPrepaidCard10Pending();
+    card = createPrepaidCard10(card);
     Long cardId = card.getId();
     Long userId = card.getIdUser();
     PrepaidCardStatus state = card.getStatus();
 
     card.setStatus(PrepaidCardStatus.ACTIVE);
     card.setExpiration(1023);
-    card.setNameOnCard(RandomStringUtils.randomAlphabetic(20));
-    card.setPan(RandomStringUtils.randomAlphabetic(16));
-    card.setEncryptedPan(RandomStringUtils.randomAlphabetic(20));
+    card.setNameOnCard(getRandomString(20));
+    card.setPan(getRandomString(16));
+    card.setEncryptedPan(getRandomString(20));
 
     boolean updated = getPrepaidEJBBean10().updateCard(null,cardId,userId,state,card);
 
@@ -109,8 +108,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   public void checkOrderDesc() throws Exception {
 
     for (int j = 0; j < 10; j++) {
-      PrepaidCard10 card = buildPrepaidCard();
-      createPrepaidCard(card);
+      PrepaidCard10 card = buildPrepaidCard10();
+      createPrepaidCard10(card);
     }
 
     List<PrepaidCard10> lst = getPrepaidEJBBean10().getPrepaidCards(null, null, null, null, null, null);

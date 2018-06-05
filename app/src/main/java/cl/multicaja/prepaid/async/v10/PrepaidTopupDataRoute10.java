@@ -25,6 +25,7 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
   private CdtTransaction10 cdtTransaction10;
+  private CdtTransaction10 cdtTransactionConfirm10;
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
   private List<ProcessorMetadata> processorMetadata = new ArrayList<>();
@@ -97,6 +98,14 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   }
   public List<ProcessorMetadata> getProcessorMetadata() {
     return processorMetadata;
+  }
+
+  public CdtTransaction10 getCdtTransactionConfirm10() {
+    return cdtTransactionConfirm10;
+  }
+
+  public void setCdtTransactionConfirm10(CdtTransaction10 cdtTransactionConfirm10) {
+    this.cdtTransactionConfirm10 = cdtTransactionConfirm10;
   }
 
   @Override

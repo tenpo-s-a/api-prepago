@@ -1,4 +1,4 @@
-package cl.multicaja.test.api;
+package cl.multicaja.test;
 
 import org.junit.runners.Suite;
 
