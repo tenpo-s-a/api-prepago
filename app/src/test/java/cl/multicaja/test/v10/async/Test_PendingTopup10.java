@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.async;
 
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
@@ -87,6 +88,14 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("debe tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
     Assert.assertEquals("debe tener una tarjeta bloqueda duro", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
+
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
+
+    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 
   @Test
@@ -123,61 +132,14 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("debe tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
     Assert.assertEquals("debe tener una tarjeta expirada", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
-  }
 
-  @Test
-  public void pendingTopup_with_prepaidMovement_PROCESS_OK() throws Exception {
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
-
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
-
-    cdtTransaction = createCdtTransaction10(cdtTransaction);
-
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
-
-    prepaidMovement = createPrepaidMovement10(prepaidMovement);
-
-    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
-
-    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
-
-    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
-
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
-    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
-    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
-
-    PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
-
-    Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
-    Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
-
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
-      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
-    } else {
-      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
-    }
-
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNumextcta());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNummovext());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getClamone());
+    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 
   @Test
@@ -234,6 +196,14 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
 
       Assert.assertNull("No debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
+
+      //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_RETURNS_REQ
+      ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+      String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_REQ;
+
+      Assert.assertEquals("debe ser reintento 5", 5, lastProcessorMetadata.getRetry());
+      Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
+      Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
     }
 
     //debe existir el mensaje en la cola de devoluciones pendientes
@@ -266,11 +236,19 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
 
       Assert.assertNull("No debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
+
+      //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_RETURNS_REQ
+      ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+      String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_REQ;
+
+      Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+      Assert.assertFalse("debe ser redirect", lastProcessorMetadata.isRedirect());
+      Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
     }
   }
 
   @Test
-  public void pendingTopup_with_prepaidMovement_PROCESS_OK_and_cdt_confirm() throws Exception {
+  public void pendingTopup_with_prepaidCard_ACTIVE_prepaidMovement_PROCESS_OK_and_cdt_confirm() throws Exception {
 
     User user = registerUser();
 
@@ -294,9 +272,10 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
-    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas cargas pendientes
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
@@ -346,5 +325,103 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     } else if (cdtTransaction.getTransactionType().equals(CdtTransactionType.CARGA_WEB)) {
       Assert.assertEquals("deben ser transactionType de confirmacion", CdtTransactionType.CARGA_WEB_CONF, cdtTransactionConfirm10.getTransactionType());
     }
+
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
+
+    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
+  }
+
+  @Test
+  public void pendingTopup_with_prepaidCard_PENDING_prepaidMovement_PROCESS_OK_and_cdt_confirm() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
+
+    //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas cargas pendientes
+
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+
+    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+    PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
+
+    Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
+    Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
+
+    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+      Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
+    } else {
+      Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
+    }
+
+    PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
+
+    Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementInDb.getEstado());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getClamone());
+
+    CdtTransaction10 cdtTransaction10 = remoteTopup.getData().getCdtTransaction10();
+
+    Assert.assertNotNull("Debe tener un regisro cdt", cdtTransaction10);
+
+    CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
+
+    Assert.assertNotNull("debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
+    Assert.assertEquals("deben ser el mismo cdt accountId", cdtTransaction.getAccountId(), cdtTransactionConfirm10.getAccountId());
+    Assert.assertEquals("deben ser el mismo cdt externalTransactionIdConfirm", cdtTransaction.getExternalTransactionIdConfirm(), cdtTransactionConfirm10.getExternalTransactionIdConfirm());
+    Assert.assertEquals("deben ser el mismo cdt gloss", cdtTransaction.getGloss(), cdtTransactionConfirm10.getGloss());
+    Assert.assertNotEquals("deben ser distinto de 0 transactionReference", Long.valueOf(0), cdtTransactionConfirm10.getTransactionReference());
+
+    if (cdtTransaction.getTransactionType().equals(CdtTransactionType.PRIMERA_CARGA)) {
+      Assert.assertEquals("deben ser transactionType de confirmacion", CdtTransactionType.PRIMERA_CARGA_CONF, cdtTransactionConfirm10.getTransactionType());
+    } else if (cdtTransaction.getTransactionType().equals(CdtTransactionType.CARGA_POS)) {
+      Assert.assertEquals("deben ser transactionType de confirmacion", CdtTransactionType.CARGA_POS_CONF, cdtTransactionConfirm10.getTransactionType());
+    } else if (cdtTransaction.getTransactionType().equals(CdtTransactionType.CARGA_WEB)) {
+      Assert.assertEquals("deben ser transactionType de confirmacion", CdtTransactionType.CARGA_WEB_CONF, cdtTransactionConfirm10.getTransactionType());
+    }
+
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_CARD_ISSUANCE_FEE_REQ
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    String endpoint = PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ;
+
+    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 }

@@ -106,6 +106,11 @@ public class PendingTopup10 extends BaseProcessor10 {
           prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
+        //TODO se agrega busqueda de tarjeta pendiente dado que es necesario para cobrar la comision, se debe validar con Felipe
+        if (prepaidCard == null) {
+          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+        }
+
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
@@ -148,8 +153,6 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
-            log.info("CDT ::" + cdtTransaction);
-
             CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
             cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
             cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -164,9 +167,6 @@ public class PendingTopup10 extends BaseProcessor10 {
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
             //TODO que pasa si cdt da error?
-
-            log.info("CDT Confirm:: " + cdtTransactionConfirm);
-
             if(!cdtTransactionConfirm.getNumError().equals("0")){
               long lNumError = numberUtils.toLong(cdtTransactionConfirm.getNumError(),-1L);
               if(lNumError != -1 && lNumError > 10000) {
@@ -176,9 +176,9 @@ public class PendingTopup10 extends BaseProcessor10 {
               }
             }
 
-            //segun la historia: https://www.pivotaltracker.com/story/show/157442267
-            // Si es 1era carga enviar a cola de cobro de emision
-            if(prepaidTopup.isFirstTopup()){
+            //segun la historia: https://www.pivotaltracker.com/story/show/158044562
+
+            if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
               data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
               req.setRetryCount(0);
