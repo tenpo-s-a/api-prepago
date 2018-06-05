@@ -89,7 +89,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           return null;
         }
 
-        PrepaidUser10 prepaidUser = getPrepaidEJBBean10().getPrepaidUserByRut(null, rut);
+        PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().getPrepaidUserByRut(null, rut);
 
         log.info("processPendingTopup prepaidUser: " + prepaidUser);
 
@@ -100,15 +100,15 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         data.setPrepaidUser10(prepaidUser);
 
-        PrepaidCard10 prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+        PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
         if (prepaidCard == null) {
-          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
         }
 
         //TODO se agrega busqueda de tarjeta pendiente dado que es necesario para cobrar la comision, se debe validar con Felipe
         if (prepaidCard == null) {
-          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
         }
 
         if (prepaidCard != null) {
@@ -209,10 +209,10 @@ public class PendingTopup10 extends BaseProcessor10 {
           //https://www.pivotaltracker.com/story/show/157816408
           //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
 
-          prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
 
           if (prepaidCard == null) {
-            prepaidCard = getPrepaidEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+            prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
           }
 
           if (prepaidCard == null) {

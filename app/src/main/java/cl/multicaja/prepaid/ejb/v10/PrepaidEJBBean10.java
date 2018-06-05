@@ -2,22 +2,16 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.OutParam;
-import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
-import cl.multicaja.users.utils.ParametersUtil;
+import cl.multicaja.users.model.v10.Timestamps;
+import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +20,6 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -39,17 +31,9 @@ import java.util.*;
 @Stateless
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class PrepaidEJBBean10 implements PrepaidEJB10 {
+public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
-
-  protected NumberUtils numberUtils = NumberUtils.getInstance();
-
-  protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
-
-  private ConfigUtils configUtils;
-
-  private DBUtils dbUtils;
 
   private final BigDecimal ONE_HUNDRED = new BigDecimal(100);
 
@@ -57,41 +41,14 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
-  public final static String APP_NAME = "prepaid.appname";
-
-
-  /**
-   *
-   * @return
-   */
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
-    }
-    return this.configUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
-    }
-    return this.dbUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  private String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
-  }
-
   @Inject
   private PrepaidTopupDelegate10 delegate;
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
   @EJB
   private UsersEJBBean10 usersEJB10;
@@ -108,6 +65,22 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
 
   public void setDelegate(PrepaidTopupDelegate10 delegate) {
     this.delegate = delegate;
+  }
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
   public UsersEJBBean10 getUsersEJB10() {
@@ -138,7 +111,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
     map.put("class", this.getClass().getSimpleName());
-    map.put("ejb_users", this.usersEJB10.info());
     return map;
   }
 
@@ -176,7 +148,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(null, user.getRut().getValue());
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
       throw new NotFoundException(102003); // Usuario no tiene prepago
@@ -186,7 +158,7 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
-    if(PrepaidUserLevel.LEVEL_1 != this.getUserLevel(user,prepaidUser)) {
+    if(PrepaidUserLevel.LEVEL_1 != this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser)) {
       // Si el usuario tiene validacion > N1, no aplica restriccion de primera carga
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
@@ -204,18 +176,18 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
     if (prepaidCard == null) {
 
-      prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
 
       if (prepaidCard == null) {
 
-        prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
 
         if (prepaidCard == null) {
-          prepaidCard = this.getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+          prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
         }
 
         if (prepaidCard != null) {
@@ -301,253 +273,6 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
   }
 
   @Override
-  public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
-
-    if(prepaidUser == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidUser"));
-    }
-
-    if(prepaidUser.getIdUserMc() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idUserMc"));
-    }
-
-    if(prepaidUser.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
-    }
-
-    if(prepaidUser.getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      prepaidUser.getIdUserMc(),
-      prepaidUser.getRut(),
-      prepaidUser.getStatus().toString(),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_usuario_v10", params);
-
-    if ("0".equals(resp.get("_error_code"))) {
-      prepaidUser.setId(numberUtils.toLong(resp.get("_r_id")));
-      return prepaidUser;
-    } else {
-      log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
-    }
-  }
-
-  @Override
-  public List<PrepaidUser10> getPrepaidUsers(Map<String, Object> headers, Long userId, Long userIdMc, Integer rut, PrepaidUserStatus status) throws Exception {
-    //si viene algun parametro en null se establece NullParam
-    Object[] params = {
-      userId != null ? userId : new NullParam(Types.BIGINT),
-      userIdMc != null ? userIdMc : new NullParam(Types.BIGINT),
-      rut != null ? rut : new NullParam(Types.INTEGER),
-      status != null ? status.toString() : new NullParam(Types.VARCHAR)
-    };
-    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-    RowMapper rm = (Map<String, Object> row) -> {
-      PrepaidUser10 u = new PrepaidUser10();
-      u.setId(numberUtils.toLong(row.get("_id"), null));
-      u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
-      u.setRut(numberUtils.toInteger(row.get("_rut"), null));
-      u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
-      u.setTimestamps(timestamps);
-      return u;
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_usuarios_v10", rm, params);
-    return (List)resp.get("result");
-  }
-
-  @Override
-  public PrepaidUser10 getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
-    if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
-    }
-    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, userId, null, null, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
-
-  @Override
-  public PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
-    if(userIdMc == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userIdMc"));
-    }
-    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
-
-  @Override
-  public PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
-    if(rut == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
-    }
-    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, null, rut, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
-
-  @Override
-  public void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception {
-
-    if(id == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
-    }
-    if(status == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      id, //id
-      status.toString(), //estado
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
-    }
-  }
-
-  @Override
-  public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
-
-    if(prepaidCard == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard"));
-    }
-
-    if(prepaidCard.getIdUser() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idUser"));
-    }
-
-    if(prepaidCard.getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      prepaidCard.getIdUser(),
-      prepaidCard.getPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getPan(),
-      prepaidCard.getEncryptedPan()==null ?new NullParam(Types.VARCHAR):prepaidCard.getEncryptedPan(),
-      prepaidCard.getProcessorUserId()==null ?new NullParam(Types.VARCHAR):prepaidCard.getProcessorUserId(),
-      prepaidCard.getExpiration()==null ?new NullParam(Types.INTEGER):prepaidCard.getExpiration(),
-      prepaidCard.getStatus().toString(),
-      prepaidCard.getNameOnCard()==null ?new NullParam(Types.VARCHAR):prepaidCard.getNameOnCard(),
-      prepaidCard.getProducto() == null ? new NullParam(Types.VARCHAR) : prepaidCard.getProducto(),
-      prepaidCard.getNumeroUnico() == null ? new NullParam(Types.VARCHAR): prepaidCard.getNumeroUnico(),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_tarjeta_v10", params);
-
-    if ("0".equals(resp.get("_error_code"))) {
-      prepaidCard.setId(numberUtils.toLong(resp.get("_r_id")));
-      return prepaidCard;
-    } else {
-      log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
-    }
-  }
-
-  @Override
-  public List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
-    //si viene algun parametro en null se establece NullParam
-    Object[] params = {
-      id != null ? id : new NullParam(Types.BIGINT),
-      userId != null ? userId : new NullParam(Types.BIGINT),
-      expiration != null ? expiration : new NullParam(Types.INTEGER),
-      status != null ? status.toString() : new NullParam(Types.VARCHAR),
-      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR)
-    };
-
-    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-    RowMapper rm = (Map<String, Object> row) -> {
-      PrepaidCard10 c = new PrepaidCard10();
-      c.setId(numberUtils.toLong(row.get("_id"), null));
-      c.setIdUser(numberUtils.toLong(row.get("_id_usuario"), null));
-      c.setPan(String.valueOf(row.get("_pan")));
-      c.setEncryptedPan(String.valueOf(row.get("_pan_encriptado")));
-      c.setProcessorUserId(String.valueOf(row.get("_contrato")));
-      c.setExpiration(numberUtils.toInteger(row.get("_expiracion"), null));
-      c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("_estado").toString().trim()));
-      c.setNameOnCard(String.valueOf(row.get("_nombre_tarjeta")));
-      c.setProducto(String.valueOf(row.get("_producto")));
-      c.setNumeroUnico(String.valueOf(row.get("_numero_unico")));
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
-      c.setTimestamps(timestamps);
-      return c;
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", rm, params);
-    return (List)resp.get("result");
-  }
-
-  @Override
-  public PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception {
-    if(id == null){
-      throw new ValidationException(2);
-    }
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, id, null, null, null, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
-
-  @Override
-  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
-    if(userId == null){
-      throw new ValidationException(2);
-    }
-    if(status == null){
-      throw new ValidationException(2);
-    }
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, status, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
-
-  @Override
-  public void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception {
-
-    if(id == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
-    }
-    if(status == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      id, //id
-      status.toString(), //estado
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_tarjeta_v10", params);
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
-    }
-  }
-
-  /**
-   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
-   *
-   * @param topup al que se le calculara la comision y total
-   * @throws IllegalStateException si el topup es null
-   * @throws IllegalStateException si el topup.amount es null
-   * @throws IllegalStateException si el topup.amount.value es null
-   * @throws IllegalStateException si el topup.merchantCode es null o vacio
-   */
-  @Override
   public void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception {
 
     if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null || StringUtils.isBlank(topup.getMerchantCode())){
@@ -583,48 +308,9 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     topup.setTotal(total);
   }
 
-  /**
-   *  Verifica el nivel del usuario
-   * @param oUser usuario multicaja
-   * @param prepaidUser10 usuario prepago
-   * @throws NotFoundException 102001 si el usuario MC es null
-   * @throws ValidationException 101000 si el rut o status del rut es null
-   * @throws NotFoundException 302003 si el usuario prepago es null
-   * @return el nivel del usuario
-   */
-  @Override
-  public PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception {
-    if(oUser == null) {
-      throw new NotFoundException(102001);
-    }
-    if(oUser.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
-    }
-    if(oUser.getRut().getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut.status"));
-    }
-    if(prepaidUser10 == null) {
-      throw new NotFoundException(102003);
-    }
-
-    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && NameStatus.VERIFIED.equals(oUser.getNameStatus())) {
-      return PrepaidUserLevel.LEVEL_2;
-    }
-    else {
-      return PrepaidUserLevel.LEVEL_1;
-    }
-  }
-
-  /**
-   *  Agrega la informacion para el voucher requerida por el POS/Switch
-   *
-   * @param topup al que se le agregara el voucher
-   * @throws IllegalStateException si el topup es null
-   * @throws IllegalStateException si el topup.amount es null
-   * @throws IllegalStateException si el topup.amount.value es null
-   */
   @Override
   public void addVoucherData(PrepaidTopup10 topup) throws Exception {
+
     if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null) {
       throw new IllegalStateException();
     }
@@ -711,37 +397,5 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
 
     return prepaidMovement;
-  }
-
-  @Override
-  public boolean updateCard(Map<String, Object> headers,Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
-
-    final String SP_NAME = getSchema() + ".mc_prp_actualiza_tarjeta_v10";
-
-    Object[] params = {
-      cardId == null ? new NullParam(Types.BIGINT): cardId,
-      userId == null ? new NullParam(Types.BIGINT):userId , //_id_usuario
-      oldState == null ? new NullParam(Types.VARCHAR):oldState.toString() ,
-      prepaidCard.getPan(), //_pan
-      prepaidCard.getEncryptedPan(), //_pan_encriptado
-      prepaidCard.getProcessorUserId(), //_contrato
-      prepaidCard.getExpiration(), //_expiracion
-      prepaidCard.getStatus().toString(), //_estado
-      prepaidCard.getNameOnCard(), //_nombre_tarjeta
-      prepaidCard.getProducto(), //_producto
-      prepaidCard.getNumeroUnico(), //_numero_unico
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
-
-    log.info("resp update card: " + resp);
-
-    if(resp.get("_error_code").equals("0")){
-      return true;
-    } else {
-      return false;
-    }
   }
 }

@@ -32,7 +32,7 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
 
     //se intenta registrar exactamente el mismo usuario
     try {
-      getPrepaidEJBBean10().createPrepaidUser(null, user);
+      getPrepaidUserEJBBean10().createPrepaidUser(null, user);
     } catch(BaseException bex) {
       Assert.assertEquals("debe retornar excepcion de dato duplicado", Integer.valueOf(1), bex.getCode());
     }
@@ -48,17 +48,17 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
     PrepaidUser10 user = buildPrepaidUser10();
     user = createPrepaidUser10(user);
 
-    PrepaidUser10 u1 = getPrepaidEJBBean10().getPrepaidUserById(null, user.getId());
+    PrepaidUser10 u1 = getPrepaidUserEJBBean10().getPrepaidUserById(null, user.getId());
 
     Assert.assertNotNull("debe retornar un usuario", u1);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u1);
 
-    PrepaidUser10 u2 = getPrepaidEJBBean10().getPrepaidUserByUserIdMc(null, user.getIdUserMc());
+    PrepaidUser10 u2 = getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(null, user.getIdUserMc());
 
     Assert.assertNotNull("debe retornar un usuario", u2);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u2);
 
-    PrepaidUser10 u3 = getPrepaidEJBBean10().getPrepaidUserByRut(null, user.getRut());
+    PrepaidUser10 u3 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut());
 
     Assert.assertNotNull("debe retornar un usuario", u3);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u3);
@@ -79,7 +79,7 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
     user2.setStatus(PrepaidUserStatus.DISABLED);
     user2 = createPrepaidUser10(user2);
 
-    List<PrepaidUser10> lst = getPrepaidEJBBean10().getPrepaidUsers(null, null, null, null, PrepaidUserStatus.DISABLED);
+    List<PrepaidUser10> lst = getPrepaidUserEJBBean10().getPrepaidUsers(null, null, null, null, PrepaidUserStatus.DISABLED);
 
     List<Long> lstFind = new ArrayList<>();
 
@@ -99,9 +99,9 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
     PrepaidUser10 user = buildPrepaidUser10();
     user = createPrepaidUser10(user);
 
-    getPrepaidEJBBean10().updatePrepaidUserStatus(null, user.getId(), PrepaidUserStatus.DISABLED);
+    getPrepaidUserEJBBean10().updatePrepaidUserStatus(null, user.getId(), PrepaidUserStatus.DISABLED);
 
-    PrepaidUser10 u1 = getPrepaidEJBBean10().getPrepaidUserById(null, user.getId());
+    PrepaidUser10 u1 = getPrepaidUserEJBBean10().getPrepaidUserById(null, user.getId());
 
     Assert.assertNotNull("debe retornar un usuario", u1);
     Assert.assertEquals("el estado debe estar actualizado", PrepaidUserStatus.DISABLED, u1.getStatus());
