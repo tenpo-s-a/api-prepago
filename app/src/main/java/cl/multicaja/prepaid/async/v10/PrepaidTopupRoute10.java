@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,9 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
+
+  @EJB
+  private MailEJBBean10 mailEJBBean10;
 
   private TecnocomService tecnocomService;
   private ParametersUtil parametersUtil;
@@ -117,6 +121,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public void setCdtEJBBean10(CdtEJBBean10 cdtEJBBean10) {
     this.cdtEJBBean10 = cdtEJBBean10;
+  }
+
+  public MailEJBBean10 getMailEJBBean10() {
+    return mailEJBBean10;
+  }
+
+  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
+    this.mailEJBBean10 = mailEJBBean10;
   }
 
   public TecnocomService getTecnocomService() {

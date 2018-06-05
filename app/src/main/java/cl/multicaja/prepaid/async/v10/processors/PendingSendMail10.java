@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
+import cl.multicaja.users.model.v10.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.io.IOUtils;
@@ -57,13 +58,25 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return new ResponseRoute<>(data);
         }
         //TODO: Se debe obtener cvc de tecnocom.
-        if (true) {
-          InputStream is = PendingSendMail10.class.getResourceAsStream("/pdf_template/card.html");
-          String theString = IOUtils.toString(is, "UTF-8");
-          String template = replaceDataHTML(theString,"8765272893876532","06/23","987");
-          String pdfB64 = getPdfUtils().protectedPdfInB64(template,""+data.getUser().getRut(),"MULTICAJA-PREPAGO","Multicaja Prepago","Cliente","Multicaja");
-          System.out.println(pdfB64);
+        if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
+
+          MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "PDF_CARD");
+          if (mailTemplate == null) {
+            Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
+            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+            req.setRetryCount(0);
+            redirectRequest(endpoint, exchange, req);
+          }
+
+          String template = replaceDataHTML(mailTemplate.getTemplate(), getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()), "" + data.getPrepaidCard10().getExpiration(), "987");
+          String pdfB64 = getPdfUtils().protectedPdfInB64(template, "" + data.getUser().getRut(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Cliente", "Multicaja");
+
           //TODO: se debe llamar al servicio de envio de mail de Users
+
+        } else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
+          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
+          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+          redirectRequest(endpoint, exchange, req);
         } else {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
