@@ -440,6 +440,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       prepaidCard.getExpiration()==null ?new NullParam(Types.INTEGER):prepaidCard.getExpiration(),
       prepaidCard.getStatus().toString(),
       prepaidCard.getNameOnCard()==null ?new NullParam(Types.VARCHAR):prepaidCard.getNameOnCard(),
+      prepaidCard.getProducto() == null ? new NullParam(Types.VARCHAR) : prepaidCard.getProducto(),
+      prepaidCard.getNumeroUnico() == null ? new NullParam(Types.VARCHAR): prepaidCard.getNumeroUnico(),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -478,6 +480,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       c.setExpiration(numberUtils.toInteger(row.get("_expiracion"), null));
       c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("_estado").toString().trim()));
       c.setNameOnCard(String.valueOf(row.get("_nombre_tarjeta")));
+      c.setProducto(String.valueOf(row.get("_producto")));
+      c.setNumeroUnico(String.valueOf(row.get("_numero_unico")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
       timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
@@ -724,6 +728,8 @@ public class PrepaidEJBBean10 implements PrepaidEJB10 {
       prepaidCard.getExpiration(), //_expiracion
       prepaidCard.getStatus().toString(), //_estado
       prepaidCard.getNameOnCard(), //_nombre_tarjeta
+      prepaidCard.getProducto(), //_producto
+      prepaidCard.getNumeroUnico(), //_numero_unico
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };

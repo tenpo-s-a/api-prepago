@@ -37,6 +37,8 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
       0, //_expiracion
       newState, //_estado
       getRandomString(10)+" "+getRandomString(10), //_nombre_tarjeta
+      getRandomString(2), //_producto
+      getRandomString(8), //_numero_unico
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };

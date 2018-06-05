@@ -27,6 +27,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_tarjeta_v10
  IN _in_expiracion          INTEGER,
  IN _in_estado              VARCHAR,
  IN _in_nombre_tarjeta      VARCHAR,
+ IN _in_producto            VARCHAR,
+ IN _in_numero_unico        VARCHAR,
  OUT _error_code            VARCHAR,
  OUT _error_msg             VARCHAR
 ) AS $$
@@ -102,6 +104,20 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_tarjeta_v10
                            nombre_tarjeta
                           END
                         ),
+       producto = (
+                          CASE WHEN _in_producto IS NOT NULL THEN
+                            _in_producto
+                          ELSE
+                           producto
+                          END
+                        ),
+       numero_unico = (
+                          CASE WHEN _in_numero_unico IS NOT NULL THEN
+                            _in_numero_unico
+                          ELSE
+                           numero_unico
+                          END
+                        ),
        fecha_actualizacion=timezone('utc', now())
     WHERE
       id = _filter_id_tarjeta AND
@@ -124,4 +140,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_tarjeta_v10(BIGINT,BIGINT,VARCHAR, VARCHAR, VARCHAR, VARCHAR, INTEGER, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_tarjeta_v10(BIGINT,BIGINT,VARCHAR, VARCHAR, VARCHAR, VARCHAR, INTEGER, VARCHAR, VARCHAR, VARCHAR, VARCHAR);
