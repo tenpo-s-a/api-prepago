@@ -50,16 +50,16 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           log.error("Error req.getData().getPrepaidTopup10() es null");
           return null;
         }
-        if(!prepaidTopup.isFirstTopup()){
-          log.error("Error req.getData().getPrepaidTopup10().isFirstTopup() es false");
-          return null;
-        }
 
         if (prepaidCard == null) {
           log.error("Error req.getData().getPrepaidCard10() es null");
           return null;
         }
 
+        if(!PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
+          log.error("Error req.getData().getPrepaidCard10().getStatus() es " + prepaidCard.getStatus().toString());
+          return null;
+        }
         if (prepaidMovement == null) {
           log.error("Error req.getData().getPrepaidMovement10() es null");
           return null;
@@ -118,7 +118,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
 
-        if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+        if (CodigoRetorno._000.equals(inclusionMovimientosDTO.getRetorno())) {
 
           issuanceFeeMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
           issuanceFeeMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
@@ -132,13 +132,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             inclusionMovimientosDTO.getClamone(),
             issuanceFeeMovement.getEstado());
 
+          // Activa la tarjeta luego de realizado el cobro de emision
+          prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+
+          getPrepaidEJBBean10().updateCard(null,
+            prepaidCard.getId(),
+            prepaidCard.getIdUser(),
+            PrepaidCardStatus.PENDING,
+            prepaidCard);
+
           // Envia a la cola de envio de email con la informacion de la tarjeta
           Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
 
-        } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+        } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);

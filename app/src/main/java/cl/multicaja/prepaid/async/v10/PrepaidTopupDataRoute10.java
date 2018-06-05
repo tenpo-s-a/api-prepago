@@ -100,6 +100,14 @@ public class PrepaidTopupDataRoute10 implements Serializable {
     return processorMetadata;
   }
 
+  public ProcessorMetadata getLastProcessorMetadata() {
+    if (!processorMetadata.isEmpty()) {
+      return processorMetadata.get(processorMetadata.size()-1);
+    } else {
+      return null;
+    }
+  }
+
   public CdtTransaction10 getCdtTransactionConfirm10() {
     return cdtTransactionConfirm10;
   }

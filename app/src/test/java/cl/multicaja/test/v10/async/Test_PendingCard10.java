@@ -103,7 +103,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener PAN", remoteTopup.getData().getPrepaidCard10().getPan());
     Assert.assertNotNull("Deberia tener PAN Encriptado", remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
     Assert.assertNotNull("Deberia tener Expire Date", remoteTopup.getData().getPrepaidCard10().getExpiration());
-    Assert.assertEquals("Status Igual a",PrepaidCardStatus.ACTIVE, remoteTopup.getData().getPrepaidCard10().getStatus());
+    Assert.assertEquals("Status Igual a",PrepaidCardStatus.PENDING, remoteTopup.getData().getPrepaidCard10().getStatus());
     Assert.assertNotNull("Deberia Tener Nombre",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
   }
 
