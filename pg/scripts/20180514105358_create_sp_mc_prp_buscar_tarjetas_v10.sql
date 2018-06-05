@@ -32,6 +32,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
   OUT _expiracion INTEGER,
   OUT _estado VARCHAR,
   OUT _nombre_tarjeta VARCHAR,
+  OUT _producto VARCHAR,
+  OUT _numero_unico VARCHAR,
   OUT _fecha_creacion TIMESTAMP,
   OUT _fecha_actualizacion TIMESTAMP
 )
@@ -47,6 +49,8 @@ BEGIN
     expiracion,
     estado,
     nombre_tarjeta,
+    producto,
+    numero_unico,
     fecha_creacion,
     fecha_actualizacion
   FROM

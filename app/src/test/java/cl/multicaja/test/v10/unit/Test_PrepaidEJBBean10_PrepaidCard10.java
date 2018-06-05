@@ -92,6 +92,8 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     card.setNameOnCard(getRandomString(20));
     card.setPan(getRandomString(16));
     card.setEncryptedPan(getRandomString(20));
+    card.setProducto(getRandomNumericString(2));
+    card.setNumeroUnico(getRandomNumericString(8));
 
     boolean updated = getPrepaidEJBBean10().updateCard(null,cardId,userId,state,card);
 

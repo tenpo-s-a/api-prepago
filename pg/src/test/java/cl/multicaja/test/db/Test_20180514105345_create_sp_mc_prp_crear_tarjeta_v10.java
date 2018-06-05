@@ -48,6 +48,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
       expiryDate, //_expiracion
       status, //_estado
       "Tarjeta de: " + getRandomString(5), //_nombre_tarjeta
+      getRandomNumericString(2),
+      getRandomNumericString(8),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -72,6 +74,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
       0, //_expiracion
       status, //_estado
       new NullParam(Types.VARCHAR), //_nombre_tarjeta
+      new NullParam(Types.VARCHAR), //_producto
+      new NullParam(Types.VARCHAR), //_numero_unico
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -103,6 +107,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
     map.put("expiracion", numberUtils.toInt(params[4]));
     map.put("estado", String.valueOf(params[5]));
     map.put("nombre_tarjeta", String.valueOf(params[6]));
+    map.put("producto", String.valueOf(params[7]));
+    map.put("numero_unico", String.valueOf(params[8]));
 
     return map;
   }
@@ -133,6 +139,8 @@ public class Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10 extends Test
     map.put("expiracion", numberUtils.toInt(params[4]));
     map.put("estado", String.valueOf(params[5]));
     map.put("nombre_tarjeta", String.valueOf(params[6]));
+    map.put("producto", String.valueOf(params[7]));
+    map.put("numero_unico", String.valueOf(params[8]));
 
     return map;
   }

@@ -206,6 +206,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setProcessorUserId(getRandomNumericString(20));
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
     return prepaidCard;
   }
 
@@ -266,6 +268,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
     prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
+    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
 
     return prepaidCard;
   }
