@@ -39,52 +39,9 @@ import java.util.*;
 @Stateless
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class PrepaidUserEJBBean10 implements PrepaidUserEJB10 {
+public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidUserEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidUserEJBBean10.class);
-
-  protected NumberUtils numberUtils = NumberUtils.getInstance();
-
-  private ConfigUtils configUtils;
-
-  private DBUtils dbUtils;
-
-  /**
-   *
-   * @return
-   */
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
-    }
-    return this.configUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
-    }
-    return this.dbUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  private String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
-  }
-
-  @Override
-  public Map<String, Object> info() throws Exception{
-    Map<String, Object> map = new HashMap<>();
-    map.put("class", this.getClass().getSimpleName());
-    return map;
-  }
 
   @Override
   public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
@@ -196,7 +153,7 @@ public class PrepaidUserEJBBean10 implements PrepaidUserEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("Error en invocacion a SP: " + resp);
       throw new BaseException(1);
@@ -204,24 +161,24 @@ public class PrepaidUserEJBBean10 implements PrepaidUserEJB10 {
   }
 
   @Override
-  public PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception {
-    if(oUser == null) {
+  public PrepaidUserLevel getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
+
+    if(user == null) {
       throw new NotFoundException(102001);
     }
-    if(oUser.getRut() == null){
+    if(user.getRut() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
     }
-    if(oUser.getRut().getStatus() == null){
+    if(user.getRut().getStatus() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "rut.status"));
     }
     if(prepaidUser10 == null) {
       throw new NotFoundException(102003);
     }
 
-    if(RutStatus.VERIFIED.equals(oUser.getRut().getStatus()) && NameStatus.VERIFIED.equals(oUser.getNameStatus())) {
+    if(RutStatus.VERIFIED.equals(user.getRut().getStatus()) && NameStatus.VERIFIED.equals(user.getNameStatus())) {
       return PrepaidUserLevel.LEVEL_2;
-    }
-    else {
+    } else {
       return PrepaidUserLevel.LEVEL_1;
     }
   }

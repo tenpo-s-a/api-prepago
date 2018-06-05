@@ -11,8 +11,6 @@ import java.util.Map;
  */
 public interface PrepaidCardEJB10 {
 
-  Map<String, Object> info() throws Exception;
-
   /**
    * permite crear una tarjeta prepago
    *
@@ -72,5 +70,5 @@ public interface PrepaidCardEJB10 {
    *  Permite realizar la actualizacion de los datos de una tarjeta
    *
   */
-  boolean updateCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception;
+  boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception;
 }

@@ -31,52 +31,9 @@ import java.util.Map;
 @Stateless
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class PrepaidCardEJBBean10 implements PrepaidCardEJB10 {
+public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidCardEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean10.class);
-
-  protected NumberUtils numberUtils = NumberUtils.getInstance();
-
-  private ConfigUtils configUtils;
-
-  private DBUtils dbUtils;
-
-  /**
-   *
-   * @return
-   */
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
-    }
-    return this.configUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
-    }
-    return this.dbUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  private String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
-  }
-
-  @Override
-  public Map<String, Object> info() throws Exception{
-    Map<String, Object> map = new HashMap<>();
-    map.put("class", this.getClass().getSimpleName());
-    return map;
-  }
 
   @Override
   public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
@@ -192,7 +149,8 @@ public class PrepaidCardEJBBean10 implements PrepaidCardEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = dbUtils.execute(getSchema() + ".mc_prp_actualizar_estado_tarjeta_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_tarjeta_v10", params);
+
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("Error en invocacion a SP: " + resp);
       throw new BaseException(1);
@@ -200,9 +158,7 @@ public class PrepaidCardEJBBean10 implements PrepaidCardEJB10 {
   }
 
   @Override
-  public boolean updateCard(Map<String, Object> headers,Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
-
-    final String SP_NAME = getSchema() + ".mc_prp_actualiza_tarjeta_v10";
+  public boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
 
     Object[] params = {
       cardId == null ? new NullParam(Types.BIGINT): cardId,
@@ -220,14 +176,8 @@ public class PrepaidCardEJBBean10 implements PrepaidCardEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_tarjeta_v10", params);
 
-    log.info("resp update card: " + resp);
-
-    if(resp.get("_error_code").equals("0")){
-      return true;
-    } else {
-      return false;
-    }
+    return resp.get("_error_code").equals("0");
   }
 }

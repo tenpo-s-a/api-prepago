@@ -4,11 +4,13 @@ import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
@@ -50,6 +52,7 @@ public abstract class BaseProcessor10 {
   public PdfUtils getPdfUtils(){
     return this.getRoute().getPdfUtils();
   }
+
   public PrepaidTopupRoute10 getRoute() {
     return route;
   }
@@ -62,10 +65,17 @@ public abstract class BaseProcessor10 {
     return this.getRoute().getPrepaidMovementEJBBean10();
   }
 
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return this.getRoute().getPrepaidUserEJBBean10();
+  }
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return this.getRoute().getPrepaidCardEJBBean10();
+  }
+
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
     return this.getRoute().getPrepaidEJBBean10();
   }
-
 
   public UsersEJBBean10 getUsersEJBBean10() {
     return this.getRoute().getUsersEJBBean10();
@@ -80,6 +90,7 @@ public abstract class BaseProcessor10 {
   }
 
   public MailEJBBean10 getMailEjbBean10(){ return  this.getRoute().getMailEJBBean10(); }
+
   /**
    * Crea un queue endpoint ser consumido por apache camel
    *

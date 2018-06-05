@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public interface PrepaidUserEJB10 {
 
-  Map<String, Object> info() throws Exception;
-
   /**
    * permite crear un usuario prepago
    *

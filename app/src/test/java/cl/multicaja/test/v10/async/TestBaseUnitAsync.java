@@ -57,10 +57,13 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       //Inicializa las rutas camel, se inicializa aun cuando no se incluya en camel, se crea dado que de
       // ella depende la instancia de tecnocomService
       PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
+      prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      prepaidTopupRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
       prepaidTopupRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
+      prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
       camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
     }
@@ -292,8 +295,15 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     return messageId;
   }
 
-
-  protected String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10,int retryCount) {
+  /**
+   *
+   * @param user
+   * @param prepaidUser10
+   * @param prepaidCard10
+   * @param retryCount
+   * @return
+   */
+  public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -318,7 +328,6 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
-
   }
 
 }

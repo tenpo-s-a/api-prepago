@@ -27,40 +27,9 @@ import java.util.Map;
 @Stateless
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
+public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidMovementEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
-
-  protected NumberUtils numberUtils = NumberUtils.getInstance();
-
-  private ConfigUtils configUtils;
-  private DBUtils dbUtils;
-
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
-    }
-    return this.configUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
-    }
-    return this.dbUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  private String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
-  }
 
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {
@@ -105,7 +74,7 @@ public class PrepaidMovementEJBBean10 implements PrepaidMovementEJB10 {
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
 
     if(resp == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "resp == null"));

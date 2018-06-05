@@ -6,20 +6,14 @@ import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
-import cl.multicaja.users.model.v10.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.InputStream;
-
-import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_REQ;
 
 /**
  * @autor abarazarte
@@ -91,9 +85,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
       }
     };
   }
+
   private String replaceDataHTML(String htmlTemplate,String numtar, String fechavenc, String cvc) {
-   return htmlTemplate.replace("${numtar}",numtar).replace("${venc}",fechavenc).replace("${cvc}",cvc);
+    return htmlTemplate.replace("${numtar}",numtar).replace("${venc}",fechavenc).replace("${cvc}",cvc);
   }
+
   /* Cola Errores */
   public ProcessorRoute processErrorPendingSendMailCard() {
     return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {

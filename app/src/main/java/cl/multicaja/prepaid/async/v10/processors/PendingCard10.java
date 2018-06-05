@@ -68,7 +68,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard.setIdUser(data.getPrepaidUser10().getId());
           prepaidCard.setStatus(PrepaidCardStatus.PENDING);
           prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-          prepaidCard = getPrepaidEJBBean10().createPrepaidCard(null,prepaidCard);
+          prepaidCard = getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
           data.setPrepaidCard10(prepaidCard);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
@@ -121,7 +121,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
 
-          PrepaidCard10 prepaidCard10 = getPrepaidEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
+          PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
 
           prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
@@ -131,7 +131,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
 
-          boolean updated = getPrepaidEJBBean10().updateCard(null,
+          boolean updated = getPrepaidCardEJBBean10().updatePrepaidCard(null,
             data.getPrepaidCard10().getId(),
             data.getPrepaidCard10().getIdUser(),
             data.getPrepaidCard10().getStatus(),
