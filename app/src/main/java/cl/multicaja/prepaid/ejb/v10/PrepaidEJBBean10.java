@@ -253,6 +253,33 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+
+    if(withdrawRequest == null || withdrawRequest.getAmount() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+    }
+    if(withdrawRequest.getAmount().getValue() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
+    }
+    if(withdrawRequest.getAmount().getCurrencyCode() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(withdrawRequest.getRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+    }
+    if(StringUtils.isBlank(withdrawRequest.getMerchantCode())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(StringUtils.isBlank(withdrawRequest.getTransactionId())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "transaction_id"));
+    }
+
+    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
+
+    return prepaidWithdraw;
+  }
+
+  @Override
   public List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId) {
     return null;
   }
