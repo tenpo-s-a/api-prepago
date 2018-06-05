@@ -68,17 +68,25 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 topup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    String messageId = sendPendingTopup(topup, user, null, null, 0);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("dee tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
-    Assert.assertEquals("dee tener una tarjeta bloqueda duro", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
+    Assert.assertNotNull("debe tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
+    Assert.assertEquals("debe tener una tarjeta bloqueda duro", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
   }
 
   @Test
@@ -96,17 +104,25 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 topup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    String messageId = sendPendingTopup(topup, user, null, null, 0);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("dee tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
-    Assert.assertEquals("dee tener una tarjeta expirada", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
+    Assert.assertNotNull("debe tener una tarjeta", remoteTopup.getData().getPrepaidCard10());
+    Assert.assertEquals("debe tener una tarjeta expirada", prepaidCard.getStatus(), remoteTopup.getData().getPrepaidCard10().getStatus());
   }
 
   @Test
@@ -133,8 +149,6 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
-
-    //Alta de cliente
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -181,28 +195,78 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement, 4);
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 4);
 
-    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    //mensaje procesado por pedingTopup pero que falla y deja en cola de devoluciones
+    {
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
 
-    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+      System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
 
-    PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
+      PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
 
-    Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementResp.getEstado());
-    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNumextcta());
-    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNummovext());
-    Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getClamone());
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
+
+      PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
+
+      Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
+      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());
+
+      CdtTransaction10 cdtTransaction10 = remoteTopup.getData().getCdtTransaction10();
+
+      Assert.assertNotNull("Debe tener un regisro cdt", cdtTransaction10);
+
+      CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
+
+      Assert.assertNull("No debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
+    }
+
+    //debe existir el mensaje en la cola de devoluciones pendientes
+    {
+      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_RESP);
+      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+
+      System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+
+      PrepaidMovement10 prepaidMovementResp = remoteTopup.getData().getPrepaidMovement10();
+
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
+
+      PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
+
+      Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
+      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());
+
+      CdtTransaction10 cdtTransaction10 = remoteTopup.getData().getCdtTransaction10();
+
+      Assert.assertNotNull("Debe tener un regisro cdt", cdtTransaction10);
+
+      CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
+
+      Assert.assertNull("No debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
+    }
   }
 
   @Test
@@ -230,8 +294,6 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
-    //Alta de cliente
-
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -249,6 +311,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementResp);
     Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
 
     if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
       Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
@@ -256,10 +319,17 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
     }
 
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNumextcta());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getNummovext());
-    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), prepaidMovementResp.getClamone());
+    PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
+
+    Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementInDb.getEstado());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado exitosamente", Integer.valueOf(0), prepaidMovementInDb.getClamone());
+
+    CdtTransaction10 cdtTransaction10 = remoteTopup.getData().getCdtTransaction10();
+
+    Assert.assertNotNull("Debe tener un regisro cdt", cdtTransaction10);
 
     CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
 
