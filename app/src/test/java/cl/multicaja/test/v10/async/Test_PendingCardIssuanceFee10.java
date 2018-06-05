@@ -26,12 +26,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
@@ -61,12 +55,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_PrepaidCardNull() throws Exception {
 
     User user = registerUser();
-
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -98,12 +86,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_PrepaidCardStatusActive() throws Exception {
 
     User user = registerUser();
-
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -139,12 +121,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
@@ -177,12 +153,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee() throws Exception {
 
     User user = registerUser();
-
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -259,12 +229,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
@@ -324,12 +288,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   public void pendingCardIssuanceFee_RetryCount4() throws Exception {
 
     User user = registerUser();
-
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
