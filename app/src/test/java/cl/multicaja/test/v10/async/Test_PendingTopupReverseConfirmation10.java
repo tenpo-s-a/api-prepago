@@ -48,7 +48,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
     cdtTransaction.setGloss(topup10.getCdtTransactionType().getName()+" "+topup10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topup10.getTransactionId());
-
+    cdtTransaction.setIndSimulacion(false);
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null,cdtTransaction);
 
     cdtTransaction.setExternalTransactionId("R" + cdtTransaction.getExternalTransactionId());

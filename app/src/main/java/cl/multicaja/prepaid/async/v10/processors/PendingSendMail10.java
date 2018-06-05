@@ -62,17 +62,18 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         if (cvv2DTO.getRetorno().equals(CodigoRetorno._000)) {
 
-          MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "PDF_CARD");
-
+          //TODO: Hay que verificar que funcione el obtener plantilla
+          /*MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "PDF_CARD");
           if (mailTemplate == null) {
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
             redirectRequest(endpoint, exchange, req);
           }
+          */
 
-          String template = replaceDataHTML(mailTemplate.getTemplate(), getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()), "" + data.getPrepaidCard10().getExpiration(), ""+cvv2DTO.getClavegen());
-          String pdfB64 = getPdfUtils().protectedPdfInB64(template, "" + data.getUser().getRut(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Cliente", "Multicaja");
+          //String template = replaceDataHTML(mailTemplate.getTemplate(), getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()), "" + data.getPrepaidCard10().getExpiration(), ""+cvv2DTO.getClavegen());
+          //String pdfB64 = getPdfUtils().protectedPdfInB64(template, "" + data.getUser().getRut(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Cliente", "Multicaja");
           //TODO: se debe llamar al servicio de envio de mail de Users
 
         } else if (cvv2DTO.getRetorno().equals(CodigoRetorno._1000)) {

@@ -1,11 +1,13 @@
 package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,6 +30,9 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
+    prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10,0);
