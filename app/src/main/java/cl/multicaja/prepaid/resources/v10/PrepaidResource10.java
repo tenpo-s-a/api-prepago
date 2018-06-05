@@ -26,7 +26,7 @@ public final class PrepaidResource10 extends BaseResource {
   private static Log log = LogFactory.getLog(PrepaidResource10.class);
 
   @EJB
-  private PrepaidEJBBean10 ejb;
+  private PrepaidEJBBean10 prepaidEJBBean10;
 
   /*
     Prepaid
@@ -35,7 +35,7 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/prepaid/topup")
   public Response topupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.ejb.topupUserBalance(headersToMap(headers), topupRequest);
+    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
 

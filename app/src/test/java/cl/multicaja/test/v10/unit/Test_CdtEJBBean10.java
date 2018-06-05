@@ -27,7 +27,5 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     Assert.assertEquals("debe tener Amount", true, oCdtTx10.getAmount().doubleValue() > 0);
     Assert.assertNotNull("debe tener Account ID", oCdtTx10.getAccountId());
     Assert.assertNotNull("debe tener External Tx Id", oCdtTx10.getExternalTransactionId());
-
   }
-
 }

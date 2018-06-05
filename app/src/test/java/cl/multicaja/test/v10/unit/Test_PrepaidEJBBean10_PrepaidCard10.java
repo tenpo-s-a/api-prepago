@@ -30,12 +30,12 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     PrepaidCard10 card = buildPrepaidCard10();
     createPrepaidCard10(card);
 
-    PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", card, c1);
 
-    PrepaidCard10 c2 = getPrepaidEJBBean10().getPrepaidCardByUserId(null, card.getIdUser(), card.getStatus());
+    PrepaidCard10 c2 = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, card.getIdUser(), card.getStatus());
 
     Assert.assertNotNull("debe retornar una tarjeta", c2);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", card, c2);
@@ -53,7 +53,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     createPrepaidCard10(card2);
 
     List<Long> lstFind = new ArrayList<>();
-    List<PrepaidCard10> lst = getPrepaidEJBBean10().getPrepaidCards(null, null, null, null, PrepaidCardStatus.EXPIRED, null);
+    List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, null, null, PrepaidCardStatus.EXPIRED, null);
     for (PrepaidCard10 p : lst) {
       if (p.getId().equals(card1.getId()) || p.getId().equals(card2.getId())) {
         lstFind.add(p.getId());
@@ -70,9 +70,9 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     PrepaidCard10 card = buildPrepaidCard10();
     card = createPrepaidCard10(card);
 
-    getPrepaidEJBBean10().updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
+    getPrepaidCardEJBBean10().updatePrepaidCardStatus(null, card.getId(), PrepaidCardStatus.EXPIRED);
 
-    PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
 
     Assert.assertNotNull("debe retornar un usuario", c1);
     Assert.assertEquals("el estado debe estar actualizado", PrepaidCardStatus.EXPIRED, c1.getStatus());
@@ -95,11 +95,11 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
     card.setProducto(getRandomNumericString(2));
     card.setNumeroUnico(getRandomNumericString(8));
 
-    boolean updated = getPrepaidEJBBean10().updateCard(null,cardId,userId,state,card);
+    boolean updated = getPrepaidCardEJBBean10().updatePrepaidCard(null,cardId,userId,state,card);
 
     Assert.assertTrue("La tarjeta be haber sido actualizada, debe ser true", updated);
 
-    PrepaidCard10 c1 = getPrepaidEJBBean10().getPrepaidCardById(null, card.getId());
+    PrepaidCard10 c1 = getPrepaidCardEJBBean10().getPrepaidCardById(null, card.getId());
 
     Assert.assertNotNull("debe retornar una tarjeta", c1);
     Assert.assertEquals("la tarjeta debe estar actualizada", card, c1);
@@ -114,7 +114,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
       createPrepaidCard10(card);
     }
 
-    List<PrepaidCard10> lst = getPrepaidEJBBean10().getPrepaidCards(null, null, null, null, null, null);
+    List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, null, null, null, null);
 
     Long id = Long.MAX_VALUE;
 
