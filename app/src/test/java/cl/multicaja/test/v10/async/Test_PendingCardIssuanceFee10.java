@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.core.utils.EncryptUtil;
@@ -9,7 +9,6 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,21 +18,15 @@ import java.util.List;
 /**
  * @autor abarazarte
  */
-public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
+public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
   @Test
   public void pendingCardIssuanceFee_PrepaidTopupNull() throws Exception {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
@@ -58,14 +51,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
@@ -92,14 +79,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
@@ -126,14 +107,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
@@ -162,17 +137,11 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
@@ -182,14 +151,14 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
     prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
@@ -234,25 +203,19 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
-    prepaidCard = createPrepaidCard(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
@@ -294,25 +257,19 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    user.setName(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_1(RandomStringUtils.randomAlphabetic(5,10));
-    user.setLastname_2(RandomStringUtils.randomAlphabetic(5,10));
-
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
-    prepaidUser = createPrepaidUser(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
     System.out.println("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
-    prepaidCard = createPrepaidCard(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
     System.out.println("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 3);

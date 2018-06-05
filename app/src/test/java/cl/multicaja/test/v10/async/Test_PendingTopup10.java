@@ -1,17 +1,13 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -20,14 +16,14 @@ import javax.jms.Queue;
  * @autor vutreras
  */
 @SuppressWarnings("unchecked")
-public class Test_PendingTopup10 extends TestBaseRouteUnit {
+public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
   @Test
   public void pendingTopup_rut_is_null() throws Exception {
 
     User user = registerUser();
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
 
     topup.setRut(null);
     user.setRut(null);
@@ -46,7 +42,7 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
 
     String messageId = sendPendingTopup(topup, user, null, null, 0);
 
@@ -62,17 +58,17 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
 
     String messageId = sendPendingTopup(topup, user, null, null, 0);
 
@@ -90,17 +86,17 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 topup = buildPrepaidTopup(user);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
 
     String messageId = sendPendingTopup(topup, user, null, null, 0);
 
@@ -118,23 +114,23 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -175,19 +171,19 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, null, prepaidMovement, 4);
 
@@ -214,23 +210,23 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
-    prepaidUser = createPrepaidUser(prepaidUser);
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildCardFromTecnocom(user, prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
 
-    prepaidCard = createPrepaidCard(prepaidCard);
+    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
-    cdtTransaction = createCdtTransaction(cdtTransaction);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
 
-    prepaidMovement = createPrepaidMovement(prepaidMovement);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 0);
 
@@ -268,9 +264,9 @@ public class Test_PendingTopup10 extends TestBaseRouteUnit {
     CdtTransaction10 cdtTransactionConfirm10 = remoteTopup.getData().getCdtTransactionConfirm10();
 
     Assert.assertNotNull("debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
-    Assert.assertEquals("deben ser el mismo cdt externalTransactionId", cdtTransaction.getAccountId(), cdtTransactionConfirm10.getAccountId());
-    Assert.assertEquals("deben ser el mismo cdt externalTransactionId", cdtTransaction.getExternalTransactionId(), cdtTransactionConfirm10.getExternalTransactionId());
-    Assert.assertEquals("deben ser el mismo cdt externalTransactionId", cdtTransaction.getGloss(), cdtTransactionConfirm10.getGloss());
+    Assert.assertEquals("deben ser el mismo cdt accountId", cdtTransaction.getAccountId(), cdtTransactionConfirm10.getAccountId());
+    Assert.assertEquals("deben ser el mismo cdt externalTransactionIdConfirm", cdtTransaction.getExternalTransactionIdConfirm(), cdtTransactionConfirm10.getExternalTransactionIdConfirm());
+    Assert.assertEquals("deben ser el mismo cdt gloss", cdtTransaction.getGloss(), cdtTransactionConfirm10.getGloss());
     Assert.assertNotEquals("deben ser distinto de 0 transactionReference", Long.valueOf(0), cdtTransactionConfirm10.getTransactionReference());
 
     if (cdtTransaction.getTransactionType().equals(CdtTransactionType.PRIMERA_CARGA)) {

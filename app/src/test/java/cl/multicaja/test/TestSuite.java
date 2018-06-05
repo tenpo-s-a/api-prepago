@@ -1,4 +1,4 @@
-package cl.multicaja.test.api;
+package cl.multicaja.test;
 
 import cl.multicaja.core.test.TestSuiteBase;
 import org.apache.commons.logging.Log;
@@ -17,15 +17,27 @@ public class TestSuite extends TestSuiteBase {
 
   private static TestServer testServer = new TestServer();
 
+  private static boolean serverRunning;
+
   @BeforeClass
   public static void setUp() throws Exception {
     System.setProperty("project.artifactId", "api-prepaid");
     testServer.start();
+    serverRunning = true;
   }
 
   @AfterClass
   public static void tearDown() {
     testServer.stop();
+    serverRunning = false;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static boolean isServerRunning() {
+    return serverRunning;
   }
 
   public static Class<?>[] suite() throws Exception {

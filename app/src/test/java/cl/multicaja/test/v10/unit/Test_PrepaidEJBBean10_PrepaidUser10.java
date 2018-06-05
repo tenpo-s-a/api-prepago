@@ -1,4 +1,4 @@
-package cl.multicaja.test.api.unit;
+package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -16,8 +16,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
 
   @Test
   public void insertUserOk() throws Exception {
-    PrepaidUser10 user = buildPrepaidUser();
-    createPrepaidUser(user);
+    PrepaidUser10 user = buildPrepaidUser10();
+    createPrepaidUser10(user);
   }
 
   @Test
@@ -27,8 +27,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso de registro de un nuevo usuario, pero que luego se intenta registrar el mismo y deberia fallar
      */
 
-    PrepaidUser10 user = buildPrepaidUser();
-    user = createPrepaidUser(user);
+    PrepaidUser10 user = buildPrepaidUser10();
+    user = createPrepaidUser10(user);
 
     //se intenta registrar exactamente el mismo usuario
     try {
@@ -45,8 +45,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso en que se registra un nuevo usuario y luego se busca por su id, id_usuario_mc y rut
      */
 
-    PrepaidUser10 user = buildPrepaidUser();
-    user = createPrepaidUser(user);
+    PrepaidUser10 user = buildPrepaidUser10();
+    user = createPrepaidUser10(user);
 
     PrepaidUser10 u1 = getPrepaidEJBBean10().getPrepaidUserById(null, user.getId());
 
@@ -71,13 +71,13 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
      * Caso en que se registra un nuevo usuario y luego se busca por su id, id_usuario_mc y rut
      */
 
-    PrepaidUser10 user1 = buildPrepaidUser();
+    PrepaidUser10 user1 = buildPrepaidUser10();
     user1.setStatus(PrepaidUserStatus.DISABLED);
-    user1 = createPrepaidUser(user1);
+    user1 = createPrepaidUser10(user1);
 
-    PrepaidUser10 user2 = buildPrepaidUser();
+    PrepaidUser10 user2 = buildPrepaidUser10();
     user2.setStatus(PrepaidUserStatus.DISABLED);
-    user2 = createPrepaidUser(user2);
+    user2 = createPrepaidUser10(user2);
 
     List<PrepaidUser10> lst = getPrepaidEJBBean10().getPrepaidUsers(null, null, null, null, PrepaidUserStatus.DISABLED);
 
@@ -96,8 +96,8 @@ public class Test_PrepaidEJBBean10_PrepaidUser10 extends TestBaseUnit {
   @Test
   public void updateStatusOk() throws Exception {
 
-    PrepaidUser10 user = buildPrepaidUser();
-    user = createPrepaidUser(user);
+    PrepaidUser10 user = buildPrepaidUser10();
+    user = createPrepaidUser10(user);
 
     getPrepaidEJBBean10().updatePrepaidUserStatus(null, user.getId(), PrepaidUserStatus.DISABLED);
 
