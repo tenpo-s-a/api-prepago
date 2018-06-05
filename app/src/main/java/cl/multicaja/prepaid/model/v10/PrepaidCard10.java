@@ -24,6 +24,10 @@ public class PrepaidCard10 extends BaseModel {
   private String nameOnCard;
   private PrepaidCardStatus status;
   private Timestamps timestamps;
+  @JsonIgnore
+  private String producto;
+  @JsonIgnore
+  private String numeroUnico;
 
   public PrepaidCard10() {
     super();
@@ -101,6 +105,22 @@ public class PrepaidCard10 extends BaseModel {
     this.timestamps = timestamps;
   }
 
+  public String getProducto() {
+    return producto;
+  }
+
+  public void setProducto(String producto) {
+    this.producto = producto;
+  }
+
+  public String getNumeroUnico() {
+    return numeroUnico;
+  }
+
+  public void setNumeroUnico(String numeroUnico) {
+    this.numeroUnico = numeroUnico;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -113,6 +133,8 @@ public class PrepaidCard10 extends BaseModel {
       Objects.equals(getEncryptedPan(), that.getEncryptedPan()) &&
       Objects.equals(getExpiration(), that.getExpiration()) &&
       Objects.equals(getNameOnCard(), that.getNameOnCard()) &&
+      Objects.equals(getProducto(), that.getProducto()) &&
+      Objects.equals(getNumeroUnico(), that.getNumeroUnico()) &&
       getStatus() == that.getStatus();
   }
 
