@@ -498,7 +498,7 @@ public class TestBaseUnit extends TestApiBase {
     TipoFactura tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
 
     if (prepaidTopup != null) {
-      if (TopupType.WEB.equals(prepaidTopup.getType())) {
+      if (TransactionOriginType.WEB.equals(prepaidTopup.getTransactionOriginType())) {
         tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
       } else {
         tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;

@@ -287,7 +287,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     fee.setCurrencyCode(currencyCodeClp);
 
     // Calcula las comisiones segun el tipo de carga (WEB o POS)
-    switch (topup.getType()) {
+    switch (topup.getTransactionOriginType()) {
       case WEB:
         fee.setValue(new BigDecimal(0));
         break;
@@ -353,7 +353,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     TipoFactura tipoFactura = null;
 
-    if (TopupType.WEB.equals(prepaidTopup.getType())) {
+    if (TransactionOriginType.WEB.equals(prepaidTopup.getTransactionOriginType())) {
       tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
     } else {
       tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
