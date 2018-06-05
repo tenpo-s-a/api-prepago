@@ -5,12 +5,14 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.async.v10.processors.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,11 +40,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
 
+  @EJB
+  private MailEJBBean10 mailEJBBean10;
+
   private TecnocomService tecnocomService;
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
-
+  private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
 
   public PrepaidTopupRoute10() {
@@ -80,7 +85,12 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
     }
     return parametersUtil;
   }
-
+  public PdfUtils getPdfUtils(){
+    if(pdfUtils == null){
+      pdfUtils = PdfUtils.getInstance();
+    }
+    return pdfUtils;
+  }
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
   }
@@ -111,6 +121,14 @@ public final class PrepaidTopupRoute10 extends CamelRouteBuilder {
 
   public void setCdtEJBBean10(CdtEJBBean10 cdtEJBBean10) {
     this.cdtEJBBean10 = cdtEJBBean10;
+  }
+
+  public MailEJBBean10 getMailEJBBean10() {
+    return mailEJBBean10;
+  }
+
+  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
+    this.mailEJBBean10 = mailEJBBean10;
   }
 
   public TecnocomService getTecnocomService() {

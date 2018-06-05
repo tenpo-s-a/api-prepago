@@ -19,6 +19,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     oCdtTx10.setGloss("RECARGA DE PREPAGO");
     oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
     oCdtTx10.setAmount(new BigDecimal(20000));
+    oCdtTx10.setIndSimulacion(false);
     oCdtTx10 = getCdtEJBBean10().addCdtTransaction(null,oCdtTx10);
 
     Assert.assertNotNull("Debe retornar Una Tx Cdt", oCdtTx10);

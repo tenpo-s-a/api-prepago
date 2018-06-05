@@ -25,6 +25,7 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_movimiento_cuenta_v10
     IN _id_tx_externo           VARCHAR,
     IN _glosa                   VARCHAR,
     IN _monto                   NUMERIC,
+    IN _ind_simulacion          VARCHAR,
     OUT _id_movimiento_cuenta   NUMERIC,
     OUT _num_error              VARCHAR,
     OUT _msj_error              VARCHAR
@@ -46,16 +47,29 @@ BEGIN
     END IF;
 
     IF COALESCE(_id_fase_movimiento, 0) = 0 THEN
-        _num_error := 'MC002';
-        _msj_error := '[mc_cdt_crea_movimiento_cuenta] El Id Movimiento no puede ser 0';
-        RETURN;
+      _num_error := 'MC002';
+      _msj_error := '[mc_cdt_crea_movimiento_cuenta] El Id Movimiento no puede ser 0';
+      RETURN;
     END IF;
 
     IF COALESCE(_id_tx_externo, '') = '' THEN
-        _num_error := 'MC003';
-        _msj_error := '[mc_cdt_crea_movimiento_cuenta] EL Id Tx Externo no puede ser vacio';
-        RETURN;
+      _num_error := 'MC003';
+      _msj_error := '[mc_cdt_crea_movimiento_cuenta] EL Id Tx Externo no puede ser vacio';
+      RETURN;
     END IF;
+
+    IF COALESCE(_ind_simulacion,'') = '' then
+      _num_error := 'MC004';
+      _msj_error := '[mc_cdt_crea_movimiento_cuenta] El indicador de simulacion no puede ser vacio';
+      RETURN;
+    END IF;
+
+    IF _ind_simulacion != 'S' AND _ind_simulacion != 'N' then
+      _num_error := 'MC004';
+      _msj_error := '[mc_cdt_crea_movimiento_cuenta] El indicador de simulacion debe ser S o N';
+      RETURN;
+    END IF;
+
 
      BEGIN
 
@@ -186,10 +200,19 @@ BEGIN
             );
         END IF;
 
+      IF(_num_error = '0' AND _ind_simulacion = 'S') THEN
+         _num_error = '999999';
+         RAISE EXCEPTION 'Simulacion'; -- RETORNA ERROR SI EXISTE ERROR EN SP mc_cdt_crea_cuenta_v10
+      END IF;
+
     EXCEPTION
     WHEN OTHERS THEN
-      IF  _num_error != '0' THEN
+       IF  _num_error != '0' AND _num_error != '999999' THEN
            RETURN;
+       ELSIF _num_error = '999999' THEN
+          _id_movimiento_cuenta:= 0;
+          _num_error := '0';
+          _msj_error := ' ';
        ELSE
           _id_movimiento_cuenta:= 0;
           _num_error := SQLSTATE;
@@ -210,4 +233,4 @@ LANGUAGE 'plpgsql';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
- DROP FUNCTION IF EXISTS  ${schema.cdt}.mc_cdt_crea_movimiento_cuenta_v10(VARCHAR,NUMERIC,NUMERIC,VARCHAR,VARCHAR,NUMERIC);
+ DROP FUNCTION IF EXISTS  ${schema.cdt}.mc_cdt_crea_movimiento_cuenta_v10(VARCHAR,NUMERIC,NUMERIC,VARCHAR,VARCHAR,NUMERIC,VARCHAR);

@@ -4,12 +4,14 @@ import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -45,6 +47,9 @@ public abstract class BaseProcessor10 {
     return this.getRoute().getParametersUtil();
   }
 
+  public PdfUtils getPdfUtils(){
+    return this.getRoute().getPdfUtils();
+  }
   public PrepaidTopupRoute10 getRoute() {
     return route;
   }
@@ -74,6 +79,7 @@ public abstract class BaseProcessor10 {
     return this.getRoute().getCdtEJBBean10();
   }
 
+  public MailEJBBean10 getMailEjbBean10(){ return  this.getRoute().getMailEJBBean10(); }
   /**
    * Crea un queue endpoint ser consumido por apache camel
    *

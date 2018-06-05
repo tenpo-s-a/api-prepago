@@ -16,7 +16,7 @@ public class CdtTransaction10 implements Serializable {
   private String externalTransactionId;
   private String gloss;
   private BigDecimal amount;
-
+  private Boolean indSimulacion;
   private String numError = "0";
   private String msjError = "";
 
@@ -90,6 +90,14 @@ public class CdtTransaction10 implements Serializable {
 
   public void setMsjError(String msjError) {
     this.msjError = msjError;
+  }
+
+  public Boolean getIndSimulacion() {
+    return indSimulacion;
+  }
+
+  public void setIndSimulacion(Boolean indSimulacion) {
+    this.indSimulacion = indSimulacion;
   }
 
   @Override
