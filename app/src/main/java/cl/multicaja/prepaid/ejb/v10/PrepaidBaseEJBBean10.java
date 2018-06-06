@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.users.utils.ParametersUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * @autor vutreras
@@ -11,7 +12,6 @@ import cl.multicaja.users.utils.ParametersUtil;
 public abstract class PrepaidBaseEJBBean10 {
 
   protected NumberUtils numberUtils = NumberUtils.getInstance();
-
   protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private ConfigUtils configUtils;

@@ -12,6 +12,7 @@ import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -400,7 +401,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
   @Override
   public CalculatorResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
+
     CalculatorResponse10 calculatorResponse10  = new CalculatorResponse10();
+
+    //VALIDACIONES USUARIO USERMC
+    User user = getUsersEJB10().getUserByRut(null,req.getUserRut());
+    if(user == null){
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+    }
+
+    // VALIDACIONES USUARIO PREPAGO
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null,req.getUserRut());
+    if(prepaidUser10 == null){
+      throw new NotFoundException(102003); // Usuario no tiene prepago
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser10.getStatus())){
+      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
+    }
+
+    // LLAMADA AL CDT
+    CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
+    cdtTransaction10.setAmount(req.getAmount().getValue());
+    cdtTransaction10.setExternalTransactionId(RandomStringUtils.random(20));
+    cdtTransaction10.setTransactionReference(0L);
+    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+req.getUserRut());
+    cdtTransaction10.setIndSimulacion(true);
+    cdtTransaction10.setGloss("");
+    if (req.getPaymentMethod() == TopupType.POS)
+      cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
+    else
+      cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
+    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null,cdtTransaction10);
+
+    if(!cdtTransaction10.getNumError().equals("0")){
+      long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
+      if(lNumError != -1 && lNumError > 10000) {
+        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      } else {
+        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      }
+    }
+
     return calculatorResponse10;
   }
 }
