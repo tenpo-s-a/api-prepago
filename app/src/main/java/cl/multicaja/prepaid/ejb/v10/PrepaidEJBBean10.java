@@ -485,12 +485,34 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
+  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception {
 
-    CalculatorTopupResponse10 calculatorResponse10  = new CalculatorTopupResponse10();
+    if(calculatorRequest == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest"));
+    }
+
+    if(calculatorRequest.getUserRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.userRut"));
+    }
+
+    if(calculatorRequest.getPaymentMethod() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.paymentMethod"));
+    }
+
+    if(calculatorRequest.getAmount() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount"));
+    }
+
+    if(calculatorRequest.getAmount().getValue() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.value"));
+    }
+
+    if(calculatorRequest.getAmount().getCurrencyCode() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.currencyCode"));
+    }
 
     //VALIDACIONES USUARIO USERMC
-    User user = getUsersEJB10().getUserByRut(null, req.getUserRut());
+    User user = getUsersEJB10().getUserByRut(null, calculatorRequest.getUserRut());
     if(user == null){
       throw new NotFoundException(102001); // Usuario MC no existe
     }
@@ -500,7 +522,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // VALIDACIONES USUARIO PREPAGO
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null,req.getUserRut());
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null,calculatorRequest.getUserRut());
     if(prepaidUser10 == null){
       throw new NotFoundException(102003); // Usuario no tiene prepago
     }
@@ -511,14 +533,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // LLAMADA AL CDT
     CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
-    cdtTransaction10.setAmount(req.getAmount().getValue());
+    cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
     cdtTransaction10.setExternalTransactionId(RandomStringUtils.random(20));
     cdtTransaction10.setTransactionReference(0L);
-    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+req.getUserRut());
+    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+calculatorRequest.getUserRut());
     cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
     cdtTransaction10.setGloss("");
 
-    if (TransactionOriginType.POS.equals(req.getPaymentMethod()))
+    if (TransactionOriginType.POS.equals(calculatorRequest.getPaymentMethod()))
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
     else
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
@@ -559,15 +581,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     double saldoTarjeta = consultaSaldoDTO.getSaldisconp().doubleValue()-consultaSaldoDTO.getSalautconp().doubleValue();
 
     // MONTO A CARGAR
-    double montoCarga = req.getAmount().getValue().doubleValue();
+    double montoCarga = calculatorRequest.getAmount().getValue().doubleValue();
 
     if(saldoTarjeta+montoCarga>500000) {
      throw new ValidationException(304101);
     }
 
-    calculatorResponse10 = calcCalculaCarga(calculatorResponse10,req.getPaymentMethod(),req.getAmount().getValue().doubleValue());
+    CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
 
-    return calculatorResponse10;
+    calculatorResponse = calcCalculaCarga(calculatorResponse, calculatorRequest.getPaymentMethod(), calculatorRequest.getAmount().getValue().doubleValue());
+
+    return calculatorResponse;
   }
 
   /**
@@ -601,8 +625,32 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
-    //TODO falta implementar
+  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception {
+
+    if(calculatorRequest == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest"));
+    }
+
+    if(calculatorRequest.getUserRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.userRut"));
+    }
+
+    if(calculatorRequest.getPaymentMethod() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.paymentMethod"));
+    }
+
+    if(calculatorRequest.getAmount() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount"));
+    }
+
+    if(calculatorRequest.getAmount().getValue() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.value"));
+    }
+
+    if(calculatorRequest.getAmount().getCurrencyCode() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.currencyCode"));
+    }
+
     return null;
   }
 }
