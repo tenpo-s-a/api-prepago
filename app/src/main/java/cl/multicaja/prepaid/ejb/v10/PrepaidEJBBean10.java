@@ -253,6 +253,58 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+
+    if(withdrawRequest == null || withdrawRequest.getAmount() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+    }
+    if(withdrawRequest.getAmount().getValue() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
+    }
+    if(withdrawRequest.getAmount().getCurrencyCode() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(withdrawRequest.getRut() == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+    }
+    if(StringUtils.isBlank(withdrawRequest.getMerchantCode())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(StringUtils.isBlank(withdrawRequest.getTransactionId())){
+      throw new ValidationException(101004).setData(new KeyValue("value", "transaction_id"));
+    }
+
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserByRut(headers, withdrawRequest.getRut());
+
+    if(user == null){
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
+
+    if(prepaidUser == null){
+      throw new NotFoundException(102003); // Usuario no tiene prepago
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
+    }
+
+    // TODO: que hacer con el nivel de usuario en el retiro?
+    PrepaidUserLevel userLevel = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
+
+    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
+
+    return prepaidWithdraw;
+  }
+
+  @Override
   public List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId) {
     return null;
   }
@@ -287,7 +339,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     fee.setCurrencyCode(currencyCodeClp);
 
     // Calcula las comisiones segun el tipo de carga (WEB o POS)
-    switch (topup.getType()) {
+    switch (topup.getTransactionOriginType()) {
       case WEB:
         fee.setValue(new BigDecimal(0));
         break;
@@ -353,7 +405,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     TipoFactura tipoFactura = null;
 
-    if (TopupType.WEB.equals(prepaidTopup.getType())) {
+    if (TransactionOriginType.WEB.equals(prepaidTopup.getTransactionOriginType())) {
       tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
     } else {
       tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;

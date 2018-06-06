@@ -3,13 +3,13 @@ package cl.multicaja.prepaid.model.v10;
 /**
  * @author abarazarte
  */
-public enum TopupType {
+public enum TransactionOriginType {
   POS,
   WEB;
 
-  public static TopupType valueOfEnum(String name) {
+  public static TransactionOriginType valueOfEnum(String name) {
     try {
-      return TopupType.valueOf(name);
+      return TransactionOriginType.valueOf(name);
     } catch(Exception ex) {
       return null;
     }
