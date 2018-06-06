@@ -3,7 +3,11 @@ package cl.multicaja.test.v10.api;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidWithdraw10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -186,4 +190,145 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
+
+  @Test
+  public void shouldReturn404_McUserNull() {
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+    prepaidWithdraw.setRut(getUniqueRutNumber());
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 404", 404, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102001", 102001, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserDeleted() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.DELETED);
+    user = updateUser(user);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserLocked() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.LOCKED);
+    user = updateUser(user);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserDisabled() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.DISABLED);
+    user = updateUser(user);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn404_PrepaidUserNull() throws Exception {
+
+    User user = registerUser();
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 404", 404, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidUserDisabled() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser.setStatus(PrepaidUserStatus.DISABLED);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102004", 102004, errorObj.get("code"));
+  }
+
 }

@@ -365,6 +365,31 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidTopup;
   }
 
+  /**
+   *
+   * @param user
+   * @return
+   */
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidWithdraw.setAmount(newAmountAndCurrency);
+
+    prepaidWithdraw.setMerchantCategory(1);
+    prepaidWithdraw.setMerchantName(getRandomString(6));
+
+    return prepaidWithdraw;
+  }
+
 
 
   /**
