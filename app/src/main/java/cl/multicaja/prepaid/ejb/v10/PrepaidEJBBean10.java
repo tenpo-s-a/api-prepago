@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -534,18 +535,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // LLAMADA AL CDT
     CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
     cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
-    cdtTransaction10.setExternalTransactionId(RandomStringUtils.random(20));
+    cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction10.setTransactionReference(0L);
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+calculatorRequest.getUserRut());
     cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
-    cdtTransaction10.setGloss("");
 
-    if (TransactionOriginType.POS.equals(calculatorRequest.getPaymentMethod()))
+    if (TransactionOriginType.POS.equals(calculatorRequest.getPaymentMethod())) {
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
-    else
+    } else {
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
+    }
 
-    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null,cdtTransaction10);
+    cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
+
+    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
 
     // VALIDACIONES CDT
     if(!cdtTransaction10.getNumError().equals("0")){
@@ -649,6 +652,32 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if(calculatorRequest.getAmount().getCurrencyCode() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.currencyCode"));
+    }
+
+    CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
+    cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
+    cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction10.setTransactionReference(0L);
+    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getUserRut());
+
+    if (TransactionOriginType.POS.equals(calculatorRequest.getPaymentMethod())) {
+      cdtTransaction10.setTransactionType(CdtTransactionType.RETIRO_POS);
+    } else {
+      cdtTransaction10.setTransactionType(CdtTransactionType.RETIRO_WEB);
+    }
+
+    cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
+
+    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
+
+    // VALIDACIONES CDT
+    if(!cdtTransaction10.getNumError().equals("0")){
+      long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
+      if(lNumError != -1 && lNumError > 10000) {
+        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      } else {
+        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      }
     }
 
     return null;
