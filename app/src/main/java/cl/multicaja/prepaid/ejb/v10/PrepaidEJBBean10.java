@@ -198,7 +198,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
-    cdtTransaction.setIndSimulacion(false);
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
@@ -294,7 +294,48 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // TODO: que hacer con el nivel de usuario en el retiro?
     PrepaidUserLevel userLevel = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
 
+    PrepaidCard10 prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+
+    if (prepaidCard == null) {
+      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+    }
+
+    if (prepaidCard == null) {
+
+      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+
+      if (prepaidCard == null) {
+        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+      }
+
+      if (prepaidCard == null) {
+        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+      }
+
+      if (prepaidCard != null) {
+        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+
+      if (prepaidCard == null) {
+        throw new ValidationException(102003); // cliente no tiene prepago
+      }
+    }
+
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(withdrawRequest.getAmount().getValue());
+    cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
+    cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
+    cdtTransaction.setTransactionReference(Long.valueOf(0));
+    cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+
+
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
+    prepaidWithdraw.setId(Long.valueOf(1));
+    prepaidWithdraw.setUserId(user.getId());
+    prepaidWithdraw.setStatus("exitoso");
+    prepaidWithdraw.setTimestamps(new Timestamps());
 
     return prepaidWithdraw;
   }
