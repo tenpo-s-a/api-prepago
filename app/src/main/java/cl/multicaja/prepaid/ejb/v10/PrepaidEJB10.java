@@ -16,6 +16,8 @@ public interface PrepaidEJB10 {
 
   void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest);
 
+  PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception;
+
   List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
 
   PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest);

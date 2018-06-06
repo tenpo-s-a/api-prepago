@@ -292,7 +292,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
 
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+    if (TransactionOriginType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getTransactionOriginType())) {
       Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
     } else {
       Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
@@ -382,7 +382,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementResp.getCodent());
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
 
-    if (TopupType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getType())) {
+    if (TransactionOriginType.WEB.equals(remoteTopup.getData().getPrepaidTopup10().getTransactionOriginType())) {
       Assert.assertEquals("debe ser tipo factura CARGA_TRANSFERENCIA", TipoFactura.CARGA_TRANSFERENCIA, prepaidMovementResp.getTipofac());
     } else {
       Assert.assertEquals("debe ser tipo factura CARGA_EFECTIVO_COMERCIO_MULTICAJA", TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA, prepaidMovementResp.getTipofac());
