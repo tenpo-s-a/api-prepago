@@ -308,9 +308,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if (prepaidCard != null) {
         throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
-      else {
-        throw new ValidationException(102003); // cliente no tiene prepago
-      }
+
+      throw new ValidationException(102003); // cliente no tiene prepago
     }
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
