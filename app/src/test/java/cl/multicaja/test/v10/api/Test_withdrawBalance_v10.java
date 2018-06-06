@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
-  private static final String URL_PATH = "/1.0/prepaid/withdraw";
+  private static final String URL_PATH = "/1.0/prepaid/withdrawal";
   /*
   @Test
   public void shouldReturn200_OnTopupUserBalance() throws Exception {
