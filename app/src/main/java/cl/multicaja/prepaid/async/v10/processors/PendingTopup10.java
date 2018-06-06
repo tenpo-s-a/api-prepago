@@ -100,16 +100,10 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         data.setPrepaidUser10(prepaidUser);
 
-        PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-
-        if (prepaidCard == null) {
-          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
-        }
-
-        //TODO se agrega busqueda de tarjeta pendiente dado que es necesario para cobrar la comision, se debe validar con Felipe
-        if (prepaidCard == null) {
-          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
-        }
+        PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+                                                                                                    PrepaidCardStatus.ACTIVE,
+                                                                                                    PrepaidCardStatus.LOCKED,
+                                                                                                    PrepaidCardStatus.PENDING);
 
         if (prepaidCard != null) {
 
@@ -209,11 +203,9 @@ public class PendingTopup10 extends BaseProcessor10 {
           //https://www.pivotaltracker.com/story/show/157816408
           //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
 
-          prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
-
-          if (prepaidCard == null) {
-            prepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
-          }
+          prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+                                                                                      PrepaidCardStatus.LOCKED_HARD,
+                                                                                      PrepaidCardStatus.EXPIRED);
 
           if (prepaidCard == null) {
             Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
