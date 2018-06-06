@@ -299,6 +299,33 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // TODO: que hacer con el nivel de usuario en el retiro?
     PrepaidUserLevel userLevel = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
 
+    PrepaidCard10 prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+
+    if (prepaidCard == null) {
+      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+    }
+
+    if (prepaidCard == null) {
+
+      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
+
+      if (prepaidCard == null) {
+        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
+      }
+
+      if (prepaidCard == null) {
+        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+      }
+
+      if (prepaidCard != null) {
+        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+
+      if (prepaidCard == null) {
+        throw new ValidationException(102003); // cliente no tiene prepago
+      }
+    }
+
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
 
     return prepaidWithdraw;

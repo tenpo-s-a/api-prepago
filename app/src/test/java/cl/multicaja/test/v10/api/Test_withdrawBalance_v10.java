@@ -1,10 +1,7 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.NewPrepaidWithdraw10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
@@ -329,6 +326,118 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102004", 102004, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidCardNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidCardPending() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidCardExpired() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
+    prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidCardHardLocked() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
+    prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
   }
 
 }
