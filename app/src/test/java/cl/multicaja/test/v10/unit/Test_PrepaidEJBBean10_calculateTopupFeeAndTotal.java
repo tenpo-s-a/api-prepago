@@ -2,7 +2,7 @@ package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.TopupType;
+import cl.multicaja.prepaid.model.v10.TransactionOriginType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
     getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
-    assertEquals("Deberia ser de tipo WEB", TopupType.WEB, topup.getType());
+    assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
     assertEquals("Deberia tener monto de comision = 0", new BigDecimal(0), topup.getFee().getValue());
@@ -87,7 +87,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
     getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
-    assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
+    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
     assertEquals("Deberia tener monto de comision = 119", new BigDecimal(119), topup.getFee().getValue());
@@ -108,7 +108,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
     getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
 
-    assertEquals("Deberia ser de tipo POS", TopupType.POS, topup.getType());
+    assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
     assertEquals("Deberia tener monto de comision = 297.5", new BigDecimal(297.5), topup.getFee().getValue());

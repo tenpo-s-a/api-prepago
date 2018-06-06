@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.NewPrepaidUserSignup10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +27,7 @@ public final class PrepaidResource10 extends BaseResource {
   private PrepaidEJBBean10 prepaidEJBBean10;
 
   /*
-    Prepaid
+    Prepaid topup
    */
 
   @POST
@@ -51,6 +49,22 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().build();
   }
 
+  /*
+    Prepaid withdraw
+   */
+
+  @POST
+  @Path("/prepaid/withdrawal")
+  public Response withdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
+    PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), withdrawRequest);
+    return Response.ok(withdrawTopup).build();
+  }
+
+  @POST
+  @Path("/prepaid/withdrawal/reverse")
+  public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdraw10Request) {
+    return Response.ok().build();
+  }
 
   /*
     Prepaid Signup
