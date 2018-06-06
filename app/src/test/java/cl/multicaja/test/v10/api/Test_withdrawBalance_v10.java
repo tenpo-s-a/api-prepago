@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,41 +18,36 @@ import java.util.Map;
 public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
   private static final String URL_PATH = "/1.0/prepaid/withdrawal";
-  /*
+
   @Test
-  public void shouldReturn200_OnTopupUserBalance() throws Exception {
+  public void shouldReturn200_OnWithdrawUserBalance() throws Exception {
 
     User user = registerUser();
-
-    System.out.println(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    System.out.println(prepaidUser);
+    createPrepaidCard10(buildPrepaidCard10(prepaidUser));
 
-    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidTopup);
+    String json = toJson(prepaidWithdraw);
 
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
 
     System.out.println("resp:: " + resp);
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
-    PrepaidTopup10 topup = resp.toObject(PrepaidTopup10.class);
+    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
 
-    Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
-    Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
-    Assert.assertNotNull("Deberia tener id", topup.getId());
-    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
+    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", withdraw.getId());
+    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
   }
-  */
 
   @Test
   public void shouldReturn422_OnMissingBody() {
