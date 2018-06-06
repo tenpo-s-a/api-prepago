@@ -10,11 +10,11 @@ public class CalculatorRequest10 extends BaseModel implements Serializable {
   private NewAmountAndCurrency10 amount;
   //private Long userId;
   private Integer userRut;
-  private TopupType paymentMethod;
+  private TransactionOriginType paymentMethod;
 
   public CalculatorRequest10(){
   }
-  public CalculatorRequest10(NewAmountAndCurrency10 amount,/* Long userId,*/ Integer userRut, TopupType paymentMethod) {
+  public CalculatorRequest10(NewAmountAndCurrency10 amount,/* Long userId,*/ Integer userRut, TransactionOriginType paymentMethod) {
     this.amount = amount;
     //this.userId = userId;
     this.userRut = userRut;
@@ -45,11 +45,11 @@ public class CalculatorRequest10 extends BaseModel implements Serializable {
     this.userRut = userRut;
   }
 
-  public TopupType getPaymentMethod() {
+  public TransactionOriginType getPaymentMethod() {
     return paymentMethod;
   }
 
-  public void setPaymentMethod(TopupType paymentMethod) {
+  public void setPaymentMethod(TransactionOriginType paymentMethod) {
     this.paymentMethod = paymentMethod;
   }
   @Override

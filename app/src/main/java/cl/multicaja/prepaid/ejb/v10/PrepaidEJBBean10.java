@@ -484,7 +484,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+req.getUserRut());
     cdtTransaction10.setIndSimulacion(true);
     cdtTransaction10.setGloss("");
-    if (req.getPaymentMethod() == TopupType.POS)
+    if (req.getPaymentMethod() == TransactionOriginType.POS)
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
     else
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
@@ -498,7 +498,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
     }
-
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null,prepaidUser10.getId(),PrepaidCardStatus.ACTIVE);
+   // getTecnocomService().consultaSaldo(prepaidUser10.get);
     return calculatorResponse10;
   }
 }
