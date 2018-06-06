@@ -164,7 +164,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     for (PrepaidCardStatus st : status) {
-      if (prepaidCard10.getStatus().equals(st)) {
+      if (st.equals(prepaidCard10.getStatus())) {
         return prepaidCard10;
       }
     }
