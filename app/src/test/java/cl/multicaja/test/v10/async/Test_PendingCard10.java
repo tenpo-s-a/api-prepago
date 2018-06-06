@@ -277,7 +277,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNull("La tarjeta debe ser Nula", remoteTopup.getData().getPrepaidCard10());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
     Assert.assertNull("Deberia tener una tarjeta", dbPrepaidCard);
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
