@@ -518,6 +518,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(102001); // Usuario MC no existe
     }
 
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
     if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
@@ -528,6 +529,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(102003); // Usuario no tiene prepago
     }
 
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser10.getStatus())){
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
@@ -652,6 +654,28 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if(calculatorRequest.getAmount().getCurrencyCode() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest.amount.currencyCode"));
+    }
+
+    //VALIDACIONES USUARIO USERMC
+    User user = getUsersEJB10().getUserByRut(null, calculatorRequest.getUserRut());
+    if(user == null){
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+    }
+
+    // VALIDACIONES USUARIO PREPAGO
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null,calculatorRequest.getUserRut());
+    if(prepaidUser10 == null){
+      throw new NotFoundException(102003); // Usuario no tiene prepago
+    }
+
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser10.getStatus())){
+      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
     CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
