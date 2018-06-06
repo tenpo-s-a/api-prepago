@@ -57,7 +57,7 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       //Inicializa las rutas camel, se inicializa aun cuando no se incluya en camel, se crea dado que de
       // ella depende la instancia de tecnocomService
       PrepaidTopupRoute10 prepaidTopupRoute10 = new PrepaidTopupRoute10();
-      prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      prepaidTopupRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       prepaidTopupRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
       prepaidTopupRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());

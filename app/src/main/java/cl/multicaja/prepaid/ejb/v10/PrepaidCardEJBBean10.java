@@ -76,8 +76,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  @Override
-  public List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
+  private List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, int fetchCount, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
@@ -107,8 +106,14 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return c;
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_tarjetas_v10", fetchCount, rm, params);
     return (List)resp.get("result");
+  }
+
+  @Override
+  public List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
+    //busca todas las tarjetas para los criterios de busqueda (fetchCount = -1 significa todas)
+    return this.getPrepaidCards(headers, -1, id, userId, expiration, status, processorUserId);
   }
 
   @Override
@@ -121,15 +126,49 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCardByUserId(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
+  public PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
     if(userId == null){
       throw new ValidationException(2);
     }
     if(status == null){
       throw new ValidationException(2);
     }
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, null, userId, null, status, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
+
+    PrepaidCard10 prepaidCard10 = lst != null && !lst.isEmpty() ? lst.get(0) : null;
+
+    if (prepaidCard10 == null) {
+      return null;
+    }
+
+    return status.equals(prepaidCard10.getStatus()) ? prepaidCard10 : null;
+  }
+
+  @Override
+  public PrepaidCard10 getLastPrepaidCardByUserIdAndOneOfStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus... status) throws Exception {
+
+    if(userId == null){
+      throw new ValidationException(2);
+    }
+    if(status == null){
+      throw new ValidationException(2);
+    }
+
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
+
+    PrepaidCard10 prepaidCard10 = lst != null && !lst.isEmpty() ? lst.get(0) : null;
+
+    if (prepaidCard10 == null) {
+      return null;
+    }
+
+    for (PrepaidCardStatus st : status) {
+      if (prepaidCard10.getStatus().equals(st)) {
+        return prepaidCard10;
+      }
+    }
+    return null;
   }
 
   @Override

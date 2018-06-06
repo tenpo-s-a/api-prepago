@@ -176,23 +176,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+                                                                                                            PrepaidCardStatus.ACTIVE,
+                                                                                                            PrepaidCardStatus.LOCKED);
 
     if (prepaidCard == null) {
 
-      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
+      prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+                                                                                                  PrepaidCardStatus.LOCKED_HARD,
+                                                                                                  PrepaidCardStatus.EXPIRED);
 
-      if (prepaidCard == null) {
-
-        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
-
-        if (prepaidCard == null) {
-          prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
-        }
-
-        if (prepaidCard != null) {
-          throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
-        }
+      if (prepaidCard != null) {
+        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
     }
 
