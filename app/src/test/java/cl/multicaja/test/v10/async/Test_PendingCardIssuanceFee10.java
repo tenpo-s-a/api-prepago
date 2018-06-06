@@ -47,8 +47,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
 
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
   }
 
   @Test
@@ -77,8 +77,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
 
   }
 
@@ -111,8 +111,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
 
   }
 
@@ -142,8 +142,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
 
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
   }
 
   /**

@@ -8,6 +8,7 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -62,6 +63,22 @@ public class TestBaseUnit extends TestApiBase {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static String getSchema() {
+    return getPrepaidCardEJBBean10().getSchema();
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static DBUtils getDbUtils() {
+    return getPrepaidCardEJBBean10().getDbUtils();
   }
 
   /**
