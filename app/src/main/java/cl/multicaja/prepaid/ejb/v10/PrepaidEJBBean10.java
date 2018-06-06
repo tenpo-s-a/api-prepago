@@ -294,31 +294,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // TODO: que hacer con el nivel de usuario en el retiro?
     PrepaidUserLevel userLevel = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
 
-    PrepaidCard10 prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
 
     if (prepaidCard == null) {
-      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED);
-    }
 
-    if (prepaidCard == null) {
-
-      prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.LOCKED_HARD);
-
-      if (prepaidCard == null) {
-        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.EXPIRED);
-      }
-
-      if (prepaidCard == null) {
-        prepaidCard = this.getPrepaidCardEJBBean10().getPrepaidCardByUserId(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
-      }
+      prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+        PrepaidCardStatus.LOCKED_HARD,
+        PrepaidCardStatus.EXPIRED,
+        PrepaidCardStatus.PENDING);
 
       if (prepaidCard != null) {
         throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
 
-      if (prepaidCard == null) {
-        throw new ValidationException(102003); // cliente no tiene prepago
-      }
+      throw new ValidationException(102003); // cliente no tiene prepago
     }
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
