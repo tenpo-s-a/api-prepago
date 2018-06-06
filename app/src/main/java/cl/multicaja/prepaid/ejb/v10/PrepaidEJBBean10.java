@@ -296,7 +296,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
-
+    // TODO: que hacer con el nivel de usuario en el retiro?
+    PrepaidUserLevel userLevel = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
 
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
 
