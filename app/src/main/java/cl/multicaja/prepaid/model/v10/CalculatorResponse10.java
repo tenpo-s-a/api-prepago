@@ -4,49 +4,51 @@ import java.math.BigDecimal;
 
 public class CalculatorResponse10 {
 
-  private BigDecimal amount;
-  private BigDecimal charges;
-  private BigDecimal totalInusd;
-  private BigDecimal total;
+
+  private BigDecimal comision;
+  private BigDecimal pca;
+  private BigDecimal eed;
+  private BigDecimal aPagar;
+
   public CalculatorResponse10(){
   }
 
-  public CalculatorResponse10(BigDecimal amount, BigDecimal charges, BigDecimal totalInusd, BigDecimal total) {
-    this.amount = amount;
-    this.charges = charges;
-    this.totalInusd = totalInusd;
-    this.total = total;
+  public CalculatorResponse10(BigDecimal comision, BigDecimal pca, BigDecimal eed, BigDecimal aPagar) {
+    this.comision = comision;
+    this.pca = pca;
+    this.eed = eed;
+    this.aPagar = aPagar;
   }
 
-  public BigDecimal getAmount() {
-    return amount;
+  public BigDecimal getComision() {
+    return comision;
   }
 
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
+  public void setComision(BigDecimal comision) {
+    this.comision = comision;
   }
 
-  public BigDecimal getCharges() {
-    return charges;
+  public BigDecimal getPca() {
+    return pca;
   }
 
-  public void setCharges(BigDecimal charges) {
-    this.charges = charges;
+  public void setPca(BigDecimal pca) {
+    this.pca = pca;
   }
 
-  public BigDecimal getTotalInusd() {
-    return totalInusd;
+  public BigDecimal getEed() {
+    return eed;
   }
 
-  public void setTotalInusd(BigDecimal totalInusd) {
-    this.totalInusd = totalInusd;
+  public void setEed(BigDecimal eed) {
+    this.eed = eed;
   }
 
-  public BigDecimal getTotal() {
-    return total;
+  public BigDecimal getaPagar() {
+    return aPagar;
   }
 
-  public void setTotal(BigDecimal total) {
-    this.total = total;
+  public void setaPagar(BigDecimal aPagar) {
+    this.aPagar = aPagar;
   }
 }

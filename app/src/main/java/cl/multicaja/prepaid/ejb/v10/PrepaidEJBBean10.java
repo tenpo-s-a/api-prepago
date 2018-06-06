@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
@@ -42,6 +43,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
+  //TODO: Valor dolar debe ser obtenido desde algun servicio.
+  private final BigDecimal USD_VALUE = new BigDecimal(645);
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -477,7 +480,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction10.setExternalTransactionId(RandomStringUtils.random(20));
     cdtTransaction10.setTransactionReference(0L);
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+req.getUserRut());
-    cdtTransaction10.setIndSimulacion(true);
+    cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
     cdtTransaction10.setGloss("");
     if (req.getPaymentMethod() == TransactionOriginType.POS)
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -485,6 +488,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
     cdtTransaction10 = getCdtEJB10().addCdtTransaction(null,cdtTransaction10);
 
+    // VALIDACIONES CDT
     if(!cdtTransaction10.getNumError().equals("0")){
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
@@ -493,8 +497,56 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
     }
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByUserId(null,prepaidUser10.getId(),PrepaidCardStatus.ACTIVE);
-   // getTecnocomService().consultaSaldo(prepaidUser10.get);
+    // OBTENGO LA TARJETA DEL USUARIO Y VALIDO
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    if (prepaidCard10 == null) {
+      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidCard10.getId(), PrepaidCardStatus.LOCKED_HARD,
+        PrepaidCardStatus.EXPIRED);
+
+      if (prepaidCard10 != null) {
+        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard10.getStatus().toString())); //tarjeta invalida
+      }
+    }
+    // CONSULTA SALDO TECNOCOM
+    ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(),""+user.getRut().getValue(),TipoDocumento.RUT);
+
+    // SALDO TARJETA EN TECNOCOM
+    double saldoTarjeta = consultaSaldoDTO.getSaldisconp().doubleValue()-consultaSaldoDTO.getSalautconp().doubleValue();
+
+    // MONTO A CARGAR
+    double montoCarga = req.getAmount().getValue().doubleValue();
+
+    if(saldoTarjeta+montoCarga>500000) {
+     throw new ValidationException(304101);
+    }
+    calculatorResponse10 = calcCalculaCarga(calculatorResponse10,req.getPaymentMethod(),req.getAmount().getValue().doubleValue());
+
     return calculatorResponse10;
   }
+
+  private CalculatorResponse10 calcCalculaCarga(CalculatorResponse10 resp, TransactionOriginType paymentMethod, double amount) {
+    if(resp == null){
+      resp = new CalculatorResponse10();
+    }
+    double pca =  (amount-240)/1.022;
+    double comision = 0;
+    double eed = pca/USD_VALUE.doubleValue();
+
+    if(paymentMethod == TransactionOriginType.WEB){
+      comision = 0;
+    }
+    else {
+      comision = Math.round(Math.max(100, (amount*0.5/100)))*1.19 ;
+    }
+    resp.setaPagar(new BigDecimal(amount+comision));
+    resp.setComision(new BigDecimal(comision));
+    resp.setPca(new BigDecimal(pca));
+    resp.setEed(new BigDecimal(eed));
+    return resp;
+  }
+
+
 }
