@@ -364,7 +364,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
 
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
@@ -565,12 +565,12 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
     prepaidMovement.setImpdiv(0L);
-    prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
-    prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
-    prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);

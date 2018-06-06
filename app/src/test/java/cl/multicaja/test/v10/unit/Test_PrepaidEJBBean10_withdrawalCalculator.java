@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
+public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
 
   @Test
   public void testCalculatorOk() throws Exception {
@@ -37,7 +37,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
 
     //TODO falta registrar los datos en tecnocom
 
-    CalculatorTopupResponse10 resp = getPrepaidEJBBean10().topupCalculator(null, calculatorRequest);
+    CalculatorWithdrawalResponse10 resp = getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
 
     //TODO falta completar el test
   }

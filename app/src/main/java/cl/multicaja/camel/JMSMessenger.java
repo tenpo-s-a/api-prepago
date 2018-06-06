@@ -146,7 +146,8 @@ public final class JMSMessenger {
    * @return
    */
   public boolean putMessage(Queue queueName, String messageId, Serializable messageObj) {
-    return this.putMessage(queueName, messageId, messageObj, null);
+    JMSHeader[] headers = null;
+    return this.putMessage(queueName, messageId, messageObj, headers);
   }
 
   /**
@@ -199,7 +200,8 @@ public final class JMSMessenger {
    * @return
    */
 	public Object putAndGetMessage(Queue queueNameReq, Queue queueNameResp, String messageId, Serializable messageObj) {
-		boolean ok = putMessage(queueNameReq, messageId, messageObj, null);
+    JMSHeader[] headers = null;
+		boolean ok = putMessage(queueNameReq, messageId, messageObj, headers);
 		return ok ? getMessage(queueNameResp, messageId) : null;
 	}
 

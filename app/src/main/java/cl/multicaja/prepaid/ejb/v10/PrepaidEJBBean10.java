@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
@@ -44,7 +45,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
   //TODO: Valor dolar debe ser obtenido desde algun servicio.
-  private final BigDecimal USD_VALUE = new BigDecimal(645);
+  private final Integer USD_VALUE = 645;
+
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -481,13 +483,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidMovement;
   }
-  @Override
-  public CalculatorResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
 
-    CalculatorResponse10 calculatorResponse10  = new CalculatorResponse10();
+  @Override
+  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
+
+    CalculatorTopupResponse10 calculatorResponse10  = new CalculatorTopupResponse10();
 
     //VALIDACIONES USUARIO USERMC
-    User user = getUsersEJB10().getUserByRut(null,req.getUserRut());
+    User user = getUsersEJB10().getUserByRut(null, req.getUserRut());
     if(user == null){
       throw new NotFoundException(102001); // Usuario MC no existe
     }
@@ -514,10 +517,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+req.getUserRut());
     cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
     cdtTransaction10.setGloss("");
-    if (req.getPaymentMethod() == TransactionOriginType.POS)
+
+    if (TransactionOriginType.POS.equals(req.getPaymentMethod()))
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
     else
       cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
+
     cdtTransaction10 = getCdtEJB10().addCdtTransaction(null,cdtTransaction10);
 
     // VALIDACIONES CDT
@@ -529,19 +534,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
     }
+
     // OBTENGO LA TARJETA DEL USUARIO Y VALIDO
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
 
     if (prepaidCard10 == null) {
-      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidCard10.getId(), PrepaidCardStatus.LOCKED_HARD,
+      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
+        PrepaidCardStatus.LOCKED_HARD,
         PrepaidCardStatus.EXPIRED);
 
       if (prepaidCard10 != null) {
         throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard10.getStatus().toString())); //tarjeta invalida
       }
     }
+
+    //TODO falta una valdacion si prepaidCard10 == null
+
     // CONSULTA SALDO TECNOCOM
     ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(),""+user.getRut().getValue(),TipoDocumento.RUT);
 
@@ -554,31 +564,45 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(saldoTarjeta+montoCarga>500000) {
      throw new ValidationException(304101);
     }
+
     calculatorResponse10 = calcCalculaCarga(calculatorResponse10,req.getPaymentMethod(),req.getAmount().getValue().doubleValue());
 
     return calculatorResponse10;
   }
 
-  private CalculatorResponse10 calcCalculaCarga(CalculatorResponse10 resp, TransactionOriginType paymentMethod, double amount) {
-    if(resp == null){
-      resp = new CalculatorResponse10();
-    }
-    double pca =  (amount-240)/1.022;
-    double comision = 0;
-    double eed = pca/USD_VALUE.doubleValue();
+  /**
+   *
+   * @param resp
+   * @param paymentMethod
+   * @param amount
+   * @return
+   */
+  private CalculatorTopupResponse10 calcCalculaCarga(CalculatorTopupResponse10 resp, TransactionOriginType paymentMethod, double amount) {
 
-    if(paymentMethod == TransactionOriginType.WEB){
-      comision = 0;
+    double pca = (amount-240)/1.022;
+    double comission = 0;
+    double eed = pca / USD_VALUE;
+
+    if(TransactionOriginType.WEB.equals(paymentMethod)){
+      comission = 0;
+    } else {
+      comission = Math.round(Math.max(100, (amount*0.5/100)))*1.19;
     }
-    else {
-      comision = Math.round(Math.max(100, (amount*0.5/100)))*1.19 ;
+
+    if(resp == null){
+      resp = new CalculatorTopupResponse10();
     }
-    resp.setaPagar(new BigDecimal(amount+comision));
-    resp.setComision(new BigDecimal(comision));
-    resp.setPca(new BigDecimal(pca));
-    resp.setEed(new BigDecimal(eed));
+
+    resp.setToPay(amount+comission);
+    resp.setComission(comission);
+    resp.setPca(pca);
+    resp.setEed(eed);
     return resp;
   }
 
-
+  @Override
+  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, CalculatorRequest10 req) throws Exception {
+    //TODO falta implementar
+    return null;
+  }
 }
