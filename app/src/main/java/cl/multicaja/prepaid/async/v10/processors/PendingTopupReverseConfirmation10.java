@@ -49,7 +49,7 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
           log.error("Error req.getPrepaidTopup10() es null");
           return null;
         }
-
+        // TODO: revisar este proceso
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
         cdtTransaction.setGloss(CdtTransactionType.REVERSA_CARGA.getName());
 
