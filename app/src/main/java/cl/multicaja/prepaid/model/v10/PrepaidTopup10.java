@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @author abarazarte
  */
-public class PrepaidTopup10 extends NewPrepaidTopup10 {
+public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransaction10 {
 
   private String status;
   private Timestamps timestamps;

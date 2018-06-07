@@ -11,7 +11,7 @@ public class NewPrepaidTopup10 extends NewPrepaidBaseTransaction10 {
   private Boolean isFirstTopup = Boolean.TRUE;
 
   public NewPrepaidTopup10() {
-    super();
+    super(PrepaidMovementType.TOPUP);
   }
 
   public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory) {

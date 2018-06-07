@@ -5,6 +5,7 @@ import cl.multicaja.cdt.helpers.CdtHelper;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
@@ -41,7 +42,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private final BigDecimal ONE_HUNDRED = new BigDecimal(100);
 
   // TODO: externalizar estos porcentajes?
-  private final BigDecimal POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  private final BigDecimal TOPUP_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  private final BigDecimal TOPUP_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0);
+  private final BigDecimal WITHDRAW_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  private final BigDecimal WITHDRAW_POS_COMMISSION_AMOUNT = new BigDecimal(100);
+  private final BigDecimal WITHDRAW_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
   //TODO: Valor dolar debe ser obtenido desde algun servicio.
@@ -326,13 +331,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(Long.valueOf(0));
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
+    // TODO: evaluar respuesta de error del CDT
 
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setId(Long.valueOf(1));
     prepaidWithdraw.setUserId(user.getId());
     prepaidWithdraw.setStatus("exitoso");
     prepaidWithdraw.setTimestamps(new Timestamps());
+
+    String contrato = prepaidCard.getProcessorUserId();
+    String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
+
+
+    /*
+      Registra el movimiento en estado pendiente
+     */
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
+    //prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+
 
     return prepaidWithdraw;
   }
@@ -379,7 +397,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case POS:
         // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
 
-        BigDecimal com = topup.getAmount().getValue().multiply(POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
+        BigDecimal com = topup.getAmount().getValue().multiply(TOPUP_POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
         // Calcula el max
         BigDecimal max = com.max(new BigDecimal(100));
         // Suma IVA
@@ -420,13 +438,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   /**
    *
-   * @param prepaidTopup
+   * @param transaction
    * @param prepaidUser
    * @param prepaidCard
    * @param cdtTransaction
    * @return
    */
-  private PrepaidMovement10 buildPrepaidMovement(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
+  private PrepaidMovement10 buildPrepaidMovement(IPrepaidTransaction10 transaction, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
 
     String codent = null;
     try {
@@ -438,10 +456,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     TipoFactura tipoFactura = null;
 
-    if (TransactionOriginType.WEB.equals(prepaidTopup.getTransactionOriginType())) {
-      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
-    } else {
-      tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+    // Verifico el tipo de movimiento (TOPUP/WITHDRAW) y el origen (POS/WEB)
+    switch (transaction.getMovementType()) {
+      case TOPUP:
+          if(TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+            tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+          } else {
+            tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+          }
+        break;
+      case WITHDRAW:
+        if(TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+          tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+        } else {
+          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+        break;
     }
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
@@ -450,7 +480,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
-    prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
@@ -463,12 +493,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
     prepaidMovement.setImpdiv(0L);
-    prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setImpfac(transaction.getAmount().getValue());
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
-    prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
-    prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
+    prepaidMovement.setCodcom(transaction.getMerchantCode());
+    prepaidMovement.setCodact(transaction.getMerchantCategory());
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
