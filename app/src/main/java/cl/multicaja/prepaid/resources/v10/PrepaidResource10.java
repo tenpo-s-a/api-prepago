@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 /**
  * @author vutreras
  */
-@Path("/1.0")
+@Path("/1.0/prepaid")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public final class PrepaidResource10 extends BaseResource {
@@ -29,22 +29,21 @@ public final class PrepaidResource10 extends BaseResource {
   /*
     Prepaid topup
    */
-
   @POST
-  @Path("/prepaid/topup")
+  @Path("/topup")
   public Response topupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest);
     return Response.ok(prepaidTopup).build();
   }
 
   @POST
-  @Path("/prepaid/topup/reverse")
+  @Path("/topup/reverse")
   public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/{userId}/topup")
+  @Path("/{userId}/topup")
   public Response getUserTopups(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
@@ -54,14 +53,14 @@ public final class PrepaidResource10 extends BaseResource {
    */
 
   @POST
-  @Path("/prepaid/withdrawal")
+  @Path("/withdrawal")
   public Response withdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), withdrawRequest);
     return Response.ok(withdrawTopup).build();
   }
 
   @POST
-  @Path("/prepaid/withdrawal/reverse")
+  @Path("/withdrawal/reverse")
   public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdraw10Request) {
     return Response.ok().build();
   }
@@ -71,13 +70,13 @@ public final class PrepaidResource10 extends BaseResource {
    */
 
   @POST
-  @Path("/prepaid/signup")
+  @Path("/signup")
   public Response initSignup(NewPrepaidUserSignup10 signupRequest) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/signup/{signupId}")
+  @Path("/signup/{signupId}")
   public Response getSignupStatus(@PathParam("signupId") Long signupId) {
     return Response.ok().build();
   }
@@ -87,13 +86,13 @@ public final class PrepaidResource10 extends BaseResource {
    */
 
   @POST
-  @Path("/prepaid/{userId}/card")
+  @Path("/{userId}/card")
   public Response issuePrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
 
   @GET
-  @Path("/prepaid/{userId}/card")
+  @Path("/{userId}/card")
   public Response getPrepaidCard(@PathParam("userId") Long userId) {
     return Response.ok().build();
   }
