@@ -18,6 +18,11 @@ public class NewAmountAndCurrency10 extends BaseModel {
     super();
   }
 
+  public NewAmountAndCurrency10(BigDecimal value, CodigoMoneda currencyCode) {
+    this.value = value;
+    this.currencyCode = currencyCode;
+  }
+
   public CodigoMoneda getCurrencyCode() {
     return currencyCode;
   }

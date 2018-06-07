@@ -2,19 +2,20 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class CalculatorWithdrawalResponse10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
-  private Double comission;
+  private BigDecimal comission;
   private NewAmountAndCurrency10 amountToDiscount;
 
   public CalculatorWithdrawalResponse10(){
     super();
   }
 
-  public CalculatorWithdrawalResponse10(NewAmountAndCurrency10 amount, Double comission, NewAmountAndCurrency10 amountToDiscount) {
+  public CalculatorWithdrawalResponse10(NewAmountAndCurrency10 amount, BigDecimal comission, NewAmountAndCurrency10 amountToDiscount) {
     this.amount = amount;
     this.comission = comission;
     this.amountToDiscount = amountToDiscount;
@@ -28,11 +29,11 @@ public class CalculatorWithdrawalResponse10 extends BaseModel {
     this.amount = amount;
   }
 
-  public Double getComission() {
+  public BigDecimal getComission() {
     return comission;
   }
 
-  public void setComission(Double comission) {
+  public void setComission(BigDecimal comission) {
     this.comission = comission;
   }
 
