@@ -7,8 +7,10 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
@@ -343,8 +345,34 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    //prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
+    CodigoMoneda clamon = prepaidMovement.getClamon();
+    IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
+    TipoFactura tipofac = prepaidMovement.getTipofac();
+    BigDecimal impfac = prepaidMovement.getImpfac();
+    String codcom = prepaidMovement.getCodcom();
+    Integer codact = prepaidMovement.getCodact();
+    CodigoPais codpais = prepaidMovement.getCodpais();
+    String nomcomred = prepaidWithdraw.getMerchantName();
+    String numreffac = prepaidMovement.getId().toString();
+    String numaut = numreffac;
+
+    //solamente los 6 primeros digitos de numreffac
+    if (numaut.length() > 6) {
+      numaut = numaut.substring(numaut.length()-6);
+    }
+
+    InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
+      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+                            numreffac, impfac, numaut, codcom,
+                            nomcomred, codact, codpais);
+
+    if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+
+    } else {
+
+    }
 
     return prepaidWithdraw;
   }
