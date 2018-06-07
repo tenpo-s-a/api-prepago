@@ -13,15 +13,24 @@ public final class CdtHelper {
 
   private static final Map<String, Integer> map;
 
-  private static final Integer CDT_ERROR_DEFAULT = 107000;
+  private static final Integer CDT_ERROR_DEFAULT = 108000;
 
   static {
     map = new ConcurrentHashMap<>();
     /**
-     TODO mapear todos los mensajes de error del cdt a códigos de errores distintos partiendo desde el 107001,
-     TODO ademas se deben maperar en el archivo de errores del api-core
+     TODO mapear todos los mensajes de error del cdt a códigos de errores distintos partiendo desde el 108000
      */
-    //Ejemplo: map.put("Error en calculo de cdt", 107001);
+    map.put("Transacción: error genérico: ${value}", 108000);
+    map.put("Saldo: error genérico: ${value}", 108050);
+    map.put("Saldo insuficiente", 108051);
+    map.put("Límites: error genérico: ${value}", 108100);
+    map.put("Excede límite de saldo máximo", 108101);
+    map.put("Excede límite de cargas mensuales", 108102);
+    map.put("Excede límite de retiros mensuales", 108103);
+    map.put("Excede límite de carga máxima POS", 108104);
+    map.put("Infringe límite de cargas mínima POS", 108105);
+    map.put("Infringe límite de retiro mínimo POS", 108106);
+    map.put("Excede límite de retiro máximo POS", 108107);
   }
 
   /**

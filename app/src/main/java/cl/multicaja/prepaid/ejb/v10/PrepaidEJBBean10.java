@@ -213,7 +213,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(!cdtTransaction.getNumError().equals("0")){
       long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(108100).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
@@ -561,7 +561,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+        throw new ValidationException(108100).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
@@ -701,13 +701,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // VALIDACIONES CDT
     if(!cdtTransaction10.getNumError().equals("0")){
-      
+
       //TODO se debe usar el CdtHelper para obtener el codigo de error
       Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
 
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+        throw new ValidationException(108100).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
