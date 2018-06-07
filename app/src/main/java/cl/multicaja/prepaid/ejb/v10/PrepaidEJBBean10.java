@@ -320,7 +320,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(Long.valueOf(0));
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
-
+    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setId(Long.valueOf(1));
