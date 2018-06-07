@@ -68,7 +68,10 @@ public class CdtEJBBean10 implements CdtEJB10{
   @Override
   public CdtTransaction10 addCdtTransaction(Map<String, Object> headers, CdtTransaction10 cdtTransaction10) throws Exception {
 
-    if(StringUtils.isAllBlank(cdtTransaction10.getAccountId().trim())) {
+    if(cdtTransaction10 == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "cdtTransaction"));
+    }
+    if(cdtTransaction10.getAccountId() == null || StringUtils.isAllBlank(cdtTransaction10.getAccountId().trim())) {
       throw new ValidationException(101004).setData(new KeyValue("value", "accountId"));
     }
     if(cdtTransaction10.getTransactionType() == null) {
