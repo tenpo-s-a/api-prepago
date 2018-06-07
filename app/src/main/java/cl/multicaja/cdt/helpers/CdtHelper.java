@@ -20,17 +20,19 @@ public final class CdtHelper {
     /**
      TODO mapear todos los mensajes de error del cdt a códigos de errores distintos partiendo desde el 108000
      */
+    //codigos genericos
     map.put("Transacción: error genérico: ${value}", 108000);
-    map.put("Saldo: error genérico: ${value}", 108050);
-    map.put("Saldo insuficiente", 108051);
-    map.put("Límites: error genérico: ${value}", 108100);
-    map.put("Excede límite de saldo máximo", 108101);
-    map.put("Excede límite de cargas mensuales", 108102);
-    map.put("Excede límite de retiros mensuales", 108103);
-    map.put("Excede límite de carga máxima POS", 108104);
-    map.put("Infringe límite de cargas mínima POS", 108105);
-    map.put("Infringe límite de retiro mínimo POS", 108106);
-    map.put("Excede límite de retiro máximo POS", 108107);
+    map.put("Límites: error genérico: ${value}", 108001);
+    //calculadora de carga
+    map.put("La carga supera el monto máximo de carga web", 108201);
+    map.put("La carga supera el monto máximo de carga pos", 108202);
+    map.put("La carga es menor al mínimo de carga", 108203);
+    map.put("La carga supera el monto máximo de cargas mensuales", 108204);
+    //calculadora de retiro
+    map.put("El retiro supera el monto máximo de un retiro web", 108301);
+    map.put("El retiro supera el monto máximo de un retiro pos", 108302);
+    map.put("El monto de retiro es menor al monto mínimo de retiros", 108303);
+    map.put("El retiro supera el monto máximo de retiros mensuales", 108304);
   }
 
   /**

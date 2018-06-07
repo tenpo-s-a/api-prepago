@@ -442,7 +442,7 @@ public class TestBaseUnit extends TestApiBase {
     if(!cdtTransaction.getNumError().equals("0")){
       long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(108100).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }

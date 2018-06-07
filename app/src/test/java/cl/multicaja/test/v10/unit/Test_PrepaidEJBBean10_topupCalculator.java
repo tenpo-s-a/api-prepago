@@ -28,7 +28,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(amountAndCurrency10);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-      calculatorRequest.setUserRut(null);
+      calculatorRequest.setRut(null);
 
       try {
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
@@ -44,7 +44,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(amountAndCurrency10);
       calculatorRequest.setPaymentMethod(null);
-      calculatorRequest.setUserRut(1);
+      calculatorRequest.setRut(1);
 
       try {
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
@@ -56,7 +56,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(null);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-      calculatorRequest.setUserRut(1);
+      calculatorRequest.setRut(1);
 
       try {
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
@@ -72,7 +72,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(amountAndCurrency10);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-      calculatorRequest.setUserRut(null);
+      calculatorRequest.setRut(null);
 
       try {
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
@@ -88,7 +88,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(amountAndCurrency10);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-      calculatorRequest.setUserRut(null);
+      calculatorRequest.setRut(null);
 
       try {
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
@@ -118,7 +118,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
     CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
     calculatorRequest.setAmount(amountAndCurrency10);
     calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-    calculatorRequest.setUserRut(user.getRut().getValue());
+    calculatorRequest.setRut(user.getRut().getValue());
 
     //TODO falta registrar los datos en tecnocom
 

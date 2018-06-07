@@ -165,7 +165,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             if(!cdtTransactionConfirm.getNumError().equals("0")){
               long lNumError = numberUtils.toLong(cdtTransactionConfirm.getNumError(),-1L);
               if(lNumError != -1 && lNumError > 10000) {
-                throw new ValidationException(108100).setData(new KeyValue("value", cdtTransactionConfirm.getMsjError()));
+                throw new ValidationException(108001).setData(new KeyValue("value", cdtTransactionConfirm.getMsjError()));
               } else {
                 throw new ValidationException(101006).setData(new KeyValue("value", cdtTransactionConfirm.getMsjError()));
               }

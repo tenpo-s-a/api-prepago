@@ -2,22 +2,21 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 public class CalculatorRequest10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
-  private Integer userRut;
+  private Integer rut;
   private TransactionOriginType paymentMethod;
 
   public CalculatorRequest10(){
     super();
   }
 
-  public CalculatorRequest10(NewAmountAndCurrency10 amount, Integer userRut, TransactionOriginType paymentMethod) {
+  public CalculatorRequest10(NewAmountAndCurrency10 amount, Integer rut, TransactionOriginType paymentMethod) {
     this.amount = amount;
-    this.userRut = userRut;
+    this.rut = rut;
     this.paymentMethod = paymentMethod;
   }
 
@@ -29,12 +28,12 @@ public class CalculatorRequest10 extends BaseModel {
     this.amount = amount;
   }
 
-  public Integer getUserRut() {
-    return userRut;
+  public Integer getRut() {
+    return rut;
   }
 
-  public void setUserRut(Integer userRut) {
-    this.userRut = userRut;
+  public void setRut(Integer rut) {
+    this.rut = rut;
   }
 
   public TransactionOriginType getPaymentMethod() {
@@ -51,12 +50,12 @@ public class CalculatorRequest10 extends BaseModel {
     if (o == null || getClass() != o.getClass()) return false;
     CalculatorRequest10 that = (CalculatorRequest10) o;
     return Objects.equals(amount, that.amount) &&
-      Objects.equals(userRut, that.userRut) &&
+      Objects.equals(rut, that.rut) &&
       paymentMethod == that.paymentMethod;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(amount, userRut, paymentMethod);
+    return Objects.hash(amount, rut, paymentMethod);
   }
 }
