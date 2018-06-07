@@ -54,6 +54,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
 
+  private final Double IVA = 1.19;
+
   //TODO: Valor dolar debe ser obtenido desde algun servicio.
   private final Integer USD_VALUE = 645;
 
@@ -632,7 +634,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
     cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction10.setTransactionReference(0L);
-    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+calculatorRequest.getRut());
+    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getRut());
     cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
 
     if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
@@ -709,7 +711,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())){
       comission = 0;
     } else {
-      comission = Math.round(Math.max(100, (amount*0.5/100)))*1.19;
+      comission = Math.round(Math.max(100, (amount*0.5/100))) * IVA;
     }
 
     //monto a cargar + comision
@@ -791,7 +793,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
       comission = WITHDRAW_WEB_COMMISSION_AMOUNT.doubleValue();
     } else {
-      comission = Math.round(Math.max(100, (amount*0.5/100)))*1.19;
+      comission = Math.round(Math.max(100, (amount*0.5/100))) * IVA;
     }
 
     //monto de retiro + comision
