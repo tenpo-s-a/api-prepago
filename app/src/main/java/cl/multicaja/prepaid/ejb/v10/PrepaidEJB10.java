@@ -27,15 +27,15 @@ public interface PrepaidEJB10 {
   PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId);
 
   /**
-   *  Calcula la comision y total a cargar segun el el tipo de carga (POS/WEB)
+   *  Calcula la comision y total segun el tipo (TOPUP/WITHDRAW) y el origen (POS/WEB)
    *
-   * @param topup con el cual se calculara la comision y total
-   * @throws IllegalStateException cuando el topup es null
-   * @throws IllegalStateException cuando el topup.amount es null
-   * @throws IllegalStateException cuando el topup.amount.value es null
-   * @throws IllegalStateException cuando el topup.merchantCode es null o vacio
+   * @param transaction con el cual se calculara la comision y total
+   * @throws IllegalStateException cuando transaction es null
+   * @throws IllegalStateException cuando transaction.amount es null
+   * @throws IllegalStateException cuando transaction.amount.value es null
+   * @throws IllegalStateException cuando transaction.merchantCode es null o vacio
    */
-  void calculateTopupFeeAndTotal(PrepaidTopup10 topup) throws Exception;
+  void calculateTopupFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception;
 
   /**
    *  Agrega la informacion para el voucher requerida por el POS/Switch
