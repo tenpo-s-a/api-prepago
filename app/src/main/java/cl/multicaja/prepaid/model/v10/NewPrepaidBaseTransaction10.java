@@ -22,6 +22,11 @@ public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
     super();
   }
 
+  public NewPrepaidBaseTransaction10(PrepaidMovementType movementType) {
+    super();
+    this.movementType = movementType;
+  }
+
   public NewPrepaidBaseTransaction10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory, PrepaidMovementType movementType) {
     super();
     this.amount = amount;
