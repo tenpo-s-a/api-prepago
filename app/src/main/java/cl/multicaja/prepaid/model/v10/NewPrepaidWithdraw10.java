@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
   public NewPrepaidWithdraw10() {
-    super();
+    super(PrepaidMovementType.WITHDRAW);
   }
 
   public NewPrepaidWithdraw10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory) {
