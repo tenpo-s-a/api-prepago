@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.helpers.CdtHelper;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
@@ -554,6 +555,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // VALIDACIONES CDT
     if(!cdtTransaction10.getNumError().equals("0")){
+
+      //TODO se debe usar el CdtHelper para obtener el codigo de error
+      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
+
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
         throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
@@ -696,6 +701,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // VALIDACIONES CDT
     if(!cdtTransaction10.getNumError().equals("0")){
+      
+      //TODO se debe usar el CdtHelper para obtener el codigo de error
+      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
+
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
         throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
