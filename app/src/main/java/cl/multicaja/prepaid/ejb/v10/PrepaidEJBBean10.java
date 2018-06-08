@@ -366,6 +366,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+
+      //Confirmar el retiro en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      //Iniciar reversa en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
+      cdtTransaction.setGloss(CdtTransactionType.REVERSA_RETIRO.getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setTransactionReference(0L);
+      cdtTransaction.setExternalTransactionId(String.format("REV_%s", withdrawRequest.getTransactionId()));
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      //Confirmar reversa en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
+
     }
 
     return prepaidWithdraw;

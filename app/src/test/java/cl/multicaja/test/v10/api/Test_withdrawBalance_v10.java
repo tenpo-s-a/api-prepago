@@ -467,14 +467,12 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
-    PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ?
-      PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
     List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
     Assert.assertTrue("Deberia tener un movimiento", dbPrepaidMovements.size() > 0);
-
+    PrepaidMovementStatus reversed = PrepaidMovementStatus.REVERSED;
     for(PrepaidMovement10 m : dbPrepaidMovements) {
       if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + status, status, m.getEstado());
+        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
       } else {
         Assert.assertTrue("Deberia ser false", Boolean.FALSE);
       }
