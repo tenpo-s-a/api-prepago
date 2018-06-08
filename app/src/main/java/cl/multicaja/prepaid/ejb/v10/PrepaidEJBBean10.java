@@ -324,20 +324,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // TODO: evaluar respuesta de error del CDT
 
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
-    prepaidWithdraw.setId(Long.valueOf(1));
+
     prepaidWithdraw.setUserId(user.getId());
     prepaidWithdraw.setStatus("exitoso");
     prepaidWithdraw.setTimestamps(new Timestamps());
-
     String contrato = prepaidCard.getProcessorUserId();
     String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
-
 
     /*
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+
+    prepaidWithdraw.setId(cdtTransaction.getTransactionReference());
 
     CodigoMoneda clamon = prepaidMovement.getClamon();
     IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
@@ -362,7 +362,41 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
+      getPrepaidMovementEJB10().updatePrepaidMovement(null,
+        prepaidMovement.getId(),
+        inclusionMovimientosDTO.getNumextcta(),
+        inclusionMovimientosDTO.getNummovext(),
+        inclusionMovimientosDTO.getClamone(),
+        PrepaidMovementStatus.PROCESS_OK);
+
+      // se confirma la transaccion
+      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
     } else {
+      //Colocar el movimiento en error
+      PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
+      getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+
+      //Confirmar el retiro en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      //Iniciar reversa en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
+      cdtTransaction.setGloss(CdtTransactionType.REVERSA_RETIRO.getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setTransactionReference(0L);
+      cdtTransaction.setExternalTransactionId(String.format("REV_%s", withdrawRequest.getTransactionId()));
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      //Confirmar reversa en CDT
+      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
     }
 
@@ -408,10 +442,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(TOPUP_WEB_COMMISSION_AMOUNT);
+          fee.setValue(TOPUP_WEB_FEE_AMOUNT);
         } else {
           // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), TOPUP_POS_COMMISSION_PERCENTAGE);
+          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), TOPUP_POS_FEE_PERCENTAGE);
           fee.setValue(commission);
         }
         // Calculo el total
@@ -420,10 +454,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(WITHDRAW_WEB_COMMISSION_AMOUNT);
+          fee.setValue(WITHDRAW_WEB_FEE_AMOUNT);
         } else {
           // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), WITHDRAW_POS_COMMISSION_PERCENTAGE);
+          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), WITHDRAW_POS_FEE_PERCENTAGE);
           fee.setValue(commission);
         }
         // Calculo el total
@@ -510,7 +544,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);
     prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
