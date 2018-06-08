@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.validation.constraints.AssertTrue;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -434,6 +436,50 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_TecnocomError_UserDoesntExists() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    createPrepaidCard10(buildPrepaidCard10(prepaidUser));
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+
+    String json = toJson(prepaidWithdraw);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 200", 200, resp.getStatus());
+    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", withdraw.getId());
+    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+
+    PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ?
+      PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
+    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
+    Assert.assertTrue("Deberia tener un movimiento", dbPrepaidMovements.size() > 0);
+
+    for(PrepaidMovement10 m : dbPrepaidMovements) {
+      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
+        Assert.assertEquals("Deberia estar en status " + status, status, m.getEstado());
+      } else {
+        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
+      }
+    }
+
   }
 
 }
