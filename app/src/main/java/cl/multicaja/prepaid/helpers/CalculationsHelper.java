@@ -40,7 +40,9 @@ public class CalculationsHelper {
     BigDecimal result = max.multiply(BigDecimal.valueOf(IVA));
 
     BigDecimal rounded = result.setScale(0, RoundingMode.DOWN);
-    log.info("Amount: " + amount + ", feePercentage: " + feePercentage + ", percentage calculated: " + percentage + ", max: " + max + ", with iva: " + result + " final: " + rounded);
+    log.info("Amount: " + amount + ", feePercentage: " + feePercentage + ", percentage calculated: " + percentage + ", max: " + max + ", with iva: " + result + ", final: " + rounded);
     return rounded;
   }
+
+
 }

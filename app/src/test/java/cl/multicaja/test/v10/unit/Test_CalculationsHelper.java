@@ -64,4 +64,49 @@ public class Test_CalculationsHelper extends TestBaseUnit {
       Assert.assertEquals("deben ser iguales", feeOk, commission);
     }
   }
+
+  @Test
+  public void testCalculateFee_20999() {
+
+    BigDecimal amount = BigDecimal.valueOf(20999);
+
+    // MAX(100; 0,5% * amount) + IVA
+    BigDecimal commission = calculateFee(amount, TOPUP_POS_FEE_PERCENTAGE);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(124), commission);
+  }
+
+  @Test
+  public void testCalculateFee_199999() {
+
+    BigDecimal amount = BigDecimal.valueOf(199999);
+
+    // MAX(100; 0,5% * amount) + IVA
+    BigDecimal commission = calculateFee(amount, TOPUP_POS_FEE_PERCENTAGE);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1189), commission);
+  }
+
+  @Test
+  public void testCalculateFee_167899() {
+
+    BigDecimal amount = BigDecimal.valueOf(167899);
+
+    // MAX(100; 0,5% * amount) + IVA
+    BigDecimal commission = calculateFee(amount, TOPUP_POS_FEE_PERCENTAGE);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(998), commission);
+  }
+
+  @Test
+  public void testCalculateFee_168067() {
+
+    BigDecimal amount = BigDecimal.valueOf(168067);
+
+    // MAX(100; 0,5% * amount) + IVA
+    BigDecimal commission = calculateFee(amount, TOPUP_POS_FEE_PERCENTAGE);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(999), commission);
+  }
+
 }
