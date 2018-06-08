@@ -667,6 +667,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidCardStatus.LOCKED);
 
     if (prepaidCard10 == null) {
+
       prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
         PrepaidCardStatus.LOCKED_HARD,
         PrepaidCardStatus.EXPIRED);
@@ -676,19 +677,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    //TODO falta una valdacion si prepaidCard10 == null
+    if (prepaidCard10 == null) {
+      //tarjeta no existe para ningun estado validado anteriormente
+      throw new ValidationException(106001).setData(new KeyValue("value", "No existe tarjeta para estados [ACTIVE, LOCKED, LOCKED_HARD, EXPIRED]"));
+    }
 
     // CONSULTA SALDO TECNOCOM
     ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), calculatorRequest.getRut().toString(), TipoDocumento.RUT);
 
     // SALDO TARJETA EN TECNOCOM
-    double saldoTarjeta = consultaSaldoDTO.getSaldisconp().doubleValue()-consultaSaldoDTO.getSalautconp().doubleValue();
+    final double balance = consultaSaldoDTO.getSaldisconp().doubleValue() - consultaSaldoDTO.getSalautconp().doubleValue();
 
     // MONTO A CARGAR
-    double montoCarga = calculatorRequest.getAmount().getValue().doubleValue();
+    final double amount = calculatorRequest.getAmount().getValue().doubleValue();
 
-    if(saldoTarjeta + montoCarga > 500000) {
-     throw new ValidationException(304101);
+    if(balance + amount > 500000) {
+      throw new ValidationException(304101);
     }
 
     /*
@@ -703,10 +707,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         La comisión será de Máx [$100 ; 0,5% monto a cargar] + IVA
         Monto a pagar = monto a cargar + comisión
      */
-    double amount = calculatorRequest.getAmount().getValue().doubleValue();
-    double comission = 0;
-    double pca = (amount-240)/1.022;
-    double eed = pca / USD_VALUE;
+    final double comission;
+    final double pca = (amount-240)/1.022;
+    final double eed = pca / USD_VALUE;
 
     if(TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())){
       comission = 0;
@@ -715,10 +718,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //monto a cargar + comision
-    BigDecimal result = calculatorRequest.getAmount().getValue().add(BigDecimal.valueOf(comission));
+    BigDecimal calculatedAmount = BigDecimal.valueOf(amount + comission);
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
-    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(result, calculatorRequest.getAmount().getCurrencyCode()));
+    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, calculatorRequest.getAmount().getCurrencyCode()));
     calculatorResponse.setComission(BigDecimal.valueOf(comission));
     calculatorResponse.setPca(BigDecimal.valueOf(pca));
     calculatorResponse.setEed(BigDecimal.valueOf(eed));
@@ -787,8 +790,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           La comisión será de Máx [$100 ; 0,5% monto de retiro] + IVA
           Monto que se descontará del saldo = monto de retiro + comisión
      */
-    double amount = calculatorRequest.getAmount().getValue().doubleValue();
-    double comission = 0;
+    final double amount = calculatorRequest.getAmount().getValue().doubleValue();
+    final double comission;
 
     if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
       comission = WITHDRAW_WEB_COMMISSION_AMOUNT.doubleValue();
@@ -796,12 +799,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       comission = Math.round(Math.max(100, (amount*0.5/100))) * IVA;
     }
 
-    //monto de retiro + comision
-    BigDecimal result = calculatorRequest.getAmount().getValue().add(BigDecimal.valueOf(comission));
+    //monto a cargar + comision
+    BigDecimal calculatedAmount = BigDecimal.valueOf(amount + comission);
 
     CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
     calculatorResponse.setComission(BigDecimal.valueOf(comission));
-    calculatorResponse.setAmount(new NewAmountAndCurrency10(result, calculatorRequest.getAmount().getCurrencyCode()));
+    calculatorResponse.setAmount(new NewAmountAndCurrency10(calculatedAmount, calculatorRequest.getAmount().getCurrencyCode()));
 
     return calculatorResponse;
   }
