@@ -408,7 +408,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(new BigDecimal(0));
+          fee.setValue(TOPUP_WEB_COMMISSION_AMOUNT);
         } else {
           // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
           BigDecimal commission = calculateComission(transaction.getAmount().getValue(), TOPUP_POS_COMMISSION_PERCENTAGE);

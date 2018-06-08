@@ -17,9 +17,12 @@ public class CalculationsHelper {
   // TODO: externalizar estos porcentajes?
   public static final BigDecimal TOPUP_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
   public static final BigDecimal TOPUP_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0);
+  public static final BigDecimal TOPUP_WEB_COMMISSION_AMOUNT = new BigDecimal(0);
+
   public static final BigDecimal WITHDRAW_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
-  public static final BigDecimal WITHDRAW_WEB_COMMISSION_AMOUNT = new BigDecimal(100);
   public static final BigDecimal WITHDRAW_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  public static final BigDecimal WITHDRAW_WEB_COMMISSION_AMOUNT = new BigDecimal(100);
+
   public static final double IVA = 1.19;
 
   /**
