@@ -369,6 +369,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         inclusionMovimientosDTO.getClamone(),
         PrepaidMovementStatus.PROCESS_OK);
 
+      // se confirma la transaccion
+      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
+      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
     } else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
@@ -437,10 +442,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(TOPUP_WEB_COMMISSION_AMOUNT);
+          fee.setValue(TOPUP_WEB_FEE_AMOUNT);
         } else {
           // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), TOPUP_POS_COMMISSION_PERCENTAGE);
+          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), TOPUP_POS_FEE_PERCENTAGE);
           fee.setValue(commission);
         }
         // Calculo el total
@@ -449,10 +454,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(WITHDRAW_WEB_COMMISSION_AMOUNT);
+          fee.setValue(WITHDRAW_WEB_FEE_AMOUNT);
         } else {
           // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), WITHDRAW_POS_COMMISSION_PERCENTAGE);
+          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), WITHDRAW_POS_FEE_PERCENTAGE);
           fee.setValue(commission);
         }
         // Calculo el total
