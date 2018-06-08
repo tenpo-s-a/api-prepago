@@ -42,7 +42,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
   public void shouldReturnExceptionWhen_TopupMerchantCodeNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setValue(new BigDecimal(100));
+    amount.setValue(BigDecimal.valueOf(100));
     topup.setAmount(amount);
 
     getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
@@ -56,7 +56,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(5000));
+    amount.setValue(BigDecimal.valueOf(5000));
     topup.setAmount(amount);
     topup.setMerchantCode("999999999999991");
 
@@ -65,8 +65,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", new BigDecimal(0), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 5000", new BigDecimal(5000), topup.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(0), topup.getFee().getValue());
+    assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5000), topup.getTotal().getValue());
   }
 
   /*
@@ -77,7 +77,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(5000));
+    amount.setValue(BigDecimal.valueOf(5000));
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
@@ -86,8 +86,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 119", new BigDecimal(119), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 4881", new BigDecimal(4881), topup.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 119", BigDecimal.valueOf(119), topup.getFee().getValue());
+    assertEquals("Deberia tener total = 4881", BigDecimal.valueOf(4881), topup.getTotal().getValue());
   }
 
   /*
@@ -98,7 +98,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(50000));
+    amount.setValue(BigDecimal.valueOf(50000));
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
@@ -107,8 +107,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 297.5", new BigDecimal(297.5), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 49702.5", new BigDecimal(49702.5), topup.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(297), topup.getFee().getValue());
+    assertEquals("Deberia tener total = 49703", BigDecimal.valueOf(49703), topup.getTotal().getValue());
   }
 
   @Test(expected = IllegalStateException.class)
@@ -135,7 +135,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
   public void shouldReturnExceptionWhen_WithdrawMerchantCodeNull() throws Exception {
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setValue(new BigDecimal(100));
+    amount.setValue(BigDecimal.valueOf(100));
     withdraw.setAmount(amount);
 
     getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
@@ -149,7 +149,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(5000));
+    amount.setValue(BigDecimal.valueOf(5000));
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("999999999999991");
 
@@ -158,8 +158,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", new BigDecimal(100), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 5000", new BigDecimal(5100), withdraw.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(100), withdraw.getFee().getValue());
+    assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5100), withdraw.getTotal().getValue());
   }
 
   /*
@@ -170,7 +170,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(5000));
+    amount.setValue(BigDecimal.valueOf(5000));
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("1234567890");
 
@@ -179,8 +179,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 119", new BigDecimal(119), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 4881", new BigDecimal(5119), withdraw.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 119", BigDecimal.valueOf(119), withdraw.getFee().getValue());
+    assertEquals("Deberia tener total = 4881", BigDecimal.valueOf(5119), withdraw.getTotal().getValue());
   }
 
   /*
@@ -191,7 +191,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal(50000));
+    amount.setValue(BigDecimal.valueOf(50000));
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("1234567890");
 
@@ -200,7 +200,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 297.5", new BigDecimal(297.5), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 49702.5", new BigDecimal(50297.5), withdraw.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(297), withdraw.getFee().getValue());
+    assertEquals("Deberia tener total = 50297", BigDecimal.valueOf(50297), withdraw.getTotal().getValue());
   }
 }
