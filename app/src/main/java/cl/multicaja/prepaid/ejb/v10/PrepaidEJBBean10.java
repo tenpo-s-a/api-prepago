@@ -32,6 +32,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
+
 /**
  * @author vutreras
  */
@@ -41,23 +43,6 @@ import java.util.*;
 public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
-
-  private final BigDecimal ONE_HUNDRED = new BigDecimal(100);
-
-  // TODO: externalizar estos porcentajes?
-  private final BigDecimal TOPUP_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
-  private final BigDecimal TOPUP_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0);
-
-  private final BigDecimal WITHDRAW_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
-  private final BigDecimal WITHDRAW_WEB_COMMISSION_AMOUNT = new BigDecimal(100);
-  private final BigDecimal WITHDRAW_WEB_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
-
-  private final BigDecimal IVA_PERCENTAGE = new BigDecimal(19);
-
-  private final Double IVA = 1.19;
-
-  //TODO: Valor dolar debe ser obtenido desde algun servicio.
-  private final Integer USD_VALUE = 645;
 
   @Inject
   private PrepaidTopupDelegate10 delegate;
@@ -419,48 +404,35 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
     total.setCurrencyCode(currencyCodeClp);
+
     NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
     fee.setCurrencyCode(currencyCodeClp);
 
     switch (transaction.getMovementType()) {
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
-        switch (transaction.getTransactionOriginType()) {
-          case WEB:
-            fee.setValue(new BigDecimal(0));
-            break;
-          case POS:
-            // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-
-            BigDecimal com = transaction.getAmount().getValue().multiply(TOPUP_POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
-            // Calcula el max
-            BigDecimal max = com.max(new BigDecimal(100));
-            // Suma IVA
-            fee.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
-            break;
+        if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+          fee.setValue(TOPUP_WEB_COMMISSION_AMOUNT);
+        } else {
+          // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
+          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), TOPUP_POS_COMMISSION_PERCENTAGE);
+          fee.setValue(commission);
         }
         // Calculo el total
         total.setValue(transaction.getAmount().getValue().subtract(fee.getValue()));
-        break;
+      break;
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
-        switch (transaction.getTransactionOriginType()) {
-          case WEB:
-            fee.setValue(WITHDRAW_WEB_COMMISSION_AMOUNT);
-            break;
-          case POS:
-            // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-
-            BigDecimal com = transaction.getAmount().getValue().multiply(WITHDRAW_POS_COMMISSION_PERCENTAGE).divide(ONE_HUNDRED);
-            // Calcula el max
-            BigDecimal max = com.max(new BigDecimal(100));
-            // Suma IVA
-            fee.setValue(max.add(max.multiply(IVA_PERCENTAGE).divide(ONE_HUNDRED)));
-            break;
+        if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+          fee.setValue(WITHDRAW_WEB_COMMISSION_AMOUNT);
+        } else {
+          // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
+          BigDecimal commission = calculateComission(transaction.getAmount().getValue(), WITHDRAW_POS_COMMISSION_PERCENTAGE);
+          fee.setValue(commission);
         }
         // Calculo el total
         total.setValue(transaction.getAmount().getValue().add(fee.getValue()));
-        break;
+      break;
     }
 
     transaction.setFee(fee);
@@ -520,14 +492,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           } else {
             tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
           }
-        break;
+      break;
       case WITHDRAW:
         if(TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
           tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
         } else {
           tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
         }
-        break;
+      break;
     }
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
@@ -707,24 +679,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         La comisión será de Máx [$100 ; 0,5% monto a cargar] + IVA
         Monto a pagar = monto a cargar + comisión
      */
-    final double comission;
-    final double pca = (amount-240)/1.022;
-    final double eed = pca / USD_VALUE;
+    BigDecimal comission;
 
     if(TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())){
-      comission = 0;
+      comission = CALCULATOR_TOPUP_WEB_COMMISSION_AMOUNT;
     } else {
-      comission = Math.round(Math.max(100, (amount*0.5/100))) * IVA;
+      comission = calculateComission(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_COMMISSION_PERCENTAGE);
     }
 
-    //monto a cargar + comision
-    BigDecimal calculatedAmount = BigDecimal.valueOf(amount + comission);
+    BigDecimal amountValue = calculatorRequest.getAmount().getValue();
+    CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
-    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, calculatorRequest.getAmount().getCurrencyCode()));
-    calculatorResponse.setComission(BigDecimal.valueOf(comission));
-    calculatorResponse.setPca(BigDecimal.valueOf(pca));
-    calculatorResponse.setEed(BigDecimal.valueOf(eed));
+    calculatorResponse.setPca(calculatePca(amountValue));
+    calculatorResponse.setEed(calculateEed(amountValue));
+
+    //monto a cargar + comision
+    BigDecimal calculatedAmount = comission.add(amountValue);
+
+    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
+    calculatorResponse.setComission(comission);
 
     return calculatorResponse;
   }
@@ -790,21 +764,23 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           La comisión será de Máx [$100 ; 0,5% monto de retiro] + IVA
           Monto que se descontará del saldo = monto de retiro + comisión
      */
-    final double amount = calculatorRequest.getAmount().getValue().doubleValue();
-    final double comission;
+    BigDecimal comission;
 
     if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
-      comission = WITHDRAW_WEB_COMMISSION_AMOUNT.doubleValue();
+      comission = CALCULATOR_WITHDRAW_WEB_COMMISSION_AMOUNT;
     } else {
-      comission = Math.round(Math.max(100, (amount*0.5/100))) * IVA;
+      comission = calculateComission(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_COMMISSION_PERCENTAGE);
     }
 
+    BigDecimal amountValue = calculatorRequest.getAmount().getValue();
+    CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+
     //monto a cargar + comision
-    BigDecimal calculatedAmount = BigDecimal.valueOf(amount + comission);
+    BigDecimal calculatedAmount = comission.add(amountValue);
 
     CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
-    calculatorResponse.setComission(BigDecimal.valueOf(comission));
-    calculatorResponse.setAmount(new NewAmountAndCurrency10(calculatedAmount, calculatorRequest.getAmount().getCurrencyCode()));
+    calculatorResponse.setComission(comission);
+    calculatorResponse.setAmount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
   }
