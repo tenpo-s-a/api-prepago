@@ -362,6 +362,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
 
+      getPrepaidMovementEJB10().updatePrepaidMovement(null,
+        prepaidMovement.getId(),
+        inclusionMovimientosDTO.getNumextcta(),
+        inclusionMovimientosDTO.getNummovext(),
+        inclusionMovimientosDTO.getClamone(),
+        PrepaidMovementStatus.PROCESS_OK);
+
     } else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;

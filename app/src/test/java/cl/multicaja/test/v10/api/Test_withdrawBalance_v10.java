@@ -30,7 +30,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    createPrepaidCard10(buildPrepaidCard10(prepaidUser));
+    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
@@ -49,6 +49,17 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+
+    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
+    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
+    PrepaidMovementStatus reversed = PrepaidMovementStatus.PROCESS_OK;
+    for(PrepaidMovement10 m : dbPrepaidMovements) {
+      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
+        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
+      } else {
+        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
+      }
+    }
   }
 
   @Test
@@ -468,7 +479,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
     List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
-    Assert.assertTrue("Deberia tener un movimiento", dbPrepaidMovements.size() > 0);
+    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
     PrepaidMovementStatus reversed = PrepaidMovementStatus.REVERSED;
     for(PrepaidMovement10 m : dbPrepaidMovements) {
       if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
