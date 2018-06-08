@@ -601,20 +601,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
+    final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
+    final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+
     // LLAMADA AL CDT
     CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
-    cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
+    cdtTransaction10.setAmount(amountValue);
     cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction10.setTransactionReference(0L);
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getRut());
-    cdtTransaction10.setIndSimulacion(true);//ES UNA SIMULACION.
-
-    if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
-      cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_WEB);
-    } else {
-      cdtTransaction10.setTransactionType(CdtTransactionType.CARGA_POS);
-    }
-
+    cdtTransaction10.setIndSimulacion(true);
+    cdtTransaction10.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
     cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
 
     cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
@@ -624,13 +621,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //TODO se debe usar el CdtHelper para obtener el codigo de error
       Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
-
+      /*
+      -La carga supera el monto máximo de carga web
+      -La carga supera el monto máximo de carga pos
+      -La carga es menor al mínimo de carga
+      -La carga supera el monto máximo de cargas mensuales.
+      */
+      /*
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
         throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
+      */
     }
 
     // OBTENGO LA TARJETA DEL USUARIO Y VALIDO
@@ -660,45 +664,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // SALDO TARJETA EN TECNOCOM
     final double balance = consultaSaldoDTO.getSaldisconp().doubleValue() - consultaSaldoDTO.getSalautconp().doubleValue();
 
-    // MONTO A CARGAR
-    final double amount = calculatorRequest.getAmount().getValue().doubleValue();
-
-    if(balance + amount > 500000) {
-      throw new ValidationException(304101);
+    if((balance + amountValue.doubleValue()) > 500000) {
+      throw new ValidationException(109000); //supera el saldo
     }
 
-    /*
-    1- La API deberá calcular el monto a pagar y las comisiones
-    2- En caso de que el método de pago sea carga web
-
-        La comisión = 0
-        El monto a pagar = monto a cargar
-
-    3- En caso de que el método de pago sea carga pos
-
-        La comisión será de Máx [$100 ; 0,5% monto a cargar] + IVA
-        Monto a pagar = monto a cargar + comisión
-     */
     BigDecimal comission;
 
-    if(TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())){
+    if(calculatorRequest.isTransactionWeb()){
       comission = CALCULATOR_TOPUP_WEB_COMMISSION_AMOUNT;
     } else {
       comission = calculateComission(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_COMMISSION_PERCENTAGE);
     }
 
-    BigDecimal amountValue = calculatorRequest.getAmount().getValue();
-    CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+    //monto a cargar + comision
+    BigDecimal calculatedAmount = comission.add(amountValue);
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
     calculatorResponse.setPca(calculatePca(amountValue));
     calculatorResponse.setEed(calculateEed(amountValue));
-
-    //monto a cargar + comision
-    BigDecimal calculatedAmount = comission.add(amountValue);
-
-    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
     calculatorResponse.setComission(comission);
+    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
   }
@@ -719,19 +704,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
+    final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
+    final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+
     CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
-    cdtTransaction10.setAmount(calculatorRequest.getAmount().getValue());
+    cdtTransaction10.setAmount(amountValue);
     cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction10.setTransactionReference(0L);
     cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getRut());
-    cdtTransaction10.setIndSimulacion(false);
-
-    if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
-      cdtTransaction10.setTransactionType(CdtTransactionType.RETIRO_WEB);
-    } else {
-      cdtTransaction10.setTransactionType(CdtTransactionType.RETIRO_POS);
-    }
-
+    cdtTransaction10.setIndSimulacion(true);
+    cdtTransaction10.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
     cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
 
     cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
@@ -741,46 +723,37 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //TODO se debe usar el CdtHelper para obtener el codigo de error
       Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
-
+      /*
+      El retiro supera el monto máximo de un retiro web
+      El retiro supera el monto máximo de un retiro pos
+      El monto de retiro es menor al monto mínimo de retiros
+      El retiro supera el monto máximo de retiros mensuales.
+     */
+      /*
       long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
       if(lNumError != -1 && lNumError > 10000) {
         throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       } else {
         throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
       }
+      */
     }
 
-    /*
-    Luego de que el cdt responda ok
-
-      1- La API deberá calcular el monto que se le descontará al usuario del saldo y las comisiones correspondientes
-      2- En caso de que el método de retiro sea retiro web
-
-          La comisión = 100
-          El monto que se le descontará al usuario = monto de retiro + comisión
-
-      3- En caso de que el método de pago sea retiro pos
-
-          La comisión será de Máx [$100 ; 0,5% monto de retiro] + IVA
-          Monto que se descontará del saldo = monto de retiro + comisión
-     */
     BigDecimal comission;
 
-    if (TransactionOriginType.WEB.equals(calculatorRequest.getPaymentMethod())) {
+    if (calculatorRequest.isTransactionWeb()) {
       comission = CALCULATOR_WITHDRAW_WEB_COMMISSION_AMOUNT;
     } else {
       comission = calculateComission(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_COMMISSION_PERCENTAGE);
     }
-
-    BigDecimal amountValue = calculatorRequest.getAmount().getValue();
-    CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
 
     //monto a cargar + comision
     BigDecimal calculatedAmount = comission.add(amountValue);
 
     CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
     calculatorResponse.setComission(comission);
-    calculatorResponse.setAmount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
+    calculatorResponse.setAmount(new NewAmountAndCurrency10(amountValue, amountCurrencyCode));
+    calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
   }

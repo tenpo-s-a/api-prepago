@@ -50,23 +50,29 @@ public class CalculationsHelper {
   }
 
   /**
-   * Calcula el: para cuanto alcanza
+   * Calcula el: para cuanto alcanza (pca)
    *
    * @param amount
    * @return
    */
-  public static BigDecimal calculatePca(BigDecimal amount) {
-    return BigDecimal.valueOf((amount.doubleValue()-240)/1.022);
+  public static double calculatePca(BigDecimal amount) {
+    if (amount == null) {
+      return 0;
+    }
+    return (amount.doubleValue() - 240) / 1.022;
   }
 
   /**
-   * Calcula el: eed
+   * Calcula el: equivalente en dolares (eed)
    *
    * @param amount
    * @return
    */
-  public static BigDecimal calculateEed(BigDecimal amount) {
-    double pca = calculatePca(amount).doubleValue();
-    return BigDecimal.valueOf(pca / USD_VALUE);
+  public static double calculateEed(BigDecimal amount) {
+    if (amount == null) {
+      return 0;
+    }
+    double pca = calculatePca(amount);
+    return pca / USD_VALUE;
   }
 }

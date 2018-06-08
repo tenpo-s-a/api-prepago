@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
@@ -42,6 +43,11 @@ public class CalculatorRequest10 extends BaseModel {
 
   public void setPaymentMethod(TransactionOriginType paymentMethod) {
     this.paymentMethod = paymentMethod;
+  }
+
+  @JsonIgnore
+  public boolean isTransactionWeb() {
+    return TransactionOriginType.WEB.equals(this.getPaymentMethod());
   }
 
   @Override

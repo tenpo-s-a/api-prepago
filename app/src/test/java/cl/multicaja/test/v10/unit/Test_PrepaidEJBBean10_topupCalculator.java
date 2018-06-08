@@ -16,17 +16,17 @@ import java.math.BigDecimal;
 public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
 
   @Test
-  public void testCalculatorErrorParamsNull() throws Exception {
+  public void calculatorWithErrorParamsNull() throws Exception {
 
     final Integer codErrorParamNull = 101004;
 
     {
-      AmountAndCurrency10 amountAndCurrency10 = new AmountAndCurrency10();
-      amountAndCurrency10.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amountAndCurrency10.setValue(BigDecimal.valueOf(3000));
+      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      amount.setValue(BigDecimal.valueOf(3000));
 
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amountAndCurrency10);
+      calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
       calculatorRequest.setRut(null);
 
@@ -37,12 +37,12 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       }
     }
     {
-      AmountAndCurrency10 amountAndCurrency10 = new AmountAndCurrency10();
-      amountAndCurrency10.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amountAndCurrency10.setValue(BigDecimal.valueOf(3000));
+      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      amount.setValue(BigDecimal.valueOf(3000));
 
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amountAndCurrency10);
+      calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(null);
       calculatorRequest.setRut(1);
 
@@ -65,12 +65,12 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       }
     }
     {
-      AmountAndCurrency10 amountAndCurrency10 = new AmountAndCurrency10();
-      amountAndCurrency10.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amountAndCurrency10.setValue(null);
+      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      amount.setValue(null);
 
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amountAndCurrency10);
+      calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
       calculatorRequest.setRut(null);
 
@@ -81,12 +81,12 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
       }
     }
     {
-      AmountAndCurrency10 amountAndCurrency10 = new AmountAndCurrency10();
-      amountAndCurrency10.setCurrencyCode(null);
-      amountAndCurrency10.setValue(BigDecimal.valueOf(3000));
+      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      amount.setCurrencyCode(null);
+      amount.setValue(BigDecimal.valueOf(3000));
 
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amountAndCurrency10);
+      calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
       calculatorRequest.setRut(null);
 
@@ -99,7 +99,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
   }
 
   @Test
-  public void testCalculatorOk() throws Exception {
+  public void calculatorOk_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -111,12 +111,12 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    AmountAndCurrency10 amountAndCurrency10 = new AmountAndCurrency10();
-    amountAndCurrency10.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amountAndCurrency10.setValue(BigDecimal.valueOf(3000));
+    AmountAndCurrency10 amount = new AmountAndCurrency10();
+    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setValue(BigDecimal.valueOf(3000));
 
     CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amountAndCurrency10);
+    calculatorRequest.setAmount(amount);
     calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
     calculatorRequest.setRut(user.getRut().getValue());
 
