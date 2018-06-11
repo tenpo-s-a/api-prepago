@@ -52,12 +52,26 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertTrue("Deberia tener el data", withdraw.getMcVoucherData().size() > 0);
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
     List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
     Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus reversed = PrepaidMovementStatus.PROCESS_OK;
+    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
     for(PrepaidMovement10 m : dbPrepaidMovements) {
       if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
+        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
       } else {
         Assert.assertTrue("Deberia ser false", Boolean.FALSE);
       }
@@ -94,12 +108,26 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertTrue("Deberia tener el data", withdraw.getMcVoucherData().size() > 0);
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
     List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
     Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus reversed = PrepaidMovementStatus.PROCESS_OK;
+    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
     for(PrepaidMovement10 m : dbPrepaidMovements) {
       if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
+        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
       } else {
         Assert.assertTrue("Deberia ser false", Boolean.FALSE);
       }
