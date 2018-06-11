@@ -25,6 +25,7 @@
       descripcion           VARCHAR(100) NOT NULL,
       valor                 NUMERIC NOT NULL,
       cod_operacion         VARCHAR(10) NOT NULL,
+      cod_error             NUMERIC(10) NOT NULL,
       estado                VARCHAR(10) NOT NULL,
       fecha_estado          TIMESTAMP NOT NULL,
       fecha_creacion        TIMESTAMP NOT NULL,
