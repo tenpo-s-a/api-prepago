@@ -45,4 +45,8 @@ public class CalculationsHelper {
   }
 
 
+  public static Integer getUsdValue() {
+    //TODO quizas se saca de algun servicio externo
+    return 645;
+  }
 }

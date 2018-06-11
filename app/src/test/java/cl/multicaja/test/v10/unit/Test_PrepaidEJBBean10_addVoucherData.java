@@ -1,6 +1,5 @@
 package cl.multicaja.test.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.AmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import org.junit.Assert;
@@ -28,7 +27,7 @@ public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupAmountValueNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new AmountAndCurrency10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     topup.setAmount(amount);
 
     getPrepaidEJBBean10().addVoucherData(topup);
@@ -37,7 +36,7 @@ public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
   @Test
   public void shouldAddReceiptData() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
-    NewAmountAndCurrency10 amount = new AmountAndCurrency10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal(1000000));
     topup.setAmount(amount);
 

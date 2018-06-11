@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -70,11 +71,11 @@ public interface PrepaidUserEJB10 {
    * actualiza el estado del usuario prepago
    *
    * @param headers
-   * @param id
+   * @param userId
    * @param status
    * @throws Exception
    */
-  void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception;
+  void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception;
 
   /**
    *  Verifica el nivel del usuario
@@ -86,4 +87,23 @@ public interface PrepaidUserEJB10 {
    * @return el nivel del usuario
    */
   PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
+
+  /**
+   * Retorna el saldo del cliente prepago
+   *
+   * @param headers
+   * @param userId
+   * @return
+   */
+  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception;
+
+  /**
+   * Actualiza el saldo del cliente prepago
+   *
+   * @param headers
+   * @param userId
+   * @param balance
+   * @throws Exception
+   */
+  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, BigDecimal balance) throws Exception;
 }

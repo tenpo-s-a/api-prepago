@@ -1,36 +1,23 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
-import cl.multicaja.users.utils.ParametersUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
-import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -98,6 +85,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
       u.setRut(numberUtils.toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
+      u.setBalance(numberUtils.toBigDecimal(row.get("_saldo")));
+      u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
       timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
@@ -137,9 +126,9 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public void updatePrepaidUserStatus(Map<String, Object> headers, Long id, PrepaidUserStatus status) throws Exception {
+  public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
-    if(id == null){
+    if(userId == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "id"));
     }
     if(status == null){
@@ -147,7 +136,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     Object[] params = {
-      id, //id
+      userId, //id
       status.toString(), //estado
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -180,6 +169,68 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return PrepaidUserLevel.LEVEL_2;
     } else {
       return PrepaidUserLevel.LEVEL_1;
+    }
+  }
+
+  @Override
+  public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception {
+
+    if(userId == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserById(null, userId);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(102003); // Usuario no tiene prepago
+    }
+
+    Long balanceExpiration = prepaidUser.getBalanceExpiration();
+
+    Integer usdValue = CalculationsHelper.getUsdValue();
+
+    boolean updated = false;
+    BigDecimal pBalance = prepaidUser.getBalance();
+
+    if (balanceExpiration <= 0 || balanceExpiration >= System.currentTimeMillis()) {
+      //TODO ir a buscar el saldo a tecnocom y actualizarlo al usuario prepago
+      updated = true;
+    }
+
+    BigDecimal sBalance = pBalance.longValue() != 0 ? BigDecimal.valueOf(pBalance.doubleValue() / usdValue) : BigDecimal.valueOf(0);
+
+    NewAmountAndCurrency10 primaryBalance = new NewAmountAndCurrency10(pBalance, CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 secondaryBalance = new NewAmountAndCurrency10(sBalance, CodigoMoneda.USA_USN);
+
+    return new PrepaidBalance10(primaryBalance, secondaryBalance, updated);
+  }
+
+  @Override
+  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, BigDecimal balance) throws Exception {
+
+    if(userId == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+    }
+    if(balance == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "balance"));
+    }
+
+    //expira en 1 minuto (60
+    Long balanceExpiration = System.currentTimeMillis() + 60000;
+
+    Object[] params = {
+      userId, //id
+      balance, //saldo
+      balanceExpiration, //saldo_expiracion
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_saldo_usuario_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("Error en invocacion a SP: " + resp);
+      throw new BaseException(1);
     }
   }
 }
