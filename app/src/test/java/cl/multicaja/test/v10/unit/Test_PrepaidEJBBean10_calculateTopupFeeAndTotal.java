@@ -5,7 +5,6 @@ import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import cl.multicaja.prepaid.model.v10.TransactionOriginType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -20,13 +19,13 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupNull() throws Exception {
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(null);
+    getPrepaidEJBBean10().calculateFeeAndTotal(null);
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -35,7 +34,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     topup.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -45,7 +44,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     amount.setValue(BigDecimal.valueOf(100));
     topup.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
   }
 
   /*
@@ -60,7 +59,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     topup.setAmount(amount);
     topup.setMerchantCode("999999999999991");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
@@ -81,7 +80,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
@@ -102,7 +101,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     topup.setAmount(amount);
     topup.setMerchantCode("1234567890");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(topup);
+    getPrepaidEJBBean10().calculateFeeAndTotal(topup);
 
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
@@ -113,13 +112,13 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_WithdrawNull() throws Exception {
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(null);
+    getPrepaidEJBBean10().calculateFeeAndTotal(null);
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountNull() throws Exception {
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -128,7 +127,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     withdraw.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -138,7 +137,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     amount.setValue(BigDecimal.valueOf(100));
     withdraw.setAmount(amount);
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
   }
 
   /*
@@ -153,7 +152,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("999999999999991");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
 
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
@@ -174,7 +173,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("1234567890");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
 
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
@@ -195,7 +194,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("1234567890");
 
-    getPrepaidEJBBean10().calculateTopupFeeAndTotal(withdraw);
+    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
 
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());

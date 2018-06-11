@@ -29,6 +29,7 @@ import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -397,12 +398,46 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(5000));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidWithdraw.setAmount(newAmountAndCurrency);
+
+    prepaidWithdraw.setMerchantCategory(1);
+    prepaidWithdraw.setMerchantName(getRandomString(6));
+
+    return prepaidWithdraw;
+  }
+
+  /**
+   *
+   * @param user
+   * @return
+   */
+  public PrepaidWithdraw10 buildPrepaidWithdraw10(User user) {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10();
+
+    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
     newAmountAndCurrency.setValue(new BigDecimal(3000));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
 
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
+
+    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
+    fee.setValue(new BigDecimal(100));
+    fee.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidWithdraw.setFee(fee);
+
+    prepaidWithdraw.setMcVoucherType("A");
+    prepaidWithdraw.setMcVoucherData(new ArrayList<>());
 
     return prepaidWithdraw;
   }

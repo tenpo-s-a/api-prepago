@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -219,7 +220,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateTopupFeeAndTotal(prepaidTopup);
+    this.calculateFeeAndTotal(prepaidTopup);
 
     /*
       Agrega la informacion par el voucher
@@ -398,7 +399,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
+      throw new IOException();
     }
+
+    /*
+      Calcular comisiones
+     */
+    this.calculateFeeAndTotal(prepaidWithdraw);
+
+    /*
+      Agrega la informacion par el voucher
+     */
+    this.addVoucherData(prepaidWithdraw);
+
+    /*
+      Enviar mensaje al proceso asincrono
+     */
+    String messageId = this.getDelegate().sendWithdraw(prepaidWithdraw, user, cdtTransaction, prepaidMovement);
+    prepaidWithdraw.setMessageId(messageId);
 
     return prepaidWithdraw;
   }
@@ -424,7 +442,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void calculateTopupFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
+  public void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
     if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null || StringUtils.isBlank(transaction.getMerchantCode())){
       throw new IllegalStateException();
@@ -470,9 +488,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void addVoucherData(PrepaidTopup10 topup) throws Exception {
+  public void addVoucherData(IPrepaidTransaction10 transaction) throws Exception {
 
-    if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null) {
+    if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null) {
       throw new IllegalStateException();
     }
 
@@ -482,16 +500,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     symbols.setGroupingSeparator('.');
     formatter.setDecimalFormatSymbols(symbols);
 
-    topup.setMcVoucherType("A");
+    transaction.setMcVoucherType("A");
 
     Map<String, String> data = new HashMap<>();
     data.put("name", "amount_paid");
-    data.put("value", formatter.format(topup.getAmount().getValue().longValue()));
+    data.put("value", formatter.format(transaction.getAmount().getValue().longValue()));
 
     List<Map<String, String>> mcVoucherData = new ArrayList<>();
     mcVoucherData.add(data);
 
-    topup.setMcVoucherData(mcVoucherData);
+    transaction.setMcVoucherData(mcVoucherData);
   }
 
   /**
@@ -537,7 +555,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
-    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setCodent(codent);
