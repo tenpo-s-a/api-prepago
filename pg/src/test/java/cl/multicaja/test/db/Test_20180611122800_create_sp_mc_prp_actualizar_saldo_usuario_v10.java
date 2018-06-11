@@ -3,9 +3,9 @@ package cl.multicaja.test.db;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
@@ -17,20 +17,22 @@ import static cl.multicaja.test.db.Test_20180510152942_create_sp_mc_prp_buscar_u
 /**
  * @autor vutreras
  */
-public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 extends TestDbBasePg {
+public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_estado_usuario_v10";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_saldo_usuario_v10";
 
   @Test
-  public void updateStatusOk() throws SQLException {
+  public void updateBalanceOk() throws SQLException {
 
     Map<String, Object> obj1 = insertUser("ACTIVO");
 
-    String newStatus = "INACTIVO";
+    BigDecimal balance = BigDecimal.valueOf(100L);
+    Long balanceExpiration = 1000L;
 
     Object[] params = {
       obj1.get("id"), //id
-      newStatus, //estado
+      balance, //saldo
+      balanceExpiration,// saldo_expiracion
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -46,16 +48,18 @@ public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 
 
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
-    Assert.assertEquals("Debe contener ser el nuevo estado",  newStatus, ((Map)result.get(0)).get("_estado"));
+    Assert.assertEquals("Debe contener el nuevo saldo", balance, ((Map)result.get(0)).get("_saldo"));
+    Assert.assertEquals("Debe contener el nuevo saldo_expiracion", balanceExpiration, ((Map)result.get(0)).get("_saldo_expiracion"));
   }
 
   @Test
-  public void updateStatusNoOk() throws SQLException {
+  public void updateBalanceNoOk() throws SQLException {
 
     {
       Object[] params = {
         new NullParam(Types.BIGINT), //id
-        "INACTIVO", //estado
+        1L, //saldo
+        1L,// saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
       };
@@ -69,7 +73,8 @@ public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 
     {
       Object[] params = {
         1L, //id
-        new NullParam(Types.VARCHAR), //estado
+        new NullParam(Types.BIGINT), //saldo
+        1L, //saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
       };
@@ -78,6 +83,36 @@ public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 
 
       Assert.assertNotNull("Debe retornar respuesta", resp);
       Assert.assertEquals("Codigo de error debe ser 0", "MC002", resp.get("_error_code"));
+    }
+
+    {
+      Object[] params = {
+        1L, //id
+        1L, //saldo
+        new NullParam(Types.BIGINT), //saldo_expiracion
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser 0", "MC003", resp.get("_error_code"));
+    }
+
+    {
+      Object[] params = {
+        1L, //id
+        1L, //saldo
+        -1, //saldo_expiracion, no puede ser expiracion menor a 0
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String, Object> resp = dbUtils.execute(SP_NAME, params);
+
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser 0", "MC003", resp.get("_error_code"));
     }
   }
 }

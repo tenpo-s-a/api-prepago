@@ -67,9 +67,9 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
 
   /**
    *
-   * @param mapMov
+   * @param map
    */
-  private void checkColumns(Map<String, Object> mapMov) {
+  private void checkColumns(Map<String, Object> map) {
 
     String[] columns = {
       "_id",
@@ -112,8 +112,10 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     };
 
     for (String column : columns) {
-      Assert.assertTrue("Debe contener la columna " + column, mapMov.containsKey(column));
+      Assert.assertTrue("Debe contener la columna " + column, map.containsKey(column));
     }
+
+    Assert.assertEquals("Debe contener solamente las columnas definidas", columns.length, map.keySet().size());
   }
 
   @Test

@@ -24,6 +24,8 @@ CREATE TABLE ${schema}.prp_usuario (
   id_usuario_mc       BIGINT NOT NULL,
   rut                 INTEGER NOT NULL,
   estado              VARCHAR(20) NOT NULL,
+  saldo               NUMERIC DEFAULT 0 NOT NULL,
+  saldo_expiracion    BIGINT DEFAULT 0 NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
   CONSTRAINT prp_usuario_pk PRIMARY KEY(id),

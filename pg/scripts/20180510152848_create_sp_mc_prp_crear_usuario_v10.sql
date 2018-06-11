@@ -54,6 +54,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
        id_usuario_mc,
        rut,
        estado,
+       saldo,
+       saldo_expiracion,
        fecha_creacion,
        fecha_actualizacion
      )
@@ -62,6 +64,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
         _id_usuario_mc,
         _rut,
         _estado,
+        0,
+        0,
         timezone('utc', now()),
         timezone('utc', now())
      )
@@ -78,5 +82,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_usuario_v10(BIGINT, INTEGER, VARCHAR, BIGINT, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crear_usuario_v10(BIGINT, INTEGER, VARCHAR);
 

@@ -28,6 +28,30 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
   }
 
   /**
+   *
+   * @param map
+   */
+  private void checkColumns(Map<String, Object> map) {
+
+    String[] columns = {
+      "_id",
+      "_id_usuario_mc",
+      "_rut",
+      "_estado",
+      "_saldo",
+      "_saldo_expiracion",
+      "_fecha_creacion",
+      "_fecha_actualizacion"
+    };
+
+    for (String column : columns) {
+      Assert.assertTrue("Debe contener la columna " + column, map.containsKey(column));
+    }
+
+    Assert.assertEquals("Debe contener solamente las columnas definidas", columns.length, map.keySet().size());
+  }
+
+  /**
    * busca usuarios
    * @param id
    * @param idUsuarioMc
@@ -58,7 +82,10 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mUsu1 = (Map)result.get(0);
+    Map<String, Object> mUsu1 = (Map)result.get(0);
+
+    checkColumns(mUsu1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
@@ -77,7 +104,10 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mUsu1 = (Map)result.get(0);
+    Map<String, Object> mUsu1 = (Map)result.get(0);
+
+    checkColumns(mUsu1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
@@ -102,7 +132,10 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mUsu1 = (Map)result.get(0);
+    Map<String, Object> mUsu1 = (Map)result.get(0);
+
+    checkColumns(mUsu1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
@@ -127,7 +160,10 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mUsu1 = (Map)result.get(0);
+    Map<String, Object> mUsu1 = (Map)result.get(0);
+
+    checkColumns(mUsu1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
@@ -155,7 +191,10 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 2 , result.size());
 
-    Map mUsu1 = (Map)result.get(0);
+    Map<String, Object> mUsu1 = (Map)result.get(0);
+
+    checkColumns(mUsu1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));

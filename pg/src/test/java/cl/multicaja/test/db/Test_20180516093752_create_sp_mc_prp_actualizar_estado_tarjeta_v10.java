@@ -17,7 +17,6 @@ import static cl.multicaja.test.db.Test_20180514105358_create_sp_mc_prp_buscar_t
 /**
  * @autor vutreras
  */
-@Ignore
 public class Test_20180516093752_create_sp_mc_prp_actualizar_estado_tarjeta_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_estado_tarjeta_v10";
@@ -43,12 +42,11 @@ public class Test_20180516093752_create_sp_mc_prp_actualizar_estado_tarjeta_v10 
 
     Map<String, Object> resp2 = searchCards((long) obj1.get("id"), null, null, null, null);
 
-    List result = (List)resp2.get("_result");
+    List result = (List)resp2.get("result");
 
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp2.get("_error_code"));
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
-    Assert.assertEquals("Debe contener ser el nuevo estado",  newStatus, ((Map)result.get(0)).get("estado"));
+    Assert.assertEquals("Debe contener ser el nuevo estado",  newStatus, ((Map)result.get(0)).get("_estado"));
   }
 
   @Test
@@ -70,7 +68,7 @@ public class Test_20180516093752_create_sp_mc_prp_actualizar_estado_tarjeta_v10 
 
     {
       Object[] params = {
-        new Long(1), //id
+        1L, //id
         new NullParam(Types.VARCHAR), //estado
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
