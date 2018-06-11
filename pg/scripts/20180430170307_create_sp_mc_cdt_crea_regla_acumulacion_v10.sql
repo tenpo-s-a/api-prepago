@@ -19,9 +19,9 @@
 
 CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_regla_acumulacion_v10
 (
-    IN _id_categoria_movimiento  NUMERIC,
     IN _periocidad               VARCHAR,
     IN _codigo_operacion         VARCHAR,
+    IN _descripcion              VARCHAR,
     OUT _num_error               VARCHAR,
     OUT _msj_error               VARCHAR
 )AS $$
@@ -32,38 +32,33 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_regla_acumulacion_v10
 	        _num_error := '0';
 	        _msj_error := '';
 
-		    IF COALESCE(_id_categoria_movimiento, 0) = 0 THEN
-          _num_error := 'MC001';
-          _msj_error := '[mc_cdt_crea_regla_acumulacion] El Id Tipo Movimiento no puede ser 0';
-          RETURN;
-	      END IF;
 
         IF TRIM(COALESCE(_periocidad, '')) = '' THEN
-          _num_error := 'MC002';
+          _num_error := 'MC001';
           _msj_error := '[mc_cdt_crea_regla_acumulacion] La Periocidad no puede ser vacia';
           RETURN;
         END IF;
 
          IF TRIM(COALESCE(_codigo_operacion, '')) = '' THEN
-            _num_error := 'MC003';
+            _num_error := 'MC002';
             _msj_error := '[mc_cdt_crea_regla_acumulacion] El Codigo Operacion no puede ser vacio';
             RETURN;
          END IF;
 
         	INSERT INTO ${schema.cdt}.cdt_regla_acumulacion
 	    		(
-	    			id_categoria_movimiento,
             periocidad,
 	    			codigo_operacion,
+	    			descripcion,
             estado,
 	    			fecha_estado,
 	    			fecha_creacion
 	    		)
         	VALUES
         		(
-              _id_categoria_movimiento,
               _periocidad,
               _codigo_operacion,
+              _descripcion,
               'ACTIVO',
         			timezone('utc', now()),
         			timezone('utc', now())

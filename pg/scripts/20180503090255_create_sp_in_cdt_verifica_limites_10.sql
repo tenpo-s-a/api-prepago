@@ -52,7 +52,8 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.in_cdt_verifica_limites_v10
                         id_regla_acumulacion,
                         descripcion,
                         valor,
-                        cod_operacion
+                        cod_operacion,
+                        cod_error
                     FROM
                          ${schema.cdt}.cdt_limite
                     WHERE
@@ -67,20 +68,20 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.in_cdt_verifica_limites_v10
                                 CASE
                                     WHEN _limite.cod_operacion = 'MAYORQIG' THEN
                                         IF (_monto < _limite.valor) THEN
-                                            _num_error := _limite.id+10000;
-                                            _msj_error := _limite.descripcion||' '||_limite.valor;
+                                            _num_error := _limite.cod_error;
+                                            _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                     WHEN _limite.cod_operacion = 'MENORQIG' THEN
                                         IF (_monto > _limite.valor) THEN
-                                            _num_error := _limite.id+10000;
-                                            _msj_error := _limite.descripcion||' '||_limite.valor;
+                                            _num_error := _limite.cod_error;
+                                            _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                     WHEN _limite.cod_operacion = 'IGUAL' THEN
                                         IF (_monto != _limite.valor) THEN
-                                           _num_error := _limite.id+10000;
-                                           _msj_error := _limite.descripcion||' '||_limite.valor;
+                                           _num_error := _limite.cod_error;
+                                           _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                 END CASE;
@@ -107,20 +108,20 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.in_cdt_verifica_limites_v10
 
                                     WHEN _limite.cod_operacion = 'MAYORQIG' THEN
                                         IF (_monto_acumulado < _limite.valor) THEN
-                                             _num_error := _limite.id+10000;
-                                             _msj_error := _limite.descripcion||' '||_limite.valor;
+                                             _num_error := _limite.cod_error;
+                                             _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                     WHEN _limite.cod_operacion = 'MENORQIG' THEN
                                         IF (_monto_acumulado > _limite.valor) THEN
-                                            _num_error := _limite.id+10000;
-                                            _msj_error := _limite.descripcion||' '||_limite.valor;
+                                            _num_error := _limite.cod_error;
+                                            _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                     WHEN _limite.cod_operacion = 'IGUAL' THEN
                                         IF (_monto_acumulado != _limite.valor) THEN
-                                            _num_error := _limite.id+10000;
-                                            _msj_error := _limite.descripcion||' '||_limite.valor;
+                                            _num_error := _limite.cod_error;
+                                            _msj_error := _limite.descripcion;
                                             RETURN;
                                         END IF;
                                 END CASE;

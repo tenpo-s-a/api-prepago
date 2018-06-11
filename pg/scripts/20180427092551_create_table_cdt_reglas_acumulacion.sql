@@ -20,7 +20,8 @@
 
   CREATE TABLE ${schema.cdt}.cdt_regla_acumulacion (
       id                        BIGSERIAL NOT NULL,
-      id_categoria_movimiento   BIGINT  REFERENCES ${schema.cdt}.cdt_categoria_movimiento(id),
+      id_bolsa                  BIGINT REFERENCES ${schema.cdt}.cdt_bolsa(id),
+      descripcion               VARCHAR(100) NOT NULL,
       periocidad                VARCHAR(10) NOT NULL,
       codigo_operacion          VARCHAR(10) NOT NULL,
       estado                    VARCHAR(10) NOT NULL,
@@ -30,7 +31,8 @@
   );
 
   CREATE INDEX cdt_regla_acumulacion_i1 ON ${schema.cdt}.cdt_regla_acumulacion (estado);
-  CREATE INDEX cdt_regla_acumulacion_i2 ON ${schema.cdt}.cdt_regla_acumulacion (estado,id_categoria_movimiento);
+  CREATE INDEX cdt_regla_acumulacion_i2 ON ${schema.cdt}.cdt_regla_acumulacion (estado,id_bolsa);
+
 -- //@UNDO
 -- SQL to undo the change goes here.
   DROP TABLE IF EXISTS ${schema.cdt}.cdt_regla_acumulacion;

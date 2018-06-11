@@ -23,8 +23,7 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_carga_fases_movimientos_v10
     IN  _in_id_fase     NUMERIC,
     OUT _id             BIGINT,
     OUT _nombre         VARCHAR,
-    OUT _descripcion    VARCHAR,
-    OUT _signo          DECIMAL
+    OUT _descripcion    VARCHAR
 )RETURNS SETOF RECORD AS $$
 
 BEGIN
@@ -32,8 +31,7 @@ BEGIN
         SELECT
             id,
             nombre,
-            descripcion,
-            signo
+            descripcion
         FROM
              ${schema.cdt}.cdt_fase_movimiento
         WHERE
