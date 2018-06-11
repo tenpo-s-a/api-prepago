@@ -25,11 +25,11 @@ public class CalculationsHelper {
   public static final BigDecimal WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
 
 
-  public static final BigDecimal CALCULATOR_TOPUP_WEB_COMMISSION_AMOUNT = new BigDecimal(0);
-  public static final BigDecimal CALCULATOR_TOPUP_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  public static final BigDecimal CALCULATOR_TOPUP_WEB_FEE_AMOUNT = new BigDecimal(0);
+  public static final BigDecimal CALCULATOR_TOPUP_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
 
-  public static final BigDecimal CALCULATOR_WITHDRAW_WEB_COMMISSION_AMOUNT = new BigDecimal(100);
-  public static final BigDecimal CALCULATOR_WITHDRAW_POS_COMMISSION_PERCENTAGE = new BigDecimal(0.5);
+  public static final BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
+  public static final BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
 
   public static final double IVA = 1.19;
 

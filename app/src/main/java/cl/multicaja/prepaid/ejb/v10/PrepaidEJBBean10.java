@@ -702,21 +702,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(109000); //supera el saldo
     }
 
-    BigDecimal comission;
+    BigDecimal fee;
 
     if(calculatorRequest.isTransactionWeb()){
-      comission = CALCULATOR_TOPUP_WEB_COMMISSION_AMOUNT;
+      fee = CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
     } else {
-      comission = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_COMMISSION_PERCENTAGE);
+      fee = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE);
     }
 
     //monto a cargar + comision
-    BigDecimal calculatedAmount = comission.add(amountValue);
+    BigDecimal calculatedAmount = amountValue.add(fee);
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
     calculatorResponse.setPca(calculatePca(amountValue));
     calculatorResponse.setEed(calculateEed(amountValue));
-    calculatorResponse.setComission(comission);
+    calculatorResponse.setFee(fee);
     calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
@@ -773,19 +773,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       */
     }
 
-    BigDecimal comission;
+    BigDecimal fee;
 
     if (calculatorRequest.isTransactionWeb()) {
-      comission = CALCULATOR_WITHDRAW_WEB_COMMISSION_AMOUNT;
+      fee = CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
     } else {
-      comission = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_COMMISSION_PERCENTAGE);
+      fee = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE);
     }
 
     //monto a cargar + comision
-    BigDecimal calculatedAmount = comission.add(amountValue);
+    BigDecimal calculatedAmount = amountValue.add(fee);
 
     CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
-    calculatorResponse.setComission(comission);
+    calculatorResponse.setFee(fee);
     calculatorResponse.setAmount(new NewAmountAndCurrency10(amountValue, amountCurrencyCode));
     calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 

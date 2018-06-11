@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class CalculatorTopupResponse10 extends BaseModel {
 
-  private BigDecimal comission;
+  private BigDecimal fee;
   private Double pca;
   private Double eed;
   private NewAmountAndCurrency10 amountToPay;
@@ -16,19 +16,19 @@ public class CalculatorTopupResponse10 extends BaseModel {
     super();
   }
 
-  public CalculatorTopupResponse10(BigDecimal comission, Double pca, Double eed, NewAmountAndCurrency10 amountToPay) {
-    this.comission = comission;
+  public CalculatorTopupResponse10(BigDecimal fee, Double pca, Double eed, NewAmountAndCurrency10 amountToPay) {
+    this.fee = fee;
     this.pca = pca;
     this.eed = eed;
     this.amountToPay = amountToPay;
   }
 
-  public BigDecimal getComission() {
-    return comission;
+  public BigDecimal getFee() {
+    return fee;
   }
 
-  public void setComission(BigDecimal comission) {
-    this.comission = comission;
+  public void setFee(BigDecimal fee) {
+    this.fee = fee;
   }
 
   public Double getPca() {
@@ -60,7 +60,7 @@ public class CalculatorTopupResponse10 extends BaseModel {
     if (this == o) return true;
     if (!(o instanceof CalculatorTopupResponse10)) return false;
     CalculatorTopupResponse10 that = (CalculatorTopupResponse10) o;
-    return Objects.equals(getComission(), that.getComission()) &&
+    return Objects.equals(getFee(), that.getFee()) &&
       Objects.equals(getPca(), that.getPca()) &&
       Objects.equals(getEed(), that.getEed()) &&
       Objects.equals(getAmountToPay(), that.getAmountToPay());
@@ -69,6 +69,6 @@ public class CalculatorTopupResponse10 extends BaseModel {
   @Override
   public int hashCode() {
 
-    return Objects.hash(getComission(), getPca(), getEed(), getAmountToPay());
+    return Objects.hash(getFee(), getPca(), getEed(), getAmountToPay());
   }
 }
