@@ -2,10 +2,7 @@ package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -21,6 +18,8 @@ import java.util.List;
 public class PrepaidTopupDataRoute10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
+  private PrepaidWithdraw10 prepaidWithdraw10;
+
   private User user;
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
@@ -47,6 +46,14 @@ public class PrepaidTopupDataRoute10 implements Serializable {
 
   public void setPrepaidTopup10(PrepaidTopup10 prepaidTopup10) {
     this.prepaidTopup10 = prepaidTopup10;
+  }
+
+  public PrepaidWithdraw10 getPrepaidWithdraw10() {
+    return prepaidWithdraw10;
+  }
+
+  public void setPrepaidWithdraw10(PrepaidWithdraw10 prepaidWithdraw10) {
+    this.prepaidWithdraw10 = prepaidWithdraw10;
   }
 
   public User getUser() {
