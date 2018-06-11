@@ -14,15 +14,16 @@
 --    limitations under the License.
 --
 
--- // create_table_cdt_confirmacion_movimiento
+-- // create_table_cdt_fase_acumulador
 -- Migration SQL that makes the change goes here.
-  CREATE TABLE ${schema.cdt}.cdt_confirmacion_movimiento (
-      id_mov_cuenta_origen          BIGINT REFERENCES ${schema.cdt}.cdt_movimiento_cuenta(id) ,
-      id_mov_cuenta_confirmacion    BIGINT REFERENCES ${schema.cdt}.cdt_movimiento_cuenta(id),
-      CONSTRAINT cdt_confirmacion_movimiento_pk PRIMARY KEY(id_mov_cuenta_origen,id_mov_cuenta_confirmacion),
-      CONSTRAINT cdt_confirmacion_movimiento_u1 UNIQUE (id_mov_cuenta_origen)
+
+  CREATE TABLE ${schema.cdt}.cdt_fase_acumulador (
+      id_fase_movimiento        BIGINT REFERENCES ${schema.cdt}.cdt_fase_movimiento(id) ,
+      id_regla_acumulacion      BIGINT REFERENCES ${schema.cdt}.cdt_regla_acumulacion(id),
+      signo                     NUMERIC(1) NOT NULL,
+      CONSTRAINT cdt_categoria_mov_fase_pk PRIMARY KEY(id_fase_movimiento,id_regla_acumulacion)
   );
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-  DROP TABLE IF EXISTS ${schema.cdt}.cdt_confirmacion_movimiento;
+  DROP TABLE IF EXISTS ${schema.cdt}.cdt_fase_acumulador;

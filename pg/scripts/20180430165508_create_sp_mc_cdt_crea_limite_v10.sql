@@ -24,6 +24,7 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_limite_v10
     IN _descripcion            VARCHAR,
     IN _valor    		           DECIMAL,
     IN _cod_operacion          VARCHAR,
+    IN _cod_error              NUMERIC,
     OUT _num_error             VARCHAR,
     OUT _msj_error             VARCHAR
 ) AS $$
@@ -59,6 +60,11 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_limite_v10
             RETURN;
         END IF;
 
+        IF COALESCE(_cod_error, 0) = 0 THEN
+            _num_error := '1005';
+            _msj_error := '[mc_cdt_crea_limite] El Codigo de error no puede estar 0';
+            RETURN;
+        END IF;
         INSERT INTO ${schema.cdt}.cdt_limite
         (
           id_fase_movimiento,
@@ -66,6 +72,7 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_limite_v10
           descripcion,
           valor,
           cod_operacion,
+          cod_error,
           estado,
           fecha_estado,
           fecha_creacion
@@ -77,6 +84,7 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_limite_v10
             _descripcion,
             _valor,
             _cod_operacion,
+            _cod_error,
             'ACTIVO',
             timezone('utc', now()),
             timezone('utc', now())
@@ -92,4 +100,4 @@ LANGUAGE 'plpgsql';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-  DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_limite_v10(NUMERIC,NUMERIC,VARCHAR,NUMERIC,VARCHAR);
+ DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_limite_v10( NUMERIC,  NUMERIC, VARCHAR,DECIMAL,VARCHAR, NUMERIC);
