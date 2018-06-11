@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -398,6 +399,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
+      throw new IOException();
     }
 
     return prepaidWithdraw;
@@ -537,7 +539,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
-    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setCodent(codent);
