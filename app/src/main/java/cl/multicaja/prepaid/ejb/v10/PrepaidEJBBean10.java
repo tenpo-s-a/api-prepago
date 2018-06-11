@@ -380,7 +380,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // se confirma la transaccion
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     } else {
@@ -389,7 +389,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
 
       //Confirmar el retiro en CDT
-      cdtTransaction.setTransactionType(TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? CdtTransactionType.RETIRO_WEB_CONF : CdtTransactionType.RETIRO_POS_CONF);
+      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
