@@ -135,6 +135,155 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
+  public void shouldReturn422_OnWithdraw_MinAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108303", 108303, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108303", 108303, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_MaxAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100001));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108302", 108302, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500001));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108301", 108301, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_MonthlyAmount() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    for(int i = 0; i < 10; i++) {
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 200", 200, resp.getStatus());
+    }
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
+
+    String json = toJson(prepaidWithdraw);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 108304", 108304, errorObj.get("code"));
+  }
+
+  @Test
   public void shouldReturn422_OnMissingBody() {
     HttpResponse resp = apiPOST(URL_PATH, "{}");
     Assert.assertEquals("status 422", 422, resp.getStatus());
