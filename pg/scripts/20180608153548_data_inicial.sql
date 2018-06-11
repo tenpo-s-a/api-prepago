@@ -97,7 +97,7 @@ VALUES(13,'Confirmación Retiro POS', 'Confirmación Retiro POS', 'S', 'ACTIVO',
 
 INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 15
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
-VALUES(0,'Solicitud Reversa de Retiro', 'Solicitud Reversa de Retiro', 'S', 'ACTIVO', LOCALTIMESTAMP,LOCALTIMESTAMP);
+VALUES(0,'Solicitud Reversa de Retiro', 'Solicitud Reversa de Retiro', 'N', 'ACTIVO', LOCALTIMESTAMP,LOCALTIMESTAMP);
 
 INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 16
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)

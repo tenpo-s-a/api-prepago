@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.users.model.v10.Timestamps;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
   private Timestamps timestamps;
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
+  @JsonIgnore
   private String messageId;
 
   // Utilizados para la respuesta al POS/switch

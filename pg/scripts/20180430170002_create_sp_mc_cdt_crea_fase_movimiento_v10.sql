@@ -84,4 +84,4 @@ LANGUAGE 'plpgsql';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
- DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10(VARCHAR,VARCHAR,NUMERIC,VARCHAR);
+ DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10(NUMERIC,VARCHAR,VARCHAR,NUMERIC,VARCHAR);
