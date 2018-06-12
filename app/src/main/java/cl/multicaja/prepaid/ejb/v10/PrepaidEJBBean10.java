@@ -11,8 +11,9 @@ import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.data.ejb.v10.DataEJB10;
+import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
+import cl.multicaja.users.model.v10.ParamValue;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
@@ -60,6 +61,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
 
+  @EJB
+  private DataEJBBean10 usersDataEJB10;
+
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
   }
@@ -106,6 +110,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
+  }
+
+  public DataEJBBean10 getUsersDataEJB10() {
+    return usersDataEJB10;
+  }
+
+  public void setUsersDataEJB10(DataEJBBean10 usersDataEJB10) {
+    this.usersDataEJB10 = usersDataEJB10;
   }
 
   @Override
@@ -295,7 +307,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
-    //TODO: Verificar password
+    // Se verifica la clave
+    ParamValue passwordParam = new ParamValue();
+    passwordParam.setValue(withdrawRequest.getPassword());
+    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getIdUserMc(), passwordParam);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,

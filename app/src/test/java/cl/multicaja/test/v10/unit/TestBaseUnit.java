@@ -212,13 +212,17 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User registerUser() throws Exception {
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)));
+  }
+
+  public User registerUser(String password) throws Exception {
     User user = preRegisterUser();
     user = getUsersEJBBean10().fillUser(user);
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+    user.setPassword(password);
     user = updateUser(user);
     return user;
   }
@@ -389,6 +393,10 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    */
   public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) {
+    return buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
+  }
+
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) {
 
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
 
@@ -405,7 +413,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
 
-    prepaidWithdraw.setPassword(user != null ? user.getPassword() : null);
+    prepaidWithdraw.setPassword(password);
 
     return prepaidWithdraw;
   }
