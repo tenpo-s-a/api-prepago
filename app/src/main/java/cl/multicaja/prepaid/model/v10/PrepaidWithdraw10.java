@@ -104,4 +104,9 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
   public void setMcVoucherData(List<Map<String, String>> mcVoucherData) {
     this.mcVoucherData = mcVoucherData;
   }
+
+  @JsonIgnore
+  public String getPassword(){
+    return super.getPassword();
+  }
 }

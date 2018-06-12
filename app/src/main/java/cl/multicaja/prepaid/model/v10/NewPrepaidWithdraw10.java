@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
+  private String password;
+
   public NewPrepaidWithdraw10() {
     super(PrepaidMovementType.WITHDRAW);
   }
@@ -25,4 +27,24 @@ public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
     return TransactionOriginType.WEB.equals(this.getTransactionOriginType()) ? CdtTransactionType.RETIRO_WEB_CONF : CdtTransactionType.RETIRO_POS_CONF;
   }
 
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  @Override
+  public String toString() {
+    return "NewPrepaidBaseTransaction10{" +
+      "amount=" + this.getAmount() +
+      ", transactionId='" + this.getTransactionId() + '\'' +
+      ", rut=" + this.getRut() +
+      ", merchantCode='" + this.getMerchantCode() + '\'' +
+      ", merchantName='" + this.getMerchantName() + '\'' +
+      ", merchantCategory=" + this.getMerchantCategory() +
+      ", movementType=" + this.getMovementType() +
+      '}';
+  }
 }
