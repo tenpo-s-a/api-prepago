@@ -127,6 +127,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   @Override
   public PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
+
     if(userId == null){
       throw new ValidationException(2);
     }
@@ -134,15 +135,25 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new ValidationException(2);
     }
 
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
-
-    PrepaidCard10 prepaidCard10 = lst != null && !lst.isEmpty() ? lst.get(0) : null;
+    PrepaidCard10 prepaidCard10 = this.getLastPrepaidCardByUserId(headers, userId);
 
     if (prepaidCard10 == null) {
       return null;
     }
 
     return status.equals(prepaidCard10.getStatus()) ? prepaidCard10 : null;
+  }
+
+  @Override
+  public PrepaidCard10 getLastPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
+
+    if(userId == null){
+      throw new ValidationException(2);
+    }
+
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
+
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
   @Override
