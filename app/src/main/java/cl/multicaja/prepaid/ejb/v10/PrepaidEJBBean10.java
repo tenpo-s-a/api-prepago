@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -223,7 +224,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateTopupFeeAndTotal(prepaidTopup);
+    this.calculateFeeAndTotal(prepaidTopup);
 
     /*
       Agrega la informacion par el voucher
@@ -318,14 +319,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(Long.valueOf(0));
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    // TODO: evaluar respuesta de error del CDT
+    // Si no cumple con los limites
+    if(!cdtTransaction.getNumError().equals("0")){
+      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      if(lNumError > 108000) {
+        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      } else {
+        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+    }
 
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
 
@@ -375,7 +384,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // se confirma la transaccion
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     } else {
@@ -384,25 +393,41 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
 
       //Confirmar el retiro en CDT
-      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
-      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Iniciar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
-      cdtTransaction.setGloss(CdtTransactionType.REVERSA_RETIRO.getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction.setTransactionReference(0L);
-      cdtTransaction.setExternalTransactionId(String.format("REV_%s", withdrawRequest.getTransactionId()));
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Confirmar reversa en CDT
-      cdtTransaction.setTransactionType(CdtTransactionType.RETIRO_POS_CONF);
-      cdtTransaction.setExternalTransactionId(cdtTransaction.getExternalTransactionIdConfirm());
+      cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO_CONF);
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
+      throw new IOException();
     }
+
+    /*
+      Calcular comisiones
+     */
+    this.calculateFeeAndTotal(prepaidWithdraw);
+
+    /*
+      Agrega la informacion par el voucher
+     */
+    this.addVoucherData(prepaidWithdraw);
+
+    /*
+      Enviar mensaje al proceso asincrono
+     */
+    String messageId = this.getDelegate().sendWithdraw(prepaidWithdraw, user, cdtTransaction, prepaidMovement);
+    prepaidWithdraw.setMessageId(messageId);
 
     return prepaidWithdraw;
   }
@@ -428,7 +453,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void calculateTopupFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
+  public void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
     if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null || StringUtils.isBlank(transaction.getMerchantCode())){
       throw new IllegalStateException();
@@ -474,9 +499,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void addVoucherData(PrepaidTopup10 topup) throws Exception {
+  public void addVoucherData(IPrepaidTransaction10 transaction) throws Exception {
 
-    if(topup == null || topup.getAmount() == null || topup.getAmount().getValue() == null) {
+    if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null) {
       throw new IllegalStateException();
     }
 
@@ -486,16 +511,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     symbols.setGroupingSeparator('.');
     formatter.setDecimalFormatSymbols(symbols);
 
-    topup.setMcVoucherType("A");
+    transaction.setMcVoucherType("A");
 
     Map<String, String> data = new HashMap<>();
     data.put("name", "amount_paid");
-    data.put("value", formatter.format(topup.getAmount().getValue().longValue()));
+    data.put("value", formatter.format(transaction.getAmount().getValue().longValue()));
 
     List<Map<String, String>> mcVoucherData = new ArrayList<>();
     mcVoucherData.add(data);
 
-    topup.setMcVoucherData(mcVoucherData);
+    transaction.setMcVoucherData(mcVoucherData);
   }
 
   /**
@@ -541,7 +566,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
     prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
-    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setCodent(codent);

@@ -26,6 +26,34 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
   /**
    *
+   * @param map
+   */
+  private void checkColumns(Map<String, Object> map) {
+
+    String[] columns = {
+      "_id",
+      "_id_usuario",
+      "_pan",
+      "_pan_encriptado",
+      "_contrato",
+      "_expiracion",
+      "_estado",
+      "_nombre_tarjeta",
+      "_producto",
+      "_numero_unico",
+      "_fecha_creacion",
+      "_fecha_actualizacion"
+    };
+
+    for (String column : columns) {
+      Assert.assertTrue("Debe contener la columna " + column, map.containsKey(column));
+    }
+
+    Assert.assertEquals("Debe contener solamente las columnas definidas", columns.length, map.keySet().size());
+  }
+
+  /**
+   *
    * @param id
    * @param idUsuario
    * @param expiracion
@@ -57,7 +85,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
@@ -76,7 +107,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
@@ -101,7 +135,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
@@ -126,7 +163,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
@@ -158,13 +198,19 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 2 , result.size());
 
-    Map mCard1 = (Map)result.get(1);
+    Map<String, Object> mCard1 = (Map)result.get(1);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));
     }
 
-    Map mCard2 = (Map)result.get(0);
+    Map<String, Object> mCard2 = (Map)result.get(0);
+
+    checkColumns(mCard2);
+
     Set<String> keys2 = obj2.keySet();
     for (String k : keys2) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj2.get(k), mCard2.get("_" + k));
@@ -189,7 +235,10 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
 
-    Map mCard1 = (Map)result.get(0);
+    Map<String, Object> mCard1 = (Map)result.get(0);
+
+    checkColumns(mCard1);
+
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       Assert.assertEquals("Debe ser la misma tarjeta", obj1.get(k), mCard1.get("_" + k));

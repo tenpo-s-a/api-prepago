@@ -21,16 +21,15 @@
 
   CREATE TABLE ${schema.cdt}.cdt_fase_movimiento (
       id                    BIGSERIAL  NOT NULL,
+      id_fase_padre         BIGINT  NOT NULL,
       nombre                VARCHAR(50) NOT NULL,
       descripcion           VARCHAR(100) NOT NULL,
-      signo                 NUMERIC NOT NULL,
       ind_confirmacion      VARCHAR(1) NOT NULL,
       estado                VARCHAR(10) NOT NULL,
       fecha_estado          TIMESTAMP NOT NULL,
       fecha_creacion        TIMESTAMP NOT NULL,
       CONSTRAINT cdt_fase_movimiento_pk PRIMARY KEY(id)
   );
-
   CREATE INDEX cdt_fase_movimiento_i1 ON ${schema.cdt}.cdt_fase_movimiento (estado);
 -- //@UNDO
 -- SQL to undo the change goes here.

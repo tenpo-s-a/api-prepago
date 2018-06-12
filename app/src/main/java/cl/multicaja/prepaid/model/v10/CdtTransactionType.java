@@ -7,18 +7,23 @@ public enum CdtTransactionType {
 
   PRIMERA_CARGA("Solicitud Primera Carga"),
   PRIMERA_CARGA_CONF("Confirmación Primera Carga"),
+  REVERSA_PRIMERA_CARGA("Solicitud Reversa Primera Carga"),
+  REVERSA_PRIMERA_CARGA_CONF("Confirmación Reversa Primera Carga"),
+
   CARGA_WEB("Solicitud Carga Web"),
   CARGA_WEB_CONF("Confirmación Carga Web"),
   CARGA_POS("Solicitud Carga POS"),
   CARGA_POS_CONF("Confirmación Carga POS"),
+  REVERSA_CARGA("Solicitud Reversa Carga"),
+  REVERSA_CARGA_CONF("Confirmación Reversa Carga"),
+
   RETIRO_WEB("Solicitud Retiro Web"),
   RETIRO_WEB_CONF("Confirmación Retiro Web"),
   RETIRO_POS("Solicitud Retiro POS"),
   RETIRO_POS_CONF("Confirmación Retiro POS"),
   REVERSA_RETIRO("Solicitud Reversa de Retiro"),
-  REVERSA_RETIRO_CONF("Confirmación Reversa de Retiro"),
-  REVERSA_CARGA("Solicitud Reversa de Carga"),
-  REVERSA_CARGA_CONF("Confirmación Reversa de Carga");
+  REVERSA_RETIRO_CONF("Confirmacion Reversa de Retiro");
+  ;
 
   private String name;
 

@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   private static final String URL_PATH = "/1.0/prepaid/withdrawal";
 
   @Test
-  public void shouldReturn200_OnWithdrawUserBalance() throws Exception {
+  public void shouldReturn200_OnPosWithdraw() throws Exception {
 
     User user = registerUser();
 
@@ -33,6 +34,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
 
     String json = toJson(prepaidWithdraw);
 
@@ -50,16 +52,235 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
 
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertTrue("Deberia tener el data", withdraw.getMcVoucherData().size() > 0);
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
     List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
     Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus reversed = PrepaidMovementStatus.PROCESS_OK;
+    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
     for(PrepaidMovement10 m : dbPrepaidMovements) {
       if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
+        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
       } else {
         Assert.assertTrue("Deberia ser false", Boolean.FALSE);
       }
     }
+  }
+
+  @Test
+  public void shouldReturn200_OnWebWithdraw() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+
+    String json = toJson(prepaidWithdraw);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 200", 200, resp.getStatus());
+    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", withdraw.getId());
+    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertTrue("Deberia tener el data", withdraw.getMcVoucherData().size() > 0);
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
+    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
+    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
+    for(PrepaidMovement10 m : dbPrepaidMovements) {
+      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
+        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
+      } else {
+        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
+      }
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_MinAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108303", 108303, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108303", 108303, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_MaxAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100001));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108302", 108302, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500001));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108301", 108301, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_MonthlyAmount() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    for(int i = 0; i < 10; i++) {
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
+
+      String json = toJson(prepaidWithdraw);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 200", 200, resp.getStatus());
+    }
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
+
+    String json = toJson(prepaidWithdraw);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 108304", 108304, errorObj.get("code"));
   }
 
   @Test
@@ -450,7 +671,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_TecnocomError_UserDoesntExists() throws Exception {
+  public void shouldReturn500_TecnocomError_UserDoesntExists() throws Exception {
 
     User user = registerUser();
 
@@ -468,27 +689,6 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     System.out.println("resp:: " + resp);
 
-    Assert.assertEquals("status 200", 200, resp.getStatus());
-    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
-
-    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
-    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
-    Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
-
-    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
-    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus reversed = PrepaidMovementStatus.REVERSED;
-    for(PrepaidMovement10 m : dbPrepaidMovements) {
-      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + reversed, reversed, m.getEstado());
-      } else {
-        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
-      }
-    }
-
+    Assert.assertEquals("status 500", 500, resp.getStatus());
   }
-
 }
