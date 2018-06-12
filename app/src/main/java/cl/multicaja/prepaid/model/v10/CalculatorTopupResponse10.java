@@ -8,15 +8,15 @@ import java.util.Objects;
 public class CalculatorTopupResponse10 extends BaseModel {
 
   private BigDecimal fee;
-  private Double pca;
-  private Double eed;
+  private BigDecimal pca;
+  private BigDecimal eed;
   private NewAmountAndCurrency10 amountToPay;
 
   public CalculatorTopupResponse10(){
     super();
   }
 
-  public CalculatorTopupResponse10(BigDecimal fee, Double pca, Double eed, NewAmountAndCurrency10 amountToPay) {
+  public CalculatorTopupResponse10(BigDecimal fee, BigDecimal pca, BigDecimal eed, NewAmountAndCurrency10 amountToPay) {
     this.fee = fee;
     this.pca = pca;
     this.eed = eed;
@@ -31,19 +31,19 @@ public class CalculatorTopupResponse10 extends BaseModel {
     this.fee = fee;
   }
 
-  public Double getPca() {
+  public BigDecimal getPca() {
     return pca;
   }
 
-  public void setPca(Double pca) {
+  public void setPca(BigDecimal pca) {
     this.pca = pca;
   }
 
-  public Double getEed() {
+  public BigDecimal getEed() {
     return eed;
   }
 
-  public void setEed(Double eed) {
+  public void setEed(BigDecimal eed) {
     this.eed = eed;
   }
 
@@ -68,7 +68,6 @@ public class CalculatorTopupResponse10 extends BaseModel {
 
   @Override
   public int hashCode() {
-
     return Objects.hash(getFee(), getPca(), getEed(), getAmountToPay());
   }
 }

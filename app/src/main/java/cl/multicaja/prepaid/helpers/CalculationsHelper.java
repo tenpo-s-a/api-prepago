@@ -35,8 +35,7 @@ public class CalculationsHelper {
 
   public static final double IVA = 1.19;
 
-  //TODO: Valor dolar debe ser obtenido desde algun servicio.
-  public static final Integer USD_VALUE = 645;
+  public static final int MAX_AMOUNT_BY_USER = 500000;
 
   /**
    * Calcula comision en la formula: MAX(100; 0,5% * amount) + IVA
@@ -62,11 +61,21 @@ public class CalculationsHelper {
    * @param amount
    * @return
    */
-  public static double calculatePca(BigDecimal amount) {
+  private static Double calculatePca_(BigDecimal amount) {
     if (amount == null) {
-      return 0;
+      return 0d;
     }
     return (amount.doubleValue() - 240) / 1.022;
+  }
+
+  /**
+   * Calcula el: para cuanto alcanza (pca)
+   *
+   * @param amount
+   * @return
+   */
+  public static BigDecimal calculatePca(BigDecimal amount) {
+    return BigDecimal.valueOf(calculatePca_(amount)).setScale(2, RoundingMode.CEILING);
   }
 
   /**
@@ -75,14 +84,18 @@ public class CalculationsHelper {
    * @param amount
    * @return
    */
-  public static double calculateEed(BigDecimal amount) {
+  public static BigDecimal calculateEed(BigDecimal amount) {
     if (amount == null) {
-      return 0;
+      return BigDecimal.valueOf(0d);
     }
-    double pca = calculatePca(amount);
-    return pca / USD_VALUE;
+    double pca = calculatePca_(amount);
+    return BigDecimal.valueOf(pca / getUsdValue()).setScale(2, RoundingMode.CEILING);
   }
 
+  /**
+   *
+   * @return
+   */
   public static Integer getUsdValue() {
     //TODO quizas se saca de algun servicio externo
     return 645;

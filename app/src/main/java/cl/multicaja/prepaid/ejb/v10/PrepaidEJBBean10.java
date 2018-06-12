@@ -696,34 +696,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       */
     }
 
-    // OBTENGO LA TARJETA DEL USUARIO Y VALIDO
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
+    //saldo del usuario
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
 
-    if (prepaidCard10 == null) {
+    log.info("Saldo de usuario: " + balance);
+    log.info("Monto a cargar: " + amountValue);
 
-      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
-        PrepaidCardStatus.LOCKED_HARD,
-        PrepaidCardStatus.EXPIRED);
-
-      if (prepaidCard10 != null) {
-        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard10.getStatus().toString())); //tarjeta invalida
-      }
-    }
-
-    if (prepaidCard10 == null) {
-      //tarjeta no existe para ningun estado validado anteriormente
-      throw new ValidationException(106001).setData(new KeyValue("value", "No existe tarjeta para estados [ACTIVE, LOCKED, LOCKED_HARD, EXPIRED]"));
-    }
-
-    // CONSULTA SALDO TECNOCOM
-    ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), calculatorRequest.getRut().toString(), TipoDocumento.RUT);
-
-    // SALDO TARJETA EN TECNOCOM
-    final double balance = consultaSaldoDTO.getSaldisconp().doubleValue() - consultaSaldoDTO.getSalautconp().doubleValue();
-
-    if((balance + amountValue.doubleValue()) > 500000) {
+    if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > MAX_AMOUNT_BY_USER) {
       throw new ValidationException(109000); //supera el saldo
     }
 

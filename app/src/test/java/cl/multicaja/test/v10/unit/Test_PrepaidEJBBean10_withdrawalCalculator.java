@@ -20,12 +20,12 @@ import java.util.Locale;
 public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
 
   @Test
-  public void calculatorWithErrorParamsNull() throws Exception {
+  public void calculator_with_error_in_params_null() throws Exception {
 
     final Integer codErrorParamNull = 101004;
 
     {
-      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
       amount.setValue(BigDecimal.valueOf(3000));
 
@@ -35,13 +35,17 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setRut(null);
 
       try {
+
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
       }
     }
     {
-      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
       amount.setValue(BigDecimal.valueOf(3000));
 
@@ -51,7 +55,11 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setRut(1);
 
       try {
+
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
       }
@@ -63,13 +71,17 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setRut(1);
 
       try {
+
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
       }
     }
     {
-      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
       amount.setValue(null);
 
@@ -79,13 +91,17 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setRut(null);
 
       try {
+
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
       }
     }
     {
-      AmountAndCurrency10 amount = new AmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setCurrencyCode(null);
       amount.setValue(BigDecimal.valueOf(3000));
 
@@ -95,7 +111,11 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setRut(null);
 
       try {
+
         getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
       }

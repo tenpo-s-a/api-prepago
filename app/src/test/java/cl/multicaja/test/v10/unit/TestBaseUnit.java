@@ -741,7 +741,7 @@ public class TestBaseUnit extends TestApiBase {
       numaut = numaut.substring(numaut.length()-6);
     }
 
-    System.out.println("Monto a cargar: " + impfac);
+    System.out.println("Monto a cargar en tecnocom: " + impfac);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
