@@ -2,39 +2,51 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
+import java.math.BigDecimal;
+
 /**
- * @author abarazarte
+ * @author vutreras
  */
 public class PrepaidBalance10 extends BaseModel {
 
-  private NewAmountAndCurrency10 primary;
-  private NewAmountAndCurrency10 secondary;
+  private NewAmountAndCurrency10 balance;
+  private BigDecimal pcaClp;
+  private BigDecimal pcaUsd;
   private boolean updated;
 
   public PrepaidBalance10() {
     super();
   }
 
-  public PrepaidBalance10(NewAmountAndCurrency10 primary, NewAmountAndCurrency10 secondary, boolean updated) {
-    this.primary = primary;
-    this.secondary = secondary;
+  public PrepaidBalance10(NewAmountAndCurrency10 balance, BigDecimal pcaClp, BigDecimal pcaUsd, boolean updated) {
+    this.balance = balance;
+    this.pcaClp = pcaClp;
+    this.pcaUsd = pcaUsd;
     this.updated = updated;
   }
 
-  public NewAmountAndCurrency10 getPrimary() {
-    return primary;
+  public NewAmountAndCurrency10 getBalance() {
+    return balance;
   }
 
-  public void setPrimary(NewAmountAndCurrency10 primary) {
-    this.primary = primary;
+  public void setBalance(NewAmountAndCurrency10 balance) {
+    this.balance = balance;
   }
 
-  public NewAmountAndCurrency10 getSecondary() {
-    return secondary;
+  public BigDecimal getPcaClp() {
+    return pcaClp;
   }
 
-  public void setSecondary(NewAmountAndCurrency10 secondary) {
-    this.secondary = secondary;
+  public void setPcaClp(BigDecimal pcaClp) {
+    this.pcaClp = pcaClp;
+  }
+
+  public BigDecimal getPcaUsd() {
+    return pcaUsd;
+  }
+
+  public void setPcaUsd(BigDecimal pcaUsd) {
+    this.pcaUsd = pcaUsd;
   }
 
   public boolean isUpdated() {

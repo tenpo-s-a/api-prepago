@@ -9,23 +9,23 @@ import java.util.Objects;
 /**
  * @autor vutreras
  */
-public class PrepaidUserBalance10 extends BaseModel {
+public class PrepaidBalanceInfo10 extends BaseModel {
 
   private Integer clamonp;
   private Integer clamons;
   private String conprod;
   private String producto;
-  private BigDecimal salautconp;
-  private BigDecimal salautcons;
-  private BigDecimal saldisconp;
-  private BigDecimal saldiscons;
+  private BigDecimal salautconp = new BigDecimal(0l);
+  private BigDecimal salautcons = new BigDecimal(0l);
+  private BigDecimal saldisconp = new BigDecimal(0l);
+  private BigDecimal saldiscons = new BigDecimal(0l);
   private String subprodu;
 
-  public PrepaidUserBalance10() {
+  public PrepaidBalanceInfo10() {
     super();
   }
 
-  public PrepaidUserBalance10(ConsultaSaldoDTO consultaSaldoDTO) {
+  public PrepaidBalanceInfo10(ConsultaSaldoDTO consultaSaldoDTO) {
     super();
     this.setClamonp(consultaSaldoDTO.getClamonp());
     this.setClamons(consultaSaldoDTO.getClamons());
@@ -34,23 +34,11 @@ public class PrepaidUserBalance10 extends BaseModel {
     this.setSalautconp(consultaSaldoDTO.getSalautconp());
     this.setSalautcons(consultaSaldoDTO.getSalautcons());
     this.setSaldisconp(consultaSaldoDTO.getSaldisconp());
-    this.setSaldiscons(BigDecimal.valueOf(consultaSaldoDTO.getSaldiscons()));
+    this.setSaldiscons(consultaSaldoDTO.getSaldiscons());
     this.setSubprodu(consultaSaldoDTO.getSubprodu());
   }
 
-  public PrepaidUserBalance10(Integer clamonp, Integer clamons, String conprod, String producto, BigDecimal salautconp, BigDecimal salautcons, BigDecimal saldisconp, BigDecimal saldiscons, String subprodu) {
-    this.clamonp = clamonp;
-    this.clamons = clamons;
-    this.conprod = conprod;
-    this.producto = producto;
-    this.salautconp = salautconp;
-    this.salautcons = salautcons;
-    this.saldisconp = saldisconp;
-    this.saldiscons = saldiscons;
-    this.subprodu = subprodu;
-  }
-
-  public PrepaidUserBalance10(Integer clamonp, Integer clamons, BigDecimal salautconp, BigDecimal salautcons, BigDecimal saldisconp, BigDecimal saldiscons) {
+  public PrepaidBalanceInfo10(Integer clamonp, Integer clamons, BigDecimal salautconp, BigDecimal salautcons, BigDecimal saldisconp, BigDecimal saldiscons) {
     this.clamonp = clamonp;
     this.clamons = clamons;
     this.salautconp = salautconp;
@@ -134,8 +122,8 @@ public class PrepaidUserBalance10 extends BaseModel {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof PrepaidUserBalance10)) return false;
-    PrepaidUserBalance10 that = (PrepaidUserBalance10) o;
+    if (!(o instanceof PrepaidBalanceInfo10)) return false;
+    PrepaidBalanceInfo10 that = (PrepaidBalanceInfo10) o;
     return Objects.equals(getClamonp(), that.getClamonp()) &&
       Objects.equals(getClamons(), that.getClamons()) &&
       Objects.equals(getConprod(), that.getConprod()) &&

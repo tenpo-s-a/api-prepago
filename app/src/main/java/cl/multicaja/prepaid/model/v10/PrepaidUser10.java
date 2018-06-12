@@ -4,7 +4,6 @@ import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -19,7 +18,7 @@ public class PrepaidUser10 extends BaseModel {
   private Timestamps timestamps;
 
   @JsonIgnore
-  private PrepaidUserBalance10 balance;
+  private PrepaidBalanceInfo10 balance;
 
   @JsonIgnore
   private Long balanceExpiration;
@@ -68,11 +67,11 @@ public class PrepaidUser10 extends BaseModel {
     this.timestamps = timestamps;
   }
 
-  public PrepaidUserBalance10 getBalance() {
+  public PrepaidBalanceInfo10 getBalance() {
     return balance;
   }
 
-  public void setBalance(PrepaidUserBalance10 balance) {
+  public void setBalance(PrepaidBalanceInfo10 balance) {
     this.balance = balance;
   }
 

@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.*;
@@ -33,6 +34,19 @@ import java.util.*;
 public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidUserEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidUserEJBBean10.class);
+
+  public static Integer BALANCE_CACHE_EXPIRATION_MILLISECONDS = 60000;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
 
   @Override
   public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
@@ -89,15 +103,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
       u.setRut(numberUtils.toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
+      u.setBalanceExpiration(0L);
       try {
         String saldo = String.valueOf(row.get("_saldo"));
         if (StringUtils.isNotBlank(saldo)) {
-          u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidUserBalance10.class));
+          u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidBalanceInfo10.class));
+          u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
         }
       } catch(Exception ex) {
-        ex.printStackTrace();
+        log.error("Error al convertir el saldo del usuario", ex);
       }
-      u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
       timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
@@ -199,33 +214,46 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     Long balanceExpiration = prepaidUser.getBalanceExpiration();
 
-    Integer usdValue = CalculationsHelper.getUsdValue();
-
     boolean updated = false;
-    PrepaidUserBalance10 pBalance = prepaidUser.getBalance();
+    PrepaidBalanceInfo10 pBalance = prepaidUser.getBalance();
 
-    if (balanceExpiration <= 0 || balanceExpiration >= System.currentTimeMillis()) {
-      //TODO buscar el saldo en tecnocom y actualizarlo al usuario prepago
-      //ConsultaSaldoDTO consultaSaldoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().consultaSaldo(contrato, prepaidUser.getRut().toString(), TipoDocumento.RUT);
-      //pBalance = new PrepaidUserBalance10(consultaSaldoDTO);
-      if (pBalance != null) {
-        this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
+    //solamente si el usuario no tiene saldo registrado o se encuentra expirado, se busca en tecnocom
+    if (pBalance == null || balanceExpiration <= 0 || System.currentTimeMillis() >= balanceExpiration) {
+
+      //se busca la ultima tarjeta para obtener el contrado de ella
+      PrepaidCard10 prepaidCard10 = this.getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, userId);
+
+      if (prepaidCard10 != null) {
+
+        ConsultaSaldoDTO consultaSaldoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+
+        if (consultaSaldoDTO != null) {
+          pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
+          this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
+          updated = true;
+        }
       }
-      updated = true;
     }
 
-    if (pBalance == null) {
-      return null;
+    BigDecimal balance = BigDecimal.valueOf(0L);
+    CodigoMoneda clamonp = CodigoMoneda.CHILE_CLP;
+
+    if (pBalance != null) {
+      //El que le mostraremos al cliente será el saldo dispuesto principal menos el saldo autorizado principal
+      balance = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
     }
 
-    NewAmountAndCurrency10 primaryBalance = new NewAmountAndCurrency10(pBalance.getSalautconp(), CodigoMoneda.fromValue(pBalance.getClamonp()));
-    NewAmountAndCurrency10 secondaryBalance = new NewAmountAndCurrency10(pBalance.getSalautcons(), CodigoMoneda.fromValue(pBalance.getClamons()));
+    //TODO falta calcular el pcaClp y pcaUsd
+    BigDecimal pcaClp = BigDecimal.valueOf(0L); //entero
+    BigDecimal pcaUsd = BigDecimal.valueOf(0d); //decimal con 2 decimales
 
-    return new PrepaidBalance10(primaryBalance, secondaryBalance, updated);
+    pcaUsd = pcaUsd.setScale(2, RoundingMode.CEILING); //solo 2 decimales
+
+    return new PrepaidBalance10(new NewAmountAndCurrency10(balance, clamonp), pcaClp, pcaUsd, updated);
   }
 
   @Override
-  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidUserBalance10 balance) throws Exception {
+  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception {
 
     if(userId == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
@@ -235,7 +263,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     //expira en 1 minuto (60
-    Long balanceExpiration = System.currentTimeMillis() + 60000;
+    Long balanceExpiration = System.currentTimeMillis() + BALANCE_CACHE_EXPIRATION_MILLISECONDS;
 
     Object[] params = {
       userId, //id

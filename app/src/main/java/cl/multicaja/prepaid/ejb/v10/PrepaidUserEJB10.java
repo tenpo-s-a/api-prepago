@@ -5,7 +5,6 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -105,5 +104,5 @@ public interface PrepaidUserEJB10 {
    * @param balance
    * @throws Exception
    */
-  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidUserBalance10 balance) throws Exception;
+  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
 }

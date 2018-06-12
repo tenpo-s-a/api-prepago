@@ -132,6 +132,7 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     if (prepaidUserEJBBean10 == null) {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+      prepaidUserEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
     }
     return prepaidUserEJBBean10;
   }
