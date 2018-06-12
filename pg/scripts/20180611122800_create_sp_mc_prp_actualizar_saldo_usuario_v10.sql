@@ -20,7 +20,7 @@
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
 (
  IN _id            BIGINT,
- IN _saldo         TEXT,
+ IN _saldo_info         TEXT,
  IN _saldo_expiracion BIGINT,
  OUT _error_code    VARCHAR,
  OUT _error_msg     VARCHAR
@@ -36,9 +36,9 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_saldo, '')) = '' THEN
+    IF TRIM(COALESCE(_saldo_info, '')) = '' THEN
       _error_code := 'MC002';
-      _error_msg := 'El _saldo es obligatorio';
+      _error_msg := 'El _saldo_info es obligatorio';
       RETURN;
     END IF;
 
@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
 
      UPDATE ${schema}.prp_usuario
      SET
-        saldo = _saldo,
+        saldo_info = _saldo_info,
         saldo_expiracion = _saldo_expiracion,
         fecha_actualizacion = timezone('utc', now())
      WHERE
@@ -59,7 +59,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
    EXCEPTION
      WHEN OTHERS THEN
          _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_actualizar_saldo_usuario_v10] Error al actualizar saldo de usuario. CAUSA ('|| SQLERRM ||')';
+         _error_msg := '[mc_prp_actualizar_saldo_usuario_v10] Error al actualizar saldo_info de usuario. CAUSA ('|| SQLERRM ||')';
      RETURN;
 END;
 $$ LANGUAGE plpgsql;

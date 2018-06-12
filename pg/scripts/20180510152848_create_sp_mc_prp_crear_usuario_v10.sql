@@ -54,7 +54,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
        id_usuario_mc,
        rut,
        estado,
-       saldo,
+       saldo_info,
        saldo_expiracion,
        fecha_creacion,
        fecha_actualizacion

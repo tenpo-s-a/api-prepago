@@ -38,7 +38,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
       "_id_usuario_mc",
       "_rut",
       "_estado",
-      "_saldo",
+      "_saldo_info",
       "_saldo_expiracion",
       "_fecha_creacion",
       "_fecha_actualizacion"

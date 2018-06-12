@@ -31,7 +31,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
 
     Object[] params = {
       obj1.get("id"), //id
-      balance, //saldo
+      balance, //saldo_info
       balanceExpiration,// saldo_expiracion
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -48,7 +48,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
 
     Assert.assertNotNull("debe retornar una lista", result);
     Assert.assertEquals("Debe contener un elemento", 1 , result.size());
-    Assert.assertEquals("Debe contener el nuevo saldo", balance, ((Map)result.get(0)).get("_saldo"));
+    Assert.assertEquals("Debe contener el nuevo saldo_info", balance, ((Map)result.get(0)).get("_saldo_info"));
     Assert.assertEquals("Debe contener el nuevo saldo_expiracion", balanceExpiration, ((Map)result.get(0)).get("_saldo_expiracion"));
   }
 
@@ -58,7 +58,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         new NullParam(Types.BIGINT), //id
-        "{}", //saldo
+        "{}", //saldo_info
         1L,// saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -73,7 +73,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        new NullParam(Types.VARCHAR), //saldo
+        new NullParam(Types.VARCHAR), //saldo_info
         1L, //saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -88,7 +88,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        "{}", //saldo
+        "{}", //saldo_info
         new NullParam(Types.BIGINT), //saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -103,7 +103,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        "{}", //saldo
+        "{}", //saldo_info
         -1, //saldo_expiracion, no puede ser expiracion menor a 0
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
