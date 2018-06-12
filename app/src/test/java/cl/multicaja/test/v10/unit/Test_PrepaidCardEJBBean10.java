@@ -13,16 +13,16 @@ import java.util.List;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
+public class Test_PrepaidCardEJBBean10 extends TestBaseUnit {
 
   @Test
-  public void insertCardOk() throws Exception {
+  public void createPrepaidCard_ok() throws Exception {
     PrepaidCard10 card = buildPrepaidCard10();
     createPrepaidCard10(card);
   }
 
   @Test
-  public void searchCardOk() throws Exception {
+  public void searchPrepaidCard_ok() throws Exception {
 
     /**
      * Caso en que se registra una nueva tarjet y luego se busca por su id y idUser
@@ -43,34 +43,61 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   }
 
   @Test
-  public void searchListCarsOkByUserIdAndStatus() throws Exception {
+  public void getPrepaidCards_ok_by_userId_and_status() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10();
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
-    card1.setStatus(PrepaidCardStatus.EXPIRED);
-    createPrepaidCard10(card1);
+    {
+      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      card1.setStatus(PrepaidCardStatus.EXPIRED);
+      createPrepaidCard10(card1);
 
-    PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
-    card2.setStatus(PrepaidCardStatus.EXPIRED);
-    createPrepaidCard10(card2);
+      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      card2.setStatus(PrepaidCardStatus.EXPIRED);
+      createPrepaidCard10(card2);
 
-    List<Long> lstFind = new ArrayList<>();
-    List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, prepaidUser.getId(), null, PrepaidCardStatus.EXPIRED, null);
-    for (PrepaidCard10 p : lst) {
-      if (p.getId().equals(card1.getId()) || p.getId().equals(card2.getId())) {
-        lstFind.add(p.getId());
+      List<Long> lstFind = new ArrayList<>();
+      List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, prepaidUser.getId(), null, PrepaidCardStatus.EXPIRED, null);
+      for (PrepaidCard10 p : lst) {
+        if (p.getId().equals(card1.getId()) || p.getId().equals(card2.getId())) {
+          lstFind.add(p.getId());
+        }
       }
+
+      Assert.assertEquals("deben ser 2", 2, lstFind.size());
+      Assert.assertTrue("debe contener id", lstFind.contains(card1.getId()) && lstFind.contains(card2.getId()));
     }
 
-    Assert.assertEquals("deben ser 2", 2 , lstFind.size());
-    Assert.assertEquals("debe contener id", true, lstFind.contains(card1.getId()) && lstFind.contains(card2.getId()));
+    {
+      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      card1.setStatus(PrepaidCardStatus.PENDING);
+      createPrepaidCard10(card1);
+
+      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+
+      Assert.assertNotNull("debe existir", prepaidCard);
+      Assert.assertEquals("debe ser igual a", card1, prepaidCard);
+    }
+
+    {
+      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
+      card1.setStatus(PrepaidCardStatus.PENDING);
+      createPrepaidCard10(card1);
+
+      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
+      card2.setStatus(PrepaidCardStatus.ACTIVE);
+      createPrepaidCard10(card2);
+
+      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
+
+      Assert.assertNull("no debe existir", prepaidCard);
+    }
   }
 
   @Test
-  public void updateStatusOk() throws Exception {
+  public void updatePrepaidCardStatus_ok() throws Exception {
 
     PrepaidCard10 card = buildPrepaidCard10();
     card = createPrepaidCard10(card);
@@ -84,7 +111,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   }
 
   @Test
-  public void updateCard() throws Exception {
+  public void updatePrepaidCard_ok() throws Exception {
 
     PrepaidCard10 card = buildPrepaidCard10Pending();
     card = createPrepaidCard10(card);
@@ -111,7 +138,7 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
   }
 
   @Test
-  public void checkOrderDesc() throws Exception {
+  public void getPrepaidCards_check_order_desc() throws Exception {
 
     for (int j = 0; j < 10; j++) {
       PrepaidCard10 card = buildPrepaidCard10();
@@ -124,53 +151,13 @@ public class Test_PrepaidEJBBean10_PrepaidCard10 extends TestBaseUnit {
 
     for (PrepaidCard10 p : lst) {
       System.out.println(p);
-      Assert.assertEquals("Debe estar en orden Descendente", true, p.getId() < id);
+      Assert.assertTrue("Debe estar en orden Descendente", p.getId() < id);
       id = p.getId();
     }
   }
 
   @Test
-  public void searchCarsOkByUserIdAndStatus() throws Exception {
-    {
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
-      card1.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card1);
-
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
-      card2.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card2);
-
-      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
-
-      Assert.assertNotNull("debe existir", prepaidCard);
-      Assert.assertEquals("debe ser igual a", card2, prepaidCard);
-    }
-
-    {
-      PrepaidUser10 prepaidUser = buildPrepaidUser10();
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      PrepaidCard10 card1 = buildPrepaidCard10(prepaidUser);
-      card1.setStatus(PrepaidCardStatus.PENDING);
-      createPrepaidCard10(card1);
-
-      PrepaidCard10 card2 = buildPrepaidCard10(prepaidUser);
-      card2.setStatus(PrepaidCardStatus.ACTIVE);
-      createPrepaidCard10(card2);
-
-      PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING);
-
-      Assert.assertNull("no debe existir", prepaidCard);
-    }
-  }
-
-  @Test
-  public void searchCarsOkByUserIdAndOneOfStatus() throws Exception {
+  public void getLastPrepaidCardByUserIdAndOneOfStatus() throws Exception {
 
     {
       PrepaidUser10 prepaidUser = buildPrepaidUser10();

@@ -231,6 +231,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidUser.setIdUserMc(user != null ? user.getId() : null);
     prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
     return prepaidUser;
   }
 
@@ -243,6 +244,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidUser.setIdUserMc(getUniqueLong());
     prepaidUser.setRut(getUniqueRutNumber());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
     return prepaidUser;
   }
 

@@ -105,5 +105,5 @@ public interface PrepaidUserEJB10 {
    * @param balance
    * @throws Exception
    */
-  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, BigDecimal balance) throws Exception;
+  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidUserBalance10 balance) throws Exception;
 }

@@ -7,10 +7,14 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.users.model.v10.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,7 +89,14 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
       u.setRut(numberUtils.toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
-      u.setBalance(numberUtils.toBigDecimal(row.get("_saldo")));
+      try {
+        String saldo = String.valueOf(row.get("_saldo"));
+        if (StringUtils.isNotBlank(saldo)) {
+          u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidUserBalance10.class));
+        }
+      } catch(Exception ex) {
+        ex.printStackTrace();
+      }
       u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
@@ -191,23 +202,30 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Integer usdValue = CalculationsHelper.getUsdValue();
 
     boolean updated = false;
-    BigDecimal pBalance = prepaidUser.getBalance();
+    PrepaidUserBalance10 pBalance = prepaidUser.getBalance();
 
     if (balanceExpiration <= 0 || balanceExpiration >= System.currentTimeMillis()) {
-      //TODO ir a buscar el saldo a tecnocom y actualizarlo al usuario prepago
+      //TODO buscar el saldo en tecnocom y actualizarlo al usuario prepago
+      //ConsultaSaldoDTO consultaSaldoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().consultaSaldo(contrato, prepaidUser.getRut().toString(), TipoDocumento.RUT);
+      //pBalance = new PrepaidUserBalance10(consultaSaldoDTO);
+      if (pBalance != null) {
+        this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
+      }
       updated = true;
     }
 
-    BigDecimal sBalance = pBalance.longValue() != 0 ? BigDecimal.valueOf(pBalance.doubleValue() / usdValue) : BigDecimal.valueOf(0);
+    if (pBalance == null) {
+      return null;
+    }
 
-    NewAmountAndCurrency10 primaryBalance = new NewAmountAndCurrency10(pBalance, CodigoMoneda.CHILE_CLP);
-    NewAmountAndCurrency10 secondaryBalance = new NewAmountAndCurrency10(sBalance, CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 primaryBalance = new NewAmountAndCurrency10(pBalance.getSalautconp(), CodigoMoneda.fromValue(pBalance.getClamonp()));
+    NewAmountAndCurrency10 secondaryBalance = new NewAmountAndCurrency10(pBalance.getSalautcons(), CodigoMoneda.fromValue(pBalance.getClamons()));
 
     return new PrepaidBalance10(primaryBalance, secondaryBalance, updated);
   }
 
   @Override
-  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, BigDecimal balance) throws Exception {
+  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidUserBalance10 balance) throws Exception {
 
     if(userId == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
@@ -221,7 +239,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     Object[] params = {
       userId, //id
-      balance, //saldo
+      JsonUtils.getJsonParser().toJson(balance), //saldo
       balanceExpiration, //saldo_expiracion
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

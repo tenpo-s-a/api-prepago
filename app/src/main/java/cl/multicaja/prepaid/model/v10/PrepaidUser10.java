@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -15,9 +16,13 @@ public class PrepaidUser10 extends BaseModel {
   private Long idUserMc;
   private Integer rut;
   private PrepaidUserStatus status;
-  private BigDecimal balance;
-  private Long balanceExpiration;
   private Timestamps timestamps;
+
+  @JsonIgnore
+  private PrepaidUserBalance10 balance;
+
+  @JsonIgnore
+  private Long balanceExpiration;
 
   public PrepaidUser10() {
     super();
@@ -63,11 +68,11 @@ public class PrepaidUser10 extends BaseModel {
     this.timestamps = timestamps;
   }
 
-  public BigDecimal getBalance() {
+  public PrepaidUserBalance10 getBalance() {
     return balance;
   }
 
-  public void setBalance(BigDecimal balance) {
+  public void setBalance(PrepaidUserBalance10 balance) {
     this.balance = balance;
   }
 
@@ -87,14 +92,11 @@ public class PrepaidUser10 extends BaseModel {
     return Objects.equals(getId(), that.getId()) &&
       Objects.equals(getIdUserMc(), that.getIdUserMc()) &&
       Objects.equals(getRut(), that.getRut()) &&
-      getStatus() == that.getStatus() &&
-      Objects.equals(getBalance(), that.getBalance()) &&
-      Objects.equals(getBalanceExpiration(), that.getBalanceExpiration()) &&
-      Objects.equals(getTimestamps(), that.getTimestamps());
+      getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus(), getBalance(), getBalanceExpiration(), getTimestamps());
+    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus(), getTimestamps());
   }
 }
