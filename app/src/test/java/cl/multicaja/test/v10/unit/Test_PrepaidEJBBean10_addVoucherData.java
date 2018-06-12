@@ -73,7 +73,7 @@ public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
   @Test(expected = IllegalStateException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountValueNull() throws Exception {
     PrepaidWithdraw10 withdraw= new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new AmountAndCurrency10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     withdraw.setAmount(amount);
 
     getPrepaidEJBBean10().addVoucherData(withdraw);
@@ -82,7 +82,7 @@ public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
   @Test
   public void shouldAddReceiptData_Withdraw() throws Exception {
     PrepaidWithdraw10 withdraw= new PrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new AmountAndCurrency10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal(1000000));
     withdraw.setAmount(amount);
 
