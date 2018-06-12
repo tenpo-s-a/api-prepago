@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -25,6 +26,9 @@ public final class PrepaidResource10 extends BaseResource {
 
   @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   /*
     Prepaid topup
@@ -97,4 +101,10 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().build();
   }
 
+  @GET
+  @Path("/{userId}/balance")
+  public Response getBalance(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userId);
+    return Response.ok(prepaidBalance10).build();
+  }
 }

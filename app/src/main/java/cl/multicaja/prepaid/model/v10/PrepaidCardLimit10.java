@@ -9,7 +9,7 @@ public class PrepaidCardLimit10 extends BaseModel {
 
   private String id;
   private String name;
-  private AmountAndCurrency10 amount;
+  private NewAmountAndCurrency10 amount;
 
   public PrepaidCardLimit10() {
     super();
@@ -31,11 +31,11 @@ public class PrepaidCardLimit10 extends BaseModel {
     this.name = name;
   }
 
-  public AmountAndCurrency10 getAmount() {
+  public NewAmountAndCurrency10 getAmount() {
     return amount;
   }
 
-  public void setAmount(AmountAndCurrency10 amount) {
+  public void setAmount(NewAmountAndCurrency10 amount) {
     this.amount = amount;
   }
 

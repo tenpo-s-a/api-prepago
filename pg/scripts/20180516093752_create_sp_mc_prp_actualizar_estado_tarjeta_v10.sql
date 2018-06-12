@@ -59,4 +59,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_estado_tarjeta_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_estado_tarjeta_v10(BIGINT, VARCHAR);

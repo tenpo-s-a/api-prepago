@@ -14,8 +14,8 @@ public class PrepaidTransaction10 extends BaseModel {
   private String realDate;
   private String accountingDate;
   private String processingDate;
-  private AmountAndCurrency10 amountPrimary;
-  private AmountAndCurrency10 amountForeign;
+  private NewAmountAndCurrency10 amountPrimary;
+  private NewAmountAndCurrency10 amountForeign;
   private Place10 place;
   private Merchant10 merchant;
 
@@ -79,19 +79,19 @@ public class PrepaidTransaction10 extends BaseModel {
     this.processingDate = processingDate;
   }
 
-  public AmountAndCurrency10 getAmountPrimary() {
+  public NewAmountAndCurrency10 getAmountPrimary() {
     return amountPrimary;
   }
 
-  public void setAmountPrimary(AmountAndCurrency10 amountPrimary) {
+  public void setAmountPrimary(NewAmountAndCurrency10 amountPrimary) {
     this.amountPrimary = amountPrimary;
   }
 
-  public AmountAndCurrency10 getAmountForeign() {
+  public NewAmountAndCurrency10 getAmountForeign() {
     return amountForeign;
   }
 
-  public void setAmountForeign(AmountAndCurrency10 amountForeign) {
+  public void setAmountForeign(NewAmountAndCurrency10 amountForeign) {
     this.amountForeign = amountForeign;
   }
 

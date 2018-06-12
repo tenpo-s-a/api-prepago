@@ -17,10 +17,11 @@
 -- // create_sp_mc_prp_actualizar_estado_usuario_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_estado_usuario_v10
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
 (
- IN _id             BIGINT,
- IN _estado         VARCHAR,
+ IN _id            BIGINT,
+ IN _saldo_info         TEXT,
+ IN _saldo_expiracion BIGINT,
  OUT _error_code    VARCHAR,
  OUT _error_msg     VARCHAR
 ) AS $$
@@ -35,15 +36,22 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_estado_usuario_v10
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_estado, '')) = '' THEN
+    IF TRIM(COALESCE(_saldo_info, '')) = '' THEN
       _error_code := 'MC002';
-      _error_msg := 'El _estado es obligatorio';
+      _error_msg := 'El _saldo_info es obligatorio';
+      RETURN;
+    END IF;
+
+    IF COALESCE(_saldo_expiracion, -1) <= -1 THEN
+      _error_code := 'MC003';
+      _error_msg := 'El _saldo_expiracion es obligatorio y debe ser mayor o igual a 0';
       RETURN;
     END IF;
 
      UPDATE ${schema}.prp_usuario
      SET
-        estado = _estado,
+        saldo_info = _saldo_info,
+        saldo_expiracion = _saldo_expiracion,
         fecha_actualizacion = timezone('utc', now())
      WHERE
         id = _id;
@@ -51,7 +59,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_estado_usuario_v10
    EXCEPTION
      WHEN OTHERS THEN
          _error_code := SQLSTATE;
-         _error_msg := '[mc_prp_actualizar_estado_usuario_v10] Error al actualizar estado de usuario. CAUSA ('|| SQLERRM ||')';
+         _error_msg := '[mc_prp_actualizar_saldo_usuario_v10] Error al actualizar saldo_info de usuario. CAUSA ('|| SQLERRM ||')';
      RETURN;
 END;
 $$ LANGUAGE plpgsql;
@@ -59,5 +67,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_estado_usuario_v10(BIGINT, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_saldo_usuario_v10(BIGINT, TEXT, BIGINT);
 
