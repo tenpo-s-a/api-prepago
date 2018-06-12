@@ -1,12 +1,10 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.model.v10.User;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +16,7 @@ import java.util.Map;
  * @author abarazarte
  */
 public class Test_topupBalance_v10 extends TestBaseUnitApi {
-
+  private final String URL_PATH = "/1.0/prepaid/topup";
   @Test
   public void shouldReturn200_OnTopupUserBalance() throws Exception {
 
@@ -38,7 +36,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     System.out.println(json);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
 
     System.out.println("resp:: " + resp);
 
@@ -55,7 +53,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn422_OnMissingBody() {
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", "{}");
+    HttpResponse resp = apiPOST(URL_PATH, "{}");
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -76,7 +74,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     System.out.println(resp);
     System.out.println(resp.getResp());
     Assert.assertEquals("status 422", 422, resp.getStatus());
@@ -99,7 +97,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -120,7 +118,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -138,7 +136,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -159,7 +157,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -180,11 +178,161 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     String json = toJson(topupRequest);
 
-    HttpResponse resp = apiPOST("/1.0/prepaid/topup", json);
+    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
+
+  @Test
+  public void shouldReturn422_OnTopup_MinAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidTopup10);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108203", 108203, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(500));
+
+      String json = toJson(prepaidTopup10);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108203", 108203, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnTopup_MaxAmount() throws Exception {
+    // POS
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(100001));
+
+      String json = toJson(prepaidTopup10);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108202", 108202, errorObj.get("code"));
+    }
+
+    //WEB
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(500001));
+
+      String json = toJson(prepaidTopup10);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 108201", 108201, errorObj.get("code"));
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnTopup_MonthlyAmount() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    for(int i = 0; i < 10; i++) {
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(100000));
+
+      String json = toJson(prepaidTopup10);
+
+      HttpResponse resp = apiPOST(URL_PATH, json);
+
+      System.out.println("resp:: " + resp);
+
+      Assert.assertEquals("status 200", 200, resp.getStatus());
+    }
+
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(100000));
+
+    String json = toJson(prepaidTopup10);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 108204", 108204, errorObj.get("code"));
+  }
+
 }

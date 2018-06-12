@@ -140,8 +140,10 @@ public class PendingCard10 extends BaseProcessor10 {
           if (updated) {
             data.setPrepaidCard10(prepaidCard10);
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
+            req.setData(data);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
+
             redirectRequest(endpoint, exchange, req);
           } else {
             Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
