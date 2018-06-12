@@ -203,11 +203,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Si no cumple con los limites
     if(!cdtTransaction.getNumError().equals("0")){
-      long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
-      if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      if(lNumError > 108000) {
+        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
