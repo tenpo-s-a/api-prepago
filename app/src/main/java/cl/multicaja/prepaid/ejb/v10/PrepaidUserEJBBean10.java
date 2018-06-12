@@ -237,21 +237,19 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       }
     }
 
-    BigDecimal balance = BigDecimal.valueOf(0L);
-    CodigoMoneda clamonp = CodigoMoneda.CHILE_CLP;
+    //por defecto debe ser 0
+    BigDecimal balanceValue = BigDecimal.valueOf(0L);
 
     if (pBalance != null) {
       //El que le mostraremos al cliente será el saldo dispuesto principal menos el saldo autorizado principal
-      balance = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
+      balanceValue = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
     }
 
-    //TODO falta calcular el pcaClp y pcaUsd
-    BigDecimal pcaClp = BigDecimal.valueOf(0L); //entero
-    BigDecimal pcaUsd = BigDecimal.valueOf(0d); //decimal con 2 decimales
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue, CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
-    pcaUsd = pcaUsd.setScale(2, RoundingMode.CEILING); //solo 2 decimales
-
-    return new PrepaidBalance10(new NewAmountAndCurrency10(balance, clamonp), pcaClp, pcaUsd, updated);
+    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, updated);
   }
 
   @Override

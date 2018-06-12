@@ -3,8 +3,9 @@ package cl.multicaja.test.v10.unit;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
@@ -12,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,12 +217,15 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
     Assert.assertEquals("Saldo expiracion debe ser 0", Long.valueOf(0L), prepaidUser10.getBalanceExpiration());
 
     {
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
+
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0L), prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
     }
 
     final PrepaidBalanceInfo10 newBalance = newBalance();
@@ -239,12 +242,18 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
 
     //obtener nuevo salo
     {
+
+      BigDecimal balanceValue = BigDecimal.valueOf(newBalance.getSaldisconp().longValue() - newBalance.getSalautconp().longValue());
+
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue, CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
+
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      BigDecimal balance = BigDecimal.valueOf(newBalance.getSaldisconp().longValue() - newBalance.getSalautconp().longValue());
-
-      Assert.assertEquals("Deben ser iguales", balance, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Deben ser iguales", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
     }
   }
 
@@ -273,25 +282,25 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
 
     PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS = 5000;
 
-    //TODO el pcaClp y pcaUsd se deben implementar, cuando esten implementados se deben calcular para verificarlos en estos test
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac, CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      Assert.assertEquals("Debe ser igual", impfac, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      Assert.assertEquals("Debe ser igual", impfac, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
@@ -300,20 +309,18 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      Assert.assertEquals("Debe ser igual", impfac, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
 
-      Assert.assertEquals("Debe ser igual", impfac, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
   }

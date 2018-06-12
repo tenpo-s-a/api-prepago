@@ -4,6 +4,7 @@ import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * @author abarazarte
@@ -38,4 +39,17 @@ public class NewAmountAndCurrency10 extends BaseModel {
     this.value = value;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof NewAmountAndCurrency10)) return false;
+    NewAmountAndCurrency10 that = (NewAmountAndCurrency10) o;
+    return getCurrencyCode() == that.getCurrencyCode() &&
+      Objects.equals(getValue(), that.getValue());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getCurrencyCode(), getValue());
+  }
 }

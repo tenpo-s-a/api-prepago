@@ -2,10 +2,12 @@ package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
@@ -13,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * @autor vutreras
@@ -32,15 +33,19 @@ public class Test_balance extends TestBaseUnitApi {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     {
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
+
       HttpResponse resp = apiGET(String.format("/1.0/prepaid/%s/balance", prepaidUser10.getId()));
       Assert.assertEquals("status 200", 200, resp.getStatus());
 
       PrepaidBalance10 prepaidBalance10 = resp.toObject(PrepaidBalance10.class);
 
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0L), prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser 0", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
+      Assert.assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
@@ -60,17 +65,18 @@ public class Test_balance extends TestBaseUnitApi {
     Thread.sleep(PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS + 1000);
 
     {
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac, CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
+
       HttpResponse resp = apiGET(String.format("/1.0/prepaid/%s/balance", prepaidUser10.getId()));
       Assert.assertEquals("status 200", 200, resp.getStatus());
 
       PrepaidBalance10 prepaidBalance10 = resp.toObject(PrepaidBalance10.class);
 
-      //TODO el pcaClp y pcaUsd se deben implementar, cuando esten implementados se deben calcular para verificarlos en este test
-
-      Assert.assertEquals("Debe ser igual", impfac, prepaidBalance10.getBalance().getValue());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0L), prepaidBalance10.getPcaClp());
-      Assert.assertEquals("Debe ser igual", BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), prepaidBalance10.getPcaUsd());
-      Assert.assertEquals("Debe ser CHILE_CLP", CodigoMoneda.CHILE_CLP, prepaidBalance10.getBalance().getCurrencyCode());
+      Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
+      Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
+      Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
   }

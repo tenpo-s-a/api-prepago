@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.helpers;
 
+import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,5 +50,27 @@ public class CalculationsHelper {
   public static Integer getUsdValue() {
     //TODO quizas se saca de algun servicio externo
     return 645;
+  }
+
+  /**
+   *
+   * @param balance
+   * @return
+   */
+  public static NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
+    //TODO calcular el pcaMain desde el valor del balance
+    NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+    return pcaMain;
+  }
+
+  /**
+   *
+   * @param balance
+   * @return
+   */
+  public static NewAmountAndCurrency10 calculatePcaSecondary(NewAmountAndCurrency10 balance) {
+    //TODO calcular el pcaSecondary desde el valor del balance
+    NewAmountAndCurrency10 pcaSecondary = new NewAmountAndCurrency10(BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), CodigoMoneda.USA_USN);
+    return pcaSecondary;
   }
 }
