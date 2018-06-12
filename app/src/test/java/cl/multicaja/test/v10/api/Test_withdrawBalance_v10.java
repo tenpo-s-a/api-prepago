@@ -51,6 +51,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+    Assert.assertNull("No deberia tener passwrd", withdraw.getPassword());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
     Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
@@ -107,6 +108,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
     Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
     Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+    Assert.assertNull("No deberia tener passwrd", withdraw.getPassword());
 
     Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
     Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
@@ -419,10 +421,33 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
+  public void shouldReturn422_OnMissingPassword() {
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+    prepaidWithdraw.setRut(getUniqueRutNumber());
+    prepaidWithdraw.setPassword(null);
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
+  }
+
+  @Test
   public void shouldReturn404_McUserNull() {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
     prepaidWithdraw.setRut(getUniqueRutNumber());
+    prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
 
     String json = toJson(prepaidWithdraw);
 
@@ -559,7 +584,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_PrepaidCardNull() throws Exception {
+  public void shouldReturn422_InvalidPassword() throws Exception {
 
     User user = registerUser();
 
@@ -581,6 +606,32 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_PrepaidCardNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
+    prepaiduser = createPrepaidUser10(prepaiduser);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
+
+    String json = toJson(prepaidWithdraw);
+
+    System.out.println(json);
+
+    HttpResponse resp = apiPOST(URL_PATH, json);
+
+    System.out.println("resp:: " + resp);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102000", 102000, errorObj.get("code"));
   }
 
   @Test
