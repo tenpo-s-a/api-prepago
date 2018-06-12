@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public class CalculatorWithdrawalResponse10 extends BaseModel {
 
-  private NewAmountAndCurrency10 amount;
   private BigDecimal fee;
   private NewAmountAndCurrency10 amountToDiscount;
 
@@ -15,18 +14,9 @@ public class CalculatorWithdrawalResponse10 extends BaseModel {
     super();
   }
 
-  public CalculatorWithdrawalResponse10(NewAmountAndCurrency10 amount, BigDecimal fee, NewAmountAndCurrency10 amountToDiscount) {
-    this.amount = amount;
+  public CalculatorWithdrawalResponse10(BigDecimal fee, NewAmountAndCurrency10 amountToDiscount) {
     this.fee = fee;
     this.amountToDiscount = amountToDiscount;
-  }
-
-  public NewAmountAndCurrency10 getAmount() {
-    return amount;
-  }
-
-  public void setAmount(NewAmountAndCurrency10 amount) {
-    this.amount = amount;
   }
 
   public BigDecimal getFee() {
@@ -50,13 +40,12 @@ public class CalculatorWithdrawalResponse10 extends BaseModel {
     if (this == o) return true;
     if (!(o instanceof CalculatorWithdrawalResponse10)) return false;
     CalculatorWithdrawalResponse10 that = (CalculatorWithdrawalResponse10) o;
-    return Objects.equals(getAmount(), that.getAmount()) &&
-      Objects.equals(getFee(), that.getFee()) &&
+    return  Objects.equals(getFee(), that.getFee()) &&
       Objects.equals(getAmountToDiscount(), that.getAmountToDiscount());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getAmount(), getFee(), getAmountToDiscount());
+    return Objects.hash(getFee(), getAmountToDiscount());
   }
 }

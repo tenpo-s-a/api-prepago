@@ -147,7 +147,6 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     CalculatorWithdrawalResponse10 resp = getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
-    Assert.assertNotNull("debe retornar un monto", resp.getAmount());
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
@@ -155,7 +154,6 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     BigDecimal feeOk = BigDecimal.valueOf(100);
 
     Assert.assertEquals("deben ser las mismas comisiones", feeOk, resp.getFee());
-    Assert.assertEquals("debe ser el mismo monto", amount, resp.getAmount());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", feeOk.add(amount.getValue()), resp.getAmountToDiscount().getValue());
   }
 
@@ -185,7 +183,6 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     BigDecimal feeOk = BigDecimal.valueOf(Math.round(Math.max(100, (amount.getValue().longValue() * 0.5 / 100)) * 1.19));
 
     Assert.assertEquals("deben ser las mismas comisiones", feeOk, resp.getFee());
-    Assert.assertEquals("debe ser el mismo monto", amount, resp.getAmount());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", feeOk.add(amount.getValue()), resp.getAmountToDiscount().getValue());
 
     Locale.setDefault(Constants.DEFAULT_LOCALE);

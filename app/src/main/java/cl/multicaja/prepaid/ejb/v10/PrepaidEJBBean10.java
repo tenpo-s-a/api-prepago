@@ -793,7 +793,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
     calculatorResponse.setFee(fee);
-    calculatorResponse.setAmount(new NewAmountAndCurrency10(amountValue, amountCurrencyCode));
     calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     //saldo del usuario
