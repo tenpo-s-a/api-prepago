@@ -7,6 +7,8 @@ import cl.multicaja.core.utils.ErrorUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -123,7 +125,7 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
   }
 
   @Test
-  public void calculatorOk_WEB() throws Exception {
+  public void calculator_ok_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -158,7 +160,7 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
   }
 
   @Test
-  public void calculatorOk_POS() throws Exception {
+  public void calculator_ok_POS() throws Exception {
 
     User user = registerUser();
 
@@ -191,5 +193,95 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     ErrorUtils err = ErrorUtils.getInstance();
 
     System.out.println(err.merge(err.getError(109000, Constants.DEFAULT_LOCALE), new KeyValue("value", 500)));
+  }
+
+  @Test
+  public void calculator_not_ok_insufficient_balance_WEB() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    BigDecimal impfac = BigDecimal.valueOf(10000); //se agrega saldo de 10.000 en tecnocom
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setValue(BigDecimal.valueOf(10001)); //se intenta retirar 10.001, debe dar error de saldo insuficiente
+
+    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
+    calculatorRequest.setAmount(amount);
+    calculatorRequest.setPaymentMethod(TransactionOriginType.WEB);
+    calculatorRequest.setRut(user.getRut().getValue());
+
+    System.out.println("Calcular retiro WEB: " + calculatorRequest);
+
+    try {
+
+      getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
+    } catch(ValidationException vex) {
+      Assert.assertEquals("debe ser error de saldo insuficiente", Integer.valueOf(109001), vex.getCode());
+    }
+  }
+
+  @Test
+  public void calculator_not_ok_insufficient_balance_POS() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    BigDecimal impfac = BigDecimal.valueOf(10000); //se agrega saldo de 10.000 en tecnocom
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setValue(BigDecimal.valueOf(10001)); //se intenta retirar 10.001, debe dar error de saldo insuficiente
+
+    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
+    calculatorRequest.setAmount(amount);
+    calculatorRequest.setPaymentMethod(TransactionOriginType.POS);
+    calculatorRequest.setRut(user.getRut().getValue());
+
+    System.out.println("Calcular retiro POS: " + calculatorRequest);
+
+    try {
+
+      getPrepaidEJBBean10().withdrawalCalculator(null, calculatorRequest);
+
+      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
+    } catch(ValidationException vex) {
+      Assert.assertEquals("debe ser error de saldo insuficiente", Integer.valueOf(109001), vex.getCode());
+    }
   }
 }

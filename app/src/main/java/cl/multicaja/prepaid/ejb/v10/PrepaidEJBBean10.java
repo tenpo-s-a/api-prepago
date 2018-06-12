@@ -699,8 +699,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     //saldo del usuario
     PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
 
-    log.info("Saldo de usuario: " + balance);
+    log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
+    log.info("Monto maximo a cargar: " + MAX_AMOUNT_BY_USER);
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > MAX_AMOUNT_BY_USER) {
       throw new ValidationException(109000); //supera el saldo
@@ -716,6 +717,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //monto a cargar + comision
     BigDecimal calculatedAmount = amountValue.add(fee);
+
+    log.info("Monto a cargar + comision: " + calculatedAmount);
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
     calculatorResponse.setPca(calculatePca(amountValue));
@@ -792,6 +795,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     calculatorResponse.setFee(fee);
     calculatorResponse.setAmount(new NewAmountAndCurrency10(amountValue, amountCurrencyCode));
     calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
+
+    //saldo del usuario
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
+
+    log.info("Saldo del usuario: " + balance.getBalance().getValue());
+    log.info("Monto a retirar: " + amountValue);
+    log.info("Monto a retirar + comision: " + calculatedAmount);
+
+    if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
+      throw new ValidationException(109001); //Saldo insuficiente
+    }
 
     return calculatorResponse;
   }

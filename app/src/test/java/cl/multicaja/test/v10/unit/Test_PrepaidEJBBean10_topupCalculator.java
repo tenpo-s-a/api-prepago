@@ -261,7 +261,7 @@ public class Test_PrepaidEJBBean10_topupCalculator extends TestBaseUnit {
 
     try {
 
-      CalculatorTopupResponse10 resp = getPrepaidEJBBean10().topupCalculator(null, calculatorRequest);
+      getPrepaidEJBBean10().topupCalculator(null, calculatorRequest);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
