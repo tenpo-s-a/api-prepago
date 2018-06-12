@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
@@ -15,6 +16,12 @@ public class PrepaidUser10 extends BaseModel {
   private Integer rut;
   private PrepaidUserStatus status;
   private Timestamps timestamps;
+
+  @JsonIgnore
+  private PrepaidBalanceInfo10 balance;
+
+  @JsonIgnore
+  private Long balanceExpiration;
 
   public PrepaidUser10() {
     super();
@@ -60,6 +67,22 @@ public class PrepaidUser10 extends BaseModel {
     this.timestamps = timestamps;
   }
 
+  public PrepaidBalanceInfo10 getBalance() {
+    return balance;
+  }
+
+  public void setBalance(PrepaidBalanceInfo10 balance) {
+    this.balance = balance;
+  }
+
+  public Long getBalanceExpiration() {
+    return balanceExpiration;
+  }
+
+  public void setBalanceExpiration(Long balanceExpiration) {
+    this.balanceExpiration = balanceExpiration;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -73,7 +96,6 @@ public class PrepaidUser10 extends BaseModel {
 
   @Override
   public int hashCode() {
-
-    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus());
+    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus(), getTimestamps());
   }
 }
