@@ -56,7 +56,7 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
     user = createPrepaidUser10(user);
 
     PrepaidUser10 u1 = getPrepaidUserEJBBean10().getPrepaidUserById(null, user.getId());
-    
+
     Assert.assertNotNull("debe retornar un usuario", u1);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u1);
 
@@ -257,43 +257,23 @@ public class Test_PrepaidUserEJBBean10 extends TestBaseUnit {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
 
-    Assert.assertEquals("debe ser exitoso", CodigoRetorno._000, altaClienteDTO.getRetorno());
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    String contrato = prepaidCard10.getProcessorUserId();
-    String pan = prepaidCard10.getPan();
-    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
-    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
-    TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
     BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
-    String codcom = "01";
-    Integer codact = 1;
-    CodigoPais codpais = CodigoPais.CHILE;
-    String nomcomred = "prueba";
-    String numreffac = getUniqueLong().toString();
-    String numaut = numreffac;
 
-    //solamente los 6 primeros digitos de numreffac
-    if (numaut.length() > 6) {
-      numaut = numaut.substring(numaut.length()-6);
-    }
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
-    System.out.println("Monto a cargar: " + impfac);
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
-      numreffac, impfac, numaut, codcom,
-      nomcomred, codact, codpais);
-
-    Assert.assertEquals("debe ser exitoso", CodigoRetorno._000, inclusionMovimientosDTO.getRetorno());
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
     PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS = 5000;
+
+    //TODO el pcaClp y pcaUsd se deben implementar, cuando esten implementados se deben calcular para verificarlos en estos test
 
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());

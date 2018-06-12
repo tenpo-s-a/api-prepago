@@ -105,7 +105,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
       u.setBalanceExpiration(0L);
       try {
-        String saldo = String.valueOf(row.get("_saldo"));
+        String saldo = String.valueOf(row.get("_saldo_info"));
         if (StringUtils.isNotBlank(saldo)) {
           u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidBalanceInfo10.class));
           u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
@@ -227,10 +227,12 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
         ConsultaSaldoDTO consultaSaldoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
 
-        if (consultaSaldoDTO != null) {
+        if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
           pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
           this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
           updated = true;
+        } else {
+          log.error("Problemas al obtener saldo del cliente: " + userId + ", rut: " + prepaidUser.getRut() + ", retorno consultaSaldoDTO: " + consultaSaldoDTO);
         }
       }
     }

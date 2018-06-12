@@ -20,6 +20,7 @@ import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -271,6 +272,31 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
     return prepaidCard;
   }
+
+  /**
+   *
+   * @param prepaidUser
+   * @param altaClienteDTO
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser, AltaClienteDTO altaClienteDTO) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setPan(getRandomNumericString(16));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    return prepaidCard;
+  }
+
 
 
   /**
@@ -603,5 +629,88 @@ public class TestBaseUnit extends TestApiBase {
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);
 
     return prepaidMovement10;
+  }
+
+  /**
+   *
+   * @param user
+   * @return
+   */
+  public AltaClienteDTO registerInTecnocom(User user) throws BaseException {
+
+    if (user == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user"));
+    }
+
+    if (user.getName() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user.name"));
+    }
+
+    if (user.getLastname_1() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user.lastname_1"));
+    }
+
+    if (user.getLastname_2() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user.lastname_2"));
+    }
+
+    if (user.getRut() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user.rut"));
+    }
+
+    if (user.getRut().getValue() == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "user.rut.value"));
+    }
+
+    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+  }
+
+  /**
+   *
+   * @param prepaidCard10
+   * @return
+   */
+  public InclusionMovimientosDTO topupInTecnocom(PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
+
+    if (prepaidCard10 == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (impfac == null) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+
+    String contrato = prepaidCard10.getProcessorUserId();
+    String pan = prepaidCard10.getPan();
+    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
+    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+    TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
+    String codcom = "1";
+    Integer codact = 1;
+    CodigoPais codpais = CodigoPais.CHILE;
+    String nomcomred = "prueba";
+    String numreffac = getUniqueLong().toString();
+    String numaut = numreffac;
+
+    //solamente los 6 primeros digitos de numreffac
+    if (numaut.length() > 6) {
+      numaut = numaut.substring(numaut.length()-6);
+    }
+
+    System.out.println("Monto a cargar: " + impfac);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+      numreffac, impfac, numaut, codcom,
+      nomcomred, codact, codpais);
+
+    return inclusionMovimientosDTO;
   }
 }
