@@ -405,6 +405,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
 
+    prepaidWithdraw.setPassword(user != null ? user.getPassword() : null);
+
     return prepaidWithdraw;
   }
 
