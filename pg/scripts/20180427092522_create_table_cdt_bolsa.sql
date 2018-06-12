@@ -26,7 +26,8 @@
       estado          VARCHAR(10) NOT NULL,
       fecha_estado    TIMESTAMP NOT NULL,
       fecha_creacion  TIMESTAMP NOT NULL,
-      CONSTRAINT cdt_bolsa_pk PRIMARY KEY(id)
+      CONSTRAINT cdt_bolsa_pk PRIMARY KEY(id),
+      CONSTRAINT  cdt_bolsa_u1 UNIQUE (nombre)
   );
   CREATE INDEX cdt_bolsa_i1 ON ${schema.cdt}.cdt_bolsa (estado);
 

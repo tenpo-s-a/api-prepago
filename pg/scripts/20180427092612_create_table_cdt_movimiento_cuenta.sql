@@ -33,7 +33,7 @@
       fecha_estado        TIMESTAMP NOT NULL,
       fecha_tx            DATE NOT NULL,
       CONSTRAINT cdt_movimiento_cuenta_pk PRIMARY KEY(id),
-      CONSTRAINT cdt_movimiento_cuenta_u1 UNIQUE(id_tx_externo,fecha_tx)
+      CONSTRAINT cdt_movimiento_cuenta_u1 UNIQUE(id_fase_movimiento,id_tx_externo,fecha_tx)
   );
 
   CREATE INDEX cdt_movimiento_cuenta_i1 ON ${schema.cdt}.cdt_movimiento_cuenta (id_fase_movimiento);

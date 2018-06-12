@@ -19,9 +19,9 @@
 
 CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10
 (
+    IN _id_fase_padre     NUMERIC,
     IN _nombre            VARCHAR,
     IN _descripcion       VARCHAR,
-    IN _signo             NUMERIC,
     IN _ind_confirmacion  VARCHAR,
     OUT _num_error        VARCHAR,
     OUT _msj_Error        VARCHAR
@@ -33,29 +33,30 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10
 	        _num_error := '0';
 	        _msj_Error := '';
 
+
 		    IF TRIM(COALESCE(_nombre, '')) = '' THEN
           _num_error := 'MC001';
           _msj_Error := '[mc_cdt_crea_fase_movimiento] El nombre de la fase movimiento no puede ser vacio';
           RETURN;
         END IF;
 
-        IF COALESCE(_signo, 0) != -1 AND  COALESCE(_signo, 0) != 1 THEN
+        IF TRIM(COALESCE(_ind_confirmacion, ''))  = '' THEN
           _num_error := 'MC002';
-          _msj_Error := '[mc_cdt_crea_fase_movimiento] El Signo de la fase de movimiento debe ser 1 o -1';
+          _msj_Error := '[mc_cdt_crea_fase_movimiento] El Indicador Confirmacion no puede ser vacio';
           RETURN;
         END IF;
 
-         IF TRIM(COALESCE(_ind_confirmacion, ''))  = '' THEN
+        IF _ind_confirmacion = 'S' AND _id_fase_padre = 0  THEN
           _num_error := 'MC003';
-          _msj_Error := '[mc_cdt_crea_fase_movimiento] El Indicador Confirmacion no puede ser vacio';
+          _msj_Error := '[mc_cdt_crea_fase_movimiento] Una confirmacion debe tener un padre';
           RETURN;
         END IF;
 
         INSERT INTO ${schema.cdt}.cdt_fase_movimiento
         (
+          id_fase_padre,
           nombre,
           descripcion,
-          signo,
           ind_confirmacion,
           estado,
           fecha_estado,
@@ -63,9 +64,9 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10
         )
         VALUES
           (
+            _id_fase_padre,
             _nombre,
             _descripcion,
-            _signo,
             _ind_confirmacion,
             'ACTIVO',
             timezone('utc', now()),
@@ -83,4 +84,4 @@ LANGUAGE 'plpgsql';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
- DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10(VARCHAR,VARCHAR,NUMERIC,VARCHAR);
+ DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_fase_movimiento_v10(NUMERIC,VARCHAR,VARCHAR,NUMERIC,VARCHAR);

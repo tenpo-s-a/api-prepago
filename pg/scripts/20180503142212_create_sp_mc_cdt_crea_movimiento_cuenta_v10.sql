@@ -33,7 +33,11 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_movimiento_cuenta_v10
 DECLARE
     _ind_confirmacion VARCHAR(1);
     _id_cuenta_interno NUMERIC;
+    _id_fase_padre  NUMERIC;
     _current_date DATE;
+    _xTx_ref_fase NUMERIC;
+    _xTx_ref_ind_conf VARCHAR;
+    _xTx_ref_mov_cta NUMERIC;
 BEGIN
     _num_error := '0';
     _msj_error := '';
@@ -65,7 +69,7 @@ BEGIN
     END IF;
 
     IF _ind_simulacion != 'S' AND _ind_simulacion != 'N' then
-      _num_error := 'MC004';
+      _num_error := 'MC005';
       _msj_error := '[mc_cdt_crea_movimiento_cuenta] El indicador de simulacion debe ser S o N';
       RETURN;
     END IF;
@@ -75,14 +79,63 @@ BEGIN
 
         -- BUSCA FASE MOVIMIENTO
         SELECT
-          ind_confirmacion
+          ind_confirmacion,
+          id_fase_padre
         INTO
-          _ind_confirmacion
+          _ind_confirmacion,
+          _id_fase_padre
         FROM
           ${schema.cdt}.cdt_fase_movimiento
         WHERE
           id = _id_fase_movimiento;
 
+        IF _ind_confirmacion = 'S' THEN
+              IF _id_mov_referencia != 0 THEN
+                BEGIN
+                  SELECT
+                    fase.id AS id_fase,
+                    fase.ind_confirmacion AS ind_conf,
+                    cuenta.id AS id_mov_cta
+                  INTO
+                    _xTx_ref_fase,
+                    _xTx_ref_ind_conf,
+                    _xTx_ref_mov_cta
+                  FROM
+                     ${schema.cdt}.cdt_movimiento_cuenta cuenta
+                  INNER JOIN ${schema.cdt}.cdt_fase_movimiento fase ON cuenta.id_fase_movimiento = fase.id
+                  WHERE
+                    cuenta.id = _id_mov_referencia;
+
+                  IF _xTx_ref_mov_cta  = 0 THEN
+                    _num_error:= 'MC006';
+                    _msj_error:= '[mc_cdt_crea_movimiento_cuenta] El Movimiento cuenta debe existir para crear una confirmacion.';
+                    RAISE EXCEPTION '[mc_cdt_crea_movimiento_cuenta] El Movimiento cuenta debe existir para crear una confirmacion.';
+
+                  ELSEIF _xTx_ref_mov_cta != 0 AND _xTx_ref_ind_conf = 'S' THEN
+                    _num_error:= 'MC007';
+                    _msj_error:= '[mc_cdt_crea_movimiento_cuenta] El movimiento cuenta de referencia no puede ser una confirmacion.';
+                    RAISE EXCEPTION '[mc_cdt_crea_movimiento_cuenta] El movimiento cuenta de referencia no puede ser una confirmacion.';
+
+                  ELSEIF  _xTx_ref_fase != _id_fase_padre THEN
+                    _num_error:= 'MC009';
+                    _msj_error:= '[mc_cdt_crea_movimiento_cuenta] La confirmacion no corresponde con su solicitud padre';
+                    RAISE EXCEPTION 'La confirmacion no corresponde con su solicitud padre';
+                  END IF;
+
+                END;
+              ELSIF _id_mov_referencia = 0 THEN
+                _num_error:= 'MC008';
+                _msj_error:= '[mc_cdt_crea_movimiento_cuenta] El Id Mov Ref, es obligatorio para una confirmacion.';
+                RAISE EXCEPTION 'mov_referencia es obligatorio para una fase de confirmacion';
+
+              ELSEIF  _xTx_ref_fase != _id_fase_padre THEN
+                _num_error:= 'MC009';
+                _msj_error:= '[mc_cdt_crea_movimiento_cuenta] La confirmacion no corresponde con su solicitud padre';
+                RAISE EXCEPTION 'La confirmacion no corresponde con su solicitud padre';
+
+              END IF;
+
+         END IF;
 
         -- BUSCA LA CUENTA
         SELECT
@@ -184,20 +237,6 @@ BEGIN
             )VLI;
         IF  _num_error != '0' THEN
           RAISE EXCEPTION 'Error en Verificacion de Limites';
-        END IF;
-
-        IF(_ind_confirmacion = 'S') THEN
-          INSERT INTO
-            ${schema.cdt}.cdt_confirmacion_movimiento
-            (
-              id_mov_cuenta_origen,
-              id_mov_cuenta_confirmacion
-            )
-          VALUES
-            (
-              _id_mov_referencia,
-              _id_movimiento_cuenta
-            );
         END IF;
 
       IF(_num_error = '0' AND _ind_simulacion = 'S') THEN
