@@ -9,7 +9,6 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.users.model.v10.User;
-import org.jboss.weld.bootstrap.spi.EEModuleDescriptor;
 import org.junit.Assert;
 import org.junit.Test;
 

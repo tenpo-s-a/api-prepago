@@ -4,7 +4,6 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.EmailParams;
@@ -14,7 +13,6 @@ import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
 import cl.multicaja.users.model.v10.EmailBody;
 import cl.multicaja.users.model.v10.MailTemplate;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -140,14 +138,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
     };
   }
 
-  public static void main(String[] args) throws JsonProcessingException {
-    EmailParams params = new EmailParams();
-    params.setMailFrom("noreply@multicaja.cl");
-    params.setMailSubject("Tarjeta Prepago");
-    params.setTemplateData("PREPAGO/card_pdf");
-    JsonUtils utils = new JsonUtils();
-    System.out.println(utils.toJson(params));
-  }
 
   /**
    * Envio recibo retiro
