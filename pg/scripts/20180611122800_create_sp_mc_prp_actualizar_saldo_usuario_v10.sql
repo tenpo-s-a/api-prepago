@@ -20,8 +20,8 @@
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
 (
  IN _id            BIGINT,
- IN _saldo         NUMERIC,
- IN _saldo_expiracion NUMERIC,
+ IN _saldo         TEXT,
+ IN _saldo_expiracion BIGINT,
  OUT _error_code    VARCHAR,
  OUT _error_msg     VARCHAR
 ) AS $$
@@ -36,7 +36,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualizar_saldo_usuario_v10
       RETURN;
     END IF;
 
-    IF COALESCE(_saldo, -1) = -1 THEN
+    IF TRIM(COALESCE(_saldo, '')) = '' THEN
       _error_code := 'MC002';
       _error_msg := 'El _saldo es obligatorio';
       RETURN;
@@ -67,5 +67,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_saldo_usuario_v10(BIGINT, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualizar_saldo_usuario_v10(BIGINT, TEXT, BIGINT);
 

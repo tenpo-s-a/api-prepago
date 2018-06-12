@@ -64,7 +64,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
         _id_usuario_mc,
         _rut,
         _estado,
-        0,
+        '',
         0,
         timezone('utc', now()),
         timezone('utc', now())

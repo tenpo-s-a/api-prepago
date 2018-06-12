@@ -26,7 +26,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
 
     Map<String, Object> obj1 = insertUser("ACTIVO");
 
-    BigDecimal balance = BigDecimal.valueOf(100L);
+    String balance = "{}";
     Long balanceExpiration = 1000L;
 
     Object[] params = {
@@ -58,7 +58,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         new NullParam(Types.BIGINT), //id
-        1L, //saldo
+        "{}", //saldo
         1L,// saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -73,7 +73,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        new NullParam(Types.BIGINT), //saldo
+        new NullParam(Types.VARCHAR), //saldo
         1L, //saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -88,7 +88,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        1L, //saldo
+        "{}", //saldo
         new NullParam(Types.BIGINT), //saldo_expiracion
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -103,7 +103,7 @@ public class Test_20180611122800_create_sp_mc_prp_actualizar_saldo_usuario_v10 e
     {
       Object[] params = {
         1L, //id
-        1L, //saldo
+        "{}", //saldo
         -1, //saldo_expiracion, no puede ser expiracion menor a 0
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
