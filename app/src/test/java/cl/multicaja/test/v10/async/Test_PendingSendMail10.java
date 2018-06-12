@@ -21,9 +21,15 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
   public void pendingSendMailOk() throws Exception {
 
     User user = registerUser();
+
     user = updateUser(user);
+    user.setName(getRandomString(10));
+    user.setLastname_1(getRandomString( 12));
+
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
+    System.out.println("User Rut: "+prepaidUser.getRut());
+    System.out.println("User Mail: "+user.getEmail());
 
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
