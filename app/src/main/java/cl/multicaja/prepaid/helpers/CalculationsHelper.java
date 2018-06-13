@@ -61,7 +61,7 @@ public class CalculationsHelper {
    * @param amount
    * @return
    */
-  private static Double calculatePca_(BigDecimal amount) {
+  private static double _calculatePca(BigDecimal amount) {
     if (amount == null) {
       return 0d;
     }
@@ -75,7 +75,7 @@ public class CalculationsHelper {
    * @return
    */
   public static BigDecimal calculatePca(BigDecimal amount) {
-    return BigDecimal.valueOf(calculatePca_(amount)).setScale(2, RoundingMode.CEILING);
+    return BigDecimal.valueOf(_calculatePca(amount)).setScale(2, RoundingMode.CEILING);
   }
 
   /**
@@ -88,7 +88,7 @@ public class CalculationsHelper {
     if (amount == null) {
       return BigDecimal.valueOf(0d);
     }
-    double pca = calculatePca_(amount);
+    double pca = _calculatePca(amount);
     return BigDecimal.valueOf(pca / getUsdValue()).setScale(2, RoundingMode.CEILING);
   }
 
