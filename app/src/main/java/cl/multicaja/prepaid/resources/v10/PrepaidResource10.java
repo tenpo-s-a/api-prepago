@@ -108,23 +108,17 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
-  /**
-   * Calculadora de Carga
-   */
   @POST
-  @Path("/prepaid/topup/calculator")
-  public Response topupCalculator(CalculatorRequest10 topupCalculatorRequest, @Context HttpHeaders headers) throws Exception {
-    CalculatorTopupResponse10 calculatorTopupResponse10 = this.prepaidEJBBean10.topupCalculator(headersToMap(headers), topupCalculatorRequest);
+  @Path("/{userId}/calculator/topup")
+  public Response topupCalculator(CalculatorRequest10 topupCalculatorRequest, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    CalculatorTopupResponse10 calculatorTopupResponse10 = this.prepaidEJBBean10.topupCalculator(headersToMap(headers), userId, topupCalculatorRequest);
     return Response.ok(calculatorTopupResponse10).build();
   }
 
-  /**
-   * Calculadora de Retiro
-   */
   @POST
-  @Path("/prepaid/withdrawal/calculator")
-  public Response withdrawalCalculator(CalculatorRequest10 topupCalculatorRequest, @Context HttpHeaders headers) throws Exception {
-    CalculatorWithdrawalResponse10 calculatorWithdrawalResponse10 = this.prepaidEJBBean10.withdrawalCalculator(headersToMap(headers), topupCalculatorRequest);
+  @Path("/{userId}/calculator/withdrawal")
+  public Response withdrawalCalculator(CalculatorRequest10 topupCalculatorRequest, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    CalculatorWithdrawalResponse10 calculatorWithdrawalResponse10 = this.prepaidEJBBean10.withdrawalCalculator(headersToMap(headers), userId, topupCalculatorRequest);
     return Response.ok(calculatorWithdrawalResponse10).build();
   }
 }

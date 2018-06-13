@@ -1,9 +1,11 @@
 package cl.multicaja.test.v10.api;
 
-import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.test.TestSuite;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 /**
@@ -11,21 +13,26 @@ import org.junit.BeforeClass;
  */
 public class TestBaseUnitApi extends TestBaseUnit {
 
+  private static Log log = LogFactory.getLog(TestBaseUnitApi.class);
+
   @BeforeClass
   public static void beforeClass() throws Exception {
-
-    /**
-     * IMPORTANTE: Esto se hace en caso que se qieran probar metodos del api de forma directa
-     * para estos casos se sobre-escribe el ambiente y el host
-     * para apuntar al api desplegada en el payara de development
-     */
-    if (!TestSuite.isServerRunning()) {
-
+    if (ConfigUtils.isEnvTest()) {
       System.setProperty("db.use.basicdatasource", "true");
-      System.setProperty("env", "development");
-      System.setProperty("api_host", "http://127.0.0.1:8080");
+      if (!TestSuite.isServerRunning()) {
+        TestSuite.startServer();
+      }
+    }
+  }
 
-      TestApiBase.CONTEXT_PATH = ConfigUtils.getInstance().getModuleProperty("context.path");
+  @AfterClass
+  public static void afterClass() throws Exception {
+    if (ConfigUtils.isEnvTest()) {
+      if (!TestSuite.isRunningInTestSuite() && TestSuite.isServerRunning()) {
+        TestSuite.stopServer();
+      } else {
+        log.warn("No es necesario detener el servidor dado que se encuentra en suite");
+      }
     }
   }
 }

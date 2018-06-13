@@ -621,17 +621,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   /**
    *
+   * @param userId
    * @param calculatorRequest
    * @throws BaseException
    */
-  private void validateCalculatorRequest10(CalculatorRequest10 calculatorRequest) throws Exception {
+  private void validateCalculatorRequest10(Long userId, CalculatorRequest10 calculatorRequest) throws BaseException {
+
+    if(userId == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+    }
 
     if(calculatorRequest == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest"));
-    }
-
-    if(calculatorRequest.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
     }
 
     if(calculatorRequest.getPaymentMethod() == null){
@@ -649,26 +650,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(calculatorRequest.getAmount().getCurrencyCode() == null) {
       throw new ValidationException(101004).setData(new KeyValue("value", "amount.currencyCode"));
     }
-
-    //VALIDACIONES USUARIO USERMC
-    User user = getUsersEJB10().getUserByRut(null, calculatorRequest.getRut());
-    if(user == null){
-      throw new NotFoundException(102001); // Usuario MC no existe
-    }
-
-    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
-    }
   }
 
   @Override
-  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception {
+  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception {
 
-    this.validateCalculatorRequest10(calculatorRequest);
+    this.validateCalculatorRequest10(userId, calculatorRequest);
 
     // VALIDACIONES USUARIO PREPAGO
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null, calculatorRequest.getRut());
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
     if(prepaidUser10 == null){
       throw new NotFoundException(102003); // Usuario no tiene prepago
     }
@@ -678,26 +668,37 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
+    //VALIDACIONES USUARIO USERMC
+    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
+    if(user == null){
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+    }
+
     final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
     final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
 
     // LLAMADA AL CDT
-    CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
-    cdtTransaction10.setAmount(amountValue);
-    cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction10.setTransactionReference(0L);
-    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getRut());
-    cdtTransaction10.setIndSimulacion(true);
-    cdtTransaction10.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
-    cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(amountValue);
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+    cdtTransaction.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
 
-    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // VALIDACIONES CDT
-    if(!cdtTransaction10.getNumError().equals("0")){
+    if(!cdtTransaction.getNumError().equals("0")){
 
       //TODO se debe usar el CdtHelper para obtener el codigo de error
-      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
+      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction.getMsjError());
       /*
       -La carga supera el monto máximo de carga web
       -La carga supera el monto máximo de carga pos
@@ -705,11 +706,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       -La carga supera el monto máximo de cargas mensuales.
       */
       /*
-      long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
-      if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      if(lNumError > 108000) {
+        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
       */
     }
@@ -722,7 +723,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto maximo a cargar: " + MAX_AMOUNT_BY_USER);
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > MAX_AMOUNT_BY_USER) {
-      throw new ValidationException(109000); //supera el saldo
+      throw new ValidationException(109000).setData(new KeyValue("value", MAX_AMOUNT_BY_USER)); //supera el saldo
     }
 
     BigDecimal fee;
@@ -739,21 +740,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
     CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
-    calculatorResponse.setPca(calculatePca(amountValue));
-    calculatorResponse.setEed(calculateEed(amountValue));
     calculatorResponse.setFee(fee);
+    calculatorResponse.setPca(new NewAmountAndCurrency10(calculatePca(amountValue), CodigoMoneda.CHILE_CLP));
+    calculatorResponse.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
     calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
   }
 
   @Override
-  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception {
+  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception {
 
-    this.validateCalculatorRequest10(calculatorRequest);
+    this.validateCalculatorRequest10(userId, calculatorRequest);
 
     // VALIDACIONES USUARIO PREPAGO
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(null, calculatorRequest.getRut());
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
     if(prepaidUser10 == null){
       throw new NotFoundException(102003); // Usuario no tiene prepago
     }
@@ -763,25 +764,36 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
     }
 
+    //VALIDACIONES USUARIO USERMC
+    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
+    if(user == null){
+      throw new NotFoundException(102001); // Usuario MC no existe
+    }
+
+    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+    }
+
     final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
     final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
 
-    CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
-    cdtTransaction10.setAmount(amountValue);
-    cdtTransaction10.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction10.setTransactionReference(0L);
-    cdtTransaction10.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + calculatorRequest.getRut());
-    cdtTransaction10.setIndSimulacion(true);
-    cdtTransaction10.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
-    cdtTransaction10.setGloss(cdtTransaction10.getTransactionType().toString());
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(amountValue);
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+    cdtTransaction.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
 
-    cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // VALIDACIONES CDT
-    if(!cdtTransaction10.getNumError().equals("0")){
+    if(!cdtTransaction.getNumError().equals("0")){
 
       //TODO se debe usar el CdtHelper para obtener el codigo de error
-      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction10.getMsjError());
+      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction.getMsjError());
       /*
       El retiro supera el monto máximo de un retiro web
       El retiro supera el monto máximo de un retiro pos
@@ -789,11 +801,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       El retiro supera el monto máximo de retiros mensuales.
      */
       /*
-      long lNumError = numberUtils.toLong(cdtTransaction10.getNumError(),-1L);
-      if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      if(lNumError > 108000) {
+        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction10.getMsjError()));
+        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
       */
     }
@@ -809,10 +821,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     //monto a cargar + comision
     BigDecimal calculatedAmount = amountValue.add(fee);
 
-    CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
-    calculatorResponse.setFee(fee);
-    calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
-
     //saldo del usuario
     PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
 
@@ -821,8 +829,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a retirar + comision: " + calculatedAmount);
 
     if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
-      throw new ValidationException(109001); //Saldo insuficiente
+      throw new ValidationException(109001).setData(new KeyValue("value", balance.getBalance().getValue())); //Saldo insuficiente
     }
+
+    CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
+    calculatorResponse.setFee(fee);
+    calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
 
     return calculatorResponse;
   }

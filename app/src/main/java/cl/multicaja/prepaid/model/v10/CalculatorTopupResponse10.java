@@ -8,15 +8,15 @@ import java.util.Objects;
 public class CalculatorTopupResponse10 extends BaseModel {
 
   private BigDecimal fee;
-  private BigDecimal pca;
-  private BigDecimal eed;
+  private NewAmountAndCurrency10 pca;
+  private NewAmountAndCurrency10 eed;
   private NewAmountAndCurrency10 amountToPay;
 
   public CalculatorTopupResponse10(){
     super();
   }
 
-  public CalculatorTopupResponse10(BigDecimal fee, BigDecimal pca, BigDecimal eed, NewAmountAndCurrency10 amountToPay) {
+  public CalculatorTopupResponse10(BigDecimal fee, NewAmountAndCurrency10 pca, NewAmountAndCurrency10 eed, NewAmountAndCurrency10 amountToPay) {
     this.fee = fee;
     this.pca = pca;
     this.eed = eed;
@@ -31,19 +31,19 @@ public class CalculatorTopupResponse10 extends BaseModel {
     this.fee = fee;
   }
 
-  public BigDecimal getPca() {
+  public NewAmountAndCurrency10 getPca() {
     return pca;
   }
 
-  public void setPca(BigDecimal pca) {
+  public void setPca(NewAmountAndCurrency10 pca) {
     this.pca = pca;
   }
 
-  public BigDecimal getEed() {
+  public NewAmountAndCurrency10 getEed() {
     return eed;
   }
 
-  public void setEed(BigDecimal eed) {
+  public void setEed(NewAmountAndCurrency10 eed) {
     this.eed = eed;
   }
 

@@ -51,19 +51,21 @@ public interface PrepaidEJB10 {
    * Calculadora de carga
    *
    * @param header
+   * @param userId
    * @param calculatorRequest
    * @return
    * @throws Exception
    */
-  CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception;
+  CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception;
 
   /**
    * Calculadora de retiro
    * @param header
+   * @param userId
    * @param calculatorRequest
    * @return
    * @throws Exception
    */
-  CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, CalculatorRequest10 calculatorRequest) throws Exception;
+  CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception;
 
 }

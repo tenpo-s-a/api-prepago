@@ -1,7 +1,8 @@
-package cl.multicaja.test.v10.unit;
+package cl.multicaja.test.v10.api;
 
 
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -17,7 +18,19 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
+public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
+
+  /**
+   *
+   * @param userId
+   * @param calculatorRequest
+   * @return
+   */
+  private HttpResponse postWithdrawalCalculator(Long userId, CalculatorRequest10 calculatorRequest) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/calculator/withdrawal", userId), toJson(calculatorRequest));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
 
   @Test
   public void withdrawalCalculator_with_error_in_params_null() throws Exception {
@@ -33,15 +46,9 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      try {
+      HttpResponse respHttp = postWithdrawalCalculator(null, calculatorRequest);
 
-        getPrepaidEJBBean10().withdrawalCalculator(null, null, calculatorRequest);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(ValidationException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
+      Assert.assertEquals("status 500", 500, respHttp.getStatus());
     }
     {
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -52,30 +59,24 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(null);
 
-      try {
+      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
 
-        getPrepaidEJBBean10().withdrawalCalculator(null, 1L, calculatorRequest);
+      ValidationException vex = respHttp.toObject(ValidationException.class);
 
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(ValidationException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
       CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
       calculatorRequest.setAmount(null);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      try {
+      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
 
-        getPrepaidEJBBean10().withdrawalCalculator(null, 1L, calculatorRequest);
+      ValidationException vex = respHttp.toObject(ValidationException.class);
 
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(ValidationException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -86,15 +87,12 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      try {
+      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
 
-        getPrepaidEJBBean10().withdrawalCalculator(null, 1L, calculatorRequest);
+      ValidationException vex = respHttp.toObject(ValidationException.class);
 
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(ValidationException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -105,15 +103,12 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
       calculatorRequest.setAmount(amount);
       calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      try {
+      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
 
-        getPrepaidEJBBean10().withdrawalCalculator(null, 1L, calculatorRequest);
+      ValidationException vex = respHttp.toObject(ValidationException.class);
 
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(ValidationException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
   }
 
@@ -148,7 +143,13 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     calculatorRequest.setAmount(amount);
     calculatorRequest.setPaymentMethod(TransactionOriginType.WEB);
 
-    CalculatorWithdrawalResponse10 resp = getPrepaidEJBBean10().withdrawalCalculator(null, prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+    CalculatorWithdrawalResponse10 resp = respHttp.toObject(CalculatorWithdrawalResponse10.class);
+
+    System.out.println("respuesta calculo: " + resp);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -192,7 +193,13 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
     calculatorRequest.setAmount(amount);
     calculatorRequest.setPaymentMethod(TransactionOriginType.POS);
 
-    CalculatorWithdrawalResponse10 resp = getPrepaidEJBBean10().withdrawalCalculator(null, prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+    CalculatorWithdrawalResponse10 resp = respHttp.toObject(CalculatorWithdrawalResponse10.class);
+
+    System.out.println("respuesta calculo: " + resp);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -240,7 +247,15 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalCalculator(null, prepaidUser10.getId(), calculatorRequest);
+      HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+
+      ValidationException vex = respHttp.toObject(ValidationException.class);
+
+      if (vex != null) {
+        throw vex;
+      }
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -284,7 +299,15 @@ public class Test_PrepaidEJBBean10_withdrawalCalculator extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalCalculator(null, prepaidUser10.getId(), calculatorRequest);
+      HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+
+      ValidationException vex = respHttp.toObject(ValidationException.class);
+
+      if (vex != null) {
+        throw vex;
+      }
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 

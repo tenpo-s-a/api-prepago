@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.api;
 
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
@@ -19,10 +20,21 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-public class Test_balance extends TestBaseUnitApi {
+public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
+
+  /**
+   *
+   * @param userId
+   * @return
+   */
+  private HttpResponse getPrepaidUserBalance(Long userId) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/balance", userId));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
 
   @Test
-  public void balance_v10() throws Exception {
+  public void getPrepaidUserBalance_ok() throws Exception {
 
     PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS = 5000;
 
@@ -37,10 +49,11 @@ public class Test_balance extends TestBaseUnitApi {
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
-      HttpResponse resp = apiGET(String.format("/1.0/prepaid/%s/balance", prepaidUser10.getId()));
-      Assert.assertEquals("status 200", 200, resp.getStatus());
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getId());
 
-      PrepaidBalance10 prepaidBalance10 = resp.toObject(PrepaidBalance10.class);
+      Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+      PrepaidBalance10 prepaidBalance10 = respHttp.toObject(PrepaidBalance10.class);
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -69,15 +82,53 @@ public class Test_balance extends TestBaseUnitApi {
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
-      HttpResponse resp = apiGET(String.format("/1.0/prepaid/%s/balance", prepaidUser10.getId()));
-      Assert.assertEquals("status 200", 200, resp.getStatus());
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getId());
 
-      PrepaidBalance10 prepaidBalance10 = resp.toObject(PrepaidBalance10.class);
+      Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+      PrepaidBalance10 prepaidBalance10 = respHttp.toObject(PrepaidBalance10.class);
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
       Assert.assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
       Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
+  }
+
+  @Test
+  public void getPrepaidUserBalance_not_ok() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    {
+      HttpResponse respHttp = getPrepaidUserBalance(null);
+
+      Assert.assertEquals("status 500", 500, respHttp.getStatus());
+    }
+
+    {
+      try {
+
+        HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getId() + 1);
+
+        Assert.assertEquals("status 404", 404, respHttp.getStatus());
+
+        NotFoundException nex = respHttp.toObject(NotFoundException.class);
+
+        if (nex != null) {
+          throw nex;
+        }
+
+        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
+      } catch(NotFoundException vex) {
+        Assert.assertEquals("debe ser error cliente no tiene prepago", Integer.valueOf(102003), vex.getCode());
+      }
+    }
+
   }
 }
