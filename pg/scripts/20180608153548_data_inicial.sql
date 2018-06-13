@@ -343,6 +343,14 @@ VALUES(16, 9, -1);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
+
+-- SE DEBE BORRAR PARA PRODUCCION
+DELETE FROM ${schema.cdt}.cdt_cuenta_acumulador;
+ALTER SEQUENCE ${schema.cdt}.cdt_cuenta_acumulador_id_seq RESTART WITH 1;
+-- SE DEBE BORRAR PARA PRODUCCION
+DELETE FROM ${schema.cdt}.cdt_movimiento_cuenta;
+ALTER SEQUENCE ${schema.cdt}.cdt_movimiento_cuenta_id_seq RESTART WITH 1;
+
 DELETE FROM  ${schema.cdt}.cdt_fase_acumulador;
 
 DELETE FROM  ${schema.cdt}.cdt_limite;
