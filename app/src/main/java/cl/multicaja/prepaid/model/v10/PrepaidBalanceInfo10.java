@@ -15,10 +15,10 @@ public class PrepaidBalanceInfo10 extends BaseModel {
   private Integer clamons;
   private String conprod;
   private String producto;
-  private BigDecimal salautconp = new BigDecimal(0l);
-  private BigDecimal salautcons = new BigDecimal(0l);
-  private BigDecimal saldisconp = new BigDecimal(0l);
-  private BigDecimal saldiscons = new BigDecimal(0l);
+  private BigDecimal salautconp = new BigDecimal(0L);
+  private BigDecimal salautcons = new BigDecimal(0L);
+  private BigDecimal saldisconp = new BigDecimal(0L);
+  private BigDecimal saldiscons = new BigDecimal(0L);
   private String subprodu;
 
   public PrepaidBalanceInfo10() {
