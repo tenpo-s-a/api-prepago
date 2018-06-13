@@ -18,6 +18,11 @@ public class NewAmountAndCurrency10 extends BaseModel {
     super();
   }
 
+  /**
+   * Crea una intancia con currencyCode por defecto en CodigoMoneda.CHILE_CLP
+   *
+   * @param value
+   */
   public NewAmountAndCurrency10(BigDecimal value) {
     this.value = value;
     this.currencyCode = CodigoMoneda.CHILE_CLP;
