@@ -67,8 +67,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
           redirectRequest(endpoint, exchange, req);
           return new ResponseRoute<>(data);
         }
+
         Cvv2DTO cvv2DTO = getTecnocomService().consultaCvv2(data.getPrepaidCard10().getProcessorUserId(),getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-        if (cvv2DTO.getRetorno().equals(CodigoRetorno._000)) {
+
+        if (cvv2DTO.isRetornoExitoso()) {
+
           MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, getConfigUtils().getProperty("prepaid.appname"), "card_pdf");
           EmailParams emailParams = getParametersUtil().getObject(getConfigUtils().getProperty("prepaid.appname"),"pdf_card","v10",EmailParams.class);
 

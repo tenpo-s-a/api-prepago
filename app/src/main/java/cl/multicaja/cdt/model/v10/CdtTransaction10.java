@@ -1,5 +1,6 @@
 package cl.multicaja.cdt.model.v10;
 
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -71,6 +72,14 @@ public class CdtTransaction10 implements Serializable {
 
   public String getNumError() {
     return numError;
+  }
+
+  public boolean isNumErrorOk() {
+    return "0".equals(this.getNumError());
+  }
+
+  public int getNumErrorInt() {
+    return NumberUtils.getInstance().toInt(this.getNumError(),-1);
   }
 
   public void setNumError(String numError) {

@@ -68,7 +68,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
 
     CdtTransaction10 cdt = remoteTopup.getData().getCdtTransaction10();
 
-    Assert.assertEquals("Deberia tener numError = 0", "0",cdt.getNumError());
+    Assert.assertEquals("Deberia tener numError = 0", 0, cdt.getNumErrorInt());
     Assert.assertEquals("No deberia tener mensaje de rror", "", cdt.getMsjError());
   }
 }

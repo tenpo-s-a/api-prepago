@@ -62,7 +62,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
         AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
 
-        if (altaClienteDTO.getRetorno().equals(CodigoRetorno._000)) {
+        if (altaClienteDTO.isRetornoExitoso()) {
 
           PrepaidCard10 prepaidCard =  new PrepaidCard10();
           prepaidCard.setIdUser(data.getPrepaidUser10().getId());
@@ -119,7 +119,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
         DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(data.getPrepaidCard10().getProcessorUserId());
 
-        if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._000)) {
+        if (datosTarjetaDTO.isRetornoExitoso()) {
 
           PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
 

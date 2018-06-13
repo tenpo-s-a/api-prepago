@@ -514,8 +514,8 @@ public class TestBaseUnit extends TestApiBase {
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
-    if(!cdtTransaction.getNumError().equals("0")){
-      long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+    if(!cdtTransaction.isNumErrorOk()){
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError != -1 && lNumError > 10000) {
         throw new ValidationException(108001).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {

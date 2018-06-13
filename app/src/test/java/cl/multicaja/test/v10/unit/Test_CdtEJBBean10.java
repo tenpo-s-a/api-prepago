@@ -18,7 +18,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
 
     CdtTransaction10 oCdtTx10 = new CdtTransaction10();
     oCdtTx10.setAccountId(accountId);
-    oCdtTx10.setTransactionReference(0l);
+    oCdtTx10.setTransactionReference(0L);
     oCdtTx10.setExternalTransactionId("POS"+getUniqueInteger());
     oCdtTx10.setGloss("RECARGA DE PREPAGO");
     oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -27,8 +27,8 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     oCdtTx10 = getCdtEJBBean10().addCdtTransaction(null,oCdtTx10);
 
     Assert.assertNotNull("Debe retornar Una Tx Cdt", oCdtTx10);
-    Assert.assertEquals("debe tener id", true, oCdtTx10.getTransactionReference() > 0);
-    Assert.assertEquals("debe tener Amount", true, oCdtTx10.getAmount().doubleValue() > 0);
+    Assert.assertTrue("debe tener id", oCdtTx10.getTransactionReference() > 0);
+    Assert.assertTrue("debe tener Amount", oCdtTx10.getAmount().doubleValue() > 0);
     Assert.assertNotNull("debe tener Account ID", oCdtTx10.getAccountId());
     Assert.assertNotNull("debe tener External Tx Id", oCdtTx10.getExternalTransactionId());
   }
@@ -48,7 +48,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(null);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS"+getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -66,7 +66,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId("");
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -84,7 +84,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(accountId);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(null);
@@ -102,7 +102,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(accountId);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId(null);
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -120,7 +120,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(accountId);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -138,7 +138,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(accountId);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
@@ -156,7 +156,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(accountId);
-      oCdtTx10.setTransactionReference(0l);
+      oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);

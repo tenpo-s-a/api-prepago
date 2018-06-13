@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.cdt.helpers.CdtHelper;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
@@ -13,7 +12,6 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
@@ -219,10 +217,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
-    if(!cdtTransaction.getNumError().equals("0")){
-      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+    if(!cdtTransaction.isNumErrorOk()){
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > 108000) {
-        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
@@ -339,16 +337,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
-    cdtTransaction.setTransactionReference(Long.valueOf(0));
+    cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
-    if(!cdtTransaction.getNumError().equals("0")){
-      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+    if(!cdtTransaction.isNumErrorOk()){
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > 108000) {
-        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
@@ -391,7 +389,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
                             numreffac, impfac, numaut, codcom,
                             nomcomred, codact, codpais);
 
-    if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+    if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
@@ -694,25 +692,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    // VALIDACIONES CDT
-    if(!cdtTransaction.getNumError().equals("0")){
-
-      //TODO se debe usar el CdtHelper para obtener el codigo de error
-      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction.getMsjError());
-      /*
-      -La carga supera el monto máximo de carga web
-      -La carga supera el monto máximo de carga pos
-      -La carga es menor al mínimo de carga
-      -La carga supera el monto máximo de cargas mensuales.
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
+      La carga supera el monto máximo de carga web
+      La carga supera el monto máximo de carga pos
+      La carga es menor al mínimo de carga
+      La carga supera el monto máximo de cargas mensuales.
       */
-      /*
-      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > 108000) {
-        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
-      */
     }
 
     //saldo del usuario
@@ -789,25 +781,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    // VALIDACIONES CDT
-    if(!cdtTransaction.getNumError().equals("0")){
-
-      //TODO se debe usar el CdtHelper para obtener el codigo de error
-      Integer errorCode = CdtHelper.getErrorCode(cdtTransaction.getMsjError());
-      /*
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
       El retiro supera el monto máximo de un retiro web
       El retiro supera el monto máximo de un retiro pos
       El monto de retiro es menor al monto mínimo de retiros
       El retiro supera el monto máximo de retiros mensuales.
      */
-      /*
-      Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > 108000) {
-        throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
-      */
     }
 
     BigDecimal fee;
