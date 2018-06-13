@@ -18,48 +18,44 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 /**
  * @autor vutreras
  */
-public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
+public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
   /**
    *
    * @param userId
-   * @param calculatorRequest
+   * @param simulationNew
    * @return
    */
-  private HttpResponse postWithdrawalCalculator(Long userId, CalculatorRequest10 calculatorRequest) {
-    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/calculator/withdrawal", userId), toJson(calculatorRequest));
+  private HttpResponse postWithdrawalSimulation(Long userId, SimulationNew10 simulationNew) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/withdrawal", userId), toJson(simulationNew));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
   @Test
-  public void withdrawalCalculator_with_error_in_params_null() throws Exception {
+  public void withdrawalSimulation_with_params_null() throws Exception {
 
     final Integer codErrorParamNull = 101004;
 
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(BigDecimal.valueOf(3000));
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postWithdrawalCalculator(null, calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(null, simulationNew);
 
       Assert.assertEquals("status 500", 500, respHttp.getStatus());
     }
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(BigDecimal.valueOf(3000));
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(null);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(null);
 
-      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -67,27 +63,11 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(null);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(null);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
-
-      ValidationException vex = respHttp.toObject(ValidationException.class);
-
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
-      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-    }
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(null);
-
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -95,15 +75,28 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(null);
+
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+
+      HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
+
+      ValidationException vex = respHttp.toObject(ValidationException.class);
+
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
+    }
+    {
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
       amount.setCurrencyCode(null);
-      amount.setValue(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postWithdrawalCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -113,7 +106,7 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void withdrawalCalculator_ok_WEB() throws Exception {
+  public void withdrawalSimulation_ok_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -129,25 +122,25 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(10000); //se carga 10.000 en tecnocom como saldo del usuario
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(8000)); //intento retirar 8.000
+    //se intenta retirar 8.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.WEB);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
-    CalculatorWithdrawalResponse10 resp = respHttp.toObject(CalculatorWithdrawalResponse10.class);
+    SimulationWithdrawal10 resp = respHttp.toObject(SimulationWithdrawal10.class);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -156,14 +149,14 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
     //calculo de la comision
-    BigDecimal feeOk = CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT);
 
-    Assert.assertEquals("deben ser las mismas comisiones", feeOk, resp.getFee());
-    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", feeOk.add(amount.getValue()), resp.getAmountToDiscount().getValue());
+    Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
+    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
   @Test
-  public void withdrawalCalculator_ok_POS() throws Exception {
+  public void withdrawalSimulation_ok_POS() throws Exception {
 
     User user = registerUser();
 
@@ -179,25 +172,25 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(10000); //se carga 10.000 en tecnocom como saldo del usuario
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(8000)); //intento retirar 8.000
+    //se intenta retirar 8.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.POS);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
-    CalculatorWithdrawalResponse10 resp = respHttp.toObject(CalculatorWithdrawalResponse10.class);
+    SimulationWithdrawal10 resp = respHttp.toObject(SimulationWithdrawal10.class);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -206,14 +199,14 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
     //calculo de la comision
-    BigDecimal feeOk = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE));
 
-    Assert.assertEquals("deben ser las mismas comisiones", feeOk, resp.getFee());
-    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", feeOk.add(amount.getValue()), resp.getAmountToDiscount().getValue());
+    Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
+    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
   @Test
-  public void withdrawalCalculator_not_ok_insufficient_balance_WEB() throws Exception {
+  public void withdrawalSimulation_not_ok_insufficient_balance_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -229,25 +222,25 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(10000); //se carga 10.000 en tecnocom como saldo del usuario
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(10000)); //intento retirar 10.000
+    //se intenta retirar 10.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(10000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.WEB);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
     try {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 
@@ -265,7 +258,7 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void withdrawalCalculator_not_ok_insufficient_balance_POS() throws Exception {
+  public void withdrawalSimulation_not_ok_insufficient_balance_POS() throws Exception {
 
     User user = registerUser();
 
@@ -281,25 +274,25 @@ public class Test_withdrawalCalculator_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(10000); //se carga 10.000 en tecnocom como saldo del usuario
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(10000)); //intento retirar 10.000
+    //se intenta retirar 10.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(10000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.POS);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
     try {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      HttpResponse respHttp = postWithdrawalCalculator(prepaidUser10.getId(), calculatorRequest);
+      HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

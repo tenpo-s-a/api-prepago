@@ -620,40 +620,40 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   /**
    *
    * @param userId
-   * @param calculatorRequest
+   * @param simulationNew
    * @throws BaseException
    */
-  private void validateCalculatorRequest10(Long userId, CalculatorRequest10 calculatorRequest) throws BaseException {
+  private void validateSimulationNew10(Long userId, SimulationNew10 simulationNew) throws BaseException {
 
     if(userId == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
     }
 
-    if(calculatorRequest == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "calculatorRequest"));
+    if(simulationNew == null){
+      throw new ValidationException(101004).setData(new KeyValue("value", "simulationNew"));
     }
 
-    if(calculatorRequest.getPaymentMethod() == null){
+    if(simulationNew.getPaymentMethod() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "paymentMethod"));
     }
 
-    if(calculatorRequest.getAmount() == null){
+    if(simulationNew.getAmount() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
     }
 
-    if(calculatorRequest.getAmount().getValue() == null){
+    if(simulationNew.getAmount().getValue() == null){
       throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
     }
 
-    if(calculatorRequest.getAmount().getCurrencyCode() == null) {
+    if(simulationNew.getAmount().getCurrencyCode() == null) {
       throw new ValidationException(101004).setData(new KeyValue("value", "amount.currencyCode"));
     }
   }
 
   @Override
-  public CalculatorTopupResponse10 topupCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception {
+  public SimulationTopup10 topupSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateCalculatorRequest10(userId, calculatorRequest);
+    this.validateSimulationNew10(userId, simulationNew);
 
     // VALIDACIONES USUARIO PREPAGO
     PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
@@ -677,8 +677,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
-    final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
-    final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+    final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // LLAMADA AL CDT
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
@@ -687,7 +686,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
-    cdtTransaction.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
@@ -720,30 +719,31 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     BigDecimal fee;
 
-    if(calculatorRequest.isTransactionWeb()){
+    if(simulationNew.isTransactionWeb()){
       fee = CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
     } else {
-      fee = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE);
+      fee = calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE);
     }
 
     //monto a cargar + comision
     BigDecimal calculatedAmount = amountValue.add(fee);
 
+    log.info("Comision: " + fee);
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
-    CalculatorTopupResponse10 calculatorResponse = new CalculatorTopupResponse10();
-    calculatorResponse.setFee(fee);
-    calculatorResponse.setPca(new NewAmountAndCurrency10(calculatePca(amountValue), CodigoMoneda.CHILE_CLP));
-    calculatorResponse.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
-    calculatorResponse.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
+    SimulationTopup10 simulationTopup = new SimulationTopup10();
+    simulationTopup.setFee(new NewAmountAndCurrency10(fee));
+    simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
+    simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
+    simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
-    return calculatorResponse;
+    return simulationTopup;
   }
 
   @Override
-  public CalculatorWithdrawalResponse10 withdrawalCalculator(Map<String,Object> header, Long userId, CalculatorRequest10 calculatorRequest) throws Exception {
+  public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateCalculatorRequest10(userId, calculatorRequest);
+    this.validateSimulationNew10(userId, simulationNew);
 
     // VALIDACIONES USUARIO PREPAGO
     PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
@@ -767,8 +767,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(102002); // Usuario MC bloqueado o borrado
     }
 
-    final BigDecimal amountValue = calculatorRequest.getAmount().getValue();
-    final CodigoMoneda amountCurrencyCode = calculatorRequest.getAmount().getCurrencyCode();
+    final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(amountValue);
@@ -776,7 +775,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
-    cdtTransaction.setTransactionType(calculatorRequest.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
+    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
@@ -798,10 +797,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     BigDecimal fee;
 
-    if (calculatorRequest.isTransactionWeb()) {
+    if (simulationNew.isTransactionWeb()) {
       fee = CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
     } else {
-      fee = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE);
+      fee = calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE);
     }
 
     //monto a cargar + comision
@@ -812,16 +811,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a retirar: " + amountValue);
+    log.info("Comision: " + fee);
     log.info("Monto a retirar + comision: " + calculatedAmount);
 
     if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
       throw new ValidationException(109001).setData(new KeyValue("value", balance.getBalance().getValue())); //Saldo insuficiente
     }
 
-    CalculatorWithdrawalResponse10 calculatorResponse = new CalculatorWithdrawalResponse10();
-    calculatorResponse.setFee(fee);
-    calculatorResponse.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount, amountCurrencyCode));
+    SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
+    simulationWithdrawal.setFee(new NewAmountAndCurrency10(fee));
+    simulationWithdrawal.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount));
 
-    return calculatorResponse;
+    return simulationWithdrawal;
   }
 }

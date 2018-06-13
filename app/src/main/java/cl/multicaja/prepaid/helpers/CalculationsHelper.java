@@ -108,7 +108,7 @@ public class CalculationsHelper {
    */
   public static NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
     //TODO calcular el pcaMain desde el valor del balance
-    NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L));
     return pcaMain;
   }
 

@@ -5,25 +5,25 @@ import cl.multicaja.core.model.BaseModel;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class CalculatorWithdrawalResponse10 extends BaseModel {
+public class SimulationWithdrawal10 extends BaseModel {
 
-  private BigDecimal fee;
+  private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 amountToDiscount;
 
-  public CalculatorWithdrawalResponse10(){
+  public SimulationWithdrawal10(){
     super();
   }
 
-  public CalculatorWithdrawalResponse10(BigDecimal fee, NewAmountAndCurrency10 amountToDiscount) {
+  public SimulationWithdrawal10(NewAmountAndCurrency10 fee, NewAmountAndCurrency10 amountToDiscount) {
     this.fee = fee;
     this.amountToDiscount = amountToDiscount;
   }
 
-  public BigDecimal getFee() {
+  public NewAmountAndCurrency10 getFee() {
     return fee;
   }
 
-  public void setFee(BigDecimal fee) {
+  public void setFee(NewAmountAndCurrency10 fee) {
     this.fee = fee;
   }
 
@@ -38,8 +38,8 @@ public class CalculatorWithdrawalResponse10 extends BaseModel {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof CalculatorWithdrawalResponse10)) return false;
-    CalculatorWithdrawalResponse10 that = (CalculatorWithdrawalResponse10) o;
+    if (!(o instanceof SimulationWithdrawal10)) return false;
+    SimulationWithdrawal10 that = (SimulationWithdrawal10) o;
     return  Objects.equals(getFee(), that.getFee()) &&
       Objects.equals(getAmountToDiscount(), that.getAmountToDiscount());
   }

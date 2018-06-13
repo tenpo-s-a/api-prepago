@@ -22,12 +22,9 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
 
     User user = registerUser();
 
-    user = updateUser(user);
-    user.setName(getRandomString(10));
-    user.setLastname_1(getRandomString( 12));
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
+
     System.out.println("User Rut: "+prepaidUser.getRut());
     System.out.println("User Mail: "+user.getEmail());
 
@@ -45,9 +42,8 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_RESP);
     ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
+    Assert.assertNotNull("Debe retornar una respuesta",remote);
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
-
-
   }
 
 }

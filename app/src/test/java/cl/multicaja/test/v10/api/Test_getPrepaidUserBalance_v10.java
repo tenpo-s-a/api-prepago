@@ -45,7 +45,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L));
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
@@ -78,7 +78,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     Thread.sleep(PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS + 1000);
 
     {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac, CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac);
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 

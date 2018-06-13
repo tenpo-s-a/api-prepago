@@ -42,7 +42,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     Assert.assertEquals("Saldo expiracion debe ser 0", Long.valueOf(0L), prepaidUser10.getBalanceExpiration());
 
     {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(0L));
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
@@ -70,7 +70,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
       BigDecimal balanceValue = BigDecimal.valueOf(newBalance.getSaldisconp().longValue() - newBalance.getSalautconp().longValue());
 
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue, CodigoMoneda.CHILE_CLP);
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
@@ -137,7 +137,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
     PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS = 5000;
 
-    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac, CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac);
     NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
     NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 

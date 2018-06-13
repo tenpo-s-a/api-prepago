@@ -18,48 +18,44 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 /**
  * @autor vutreras
  */
-public class Test_topupCalculator_v10 extends TestBaseUnitApi {
+public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
   /**
    *
    * @param userId
-   * @param calculatorRequest
+   * @param simulationNew
    * @return
    */
-  private HttpResponse postTopupCalculator(Long userId, CalculatorRequest10 calculatorRequest) {
-    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/calculator/topup", userId), toJson(calculatorRequest));
+  private HttpResponse postTopupSimulation(Long userId, SimulationNew10 simulationNew) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/topup", userId), toJson(simulationNew));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
   @Test
-  public void topupCalculator_with_error_in_params_null() throws Exception {
+  public void topupSimulation_with_params_null() throws Exception {
 
     final Integer codErrorParamNull = 101004;
 
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(BigDecimal.valueOf(3000));
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupCalculator(null, calculatorRequest);
+      HttpResponse respHttp = postTopupSimulation(null, simulationNew);
 
       Assert.assertEquals("status 500", 500, respHttp.getStatus());
     }
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(BigDecimal.valueOf(3000));
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(null);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(null);
 
-      HttpResponse respHttp = postTopupCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -67,27 +63,11 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(null);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(null);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupCalculator(1L, calculatorRequest);
-
-      ValidationException vex = respHttp.toObject(ValidationException.class);
-
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
-      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-    }
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-      amount.setValue(null);
-
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      HttpResponse respHttp = postTopupCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -95,15 +75,28 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(null);
+
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+
+      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
+
+      ValidationException vex = respHttp.toObject(ValidationException.class);
+
+      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
+    }
+    {
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
       amount.setCurrencyCode(null);
-      amount.setValue(BigDecimal.valueOf(3000));
 
-      CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-      calculatorRequest.setAmount(amount);
-      calculatorRequest.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupCalculator(1L, calculatorRequest);
+      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
 
       ValidationException vex = respHttp.toObject(ValidationException.class);
 
@@ -113,7 +106,7 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void topupCalculator_ok_WEB() throws Exception {
+  public void topupSimulation_ok_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -135,31 +128,30 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(3000));
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.WEB);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    System.out.println("Calcular carga WEB: " + calculatorRequest);
+    System.out.println("Calcular carga WEB: " + simulationNew);
 
-    HttpResponse respHttp = postTopupCalculator(prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
-    CalculatorTopupResponse10 resp = respHttp.toObject(CalculatorTopupResponse10.class);
+    SimulationTopup10 resp = respHttp.toObject(SimulationTopup10.class);
 
     System.out.println("respuesta calculo: " + resp);
 
-    BigDecimal calculatedFee = CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
 
-    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
@@ -167,7 +159,7 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void topupCalculator_ok_POS() throws Exception {
+  public void topupSimulation_ok_POS() throws Exception {
 
     User user = registerUser();
 
@@ -189,32 +181,30 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(3000));
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.POS);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    System.out.println("Calcular carga POS: " + calculatorRequest);
+    System.out.println("Calcular carga POS: " + simulationNew);
 
-    HttpResponse respHttp = postTopupCalculator(prepaidUser10.getId(), calculatorRequest);
+    HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
-    CalculatorTopupResponse10 resp = respHttp.toObject(CalculatorTopupResponse10.class);
+    SimulationTopup10 resp = respHttp.toObject(SimulationTopup10.class);
 
     System.out.println("respuesta calculo: " + resp);
 
-    BigDecimal calculatedFee = calculateFee(calculatorRequest.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE));
 
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
 
-    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
@@ -222,7 +212,7 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void topupCalculator_not_ok_exceeds_balance() throws Exception {
+  public void topupSimulation_not_ok_exceeds_balance() throws Exception {
 
     User user = registerUser();
 
@@ -244,21 +234,20 @@ public class Test_topupCalculator_v10 extends TestBaseUnitApi {
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(BigDecimal.valueOf(100001)); //se intenta cargar 100.001, debe dar error dado que el maximo es 500.000
+    //se intenta cargar 100.001, debe dar error dado que el maximo es 500.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(100001));
 
-    CalculatorRequest10 calculatorRequest = new CalculatorRequest10();
-    calculatorRequest.setAmount(amount);
-    calculatorRequest.setPaymentMethod(TransactionOriginType.WEB); //da lo mismo si es WEB o POS, para los 2 casos es la misma validacion
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB); //da lo mismo si es WEB o POS, para los 2 casos es la misma validacion
 
-    System.out.println("Calcular carga WEB: " + calculatorRequest);
+    System.out.println("Calcular carga WEB: " + simulationNew);
 
     try {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      HttpResponse respHttp = postTopupCalculator(prepaidUser10.getId(), calculatorRequest);
+      HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

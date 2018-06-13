@@ -5,29 +5,29 @@ import cl.multicaja.core.model.BaseModel;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class CalculatorTopupResponse10 extends BaseModel {
+public class SimulationTopup10 extends BaseModel {
 
-  private BigDecimal fee;
+  private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 pca;
   private NewAmountAndCurrency10 eed;
   private NewAmountAndCurrency10 amountToPay;
 
-  public CalculatorTopupResponse10(){
+  public SimulationTopup10(){
     super();
   }
 
-  public CalculatorTopupResponse10(BigDecimal fee, NewAmountAndCurrency10 pca, NewAmountAndCurrency10 eed, NewAmountAndCurrency10 amountToPay) {
+  public SimulationTopup10(NewAmountAndCurrency10 fee, NewAmountAndCurrency10 pca, NewAmountAndCurrency10 eed, NewAmountAndCurrency10 amountToPay) {
     this.fee = fee;
     this.pca = pca;
     this.eed = eed;
     this.amountToPay = amountToPay;
   }
 
-  public BigDecimal getFee() {
+  public NewAmountAndCurrency10 getFee() {
     return fee;
   }
 
-  public void setFee(BigDecimal fee) {
+  public void setFee(NewAmountAndCurrency10 fee) {
     this.fee = fee;
   }
 
@@ -58,8 +58,8 @@ public class CalculatorTopupResponse10 extends BaseModel {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof CalculatorTopupResponse10)) return false;
-    CalculatorTopupResponse10 that = (CalculatorTopupResponse10) o;
+    if (!(o instanceof SimulationTopup10)) return false;
+    SimulationTopup10 that = (SimulationTopup10) o;
     return Objects.equals(getFee(), that.getFee()) &&
       Objects.equals(getPca(), that.getPca()) &&
       Objects.equals(getEed(), that.getEed()) &&

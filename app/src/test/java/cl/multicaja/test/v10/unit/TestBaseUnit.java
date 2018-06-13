@@ -220,6 +220,9 @@ public class TestBaseUnit extends TestApiBase {
 
   public User registerUser(String password) throws Exception {
     User user = preRegisterUser();
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
     user = getUsersEJBBean10().fillUser(user);
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);

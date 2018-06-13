@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Objects;
 
-public class CalculatorRequest10 extends BaseModel {
+public class SimulationNew10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
   private TransactionOriginType paymentMethod;
 
-  public CalculatorRequest10(){
+  public SimulationNew10(){
     super();
   }
 
-  public CalculatorRequest10(NewAmountAndCurrency10 amount, TransactionOriginType paymentMethod) {
+  public SimulationNew10(NewAmountAndCurrency10 amount, TransactionOriginType paymentMethod) {
     this.amount = amount;
     this.paymentMethod = paymentMethod;
   }
@@ -44,7 +44,7 @@ public class CalculatorRequest10 extends BaseModel {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CalculatorRequest10 that = (CalculatorRequest10) o;
+    SimulationNew10 that = (SimulationNew10) o;
     return Objects.equals(amount, that.amount) &&
       paymentMethod == that.paymentMethod;
   }
