@@ -119,7 +119,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
 
-        if (CodigoRetorno._000.equals(inclusionMovimientosDTO.getRetorno())) {
+        if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
           issuanceFeeMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
           issuanceFeeMovement.setNummovext(inclusionMovimientosDTO.getNummovext());

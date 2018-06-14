@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
 
 /**
@@ -131,7 +132,7 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                       numreffac, impfac, numaut, codcom,
                                                                                                       nomcomred, codact, codpais);
 
-          if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._000)) {
+          if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
             Integer numextcta = inclusionMovimientosDTO.getNumextcta();
             Integer nummovext = inclusionMovimientosDTO.getNummovext();
@@ -162,12 +163,12 @@ public class PendingTopup10 extends BaseProcessor10 {
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
             //TODO que pasa si cdt da error?
-            if(!cdtTransaction.getNumError().equals("0")){
-              Long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
-              if(lNumError > 108000) {
-                throw new ValidationException(lNumError.intValue()).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+            if(!cdtTransaction.isNumErrorOk()){
+              int lNumError = cdtTransaction.getNumErrorInt();
+              if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+                throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
               } else {
-                throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+                throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
               }
             }
 

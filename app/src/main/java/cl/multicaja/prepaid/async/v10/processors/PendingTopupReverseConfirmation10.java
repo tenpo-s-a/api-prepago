@@ -57,8 +57,8 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
 
         // Si hay error
         //TODO: que hacer si falla?
-        if(!cdtTransaction.getNumError().equals("0")){
-          log.debug(String.format("Error code: %s", cdtTransaction.getNumError()));
+        if(!cdtTransaction.isNumErrorOk()){
+          log.debug(String.format("Error code: %s", cdtTransaction.getNumErrorInt()));
           log.debug(String.format("Error msg: %s", cdtTransaction.getMsjError()));
         }
         return new ResponseRoute<>(data);

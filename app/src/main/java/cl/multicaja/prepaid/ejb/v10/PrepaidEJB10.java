@@ -46,4 +46,27 @@ public interface PrepaidEJB10 {
    * @throws IllegalStateException si transaction.amount.value es null
    */
   void addVoucherData(IPrepaidTransaction10 transaction) throws Exception;
+
+  /**
+   * Calculadora de carga
+   *
+   * @param header
+   * @param userId
+   * @param simulationNew
+   * @return
+   * @throws Exception
+   */
+  SimulationTopup10 topupSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception;
+
+  /**
+   * Calculadora de retiro
+   *
+   * @param header
+   * @param userId
+   * @param simulationNew
+   * @return
+   * @throws Exception
+   */
+  SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception;
+
 }

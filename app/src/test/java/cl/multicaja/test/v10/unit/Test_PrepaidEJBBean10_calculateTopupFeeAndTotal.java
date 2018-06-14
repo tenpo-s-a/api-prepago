@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
@@ -17,18 +18,18 @@ import static org.junit.Assert.assertNotNull;
  */
 public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUnit {
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupNull() throws Exception {
     getPrepaidEJBBean10().calculateFeeAndTotal(null);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     getPrepaidEJBBean10().calculateFeeAndTotal(topup);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupAmountValueNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -37,7 +38,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     getPrepaidEJBBean10().calculateFeeAndTotal(topup);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupMerchantCodeNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -110,18 +111,18 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia tener total = 49703", BigDecimal.valueOf(49703), topup.getTotal().getValue());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawNull() throws Exception {
     getPrepaidEJBBean10().calculateFeeAndTotal(null);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountNull() throws Exception {
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountValueNull() throws Exception {
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -130,7 +131,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawMerchantCodeNull() throws Exception {
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();

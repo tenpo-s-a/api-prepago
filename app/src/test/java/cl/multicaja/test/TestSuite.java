@@ -17,19 +17,33 @@ public class TestSuite extends TestSuiteBase {
 
   private static TestServer testServer = new TestServer();
 
-  private static boolean serverRunning;
+  private static boolean runningInTestSuite = false;
+
+  /**
+   *
+   * @throws Exception
+   */
+  public static void startServer() throws Exception {
+    System.setProperty("project.artifactId", "api-prepaid");
+    testServer.start();
+  }
+
+  /**
+   *
+   */
+  public static void stopServer() {
+    testServer.stop();
+  }
 
   @BeforeClass
   public static void setUp() throws Exception {
-    System.setProperty("project.artifactId", "api-prepaid");
-    testServer.start();
-    serverRunning = true;
+    runningInTestSuite = true;
+    startServer();
   }
 
   @AfterClass
   public static void tearDown() {
-    testServer.stop();
-    serverRunning = false;
+    stopServer();
   }
 
   /**
@@ -37,11 +51,19 @@ public class TestSuite extends TestSuiteBase {
    * @return
    */
   public static boolean isServerRunning() {
-    return serverRunning;
+    return testServer.isServerRunning();
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static boolean isRunningInTestSuite() {
+    return runningInTestSuite;
   }
 
   public static Class<?>[] suite() throws Exception {
-    String packageName = new TestSuite().getClass().getPackage().getName();
+    String packageName = TestSuite.class.getPackage().getName();
     log.info("packageName: " + packageName);
     Class[] classList = getClasses(packageName);
     log.info("------------ Lista de clases de test ------------");

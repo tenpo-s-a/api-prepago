@@ -23,11 +23,14 @@ public class TestServer {
 
   private GlassFish glassfish;
 
+  private boolean serverRunning;
+
   public TestServer() {
     super();
   }
 
   /**
+   * inicia el servidor embebido
    *
    * @throws Exception
    */
@@ -38,7 +41,7 @@ public class TestServer {
 
     //se genera un port aleatorio
     int port = NumberUtils.getInstance().random(3200, 7200);
-    String env = System.getProperty("env", "test");
+    String env = ConfigUtils.getEnv();
 
     //se establecen los datos de conexion http al TestApiBase
     TestApiBase.PORT_HTTP = port;
@@ -79,7 +82,7 @@ public class TestServer {
     log.info("war: " + Arrays.asList(files));
 
     if (files == null || files.length == 0) {
-      throw new RuntimeException("No existe el war para desplegar en el servidor de test");
+      throw new RuntimeException("No existe el war para desplegar en el servidor de test, ejecuta un ./package.sh o mvn package");
     }
 
     File fileWar = files[0];
@@ -94,10 +97,11 @@ public class TestServer {
     glassfish = runtime.newGlassFish(glassfishProperties);
     glassfish.start();
     glassfish.getDeployer().deploy(fileWar);
+    serverRunning = true;
   }
 
   /**
-   *
+   * detiene el servidor embebido
    */
   public void stop() {
     if (glassfish != null) {
@@ -106,5 +110,15 @@ public class TestServer {
       } catch (Exception e) {
       }
     }
+    serverRunning = false;
+  }
+
+  /**
+   * retorna true si el servidor embebido se encuentra en ejecucion
+   *
+   * @return
+   */
+  public boolean isServerRunning() {
+    return serverRunning;
   }
 }

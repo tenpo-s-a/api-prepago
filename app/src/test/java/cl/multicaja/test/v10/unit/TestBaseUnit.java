@@ -2,6 +2,7 @@ package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
@@ -33,6 +34,8 @@ import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @autor vutreras
@@ -220,6 +223,9 @@ public class TestBaseUnit extends TestApiBase {
 
   public User registerUser(String password) throws Exception {
     User user = preRegisterUser();
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
     user = getUsersEJBBean10().fillUser(user);
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
@@ -399,7 +405,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
 
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
@@ -514,12 +520,12 @@ public class TestBaseUnit extends TestApiBase {
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
-    if(!cdtTransaction.getNumError().equals("0")){
-      long lNumError = numberUtils.toLong(cdtTransaction.getNumError(),-1L);
+    if(!cdtTransaction.isNumErrorOk()){
+      int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError != -1 && lNumError > 10000) {
-        throw new ValidationException(107000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(LIMITES_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(101006).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(LIMITES_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
@@ -640,12 +646,12 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
     prepaidMovement.setImpdiv(0L);
-    prepaidMovement.setImpfac(prepaidTopup.getAmount().getValue());
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
-    prepaidMovement.setCodcom(prepaidTopup.getMerchantCode());
-    prepaidMovement.setCodact(prepaidTopup.getMerchantCategory());
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
     prepaidMovement.setImpliq(0L); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
@@ -685,27 +691,27 @@ public class TestBaseUnit extends TestApiBase {
   public AltaClienteDTO registerInTecnocom(User user) throws BaseException {
 
     if (user == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
     }
 
     if (user.getName() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user.name"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.name"));
     }
 
     if (user.getLastname_1() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user.lastname_1"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_1"));
     }
 
     if (user.getLastname_2() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user.lastname_2"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_2"));
     }
 
     if (user.getRut() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user.rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
     }
 
     if (user.getRut().getValue() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "user.rut.value"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
     }
 
     return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
@@ -719,19 +725,19 @@ public class TestBaseUnit extends TestApiBase {
   public InclusionMovimientosDTO topupInTecnocom(PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
 
     if (prepaidCard10 == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
     }
 
     if (impfac == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
 
     if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
     }
 
     if (StringUtils.isBlank(prepaidCard10.getPan())) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard10.pan"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
     }
 
     String contrato = prepaidCard10.getProcessorUserId();
@@ -751,7 +757,7 @@ public class TestBaseUnit extends TestApiBase {
       numaut = numaut.substring(numaut.length()-6);
     }
 
-    System.out.println("Monto a cargar: " + impfac);
+    System.out.println("Monto a cargar en tecnocom: " + impfac);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,

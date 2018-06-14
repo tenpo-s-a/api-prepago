@@ -1,11 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
@@ -21,9 +19,10 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author vutreras
@@ -39,15 +38,15 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
 
     if(prepaidCard == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidCard"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard"));
     }
 
     if(prepaidCard.getIdUser() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idUser"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUser"));
     }
 
     if(prepaidCard.getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -72,7 +71,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return prepaidCard;
     } else {
       log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
@@ -119,7 +118,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @Override
   public PrepaidCard10 getPrepaidCardById(Map<String, Object> headers, Long id) throws Exception {
     if(id == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, id, null, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -129,10 +128,10 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidCard10 getLastPrepaidCardByUserIdAndStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus status) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
     if(status == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     PrepaidCard10 prepaidCard10 = this.getLastPrepaidCardByUserId(headers, userId);
@@ -148,7 +147,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidCard10 getLastPrepaidCardByUserId(Map<String, Object> headers, Long userId) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
@@ -160,10 +159,10 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidCard10 getLastPrepaidCardByUserIdAndOneOfStatus(Map<String, Object> headers, Long userId, PrepaidCardStatus... status) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
     if(status == null){
-      throw new ValidationException(2);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
@@ -186,10 +185,10 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception {
 
     if(id == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
     if(status == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -203,17 +202,17 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
   @Override
-  public boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception {
+  public boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception {
 
     Object[] params = {
       cardId == null ? new NullParam(Types.BIGINT): cardId,
       userId == null ? new NullParam(Types.BIGINT):userId , //_id_usuario
-      oldState == null ? new NullParam(Types.VARCHAR):oldState.toString() ,
+      oldStatus == null ? new NullParam(Types.VARCHAR):oldStatus.toString() ,
       prepaidCard.getPan(), //_pan
       prepaidCard.getEncryptedPan(), //_pan_encriptado
       prepaidCard.getProcessorUserId(), //_contrato
@@ -228,6 +227,6 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_tarjeta_v10", params);
 
-    return resp.get("_error_code").equals("0");
+    return "0".equals(resp.get("_error_code"));
   }
 }

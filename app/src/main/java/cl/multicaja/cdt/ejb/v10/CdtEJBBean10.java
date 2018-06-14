@@ -1,6 +1,7 @@
 package cl.multicaja.cdt.ejb.v10;
 
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
@@ -21,6 +22,8 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -69,22 +72,22 @@ public class CdtEJBBean10 implements CdtEJB10{
   public CdtTransaction10 addCdtTransaction(Map<String, Object> headers, CdtTransaction10 cdtTransaction10) throws Exception {
 
     if(cdtTransaction10 == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "cdtTransaction"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cdtTransaction"));
     }
     if(cdtTransaction10.getAccountId() == null || StringUtils.isAllBlank(cdtTransaction10.getAccountId().trim())) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "accountId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
     }
     if(cdtTransaction10.getTransactionType() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "transactionType"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transactionType"));
     }
     if(cdtTransaction10.getExternalTransactionId() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "externalTransactionId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalTransactionId"));
     }
     if(cdtTransaction10.getAmount() == null || cdtTransaction10.getAmount().doubleValue() == 0){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount o amount == 0"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount o amount == 0"));
     }
     if(cdtTransaction10.getIndSimulacion() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "indSimulacion"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indSimulacion"));
     }
 
     Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC)};
@@ -92,8 +95,8 @@ public class CdtEJBBean10 implements CdtEJB10{
 
     List lstFases = (List) outputData.get("result");
 
-    if(lstFases == null || lstFases.size() == 0) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "lstFases == null o lstFases.size == 0"));
+    if(lstFases == null || lstFases.isEmpty()) {
+      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "lstFases == null o lstFases.isEmpty"));
     }
 
     HashMap<String,Object> mapFase = (HashMap<String, Object>) lstFases.get(0);

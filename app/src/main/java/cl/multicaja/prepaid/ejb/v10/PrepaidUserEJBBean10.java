@@ -1,8 +1,8 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -11,19 +11,24 @@ import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
-import cl.multicaja.users.model.v10.*;
+import cl.multicaja.users.model.v10.NameStatus;
+import cl.multicaja.users.model.v10.RutStatus;
+import cl.multicaja.users.model.v10.Timestamps;
+import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author vutreras
@@ -52,19 +57,19 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidUser10 createPrepaidUser(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     if(prepaidUser == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "prepaidUser"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
     }
 
     if(prepaidUser.getIdUserMc() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idUserMc"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUserMc"));
     }
 
     if(prepaidUser.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
 
     if(prepaidUser.getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -83,7 +88,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return prepaidUser;
     } else {
       log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
@@ -127,7 +132,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @Override
   public PrepaidUser10 getPrepaidUserById(Map<String, Object> headers, Long userId) throws Exception {
     if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, userId, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -136,7 +141,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @Override
   public PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userIdMc"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, userIdMc, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -145,7 +150,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @Override
   public PrepaidUser10 getPrepaidUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     if(rut == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
     List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, null, rut, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -155,10 +160,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
     if(status == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -171,7 +176,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
@@ -179,16 +184,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidUserLevel getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
 
     if(user == null) {
-      throw new NotFoundException(102001);
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
     if(user.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
     if(user.getRut().getStatus() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut.status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut.status"));
     }
     if(prepaidUser10 == null) {
-      throw new NotFoundException(102003);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     if(RutStatus.VERIFIED.equals(user.getRut().getStatus()) && NameStatus.VERIFIED.equals(user.getNameStatus())) {
@@ -202,14 +207,14 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserById(null, userId);
 
     if(prepaidUser == null){
-      throw new NotFoundException(102003); // Usuario no tiene prepago
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     Long balanceExpiration = prepaidUser.getBalanceExpiration();
@@ -245,7 +250,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       balanceValue = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
     }
 
-    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue, CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
     NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
     NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
@@ -256,10 +261,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception {
 
     if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
     if(balance == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "balance"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "balance"));
     }
 
     //expira en 1 minuto (60
@@ -274,9 +279,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     };
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_saldo_usuario_v10", params);
+
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("Error en invocacion a SP: " + resp);
-      throw new BaseException(1);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 }

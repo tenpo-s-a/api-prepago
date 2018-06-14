@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -21,13 +22,13 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
     getPrepaidUserEJBBean10().getUserLevel(null, null);
   }
 
-  @Test(expected = ValidationException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_UserRutNull() throws Exception {
     User user = new User();
     getPrepaidUserEJBBean10().getUserLevel(user, null);
   }
 
-  @Test(expected = ValidationException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_UserRutStatusNull() throws Exception {
     User user = new User();
     user.setRut(new Rut());

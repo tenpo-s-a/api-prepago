@@ -40,7 +40,8 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
     System.out.println("resp:: " + resp);
 
-    Assert.assertEquals("status 200", 200, resp.getStatus());
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
     PrepaidTopup10 topup = resp.toObject(PrepaidTopup10.class);
 
     Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
@@ -52,9 +53,9 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingBody() {
+  public void shouldReturn400_OnMissingBody() {
     HttpResponse resp = apiPOST(URL_PATH, "{}");
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -62,7 +63,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingRut() {
+  public void shouldReturn400_OnMissingRut() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
@@ -77,7 +78,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     HttpResponse resp = apiPOST(URL_PATH, json);
     System.out.println(resp);
     System.out.println(resp.getResp());
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -85,7 +86,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingTransactionId() {
+  public void shouldReturn400_OnMissingTransactionId() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setRut(11111111);
@@ -98,7 +99,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -106,7 +107,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingMerchantCode() {
+  public void shouldReturn400_OnMissingMerchantCode() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
@@ -119,7 +120,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -127,7 +128,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmount() {
+  public void shouldReturn400_OnMissingAmount() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
@@ -137,7 +138,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -145,7 +146,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmountCurrencyCode() {
+  public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
@@ -158,7 +159,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -166,7 +167,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmountValue() {
+  public void shouldReturn400_OnMissingAmountValue() {
 
     NewPrepaidTopup10 topupRequest = new NewPrepaidTopup10();
     topupRequest.setTransactionId("123456789");
@@ -179,7 +180,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
     String json = toJson(topupRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -317,7 +318,7 @@ public class Test_topupBalance_v10 extends TestBaseUnitApi {
 
       System.out.println("resp:: " + resp);
 
-      Assert.assertEquals("status 200", 200, resp.getStatus());
+      Assert.assertEquals("status 201", 201, resp.getStatus());
     }
 
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);

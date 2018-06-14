@@ -13,6 +13,6 @@ public class Test_reverseTopup_v10 extends TestBaseUnitApi {
   public void reverseTopupUserBalance(){
     HttpResponse resp = apiPOST("/1.0/prepaid/topup/reverse", "{}");
     System.out.println("RESP:::" + resp.toMap());
-    Assert.assertEquals("status 200", 200, resp.getStatus());
+    Assert.assertEquals("status 201", 201, resp.getStatus());
   }
 }

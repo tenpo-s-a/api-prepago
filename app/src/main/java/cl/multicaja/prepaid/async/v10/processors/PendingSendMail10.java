@@ -30,6 +30,7 @@ import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.ERROR_SEND_MAIL
 public class PendingSendMail10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingSendMail10.class);
+
   public PendingSendMail10(PrepaidTopupRoute10 prepaidTopupRoute10) {
     super(prepaidTopupRoute10);
   }
@@ -59,7 +60,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-
         if(req.getRetryCount() > 3) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -67,8 +67,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
           redirectRequest(endpoint, exchange, req);
           return new ResponseRoute<>(data);
         }
+
         Cvv2DTO cvv2DTO = getTecnocomService().consultaCvv2(data.getPrepaidCard10().getProcessorUserId(),getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-        if (cvv2DTO.getRetorno().equals(CodigoRetorno._000)) {
+
+        if (cvv2DTO.isRetornoExitoso()) {
+
           MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, getConfigUtils().getProperty("prepaid.appname"), "card_pdf");
           EmailParams emailParams = getParametersUtil().getObject(getConfigUtils().getProperty("prepaid.appname"),"pdf_card","v10",EmailParams.class);
 
@@ -155,7 +158,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
         PrepaidTopupDataRoute10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
 
         if(req.getRetryCount() > 3) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_REQ);

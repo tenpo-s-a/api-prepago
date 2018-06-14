@@ -26,7 +26,16 @@ public class CalculationsHelper {
   public static final BigDecimal WITHDRAW_WEB_FEE_PERCENTAGE = new BigDecimal(0.5);
   public static final BigDecimal WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
 
+
+  public static final BigDecimal CALCULATOR_TOPUP_WEB_FEE_AMOUNT = new BigDecimal(0);
+  public static final BigDecimal CALCULATOR_TOPUP_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
+
+  public static final BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
+  public static final BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
+
   public static final double IVA = 1.19;
+
+  public static final int MAX_AMOUNT_BY_USER = 500000;
 
   /**
    * Calcula comision en la formula: MAX(100; 0,5% * amount) + IVA
@@ -46,7 +55,47 @@ public class CalculationsHelper {
     return rounded;
   }
 
+  /**
+   * Calcula el: para cuanto alcanza (pca)
+   *
+   * @param amount
+   * @return
+   */
+  private static double _calculatePca(BigDecimal amount) {
+    if (amount == null) {
+      return 0d;
+    }
+    return (amount.doubleValue() - 240) / 1.022;
+  }
 
+  /**
+   * Calcula el: para cuanto alcanza (pca)
+   *
+   * @param amount
+   * @return
+   */
+  public static BigDecimal calculatePca(BigDecimal amount) {
+    return BigDecimal.valueOf(_calculatePca(amount)).setScale(2, RoundingMode.CEILING);
+  }
+
+  /**
+   * Calcula el: equivalente en dolares (eed)
+   *
+   * @param amount
+   * @return
+   */
+  public static BigDecimal calculateEed(BigDecimal amount) {
+    if (amount == null) {
+      return BigDecimal.valueOf(0d);
+    }
+    double pca = _calculatePca(amount);
+    return BigDecimal.valueOf(pca / getUsdValue()).setScale(2, RoundingMode.CEILING);
+  }
+
+  /**
+   *
+   * @return
+   */
   public static Integer getUsdValue() {
     //TODO quizas se saca de algun servicio externo
     return 645;
@@ -59,7 +108,7 @@ public class CalculationsHelper {
    */
   public static NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
     //TODO calcular el pcaMain desde el valor del balance
-    NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L), CodigoMoneda.CHILE_CLP);
+    NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L));
     return pcaMain;
   }
 
