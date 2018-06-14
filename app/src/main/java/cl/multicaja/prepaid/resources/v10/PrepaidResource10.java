@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.core.resources.BaseResource;
@@ -13,6 +15,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author vutreras
@@ -29,6 +33,9 @@ public final class PrepaidResource10 extends BaseResource {
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
   /*
     Prepaid topup
@@ -92,9 +99,12 @@ public final class PrepaidResource10 extends BaseResource {
 
   @GET
   @Path("/{userId}/card")
-  public Response getPrepaidCard(@PathParam("userId") Long userId) {
-    //TODO falta implementar
-    return Response.ok().build();
+  public Response getPrepaidCard(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(headersToMap(headers), userId);
+    if (prepaidCard10 == null) {
+      throw new NotFoundException(TARJETA_NO_EXISTE);
+    }
+    return Response.ok(prepaidCard10).build();
   }
 
   @GET

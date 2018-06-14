@@ -2,13 +2,15 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.db.*;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.core.utils.db.InParam;
+import cl.multicaja.core.utils.db.NullParam;
+import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.users.model.v10.Timestamps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,15 +19,13 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.PARAMETRO_ILEGIBLE_$VALUE;
 
 @Stateless
 @LocalBean

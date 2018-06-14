@@ -30,6 +30,7 @@ import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.ERROR_SEND_MAIL
 public class PendingSendMail10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingSendMail10.class);
+
   public PendingSendMail10(PrepaidTopupRoute10 prepaidTopupRoute10) {
     super(prepaidTopupRoute10);
   }
@@ -58,7 +59,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
         PrepaidTopupDataRoute10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
 
         if(req.getRetryCount() > 3) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
@@ -158,7 +158,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
         PrepaidTopupDataRoute10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
 
         if(req.getRetryCount() > 3) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_REQ);
