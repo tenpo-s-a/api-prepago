@@ -22,7 +22,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   private static final String URL_PATH = "/1.0/prepaid/withdrawal";
 
   @Test
-  public void shouldReturn200_OnPosWithdraw() throws Exception {
+  public void shouldReturn201_OnPosWithdraw() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
@@ -42,7 +42,8 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     System.out.println("resp:: " + resp);
 
-    Assert.assertEquals("status 200", 200, resp.getStatus());
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
     PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
 
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
@@ -80,7 +81,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn200_OnWebWithdraw() throws Exception {
+  public void shouldReturn201_OnWebWithdraw() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
@@ -100,7 +101,8 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     System.out.println("resp:: " + resp);
 
-    Assert.assertEquals("status 200", 200, resp.getStatus());
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
     PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
 
     Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
@@ -273,7 +275,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
       System.out.println("resp:: " + resp);
 
-      Assert.assertEquals("status 200", 200, resp.getStatus());
+      Assert.assertEquals("status 201", 201, resp.getStatus());
     }
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
@@ -292,9 +294,9 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingBody() {
+  public void shouldReturn400_OnMissingBody() {
     HttpResponse resp = apiPOST(URL_PATH, "{}");
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -302,7 +304,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingRut() {
+  public void shouldReturn400_OnMissingRut() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setTransactionId("123456789");
@@ -317,7 +319,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     HttpResponse resp = apiPOST(URL_PATH, json);
     System.out.println(resp);
     System.out.println(resp.getResp());
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -325,7 +327,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingTransactionId() {
+  public void shouldReturn400_OnMissingTransactionId() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setRut(11111111);
@@ -338,7 +340,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     String json = toJson(withdrawRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -346,7 +348,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingMerchantCode() {
+  public void shouldReturn400_OnMissingMerchantCode() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setTransactionId("123456789");
@@ -359,7 +361,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     String json = toJson(withdrawRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -367,7 +369,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmount() {
+  public void shouldReturn400_OnMissingAmount() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setTransactionId("123456789");
@@ -377,7 +379,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     String json = toJson(withdrawRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -385,7 +387,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmountCurrencyCode() {
+  public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setTransactionId("123456789");
@@ -398,7 +400,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     String json = toJson(withdrawRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -406,7 +408,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingAmountValue() {
+  public void shouldReturn400_OnMissingAmountValue() {
 
     NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
     withdrawRequest.setTransactionId("123456789");
@@ -419,7 +421,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     String json = toJson(withdrawRequest);
 
     HttpResponse resp = apiPOST(URL_PATH, json);
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
@@ -427,7 +429,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnMissingPassword() {
+  public void shouldReturn400_OnMissingPassword() {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
     prepaidWithdraw.setRut(getUniqueRutNumber());
@@ -441,7 +443,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     System.out.println("resp:: " + resp);
 
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);

@@ -5,6 +5,8 @@ import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
+
 /**
  * @autor vutreras
  */
@@ -34,7 +36,7 @@ public class Test_PrepaidUserEJBBean10_createPrepaidUser extends TestBaseUnit {
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(BaseException bex) {
-      Assert.assertEquals("debe retornar excepcion de dato duplicado", Integer.valueOf(1), bex.getCode());
+      Assert.assertEquals("debe retornar excepcion de dato duplicado", ERROR_DE_COMUNICACION_CON_BBDD.getValue(), bex.getCode());
     }
   }
 }

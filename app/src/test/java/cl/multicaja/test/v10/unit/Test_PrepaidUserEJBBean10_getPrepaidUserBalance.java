@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
@@ -13,6 +14,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @autor vutreras
@@ -97,8 +101,8 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", Integer.valueOf(101004), vex.getCode());
+    } catch(BadRequestException vex) {
+      Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
     }
 
     try {
@@ -108,7 +112,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(NotFoundException nex) {
-      Assert.assertEquals("debe ser error de validacion", Integer.valueOf(102003), nex.getCode());
+      Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), nex.getCode());
     }
   }
 

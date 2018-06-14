@@ -1,10 +1,10 @@
 package cl.multicaja.test.v10.api;
 
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.SALDO_INSUFICIENTE_$VALUE;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 
 /**
@@ -35,7 +37,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
   @Test
   public void withdrawalSimulation_with_params_null() throws Exception {
 
-    final Integer codErrorParamNull = 101004;
+    final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
 
     {
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
@@ -57,9 +59,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+      BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("status 400", 400, respHttp.getStatus());
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
@@ -69,9 +71,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+      BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("status 400", 400, respHttp.getStatus());
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
@@ -83,9 +85,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+      BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("status 400", 400, respHttp.getStatus());
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
     {
@@ -98,9 +100,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       HttpResponse respHttp = postWithdrawalSimulation(1L, simulationNew);
 
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+      BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
+      Assert.assertEquals("status 400", 400, respHttp.getStatus());
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
   }
@@ -253,7 +255,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de saldo insuficiente", Integer.valueOf(109001), vex.getCode());
+      Assert.assertEquals("debe ser error de saldo insuficiente", SALDO_INSUFICIENTE_$VALUE.getValue(), vex.getCode());
     }
   }
 
@@ -305,7 +307,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de saldo insuficiente", Integer.valueOf(109001), vex.getCode());
+      Assert.assertEquals("debe ser error de saldo insuficiente", SALDO_INSUFICIENTE_$VALUE.getValue(), vex.getCode());
     }
   }
 }

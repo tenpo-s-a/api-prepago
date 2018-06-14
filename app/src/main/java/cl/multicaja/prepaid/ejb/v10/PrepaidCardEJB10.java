@@ -88,8 +88,15 @@ public interface PrepaidCardEJB10 {
   void updatePrepaidCardStatus(Map<String, Object> headers, Long id, PrepaidCardStatus status) throws Exception;
 
   /**
-   *  Permite realizar la actualizacion de los datos de una tarjeta
+   * Permite realizar la actualizacion de los datos de una tarjeta
    *
-  */
-  boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldState, PrepaidCard10 prepaidCard) throws Exception;
+   * @param headers
+   * @param cardId
+   * @param userId
+   * @param oldStatus
+   * @param prepaidCard
+   * @return
+   * @throws Exception
+   */
+  boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
 }

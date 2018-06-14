@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
@@ -14,18 +15,18 @@ import java.util.Map;
  */
 public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupNull() throws Exception {
     getPrepaidEJBBean10().addVoucherData(null);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupAmountNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     getPrepaidEJBBean10().addVoucherData(topup);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TopupAmountValueNull() throws Exception {
     PrepaidTopup10 topup = new PrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -59,18 +60,18 @@ public class Test_PrepaidEJBBean10_addVoucherData extends TestBaseUnit {
     Assert.assertEquals("Deberia tener el atributo value = 1.000.000","1.000.000", variableData.get("value"));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawNull() throws Exception {
     getPrepaidEJBBean10().addVoucherData(null);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountNull() throws Exception {
     PrepaidWithdraw10 withdraw= new PrepaidWithdraw10();
     getPrepaidEJBBean10().addVoucherData(withdraw);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_WithdrawAmountValueNull() throws Exception {
     PrepaidWithdraw10 withdraw= new PrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();

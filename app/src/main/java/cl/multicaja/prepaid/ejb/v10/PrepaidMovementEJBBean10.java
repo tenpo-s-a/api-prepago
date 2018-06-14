@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
@@ -23,6 +24,8 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -76,25 +79,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
 
-    if(resp == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "resp == null"));
-    }
-
     String numError = String.valueOf(resp.get("_error_code"));
     String msjError = String.valueOf(resp.get("_error_msg"));
 
     if(StringUtils.isBlank(numError) || !numError.equals("0") ){
       log.error("Num Error: "+numError+ " MsjError: "+msjError);
-      throw new ValidationException(101004).setData(new KeyValue("value", "numError: " + numError + ", msjError: " + msjError));
+      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "numError: " + numError + ", msjError: " + msjError));
     }
 
-    BigDecimal id = numberUtils.toBigDecimal(resp.get("_id"));
+    Long id = numberUtils.toLong(resp.get("_id"));
 
-    if(id == null  || id.longValue() == 0 ) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "id == null o id == 0"));
+    if(id == 0) {
+      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "id == 0"));
     }
 
-    data.setId(id.longValue());
+    data.setId(id);
     return data;
   }
 
@@ -102,11 +101,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   public void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception { ;
 
     if(id == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
     if(status == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
     Object[] params = {
@@ -123,14 +122,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     log.info("Resp updatePrepaidMovement: " + resp);
 
-    if(resp == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "resp == null"));
-    }
-
     String sNumError = String.valueOf(resp.get("_error_code"));
 
     if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
-      throw new ValidationException(101004).setData(new KeyValue("value", "sNumError: " + sNumError));
+      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "sNumError: " + sNumError));
     }
   }
 
@@ -206,7 +201,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public PrepaidMovement10 getPrepaidMovementById(Long id) throws Exception {
     if(id == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
     List<PrepaidMovement10> lst = this.getPrepaidMovements(id, null, null, null, null, null, null, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
@@ -215,7 +210,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUser(Long idPrepaidUser) throws Exception {
     if(idPrepaidUser == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idPrepaidUser"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, null);
   }
@@ -223,10 +218,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long idPrepaidUser, PrepaidMovementStatus estado) throws Exception {
     if(idPrepaidUser == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idPrepaidUser"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     if(estado == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "estado"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "estado"));
     }
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null);
   }
@@ -234,10 +229,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndTipoMovimiento(Long idPrepaidUser, PrepaidMovementType tipoMovimiento) throws Exception {
     if(idPrepaidUser == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "idPrepaidUser"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     if(tipoMovimiento == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "tipoMovimiento"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
     }
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null);
   }

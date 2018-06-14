@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+
 public class Test_CdtEJBBean10 extends TestBaseUnit {
 
   private String accountId = String.format("PREPAGO_%s", getUniqueRutNumber());
@@ -38,7 +40,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     try {
       getCdtEJBBean10().addCdtTransaction(null,null);
     } catch (ValidationException ex ) {
-      Assert.assertEquals("cdtTransaction null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("cdtTransaction null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -56,7 +58,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null,oCdtTx10);
     } catch (ValidationException ex ) {
-      Assert.assertEquals("accountId null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("accountId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -74,7 +76,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("accountId null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("accountId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -92,7 +94,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("transactionType null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("transactionType null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -110,7 +112,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("externalTransactionId null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("externalTransactionId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -128,7 +130,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("amount null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("amount null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -146,7 +148,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("amount 0", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("amount 0", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -164,7 +166,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setIndSimulacion(null);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
     } catch (ValidationException ex) {
-      Assert.assertEquals("indSimulacion null", Integer.valueOf(101004), ex.getCode());
+      Assert.assertEquals("indSimulacion null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 }

@@ -17,6 +17,8 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+
 /**
  * @autor vutreras
  */
@@ -104,6 +106,8 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
+    System.out.println("pppp:" + prepaidUser10);
+
     {
       HttpResponse respHttp = getPrepaidUserBalance(null);
 
@@ -126,7 +130,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
       } catch(NotFoundException vex) {
-        Assert.assertEquals("debe ser error cliente no tiene prepago", Integer.valueOf(102003), vex.getCode());
+        Assert.assertEquals("debe ser error cliente no tiene prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
       }
     }
 

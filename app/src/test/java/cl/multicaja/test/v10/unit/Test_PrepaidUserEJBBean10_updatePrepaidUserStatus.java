@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -10,6 +11,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @autor vutreras
@@ -55,8 +58,8 @@ public class Test_PrepaidUserEJBBean10_updatePrepaidUserStatus extends TestBaseU
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe se error 101004", Integer.valueOf(101004), vex.getCode());
+    } catch(BadRequestException vex) {
+      Assert.assertEquals("debe se error 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
     }
 
     prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUser10.getId());

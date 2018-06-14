@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -33,6 +34,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 
+import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 
 /**
@@ -133,44 +135,44 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
 
     if(topupRequest == null || topupRequest.getAmount() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
     if(topupRequest.getAmount().getValue() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
     }
     if(topupRequest.getAmount().getCurrencyCode() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currency_code"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
     }
     if(topupRequest.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
     if(StringUtils.isBlank(topupRequest.getMerchantCode())){
-      throw new ValidationException(101004).setData(new KeyValue("value", "merchant_code"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
     if(StringUtils.isBlank(topupRequest.getTransactionId())){
-      throw new ValidationException(101004).setData(new KeyValue("value", "transaction_id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
 
     // Obtener Usuario
     User user = this.getUsersEJB10().getUserByRut(headers, topupRequest.getRut());
 
     if(user == null){
-      throw new NotFoundException(102001); // Usuario MC no existe
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(102003); // Usuario no tiene prepago
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
     if(PrepaidUserLevel.LEVEL_1 != this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser)) {
@@ -219,10 +221,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si no cumple con los limites
     if(!cdtTransaction.isNumErrorOk()){
       int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > 108000) {
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
@@ -266,47 +268,47 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
 
     if(withdrawRequest == null || withdrawRequest.getAmount() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
     if(withdrawRequest.getAmount().getValue() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
     }
     if(withdrawRequest.getAmount().getCurrencyCode() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currency_code"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
     }
     if(withdrawRequest.getRut() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
     if(StringUtils.isBlank(withdrawRequest.getMerchantCode())){
-      throw new ValidationException(101004).setData(new KeyValue("value", "merchant_code"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
     if(StringUtils.isBlank(withdrawRequest.getTransactionId())){
-      throw new ValidationException(101004).setData(new KeyValue("value", "transaction_id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
     if(StringUtils.isBlank(withdrawRequest.getPassword())){
-      throw new ValidationException(101004).setData(new KeyValue("value", "password"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
     }
 
     // Obtener Usuario MC
     User user = this.getUsersEJB10().getUserByRut(headers, withdrawRequest.getRut());
 
     if(user == null){
-      throw new NotFoundException(102001); // Usuario MC no existe
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
-      throw new NotFoundException(102003); // Usuario no tiene prepago
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
     // Se verifica la clave
@@ -326,10 +328,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         PrepaidCardStatus.PENDING);
 
       if (prepaidCard != null) {
-        throw new ValidationException(106000).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString()));
       }
 
-      throw new ValidationException(102003); // cliente no tiene prepago
+      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
@@ -345,10 +347,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si no cumple con los limites
     if(!cdtTransaction.isNumErrorOk()){
       int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > 108000) {
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
@@ -471,8 +473,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
-    if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null || StringUtils.isBlank(transaction.getMerchantCode())){
-      throw new IllegalStateException();
+    if(transaction == null || transaction.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(transaction.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
+    }
+    if(StringUtils.isBlank(transaction.getMerchantCode())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
 
     CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
@@ -517,8 +525,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public void addVoucherData(IPrepaidTransaction10 transaction) throws Exception {
 
-    if(transaction == null || transaction.getAmount() == null || transaction.getAmount().getValue() == null) {
-      throw new IllegalStateException();
+    if(transaction == null || transaction.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(transaction.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
     }
 
     DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(new Locale("es_CL"));
@@ -626,27 +637,27 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private void validateSimulationNew10(Long userId, SimulationNew10 simulationNew) throws BaseException {
 
     if(userId == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "userId"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
     if(simulationNew == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "simulationNew"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "simulationNew"));
     }
 
     if(simulationNew.getPaymentMethod() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "paymentMethod"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "paymentMethod"));
     }
 
     if(simulationNew.getAmount() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
 
     if(simulationNew.getAmount().getValue() == null){
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.value"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
     }
 
     if(simulationNew.getAmount().getCurrencyCode() == null) {
-      throw new ValidationException(101004).setData(new KeyValue("value", "amount.currencyCode"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currencyCode"));
     }
   }
 
@@ -655,26 +666,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     this.validateSimulationNew10(userId, simulationNew);
 
-    // VALIDACIONES USUARIO PREPAGO
     PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
     if(prepaidUser10 == null){
-      throw new NotFoundException(102003); // Usuario no tiene prepago
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
-    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser10.getStatus())){
-      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
-    }
-
-    //VALIDACIONES USUARIO USERMC
     User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
     if(user == null){
-      throw new NotFoundException(102001); // Usuario MC no existe
-    }
-
-    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
@@ -699,10 +698,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       La carga supera el monto máximo de cargas mensuales.
       */
       int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > 108000) {
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
@@ -714,7 +713,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto maximo a cargar: " + MAX_AMOUNT_BY_USER);
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > MAX_AMOUNT_BY_USER) {
-      throw new ValidationException(109000).setData(new KeyValue("value", MAX_AMOUNT_BY_USER)); //supera el saldo
+      throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(new KeyValue("value", MAX_AMOUNT_BY_USER));
     }
 
     BigDecimal fee;
@@ -745,26 +744,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     this.validateSimulationNew10(userId, simulationNew);
 
-    // VALIDACIONES USUARIO PREPAGO
     PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
     if(prepaidUser10 == null){
-      throw new NotFoundException(102003); // Usuario no tiene prepago
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
-    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser10.getStatus())){
-      throw new ValidationException(102004); // Usuario prepago bloqueado o borrado
-    }
-
-    //VALIDACIONES USUARIO USERMC
     User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
     if(user == null){
-      throw new NotFoundException(102001); // Usuario MC no existe
-    }
-
-    //TODO a pesar que es necesario verificar que el usuario exista, se debe validar con Felipe si es necesario validar el estado
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(102002); // Usuario MC bloqueado o borrado
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
@@ -788,10 +775,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       El retiro supera el monto máximo de retiros mensuales.
      */
       int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > 108000) {
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(108000).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
 
@@ -815,7 +802,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a retirar + comision: " + calculatedAmount);
 
     if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
-      throw new ValidationException(109001).setData(new KeyValue("value", balance.getBalance().getValue())); //Saldo insuficiente
+      throw new ValidationException(SALDO_INSUFICIENTE_$VALUE).setData(new KeyValue("value", balance.getBalance().getValue()));
     }
 
     SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
