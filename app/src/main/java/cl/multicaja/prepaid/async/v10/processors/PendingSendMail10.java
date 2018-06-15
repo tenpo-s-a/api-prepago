@@ -4,8 +4,9 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.core.utils.Utils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.EmailParams;
 import cl.multicaja.prepaid.model.v10.MimeType;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
@@ -21,8 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_REQ;
-import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.ERROR_SEND_MAIL_WITHDRAW_REQ;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 
 /**
  * @autor abarazarte
@@ -31,8 +31,8 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingSendMail10.class);
 
-  public PendingSendMail10(PrepaidTopupRoute10 prepaidTopupRoute10) {
-    super(prepaidTopupRoute10);
+  public PendingSendMail10(BaseRoute10 route) {
+    super(route);
   }
 
   private String replaceDataHTML(String template, Map<String, String> data) {
@@ -68,27 +68,31 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return new ResponseRoute<>(data);
         }
 
-        Cvv2DTO cvv2DTO = getTecnocomService().consultaCvv2(data.getPrepaidCard10().getProcessorUserId(),getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
+        Cvv2DTO cvv2DTO = getRoute().getTecnocomService().consultaCvv2(data.getPrepaidCard10().getProcessorUserId(),
+                                      getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
 
         if (cvv2DTO.isRetornoExitoso()) {
 
-          MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, getConfigUtils().getProperty("prepaid.appname"), "card_pdf");
-          EmailParams emailParams = getParametersUtil().getObject(getConfigUtils().getProperty("prepaid.appname"),"pdf_card","v10",EmailParams.class);
+          MailTemplate mailTemplate = getRoute().getMailEJBBean10().getMailTemplateByAppAndName(null, getRoute().getConfigUtils().getProperty("prepaid.appname"), "card_pdf");
+          EmailParams emailParams = getRoute().getParametersUtil().getObject(getRoute().getConfigUtils().getProperty("prepaid.appname"),"pdf_card","v10",EmailParams.class);
 
           if (mailTemplate == null || emailParams == null) {
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             req.setRetryCount(0);
             redirectRequest(endpoint, exchange, req);
+            return new ResponseRoute<>(data);
           }
 
           Map<String, String> mailData = new HashMap<>();
-          mailData.put("${numtar}",getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-          mailData.put("${venc}",""+data.getPrepaidCard10().getExpiration());
-          mailData.put("${cvc}",""+cvv2DTO.getClavegen());
+          mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
+          mailData.put("${venc}", data.getPrepaidCard10().getExpiration().toString());
+          mailData.put("${cvc}", cvv2DTO.getClavegen().toString());
 
           String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
-          String pdfB64 = getPdfUtils().protectedPdfInB64(template, "" + data.getUser().getRut().getValue(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
+
+          //TODO el passwordOwner quizas debe externalizarse
+          String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
           EmailBody emailBody = new EmailBody();
           emailBody.setTemplateData("{ 'cliente' : '"+data.getUser().getName()+" "+data.getUser().getLastname_1()+"' }");
@@ -97,9 +101,9 @@ public class PendingSendMail10 extends BaseProcessor10 {
           emailBody.setAddress(data.getUser().getEmail().getValue());
           emailBody.setFrom(emailParams.getMailFrom());
           emailBody.setSubject(emailParams.getMailSubject());
-          emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_"+data.getUser().getLastname_1()+"_"+data.getUser().getName()+".pdf");
+          emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_" + Utils.uniqueCurrentTimeNano() + ".pdf");
 
-          Boolean bResultadoEnvioMail = getMailEjbBean10().sendMail(null,null,emailBody);
+          Boolean bResultadoEnvioMail = getRoute().getMailEJBBean10().sendMail(null,null, emailBody);
 
           if (!bResultadoEnvioMail) {
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
@@ -108,7 +112,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
           }
 
         } else if (cvv2DTO.getRetorno().equals(CodigoRetorno._1000)) {
-          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
+          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           redirectRequest(endpoint, exchange, req);
         } else {
@@ -129,12 +133,14 @@ public class PendingSendMail10 extends BaseProcessor10 {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
 
-        log.info("processError - REQ: " + req);
+        log.info("processErrorPendingSendMailCard - REQ: " + req);
         req.retryCountNext();
 
         PrepaidTopupDataRoute10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+
+        //TODO falta implementar
 
         return new ResponseRoute<>(data);
       }
@@ -151,7 +157,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
 
-        log.info("pendingSendMailWithdraw - REQ: " + req);
+        log.info("processPendingWithdrawMail - REQ: " + req);
 
         req.retryCountNext();
 
@@ -197,13 +203,15 @@ public class PendingSendMail10 extends BaseProcessor10 {
       @Override
       public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
 
-        log.info("errorSendMailWithdraw - REQ: " + req);
+        log.info("processErrorPendingWithdrawMail - REQ: " + req);
 
         req.retryCountNext();
 
         PrepaidTopupDataRoute10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+
+        //TODO falta implementar
 
         return new ResponseRoute<>(data);
       }

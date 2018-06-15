@@ -13,7 +13,9 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
 
   private String status;
   private Timestamps timestamps;
+  @JsonIgnore
   private NewAmountAndCurrency10 fee;
+  @JsonIgnore
   private NewAmountAndCurrency10 total;
   @JsonIgnore
   private String messageId;

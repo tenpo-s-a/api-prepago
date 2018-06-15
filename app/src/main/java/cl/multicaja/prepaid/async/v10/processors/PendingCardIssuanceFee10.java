@@ -4,8 +4,8 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 
-import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 
 /**
  * @autor abarazarte
@@ -25,8 +25,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCardIssuanceFee10.class);
 
-  public PendingCardIssuanceFee10(PrepaidTopupRoute10 prepaidTopupRoute10) {
-    super(prepaidTopupRoute10);
+  public PendingCardIssuanceFee10(BaseRoute10 route) {
+    super(route);
   }
 
   /**
@@ -79,13 +79,14 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
 
-          issuanceFeeMovement = getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
+          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
 
           req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
         }
 
         if(req.getRetryCount() > 3) {
 
+          //TODO cambiar la forma en como se actualiza el movimiento
           issuanceFeeMovement.setNumextcta(0);
           issuanceFeeMovement.setNummovext(0);
           issuanceFeeMovement.setClamone(0);
@@ -99,7 +100,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         }
 
         String contrato = prepaidCard.getProcessorUserId();
-        String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+        String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
         CodigoMoneda clamon = prepaidMovement.getClamon();
         IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
         TipoFactura tipofac = prepaidMovement.getTipofac();
@@ -116,17 +117,18 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           numaut = numaut.substring(numaut.length()-6);
         }
 
-        InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato,
+        InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
+          //TODO cambiar la forma en como se actualiza el movimiento
           issuanceFeeMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
           issuanceFeeMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
           issuanceFeeMovement.setClamone(inclusionMovimientosDTO.getClamone());
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESS_OK); //realizado
 
-          getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
             inclusionMovimientosDTO.getNumextcta(),
             inclusionMovimientosDTO.getNummovext(),
@@ -136,7 +138,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           // Activa la tarjeta luego de realizado el cobro de emision
           prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
 
-          getPrepaidCardEJBBean10().updatePrepaidCard(null,
+          getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
             prepaidCard.getId(),
             prepaidCard.getIdUser(),
             PrepaidCardStatus.PENDING,
@@ -154,12 +156,13 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           redirectRequest(endpoint, exchange, req);
         } else {
 
+          //TODO cambiar la forma en como se actualiza el movimiento
           issuanceFeeMovement.setNumextcta(0);
           issuanceFeeMovement.setNummovext(0);
           issuanceFeeMovement.setClamone(0);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
 
-          getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
             issuanceFeeMovement.getNumextcta(),
             issuanceFeeMovement.getNummovext(),
@@ -194,7 +197,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         issuanceFeeMovement.setClamone(0);
         issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
 
-        getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+        getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
           issuanceFeeMovement.getId(),
           issuanceFeeMovement.getNumextcta(),
           issuanceFeeMovement.getNummovext(),

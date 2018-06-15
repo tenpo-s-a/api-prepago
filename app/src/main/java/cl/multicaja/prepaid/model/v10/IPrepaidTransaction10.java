@@ -26,4 +26,5 @@ public interface IPrepaidTransaction10 {
 
   void setTotal(NewAmountAndCurrency10 total);
 
+  Integer getRut();
 }

@@ -7,8 +7,8 @@ import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import java.math.BigDecimal;
 
 import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
-import static cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 
 /**
  * @autor vutreras
@@ -30,8 +30,8 @@ public class PendingTopup10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingTopup10.class);
 
-  public PendingTopup10(PrepaidTopupRoute10 prepaidTopupRoute10) {
-    super(prepaidTopupRoute10);
+  public PendingTopup10(BaseRoute10 route) {
+    super(route);
   }
 
   public ProcessorRoute processPendingTopup() {
@@ -59,7 +59,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           //segun la historia: https://www.pivotaltracker.com/story/show/157850744
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-          getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
           prepaidMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
@@ -90,7 +90,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           return null;
         }
 
-        PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().getPrepaidUserByRut(null, rut);
+        PrepaidUser10 prepaidUser = getRoute().getPrepaidUserEJBBean10().getPrepaidUserByRut(null, rut);
 
         log.info("processPendingTopup prepaidUser: " + prepaidUser);
 
@@ -101,7 +101,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         data.setPrepaidUser10(prepaidUser);
 
-        PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+        PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
                                                                                                     PrepaidCardStatus.ACTIVE,
                                                                                                     PrepaidCardStatus.LOCKED,
                                                                                                     PrepaidCardStatus.PENDING);
@@ -111,7 +111,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           data.setPrepaidCard10(prepaidCard);
 
           String contrato = prepaidCard.getProcessorUserId();
-          String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+          String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
           CodigoMoneda clamon = prepaidMovement.getClamon();
           IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
@@ -128,7 +128,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             numaut = numaut.substring(numaut.length()-6);
           }
 
-          InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
+          InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
                                                                                                       numreffac, impfac, numaut, codcom,
                                                                                                       nomcomred, codact, codpais);
 
@@ -139,7 +139,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             Integer clamone = inclusionMovimientosDTO.getClamone();
             PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK; //realizado
 
-            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), numextcta, nummovext, clamone, status);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), numextcta, nummovext, clamone, status);
 
             prepaidMovement.setNumextcta(numextcta);
             prepaidMovement.setNummovext(nummovext);
@@ -158,7 +158,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
             cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getExternalTransactionId());
 
-            cdtTransactionConfirm = getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
+            cdtTransactionConfirm = getRoute().getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
 
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
@@ -190,7 +190,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           } else {
 
             PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-            getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
             data.getPrepaidMovement10().setEstado(status);
 
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
@@ -204,7 +204,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           //https://www.pivotaltracker.com/story/show/157816408
           //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
 
-          prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+          prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
                                                                                       PrepaidCardStatus.LOCKED_HARD,
                                                                                       PrepaidCardStatus.EXPIRED);
 
