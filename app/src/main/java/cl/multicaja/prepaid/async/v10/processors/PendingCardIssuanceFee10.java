@@ -86,11 +86,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         if(req.getRetryCount() > 3) {
 
-          //TODO cambiar la forma en como se actualiza el movimiento
-          issuanceFeeMovement.setNumextcta(0);
-          issuanceFeeMovement.setNummovext(0);
-          issuanceFeeMovement.setClamone(0);
-          issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
+          Integer numextcta = 0;
+          Integer nummovext = 0;
+          Integer clamone = 0;
+          PrepaidMovementStatus  status = PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
+
+          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+            issuanceFeeMovement.getId(),
+            numextcta,
+            nummovext,
+            clamone,
+            status);
+
+          issuanceFeeMovement.setNumextcta(numextcta);
+          issuanceFeeMovement.setNummovext(nummovext);
+          issuanceFeeMovement.setClamone(clamone);
+          issuanceFeeMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -122,18 +133,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
-          //TODO cambiar la forma en como se actualiza el movimiento
-          issuanceFeeMovement.setNumextcta(inclusionMovimientosDTO.getNumextcta());
-          issuanceFeeMovement.setNummovext(inclusionMovimientosDTO.getNummovext());
-          issuanceFeeMovement.setClamone(inclusionMovimientosDTO.getClamone());
-          issuanceFeeMovement.setEstado(PrepaidMovementStatus.PROCESS_OK); //realizado
+          Integer numextcta = inclusionMovimientosDTO.getNumextcta();
+          Integer nummovext = inclusionMovimientosDTO.getNummovext();
+          Integer clamone = inclusionMovimientosDTO.getClamone();
+          PrepaidMovementStatus  status = PrepaidMovementStatus.PROCESS_OK;
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
-            inclusionMovimientosDTO.getNumextcta(),
-            inclusionMovimientosDTO.getNummovext(),
-            inclusionMovimientosDTO.getClamone(),
-            issuanceFeeMovement.getEstado());
+            numextcta,
+            nummovext,
+            clamone,
+            status);
+
+          issuanceFeeMovement.setNumextcta(numextcta);
+          issuanceFeeMovement.setNummovext(nummovext);
+          issuanceFeeMovement.setClamone(clamone);
+          issuanceFeeMovement.setEstado(status);
 
           // Activa la tarjeta luego de realizado el cobro de emision
           prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -156,18 +171,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           redirectRequest(endpoint, exchange, req);
         } else {
 
-          //TODO cambiar la forma en como se actualiza el movimiento
-          issuanceFeeMovement.setNumextcta(0);
-          issuanceFeeMovement.setNummovext(0);
-          issuanceFeeMovement.setClamone(0);
-          issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
+          Integer numextcta = 0;
+          Integer nummovext = 0;
+          Integer clamone = 0;
+          PrepaidMovementStatus  status = PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
-            issuanceFeeMovement.getNumextcta(),
-            issuanceFeeMovement.getNummovext(),
-            issuanceFeeMovement.getClamone(),
-            issuanceFeeMovement.getEstado());
+            numextcta,
+            nummovext,
+            clamone,
+            status);
+
+          issuanceFeeMovement.setNumextcta(numextcta);
+          issuanceFeeMovement.setNummovext(nummovext);
+          issuanceFeeMovement.setClamone(clamone);
+          issuanceFeeMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -190,19 +209,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         req.retryCountNext();
         PrepaidTopupDataRoute10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
-        PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
-        issuanceFeeMovement.setNumextcta(0);
-        issuanceFeeMovement.setNummovext(0);
-        issuanceFeeMovement.setClamone(0);
-        issuanceFeeMovement.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE);
-
-        getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
-          issuanceFeeMovement.getId(),
-          issuanceFeeMovement.getNumextcta(),
-          issuanceFeeMovement.getNummovext(),
-          issuanceFeeMovement.getClamone(),
-          issuanceFeeMovement.getEstado());
 
         return new ResponseRoute<>(data);
       }
