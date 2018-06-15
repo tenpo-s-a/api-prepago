@@ -158,6 +158,9 @@ public class PendingTopup10 extends BaseProcessor10 {
             cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
             cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getExternalTransactionId());
 
+            log.info("CDT Init: " + cdtTransaction);
+            log.info("CDT Conf: " + cdtTransactionConfirm);
+
             cdtTransactionConfirm = getRoute().getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
 
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);

@@ -30,7 +30,7 @@ import static cl.multicaja.core.model.Errors.*;
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
 public class CdtEJBBean10 implements CdtEJB10{
 
-  private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
+  private static Log log = LogFactory.getLog(CdtEJBBean10.class);
 
   private ConfigUtils configUtils;
   private DBUtils dbUtils;
@@ -99,6 +99,8 @@ public class CdtEJBBean10 implements CdtEJB10{
       throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "lstFases == null o lstFases.isEmpty"));
     }
 
+    log.info("Registrando en CDT: " + cdtTransaction10);
+
     HashMap<String,Object> mapFase = (HashMap<String, Object>) lstFases.get(0);
 
     Long faseId = (Long) mapFase.get("_id");
@@ -124,9 +126,10 @@ public class CdtEJBBean10 implements CdtEJB10{
     if(numError.equals("0")){
       cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
     } else {
-      log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError);
+      log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError + " - " + cdtTransaction10);
       cdtTransaction10.setNumError(numError);
       cdtTransaction10.setMsjError(msjError);
+      throw new RuntimeException("prueba");
     }
     return cdtTransaction10;
   }

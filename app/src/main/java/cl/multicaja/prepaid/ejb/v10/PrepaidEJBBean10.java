@@ -684,11 +684,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
-    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // LLAMADA AL CDT
@@ -760,11 +755,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();

@@ -13,8 +13,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
-import static cl.multicaja.core.model.Errors.SALDO_SUPERARA_LOS_$$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 
 /**
