@@ -106,4 +106,9 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
   public void setMcVoucherData(List<Map<String, String>> mcVoucherData) {
     this.mcVoucherData = mcVoucherData;
   }
+
+  @JsonIgnore
+  public Integer getRut() {
+    return super.getRut();
+  }
 }

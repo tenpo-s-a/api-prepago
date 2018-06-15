@@ -109,4 +109,9 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
   public String getPassword(){
     return super.getPassword();
   }
+
+  @JsonIgnore
+  public Integer getRut() {
+    return super.getRut();
+  }
 }
