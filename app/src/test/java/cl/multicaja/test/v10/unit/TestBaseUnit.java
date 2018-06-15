@@ -191,6 +191,16 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   *
+   * Ejecuta signUp con datos aleatorios
+   * */
+  public SignUp getSignup() throws Exception {
+    String email = getUniqueEmail();
+    Integer rut = getUniqueRutNumber();
+    return getUsersEJBBean10().signUpUser(null, rut, email);
+  }
+
+  /**
    * pre-registra a un usuario (solo rut e email)
    * @return
    * @throws Exception

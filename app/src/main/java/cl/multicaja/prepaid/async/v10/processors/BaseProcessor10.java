@@ -1,20 +1,9 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.JMSMessenger;
-import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.PdfUtils;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
-import cl.multicaja.users.utils.ParametersUtil;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 
@@ -25,71 +14,24 @@ import javax.jms.Queue;
  */
 public abstract class BaseProcessor10 {
 
-  private PrepaidTopupRoute10 route;
+  private BaseRoute10 route;
 
-  public BaseProcessor10(PrepaidTopupRoute10 route) {
-    this.route = route;
-  }
+  protected static CamelFactory camelFactory = CamelFactory.getInstance();
 
   protected static NumberUtils numberUtils = NumberUtils.getInstance();
+
+  public BaseProcessor10(BaseRoute10 route) {
+    super();
+    this.route = route;
+  }
 
   /**
    *
    * @return
    */
-  public ConfigUtils getConfigUtils() {
-    return this.getRoute().getConfigUtils();
+  public BaseRoute10 getRoute() {
+    return this.route;
   }
-
-  public EncryptUtil getEncryptUtil(){
-    return this.getRoute().getEncryptUtil();
-  }
-
-  public ParametersUtil getParametersUtil() {
-    return this.getRoute().getParametersUtil();
-  }
-
-  public PdfUtils getPdfUtils(){
-    return this.getRoute().getPdfUtils();
-  }
-
-  public PrepaidTopupRoute10 getRoute() {
-    return route;
-  }
-
-  public void setRoute(PrepaidTopupRoute10 route) {
-    this.route = route;
-  }
-
-  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
-    return this.getRoute().getPrepaidMovementEJBBean10();
-  }
-
-  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
-    return this.getRoute().getPrepaidUserEJBBean10();
-  }
-
-  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    return this.getRoute().getPrepaidCardEJBBean10();
-  }
-
-  public PrepaidEJBBean10 getPrepaidEJBBean10() {
-    return this.getRoute().getPrepaidEJBBean10();
-  }
-
-  public UsersEJBBean10 getUsersEJBBean10() {
-    return this.getRoute().getUsersEJBBean10();
-  }
-
-  public TecnocomService getTecnocomService() {
-    return this.getRoute().getTecnocomService();
-  }
-
-  public CdtEJBBean10 getCdtEJBBean10() {
-    return this.getRoute().getCdtEJBBean10();
-  }
-
-  public MailEJBBean10 getMailEjbBean10(){ return  this.getRoute().getMailEJBBean10(); }
 
   /**
    * Crea un queue endpoint ser consumido por apache camel

@@ -5,8 +5,8 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDataRoute10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import org.apache.camel.Exchange;
@@ -20,8 +20,8 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingTopupReverseConfirmation10.class);
 
-  public PendingTopupReverseConfirmation10(PrepaidTopupRoute10 prepaidTopupRoute10) {
-    super(prepaidTopupRoute10);
+  public PendingTopupReverseConfirmation10(BaseRoute10 route) {
+    super(route);
   }
 
   public ProcessorRoute processPendingTopupReverseConfirmation() {
@@ -53,7 +53,7 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
         cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
         cdtTransaction.setGloss(CdtTransactionType.REVERSA_CARGA.getName());
 
-        cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+        cdtTransaction = getRoute().getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
 
         // Si hay error
         //TODO: que hacer si falla?

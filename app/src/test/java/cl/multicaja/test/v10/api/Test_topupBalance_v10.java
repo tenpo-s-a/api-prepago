@@ -16,7 +16,9 @@ import java.util.Map;
  * @author abarazarte
  */
 public class Test_topupBalance_v10 extends TestBaseUnitApi {
+
   private final String URL_PATH = "/1.0/prepaid/topup";
+
   @Test
   public void shouldReturn200_OnTopupUserBalance() throws Exception {
 

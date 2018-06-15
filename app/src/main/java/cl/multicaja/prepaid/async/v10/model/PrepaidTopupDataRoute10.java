@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.async.v10;
+package cl.multicaja.prepaid.async.v10.model;
 
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;

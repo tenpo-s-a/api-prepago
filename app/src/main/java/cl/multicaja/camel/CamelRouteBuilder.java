@@ -1,5 +1,6 @@
 package cl.multicaja.camel;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.RouteBuilder;
 
@@ -19,6 +20,14 @@ public abstract class CamelRouteBuilder extends RouteBuilder {
    */
   public CamelRouteBuilder() {
     super();
+  }
+
+  /**
+   *
+   * @param context
+   */
+  public CamelRouteBuilder(CamelContext context) {
+    super(context);
   }
 
   /**

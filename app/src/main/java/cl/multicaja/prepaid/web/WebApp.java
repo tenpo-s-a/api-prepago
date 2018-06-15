@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.web;
 
 import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
 import org.apache.activemq.broker.BrokerService;
@@ -33,14 +33,6 @@ public class WebApp implements ServletContextListener  {
     super();
   }
 
-  public PrepaidTopupRoute10 getPrepaidTopupRoute10() {
-    return prepaidTopupRoute10;
-  }
-
-  public void setPrepaidTopupRoute10(PrepaidTopupRoute10 prepaidTopupRoute10) {
-    this.prepaidTopupRoute10 = prepaidTopupRoute10;
-  }
-
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     Locale.setDefault(Constants.DEFAULT_LOCALE);
@@ -66,12 +58,6 @@ public class WebApp implements ServletContextListener  {
     } catch (Exception e) {
       log.error("Error al inicializar apache camel", e);
     }
-
-    System.out.println("------------ Configuraciones del modulo --------------");
-    ConfigUtils.getInstance().printList();
-
-    System.out.println("------------ Configuraciones del modulo api-users --------------");
-    new ConfigUtils("api-users").printList();
   }
 
   @Override

@@ -8,6 +8,7 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
@@ -149,6 +150,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(topupRequest.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
+    if(StringUtils.isBlank(topupRequest.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(topupRequest.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
     if(StringUtils.isBlank(topupRequest.getTransactionId())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
@@ -229,7 +236,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
-    prepaidTopup.setId(cdtTransaction.getTransactionReference());
     prepaidTopup.setUserId(user.getId());
     prepaidTopup.setStatus("exitoso");
     prepaidTopup.setTimestamps(new Timestamps());
@@ -249,6 +255,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+
+    prepaidTopup.setId(prepaidMovement.getId());
 
     /*
       Enviar mensaje al proceso asincrono
@@ -544,8 +552,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     data.put("name", "amount_paid");
     data.put("value", formatter.format(transaction.getAmount().getValue().longValue()));
 
+    Map<String, String> dataRut = new HashMap<>();
+    dataRut.put("name", "rut");
+    dataRut.put("value", RutUtils.getInstance().format(transaction.getRut(), null));
+
     List<Map<String, String>> mcVoucherData = new ArrayList<>();
     mcVoucherData.add(data);
+    mcVoucherData.add(dataRut);
 
     transaction.setMcVoucherData(mcVoucherData);
   }

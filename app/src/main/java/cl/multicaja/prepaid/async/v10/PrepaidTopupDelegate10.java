@@ -5,6 +5,7 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.Utils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
