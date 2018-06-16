@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -32,6 +33,7 @@ public class CdtEJBBean10 implements CdtEJB10{
 
   private static Log log = LogFactory.getLog(CdtEJBBean10.class);
 
+  private NumberUtils numberUtils = NumberUtils.getInstance();
   private ConfigUtils configUtils;
   private DBUtils dbUtils;
 
@@ -90,8 +92,12 @@ public class CdtEJBBean10 implements CdtEJB10{
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indSimulacion"));
     }
 
-    Object[] params = {cdtTransaction10.getTransactionType().getName() , new NullParam(Types.NUMERIC)};
-    Map<String,Object> outputData = getDbUtils().execute(getSchema() + SP_CARGA_FASES_MOVIMIENTOS,params);
+    Object[] params = {
+      cdtTransaction10.getTransactionType().getName(),
+      new NullParam(Types.NUMERIC)
+    };
+
+    Map<String,Object> outputData = getDbUtils().execute(getSchema() + SP_CARGA_FASES_MOVIMIENTOS, params);
 
     List lstFases = (List) outputData.get("result");
 
@@ -123,13 +129,12 @@ public class CdtEJBBean10 implements CdtEJB10{
     String numError = (String) outputData.get("NumError");
     String msjError = (String) outputData.get("MsjError");
 
-    if(numError.equals("0")){
-      cdtTransaction10.setTransactionReference(((BigDecimal)outputData.get("IdMovimiento")).longValue());
+    if("0".equals(numError)){
+      cdtTransaction10.setTransactionReference(numberUtils.toLong(outputData.get("IdMovimiento")));
     } else {
-      log.error("[CdtEJBBean10][addCdtTransaction] NumError: "+numError+" MsjError: "+msjError + " - " + cdtTransaction10);
+      log.error("addCdtTransaction resp: " + outputData + " - " + cdtTransaction10);
       cdtTransaction10.setNumError(numError);
       cdtTransaction10.setMsjError(msjError);
-      throw new RuntimeException("prueba");
     }
     return cdtTransaction10;
   }

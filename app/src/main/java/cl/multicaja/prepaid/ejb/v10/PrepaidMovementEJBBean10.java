@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -24,6 +25,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
+import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_ILEGIBLE_$VALUE;
 
@@ -79,22 +81,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
 
-    String numError = String.valueOf(resp.get("_error_code"));
-    String msjError = String.valueOf(resp.get("_error_msg"));
+    System.out.println(resp);
 
-    if(StringUtils.isBlank(numError) || !numError.equals("0") ){
-      log.error("Num Error: "+numError+ " MsjError: "+msjError);
-      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "numError: " + numError + ", msjError: " + msjError));
+    if ("0".equals(resp.get("_error_code"))) {
+      long id = numberUtils.toLong(resp.get("_id"), -1L);
+      if (id == -1) {
+        id = numberUtils.toLong(resp.get("_r_id"));
+      }
+      data.setId(id);
+      return data;
+    } else {
+      log.error("addPrepaidMovement resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
-
-    Long id = numberUtils.toLong(resp.get("_id"));
-
-    if(id == 0) {
-      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "id == 0"));
-    }
-
-    data.setId(id);
-    return data;
   }
 
   @Override
@@ -120,17 +119,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_v10",params);
 
-    log.info("Resp updatePrepaidMovement: " + resp);
-
-    String sNumError = String.valueOf(resp.get("_error_code"));
-
-    if(StringUtils.isBlank(sNumError) || !sNumError.equals("0") ){
-      throw new ValidationException(PARAMETRO_ILEGIBLE_$VALUE).setData(new KeyValue("value", "sNumError: " + sNumError));
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updatePrepaidMovement resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
   @Override
-  public void updatePrepaidMovement(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
+  public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
     this.updatePrepaidMovement(null, id, null, null, null, status);
   }
 

@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -87,7 +88,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       prepaidUser.setId(numberUtils.toLong(resp.get("_r_id")));
       return prepaidUser;
     } else {
-      log.error("Error en invocacion a SP: " + resp);
+      log.error("createPrepaidUser resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
@@ -174,8 +175,9 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     };
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_usuario_v10", params);
+
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("Error en invocacion a SP: " + resp);
+      log.error("updatePrepaidUserStatus resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
@@ -234,8 +236,12 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
         if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
           pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
-          this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
-          updated = true;
+          try {
+            this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
+            updated = true;
+          } catch(Exception ex) {
+            log.error("Error al actualizar el saldo del usuario", ex);
+          }
         } else {
           log.error("Problemas al obtener saldo del cliente: " + userId + ", rut: " + prepaidUser.getRut() + ", retorno consultaSaldoDTO: " + consultaSaldoDTO);
         }
@@ -281,7 +287,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_saldo_usuario_v10", params);
 
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("Error en invocacion a SP: " + resp);
+      log.error("updatePrepaidUserBalance resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }

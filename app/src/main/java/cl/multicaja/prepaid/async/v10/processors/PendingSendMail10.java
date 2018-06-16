@@ -86,8 +86,8 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
           Map<String, String> mailData = new HashMap<>();
           mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-          mailData.put("${venc}", data.getPrepaidCard10().getExpiration().toString());
-          mailData.put("${cvc}", cvv2DTO.getClavegen().toString());
+          mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getExpiration()));
+          mailData.put("${cvc}", String.valueOf(cvv2DTO.getClavegen()));
 
           String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
 

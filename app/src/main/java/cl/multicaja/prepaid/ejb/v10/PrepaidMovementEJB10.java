@@ -22,6 +22,7 @@ public interface PrepaidMovementEJB10 {
   PrepaidMovement10 addPrepaidMovement(Map<String,Object> header, PrepaidMovement10 value) throws Exception;
 
   /**
+   * actualiza datos retornados por tecnocom en el movimiento
    *
    * @param header
    * @param id
@@ -34,14 +35,14 @@ public interface PrepaidMovementEJB10 {
   void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
 
   /**
-   * Actualiza solo el estado
+   * actualiza solo el estado
    *
    * @param header
    * @param id
    * @param status
    * @throws Exception
    */
-  void updatePrepaidMovement(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
+  void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
 
   /**
    *
