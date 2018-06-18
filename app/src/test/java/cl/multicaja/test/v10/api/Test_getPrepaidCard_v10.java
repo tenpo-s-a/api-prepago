@@ -2,6 +2,7 @@ package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,7 +47,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
-
+    Timestamps timestamps = card1.getTimestamps();
+    Assert.assertNotNull("deberia tener timestamps", timestamps);
+    Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
+    Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
   @Test
@@ -81,6 +85,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
+    Timestamps timestamps = card1.getTimestamps();
+    Assert.assertNotNull("deberia tener timestamps", timestamps);
+    Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
+    Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
   @Test
@@ -115,6 +123,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
+    Timestamps timestamps = card1.getTimestamps();
+    Assert.assertNotNull("deberia tener timestamps", timestamps);
+    Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
+    Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
   @Test
@@ -149,6 +161,10 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNull("no debe tener encryptedPan", card1.getEncryptedPan());
     Assert.assertNull("no debe tener producto", card1.getProducto());
     Assert.assertNull("no debe tener numeroUnico", card1.getNumeroUnico());
+    Timestamps timestamps = card1.getTimestamps();
+    Assert.assertNotNull("deberia tener timestamps", timestamps);
+    Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
+    Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
   @Test
