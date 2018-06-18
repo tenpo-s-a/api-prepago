@@ -74,7 +74,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new InParam(data.getLinref(), Types.NUMERIC),//_linref NUMERIC
       new InParam(data.getNumbencta(),Types.NUMERIC),//_numbencta NUMERIC
       new InParam(data.getNumplastico(),Types.NUMERIC),//_numplastico NUMERIC
-      new OutParam("_id", Types.NUMERIC),
+      new OutParam("_r_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -84,11 +84,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     System.out.println(resp);
 
     if ("0".equals(resp.get("_error_code"))) {
-      long id = numberUtils.toLong(resp.get("_id"), -1L);
-      if (id == -1) {
-        id = numberUtils.toLong(resp.get("_r_id"));
-      }
-      data.setId(id);
+      data.setId(numberUtils.toLong(resp.get("_r_id")));
       return data;
     } else {
       log.error("addPrepaidMovement resp: " + resp);
