@@ -234,7 +234,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_FirstTopupInProcess() throws Exception {
+  public void shouldReturn422_FirstTopupInProcess_PrepaidCardPending() throws Exception {
     User user = registerUser();
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
@@ -246,9 +246,27 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
+    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_FirstTopupInProcess_MovementPending() throws Exception {
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard10);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
@@ -260,6 +278,93 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_FirstTopupInProcess_MovementInProcess() throws Exception {
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+    prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_FirstTopupInProcess_MovementErrorAndPending() throws Exception {
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+
+      System.out.println("RESP:::" + resp.toMap());
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
+    }
+    {
+      User user = registerUser();
+
+      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+
+      System.out.println("RESP:::" + resp.toMap());
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
+    }
   }
 
   @Test
