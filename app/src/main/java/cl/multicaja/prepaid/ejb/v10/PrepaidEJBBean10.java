@@ -474,8 +474,43 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId) {
-    return null;
+  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception {
+    if(userId == null || Long.valueOf(0).equals(userId)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserById(headers, userId);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.PENDING);
+
+    List<PrepaidMovement10> prepaidMovements = this.getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUser(userId);
+
+    if(prepaidCard != null) {
+      throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString()));
+    }
+
+    prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED,
+      PrepaidCardStatus.EXPIRED);
+
+    if(prepaidCard == null) {
+      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+
+
+    return prepaidCard;
   }
 
   @Override

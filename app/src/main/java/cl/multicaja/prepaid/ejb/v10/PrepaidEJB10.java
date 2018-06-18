@@ -24,7 +24,7 @@ public interface PrepaidEJB10 {
 
   PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId);
 
-  PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId);
+  PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception;
 
   /**
    *  Calcula la comision y total segun el tipo (TOPUP/WITHDRAW) y el origen (POS/WEB)
