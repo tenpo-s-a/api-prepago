@@ -490,25 +490,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
-      PrepaidCardStatus.PENDING);
-
-    List<PrepaidMovement10> prepaidMovements = this.getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUser(userId);
-
-    if(prepaidCard != null) {
-      throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString()));
-    }
-
-    prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED,
-      PrepaidCardStatus.EXPIRED);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     if(prepaidCard == null) {
-      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+    } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     }
-
-
 
     return prepaidCard;
   }
