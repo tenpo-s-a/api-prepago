@@ -112,13 +112,13 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
-        CodigoMoneda clamon = prepaidMovement.getClamon();
-        IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
-        TipoFactura tipofac = prepaidMovement.getTipofac();
-        BigDecimal impfac = prepaidMovement.getImpfac();
-        String codcom = prepaidMovement.getCodcom();
-        Integer codact = prepaidMovement.getCodact();
-        CodigoPais codpais = prepaidMovement.getCodpais();
+        CodigoMoneda clamon = issuanceFeeMovement.getClamon();
+        IndicadorNormalCorrector indnorcor = issuanceFeeMovement.getIndnorcor();
+        TipoFactura tipofac = issuanceFeeMovement.getTipofac();
+        BigDecimal impfac = issuanceFeeMovement.getImpfac();
+        String codcom = issuanceFeeMovement.getCodcom();
+        Integer codact = issuanceFeeMovement.getCodact();
+        CodigoPais codpais = issuanceFeeMovement.getCodpais();
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString();
         String numaut = numreffac;
