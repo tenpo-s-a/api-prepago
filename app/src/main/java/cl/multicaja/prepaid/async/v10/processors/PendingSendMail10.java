@@ -177,8 +177,8 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         Map<String, String> mailData = new HashMap<>();
 
-        mailData.put("${amount}", withdraw.getAmount().getValue().toString());
-        mailData.put("${fee}", withdraw.getFee().getValue().toString());
+        mailData.put("${amount}", String.valueOf(withdraw.getAmount().getValue()));
+        mailData.put("${fee}", String.valueOf(withdraw.getFee().getValue()));
 
         //TODO: Hay que verificar que funcione el obtener plantilla
         /*MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "WITHDRAW");
