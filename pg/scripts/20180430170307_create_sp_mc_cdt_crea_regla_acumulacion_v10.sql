@@ -74,4 +74,4 @@ LANGUAGE 'plpgsql';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
- DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_regla_acumulacion_v10(NUMERIC,VARCHAR,VARCHAR);
+ DROP FUNCTION IF EXISTS ${schema.cdt}.mc_cdt_crea_regla_acumulacion_v10(VARCHAR,VARCHAR,VARCHAR);
