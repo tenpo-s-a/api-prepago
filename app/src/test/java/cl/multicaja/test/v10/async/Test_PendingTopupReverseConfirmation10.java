@@ -1,8 +1,8 @@
 package cl.multicaja.test.v10.async;
 
-import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.users.model.v10.User;
@@ -28,7 +28,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REVERSE_CONFIRMATION_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNull("No deberia existir un topup", remoteTopup);
   }
@@ -59,7 +59,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REVERSE_CONFIRMATION_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());

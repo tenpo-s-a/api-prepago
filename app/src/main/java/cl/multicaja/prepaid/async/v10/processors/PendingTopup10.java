@@ -1,13 +1,10 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.ProcessorMetadata;
-import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -35,15 +32,15 @@ public class PendingTopup10 extends BaseProcessor10 {
   }
 
   public ProcessorRoute processPendingTopup() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingTopup - REQ: " + req);
 
         req.retryCountNext();
 
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
@@ -66,7 +63,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
-          return new ResponseRoute<>(data);
+          return req;
         }
 
         User user = data.getUser();
@@ -184,7 +181,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.setRetryCount(0);
               redirectRequest(endpoint, exchange, req);
             } else {
-              return new ResponseRoute<>(data);
+              return req;
             }
 
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -219,31 +216,31 @@ public class PendingTopup10 extends BaseProcessor10 {
             redirectRequest(endpoint, exchange, req);
           } else {
             data.setPrepaidCard10(prepaidCard);
-            return new ResponseRoute<>(data);
+            return req;
           }
         }
 
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }
 
   public ProcessorRoute processPendingTopupReturns() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingTopupReturns - REQ: " + req);
 
         req.retryCountNext();
 
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
         //TODO falta implementar la devolucion
 
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }

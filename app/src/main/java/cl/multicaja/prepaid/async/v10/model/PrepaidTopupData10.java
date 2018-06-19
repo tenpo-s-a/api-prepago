@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @autor vutreras
  */
-public class PrepaidTopupDataRoute10 implements Serializable {
+public class PrepaidTopupData10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
@@ -29,11 +29,11 @@ public class PrepaidTopupDataRoute10 implements Serializable {
   private PrepaidMovement10 issuanceFeeMovement10;
   private List<ProcessorMetadata> processorMetadata = new ArrayList<>();
 
-  public PrepaidTopupDataRoute10() {
+  public PrepaidTopupData10() {
     super();
   }
 
-  public PrepaidTopupDataRoute10(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+  public PrepaidTopupData10(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
     this.prepaidTopup10 = prepaidTopup;
     this.user = user;
     this.cdtTransaction10 = cdtTransaction;

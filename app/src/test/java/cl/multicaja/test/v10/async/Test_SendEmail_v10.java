@@ -30,7 +30,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 
-    ResponseRoute<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
+    ExchangeData<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
 
     Assert.assertNotNull("debe existir una respuesta", resp);
 
@@ -50,7 +50,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 
-    ResponseRoute<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
+    ExchangeData<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
 
     Assert.assertNotNull("debe existir una respuesta", resp);
 

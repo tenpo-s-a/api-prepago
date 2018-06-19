@@ -6,29 +6,43 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 
 /**
- * Representa una respuesta de una ruta camel, todas las respuestas camel deben heredar de esta clase
+ * Representa un mensaje de una ruta camel
  *
  * @autor vutreras
  */
-public class ResponseRoute<E extends Serializable> implements Serializable {
+public class ExchangeData<E extends Serializable> implements Serializable {
 
   private E data;
 
+  private int retryCount = 0;
+
   private ExchangeContext exchangeContext;
 
-  public ResponseRoute() {
+  public ExchangeData() {
     super();
   }
 
-  public ResponseRoute(E data) {
+  public ExchangeData(E data) {
     super();
     this.data = data;
   }
 
-  public ResponseRoute(E data, ExchangeContext exchangeContext) {
+  public ExchangeData(E data, ExchangeContext exchangeContext) {
     super();
     this.data = data;
     this.exchangeContext = exchangeContext;
+  }
+
+  public int getRetryCount() {
+    return retryCount;
+  }
+
+  public void setRetryCount(int retryCount) {
+    this.retryCount = retryCount;
+  }
+
+  public void retryCountNext() {
+    this.retryCount++;
   }
 
   public E getData() {
