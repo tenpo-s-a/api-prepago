@@ -9,8 +9,6 @@ import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.SQLException;
-
 /**
  * Helper para inicializar el servicio de tecnocom
  *

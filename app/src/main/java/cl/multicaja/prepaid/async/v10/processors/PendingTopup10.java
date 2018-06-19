@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.*;
+import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;

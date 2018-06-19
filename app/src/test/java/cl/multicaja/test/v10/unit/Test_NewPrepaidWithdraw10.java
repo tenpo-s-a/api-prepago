@@ -1,6 +1,8 @@
 package cl.multicaja.test.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.CdtTransactionType;
+import cl.multicaja.prepaid.model.v10.NewPrepaidWithdraw10;
+import cl.multicaja.prepaid.model.v10.TransactionOriginType;
 import org.junit.Assert;
 import org.junit.Test;
 

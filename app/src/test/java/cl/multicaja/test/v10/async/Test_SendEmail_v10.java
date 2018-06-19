@@ -1,7 +1,5 @@
 package cl.multicaja.test.v10.async;
 
-import cl.multicaja.core.utils.Utils;
-import cl.multicaja.users.model.v10.EmailBody;
 import org.junit.Ignore;
 
 /**

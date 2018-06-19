@@ -2,11 +2,9 @@ package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
@@ -16,7 +14,6 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
-import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**

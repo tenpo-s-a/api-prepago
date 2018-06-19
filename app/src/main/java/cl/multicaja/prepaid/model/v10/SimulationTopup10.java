@@ -2,7 +2,6 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 public class SimulationTopup10 extends BaseModel {

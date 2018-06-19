@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.*;
+import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;

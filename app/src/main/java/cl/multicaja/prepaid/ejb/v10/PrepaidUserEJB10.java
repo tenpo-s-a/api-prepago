@@ -2,7 +2,10 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
+import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.users.model.v10.User;
 
 import java.util.List;

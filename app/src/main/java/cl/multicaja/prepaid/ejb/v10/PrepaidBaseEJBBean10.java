@@ -6,7 +6,6 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.utils.ParametersUtil;
-import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * @autor vutreras

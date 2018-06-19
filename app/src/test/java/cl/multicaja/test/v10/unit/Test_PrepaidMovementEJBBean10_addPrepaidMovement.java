@@ -1,15 +1,10 @@
 package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.model.v10.User;
-import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_addPrepaidMovement extends TestBaseUnit {
 
