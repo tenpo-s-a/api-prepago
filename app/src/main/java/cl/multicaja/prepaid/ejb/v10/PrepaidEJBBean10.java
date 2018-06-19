@@ -474,13 +474,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userId) throws Exception {
-    if(userId == null || Long.valueOf(0).equals(userId)){
+  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
+    // Obtener usuario Multicaja
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserById(headers, userId);
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -494,7 +505,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
-    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(userId,
+    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
       PrepaidMovementStatus.PENDING,
       PrepaidMovementStatus.IN_PROCESS);
 

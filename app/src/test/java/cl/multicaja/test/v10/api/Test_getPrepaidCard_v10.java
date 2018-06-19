@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.Timestamps;
 import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId()));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -67,7 +68,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId()));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -105,7 +106,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId()));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -143,7 +144,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId()));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -168,19 +169,75 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
+  public void shouldReturn404_McUserNull() {
+
+    HttpResponse resp = apiGET(String.format(URL_PATH, numberUtils.random(999, 99999) + 1));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 404", 404, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102001", 102001, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserDisabled() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.DISABLED);
+    updateUser(user);
+
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserLocked() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.LOCKED);
+    updateUser(user);
+
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_McUserDeleted() throws Exception {
+
+    User user = registerUser();
+    user.setGlobalStatus(UserStatus.DELETED);
+    updateUser(user);
+
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
+
+    System.out.println("RESP:::" + resp.toMap());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
+  }
+
+  @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() + 1));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -204,7 +261,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId()));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -223,7 +280,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -246,7 +303,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -270,7 +327,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -294,7 +351,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
     System.out.println("RESP:::" + resp.toMap());
 
@@ -324,7 +381,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
       prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+      HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
       System.out.println("RESP:::" + resp.toMap());
 
@@ -356,7 +413,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
       prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = apiGET(String.format(URL_PATH, prepaidUser10.getId() ));
+      HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
 
       System.out.println("RESP:::" + resp.toMap());
 
@@ -368,22 +425,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn400_Id0() throws Exception {
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
-
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard10);
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+  public void shouldReturn400_Id0() {
 
     HttpResponse resp = apiGET(String.format(URL_PATH, 0));
 
