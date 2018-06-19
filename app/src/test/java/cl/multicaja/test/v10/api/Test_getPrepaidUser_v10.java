@@ -82,7 +82,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     Assert.assertNotNull("debe tener usuario", respUser);
     Assert.assertEquals("debe tener el mismo id", prepaidUser.getId(), respUser.getId());
-    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserId(), respUser.getUserId());
+    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserIdMc(), respUser.getUserIdMc());
     Assert.assertEquals("debe tener el mismo rut", prepaidUser.getRut(), respUser.getRut());
     Assert.assertEquals("debe tener el mismo status", prepaidUser.getStatus(), respUser.getStatus());
     Assert.assertEquals("debe tener status = ACTIVE", PrepaidUserStatus.ACTIVE, respUser.getStatus());
@@ -112,7 +112,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     Assert.assertNotNull("debe tener usuario", respUser);
     Assert.assertEquals("debe tener el mismo id", prepaidUser.getId(), respUser.getId());
-    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserId(), respUser.getUserId());
+    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserIdMc(), respUser.getUserIdMc());
     Assert.assertEquals("debe tener el mismo rut", prepaidUser.getRut(), respUser.getRut());
     Assert.assertEquals("debe tener el mismo status", prepaidUser.getStatus(), respUser.getStatus());
     Assert.assertEquals("debe tener status = ACTIVE", PrepaidUserStatus.DISABLED, respUser.getStatus());
@@ -144,7 +144,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     Assert.assertNotNull("debe tener usuario", respUser);
     Assert.assertEquals("debe tener el mismo id", prepaidUser.getId(), respUser.getId());
-    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserId(), respUser.getUserId());
+    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserIdMc(), respUser.getUserIdMc());
     Assert.assertEquals("debe tener el mismo rut", prepaidUser.getRut(), respUser.getRut());
     Assert.assertEquals("debe tener el mismo status", prepaidUser.getStatus(), respUser.getStatus());
     Timestamps timestamps = respUser.getTimestamps();
@@ -174,7 +174,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     Assert.assertNotNull("debe tener usuario", respUser);
     Assert.assertEquals("debe tener el mismo id", prepaidUser.getId(), respUser.getId());
-    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserId(), respUser.getUserId());
+    Assert.assertEquals("debe tener el mismo user_id", prepaidUser.getUserIdMc(), respUser.getUserIdMc());
     Assert.assertEquals("debe tener el mismo rut", prepaidUser.getRut(), respUser.getRut());
     Assert.assertEquals("debe tener el mismo status", prepaidUser.getStatus(), respUser.getStatus());
     Timestamps timestamps = respUser.getTimestamps();

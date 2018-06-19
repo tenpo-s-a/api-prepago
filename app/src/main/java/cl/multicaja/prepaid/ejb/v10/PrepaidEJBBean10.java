@@ -331,7 +331,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Se verifica la clave
     ParamValue passwordParam = new ParamValue();
     passwordParam.setValue(withdrawRequest.getPassword());
-    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserId(), passwordParam);
+    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), passwordParam);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,

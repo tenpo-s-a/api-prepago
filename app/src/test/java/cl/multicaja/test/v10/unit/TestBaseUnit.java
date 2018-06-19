@@ -251,7 +251,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 buildPrepaidUser10(User user) {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserId(user != null ? user.getId() : null);
+    prepaidUser.setUserIdMc(user != null ? user.getId() : null);
     prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
@@ -264,7 +264,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserId(getUniqueLong());
+    prepaidUser.setUserIdMc(getUniqueLong());
     prepaidUser.setRut(getUniqueRutNumber());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
@@ -553,7 +553,7 @@ public class TestBaseUnit extends TestApiBase {
 
     Assert.assertNotNull("debe retornar un usuario", prepaidUser);
     Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
-    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getUserId() > 0);
+    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getUserIdMc() > 0);
     Assert.assertEquals("debe tener rut", true, prepaidUser.getRut() > 0);
     Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
 

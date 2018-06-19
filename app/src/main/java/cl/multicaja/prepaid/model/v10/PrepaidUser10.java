@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.model.v10;
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.users.model.v10.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -12,7 +13,8 @@ import java.util.Objects;
 public class PrepaidUser10 extends BaseModel {
 
   private Long id;
-  private Long userId;
+  @JsonProperty("user_id")
+  private Long userIdMc;
   private Integer rut;
   private PrepaidUserStatus status;
   private Timestamps timestamps;
@@ -36,12 +38,12 @@ public class PrepaidUser10 extends BaseModel {
     this.id = id;
   }
 
-  public Long getUserId() {
-    return userId;
+  public Long getUserIdMc() {
+    return userIdMc;
   }
 
-  public void setUserId(Long userId) {
-    this.userId = userId;
+  public void setUserIdMc(Long userIdMc) {
+    this.userIdMc = userIdMc;
   }
 
   public Integer getRut() {
@@ -98,13 +100,13 @@ public class PrepaidUser10 extends BaseModel {
     if (!(o instanceof PrepaidUser10)) return false;
     PrepaidUser10 that = (PrepaidUser10) o;
     return Objects.equals(getId(), that.getId()) &&
-      Objects.equals(getUserId(), that.getUserId()) &&
+      Objects.equals(getUserIdMc(), that.getUserIdMc()) &&
       Objects.equals(getRut(), that.getRut()) &&
       getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getUserId(), getRut(), getStatus(), getTimestamps());
+    return Objects.hash(getId(), getUserIdMc(), getRut(), getStatus(), getTimestamps());
   }
 }

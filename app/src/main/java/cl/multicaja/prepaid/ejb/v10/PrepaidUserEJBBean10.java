@@ -60,7 +60,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
     }
 
-    if(prepaidUser.getUserId() == null){
+    if(prepaidUser.getUserIdMc() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUserMc"));
     }
 
@@ -73,7 +73,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     Object[] params = {
-      prepaidUser.getUserId(),
+      prepaidUser.getUserIdMc(),
       prepaidUser.getRut(),
       prepaidUser.getStatus().toString(),
       new OutParam("_r_id", Types.BIGINT),
@@ -105,7 +105,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(numberUtils.toLong(row.get("_id"), null));
-      u.setUserId(numberUtils.toLong(row.get("_id_usuario_mc"), null));
+      u.setUserIdMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
       u.setRut(numberUtils.toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
       u.setBalanceExpiration(0L);
