@@ -1,11 +1,10 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,8 +14,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author vutreras
