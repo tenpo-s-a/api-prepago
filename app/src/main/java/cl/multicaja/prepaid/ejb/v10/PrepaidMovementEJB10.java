@@ -90,6 +90,15 @@ public interface PrepaidMovementEJB10 {
   /**
    *
    * @param idPrepaidUser
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long idPrepaidUser, PrepaidMovementStatus... status) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
    * @param tipoMovimiento
    * @return
    * @throws Exception

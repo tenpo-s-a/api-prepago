@@ -100,10 +100,7 @@ public final class PrepaidResource10 extends BaseResource {
   @GET
   @Path("/{userId}/card")
   public Response getPrepaidCard(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(headersToMap(headers), userId);
-    if (prepaidCard10 == null) {
-      throw new NotFoundException(TARJETA_NO_EXISTE);
-    }
+    PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userId);
     return Response.ok(prepaidCard10).build();
   }
 

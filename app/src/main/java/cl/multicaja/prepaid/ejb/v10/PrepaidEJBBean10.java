@@ -296,6 +296,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(withdrawRequest.getPassword())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
     }
+    if(StringUtils.isBlank(withdrawRequest.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(withdrawRequest.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
 
     // Obtener Usuario MC
     User user = this.getUsersEJB10().getUserByRut(headers, withdrawRequest.getRut());
@@ -401,12 +407,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
+      Integer numextcta = inclusionMovimientosDTO.getNumextcta();
+      Integer nummovext = inclusionMovimientosDTO.getNummovext();
+      Integer clamone = inclusionMovimientosDTO.getClamone();
+      PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK;
+
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
-        inclusionMovimientosDTO.getNumextcta(),
-        inclusionMovimientosDTO.getNummovext(),
-        inclusionMovimientosDTO.getClamone(),
-        PrepaidMovementStatus.PROCESS_OK);
+        numextcta,
+        nummovext,
+        clamone,
+        status);
 
       // se confirma la transaccion
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -474,8 +485,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId) {
-    return null;
+  public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener tarjeta
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
+
+    //Obtener ultimo movimiento
+    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+      PrepaidMovementStatus.PENDING,
+      PrepaidMovementStatus.IN_PROCESS);
+
+    if(prepaidCard == null) {
+      // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
+      if(movement != null){
+        throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+      }
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+    } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    }
+
+    return prepaidCard;
   }
 
   @Override

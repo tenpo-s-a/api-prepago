@@ -119,7 +119,8 @@ BEGIN
     (TRIM(COALESCE(_in_cuenta,'')) = '' OR cuenta = _in_cuenta) AND
     (COALESCE(_in_clamon, 0) = 0 OR clamon = _in_clamon) AND
     (COALESCE(_in_indnorcor, 0) = 0 OR indnorcor = _in_indnorcor) AND
-    (COALESCE(_in_tipofac, 0) = 0 OR tipofac = _in_tipofac);
+    (COALESCE(_in_tipofac, 0) = 0 OR tipofac = _in_tipofac)
+    ORDER BY id DESC;
    RETURN;
 END;
 $$ LANGUAGE plpgsql;
