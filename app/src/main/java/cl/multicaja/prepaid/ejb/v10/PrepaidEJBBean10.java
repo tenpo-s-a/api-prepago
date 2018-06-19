@@ -707,8 +707,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    log.info("CDT validacion: " + cdtTransaction.getNumError() + ", " + cdtTransaction.getMsjError());
-
     if(!cdtTransaction.isNumErrorOk()){
       /* Posibles errores:
       La carga supera el monto máximo de carga web

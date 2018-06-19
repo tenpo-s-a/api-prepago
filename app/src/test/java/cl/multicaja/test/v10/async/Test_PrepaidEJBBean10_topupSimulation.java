@@ -354,8 +354,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     try {
 
-      //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
-      //supera el maximo de 500.000
+      //debe lanzar excepcion de validacion del CDT, dado que intenta cargar 100.000 que sumado a las cargas anteriores de
+      //902.010 supera el maximo de 1.000.000 mensual
       getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
