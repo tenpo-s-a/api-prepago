@@ -1,28 +1,29 @@
-package cl.multicaja.test.v10.unit;
+package cl.multicaja.test.v10.async;
 
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.SALDO_INSUFICIENTE_$VALUE;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
+public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsync {
 
   @Test
-  public void topupSimulation_with_params_null() throws Exception {
+  public void withdrawalSimulation_not_ok_by_params_null() throws Exception {
 
     final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
 
@@ -35,7 +36,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, null, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, null, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -52,7 +53,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -67,7 +68,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -84,7 +85,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -102,7 +103,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -113,7 +114,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
   }
 
   @Test
-  public void topupSimulation_ok_WEB() throws Exception {
+  public void withdrawalSimulation_ok_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -129,40 +130,35 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+    //se intenta retirar 8.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    System.out.println("Calcular carga WEB: " + simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+    Assert.assertNotNull("debe retornar una respuesta", resp);
+    Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
+    Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
-    System.out.println("respuesta calculo: " + resp);
+    //calculo de la comision
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
-
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
-
-    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
-
-    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
-
-    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
-    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getEed());
+    Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
+    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
   @Test
-  public void topupSimulation_ok_POS() throws Exception {
+  public void withdrawalSimulation_ok_POS() throws Exception {
 
     User user = registerUser();
 
@@ -178,40 +174,35 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+    //se intenta retirar 8.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    System.out.println("Calcular carga POS: " + simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+    Assert.assertNotNull("debe retornar una respuesta", resp);
+    Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
+    Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
-    System.out.println("respuesta calculo: " + resp);
+    //calculo de la comision
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE));
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE));
-
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
-
-    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
-
-    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
-
-    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
-    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getEed());
+    Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
+    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
   @Test
-  public void topupSimulation_not_ok_exceeds_balance() throws Exception {
+  public void withdrawalSimulation_not_ok_by_insufficient_balance_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -227,31 +218,74 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    BigDecimal impfac = BigDecimal.valueOf(400000); //se agrega saldo de 450.000 en tecnocom
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    //se intenta cargar 100.001, debe dar error dado que el maximo es 500.000
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(100001));
+    //se intenta retirar 10.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(10000));
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
-    simulationNew.setPaymentMethod(TransactionOriginType.WEB); //da lo mismo si es WEB o POS, para los 2 casos es la misma validacion
-
-    System.out.println("Calcular carga WEB: " + simulationNew);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
     try {
 
-      //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
-      //supera el maximo de 500.000
-      getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+      //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
+      //retiro WEB  y eso supera el saldo inicial de 10.000
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de supera saldo", SALDO_SUPERARA_LOS_$$VALUE.getValue(), vex.getCode());
+      Assert.assertEquals("debe ser error de saldo insuficiente", SALDO_INSUFICIENTE_$VALUE.getValue(), vex.getCode());
+    }
+  }
+
+  @Test
+  public void withdrawalSimulation_not_ok_by_insufficient_balance_POS() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    //se carga 10.000 en tecnocom como saldo del usuario
+    BigDecimal impfac = BigDecimal.valueOf(10000);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    //se intenta retirar 10.000
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(10000));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
+
+    try {
+
+      //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
+      //retiro POS  y eso supera el saldo inicial de 10.000
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+
+      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+
+    } catch(ValidationException vex) {
+      Assert.assertEquals("debe ser error de saldo insuficiente", SALDO_INSUFICIENTE_$VALUE.getValue(), vex.getCode());
     }
   }
 }
