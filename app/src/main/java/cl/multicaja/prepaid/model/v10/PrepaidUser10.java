@@ -12,10 +12,11 @@ import java.util.Objects;
 public class PrepaidUser10 extends BaseModel {
 
   private Long id;
-  private Long idUserMc;
+  private Long userId;
   private Integer rut;
   private PrepaidUserStatus status;
   private Timestamps timestamps;
+  private PrepaidUserLevel userLevel;
 
   @JsonIgnore
   private PrepaidBalanceInfo10 balance;
@@ -35,12 +36,12 @@ public class PrepaidUser10 extends BaseModel {
     this.id = id;
   }
 
-  public Long getIdUserMc() {
-    return idUserMc;
+  public Long getUserId() {
+    return userId;
   }
 
-  public void setIdUserMc(Long idUserMc) {
-    this.idUserMc = idUserMc;
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
   public Integer getRut() {
@@ -83,19 +84,27 @@ public class PrepaidUser10 extends BaseModel {
     this.balanceExpiration = balanceExpiration;
   }
 
+  public PrepaidUserLevel getUserLevel() {
+    return userLevel;
+  }
+
+  public void setUserLevel(PrepaidUserLevel userLevel) {
+    this.userLevel = userLevel;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof PrepaidUser10)) return false;
     PrepaidUser10 that = (PrepaidUser10) o;
     return Objects.equals(getId(), that.getId()) &&
-      Objects.equals(getIdUserMc(), that.getIdUserMc()) &&
+      Objects.equals(getUserId(), that.getUserId()) &&
       Objects.equals(getRut(), that.getRut()) &&
       getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getIdUserMc(), getRut(), getStatus(), getTimestamps());
+    return Objects.hash(getId(), getUserId(), getRut(), getStatus(), getTimestamps());
   }
 }

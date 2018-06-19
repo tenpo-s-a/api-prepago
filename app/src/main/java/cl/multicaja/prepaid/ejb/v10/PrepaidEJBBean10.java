@@ -182,7 +182,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    if(PrepaidUserLevel.LEVEL_1 != this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser)) {
+    //verifica el nivel del usuario
+    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
+
+    if(!PrepaidUserLevel.LEVEL_1.equals(prepaidUser.getUserLevel())) {
       // Si el usuario tiene validacion > N1, no aplica restriccion de primera carga
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
@@ -322,7 +325,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Se verifica la clave
     ParamValue passwordParam = new ParamValue();
     passwordParam.setValue(withdrawRequest.getPassword());
-    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getIdUserMc(), passwordParam);
+    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserId(), passwordParam);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -823,5 +826,31 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationWithdrawal.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount));
 
     return simulationWithdrawal;
+  }
+
+  @Override
+  public PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Busco el usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    // Busco el usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    // Obtiene el nivel del usuario
+    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+
+    return prepaidUser;
   }
 }

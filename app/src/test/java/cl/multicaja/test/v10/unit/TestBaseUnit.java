@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -252,7 +251,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 buildPrepaidUser10(User user) {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setIdUserMc(user != null ? user.getId() : null);
+    prepaidUser.setUserId(user != null ? user.getId() : null);
     prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
@@ -265,7 +264,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setIdUserMc(getUniqueLong());
+    prepaidUser.setUserId(getUniqueLong());
     prepaidUser.setRut(getUniqueRutNumber());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
@@ -554,7 +553,7 @@ public class TestBaseUnit extends TestApiBase {
 
     Assert.assertNotNull("debe retornar un usuario", prepaidUser);
     Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
-    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getIdUserMc() > 0);
+    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getUserId() > 0);
     Assert.assertEquals("debe tener rut", true, prepaidUser.getRut() > 0);
     Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
 

@@ -78,14 +78,15 @@ public interface PrepaidUserEJB10 {
 
   /**
    *  Verifica el nivel del usuario
+   *
    * @param oUser usuario multicaja
    * @param prepaidUser10 usuario prepago
    * @throws NotFoundException 102001 si el usuario MC es null
-   * @throws ValidationException 101000 si el rut o status del rut es null
+   * @throws ValidationException 101004 si el rut, status del rut o el nameStatus es null
    * @throws NotFoundException 302003 si el usuario prepago es null
    * @return el nivel del usuario
    */
-  PrepaidUserLevel getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
+  PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
    * Retorna el saldo del cliente prepago
