@@ -24,12 +24,12 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
   /**
    *
-   * @param userId
+   * @param userIdMc
    * @param simulationNew
    * @return
    */
-  private HttpResponse postWithdrawalSimulation(Long userId, SimulationNew10 simulationNew) {
-    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/withdrawal", userId), toJson(simulationNew));
+  private HttpResponse postWithdrawalSimulation(Long userIdMc, SimulationNew10 simulationNew) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/withdrawal", userIdMc), toJson(simulationNew));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
@@ -138,7 +138,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
+    HttpResponse respHttp = postWithdrawalSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -188,7 +188,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
+    HttpResponse respHttp = postWithdrawalSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -242,7 +242,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
+      HttpResponse respHttp = postWithdrawalSimulation(user.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 
@@ -294,7 +294,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      HttpResponse respHttp = postWithdrawalSimulation(prepaidUser10.getId(), simulationNew);
+      HttpResponse respHttp = postWithdrawalSimulation(user.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

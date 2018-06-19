@@ -24,12 +24,12 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
   /**
    *
-   * @param userId
+   * @param userIdMc
    * @param simulationNew
    * @return
    */
-  private HttpResponse postTopupSimulation(Long userId, SimulationNew10 simulationNew) {
-    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/topup", userId), toJson(simulationNew));
+  private HttpResponse postTopupSimulation(Long userIdMc, SimulationNew10 simulationNew) {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/topup", userIdMc), toJson(simulationNew));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
@@ -138,7 +138,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
 
-    HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
+    HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -191,7 +191,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga POS: " + simulationNew);
 
-    HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
+    HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -249,7 +249,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      HttpResponse respHttp = postTopupSimulation(prepaidUser10.getId(), simulationNew);
+      HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

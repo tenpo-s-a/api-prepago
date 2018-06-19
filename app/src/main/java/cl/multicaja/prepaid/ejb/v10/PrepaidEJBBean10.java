@@ -643,14 +643,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   /**
    *
-   * @param userId
+   * @param userIdMc
    * @param simulationNew
    * @throws BaseException
    */
-  private void validateSimulationNew10(Long userId, SimulationNew10 simulationNew) throws BaseException {
+  private void validateSimulationNew10(Long userIdMc, SimulationNew10 simulationNew) throws BaseException {
 
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    if(userIdMc == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
     }
 
     if(simulationNew == null){
@@ -675,11 +675,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public SimulationTopup10 topupSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
+  public SimulationTopup10 topupSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userId, simulationNew);
+    this.validateSimulationNew10(userIdMc, simulationNew);
 
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    //obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
@@ -714,7 +723,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
@@ -748,11 +757,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
+  public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userId, simulationNew);
+    this.validateSimulationNew10(userIdMc, simulationNew);
 
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    //obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
@@ -797,7 +815,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a retirar: " + amountValue);

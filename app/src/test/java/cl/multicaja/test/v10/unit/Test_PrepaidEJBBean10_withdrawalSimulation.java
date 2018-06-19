@@ -143,7 +143,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -187,7 +187,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -235,7 +235,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -279,7 +279,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 

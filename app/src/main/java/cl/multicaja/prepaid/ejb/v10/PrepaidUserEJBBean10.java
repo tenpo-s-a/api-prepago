@@ -14,6 +14,7 @@ import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
+import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.NameStatus;
 import cl.multicaja.users.model.v10.RutStatus;
 import cl.multicaja.users.model.v10.Timestamps;
@@ -46,12 +47,23 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
+  @EJB
+  private UsersEJBBean10 usersEJB10;
+
   public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
     return prepaidCardEJBBean10;
   }
 
   public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
+
+  public UsersEJBBean10 getUsersEJB10() {
+    return usersEJB10;
+  }
+
+  public void setUsersEJB10(UsersEJBBean10 usersEJB10) {
+    this.usersEJB10 = usersEJB10;
   }
 
   @Override
@@ -206,18 +218,28 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception {
+  public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception {
 
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    if(userIdMc == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
+    }
+
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserById(null, userId);
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByRut(headers, user.getRut().getValue());
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
+    //permite refrescar el saldo del usuario de forma obligada, usado principalmente en test o podria usarse desde la web
+    boolean forceRefreshBalance = headers != null ? numberUtils.toBoolean(headers.get("forceRefreshBalance"), false) : false;
 
     Long balanceExpiration = prepaidUser.getBalanceExpiration();
 
@@ -225,10 +247,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     PrepaidBalanceInfo10 pBalance = prepaidUser.getBalance();
 
     //solamente si el usuario no tiene saldo registrado o se encuentra expirado, se busca en tecnocom
-    if (pBalance == null || balanceExpiration <= 0 || System.currentTimeMillis() >= balanceExpiration) {
+    if (pBalance == null || balanceExpiration <= 0 || System.currentTimeMillis() >= balanceExpiration || forceRefreshBalance) {
 
       //se busca la ultima tarjeta para obtener el contrado de ella
-      PrepaidCard10 prepaidCard10 = this.getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, userId);
+      PrepaidCard10 prepaidCard10 = this.getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
       if (prepaidCard10 != null) {
 
@@ -243,7 +265,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
             log.error("Error al actualizar el saldo del usuario", ex);
           }
         } else {
-          log.error("Problemas al obtener saldo del cliente: " + userId + ", rut: " + prepaidUser.getRut() + ", retorno consultaSaldoDTO: " + consultaSaldoDTO);
+          log.error("Problemas al obtener saldo del cliente MC: " + userIdMc + ", rut: " + prepaidUser.getRut() + ", retorno consultaSaldoDTO: " + consultaSaldoDTO);
         }
       }
     }

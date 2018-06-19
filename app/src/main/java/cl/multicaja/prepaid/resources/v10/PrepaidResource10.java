@@ -109,22 +109,22 @@ public final class PrepaidResource10 extends BaseResource {
 
   @GET
   @Path("/{userId}/balance")
-  public Response getBalance(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userId);
+  public Response getBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userIdMc);
     return Response.ok(prepaidBalance10).build();
   }
 
   @POST
   @Path("/{userId}/simulation/topup")
-  public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    SimulationTopup10 simulationTopup10 = this.prepaidEJBBean10.topupSimulation(headersToMap(headers), userId, simulationNew);
+  public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    SimulationTopup10 simulationTopup10 = this.prepaidEJBBean10.topupSimulation(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationTopup10).build();
   }
 
   @POST
   @Path("/{userId}/simulation/withdrawal")
-  public Response withdrawalSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userId, simulationNew);
+  public Response withdrawalSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationWithdrawal10).build();
   }
 }

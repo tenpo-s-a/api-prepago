@@ -139,6 +139,7 @@ public class TestBaseUnit extends TestApiBase {
     if (prepaidUserEJBBean10 == null) {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
       prepaidUserEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      prepaidUserEJBBean10.setUsersEJB10(getUsersEJBBean10());
     }
     return prepaidUserEJBBean10;
   }
@@ -774,5 +775,32 @@ public class TestBaseUnit extends TestApiBase {
       nomcomred, codact, codpais);
 
     return inclusionMovimientosDTO;
+  }
+
+  /**
+   * Espera por 10 intentos cada 1 segundo la existencia de una tarjeta del cliente prepago
+   *
+   * @param prepaidUser10
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  protected PrepaidCard10 waitForLastPrepaidCardInStatus(PrepaidUser10 prepaidUser10, PrepaidCardStatus status) throws Exception {
+
+    PrepaidCard10 prepaidCard10 = null;
+
+    //Espera por que la tarjeta se encuentre activa
+    for(int j = 0; j < 10; j++) {
+
+      Thread.sleep(1000);
+
+      prepaidCard10 = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
+
+      if (prepaidCard10 != null && status.equals(prepaidCard10.getStatus())) {
+        break;
+      }
+    }
+
+    return prepaidCard10;
   }
 }

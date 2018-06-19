@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
@@ -50,7 +51,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -78,7 +79,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -107,12 +108,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
     try {
 
-      getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId() + 1);
+      getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId() + 1);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(NotFoundException nex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), nex.getCode());
+      Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_EXISTE.getValue(), nex.getCode());
     }
   }
 
@@ -146,7 +147,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 
     {
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -155,7 +156,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     }
 
     {
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -166,7 +167,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     Thread.sleep(PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS + 1000);
 
     {
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -175,7 +176,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     }
 
     {
-      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());

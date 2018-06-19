@@ -50,23 +50,23 @@ public interface PrepaidEJB10 {
   /**
    * Calculadora de carga
    *
-   * @param header
-   * @param userId
+   * @param headers
+   * @param userIdMc id de usuario multicaja
    * @param simulationNew
    * @return
    * @throws Exception
    */
-  SimulationTopup10 topupSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception;
+  SimulationTopup10 topupSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
   /**
    * Calculadora de retiro
    *
-   * @param header
-   * @param userId
+   * @param headers
+   * @param userIdMc id de usuario multicaja
    * @param simulationNew
    * @return
    * @throws Exception
    */
-  SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception;
+  SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
 }

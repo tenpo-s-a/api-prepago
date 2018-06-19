@@ -143,7 +143,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -192,7 +192,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
     System.out.println("Calcular carga POS: " + simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -246,7 +246,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnit {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      getPrepaidEJBBean10().topupSimulation(null, prepaidUser10.getId(), simulationNew);
+      getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
