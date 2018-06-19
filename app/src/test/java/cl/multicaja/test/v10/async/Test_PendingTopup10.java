@@ -315,7 +315,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
     Assert.assertEquals("deben ser el mismo cdt accountId", cdtTransaction.getAccountId(), cdtTransactionConfirm10.getAccountId());
     Assert.assertEquals("deben ser el mismo cdt externalTransactionIdConfirm", cdtTransaction.getExternalTransactionId(), cdtTransactionConfirm10.getExternalTransactionId());
-    Assert.assertEquals("deben ser el mismo cdt gloss", prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransaction.getExternalTransactionId(), cdtTransactionConfirm10.getGloss());
+    Assert.assertEquals("deben ser el mismo cdt gloss", prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransaction.getAmount(), cdtTransactionConfirm10.getGloss());
     Assert.assertNotEquals("deben ser distinto de 0 transactionReference", Long.valueOf(0), cdtTransactionConfirm10.getTransactionReference());
 
     if (cdtTransaction.getTransactionType().equals(CdtTransactionType.PRIMERA_CARGA)) {
@@ -405,7 +405,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
     Assert.assertEquals("deben ser el mismo cdt accountId", cdtTransaction.getAccountId(), cdtTransactionConfirm10.getAccountId());
     Assert.assertEquals("deben ser el mismo cdt externalTransactionIdConfirm", cdtTransaction.getExternalTransactionId(), cdtTransactionConfirm10.getExternalTransactionId());
-    Assert.assertEquals("deben ser el mismo cdt gloss", prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransaction.getExternalTransactionId(), cdtTransactionConfirm10.getGloss());
+    Assert.assertEquals("deben ser el mismo cdt gloss", prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransaction.getAmount(), cdtTransactionConfirm10.getGloss());
     Assert.assertNotEquals("deben ser distinto de 0 transactionReference", Long.valueOf(0), cdtTransactionConfirm10.getTransactionReference());
 
     if (cdtTransaction.getTransactionType().equals(CdtTransactionType.PRIMERA_CARGA)) {

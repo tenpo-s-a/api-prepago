@@ -17,14 +17,21 @@ import java.util.Map;
  */
 public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
-  private static final String URL_PATH = "/1.0/prepaid/%s";
+  /**
+   *
+   * @param userIdMc
+   * @return
+   */
+  private HttpResponse getPrepaidUser(Long userIdMc) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s", userIdMc));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
 
   @Test
   public void shouldReturn400_UserId0() {
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, 0));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(0L);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -36,9 +43,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
   @Test
   public void shouldReturn400_UserMcNull() throws Exception {
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, numberUtils.random(999, 9999) + 1));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(numberUtils.random(999L, 9999L) + 1);
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -52,9 +57,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     User user = registerUser();
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(user.getId());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -72,9 +75,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -102,9 +103,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -134,9 +133,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -164,9 +161,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidUser(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 

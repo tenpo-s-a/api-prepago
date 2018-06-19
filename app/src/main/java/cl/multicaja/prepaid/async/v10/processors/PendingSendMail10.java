@@ -84,28 +84,30 @@ public class PendingSendMail10 extends BaseProcessor10 {
             return new ResponseRoute<>(data);
           }
 
-          Map<String, String> mailData = new HashMap<>();
-          mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-          mailData.put("${venc}", data.getPrepaidCard10().getExpiration().toString());
-          mailData.put("${cvc}", cvv2DTO.getClavegen().toString());
+          try {
 
-          String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
+            Map<String, String> mailData = new HashMap<>();
+            mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
+            mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getExpiration()));
+            mailData.put("${cvc}", String.valueOf(cvv2DTO.getClavegen()));
 
-          //TODO el passwordOwner quizas debe externalizarse
-          String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
+            String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
 
-          EmailBody emailBody = new EmailBody();
-          emailBody.setTemplateData("{ 'cliente' : '"+data.getUser().getName()+" "+data.getUser().getLastname_1()+"' }");
+            //TODO el passwordOwner quizas debe externalizarse
+            String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
-          emailBody.setTemplate(emailParams.getTemplateData());
-          emailBody.setAddress(data.getUser().getEmail().getValue());
-          emailBody.setFrom(emailParams.getMailFrom());
-          emailBody.setSubject(emailParams.getMailSubject());
-          emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_" + Utils.uniqueCurrentTimeNano() + ".pdf");
+            EmailBody emailBody = new EmailBody();
+            emailBody.setTemplateData("{ 'cliente' : '"+data.getUser().getName()+" "+data.getUser().getLastname_1()+"' }");
 
-          Boolean bResultadoEnvioMail = getRoute().getMailEJBBean10().sendMail(null,null, emailBody);
+            emailBody.setTemplate(emailParams.getTemplateData());
+            emailBody.setAddress(data.getUser().getEmail().getValue());
+            emailBody.setFrom(emailParams.getMailFrom());
+            emailBody.setSubject(emailParams.getMailSubject());
+            emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_" + Utils.uniqueCurrentTimeNano() + ".pdf");
 
-          if (!bResultadoEnvioMail) {
+            getRoute().getMailEJBBean10().sendMailAsync(null, null, emailBody);
+
+          } catch(Exception ex) {
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             redirectRequest(endpoint, exchange, req);
@@ -177,8 +179,8 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         Map<String, String> mailData = new HashMap<>();
 
-        mailData.put("${amount}", withdraw.getAmount().getValue().toString());
-        mailData.put("${fee}", withdraw.getFee().getValue().toString());
+        mailData.put("${amount}", String.valueOf(withdraw.getAmount().getValue()));
+        mailData.put("${fee}", String.valueOf(withdraw.getFee().getValue()));
 
         //TODO: Hay que verificar que funcione el obtener plantilla
         /*MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "WITHDRAW");

@@ -1,4 +1,4 @@
-package cl.multicaja.test.v10.unit;
+package cl.multicaja.test.v10.async;
 
 
 import cl.multicaja.core.exceptions.BadRequestException;
@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,10 +20,10 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
 /**
  * @autor vutreras
  */
-public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
+public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsync {
 
   @Test
-  public void withdrawalSimulation_with_params_null() throws Exception {
+  public void withdrawalSimulation_not_ok_by_params_null() throws Exception {
 
     final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
 
@@ -143,7 +144,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -187,7 +188,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -201,7 +202,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
   }
 
   @Test
-  public void withdrawalSimulation_not_ok_insufficient_balance_WEB() throws Exception {
+  public void withdrawalSimulation_not_ok_by_insufficient_balance_WEB() throws Exception {
 
     User user = registerUser();
 
@@ -235,7 +236,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -245,7 +246,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
   }
 
   @Test
-  public void withdrawalSimulation_not_ok_insufficient_balance_POS() throws Exception {
+  public void withdrawalSimulation_not_ok_by_insufficient_balance_POS() throws Exception {
 
     User user = registerUser();
 
@@ -279,7 +280,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnit {
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 

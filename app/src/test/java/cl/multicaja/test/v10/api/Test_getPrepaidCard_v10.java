@@ -15,7 +15,16 @@ import java.util.Map;
  */
 public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
-  private static final String URL_PATH = "/1.0/prepaid/%s/card";
+  /**
+   *
+   * @param userIdMc
+   * @return
+   */
+  private HttpResponse getPrepaidCard(Long userIdMc) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/card", userIdMc));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
 
   @Test
   public void shouldReturn200_PrepaidCardActive() throws Exception {
@@ -30,9 +39,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -68,9 +75,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -106,9 +111,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -144,9 +147,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -171,9 +172,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn404_McUserNull() {
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, numberUtils.random(999, 99999) + 1));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(numberUtils.random(999L, 99999L) + 1);
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -188,9 +187,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.DISABLED);
     updateUser(user);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -205,9 +202,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.LOCKED);
     updateUser(user);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -222,9 +217,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.DELETED);
     updateUser(user);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -237,9 +230,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     User user = registerUser();
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -261,9 +252,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId()));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -280,9 +269,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -303,9 +290,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -327,9 +312,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -351,9 +334,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(user.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -381,9 +362,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
       prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-      System.out.println("RESP:::" + resp.toMap());
+      HttpResponse resp = getPrepaidCard(user.getId());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -413,9 +392,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
       prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = apiGET(String.format(URL_PATH, user.getId() ));
-
-      System.out.println("RESP:::" + resp.toMap());
+      HttpResponse resp = getPrepaidCard(user.getId());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -427,9 +404,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_Id0() {
 
-    HttpResponse resp = apiGET(String.format(URL_PATH, 0));
-
-    System.out.println("RESP:::" + resp.toMap());
+    HttpResponse resp = getPrepaidCard(0L);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();

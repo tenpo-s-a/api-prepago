@@ -11,7 +11,7 @@ import org.junit.Ignore;
 public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
   /*
-  public static EmailBody newContent(String address) {
+  public static EmailBody newEmailBody(String address) {
     long id = Utils.uniqueCurrentTimeMillis();
     EmailBody content = new EmailBody();
     content.setAddress(address);
@@ -26,7 +26,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     SignUp signUp = getSignup();
 
-    EmailBody content = newContent(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(10)));
+    EmailBody content = newEmailBody(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(10)));
 
     String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 
@@ -46,7 +46,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     SignUp signUp = getSignup();
 
-    EmailBody content = newContent(getUniqueEmail());
+    EmailBody content = newEmailBody(getUniqueEmail());
 
     String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 

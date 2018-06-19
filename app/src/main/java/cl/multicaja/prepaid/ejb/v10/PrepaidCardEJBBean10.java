@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
@@ -70,7 +71,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       prepaidCard.setId(numberUtils.toLong(resp.get("_r_id")));
       return prepaidCard;
     } else {
-      log.error("Error en invocacion a SP: " + resp);
+      log.error("createPrepaidCard resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
@@ -201,13 +202,13 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_estado_tarjeta_v10", params);
 
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("Error en invocacion a SP: " + resp);
+      log.error("updatePrepaidCardStatus resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
   @Override
-  public boolean updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception {
+  public void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception {
 
     Object[] params = {
       cardId == null ? new NullParam(Types.BIGINT): cardId,
@@ -227,6 +228,9 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_tarjeta_v10", params);
 
-    return "0".equals(resp.get("_error_code"));
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updatePrepaidCard resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
   }
 }

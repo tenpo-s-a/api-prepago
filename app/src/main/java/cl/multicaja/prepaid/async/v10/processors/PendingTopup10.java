@@ -59,7 +59,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           //segun la historia: https://www.pivotaltracker.com/story/show/157850744
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+          getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
           prepaidMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
@@ -156,7 +156,11 @@ public class PendingTopup10 extends BaseProcessor10 {
             cdtTransactionConfirm.setIndSimulacion(false);
             //se debe agregar CONFIRM para evitar el constraint unique de esa columna
             cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
-            cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getExternalTransactionId());
+            cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getAmount());
+
+            log.info("IsFirstTopup: " + prepaidTopup.isFirstTopup());
+            log.info("CDT Init: " + cdtTransaction);
+            log.info("CDT Conf: " + cdtTransactionConfirm);
 
             cdtTransactionConfirm = getRoute().getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
 
@@ -190,7 +194,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           } else {
 
             PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, data.getPrepaidMovement10().getId(), status);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
             data.getPrepaidMovement10().setEstado(status);
 
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
