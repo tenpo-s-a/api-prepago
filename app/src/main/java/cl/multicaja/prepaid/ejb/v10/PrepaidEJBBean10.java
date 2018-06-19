@@ -296,6 +296,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(withdrawRequest.getPassword())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
     }
+    if(StringUtils.isBlank(withdrawRequest.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(withdrawRequest.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
 
     // Obtener Usuario MC
     User user = this.getUsersEJB10().getUserByRut(headers, withdrawRequest.getRut());
@@ -401,12 +407,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
+      Integer numextcta = inclusionMovimientosDTO.getNumextcta();
+      Integer nummovext = inclusionMovimientosDTO.getNummovext();
+      Integer clamone = inclusionMovimientosDTO.getClamone();
+      PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK;
+
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
-        inclusionMovimientosDTO.getNumextcta(),
-        inclusionMovimientosDTO.getNummovext(),
-        inclusionMovimientosDTO.getClamone(),
-        PrepaidMovementStatus.PROCESS_OK);
+        numextcta,
+        nummovext,
+        clamone,
+        status);
 
       // se confirma la transaccion
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
