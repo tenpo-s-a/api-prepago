@@ -93,4 +93,13 @@ public interface PrepaidEJB10 {
    */
   PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param rut
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception;
+
 }

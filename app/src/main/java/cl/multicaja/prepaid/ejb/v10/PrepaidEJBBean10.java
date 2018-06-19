@@ -908,4 +908,30 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidUser;
   }
+
+  @Override
+  public PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception {
+    if(rut == null || Integer.valueOf(0).equals(rut)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+
+    // Busco el usuario MC
+    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    // Busco el usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, user.getId());
+
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    // Obtiene el nivel del usuario
+    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+
+    return prepaidUser;
+  }
 }
