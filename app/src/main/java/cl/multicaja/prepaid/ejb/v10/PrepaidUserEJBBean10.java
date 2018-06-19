@@ -60,7 +60,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
     }
 
-    if(prepaidUser.getIdUserMc() == null){
+    if(prepaidUser.getUserIdMc() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idUserMc"));
     }
 
@@ -73,7 +73,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     Object[] params = {
-      prepaidUser.getIdUserMc(),
+      prepaidUser.getUserIdMc(),
       prepaidUser.getRut(),
       prepaidUser.getStatus().toString(),
       new OutParam("_r_id", Types.BIGINT),
@@ -105,7 +105,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(numberUtils.toLong(row.get("_id"), null));
-      u.setIdUserMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
+      u.setUserIdMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
       u.setRut(numberUtils.toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
       u.setBalanceExpiration(0L);
@@ -181,7 +181,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidUserLevel getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
+  public PrepaidUser10 getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
 
     if(user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -192,15 +192,19 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(user.getRut().getStatus() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut.status"));
     }
+    if(user.getNameStatus() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "nameStatus"));
+    }
     if(prepaidUser10 == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     if(RutStatus.VERIFIED.equals(user.getRut().getStatus()) && NameStatus.VERIFIED.equals(user.getNameStatus())) {
-      return PrepaidUserLevel.LEVEL_2;
+      prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_2);
     } else {
-      return PrepaidUserLevel.LEVEL_1;
+      prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_1);
     }
+    return prepaidUser10;
   }
 
   @Override

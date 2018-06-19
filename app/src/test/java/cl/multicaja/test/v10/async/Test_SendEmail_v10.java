@@ -28,7 +28,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     EmailBody content = newContent(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(10)));
 
-    String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
+    String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 
     ResponseRoute<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
 
@@ -48,7 +48,7 @@ public class Test_SendEmail_v10 extends TestBaseUnitAsync {
 
     EmailBody content = newContent(getUniqueEmail());
 
-    String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
+    String messageId = getMailEJBBean10().sendMailAsync(null, signUp.getUserIdMc(), content);
 
     ResponseRoute<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
 

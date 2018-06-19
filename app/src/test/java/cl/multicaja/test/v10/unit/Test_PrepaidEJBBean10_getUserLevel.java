@@ -35,7 +35,7 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
     getPrepaidUserEJBBean10().getUserLevel(user, null);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
     User user = new User();
     Rut rut = new Rut();
@@ -53,12 +53,14 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
     user.setNameStatus(NameStatus.UNVERIFIED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser));
+    prepaidUser = getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, prepaidUser.getUserLevel());
 
     rut.setStatus(RutStatus.UNVERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
 
-    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser));
+    prepaidUser = getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_1, prepaidUser.getUserLevel());
   }
 
   @Test
@@ -70,6 +72,7 @@ public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
     user.setNameStatus(NameStatus.VERIFIED);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_2, getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser));
+    prepaidUser = getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+    Assert.assertEquals("Deberia ser N1", PrepaidUserLevel.LEVEL_2, prepaidUser.getUserLevel());
   }
 }

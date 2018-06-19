@@ -28,7 +28,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUser extends TestBaseUnit {
     Assert.assertNotNull("debe retornar un usuario", u1);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u1);
 
-    PrepaidUser10 u2 = getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(null, user.getIdUserMc());
+    PrepaidUser10 u2 = getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(null, user.getUserIdMc());
 
     Assert.assertNotNull("debe retornar un usuario", u2);
     Assert.assertEquals("debe ser igual al registrado anteriormemte", user, u2);
