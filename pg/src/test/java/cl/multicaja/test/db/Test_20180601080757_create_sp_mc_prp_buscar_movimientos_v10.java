@@ -194,6 +194,22 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       Assert.assertEquals("debe ser el mismo registro", indnorcor, numberUtils.toInteger(mapMov.get("_indnorcor")));
       Assert.assertEquals("debe ser el mismo registro", tipofac, numberUtils.toInteger(mapMov.get("_tipofac")));
     }
+    {
+      Map<String, Object> resp = searchMovements(null, null, null, null, null, null, null, null, null, null);
+      //mapMov1
+      //mapMov2
+      List result = (List)resp.get("result");
+
+      System.out.println(result);
+
+      Assert.assertNotNull("debe retornar una lista", result);
+      Assert.assertTrue("Debe contener n elementos", result.size() > 0);
+
+      Map<String, Object> mov1 = (Map)result.get(0);
+      Map<String, Object> mov2 = (Map)result.get(1);
+      Assert.assertEquals("Debe estar ordenado de forma DESC", numberUtils.toLong(mapMov2.get("_id")), numberUtils.toLong(mov1.get("_id")));
+      Assert.assertEquals("Debe estar ordenado de forma DESC", numberUtils.toLong(mapMov1.get("_id")), numberUtils.toLong(mov2.get("_id")));
+    }
 
   }
 

@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
@@ -24,7 +25,21 @@ public interface PrepaidEJB10 {
 
   PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId);
 
-  PrepaidCard10 issuePrepaidCard(Map<String, Object> headers, Long userId);
+  /**
+   * Retorna la informacion de la ultima tarjeta del usuario
+   *
+   * @param headers
+   * @param userIdMc ID usuario MC
+   * @return tarjeta prepago
+   * @throws BadRequestException cuando userIdMc es null o 0
+   * @throws NotFoundException cuando el usuario no existe
+   * @throws ValidationException cuando el usuario esta bloqueado o borrado
+   * @throws NotFoundException cuando el usuario no esta registrado en prepago
+   * @throws ValidationException cuando el usuario prepago esta bloqueado o borrado
+   * @throws ValidationException cuando el usuario prepago tiene la primera carga pendiente
+   * @throws ValidationException cuando el usuario prepago tiene la primera carga en proceso
+   */
+  PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
    *  Calcula la comision y total segun el tipo (TOPUP/WITHDRAW) y el origen (POS/WEB)
