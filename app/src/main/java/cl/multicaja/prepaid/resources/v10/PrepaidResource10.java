@@ -97,6 +97,16 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().status(201).build();
   }
 
+  /*
+    Prepaid User
+   */
+  @GET
+  @Path("/{userId}")
+  public Response getPrepaidUser(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    PrepaidUser10 prepaidUser = this.prepaidEJBBean10.getPrepaidUser(headersToMap(headers), userId);
+    return Response.ok(prepaidUser).build();
+  }
+
   @GET
   @Path("/{userId}/card")
   public Response getPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
@@ -111,6 +121,9 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
+  /*
+     Prepaid Simulations
+   */
   @POST
   @Path("/{userId}/simulation/topup")
   public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {

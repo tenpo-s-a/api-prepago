@@ -84,4 +84,13 @@ public interface PrepaidEJB10 {
    */
   SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception;
+
 }
