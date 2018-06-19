@@ -28,14 +28,14 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
    * @param simulationNew
    * @return
    */
-  private HttpResponse postTopupSimulation(Long userIdMc, SimulationNew10 simulationNew) {
+  private HttpResponse topupSimulation(Long userIdMc, SimulationNew10 simulationNew) {
     HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/simulation/topup", userIdMc), toJson(simulationNew));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
   @Test
-  public void topupSimulation_with_params_null() throws Exception {
+  public void topupSimulation_not_ok_by_params_null() throws Exception {
 
     final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
 
@@ -46,7 +46,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(amount);
       simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupSimulation(null, simulationNew);
+      HttpResponse respHttp = topupSimulation(null, simulationNew);
 
       Assert.assertEquals("status 500", 500, respHttp.getStatus());
     }
@@ -57,7 +57,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(amount);
       simulationNew.setPaymentMethod(null);
 
-      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
+      HttpResponse respHttp = topupSimulation(1L, simulationNew);
 
       BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
@@ -69,7 +69,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(null);
       simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
+      HttpResponse respHttp = topupSimulation(1L, simulationNew);
 
       BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
@@ -83,7 +83,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(amount);
       simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
+      HttpResponse respHttp = topupSimulation(1L, simulationNew);
 
       BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
@@ -98,7 +98,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(amount);
       simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
 
-      HttpResponse respHttp = postTopupSimulation(1L, simulationNew);
+      HttpResponse respHttp = topupSimulation(1L, simulationNew);
 
       BadRequestException vex = respHttp.toObject(BadRequestException.class);
 
@@ -138,7 +138,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
 
-    HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
+    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -191,7 +191,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga POS: " + simulationNew);
 
-    HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
+    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -249,7 +249,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      HttpResponse respHttp = postTopupSimulation(user.getId(), simulationNew);
+      HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

@@ -1,6 +1,7 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.model.v10.SimulationNew10;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,10 +10,20 @@ import org.junit.Test;
  */
 public class Test_getUserTopups_v10 extends TestBaseUnitApi {
 
+  /**
+   *
+   * @param userIdMc
+   * @return
+   */
+  private HttpResponse getUserTopups(Long userIdMc) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/topup", userIdMc));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
+
   @Test
-  public void getUserTopups(){
-    HttpResponse resp = apiGET("/1.0/prepaid/1/topup");
-    System.out.println("RESP:::" + resp.toMap());
+  public void getUserTopups_ok(){
+    HttpResponse resp = getUserTopups(1L);
     Assert.assertEquals("status 200", 200, resp.getStatus());
   }
 }

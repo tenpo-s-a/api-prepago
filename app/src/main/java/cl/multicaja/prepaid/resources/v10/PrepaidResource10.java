@@ -56,7 +56,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @GET
   @Path("/{userId}/topup")
-  public Response getUserTopups(@PathParam("userId") Long userId) {
+  public Response getUserTopups(@PathParam("userId") Long userIdMc) {
     //TODO falta implementar
     return Response.ok().build();
   }
@@ -74,7 +74,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/withdrawal/reverse")
-  public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdraw10Request) {
+  public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdraw10Request, @Context HttpHeaders headers) {
     //TODO falta implementar
     return Response.ok().status(201).build();
   }
@@ -85,28 +85,28 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/signup")
-  public Response signup(NewPrepaidUserSignup10 signupRequest) {
+  public Response initSignup(NewPrepaidUserSignup10 signupRequest, @Context HttpHeaders headers) {
     //TODO falta implementar
     return Response.ok().status(201).build();
   }
 
   @GET
   @Path("/signup/{signupId}")
-  public Response getSignup(@PathParam("signupId") Long signupId) {
+  public Response getSignup(@PathParam("signupId") Long signupId, @Context HttpHeaders headers) {
     //TODO falta implementar
     return Response.ok().status(201).build();
   }
 
   @GET
   @Path("/{userId}/card")
-  public Response getPrepaidCard(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userId);
+  public Response getPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userIdMc);
     return Response.ok(prepaidCard10).build();
   }
 
   @GET
   @Path("/{userId}/balance")
-  public Response getBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+  public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userIdMc);
     return Response.ok(prepaidBalance10).build();
   }

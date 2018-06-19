@@ -18,9 +18,18 @@ import java.util.Map;
 /**
  * @author abarazarte
  */
-public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
+public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
-  private static final String URL_PATH = "/1.0/prepaid/withdrawal";
+  /**
+   *
+   * @param newPrepaidWithdraw10
+   * @return
+   */
+  private HttpResponse withdrawUserBalance(NewPrepaidWithdraw10 newPrepaidWithdraw10) {
+    HttpResponse respHttp = apiPOST("/1.0/prepaid/withdrawal", toJson(newPrepaidWithdraw10));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
 
   @Test
   public void shouldReturn201_OnPosWithdraw() throws Exception {
@@ -37,11 +46,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
 
-    String json = toJson(prepaidWithdraw);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -108,11 +113,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-    String json = toJson(prepaidWithdraw);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -180,11 +181,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
       prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
-      String json = toJson(prepaidWithdraw);
-
-      HttpResponse resp = apiPOST(URL_PATH, json);
-
-      System.out.println("resp:: " + resp);
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -207,11 +204,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
-      String json = toJson(prepaidWithdraw);
-
-      HttpResponse resp = apiPOST(URL_PATH, json);
-
-      System.out.println("resp:: " + resp);
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -237,11 +230,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
       prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100001));
 
-      String json = toJson(prepaidWithdraw);
-
-      HttpResponse resp = apiPOST(URL_PATH, json);
-
-      System.out.println("resp:: " + resp);
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -264,11 +253,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500001));
 
-      String json = toJson(prepaidWithdraw);
-
-      HttpResponse resp = apiPOST(URL_PATH, json);
-
-      System.out.println("resp:: " + resp);
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -290,14 +275,11 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
     for(int i = 0; i < 10; i++) {
+
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
 
-      String json = toJson(prepaidWithdraw);
-
-      HttpResponse resp = apiPOST(URL_PATH, json);
-
-      System.out.println("resp:: " + resp);
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
       Assert.assertEquals("status 201", 201, resp.getStatus());
     }
@@ -305,11 +287,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
 
-    String json = toJson(prepaidWithdraw);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -319,7 +297,8 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn400_OnMissingBody() {
-    HttpResponse resp = apiPOST(URL_PATH, "{}");
+
+    HttpResponse resp = withdrawUserBalance(null);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -330,19 +309,16 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingRut() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setTransactionId("123456789");
-    withdrawRequest.setMerchantCode("987654321");
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setTransactionId("123456789");
+    prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
-    withdrawRequest.setAmount(amount);
+    prepaidWithdraw.setAmount(amount);
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
-    System.out.println(resp);
-    System.out.println(resp.getResp());
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -353,17 +329,16 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingTransactionId() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setRut(11111111);
-    withdrawRequest.setMerchantCode("987654321");
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setRut(11111111);
+    prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
-    withdrawRequest.setAmount(amount);
+    prepaidWithdraw.setAmount(amount);
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -374,17 +349,16 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingMerchantCode() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setTransactionId("123456789");
-    withdrawRequest.setRut(11111111);
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setTransactionId("123456789");
+    prepaidWithdraw.setRut(11111111);
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
-    withdrawRequest.setAmount(amount);
+    prepaidWithdraw.setAmount(amount);
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -395,14 +369,13 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingAmount() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setTransactionId("123456789");
-    withdrawRequest.setRut(11111111);
-    withdrawRequest.setMerchantCode("987654321");
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setTransactionId("123456789");
+    prepaidWithdraw.setRut(11111111);
+    prepaidWithdraw.setMerchantCode("987654321");
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -413,17 +386,16 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setTransactionId("123456789");
-    withdrawRequest.setRut(11111111);
-    withdrawRequest.setMerchantCode("987654321");
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setTransactionId("123456789");
+    prepaidWithdraw.setRut(11111111);
+    prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setValue(new BigDecimal("9999.90"));
-    withdrawRequest.setAmount(amount);
+    prepaidWithdraw.setAmount(amount);
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -434,17 +406,16 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMissingAmountValue() {
 
-    NewPrepaidWithdraw10 withdrawRequest = new NewPrepaidWithdraw10();
-    withdrawRequest.setTransactionId("123456789");
-    withdrawRequest.setRut(11111111);
-    withdrawRequest.setMerchantCode("987654321");
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setTransactionId("123456789");
+    prepaidWithdraw.setRut(11111111);
+    prepaidWithdraw.setMerchantCode("987654321");
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    withdrawRequest.setAmount(amount);
+    prepaidWithdraw.setAmount(amount);
 
-    String json = toJson(withdrawRequest);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    HttpResponse resp = apiPOST(URL_PATH, json);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
@@ -459,13 +430,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(null);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -481,13 +446,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -505,13 +464,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -529,13 +482,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -553,13 +500,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -574,13 +515,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
     User user = registerUser();
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -600,13 +535,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -625,13 +554,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -651,13 +574,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -681,13 +598,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -711,13 +622,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -741,13 +646,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
-    String json = toJson(prepaidWithdraw);
-
-    System.out.println(json);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -770,11 +669,7 @@ public class Test_withdrawBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
-    String json = toJson(prepaidWithdraw);
-
-    HttpResponse resp = apiPOST(URL_PATH, json);
-
-    System.out.println("resp:: " + resp);
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
     Assert.assertEquals("status 500", 500, resp.getStatus());
   }
