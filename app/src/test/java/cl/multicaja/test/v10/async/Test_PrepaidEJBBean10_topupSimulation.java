@@ -263,7 +263,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
 
