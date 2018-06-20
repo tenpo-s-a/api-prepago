@@ -35,6 +35,7 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+
     DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
     prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));

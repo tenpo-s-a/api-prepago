@@ -39,7 +39,7 @@ public class WebApp implements ServletContextListener  {
     ConfigUtils cu = ConfigUtils.getInstance();
     log.info("Init app: " + cu.getModuleProperties());
     //solamente crea un mq embebido si la conexión es del tipo vm, caso contrario se conecta a un activemq externo
-    if (cu.getProperty("activemq.url").startsWith("vm:")) {
+    if (cu.getProperty("activemq.url","").startsWith("vm:")) {
       try {
         brokerService = camelFactory.createBrokerService();
         brokerService.start();

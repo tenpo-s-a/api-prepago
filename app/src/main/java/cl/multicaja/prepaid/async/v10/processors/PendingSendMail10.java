@@ -107,6 +107,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
             getRoute().getMailEJBBean10().sendMailAsync(null, null, emailBody);
 
           } catch(Exception ex) {
+            log.error("Error al enviar email cvv", ex);
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
             redirectRequest(endpoint, exchange, req);
