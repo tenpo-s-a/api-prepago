@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
+import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
@@ -62,7 +63,15 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
       prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
+      /**
+       * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
+       */
+
+      UsersEmailRoute10 usersEmailRoute10 = new UsersEmailRoute10();
+      usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
+
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10);
     }
 
     simpleNamingContextBuilder.deactivate();

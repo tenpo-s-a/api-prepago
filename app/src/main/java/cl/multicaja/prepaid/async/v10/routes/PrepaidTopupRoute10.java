@@ -153,15 +153,5 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
       .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP)).end();
 
-    /**
-     * Agrega rutas de envio de emails de users pero al camel context de prepago
-     */
-    /*
-    UsersEmailRoute10 usersEmailRoute10 = new UsersEmailRoute10();
-    usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
-    usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
-
-    getContext().addRoutes(usersEmailRoute10);
-    */
   }
 }
