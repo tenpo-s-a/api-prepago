@@ -393,7 +393,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal impfac = prepaidMovement.getImpfac();
     String codcom = prepaidMovement.getCodcom();
     Integer codact = prepaidMovement.getCodact();
-    CodigoPais codpais = prepaidMovement.getCodpais();
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString();
     String numaut = numreffac;
@@ -404,12 +404,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
-      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
-                            numreffac, impfac, numaut, codcom,
-                            nomcomred, codact, codpais);
+      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
-    if (inclusionMovimientosDTO.isRetornoExitoso()) {
-
+      if (inclusionMovimientosDTO.isRetornoExitoso()) {
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();

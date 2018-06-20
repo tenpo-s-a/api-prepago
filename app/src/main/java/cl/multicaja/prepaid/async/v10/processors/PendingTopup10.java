@@ -117,7 +117,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           BigDecimal impfac = prepaidMovement.getImpfac();
           String codcom = prepaidMovement.getCodcom();
           Integer codact = prepaidMovement.getCodact();
-          CodigoPais codpais = prepaidMovement.getCodpais();
+          CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString();
           String numaut = numreffac;
@@ -129,7 +129,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
                                                                                                       numreffac, impfac, numaut, codcom,
-                                                                                                      nomcomred, codact, codpais);
+                                                                                                      nomcomred, codact, clamondiv,impfac);
 
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
