@@ -1,10 +1,10 @@
 package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.NameStatus;
@@ -154,7 +154,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
 
       Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+      ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un topup", remoteTopup);
       Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
@@ -193,7 +193,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
 
       Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-      ResponseRoute<PrepaidTopupDataRoute10> remoteTopup = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+      ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un topup", remoteTopup);
       Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());

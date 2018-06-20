@@ -2,7 +2,6 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -12,7 +11,6 @@ import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,7 +25,6 @@ import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_ILEGIBLE_$VALUE;
 
 @Stateless
 @LocalBean

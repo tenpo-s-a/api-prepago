@@ -1,10 +1,12 @@
 package cl.multicaja.test.v10.async;
 
-import cl.multicaja.camel.ResponseRoute;
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
@@ -40,7 +42,7 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10,0);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_RESP);
-    ResponseRoute<PrepaidTopupDataRoute10> remote = (ResponseRoute<PrepaidTopupDataRoute10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Debe retornar una respuesta",remote);
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());

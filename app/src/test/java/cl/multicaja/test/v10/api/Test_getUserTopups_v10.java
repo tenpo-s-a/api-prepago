@@ -1,7 +1,6 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.model.v10.SimulationNew10;
 import org.junit.Assert;
 import org.junit.Test;
 

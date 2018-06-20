@@ -1,10 +1,9 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -31,17 +30,17 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   /**
    *
-   * @return
+   * @returnr
    */
   public ProcessorRoute processPendingIssuanceFee() {
 
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingIssuanceFee - REQ: " + req);
 
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
         PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
@@ -107,7 +106,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
-          return new ResponseRoute<>(data);
+          return req;
         }
 
         String contrato = prepaidCard.getProcessorUserId();
@@ -193,24 +192,24 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
         }
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }
 
   /* Cola Errores */
   public ProcessorRoute processErrorPendingIssuanceFee() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processErrorPendingIssuanceFee - REQ: " + req);
 
         req.retryCountNext();
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }

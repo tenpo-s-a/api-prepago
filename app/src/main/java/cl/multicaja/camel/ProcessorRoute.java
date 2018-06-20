@@ -41,18 +41,52 @@ public abstract class ProcessorRoute<REQ extends Serializable, RESP extends Seri
   public void process(Exchange exchange) {
 
     long idTrx = Utils.uniqueCurrentTimeNano();
+    long timestampStart = System.currentTimeMillis();
 
-    ExchangeContext exchangeContext = new ExchangeContext();
-    exchangeContext.setIdTrx(idTrx);
-    exchangeContext.setTimestampStart(System.currentTimeMillis());
+    ExchangeContext exchangeContext = null;
+
+    ExchangeContext exchangeContextEx = new ExchangeContext();
+    exchangeContextEx.setIdTrx(idTrx);
+    exchangeContextEx.setTimestampStart(timestampStart);
 
     RESP resp = null;
 
     try {
+
       REQ req = (REQ)exchange.getIn().getBody();
+
+      //si el req tiene un ExchangeContext se reutiliza ese
+      if (req instanceof ExchangeData) {
+        exchangeContext = ((ExchangeData) req).getExchangeContext();
+      }
+
+      if (exchangeContext == null) {
+        exchangeContext = new ExchangeContext();
+        exchangeContext.setIdTrx(idTrx);
+        exchangeContext.setTimestampStart(timestampStart);
+      } else {
+        //si el ExchangeContext tiene un idTrx se reutiliza ese
+        if (exchangeContext.getIdTrx() == 0) {
+          exchangeContext.setIdTrx(idTrx);
+        } else {
+          idTrx = exchangeContext.getIdTrx();
+        }
+        if (exchangeContext.getTimestampStart() == 0) {
+          exchangeContext.setTimestampStart(timestampStart);
+        }
+      }
+
+      if (req instanceof ExchangeData) {
+        ((ExchangeData) req).setExchangeContext(exchangeContext);
+      }
+
       resp = this.processExchange(idTrx, req, exchange);
+
     } catch (Exception ex) {
       log.error(idTrx + " - Error al procesar mensaje: ", ex);
+      if (exchangeContext == null) {
+        exchangeContext = exchangeContextEx;
+      }
       exchangeContext.setException(new BaseException(ex, 1000, "Error procesando mensaje camel: " + ex.getMessage()));
       try {
         Type superclass = this.getClass().getGenericSuperclass();
@@ -67,8 +101,8 @@ public abstract class ProcessorRoute<REQ extends Serializable, RESP extends Seri
     exchangeContext.setTimestampEnd(System.currentTimeMillis());
     exchangeContext.calcTimeProcess();
 
-    if (resp != null && resp instanceof ResponseRoute) {
-      ((ResponseRoute) resp).setExchangeContext(exchangeContext);
+    if (resp instanceof ExchangeData) {
+      ((ExchangeData) resp).setExchangeContext(exchangeContext);
     }
 
     exchange.getOut().setHeaders(exchange.getIn().getHeaders());
