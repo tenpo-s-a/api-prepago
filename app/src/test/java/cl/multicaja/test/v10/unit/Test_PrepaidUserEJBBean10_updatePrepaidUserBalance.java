@@ -1,7 +1,6 @@
 package cl.multicaja.test.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.users.model.v10.User;

@@ -36,7 +36,7 @@
 
     <dependency>
       <groupId>cl.multicaja</groupId>
-      <artifactId>api-core</artifactId>
+      <artifactId>multicaja-base</artifactId>
       <version>1.0.0</version>
     </dependency>
 

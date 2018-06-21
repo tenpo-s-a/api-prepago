@@ -215,7 +215,7 @@ VALUES(13, 5, 'El retiro supera el monto máximo de retiros mensuales', 1000000,
 
 INSERT INTO ${schema.cdt}.cdt_fase_acumulador
 (id_fase_movimiento, id_regla_acumulacion, signo)
-VALUES(1, 1, 1);
+VALUES(1, 3, 1);
 
 INSERT INTO ${schema.cdt}.cdt_fase_acumulador
 (id_fase_movimiento, id_regla_acumulacion, signo)

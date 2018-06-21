@@ -14,8 +14,9 @@ public class NewPrepaidTopup10 extends NewPrepaidBaseTransaction10 {
     super(PrepaidMovementType.TOPUP);
   }
 
-  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory) {
+  public NewPrepaidTopup10(NewAmountAndCurrency10 amount, String transactionId, Integer rut, String merchantCode, String merchantName, Integer merchantCategory, Boolean isFirstTopup) {
     super(amount, transactionId, rut, merchantCode, merchantName, merchantCategory, PrepaidMovementType.TOPUP);
+    this.isFirstTopup = isFirstTopup;
   }
 
   @JsonIgnore

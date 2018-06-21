@@ -1,10 +1,9 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.camel.ResponseRoute;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -31,17 +30,17 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   /**
    *
-   * @return
+   * @returnr
    */
   public ProcessorRoute processPendingIssuanceFee() {
 
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingIssuanceFee - REQ: " + req);
 
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
         PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
@@ -107,18 +106,18 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
-          return new ResponseRoute<>(data);
+          return req;
         }
 
         String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
-        CodigoMoneda clamon = prepaidMovement.getClamon();
-        IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
-        TipoFactura tipofac = prepaidMovement.getTipofac();
-        BigDecimal impfac = prepaidMovement.getImpfac();
-        String codcom = prepaidMovement.getCodcom();
-        Integer codact = prepaidMovement.getCodact();
-        CodigoPais codpais = prepaidMovement.getCodpais();
+        CodigoMoneda clamon = issuanceFeeMovement.getClamon();
+        IndicadorNormalCorrector indnorcor = issuanceFeeMovement.getIndnorcor();
+        TipoFactura tipofac = issuanceFeeMovement.getTipofac();
+        BigDecimal impfac = issuanceFeeMovement.getImpfac();
+        String codcom = issuanceFeeMovement.getCodcom();
+        Integer codact = issuanceFeeMovement.getCodact();
+        CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString();
         String numaut = numreffac;
@@ -129,7 +128,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         }
 
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
-          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
@@ -193,24 +192,24 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           req.setRetryCount(0);
           redirectRequest(endpoint, exchange, req);
         }
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }
 
   /* Cola Errores */
   public ProcessorRoute processErrorPendingIssuanceFee() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processErrorPendingIssuanceFee - REQ: " + req);
 
         req.retryCountNext();
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }

@@ -2,7 +2,10 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
+import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.users.model.v10.User;
 
 import java.util.List;
@@ -27,8 +30,8 @@ public interface PrepaidUserEJB10 {
    * permite buscar usuarios prepago
    *
    * @param headers
-   * @param userId
-   * @param userIdMc
+   * @param userId id de usuario prepago
+   * @param userIdMc id de usuario multicaja
    * @param rut
    * @param status
    * @return
@@ -40,7 +43,7 @@ public interface PrepaidUserEJB10 {
    * permite buscar un usuario prepago por su id
    *
    * @param headers
-   * @param userId
+   * @param userId id de usuario prepago
    * @return
    * @throws Exception
    */
@@ -50,7 +53,7 @@ public interface PrepaidUserEJB10 {
    * permite buscar un usuario prepago por el id de usuario de multicaja
    *
    * @param headers
-   * @param userIdMc
+   * @param userIdMc id de usuario multicaja
    * @return
    * @throws Exception
    */
@@ -70,7 +73,7 @@ public interface PrepaidUserEJB10 {
    * actualiza el estado del usuario prepago
    *
    * @param headers
-   * @param userId
+   * @param userId id de usuario prepago
    * @param status
    * @throws Exception
    */
@@ -92,16 +95,16 @@ public interface PrepaidUserEJB10 {
    * Retorna el saldo del cliente prepago
    *
    * @param headers
-   * @param userId
+   * @param userIdMc id de usuario multicaja
    * @return
    */
-  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception;
+  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
    * Actualiza el saldo del cliente prepago
    *
    * @param headers
-   * @param userId
+   * @param userId id de usuario prepago
    * @param balance
    * @throws Exception
    */

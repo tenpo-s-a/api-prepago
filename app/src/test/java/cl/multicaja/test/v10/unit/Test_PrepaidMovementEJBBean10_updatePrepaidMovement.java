@@ -27,7 +27,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(), PrepaidMovementStatus.IN_PROCESS);
+    getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), PrepaidMovementStatus.IN_PROCESS);
 
     prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
 

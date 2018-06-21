@@ -1,14 +1,15 @@
 package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
-import cl.multicaja.camel.RequestRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
+import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
@@ -62,7 +63,15 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
       prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
+      /**
+       * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
+       */
+
+      UsersEmailRoute10 usersEmailRoute10 = new UsersEmailRoute10();
+      usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
+
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10);
     }
 
     simpleNamingContextBuilder.deactivate();
@@ -166,11 +175,11 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
 
     //se envia el mensaje a la cola
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
@@ -205,11 +214,11 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     }
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, null, null, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, null, null, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
     data.setPrepaidCard10(prepaidCard);
 
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
 
     if (retryCount != null){
       req.setRetryCount(retryCount);
@@ -239,10 +248,10 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
 
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
     req.getData().setPrepaidUser10(prepaidUser);
 
@@ -278,10 +287,10 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     // Realiza alta en tecnocom para que el usuario exista
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
 
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
     req.getData().setPrepaidCard10(prepaidCard);
     req.getData().setPrepaidUser10(prepaidUser);
@@ -314,9 +323,10 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     // Realiza alta en tecnocom para que el usuario exista
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10(null, user, null, null);
+    PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
     req.getData().setPrepaidCard10(prepaidCard10);
     req.getData().setPrepaidUser10(prepaidUser10);
@@ -349,12 +359,12 @@ public class TestBaseUnitAsync extends TestBaseUnit {
 
     //se crea la el objeto con los datos del proceso
     prepaidWithdraw10.setMessageId(messageId);
-    PrepaidTopupDataRoute10 data = new PrepaidTopupDataRoute10();
+    PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setUser(user);
     data.setPrepaidWithdraw10(prepaidWithdraw10);
 
     data.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
-    RequestRoute<PrepaidTopupDataRoute10> req = new RequestRoute<>(data);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
 
     req.setRetryCount(retryCount == null ? 0 : retryCount);
 

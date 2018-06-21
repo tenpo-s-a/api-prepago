@@ -1,11 +1,10 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.camel.RequestRoute;
-import cl.multicaja.camel.ResponseRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupDataRoute10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
@@ -25,15 +24,15 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
   }
 
   public ProcessorRoute processPendingTopupReverseConfirmation() {
-    return new ProcessorRoute<RequestRoute<PrepaidTopupDataRoute10>, ResponseRoute<PrepaidTopupDataRoute10>>() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
-      public ResponseRoute<PrepaidTopupDataRoute10> processExchange(long idTrx, RequestRoute<PrepaidTopupDataRoute10> req, Exchange exchange) throws Exception {
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingTopupReverseConfirmation - REQ: " + req);
 
         req.retryCountNext();
 
-        PrepaidTopupDataRoute10 data = req.getData();
+        PrepaidTopupData10 data = req.getData();
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
@@ -61,7 +60,7 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
           log.debug(String.format("Error code: %s", cdtTransaction.getNumErrorInt()));
           log.debug(String.format("Error msg: %s", cdtTransaction.getMsjError()));
         }
-        return new ResponseRoute<>(data);
+        return req;
       }
     };
   }

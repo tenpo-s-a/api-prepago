@@ -6,7 +6,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.TOPUP_POS_FEE_PERCENTAGE;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateFee;
 
 /**
  * @autor vutreras

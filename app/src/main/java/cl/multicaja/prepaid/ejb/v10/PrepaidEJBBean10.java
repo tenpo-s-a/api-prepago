@@ -393,7 +393,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal impfac = prepaidMovement.getImpfac();
     String codcom = prepaidMovement.getCodcom();
     Integer codact = prepaidMovement.getCodact();
-    CodigoPais codpais = prepaidMovement.getCodpais();
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString();
     String numaut = numreffac;
@@ -404,12 +404,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
-      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
-                            numreffac, impfac, numaut, codcom,
-                            nomcomred, codact, codpais);
+      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
-    if (inclusionMovimientosDTO.isRetornoExitoso()) {
-
+      if (inclusionMovimientosDTO.isRetornoExitoso()) {
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();
@@ -430,7 +427,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     } else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
-      getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), status);
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
 
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -448,7 +445,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-      getPrepaidMovementEJB10().updatePrepaidMovement(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
       throw new IOException();
     }
@@ -701,14 +698,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   /**
    *
-   * @param userId
+   * @param userIdMc
    * @param simulationNew
    * @throws BaseException
    */
-  private void validateSimulationNew10(Long userId, SimulationNew10 simulationNew) throws BaseException {
+  private void validateSimulationNew10(Long userIdMc, SimulationNew10 simulationNew) throws BaseException {
 
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    if(userIdMc == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
     }
 
     if(simulationNew == null){
@@ -733,18 +730,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public SimulationTopup10 topupSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
+  public SimulationTopup10 topupSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userId, simulationNew);
+    this.validateSimulationNew10(userIdMc, simulationNew);
 
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
-    if(prepaidUser10 == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
 
-    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
     if(user == null){
       throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    //obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+
+    if(prepaidUser10 == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
@@ -777,7 +778,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
@@ -811,18 +812,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> header, Long userId, SimulationNew10 simulationNew) throws Exception {
+  public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userId, simulationNew);
+    this.validateSimulationNew10(userIdMc, simulationNew);
 
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, userId);
-    if(prepaidUser10 == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
+    // Obtener Usuario MC
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
 
-    User user = getUsersEJB10().getUserByRut(null, prepaidUser10.getRut());
     if(user == null){
       throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    //obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+
+    if(prepaidUser10 == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
@@ -865,7 +870,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(header, prepaidUser10.getId());
+    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a retirar: " + amountValue);

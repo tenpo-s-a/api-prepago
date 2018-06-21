@@ -32,7 +32,7 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
 
   public PrepaidTopup10(NewPrepaidTopup10 topupRequest) {
     super(topupRequest.getAmount(), topupRequest.getTransactionId(), topupRequest.getRut(),
-          topupRequest.getMerchantCode(), topupRequest.getMerchantName(), topupRequest.getMerchantCategory());
+          topupRequest.getMerchantCode(), topupRequest.getMerchantName(), topupRequest.getMerchantCategory(), topupRequest.isFirstTopup());
   }
 
   public Long getId() {
