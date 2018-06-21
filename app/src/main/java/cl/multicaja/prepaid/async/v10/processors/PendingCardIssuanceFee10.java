@@ -117,7 +117,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         BigDecimal impfac = issuanceFeeMovement.getImpfac();
         String codcom = issuanceFeeMovement.getCodcom();
         Integer codact = issuanceFeeMovement.getCodact();
-        CodigoPais codpais = issuanceFeeMovement.getCodpais();
+        CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString();
         String numaut = numreffac;
@@ -128,7 +128,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         }
 
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
-          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, codpais);
+          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 

@@ -758,7 +758,7 @@ public class TestBaseUnit extends TestApiBase {
     TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
     String codcom = "1";
     Integer codact = 1;
-    CodigoPais codpais = CodigoPais.CHILE;
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
     String numaut = numreffac;
@@ -772,7 +772,7 @@ public class TestBaseUnit extends TestApiBase {
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
-      nomcomred, codact, codpais);
+      nomcomred, codact, clamondiv,impfac);
 
     return inclusionMovimientosDTO;
   }
