@@ -14,16 +14,28 @@ import java.util.Map;
 
 public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
 
-  private HttpResponse findPrepaidUser(Integer rut) {
+  private HttpResponse findPrepaidUser(String rut) {
     HttpResponse respHttp = apiGET(String.format("/1.0/prepaid?rut=%s", rut));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
   @Test
-  public void shouldReturn400_RutNull() {
+  public void shouldReturn400_Rut0() {
 
-    HttpResponse resp = findPrepaidUser(0);
+    HttpResponse resp = findPrepaidUser("0");
+
+    Assert.assertEquals("status 400", 400, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn400_RutEmpty() {
+
+    HttpResponse resp = findPrepaidUser("");
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -35,7 +47,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_UserMcNull() {
 
-    HttpResponse resp = findPrepaidUser(getUniqueRutNumber());
+    HttpResponse resp = findPrepaidUser(getUniqueRutNumber().toString());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -49,7 +61,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
 
     User user = registerUser();
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue());
+    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -67,7 +79,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue());
+    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -95,7 +107,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue());
+    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -125,7 +137,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue());
+    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -153,7 +165,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue());
+    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
