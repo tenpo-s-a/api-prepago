@@ -373,6 +373,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidWithdraw.setUserId(user.getId());
     prepaidWithdraw.setStatus("exitoso");
     prepaidWithdraw.setTimestamps(new Timestamps());
+
     String contrato = prepaidCard.getProcessorUserId();
     String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
 
@@ -382,7 +383,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
-    prepaidWithdraw.setId(cdtTransaction.getTransactionReference());
+    prepaidWithdraw.setId(prepaidMovement.getId());
 
     CodigoMoneda clamon = prepaidMovement.getClamon();
     IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
@@ -395,7 +396,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     String numreffac = prepaidMovement.getId().toString();
     String numaut = numreffac;
 
-    //solamente los 6 primeros digitos de numreffac
+    //solamente los 6 ultimos digitos de numreffac
     if (numaut.length() > 6) {
       numaut = numaut.substring(numaut.length()-6);
     }
@@ -900,6 +901,32 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Busco el usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    // Obtiene el nivel del usuario
+    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+
+    return prepaidUser;
+  }
+
+  @Override
+  public PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception {
+    if(rut == null || Integer.valueOf(0).equals(rut)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+
+    // Busco el usuario MC
+    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    // Busco el usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, user.getId());
 
     if(prepaidUser == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);

@@ -16,7 +16,7 @@ import java.util.List;
 public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
 
   @Test
-  public void getPrepaidCardById_() throws Exception {
+  public void getPrepaidCardById() throws Exception {
 
     /**
      * Caso en que se registra una nueva tarjet y luego se busca por su id y idUser
@@ -88,17 +88,20 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
   @Test
   public void getPrepaidCards_check_order_desc() throws Exception {
 
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
     for (int j = 0; j < 10; j++) {
-      PrepaidCard10 card = buildPrepaidCard10();
+      PrepaidCard10 card = buildPrepaidCard10(prepaidUser);
       createPrepaidCard10(card);
     }
 
-    List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, null, null, null, null);
+    List<PrepaidCard10> lst = getPrepaidCardEJBBean10().getPrepaidCards(null, null, prepaidUser.getId(), null, null, null);
 
     Long id = Long.MAX_VALUE;
 
     for (PrepaidCard10 p : lst) {
-      System.out.println(p);
       Assert.assertTrue("Debe estar en orden Descendente", p.getId() < id);
       id = p.getId();
     }

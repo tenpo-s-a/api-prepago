@@ -90,16 +90,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
-    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
-    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
-    for(PrepaidMovement10 m : dbPrepaidMovements) {
-      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
-      } else {
-        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
-      }
-    }
+    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
+    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
+    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
   }
 
   @Test
@@ -160,16 +153,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
-    List<PrepaidMovement10> dbPrepaidMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
-    Assert.assertEquals("Deberia tener un movimiento", 1, dbPrepaidMovements.size());
-    PrepaidMovementStatus ok = PrepaidMovementStatus.PROCESS_OK;
-    for(PrepaidMovement10 m : dbPrepaidMovements) {
-      if(m.getIdMovimientoRef().equals(withdraw.getId()) && m.getIdTxExterno().equals(withdraw.getTransactionId())){
-        Assert.assertEquals("Deberia estar en status " + ok, ok, m.getEstado());
-      } else {
-        Assert.assertTrue("Deberia ser false", Boolean.FALSE);
-      }
-    }
+    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
+    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
+    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
   }
 
   @Test
@@ -715,5 +701,16 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106001", 106001, errorObj.get("code"));
+
+    // Verifica la transaccion
+    PrepaidMovement10 movement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+      PrepaidMovementStatus.ERROR_POS_WITHDRAW,
+      PrepaidMovementStatus.ERROR_WEB_WITHDRAW,
+      PrepaidMovementStatus.REVERSED);
+
+    Assert.assertNotNull("Debe existir un movimiento", movement);
+    Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
+    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, movement.getEstado());
+
   }
 }

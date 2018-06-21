@@ -105,6 +105,13 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @GET
+  @Path("/")
+  public Response findPrepaidUser(@QueryParam("rut") Integer rut, @Context HttpHeaders headers) throws Exception {
+    PrepaidUser10 prepaidUser = this.prepaidEJBBean10.findPrepaidUser(headersToMap(headers), rut);
+    return Response.ok(prepaidUser).build();
+  }
+
+  @GET
   @Path("/{userId}/card")
   public Response getPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     PrepaidCard10 prepaidCard10 = prepaidEJBBean10.getPrepaidCard(headersToMap(headers), userIdMc);

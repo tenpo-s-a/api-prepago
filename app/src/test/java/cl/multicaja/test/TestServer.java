@@ -50,7 +50,7 @@ public class TestServer {
 
     //en caso que sea development* o production* lo puertos por defecto son 8080 y 8181 dado que son los puertos
     //del servidor externo
-    if (env.startsWith("development") || env.startsWith("production")) {
+    if (ConfigUtils.isEnvDevelopment() || ConfigUtils.isEnvProduction()) {
       TestApiBase.PORT_HTTP = 8080;
       TestApiBase.PORT_HTTPS = 8181;
     }
@@ -66,7 +66,7 @@ public class TestServer {
 
     //Si es development o production quiere decir que se intenta conectar a un payara externo, en este caso no es necesario
     //ejecutar un payara embebido
-    if (env.startsWith("development") || env.startsWith("production")) {
+    if (ConfigUtils.isEnvDevelopment() || ConfigUtils.isEnvProduction()) {
       return;
     }
 
@@ -79,7 +79,7 @@ public class TestServer {
       }
     });
 
-    log.info("war: " + Arrays.asList(files));
+    log.info("war: " + (files != null ? Arrays.asList(files) : null));
 
     if (files == null || files.length == 0) {
       throw new RuntimeException("No existe el war para desplegar en el servidor de test, ejecuta un ./package.sh o mvn package");

@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.api;
 
+import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.test.TestSuite;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
@@ -14,6 +15,16 @@ import org.junit.BeforeClass;
 public class TestBaseUnitApi extends TestBaseUnit {
 
   private static Log log = LogFactory.getLog(TestBaseUnitApi.class);
+
+  // Descomentar para probar los tests del API al payara
+  /*
+  static {
+    System.setProperty("env", "development");
+    PORT_HTTP = 8080;
+    CONTEXT_PATH = "api-prepaid-1.0";
+    System.setProperty("db.use.basicdatasource", "true");
+  }
+  */
 
   @BeforeClass
   public static void beforeClass() throws Exception {
