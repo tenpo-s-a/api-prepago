@@ -55,6 +55,10 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     int concurrentConsumers = 10;
     int sedaSize = 1000;
 
+    //los mensajes de las colas de respuesta se usan para verificaciones en los test, en la practica no se usan realmente
+    //dado eso se establece un tiempo de vida de esos mensajes de solo 10 minutos
+    String confResp = "?timeToLive=" + 600000;
+
     /**
      * Cargas pendientes
      */
@@ -66,42 +70,42 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     //consume un mensaje desde una cola de requerimientos y lo envia a una cola de respuestas
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processPendingTopup())
-      .to(createJMSEndpoint(PENDING_TOPUP_RESP)).end();
+      .to(createJMSEndpoint(PENDING_TOPUP_RESP + confResp)).end();
 
     /**
      * devoluciones pendientes
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_RETURNS_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processPendingTopupReturns())
-      .to(createJMSEndpoint(PENDING_TOPUP_RETURNS_RESP)).end();
+      .to(createJMSEndpoint(PENDING_TOPUP_RETURNS_RESP + confResp)).end();
 
     /**
      * Emisiones pendientes
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_EMISSION_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processPendingEmission())
-      .to(createJMSEndpoint(PENDING_EMISSION_RESP)).end();
+      .to(createJMSEndpoint(PENDING_EMISSION_RESP + confResp)).end();
 
     /**
      * Obtener Datos Tarjeta
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CREATE_CARD_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processPendingCreateCard())
-      .to(createJMSEndpoint(PENDING_CREATE_CARD_RESP)).end();
+      .to(createJMSEndpoint(PENDING_CREATE_CARD_RESP + confResp)).end();
 
     /**
      * Error Emisiones
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_EMISSION_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processErrorEmission())
-      .to(createJMSEndpoint(ERROR_EMISSION_RESP)).end();
+      .to(createJMSEndpoint(ERROR_EMISSION_RESP + confResp)).end();
 
     /**
      * Error Obtener Datos Tarjeta
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CREATE_CARD_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processErrorCreateCard())
-      .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP)).end();
+      .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP + confResp)).end();
 
     /**
      * Confirmacion reversa de topup pendientes
@@ -111,31 +115,31 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
 
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_CONFIRMATION_REQ, concurrentConsumers)))
       .process(new PendingTopupReverseConfirmation10(this).processPendingTopupReverseConfirmation())
-      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP)).end();
+      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP + confResp)).end();
 
     /**
      * Cobros de emisión pendientes
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
       .process(new PendingCardIssuanceFee10(this).processPendingIssuanceFee())
-      .to(createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_RESP)).end();
+      .to(createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_RESP + confResp)).end();
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
       .process(new PendingCardIssuanceFee10(this).processErrorPendingIssuanceFee())
-      .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
+      .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP + confResp)).end();
 
     /**
      * Envio Mail Tarjeta
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_CARD_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processPendingSendMailCard())
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_CARD_RESP)).end();
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_CARD_RESP + confResp)).end();
 
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingSendMailCard())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP)).end();
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP + confResp)).end();
 
     /**
      * Envio recibo de retiro
@@ -146,12 +150,12 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
 
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processPendingWithdrawMail())
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_RESP)).end();
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_RESP + confResp)).end();
 
     //Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP)).end();
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP + confResp)).end();
 
   }
 }
