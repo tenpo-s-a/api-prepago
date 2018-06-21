@@ -376,6 +376,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidWithdraw.setUserId(user.getId());
     prepaidWithdraw.setStatus("exitoso");
     prepaidWithdraw.setTimestamps(new Timestamps());
+
     String contrato = prepaidCard.getProcessorUserId();
     String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
 
@@ -385,7 +386,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
-    prepaidWithdraw.setId(cdtTransaction.getTransactionReference());
+    prepaidWithdraw.setId(prepaidMovement.getId());
 
     CodigoMoneda clamon = prepaidMovement.getClamon();
     IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
@@ -393,23 +394,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal impfac = prepaidMovement.getImpfac();
     String codcom = prepaidMovement.getCodcom();
     Integer codact = prepaidMovement.getCodact();
-    CodigoPais codpais = prepaidMovement.getCodpais();
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString();
     String numaut = numreffac;
 
-    //solamente los 6 primeros digitos de numreffac
+    //solamente los 6 ultimos digitos de numreffac
     if (numaut.length() > 6) {
       numaut = numaut.substring(numaut.length()-6);
     }
 
     InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
-      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
-                            numreffac, impfac, numaut, codcom,
-                            nomcomred, codact, codpais);
+      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
-    if (inclusionMovimientosDTO.isRetornoExitoso()) {
-
+      if (inclusionMovimientosDTO.isRetornoExitoso()) {
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();
