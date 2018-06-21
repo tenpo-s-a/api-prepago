@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -41,7 +42,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
@@ -108,7 +112,11 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -263,7 +271,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnWithdraw_MonthlyAmount() throws Exception {
+  public void shouldReturn422_OnWithdraw_MaxMonthlyAmount() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
@@ -272,7 +280,12 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    for(int i = 0; i < 3; i++){
+      InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(500000));
+      Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    }
 
     for(int i = 0; i < 10; i++) {
 
@@ -293,6 +306,33 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 108304", 108304, errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_InsufficientFounds() throws Exception {
+
+    String password = RandomStringUtils.randomNumeric(4);
+    User user = registerUser(password);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(10000));
+
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106001", 106001, errorObj.get("code"));
   }
 
   @Test
@@ -671,6 +711,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
-    Assert.assertEquals("status 500", 500, resp.getStatus());
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106001", 106001, errorObj.get("code"));
   }
 }

@@ -2,10 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.RutUtils;
@@ -447,7 +444,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
-      throw new IOException();
+      throw  new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     /*
