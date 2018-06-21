@@ -53,6 +53,7 @@ public class TestBaseUnitAsync extends TestBaseUnit {
 
       //crea e inicia el activemq
       brokerService = camelFactory.createBrokerService();
+      brokerService.setSchedulerSupport(true); //habilita la funcionalidad de mensajes programados
       brokerService.start();
 
       //Inicializa las rutas camel, se inicializa aun cuando no se incluya en camel, se crea dado que de

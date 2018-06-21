@@ -59,7 +59,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-        if(req.getRetryCount() > 3) {
+        if(req.getRetryCount() > getMaxRetryCount()) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
@@ -116,7 +116,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         } else if (cvv2DTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          redirectRequest(endpoint, exchange, req);
+          redirectRequest(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
         } else {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
@@ -134,17 +134,12 @@ public class PendingSendMail10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-
-        log.info("processErrorPendingSendMailCard - REQ: " + req);
-        req.retryCountNext();
-
-        PrepaidTopupData10 data = req.getData();
-
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
-        //TODO falta implementar
-
-        return req;
+      log.info("processErrorPendingSendMailCard - REQ: " + req);
+      req.retryCountNext();
+      PrepaidTopupData10 data = req.getData();
+      data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+      //TODO falta implementar
+      return req;
       }
     };
   }
@@ -166,7 +161,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
 
-        if(req.getRetryCount() > 3) {
+        if(req.getRetryCount() > getMaxRetryCount()) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_REQ);
           data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
           req.setRetryCount(0);
@@ -203,18 +198,12 @@ public class PendingSendMail10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-
-        log.info("processErrorPendingWithdrawMail - REQ: " + req);
-
-        req.retryCountNext();
-
-        PrepaidTopupData10 data = req.getData();
-
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
-        //TODO falta implementar
-
-        return req;
+      log.info("processErrorPendingWithdrawMail - REQ: " + req);
+      req.retryCountNext();
+      PrepaidTopupData10 data = req.getData();
+      data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
+      //TODO falta implementar, no se sabe que hacer en este caso
+      return req;
       }
     };
   }
