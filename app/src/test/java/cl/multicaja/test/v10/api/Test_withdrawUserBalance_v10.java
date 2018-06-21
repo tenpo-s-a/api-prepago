@@ -319,6 +319,17 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106001", 106001, errorObj.get("code"));
+
+    // Verifica la transaccion
+    PrepaidMovement10 movement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+      PrepaidMovementStatus.ERROR_POS_WITHDRAW,
+      PrepaidMovementStatus.ERROR_WEB_WITHDRAW,
+      PrepaidMovementStatus.REVERSED);
+
+    Assert.assertNotNull("Debe existir un movimiento", movement);
+    Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
+    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, movement.getEstado());
+
   }
 
   @Test
