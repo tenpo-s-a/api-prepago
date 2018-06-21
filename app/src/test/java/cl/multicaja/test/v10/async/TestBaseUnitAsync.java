@@ -8,6 +8,7 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.test.TestSuite;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
 import cl.multicaja.users.model.v10.User;
@@ -38,7 +39,9 @@ public class TestBaseUnitAsync extends TestBaseUnit {
 
     SimpleNamingContextBuilder simpleNamingContextBuilder = new SimpleNamingContextBuilder();
 
-    if (!NamingManager.hasInitialContextFactoryBuilder()) {
+    //Por un extraño conflicto con payara cuando no se usa, se debe sobre-escribir el InitialContext por defecto
+    //sino se lanza un NullPointerException en camel producto de la existencia de payara.
+    if (!NamingManager.hasInitialContextFactoryBuilder() || !TestSuite.isServerRunning()) {
       simpleNamingContextBuilder.activate();
     }
 
