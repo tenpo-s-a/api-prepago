@@ -22,6 +22,7 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -59,6 +60,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
+  private static DataEJBBean10 userDataEJBBean10;
 
   /**
    *
@@ -179,9 +181,22 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
       prepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setUsersDataEJB10(getDataEJBBean10());
     }
     return prepaidEJBBean10;
   }
+
+  /**
+   *
+   * @return
+   */
+  public static DataEJBBean10 getDataEJBBean10(){
+    if (userDataEJBBean10 == null) {
+      userDataEJBBean10 = new DataEJBBean10();
+    }
+    return userDataEJBBean10;
+  }
+
 
   /**
    *
