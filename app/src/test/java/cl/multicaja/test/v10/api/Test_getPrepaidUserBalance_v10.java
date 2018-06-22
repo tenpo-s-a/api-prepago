@@ -4,10 +4,7 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.User;
@@ -63,24 +60,17 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    // se hace una carga
+    BigDecimal impfac = BigDecimal.valueOf(3000);
+    topupUserBalance(user, impfac);
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     Thread.sleep(PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS + 1000);
 
     {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac);
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(2010));
       NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance);
 

@@ -116,20 +116,11 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    // se hace una carga
+    topupUserBalance(user, BigDecimal.valueOf(10000));
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    //se carga 10.000 en tecnocom como saldo del usuario
-    BigDecimal impfac = BigDecimal.valueOf(10000);
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     //se intenta retirar 8.000
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));
@@ -166,20 +157,11 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    // se hace una carga
+    topupUserBalance(user, BigDecimal.valueOf(10000));
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    //se carga 10.000 en tecnocom como saldo del usuario
-    BigDecimal impfac = BigDecimal.valueOf(10000);
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     //se intenta retirar 8.000
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(8000));

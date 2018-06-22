@@ -43,7 +43,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
   @Test
   public void shouldReturn400_UserMcNull() throws Exception {
 
-    HttpResponse resp = getPrepaidUser(numberUtils.random(999L, 9999L) + 1);
+    HttpResponse resp = getPrepaidUser(numberUtils.random(999L, 9999L) + numberUtils.random(999L, 9999L));
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 

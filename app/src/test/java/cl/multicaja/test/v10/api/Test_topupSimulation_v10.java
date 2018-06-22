@@ -222,19 +222,11 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    // se hace una carga
+    topupUserBalance(user, BigDecimal.valueOf(450000)); //se agrega saldo de 450.000 en tecnocom
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    BigDecimal impfac = BigDecimal.valueOf(400000); //se agrega saldo de 450.000 en tecnocom
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     //se intenta cargar 100.001, debe dar error dado que el maximo es 500.000
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(100001));
