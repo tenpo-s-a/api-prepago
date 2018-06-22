@@ -47,8 +47,6 @@ public class PendingCard10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         if(req.getRetryCount() > getMaxRetryCount()) {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
@@ -56,10 +54,7 @@ public class PendingCard10 extends BaseProcessor10 {
           data.getPrepaidMovement10().setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-          return req;
+          return redirectRequest(endpoint, exchange, req, false);
         }
 
         User user = data.getUser();
@@ -76,14 +71,11 @@ public class PendingCard10 extends BaseProcessor10 {
           data.setPrepaidCard10(prepaidCard);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
+          return redirectRequest(endpoint, exchange, req, false);
 
         } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          redirectRequest(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+          return redirectRequest(endpoint, exchange, req, true);
         } else {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
@@ -91,12 +83,8 @@ public class PendingCard10 extends BaseProcessor10 {
           data.getPrepaidMovement10().setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
+          return redirectRequest(endpoint, exchange, req, false);
         }
-
-        return req;
       }
     };
   }
@@ -116,8 +104,6 @@ public class PendingCard10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         if(req.getRetryCount() > getMaxRetryCount()) {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD;
@@ -125,10 +111,7 @@ public class PendingCard10 extends BaseProcessor10 {
           data.getPrepaidMovement10().setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-          return req;
+          return redirectRequest(endpoint, exchange, req, false);
         }
 
         DatosTarjetaDTO datosTarjetaDTO = getRoute().getTecnocomService().datosTarjeta(data.getPrepaidCard10().getProcessorUserId());
@@ -154,12 +137,10 @@ public class PendingCard10 extends BaseProcessor10 {
               prepaidCard10);
 
             data.setPrepaidCard10(prepaidCard10);
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
             req.setData(data);
-            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-            req.setRetryCount(0);
 
-            redirectRequest(endpoint, exchange, req);
+            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
+            return redirectRequest(endpoint, exchange, req, false);
 
           } catch(Exception ex) {
 
@@ -170,15 +151,12 @@ public class PendingCard10 extends BaseProcessor10 {
             data.getPrepaidMovement10().setEstado(status);
 
             Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
-            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-            req.setRetryCount(0);
-            redirectRequest(endpoint, exchange, req);
+            return redirectRequest(endpoint, exchange, req, false);
           }
 
         } else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          redirectRequest(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+          return redirectRequest(endpoint, exchange, req, true);
         } else {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD;
@@ -186,12 +164,8 @@ public class PendingCard10 extends BaseProcessor10 {
           data.getPrepaidMovement10().setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CREATE_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
+          return redirectRequest(endpoint, exchange, req, false);
         }
-
-        return req;
       }
     };
   }
@@ -204,7 +178,6 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorEmission - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
       //TODO falta implementar, no se sabe que hacer en este caso
       return req;
       }
@@ -218,7 +191,6 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorCreateCard - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
       //TODO falta implementar, no se sabe que hacer en este caso
       return req;
       }

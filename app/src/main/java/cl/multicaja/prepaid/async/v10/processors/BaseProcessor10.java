@@ -1,9 +1,8 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.CamelFactory;
-import cl.multicaja.camel.JMSMessenger;
-import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.camel.*;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.camel.Endpoint;
@@ -90,8 +89,11 @@ public abstract class BaseProcessor10 {
    * @param exchange
    * @param req
    */
-  protected void redirectRequest(Endpoint endpoint, Exchange exchange, Object req) {
+  @SuppressWarnings({"unchecked"})
+  protected Object redirectRequestObject(Endpoint endpoint, Exchange exchange, Object req) {
+    log.info("redirectRequestObject - " + endpoint.getEndpointUri());
     exchange.getContext().createProducerTemplate().sendBodyAndHeaders(endpoint, req, exchange.getIn().getHeaders());
+    return req;
   }
 
   /**
@@ -102,7 +104,10 @@ public abstract class BaseProcessor10 {
    * @param req
    * @param delayTimeoutToRedirect tiempo en milisegundos de espera para enviar el mensaje
    */
-  protected void redirectRequest(Endpoint endpoint, Exchange exchange, Object req, long delayTimeoutToRedirect) {
+  @SuppressWarnings({"unchecked"})
+  protected Object redirectRequestObject(Endpoint endpoint, Exchange exchange, Object req, long delayTimeoutToRedirect) {
+
+    log.info("redirectRequestObject - " + endpoint.getEndpointUri() + ", delayTimeoutToRedirect: " + delayTimeoutToRedirect);
 
     Map<String, Object> headers = exchange.getIn().getHeaders();
 
@@ -117,6 +122,7 @@ public abstract class BaseProcessor10 {
     }
 
     exchange.getContext().createProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
+    return req;
   }
 
   //2do intento en +10s, 3to en +50s
@@ -161,5 +167,28 @@ public abstract class BaseProcessor10 {
     } else {
       return array.length;
     }
+  }
+
+  /**
+   * reenvia un mensaje de  ExchangeData<PrepaidTopupData10>
+   *
+   * @param endpoint endpoint al cual se desea reenviar el mensaje
+   * @param exchange instancia del mensaje de apache camel
+   * @param req instancia del mensaje de prepago
+   * @param isRetry true: es un mensaje de reintento, usara el tiempo de delay, false: es un mensaje de reenvio simplemente sin reintento
+   * @return
+   */
+  protected ExchangeData<PrepaidTopupData10> redirectRequest(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidTopupData10> req, boolean isRetry) {
+
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+
+    if (isRetry) {
+      redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+    } else {
+      req.setRetryCount(0);
+      redirectRequestObject(endpoint, exchange, req);
+    }
+
+    return req;
   }
 }

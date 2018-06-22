@@ -52,7 +52,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
 
-    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
 
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
@@ -65,10 +65,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_CREATE_CARD_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
     Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
@@ -104,7 +104,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
 
-    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
 
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
@@ -128,10 +128,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
     Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
@@ -176,10 +176,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_CREATE_CARD_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
     Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
@@ -236,10 +236,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
     Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
@@ -281,10 +281,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNull("Deberia tener una tarjeta", dbPrepaidCard);
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_EMISSION_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.ERROR_EMISSION_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento", 0, lastProcessorMetadata.getRetry());
     Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
@@ -341,10 +341,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea ERROR_CREATE_CARD_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getData().getLastProcessorMetadata();
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.ERROR_CREATE_CARD_REQ;
 
-    Assert.assertEquals("debe ser reintento 1", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento", 0, lastProcessorMetadata.getRetry());
     Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }

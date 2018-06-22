@@ -67,8 +67,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         req.retryCountNext();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
 
         if (issuanceFeeMovement == null) {
@@ -103,10 +101,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-          return req;
+          return redirectRequest(endpoint, exchange, req, false);
         }
 
         String contrato = prepaidCard.getProcessorUserId();
@@ -160,14 +155,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           // Envia a la cola de envio de email con la informacion de la tarjeta
           Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
+          return redirectRequest(endpoint, exchange, req, false);
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          redirectRequest(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+          return redirectRequest(endpoint, exchange, req, true);
         } else {
 
           Integer numextcta = 0;
@@ -188,11 +180,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
+          return redirectRequest(endpoint, exchange, req, false);
         }
-        return req;
       }
     };
   }
@@ -205,7 +194,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
       log.info("processErrorPendingIssuanceFee - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
       //TODO falta implementar, no se sabe que hacer en este caso
       return req;
       }

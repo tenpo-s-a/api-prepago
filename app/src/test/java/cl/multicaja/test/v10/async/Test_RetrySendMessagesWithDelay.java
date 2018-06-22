@@ -105,12 +105,10 @@ public class Test_RetrySendMessagesWithDelay extends TestBaseUnitAsync {
 
           if (req.getRetryCount() > getMaxRetryCount()) {
             Endpoint endpoint = createJMSEndpoint(TEST_DELAY_RESP);
-            redirectRequest(endpoint, exchange, req);
-            return req;
+            return (ExchangeData<TimeInfo>)redirectRequestObject(endpoint, exchange, req);
           } else {
             Endpoint endpoint = createJMSEndpoint(TEST_DELAY_REQ);
-            redirectRequest(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
-            return req;
+            return (ExchangeData<TimeInfo>)redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
           }
         }
       };
