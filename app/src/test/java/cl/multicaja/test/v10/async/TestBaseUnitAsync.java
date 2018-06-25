@@ -5,6 +5,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
@@ -22,6 +23,8 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import javax.jms.Queue;
 import javax.naming.spi.NamingManager;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @autor vutreras
@@ -375,6 +378,13 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
+  }
+
+  public Map<String,Object> getDefaultHeaders(){
+    Map<String,Object> header = new HashMap<>();
+    header.put(Constants.HEADER_USER_LOCALE,Constants.DEFAULT_LOCALE.toString());
+    header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
+    return header;
   }
 
 }

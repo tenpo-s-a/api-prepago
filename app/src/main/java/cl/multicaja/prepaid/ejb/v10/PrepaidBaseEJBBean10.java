@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
@@ -17,7 +18,7 @@ public abstract class PrepaidBaseEJBBean10 {
   private ConfigUtils configUtils;
 
   private DBUtils dbUtils;
-
+  private DateUtils dateUtils;
   public final static String APP_NAME = "prepaid.appname";
 
   public TecnocomService getTecnocomService() {
@@ -53,4 +54,12 @@ public abstract class PrepaidBaseEJBBean10 {
   public String getSchema() {
     return this.getConfigUtils().getProperty("schema");
   }
+
+  public DateUtils getDateUtils(){
+    if (this.dateUtils == null) {
+      this.dateUtils = new DateUtils();
+    }
+    return this.dateUtils;
+  }
+
 }

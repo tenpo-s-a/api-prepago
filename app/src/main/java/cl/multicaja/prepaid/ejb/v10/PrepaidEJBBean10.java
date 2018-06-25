@@ -14,7 +14,9 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.ParamValue;
@@ -30,9 +32,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
+import java.text.*;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -914,4 +914,89 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidUser;
   }
+
+  public List<Transaction10> getTransactions(Map<String,Object> headers,Long userIdMc,String startDate,String endDate) throws Exception {
+
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener tarjeta
+    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
+
+    //Obtener ultimo movimiento
+    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+    PrepaidMovementStatus.PENDING,
+    PrepaidMovementStatus.IN_PROCESS);
+
+    if(prepaidCard == null) {
+      // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
+      if(movement != null){
+        throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+      }else {
+        throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+      }
+    } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    }
+    Date _startDate;
+    Date _endDate;
+
+    if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
+      _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),"America/Santiago");
+      _endDate = new Date(System.currentTimeMillis());
+    }
+    else {
+      _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");
+      _endDate = getDateUtils().dateStringToDate(endDate,"dd-MM-yyyy");
+    }
+   ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
+    List<Transaction10> listTransaction10 = new ArrayList<>();
+    for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
+
+      Transaction10 transaction10 = new Transaction10();
+      // Get Date and parse
+      String sDate = (String) movimientosDTO.getFecfac().get("valueDate");
+      String sFormat = (String) movimientosDTO.getFecfac().get("format");
+      transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
+      transaction10.setDescription(movimientosDTO.getDestipfac());
+      // New Ammount And Curreycy Principal
+      NewAmountAndCurrency10 newAmountAndCurrency10 = new NewAmountAndCurrency10();
+      newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamon());
+      newAmountAndCurrency10.setValue(movimientosDTO.getImporte());
+      transaction10.setAmountPrimary(newAmountAndCurrency10);
+      // New Ammount And Curreycy Secondary
+      newAmountAndCurrency10 = new NewAmountAndCurrency10();
+      newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamondiv());
+      newAmountAndCurrency10.setValue(movimientosDTO.getImpdiv());
+      transaction10.setAmountSecondary(newAmountAndCurrency10);
+
+      listTransaction10.add(transaction10);
+    }
+    System.out.println(listTransaction10.size());
+    return listTransaction10;
+  }
+
 }
