@@ -1,7 +1,7 @@
 package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.OutParam;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,6 +21,11 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
 
   @BeforeClass
   public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+  }
+
+  @AfterClass
+  public static void afterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
   }
 
@@ -186,7 +191,7 @@ public class Test_20180514105358_create_sp_mc_prp_buscar_tarjetas_v10 extends Te
      * se crean un registro y solo se deberia encontrar uno que coincidan con el criterio de busqueda
      */
 
-    String status = "ACTIVA" + numberUtils.random(1111,9999);
+    String status = getRandomString(10);
 
     Map<String, Object> obj1 = insertCard(status);
     Map<String, Object> obj2 = insertCard(status);
