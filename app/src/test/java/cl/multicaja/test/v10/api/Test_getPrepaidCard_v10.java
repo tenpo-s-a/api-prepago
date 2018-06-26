@@ -172,7 +172,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn404_McUserNull() {
 
-    HttpResponse resp = getPrepaidCard(numberUtils.random(999L, 99999L) + 1);
+    HttpResponse resp = getPrepaidCard(Long.MAX_VALUE);
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
