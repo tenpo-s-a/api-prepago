@@ -95,6 +95,17 @@ public interface PrepaidEJB10 {
    */
   PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception;
 
+
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @param startDate
+   * @param endDate
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate) throws Exception;
   /**
    *
    * @param headers

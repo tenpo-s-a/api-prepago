@@ -7,9 +7,11 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
@@ -34,6 +36,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
@@ -61,6 +65,12 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
+
+  protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
+    new HttpHeader("Content-Type", "application/json"),
+    new HttpHeader(Constants.HEADER_USER_LOCALE, Constants.DEFAULT_LOCALE.toString()),
+    new HttpHeader(Constants.HEADER_USER_TIMEZONE,"America/Santiago")
+  };
 
   /**
    *
@@ -818,5 +828,11 @@ public class TestBaseUnit extends TestApiBase {
     }
 
     return prepaidCard10;
+  }
+  public Map<String,Object> getDefaultHeaders(){
+    Map<String,Object> header = new HashMap<>();
+    header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());
+    header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
+    return header;
   }
 }

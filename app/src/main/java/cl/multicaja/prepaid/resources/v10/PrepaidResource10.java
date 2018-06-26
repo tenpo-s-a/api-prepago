@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * @author vutreras
@@ -141,4 +142,13 @@ public final class PrepaidResource10 extends BaseResource {
     SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationWithdrawal10).build();
   }
+
+
+  @GET
+  @Path("/{userId}/transactions")
+  public Response getTransactions(@PathParam("userId") Long userIdMc, @QueryParam("from") String from, @QueryParam("to") String to, @Context HttpHeaders headers) throws Exception {
+    List<PrepaidTransaction10> transaction10List = this.prepaidEJBBean10.getTransactions(headersToMap(headers),userIdMc,from,to);
+    return Response.ok(transaction10List).build();
+  }
+
 }
