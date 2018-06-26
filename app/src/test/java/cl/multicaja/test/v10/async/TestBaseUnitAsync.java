@@ -380,11 +380,4 @@ public class TestBaseUnitAsync extends TestBaseUnit {
     return messageId;
   }
 
-  public Map<String,Object> getDefaultHeaders(){
-    Map<String,Object> header = new HashMap<>();
-    header.put(Constants.HEADER_USER_LOCALE,Constants.DEFAULT_LOCALE.toString());
-    header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
-    return header;
-  }
-
 }

@@ -915,7 +915,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidUser;
   }
 
-  public List<Transaction10> getTransactions(Map<String,Object> headers,Long userIdMc,String startDate,String endDate) throws Exception {
+  public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate) throws Exception {
 
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -972,11 +972,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");
       _endDate = getDateUtils().dateStringToDate(endDate,"dd-MM-yyyy");
     }
-   ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
-    List<Transaction10> listTransaction10 = new ArrayList<>();
+    ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
+    List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
 
-      Transaction10 transaction10 = new Transaction10();
+      PrepaidTransaction10 transaction10 = new PrepaidTransaction10();
       // Get Date and parse
       String sDate = (String) movimientosDTO.getFecfac().get("valueDate");
       String sFormat = (String) movimientosDTO.getFecfac().get("format");
