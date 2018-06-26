@@ -6,7 +6,7 @@
 .project
 .idea
 .settings
-app/api-prepaid.iml
+*.iml
 pg/pg-prepaid.iml
 app/datos-mock.cache
 
