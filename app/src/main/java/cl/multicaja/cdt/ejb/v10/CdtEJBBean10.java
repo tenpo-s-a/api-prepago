@@ -66,7 +66,7 @@ public class CdtEJBBean10 implements CdtEJB10{
    *
    * @return
    */
-  private String getSchema() {
+  public String getSchema() {
     return this.getConfigUtils().getProperty("schema.cdt");
   }
 
