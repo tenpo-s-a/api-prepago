@@ -64,12 +64,13 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
+  private static DataEJBBean10 userDataEJBBean10;
+
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
     new HttpHeader(Constants.HEADER_USER_LOCALE, Constants.DEFAULT_LOCALE.toString()),
     new HttpHeader(Constants.HEADER_USER_TIMEZONE,"America/Santiago")
   };
-  private static DataEJBBean10 userDataEJBBean10;
 
   /**
    *

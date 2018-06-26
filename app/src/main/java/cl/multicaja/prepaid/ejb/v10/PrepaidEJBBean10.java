@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
+import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.RutUtils;
@@ -987,7 +988,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Date _endDate;
 
     if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
-      _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),"America/Santiago");
+      _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),headers.get(Constants.HEADER_USER_TIMEZONE).toString());
       _endDate = new Date(System.currentTimeMillis());
     }
     else {
