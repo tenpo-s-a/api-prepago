@@ -97,13 +97,13 @@ public final class TestHelpersResource10 extends BaseResource {
 
       String subQuery = String.format("select id from %s.users where rut >= %s AND rut <= %s", schema, min, max);
 
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_address where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_bank_account where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_cellphone where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_email where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_rut where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users_signup where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.users where id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_address where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_bank_account where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_cellphone where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_email where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_rut where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_signup where users_id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.users where id in (%s);", schema, subQuery));
     }
 
     //se borran usuarios en api-prepaid
@@ -113,9 +113,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
       String subQuery = String.format("select id from %s.prp_usuario where rut >= %s AND rut <= %s", schema, min, max);
 
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.prp_tarjeta where id_usuario in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.prp_movimiento where id_usuario in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.prp_usuario where id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_tarjeta where id_usuario in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_movimiento where id_usuario in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_usuario where id in (%s);", schema, subQuery));
     }
 
     //se borran datos en cdt
@@ -126,9 +126,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
       String subQuery = String.format("select id from %s.cdt_cuenta where id_externo in (%s)", schema, StringUtils.join(lstAccountsCdt, ","));
 
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.cdt_cuenta_acumulador where id_cuenta in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.cdt_movimiento_cuenta where id_cuenta in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("jdbcExecute from %s.cdt_cuenta where id in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_cuenta_acumulador where id_cuenta in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_movimiento_cuenta where id_cuenta in (%s);", schema, subQuery));
+      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_cuenta where id in (%s);", schema, subQuery));
     }
 
     log.info("Borrado exitoso de datos de usuarios");
