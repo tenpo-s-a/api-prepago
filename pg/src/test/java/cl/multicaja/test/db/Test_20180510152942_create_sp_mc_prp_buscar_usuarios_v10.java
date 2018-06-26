@@ -1,7 +1,7 @@
 package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.OutParam;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,8 +21,12 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
   @BeforeClass
   public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+  }
 
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
+  @AfterClass
+  public static void afterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
   }
@@ -179,7 +183,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
   @Test
   public void searchUserBy_estado() throws SQLException {
 
-    String status = "ACTIVO" + numberUtils.random(1111,9999);
+    String status = getRandomString(10) + numberUtils.random(11111, 99999);
 
     Map<String, Object> obj1 = insertUser(status);
     Map<String, Object> obj2 = insertUser(status);
@@ -197,6 +201,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
+      System.out.println(obj1.get(k) + " == "  + mUsu1.get("_" + k));
       Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
     }
 

@@ -26,7 +26,6 @@ public class PrepaidTopupData10 implements Serializable {
   private CdtTransaction10 cdtTransactionConfirm10;
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
-  private List<ProcessorMetadata> processorMetadata = new ArrayList<>();
 
   public PrepaidTopupData10() {
     super();
@@ -101,17 +100,6 @@ public class PrepaidTopupData10 implements Serializable {
 
   public void setIssuanceFeeMovement10(PrepaidMovement10 issuanceFeeMovement10) {
     this.issuanceFeeMovement10 = issuanceFeeMovement10;
-  }
-  public List<ProcessorMetadata> getProcessorMetadata() {
-    return processorMetadata;
-  }
-
-  public ProcessorMetadata getLastProcessorMetadata() {
-    if (!processorMetadata.isEmpty()) {
-      return processorMetadata.get(processorMetadata.size()-1);
-    } else {
-      return null;
-    }
   }
 
   public CdtTransaction10 getCdtTransactionConfirm10() {

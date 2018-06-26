@@ -17,16 +17,15 @@ import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_ta
 public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_v10";
-  private static final String TABLE_NAME = SCHEMA + ".prp_movimiento";
 
   @BeforeClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
   }
 
   @AfterClass
   public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
   }
 
   public static InParam setInParam(Object o){
@@ -47,8 +46,8 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
    * @return
    * @throws SQLException
    */
-  public static Map<String, Object> insertaMovimiento(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
-                                                      String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
+  public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                   String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
     Object[] params = {
       setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
       setInParam(idUsuario), //_id_usuario NUMERIC
@@ -98,7 +97,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
    * @return
    * @throws SQLException
    */
-  public static Map<String, Object> insertaMovimientoRandom() throws SQLException {
+  public static Map<String, Object> insertRandomMovement() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -113,12 +112,12 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> mapMovimiento = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMovimiento = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
     return mapMovimiento;
   }
 
   @Test
-  public void llamadaSpCreaMovimientoOk() throws SQLException {
+  public void insertMovementOk() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -133,15 +132,15 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> resp = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertEquals("Debe retornar un id", true, numberUtils.toLong(resp.get("_id")) > 0);
+    Assert.assertTrue("Debe retornar un id", numberUtils.toLong(resp.get("_id")) > 0);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
   }
 
   @Test
-  public void llamadaSpCreaMovimientoNoOk() throws SQLException {
+  public void insertMovementNotOk() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -156,7 +155,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> resp = insertaMovimiento(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));

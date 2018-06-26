@@ -34,8 +34,6 @@ public class PendingTopupReverseConfirmation10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
         if (cdtTransaction == null) {

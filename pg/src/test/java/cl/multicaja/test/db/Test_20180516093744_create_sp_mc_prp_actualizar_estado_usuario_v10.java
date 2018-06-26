@@ -2,8 +2,9 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -20,6 +21,18 @@ import static cl.multicaja.test.db.Test_20180510152942_create_sp_mc_prp_buscar_u
 public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_estado_usuario_v10";
+
+  @BeforeClass
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+  }
 
   @Test
   public void updateStatusOk() throws SQLException {
@@ -50,7 +63,7 @@ public class Test_20180516093744_create_sp_mc_prp_actualizar_estado_usuario_v10 
   }
 
   @Test
-  public void updateStatusNoOk() throws SQLException {
+  public void updateStatusNotOk() throws SQLException {
 
     {
       Object[] params = {

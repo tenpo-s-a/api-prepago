@@ -2,10 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.RutUtils;
@@ -29,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.*;
@@ -52,10 +48,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private PrepaidTopupDelegate10 delegate;
 
   @EJB
-  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+  private PrepaidUserEJBBean10 prepaidUserEJB10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private PrepaidCardEJBBean10 prepaidCardEJB10;
 
   @EJB
   private UsersEJBBean10 usersEJB10;
@@ -77,20 +73,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.delegate = delegate;
   }
 
-  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
-    return prepaidUserEJBBean10;
+  public PrepaidUserEJBBean10 getPrepaidUserEJB10() {
+    return prepaidUserEJB10;
   }
 
-  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
-    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  public void setPrepaidUserEJB10(PrepaidUserEJBBean10 prepaidUserEJB10) {
+    this.prepaidUserEJB10 = prepaidUserEJB10;
   }
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    return prepaidCardEJBBean10;
+  public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
+    return prepaidCardEJB10;
   }
 
-  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJB10) {
+    this.prepaidCardEJB10 = prepaidCardEJB10;
   }
 
   public UsersEJBBean10 getUsersEJB10() {
@@ -172,7 +168,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -183,7 +179,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //verifica el nivel del usuario
-    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser);
+    prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user,prepaidUser);
 
     if(!PrepaidUserLevel.LEVEL_1.equals(prepaidUser.getUserLevel())) {
       // Si el usuario tiene validacion > N1, no aplica restriccion de primera carga
@@ -203,13 +199,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
                                                                                                             PrepaidCardStatus.ACTIVE,
                                                                                                             PrepaidCardStatus.LOCKED);
 
     if (prepaidCard == null) {
 
-      prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
                                                                                                   PrepaidCardStatus.LOCKED_HARD,
                                                                                                   PrepaidCardStatus.EXPIRED);
 
@@ -318,7 +314,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByRut(null, user.getRut().getValue());
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByRut(null, user.getRut().getValue());
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -333,13 +329,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     passwordParam.setValue(withdrawRequest.getPassword());
     this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), passwordParam);
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
 
     if (prepaidCard == null) {
 
-      prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
         PrepaidCardStatus.LOCKED_HARD,
         PrepaidCardStatus.EXPIRED,
         PrepaidCardStatus.PENDING);
@@ -448,7 +444,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
-      throw new IOException();
+      throw  new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     /*
@@ -503,7 +499,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -514,7 +510,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener tarjeta
-    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
     PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
@@ -743,7 +739,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //obtener usuario prepago
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, user.getRut().getValue());
 
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -779,7 +775,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
+    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
@@ -825,7 +821,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //obtener usuario prepago
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserByRut(headers, user.getRut().getValue());
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, user.getRut().getValue());
 
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -871,7 +867,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, userIdMc);
+    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a retirar: " + amountValue);
@@ -903,14 +899,40 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Busco el usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
 
     if(prepaidUser == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     // Obtiene el nivel del usuario
-    prepaidUser = this.getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
+    prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
+
+    return prepaidUser;
+  }
+
+  @Override
+  public PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception {
+    if(rut == null || Integer.valueOf(0).equals(rut)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+
+    // Busco el usuario MC
+    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    // Busco el usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, user.getId());
+
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    // Obtiene el nivel del usuario
+    prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
 
     return prepaidUser;
   }
@@ -933,7 +955,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJBBean10().getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
 
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
@@ -944,10 +966,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener tarjeta
-    PrepaidCard10 prepaidCard = getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
+    PrepaidCard10 prepaidCard = this.getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
-    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+    PrepaidMovement10 movement = this.getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
     PrepaidMovementStatus.PENDING,
     PrepaidMovementStatus.IN_PROCESS);
 
@@ -972,7 +994,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");
       _endDate = getDateUtils().dateStringToDate(endDate,"dd-MM-yyyy");
     }
-    ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
+    ConsultaMovimientosDTO consultaMovimientosDTO = this.getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
 
@@ -995,7 +1017,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       listTransaction10.add(transaction10);
     }
-    System.out.println(listTransaction10.size());
     return listTransaction10;
   }
 

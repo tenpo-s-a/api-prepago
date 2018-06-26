@@ -24,6 +24,7 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -68,6 +69,8 @@ public class TestBaseUnit extends TestApiBase {
     new HttpHeader(Constants.HEADER_USER_LOCALE, Constants.DEFAULT_LOCALE.toString()),
     new HttpHeader(Constants.HEADER_USER_TIMEZONE,"America/Santiago")
   };
+  private static DataEJBBean10 userDataEJBBean10;
+
   /**
    *
    * @return
@@ -146,8 +149,9 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     if (prepaidUserEJBBean10 == null) {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
-      prepaidUserEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
       prepaidUserEJBBean10.setUsersEJB10(getUsersEJBBean10());
+      prepaidUserEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidUserEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
     }
     return prepaidUserEJBBean10;
   }
@@ -185,11 +189,24 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setUsersEJB10(getUsersEJBBean10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
-      prepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
-      prepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
+      prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setUsersDataEJB10(getDataEJBBean10());
     }
     return prepaidEJBBean10;
   }
+
+  /**
+   *
+   * @return
+   */
+  public static DataEJBBean10 getDataEJBBean10(){
+    if (userDataEJBBean10 == null) {
+      userDataEJBBean10 = new DataEJBBean10();
+    }
+    return userDataEJBBean10;
+  }
+
 
   /**
    *

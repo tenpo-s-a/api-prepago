@@ -68,9 +68,11 @@ public final class PrepaidTopupDelegate10 {
     String endpoint = "seda:PrepaidTopupRoute10.pendingTopup";
 
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
-    data.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
 
-    this.getProducerTemplate().sendBodyAndHeaders(endpoint, new ExchangeData<>(data), headers);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
 
     return messageId;
   }
@@ -103,9 +105,10 @@ public final class PrepaidTopupDelegate10 {
     data.setCdtTransaction10(cdtTransaction);
     data.setPrepaidMovement10(prepaidMovement);
 
-    data.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
 
-    this.getProducerTemplate().sendBodyAndHeaders(endpoint, new ExchangeData<>(data), headers);
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
 
     return messageId;
   }
@@ -136,9 +139,11 @@ public final class PrepaidTopupDelegate10 {
     String endpoint = "seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation";
 
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
-    data.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
 
-    this.getProducerTemplate().sendBodyAndHeaders(endpoint, new ExchangeData<>(data), headers);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
 
     return messageId;
   }

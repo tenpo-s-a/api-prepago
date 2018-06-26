@@ -44,17 +44,11 @@ public class PendingTopup10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
         PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
-
-        log.info("processPendingTopup prepaidTopup: " + prepaidTopup);
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
 
-        log.info("processPendingTopup prepaidMovement: " + prepaidMovement);
-
-        if(req.getRetryCount() > 3) {
+        if(req.getRetryCount() > getMaxRetryCount()) {
 
           //segun la historia: https://www.pivotaltracker.com/story/show/157850744
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
@@ -62,15 +56,10 @@ public class PendingTopup10 extends BaseProcessor10 {
           prepaidMovement.setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-          return req;
+          return redirectRequest(endpoint, exchange, req, false);
         }
 
         User user = data.getUser();
-
-        log.info("processPendingTopup user: " + user);
 
         if (user == null) {
           log.error("Error user es null");
@@ -90,8 +79,6 @@ public class PendingTopup10 extends BaseProcessor10 {
         }
 
         PrepaidUser10 prepaidUser = getRoute().getPrepaidUserEJBBean10().getPrepaidUserByRut(null, rut);
-
-        log.info("processPendingTopup prepaidUser: " + prepaidUser);
 
         if (prepaidUser == null){
           log.error("Error al buscar PrepaidUser10 con rut: " + rut);
@@ -157,10 +144,6 @@ public class PendingTopup10 extends BaseProcessor10 {
             cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
             cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getAmount());
 
-            log.info("IsFirstTopup: " + prepaidTopup.isFirstTopup());
-            log.info("CDT Init: " + cdtTransaction);
-            log.info("CDT Conf: " + cdtTransactionConfirm);
-
             cdtTransactionConfirm = getRoute().getCdtEJBBean10().addCdtTransaction(null, cdtTransactionConfirm);
 
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
@@ -179,17 +162,14 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
-              data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-              req.setRetryCount(0);
-              redirectRequest(endpoint, exchange, req);
+              return redirectRequest(endpoint, exchange, req, false);
             } else {
               return req;
             }
 
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
-            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-            redirectRequest(endpoint, exchange, req);
+            return redirectRequest(endpoint, exchange, req, true);
           } else {
 
             PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
@@ -197,9 +177,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             data.getPrepaidMovement10().setEstado(status);
 
             Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
-            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-            req.setRetryCount(0);
-            redirectRequest(endpoint, exchange, req);
+            return redirectRequest(endpoint, exchange, req, false);
           }
 
         } else {
@@ -213,16 +191,12 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           if (prepaidCard == null) {
             Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
-            data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-            req.setRetryCount(0);
-            redirectRequest(endpoint, exchange, req);
+            return redirectRequest(endpoint, exchange, req, false);
           } else {
             data.setPrepaidCard10(prepaidCard);
             return req;
           }
         }
-
-        return req;
       }
     };
   }
@@ -231,18 +205,11 @@ public class PendingTopup10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-
-        log.info("processPendingTopupReturns - REQ: " + req);
-
-        req.retryCountNext();
-
-        PrepaidTopupData10 data = req.getData();
-
-        data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), exchange.getFromEndpoint().getEndpointUri()));
-
-        //TODO falta implementar la devolucion
-
-        return req;
+      log.info("processPendingTopupReturns - REQ: " + req);
+      req.retryCountNext();
+      PrepaidTopupData10 data = req.getData();
+      //TODO falta implementar, no se sabe que hacer en este caso
+      return req;
       }
     };
   }

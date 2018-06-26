@@ -64,7 +64,7 @@ public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
 
-    System.out.println("Steps: " + remoteTopup.getData().getProcessorMetadata());
+    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
 
     CdtTransaction10 cdt = remoteTopup.getData().getCdtTransaction10();
 
