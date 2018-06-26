@@ -5,6 +5,7 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.faces.convert.BigDecimalConverter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -107,19 +108,39 @@ public class CalculationsHelper {
    * @return
    */
   public static NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
-    //TODO calcular el pcaMain desde el valor del balance
+    //https://www.pivotaltracker.com/story/show/158367667
+    if (balance == null) {
+      return null;
+    }
+    //por defecto debe ser 0
     NewAmountAndCurrency10 pcaMain = new NewAmountAndCurrency10(BigDecimal.valueOf(0L));
+    //solamente se debe calcular el pca si el saldo es mayor a 0
+    if (balance.getValue().compareTo(BigDecimal.ZERO) > 0) {
+      BigDecimal pca = calculatePca(balance.getValue());
+      if (pca.compareTo(BigDecimal.ZERO) > 0) {
+        pcaMain.setValue(pca);
+      }
+    }
     return pcaMain;
   }
 
   /**
    *
    * @param balance
+   * @param pcaMain
    * @return
    */
-  public static NewAmountAndCurrency10 calculatePcaSecondary(NewAmountAndCurrency10 balance) {
-    //TODO calcular el pcaSecondary desde el valor del balance
+  public static NewAmountAndCurrency10 calculatePcaSecondary(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain) {
+    //https://www.pivotaltracker.com/story/show/158367667
+    if (balance == null || pcaMain == null) {
+      return null;
+    }
+    //por defecto debe ser 0
     NewAmountAndCurrency10 pcaSecondary = new NewAmountAndCurrency10(BigDecimal.valueOf(0d).setScale(2, RoundingMode.CEILING), CodigoMoneda.USA_USN);
+    //solamente se debe calcular el pca si el saldo es mayor a 0 y el pcaMain es mayor a 0
+    if (balance.getValue().compareTo(BigDecimal.ZERO) > 0 && pcaMain.getValue().compareTo(BigDecimal.ZERO) > 0) {
+      pcaSecondary.setValue(calculateEed(balance.getValue()));
+    }
     return pcaSecondary;
   }
 }

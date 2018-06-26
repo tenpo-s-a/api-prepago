@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
-import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertaMovimiento;
+import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement;
 
 /**
  * @autor vutreras
@@ -20,16 +20,15 @@ import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_mov
 public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_buscar_movimientos_v10";
-  private static final String TABLE_NAME = SCHEMA + ".prp_movimiento";
 
   @BeforeClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
   }
 
   @AfterClass
   public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s", TABLE_NAME));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
   }
 
   /**
@@ -119,7 +118,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
   }
 
   @Test
-  public void findMovements() throws SQLException {
+  public void searchMovements() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -133,7 +132,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> mapMov1 = insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMov1 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     {
       Long id = numberUtils.toLong(mapMov1.get("_id"));
@@ -166,7 +165,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     indnorcor = 1;
     tipofac = 3000;
 
-    Map<String, Object> mapMov2 = insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMov2 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     {
       Long id = numberUtils.toLong(mapMov2.get("_id"));
@@ -214,7 +213,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
   }
 
   @Test
-  public void findMovements_tipoMovimiento() throws SQLException {
+  public void searchMovements_tipoMovimiento() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -222,14 +221,14 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     Long idPrepaidUser = (Long)mapCard.get("id_usuario");
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
-    String estado = "PRUEBA1";
+    String estado = getRandomString(8);
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
-    insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null);
 
@@ -259,7 +258,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
   }
 
   @Test
-  public void findMovements_estado() throws SQLException {
+  public void searchMovements_estado() throws SQLException {
 
     Map<String, Object> mapCard = insertCard("ACTIVA");
 
@@ -267,14 +266,14 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     Long idPrepaidUser = (Long)mapCard.get("id_usuario");
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
-    String estado = "PRUEBA1";
+    String estado = getRandomString(8);
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
-    insertaMovimiento(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
 
     Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null);
 

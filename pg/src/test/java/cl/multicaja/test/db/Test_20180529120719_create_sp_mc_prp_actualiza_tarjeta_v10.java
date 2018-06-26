@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,12 +19,16 @@ import static cl.multicaja.test.db.Test_20180514105358_create_sp_mc_prp_buscar_t
 public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_tarjeta_v10";
-  private static final String TABLE_NAME = SCHEMA + ".prp_tarjeta";
+
   @BeforeClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("DELETE from %s", TABLE_NAME));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
   }
 
+  @AfterClass
+  public static void afterClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
+  }
 
   public static Object[] buildUpdateCard(Long idTarjeta,Long idUsuario,String oldState, String newState) throws SQLException {
 
@@ -46,7 +51,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   }
 
   @Test
-  public  void testUpdateOk() throws SQLException {
+  public  void updateCardOk() throws SQLException {
 
     Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
 
@@ -62,7 +67,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   }
 
   @Test
-  public  void testUpdateIdTarjetaNull() throws SQLException {
+  public  void updateCardIdTarjetaNull() throws SQLException {
 
     Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard(null,(Long) card.get("id_usuario"),(String) card.get("estado"),"CREATED");
@@ -74,7 +79,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
   }
 
   @Test
-  public  void testUpdateIdUsuarioNull() throws SQLException {
+  public  void updateCardIdUsuarioNull() throws SQLException {
 
     Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard((Long) card.get("id"),null,(String) card.get("estado"),"CREATED");
@@ -82,11 +87,10 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser MC002", "MC002", resp.get("_error_code"));
-
   }
 
   @Test
-  public  void testUpdateEstadoNull() throws SQLException {
+  public  void updateCardEstadoNull() throws SQLException {
 
     Map<String,Object> card = insertEmptyCard(getRandomString(10),"PEND");
     Object[] params = buildUpdateCard((Long) card.get("id"),(Long) card.get("id_usuario"),null,"CREATED");
@@ -94,7 +98,5 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser MC003", "MC003", resp.get("_error_code"));
-
   }
-
 }
