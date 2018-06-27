@@ -57,6 +57,7 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
       ObjectMapper mapper = new ObjectMapper();
       mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SnakeCaseStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
       List<PrepaidTransaction10> prepaidTransaction10List = mapper.readValue(respHttp.getResp(), new TypeReference<List<PrepaidTransaction10>>(){});
+      System.out.println(respHttp.getResp());
       Assert.assertNotNull("Response Not Null",prepaidTransaction10List);
       Assert.assertEquals("ArrayList.size() = 1",1,prepaidTransaction10List.size());
       Assert.assertEquals("Debe  coincidir el monto ",amount,prepaidTransaction10List.get(0).getAmountPrimary().getValue().intValue());

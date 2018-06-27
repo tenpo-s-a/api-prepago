@@ -1004,12 +1004,30 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       String sDate = (String) movimientosDTO.getFecfac().get("valueDate");
       String sFormat = (String) movimientosDTO.getFecfac().get("format");
       transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
-      transaction10.setDescription(movimientosDTO.getDestipfac());
+      transaction10.setInvoiceDescription(movimientosDTO.getDestipfac());
+      transaction10.setExchangeRate(movimientosDTO.getCmbapli());
+      transaction10.setCommerceCode(movimientosDTO.getCodcom());
+      transaction10.setEconomicConcept1(movimientosDTO.getCodconeco1());
+      transaction10.setEconomicConcept2(movimientosDTO.getCodconeco2());
+      transaction10.setDescEconomicConcept1(movimientosDTO.getDesconeco1());
+      transaction10.setDescEconomicConcept2(movimientosDTO.getDesconeco2());
+      transaction10.setAmountDescriptionType1(movimientosDTO.getDesimp1());
+      transaction10.setAmountDescriptionType2(movimientosDTO.getDesimp2());
+      transaction10.setApplicationAmount1(movimientosDTO.getImpapleco1());
+      transaction10.setApplicationAmount2(movimientosDTO.getImpapleco2());
+      transaction10.setGrossValue1(movimientosDTO.getImpbrueco1());
+      transaction10.setGrossValue2(movimientosDTO.getImpbrueco2());
+      transaction10.setInvoiceDescription(movimientosDTO.getDestipfac());
+      transaction10.setExtractAccount(movimientosDTO.getNumextcta());
+      transaction10.setExtractTransaction(movimientosDTO.getNummovext());
+      transaction10.setInvoiceType(movimientosDTO.getTipofac());
+
       // New Ammount And Curreycy Principal
       NewAmountAndCurrency10 newAmountAndCurrency10 = new NewAmountAndCurrency10();
       newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamon());
       newAmountAndCurrency10.setValue(movimientosDTO.getImporte());
       transaction10.setAmountPrimary(newAmountAndCurrency10);
+
       // New Ammount And Curreycy Secondary
       newAmountAndCurrency10 = new NewAmountAndCurrency10();
       newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamondiv());
