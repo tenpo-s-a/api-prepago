@@ -255,16 +255,27 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User registerUser() throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)));
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
+  /**
+   * pre-registra un usuario y además lo deja en algun estado
+   * @return
+   * @throws Exception
+   */
 
+  public User registerUser(UserStatus status) throws Exception {
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)),status);
+  }
   public User registerUser(String password) throws Exception {
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+  }
+  public User registerUser(String password,UserStatus status) throws Exception {
     User user = preRegisterUser();
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
     user = getUsersEJBBean10().fillUser(user);
-    user.setGlobalStatus(UserStatus.ENABLED);
+    user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
