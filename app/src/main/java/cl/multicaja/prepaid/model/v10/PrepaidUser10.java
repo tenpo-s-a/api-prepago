@@ -19,12 +19,11 @@ public class PrepaidUser10 extends BaseModel {
   private PrepaidUserStatus status;
   private Timestamps timestamps;
   private PrepaidUserLevel userLevel;
-
   @JsonIgnore
   private PrepaidBalanceInfo10 balance;
-
   @JsonIgnore
   private Long balanceExpiration;
+  private boolean hasPrepaidCard;
 
   public PrepaidUser10() {
     super();
@@ -92,6 +91,14 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setUserLevel(PrepaidUserLevel userLevel) {
     this.userLevel = userLevel;
+  }
+
+  public boolean isHasPrepaidCard() {
+    return hasPrepaidCard;
+  }
+
+  public void setHasPrepaidCard(boolean hasPrepaidCard) {
+    this.hasPrepaidCard = hasPrepaidCard;
   }
 
   @Override
