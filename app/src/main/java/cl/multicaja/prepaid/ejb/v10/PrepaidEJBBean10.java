@@ -930,6 +930,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception {
+
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
@@ -951,11 +952,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtiene el nivel del usuario
     prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
 
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED,
+      PrepaidCardStatus.PENDING);
+
+    prepaidUser.setHasPrepaidCard(prepaidCard != null);
+
     return prepaidUser;
   }
 
   @Override
   public PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception {
+
     if(rut == null || Integer.valueOf(0).equals(rut)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
@@ -976,6 +985,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtiene el nivel del usuario
     prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED,
+      PrepaidCardStatus.PENDING);
+
+    prepaidUser.setHasPrepaidCard(prepaidCard != null);
 
     return prepaidUser;
   }
