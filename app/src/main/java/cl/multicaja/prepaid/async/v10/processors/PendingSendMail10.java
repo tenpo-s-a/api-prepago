@@ -87,8 +87,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
             //TODO el passwordOwner quizas debe externalizarse
             String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
+            Map<String, Object> templateData = new HashMap<>();
+            templateData.put("cliente", data.getUser().getName() + " " + data.getUser().getLastname_1());
+
             EmailBody emailBody = new EmailBody();
-            emailBody.setTemplateData("{ 'cliente' : '"+data.getUser().getName()+" "+data.getUser().getLastname_1()+"' }");
+            emailBody.setTemplateData(templateData);
 
             emailBody.setTemplate(emailParams.getTemplateData());
             emailBody.setAddress(data.getUser().getEmail().getValue());

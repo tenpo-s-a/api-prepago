@@ -909,6 +909,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtiene el nivel del usuario
     prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
 
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED,
+      PrepaidCardStatus.PENDING);
+
+    prepaidUser.setHasPrepaidCard(prepaidCard != null);
+
     return prepaidUser;
   }
 
