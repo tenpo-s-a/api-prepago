@@ -23,7 +23,7 @@ public interface PrepaidEJB10 {
 
   List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
 
-  PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest);
+  PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception;
 
   PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId);
 

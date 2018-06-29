@@ -17,10 +17,7 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.ParamValue;
-import cl.multicaja.users.model.v10.Timestamps;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
+import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -473,8 +470,53 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) {
-    return null;
+  public PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception {
+
+    if(signupRequest == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE);
+    }
+    if(signupRequest.getRut() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Rut"));
+    }
+    if(StringUtils.isAllBlank(signupRequest.getEmail())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Email"));
+    }
+
+    User user = getUsersEJB10().getUserByRut(headers,signupRequest.getRut());
+    if(user == null) {
+      user = getUsersEJB10().getUserByEmail(headers,signupRequest.getEmail());
+      if(user != null){
+        throw new ValidationException(CORREO_YA_UTILIZADO);
+      }
+    }else{
+      if(!user.getEmail().getValue().equals(signupRequest.getEmail()) && user.getEmail().getStatus() == EmailStatus.VERIFIED) {
+        throw new ValidationException(CORREO_NO_COINCIDE);
+      }
+      else if (user.getGlobalStatus() == UserStatus.DELETED || user.getGlobalStatus() == UserStatus.LOCKED || user.getGlobalStatus() == UserStatus.DISABLED) {
+        throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+      }
+    }
+
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers,signupRequest.getRut());
+    if(prepaidUser10 != null) {
+      throw new ValidationException(CLIENTE_YA_TIENE_PREPAGO);
+    }
+
+    SignUp signUp = getUsersEJB10().signUpUser(headers,signupRequest.getRut(),signupRequest.getEmail());
+    //TODO: Revisar proceso.
+    PrepaidUserSignup10 prepaidUserSignup10 = new PrepaidUserSignup10();
+    prepaidUserSignup10.setId(signUp.getId());
+    prepaidUserSignup10.setUserId(signUp.getUserId());
+    prepaidUserSignup10.setName(signUp.getName());
+    prepaidUserSignup10.setLastname_1(signUp.getLastname_1());
+    prepaidUserSignup10.setEmail(signUp.getEmail());
+    prepaidUserSignup10.setRut(signUp.getRut());
+    prepaidUserSignup10.setMustAcceptTermsAndConditions(Boolean.TRUE);
+    prepaidUserSignup10.setMustChoosePassword(Boolean.TRUE);
+    prepaidUserSignup10.setMustValidateCellphone(Boolean.TRUE);
+    prepaidUserSignup10.setMustValidateEmail(Boolean.TRUE);
+    return prepaidUserSignup10;
+
   }
 
   @Override

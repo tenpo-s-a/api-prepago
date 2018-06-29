@@ -83,9 +83,9 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/signup")
-  public Response initSignup(NewPrepaidUserSignup10 signupRequest, @Context HttpHeaders headers) {
-    //TODO falta implementar
-    return Response.ok().status(201).build();
+  public Response initSignup(NewPrepaidUserSignup10 signupRequest, @Context HttpHeaders headers) throws Exception {
+    PrepaidUserSignup10 prepaidUserSignup10 = this.prepaidEJBBean10.initUserSignup(headersToMap(headers),signupRequest);
+    return Response.ok(prepaidUserSignup10).status(201).build();
   }
 
   @GET
