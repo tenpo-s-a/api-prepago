@@ -1,14 +1,19 @@
 package cl.multicaja.prepaid.resources.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,11 +21,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static cl.multicaja.core.model.Errors.CLIENTE_BLOQUEADO_O_BORRADO;
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 
 /**
  * @author vutreras
@@ -67,7 +77,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @POST
   @Path("/users/reset")
-  public Response usersReset(Map<String, Object> body) throws Exception {
+  public Response usersReset(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
 
     validate();
 
@@ -139,5 +149,51 @@ public final class TestHelpersResource10 extends BaseResource {
   private void jdbcExecute(JdbcTemplate jdbcTemplate, String sql) {
 	  log.info("Ejecutando sql: " + sql);
     jdbcTemplate.execute(sql);
+  }
+
+  @POST
+  @Path("/user")
+  public Response createUser(User user, @Context HttpHeaders headers) throws Exception {
+
+	  Map<String, Object> mapHeaders = headersToMap(headers);
+
+    SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
+
+    user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+
+    return Response.ok(user).status(200).build();
+  }
+
+  @POST
+  @Path("/prepaiduser/{userId}")
+  public Response createPrepaidUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    user = usersEJBBean10.fillUser(user);
+
+    user.setGlobalStatus(UserStatus.ENABLED);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+
+    user = usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(user.getId());
+    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
+
+    return Response.ok(prepaidUser).status(200).build();
   }
 }
