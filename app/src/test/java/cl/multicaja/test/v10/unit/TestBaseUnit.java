@@ -221,7 +221,7 @@ public class TestBaseUnit extends TestApiBase {
    *
    * Ejecuta signUp con datos aleatorios
    * */
-  public SignUp getSignup() throws Exception {
+  public SignUp signupUser() throws Exception {
     String email = getUniqueEmail();
     Integer rut = getUniqueRutNumber();
     return getUsersEJBBean10().signUpUser(null, rut, email);
@@ -257,6 +257,7 @@ public class TestBaseUnit extends TestApiBase {
   public User registerUser() throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
+
   /**
    * pre-registra un usuario y además lo deja en algun estado
    * @return
@@ -266,9 +267,24 @@ public class TestBaseUnit extends TestApiBase {
   public User registerUser(UserStatus status) throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),status);
   }
+
+  /**
+   *
+   * @param password
+   * @return
+   * @throws Exception
+   */
   public User registerUser(String password) throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
+
+  /**
+   *
+   * @param password
+   * @param status
+   * @return
+   * @throws Exception
+   */
   public User registerUser(String password,UserStatus status) throws Exception {
     User user = preRegisterUser();
     user.setName(null);
@@ -356,8 +372,6 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
     return prepaidCard;
   }
-
-
 
   /**
    * CREA TARJETA ESTADO PENDIENTE

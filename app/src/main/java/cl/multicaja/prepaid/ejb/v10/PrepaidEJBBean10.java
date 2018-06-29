@@ -526,6 +526,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
