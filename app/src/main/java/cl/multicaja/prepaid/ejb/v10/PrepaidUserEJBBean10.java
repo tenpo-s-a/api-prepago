@@ -321,7 +321,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
     NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
 
-    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, updated);
+    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, CalculationsHelper.getUsdValue(), CalculationsHelper.getUsdMultiplier(), updated);
   }
 
   @Override

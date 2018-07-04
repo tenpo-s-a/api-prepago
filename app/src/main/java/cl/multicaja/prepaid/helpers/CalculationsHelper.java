@@ -40,6 +40,7 @@ public class CalculationsHelper {
 
   /**
    * Calcula comision en la formula: MAX(100; 0,5% * amount) + IVA
+   *
    * @param amount
    * @param feePercentage
    * @return
@@ -94,12 +95,20 @@ public class CalculationsHelper {
   }
 
   /**
-   *
    * @return
    */
   public static Integer getUsdValue() {
     //TODO quizas se saca de algun servicio externo
     return 645;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static Double getUsdMultiplier() {
+    //TODO quizas se saca de algun servicio externo
+    return 1.0475;
   }
 
   /**
