@@ -132,8 +132,8 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{userId}/simulation/topup")
   public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    SimulationTopup10 simulationTopup10 = this.prepaidEJBBean10.topupSimulation(headersToMap(headers), userIdMc, simulationNew);
-    return Response.ok(simulationTopup10).build();
+    SimulationTopupGroup10 simulationTopupGroup10 = this.prepaidEJBBean10.topupSimulationGroup(headersToMap(headers), userIdMc, simulationNew);
+    return Response.ok(simulationTopupGroup10).build();
   }
 
   @POST

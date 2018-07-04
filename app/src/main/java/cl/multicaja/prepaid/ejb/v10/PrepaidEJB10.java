@@ -65,15 +65,23 @@ public interface PrepaidEJB10 {
   void addVoucherData(IPrepaidTransaction10 transaction) throws Exception;
 
   /**
-   * Calculadora de carga
    *
    * @param headers
-   * @param userIdMc id de usuario multicaja
+   * @param prepaidUser10
    * @param simulationNew
    * @return
    * @throws Exception
    */
-  SimulationTopup10 topupSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
+  SimulationTopup10 topupSimulation(Map<String, Object> headers, PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew)throws Exception;
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @param simulationNew
+   * @return
+   * @throws Exception
+   */
+  SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
   /**
    * Calculadora de retiro
