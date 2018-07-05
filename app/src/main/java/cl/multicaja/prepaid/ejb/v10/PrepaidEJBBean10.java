@@ -1098,4 +1098,79 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return listTransaction10;
   }
 
+  //TODO: Revisar implementacion con las historias correspondientes
+  @Override
+  public void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if(user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
+      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE);
+
+    if(prepaidCard != null) {
+      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.LOCKED);
+      //TODO: Bloquear tarjeta en tecnocom
+    }
+  }
+
+  //TODO: Revisar implementacion con las historias correspondientes
+  @Override
+  public void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if (userIdMc == null || Long.valueOf(0).equals(userIdMc)) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if (user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if (prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if (!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())) {
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.LOCKED);
+
+    if (prepaidCard != null) {
+      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.ACTIVE);
+      //TODO: Desbloquear tarjeta en tecnocom
+    }
+  }
 }
