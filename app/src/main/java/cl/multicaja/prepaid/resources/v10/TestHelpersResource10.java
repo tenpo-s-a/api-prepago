@@ -76,6 +76,7 @@ public final class TestHelpersResource10 extends BaseResource {
   @GET
   @Path("/send/test")
   public Response sendEmailAsynTest(@QueryParam("address") String address, @QueryParam("withAttachment") String withAttachment) throws Exception {
+    validate();
     return Response.status(200).entity(this.mailEJBBean10.sendEmailAsynTest(address, numberUtils.toBoolean(withAttachment, false))).build();
   }
 
@@ -159,29 +160,26 @@ public final class TestHelpersResource10 extends BaseResource {
   @Path("/user")
   public Response createUser(User user, @Context HttpHeaders headers) throws Exception {
 
+    validate();
+
 	  Map<String, Object> mapHeaders = headersToMap(headers);
 
     SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
 
-    User userTmp = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
-
-    usersEJBBean10.updateUser(userTmp, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
-
-    user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
-
-    return Response.ok(user).status(200).build();
+    return this.updateUser(user, signUp.getUserId(), headers);
   }
 
   @PUT
   @Path("/user/{userId}")
   public Response updateUser(User user, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
 
-	  log.info("userIdMc: " + userIdMc);
+    validate();
+
+    user.setId(userIdMc);
+
 	  log.info("Before user: " + user);
 
     Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User userTmp = usersEJBBean10.getUserById(mapHeaders, userIdMc);
 
     if (StringUtils.isNotBlank(user.getName()) && StringUtils.isNotBlank(user.getLastname_1())) {
 
@@ -199,7 +197,16 @@ public final class TestHelpersResource10 extends BaseResource {
       user.setNameStatus(NameStatus.VERIFIED);
     }
 
-    usersEJBBean10.updateUser(userTmp, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+    if (user.getRut() != null && user.getRut().getStatus() == null) {
+      user.getRut().setStatus(RutStatus.UNVERIFIED);
+    }
+
+    if (user.getEmail() != null && user.getEmail().getStatus() == null) {
+      user.getEmail().setStatus(EmailStatus.UNVERIFIED);
+    }
+
+    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
+                            user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
 
     user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
 
@@ -211,6 +218,8 @@ public final class TestHelpersResource10 extends BaseResource {
   @POST
   @Path("/prepaiduser/{userId}")
   public Response createPrepaidUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 
