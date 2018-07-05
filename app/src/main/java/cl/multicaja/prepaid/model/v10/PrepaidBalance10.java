@@ -14,19 +14,17 @@ public class PrepaidBalance10 extends BaseModel {
   private NewAmountAndCurrency10 pcaMain;
   private NewAmountAndCurrency10 pcaSecondary;
   private Integer usdValue;
-  private Double usdMultiplier;
   private boolean updated;
 
   public PrepaidBalance10() {
     super();
   }
 
-  public PrepaidBalance10(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain, NewAmountAndCurrency10 pcaSecondary, Integer usdValue, Double usdMultiplier, boolean updated) {
+  public PrepaidBalance10(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain, NewAmountAndCurrency10 pcaSecondary, Integer usdValue, boolean updated) {
     this.balance = balance;
     this.pcaMain = pcaMain;
     this.pcaSecondary = pcaSecondary;
     this.usdValue = usdValue;
-    this.usdMultiplier = usdMultiplier;
     this.updated = updated;
   }
 
@@ -60,14 +58,6 @@ public class PrepaidBalance10 extends BaseModel {
 
   public void setUsdValue(Integer usdValue) {
     this.usdValue = usdValue;
-  }
-
-  public Double getUsdMultiplier() {
-    return usdMultiplier;
-  }
-
-  public void setUsdMultiplier(Double usdMultiplier) {
-    this.usdMultiplier = usdMultiplier;
   }
 
   public boolean isUpdated() {

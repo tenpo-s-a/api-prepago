@@ -104,15 +104,6 @@ public class CalculationsHelper {
 
   /**
    *
-   * @return
-   */
-  public static Double getUsdMultiplier() {
-    //TODO quizas se saca de algun servicio externo
-    return 1.0475;
-  }
-
-  /**
-   *
    * @param balance
    * @return
    */
