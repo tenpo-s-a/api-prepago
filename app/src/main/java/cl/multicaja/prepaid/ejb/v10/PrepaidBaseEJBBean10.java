@@ -13,12 +13,16 @@ import cl.multicaja.users.utils.ParametersUtil;
  */
 public abstract class PrepaidBaseEJBBean10 {
 
-  protected NumberUtils numberUtils = NumberUtils.getInstance();
-  protected ParametersUtil parametersUtil = ParametersUtil.getInstance();
-  private ConfigUtils configUtils;
+  protected static NumberUtils numberUtils = NumberUtils.getInstance();
 
-  private DBUtils dbUtils;
-  private DateUtils dateUtils;
+  protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
+
+  private static ConfigUtils configUtils;
+
+  private static DBUtils dbUtils;
+
+  private static DateUtils dateUtils;
+
   public final static String APP_NAME = "prepaid.appname";
 
   public TecnocomService getTecnocomService() {
@@ -29,37 +33,36 @@ public abstract class PrepaidBaseEJBBean10 {
    *
    * @return
    */
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
+  public static ConfigUtils getConfigUtils() {
+    if (configUtils == null) {
+      configUtils = new ConfigUtils("api-prepaid");
     }
-    return this.configUtils;
+    return configUtils;
   }
 
   /**
    *
    * @return
    */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
+  public static DBUtils getDbUtils() {
+    if (dbUtils == null) {
+      dbUtils = new DBUtils(getConfigUtils());
     }
-    return this.dbUtils;
+    return dbUtils;
   }
 
   /**
    *
    * @return
    */
-  public String getSchema() {
-    return this.getConfigUtils().getProperty("schema");
+  public static String getSchema() {
+    return getConfigUtils().getProperty("schema");
   }
 
-  public DateUtils getDateUtils(){
-    if (this.dateUtils == null) {
-      this.dateUtils = new DateUtils();
+  public static DateUtils getDateUtils(){
+    if (dateUtils == null) {
+      dateUtils = new DateUtils();
     }
-    return this.dateUtils;
+    return dateUtils;
   }
-
 }

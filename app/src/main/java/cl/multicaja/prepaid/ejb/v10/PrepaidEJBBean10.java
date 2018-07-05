@@ -784,6 +784,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(prepaidUser10 == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
     prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
     SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
 
@@ -808,14 +809,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
+
     if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
       cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
-    }
-    else {
+    } else {
       cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
     }
+
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
     if(!cdtTransaction.isNumErrorOk()){
       /* Posibles errores:
       La carga supera el monto máximo de carga web
@@ -857,10 +860,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
+
     if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);
       simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));
     }
+
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
     simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
@@ -1014,7 +1019,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidUser;
   }
 
-  public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate) throws Exception {
+  @Override
+  public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate, Integer count) throws Exception {
 
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -1060,19 +1066,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
       throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     }
+
     Date _startDate;
     Date _endDate;
 
     if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
       _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),headers.get(Constants.HEADER_USER_TIMEZONE).toString());
       _endDate = new Date(System.currentTimeMillis());
-    }
-    else {
+    } else {
       _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");
       _endDate = getDateUtils().dateStringToDate(endDate,"dd-MM-yyyy");
     }
+
     ConsultaMovimientosDTO consultaMovimientosDTO = this.getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
+
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
+
+    count = count != null ? count : -1;
+    int index = 0;
+
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
 
       PrepaidTransaction10 transaction10 = new PrepaidTransaction10();
@@ -1099,19 +1111,30 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       transaction10.setInvoiceType(movimientosDTO.getTipofac());
 
       // New Ammount And Curreycy Principal
-      NewAmountAndCurrency10 newAmountAndCurrency10 = new NewAmountAndCurrency10();
-      newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamon());
-      newAmountAndCurrency10.setValue(movimientosDTO.getImporte());
-      transaction10.setAmountPrimary(newAmountAndCurrency10);
+      NewAmountAndCurrency10 amountPrimary = new NewAmountAndCurrency10();
+      amountPrimary.setCurrencyCode(movimientosDTO.getClamon());
+      amountPrimary.setValue(movimientosDTO.getImporte());
+      transaction10.setAmountPrimary(amountPrimary);
 
-      // New Ammount And Curreycy Secondary
-      newAmountAndCurrency10 = new NewAmountAndCurrency10();
-      newAmountAndCurrency10.setCurrencyCode(movimientosDTO.getClamondiv());
-      newAmountAndCurrency10.setValue(movimientosDTO.getImpdiv());
-      transaction10.setAmountSecondary(newAmountAndCurrency10);
+      if (movimientosDTO.getClamondiv() != null && movimientosDTO.getImpdiv() != null) {
+        // New Ammount And Curreycy Secondary
+        NewAmountAndCurrency10 amountSecondary = new NewAmountAndCurrency10();
+        amountSecondary.setCurrencyCode(movimientosDTO.getClamondiv());
+        amountSecondary.setValue(movimientosDTO.getImpdiv());
+        transaction10.setAmountSecondary(amountSecondary);
+      }
 
       listTransaction10.add(transaction10);
+
+      index++;
+
+      if (count > 0) {
+        if (index == count) {
+          break;
+        }
+      }
     }
+
     return listTransaction10;
   }
 
