@@ -155,27 +155,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
 
-    // Obtener Usuario
-    User user = this.getUsersEJB10().getUserByRut(headers, topupRequest.getRut());
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-    }
+    // Obtener usuario Multicaja
+    User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByRut(null, user.getRut().getValue());
-
-    if(prepaidUser == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
-    }
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
     //verifica el nivel del usuario
     prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user,prepaidUser);
@@ -301,27 +285,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
     }
 
-    // Obtener Usuario MC
-    User user = this.getUsersEJB10().getUserByRut(headers, withdrawRequest.getRut());
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-    }
+    // Obtener usuario Multicaja
+    User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByRut(null, user.getRut().getValue());
-
-    if(prepaidUser == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
-    }
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
     // Se verifica la clave
     ParamValue passwordParam = new ParamValue();
@@ -533,26 +501,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
-
-    if(user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-    }
+    User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    if(prepaidUser == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
-    }
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     // Obtener tarjeta
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
@@ -771,19 +723,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     this.validateSimulationNew10(userIdMc, simulationNew);
 
-    // Obtener Usuario MC
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
 
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    //obtener usuario prepago
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, user.getRut().getValue());
-
-    if(prepaidUser10 == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
     SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
@@ -879,19 +823,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     this.validateSimulationNew10(userIdMc, simulationNew);
 
-    // Obtener Usuario MC
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
 
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    //obtener usuario prepago
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, user.getRut().getValue());
-
-    if(prepaidUser10 == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
@@ -1027,26 +963,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
-
-    if(user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    if(!UserStatus.ENABLED.equals(user.getGlobalStatus())){
-      throw  new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-    }
+    User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    if(prepaidUser == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
-    }
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     // Obtener tarjeta
     PrepaidCard10 prepaidCard = this.getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
@@ -1136,6 +1056,89 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     return listTransaction10;
+  }
+
+  //TODO: Revisar implementacion con las historias correspondientes
+  @Override
+  public void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE);
+
+    if(prepaidCard != null) {
+      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.LOCKED);
+      //TODO: Bloquear tarjeta en tecnocom
+    }
+  }
+
+  //TODO: Revisar implementacion con las historias correspondientes
+  @Override
+  public void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if (userIdMc == null || Long.valueOf(0).equals(userIdMc)) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.LOCKED);
+
+    if (prepaidCard != null) {
+      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.ACTIVE);
+      //TODO: Desbloquear tarjeta en tecnocom
+    }
+  }
+
+  private User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if (user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+    return user;
+  }
+
+  private User getUserMcByRut(Map<String, Object> headers, Integer rut) throws Exception {
+    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+
+    if (user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
+    return user;
+  }
+
+  private PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {
+    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if (prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    if (!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())) {
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+    return prepaidUser;
   }
 
 }

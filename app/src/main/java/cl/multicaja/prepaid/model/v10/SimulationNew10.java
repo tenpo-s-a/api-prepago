@@ -9,7 +9,6 @@ public class SimulationNew10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
 
-  @JsonIgnore
   private TransactionOriginType paymentMethod;
 
   public SimulationNew10(){

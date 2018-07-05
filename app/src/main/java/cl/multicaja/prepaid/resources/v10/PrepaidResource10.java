@@ -151,4 +151,18 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(transaction10List).build();
   }
 
+  @PUT
+  @Path("/{userId}/card/lock")
+  public Response lockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.lockPrepaidCard(headersToMap(headers), userIdMc);
+    return Response.noContent().build();
+  }
+
+  @PUT
+  @Path("/{userId}/card/unlock")
+  public Response unlockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.unlockPrepaidCard(headersToMap(headers), userIdMc);
+    return Response.noContent().build();
+  }
+
 }

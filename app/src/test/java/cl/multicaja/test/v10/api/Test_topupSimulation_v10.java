@@ -57,7 +57,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       simulationNew.setAmount(amount);
       simulationNew.setPaymentMethod(null);
 
-      HttpResponse respHttp = topupSimulation(1L, simulationNew);
+      HttpResponse respHttp = topupSimulation(Long.MAX_VALUE, simulationNew);
 
       BadRequestException vex = respHttp.toObject(BadRequestException.class);
 

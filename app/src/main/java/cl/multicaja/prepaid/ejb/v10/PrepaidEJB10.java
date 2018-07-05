@@ -124,4 +124,20 @@ public interface PrepaidEJB10 {
    */
   PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @throws Exception
+   */
+  void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @throws Exception
+   */
+  void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
+
 }

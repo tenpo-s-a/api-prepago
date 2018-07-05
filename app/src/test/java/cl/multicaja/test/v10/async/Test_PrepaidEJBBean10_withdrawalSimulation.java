@@ -2,6 +2,7 @@ package cl.multicaja.test.v10.async;
 
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 import static cl.multicaja.core.model.Errors.SALDO_INSUFICIENTE_$VALUE;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
@@ -52,12 +54,12 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       try {
 
-        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().withdrawalSimulation(null, Long.MAX_VALUE, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
+      } catch(NotFoundException vex) {
+        Assert.assertEquals("debe ser error de validacion de parametros", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
       }
     }
     {
