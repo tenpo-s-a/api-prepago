@@ -2,6 +2,7 @@ package cl.multicaja.test.v10.async;
 
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -40,7 +41,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, null, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, null, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -57,12 +58,12 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulationGroup(null, 1L, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, Long.MAX_VALUE, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
+      } catch(NotFoundException vex) {
+        Assert.assertEquals("debe ser error de validacion de parametros", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
       }
     }
     {
@@ -205,14 +206,14 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
-    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupPOS().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupPOS().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
-    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
-    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
   }
 
   @Test
