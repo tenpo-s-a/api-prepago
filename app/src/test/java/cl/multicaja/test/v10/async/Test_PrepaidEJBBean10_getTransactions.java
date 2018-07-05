@@ -42,7 +42,7 @@ public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
     inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    List<PrepaidTransaction10> transaction10List =getPrepaidEJBBean10().getTransactions(getDefaultHeaders(),user.getId(),null,null);
+    List<PrepaidTransaction10> transaction10List =getPrepaidEJBBean10().getTransactions(getDefaultHeaders(),user.getId(),null,null, null);
     Assert.assertNotNull("List<PrepaidTransaction10> Not Null ",transaction10List);
     System.out.println(transaction10List.size());
     Assert.assertEquals("Size = a 2", 2,transaction10List.size() );
@@ -51,7 +51,7 @@ public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
 
   @Test(expected = BadRequestException.class)
   public void getTransacctionsParamsError() throws Exception{
-    getPrepaidEJBBean10().getTransactions(null,null,null,null);
+    getPrepaidEJBBean10().getTransactions(null,null,null,null, null);
   }
 
 }

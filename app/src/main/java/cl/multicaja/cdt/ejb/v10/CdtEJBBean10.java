@@ -29,13 +29,13 @@ import static cl.multicaja.core.model.Errors.*;
 @Stateless
 @LocalBean
 @TransactionManagement(value=TransactionManagementType.CONTAINER)
-public class CdtEJBBean10 implements CdtEJB10{
+public class CdtEJBBean10 implements CdtEJB10 {
 
   private static Log log = LogFactory.getLog(CdtEJBBean10.class);
 
-  private NumberUtils numberUtils = NumberUtils.getInstance();
-  private ConfigUtils configUtils;
-  private DBUtils dbUtils;
+  private static NumberUtils numberUtils = NumberUtils.getInstance();
+  private static ConfigUtils configUtils;
+  private static DBUtils dbUtils;
 
   private final String SP_CARGA_FASES_MOVIMIENTOS  = ".mc_cdt_carga_fases_movimientos_v10";
   private final String SP_CREA_MOVIMIENTO_CUENTA = ".mc_cdt_crea_movimiento_cuenta_v10";
@@ -44,30 +44,30 @@ public class CdtEJBBean10 implements CdtEJB10{
    *
    * @return
    */
-  public ConfigUtils getConfigUtils() {
-    if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-prepaid");
+  public static ConfigUtils getConfigUtils() {
+    if (configUtils == null) {
+      configUtils = new ConfigUtils("api-prepaid");
     }
-    return this.configUtils;
+    return configUtils;
   }
 
   /**
    *
    * @return
    */
-  public DBUtils getDbUtils() {
-    if (this.dbUtils == null) {
-      this.dbUtils = new DBUtils(this.getConfigUtils());
+  public static DBUtils getDbUtils() {
+    if (dbUtils == null) {
+      dbUtils = new DBUtils(getConfigUtils());
     }
-    return this.dbUtils;
+    return dbUtils;
   }
 
   /**
    *
    * @return
    */
-  public String getSchema() {
-    return this.getConfigUtils().getProperty("schema.cdt");
+  public static String getSchema() {
+    return getConfigUtils().getProperty("schema.cdt");
   }
 
   @Override

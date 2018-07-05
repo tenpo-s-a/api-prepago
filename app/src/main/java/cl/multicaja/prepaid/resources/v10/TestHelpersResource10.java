@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -62,6 +63,9 @@ public final class TestHelpersResource10 extends BaseResource {
 	@EJB
   private MailEJBBean10 mailEJBBean10;
 
+	@EJB
+  private DataEJBBean10 dataEJBBean10;
+
 	private void validate() {
     if (ConfigUtils.isEnvProduction()) {
       throw new SecurityException("Este metodo no puede ser ejecutado en un ambiente de produccion");
@@ -72,6 +76,7 @@ public final class TestHelpersResource10 extends BaseResource {
   @GET
   @Path("/send/test")
   public Response sendEmailAsynTest(@QueryParam("address") String address, @QueryParam("withAttachment") String withAttachment) throws Exception {
+    validate();
     return Response.status(200).entity(this.mailEJBBean10.sendEmailAsynTest(address, numberUtils.toBoolean(withAttachment, false))).build();
   }
 
@@ -155,11 +160,57 @@ public final class TestHelpersResource10 extends BaseResource {
   @Path("/user")
   public Response createUser(User user, @Context HttpHeaders headers) throws Exception {
 
+    validate();
+
 	  Map<String, Object> mapHeaders = headersToMap(headers);
 
     SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
 
-    user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+    return this.updateUser(user, signUp.getUserId(), headers);
+  }
+
+  @PUT
+  @Path("/user/{userId}")
+  public Response updateUser(User user, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    user.setId(userIdMc);
+
+	  log.info("Before user: " + user);
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    if (StringUtils.isNotBlank(user.getName()) && StringUtils.isNotBlank(user.getLastname_1())) {
+
+      if (StringUtils.isBlank(user.getLastname_2())) {
+        user.setLastname_2(".");
+      }
+
+      PersonalData personalData = new PersonalData();
+      personalData.setName(user.getName());
+      personalData.setLastname_1(user.getLastname_1());
+      personalData.setLastname_2(user.getLastname_2());
+
+      dataEJBBean10.updatePersonalData(mapHeaders, userIdMc, personalData);
+
+      user.setNameStatus(NameStatus.VERIFIED);
+    }
+
+    if (user.getRut() != null && user.getRut().getStatus() == null) {
+      user.getRut().setStatus(RutStatus.UNVERIFIED);
+    }
+
+    if (user.getEmail() != null && user.getEmail().getStatus() == null) {
+      user.getEmail().setStatus(EmailStatus.UNVERIFIED);
+    }
+
+    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
+                            user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    log.info("After user: " + user);
 
     return Response.ok(user).status(200).build();
   }
@@ -167,6 +218,8 @@ public final class TestHelpersResource10 extends BaseResource {
   @POST
   @Path("/prepaiduser/{userId}")
   public Response createPrepaidUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 

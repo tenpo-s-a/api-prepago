@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -12,16 +13,18 @@ public class PrepaidBalance10 extends BaseModel {
   private NewAmountAndCurrency10 balance;
   private NewAmountAndCurrency10 pcaMain;
   private NewAmountAndCurrency10 pcaSecondary;
+  private Integer usdValue;
   private boolean updated;
 
   public PrepaidBalance10() {
     super();
   }
 
-  public PrepaidBalance10(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain, NewAmountAndCurrency10 pcaSecondary, boolean updated) {
+  public PrepaidBalance10(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain, NewAmountAndCurrency10 pcaSecondary, Integer usdValue, boolean updated) {
     this.balance = balance;
     this.pcaMain = pcaMain;
     this.pcaSecondary = pcaSecondary;
+    this.usdValue = usdValue;
     this.updated = updated;
   }
 
@@ -47,6 +50,14 @@ public class PrepaidBalance10 extends BaseModel {
 
   public void setPcaSecondary(NewAmountAndCurrency10 pcaSecondary) {
     this.pcaSecondary = pcaSecondary;
+  }
+
+  public Integer getUsdValue() {
+    return usdValue;
+  }
+
+  public void setUsdValue(Integer usdValue) {
+    this.usdValue = usdValue;
   }
 
   public boolean isUpdated() {
