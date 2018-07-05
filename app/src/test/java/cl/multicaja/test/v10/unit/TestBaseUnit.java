@@ -257,7 +257,9 @@ public class TestBaseUnit extends TestApiBase {
   public User registerUser() throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
-
+  public User registerUserFirstTopup() throws Exception {
+    return registerUserFirstTopup(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+  }
   /**
    * pre-registra un usuario y además lo deja en algun estado
    * @return
@@ -278,6 +280,20 @@ public class TestBaseUnit extends TestApiBase {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
 
+  public User registerUserFirstTopup(String password,UserStatus status) throws Exception {
+    User user = preRegisterUser();
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
+    user = getUsersEJBBean10().fillUser(user);
+    user.setGlobalStatus(status);
+    user.getRut().setStatus(RutStatus.UNVERIFIED);
+    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setPassword(password);
+    user = updateUser(user);
+    return user;
+  }
   /**
    *
    * @param password
