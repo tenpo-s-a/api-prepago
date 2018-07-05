@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -61,6 +62,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
 	@EJB
   private MailEJBBean10 mailEJBBean10;
+
+	@EJB
+  private DataEJBBean10 dataEJBBean10;
 
 	private void validate() {
     if (ConfigUtils.isEnvProduction()) {
@@ -159,7 +163,47 @@ public final class TestHelpersResource10 extends BaseResource {
 
     SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
 
+    User userTmp = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+
+    usersEJBBean10.updateUser(userTmp, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
     user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+
+    return Response.ok(user).status(200).build();
+  }
+
+  @PUT
+  @Path("/user/{userId}")
+  public Response updateUser(User user, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+	  log.info("userIdMc: " + userIdMc);
+	  log.info("Before user: " + user);
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User userTmp = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if (StringUtils.isNotBlank(user.getName()) && StringUtils.isNotBlank(user.getLastname_1())) {
+
+      if (StringUtils.isBlank(user.getLastname_2())) {
+        user.setLastname_2(".");
+      }
+
+      PersonalData personalData = new PersonalData();
+      personalData.setName(user.getName());
+      personalData.setLastname_1(user.getLastname_1());
+      personalData.setLastname_2(user.getLastname_2());
+
+      dataEJBBean10.updatePersonalData(mapHeaders, userIdMc, personalData);
+
+      user.setNameStatus(NameStatus.VERIFIED);
+    }
+
+    usersEJBBean10.updateUser(userTmp, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    log.info("After user: " + user);
 
     return Response.ok(user).status(200).build();
   }
