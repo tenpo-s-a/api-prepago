@@ -21,6 +21,7 @@ import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omg.PortableInterceptor.USER_EXCEPTION;
 
 import javax.ejb.*;
 import javax.inject.Inject;
@@ -705,10 +706,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "simulationNew"));
     }
 
-    if(simulationNew.getPaymentMethod() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "paymentMethod"));
-    }
-
     if(simulationNew.getAmount() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
@@ -721,9 +718,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currencyCode"));
     }
   }
-
   @Override
-  public SimulationTopup10 topupSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
+  public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
     this.validateSimulationNew10(userIdMc, simulationNew);
 
@@ -732,6 +728,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
+    SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
+
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+    simulationTopupGroup10.setSimulationTopupWeb(topupSimulation(headers,prepaidUser10,simulationNew));
+
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
+    simulationTopupGroup10.setSimulationTopupPOS(topupSimulation(headers,prepaidUser10,simulationNew));
+
+    return simulationTopupGroup10;
+  }
+
+  @Override
+  public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
@@ -742,11 +753,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
-    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+      cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
+    }
+    else {
+      cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    }
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
-
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
     if(!cdtTransaction.isNumErrorOk()){
       /* Posibles errores:
       La carga supera el monto máximo de carga web
@@ -763,7 +777,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
+    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
@@ -788,6 +802,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
+    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+      calculatedAmount = calculatedAmount.add(OPENING_FEE);
+      simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));
+    }
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
     simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));

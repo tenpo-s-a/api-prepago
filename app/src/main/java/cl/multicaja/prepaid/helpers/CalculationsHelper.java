@@ -34,6 +34,8 @@ public class CalculationsHelper {
   public static final BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
   public static final BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
 
+  public static final BigDecimal OPENING_FEE = new BigDecimal(990);
+
   public static final double IVA = 1.19;
 
   public static final int MAX_AMOUNT_BY_USER = 500000;
