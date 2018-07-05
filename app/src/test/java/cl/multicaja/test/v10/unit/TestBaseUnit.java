@@ -275,7 +275,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User registerUser(String password) throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+    return registerUser(password ,UserStatus.ENABLED);
   }
 
   /**
