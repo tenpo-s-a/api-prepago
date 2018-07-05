@@ -4,10 +4,7 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
-import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.RutUtils;
-import cl.multicaja.core.utils.Utils;
+import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -21,13 +18,14 @@ import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.PortableInterceptor.USER_EXCEPTION;
 
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.text.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -1042,6 +1040,44 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         amountSecondary.setCurrencyCode(movimientosDTO.getClamondiv());
         amountSecondary.setValue(movimientosDTO.getImpdiv());
         transaction10.setAmountSecondary(amountSecondary);
+      }
+
+      //TODO esta implementacion es provisoria, se debe definir con Felipe cuando es compra, retiro o carga
+
+      transaction10.setDescription(transaction10.getInvoiceDescription());
+
+      Integer invoiceType = transaction10.getInvoiceType();
+      TipoFactura tf = TipoFactura.valueOfEnumByCodeAndCorrector(invoiceType, 0);
+      transaction10.setDescription(tf != null ? tf.name() : null);
+
+      if (invoiceType == TipoFactura.COMPRA_COMERCIO_RELACIONADO.getCode() ||
+        invoiceType == TipoFactura.COMPRA_INTERNACIONAL.getCode() ||
+        invoiceType == TipoFactura.COMPRA_NACIONAL.getCode()) {
+
+        transaction10.setOperation("Compra");
+
+      } else if (invoiceType == TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode() ||
+                invoiceType == TipoFactura.CARGA_TRANSFERENCIA.getCode()) {
+
+        transaction10.setOperation("Carga");
+
+      } else if (invoiceType == TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.getCode() ||
+                  invoiceType == TipoFactura.RETIRO_TRANSFERENCIA.getCode()) {
+
+        transaction10.setOperation("Retiro");
+
+      } else if (invoiceType == TipoFactura.COMISION_APERTURA.getCode()) {
+
+        transaction10.setOperation("Comisión de apertura");
+
+      } else {
+        transaction10.setOperation("Operación indefinida");
+      }
+
+      if (StringUtils.isBlank(transaction10.getDescription())) {
+        transaction10.setDescription("Descripción indefinida");
+      } else {
+        transaction10.setDescription(StringUtils.capitalize(transaction10.getDescription().replaceAll("_", " ").toLowerCase()));
       }
 
       listTransaction10.add(transaction10);
