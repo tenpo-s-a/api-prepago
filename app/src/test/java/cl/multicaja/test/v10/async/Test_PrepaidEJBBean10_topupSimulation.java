@@ -57,7 +57,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -72,7 +72,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -89,7 +89,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -107,7 +107,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupSimulation(null, 1L, simulationNew);
+        getPrepaidEJBBean10().topupSimulationGroup(null, 1L, simulationNew);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -148,7 +148,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+    SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -156,14 +156,14 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
-    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
-    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
-    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getEed());
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
   }
 
   @Test
@@ -197,7 +197,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("Calcular carga POS: " + simulationNew);
 
-    SimulationTopup10 resp = getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+    SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
 
     System.out.println("respuesta calculo: " + resp);
 
@@ -205,14 +205,14 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
-    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getAmountToPay());
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
-    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getPca());
-    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getEed());
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
   }
 
   @Test
@@ -251,7 +251,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -353,7 +353,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       //debe lanzar excepcion de validacion del CDT, dado que intenta cargar 100.000 que sumado a las cargas anteriores de
       //902.010 supera el maximo de 1.000.000 mensual
-      getPrepaidEJBBean10().topupSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
