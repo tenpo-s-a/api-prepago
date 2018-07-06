@@ -27,6 +27,9 @@ public class PrepaidTransaction10 extends BaseModel {
   private NewAmountAndCurrency10 amountPrimary;
   private NewAmountAndCurrency10 amountSecondary;
 
+  private String description;
+  private String operation;
+
   public Date getDate() {
     return date;
   }
@@ -177,5 +180,21 @@ public class PrepaidTransaction10 extends BaseModel {
 
   public void setAmountSecondary(NewAmountAndCurrency10 amountSecondary) {
     this.amountSecondary = amountSecondary;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getOperation() {
+    return operation;
+  }
+
+  public void setOperation(String operation) {
+    this.operation = operation;
   }
 }
