@@ -745,6 +745,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
+    Boolean isFirstTopup = this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId());
+    simulationTopup.setFirstTopup(isFirstTopup);
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
@@ -788,7 +790,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //saldo del usuario
     PrepaidBalance10 balance;
-    if(this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId())){
+    if(simulationTopup.getFirstTopup()){
       balance = new PrepaidBalance10();
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       balance.setPcaMain(amount);

@@ -13,6 +13,7 @@ public class SimulationTopup10 extends BaseModel {
   private NewAmountAndCurrency10 openingFee;
   private Integer code;
   private String message;
+  private Boolean isFirstTopup;
 
   public SimulationTopup10(){
     super();
@@ -80,6 +81,14 @@ public class SimulationTopup10 extends BaseModel {
 
   public void setMessage(String message) {
     this.message = message;
+  }
+
+  public Boolean getFirstTopup() {
+    return isFirstTopup;
+  }
+
+  public void setFirstTopup(Boolean firstTopup) {
+    isFirstTopup = firstTopup;
   }
 
   @Override

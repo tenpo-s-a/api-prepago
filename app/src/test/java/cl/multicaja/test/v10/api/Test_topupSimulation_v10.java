@@ -157,6 +157,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
 
   @Test
@@ -211,6 +212,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
 
   @Test
@@ -307,7 +309,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
     Assert.assertEquals("Debe ser 990 comision de apertura", new BigDecimal(990), resp.getSimulationTopupPOS().getOpeningFee().getValue());
     Assert.assertEquals("debe ser monto a pagar + comision + 990 Monto Apertura", calculatedAmount.getValue(), resp.getSimulationTopupPOS().getAmountToPay().getValue());
-
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupPOS().getFirstTopup());
   }
 
   @Test
@@ -458,6 +460,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     SimulationTopupGroup10 group = respHttp.toObject(SimulationTopupGroup10.class);
 
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue(), group.getSimulationTopupWeb().getCode());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no",group.getSimulationTopupWeb().getFirstTopup());
   }
 
   @Test
@@ -494,7 +497,6 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     SimulationTopupGroup10 group = respHttp.toObject(SimulationTopupGroup10.class);
 
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue(), group.getSimulationTopupPOS().getCode());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no",group.getSimulationTopupPOS().getFirstTopup());
   }
-
-
 }
