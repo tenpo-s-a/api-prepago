@@ -756,7 +756,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
 
-    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
       cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
     } else {
       cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
@@ -788,9 +788,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //saldo del usuario
     PrepaidBalance10 balance;
-    try {
-      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
-    } catch (ValidationException vex){
+    if(this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId())){
       balance = new PrepaidBalance10();
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       balance.setPcaMain(amount);
@@ -798,6 +796,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setPcaSecondary(amount);
       balance.setUsdValue(CalculationsHelper.getUsdValue());
       balance.setUpdated(Boolean.FALSE);
+    } else {
+      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
     }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());

@@ -275,6 +275,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     } catch(ValidationException vex) {
       System.out.println(vex);
       Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_PRIMERA_CARGA.getValue(), vex.getCode());
+    } catch(BadRequestException | NotFoundException ex){
+      throw ex;
     }
   }
 
@@ -435,15 +437,24 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    PrepaidCard10 prepaidCard10;
+    //primera carga
+    {
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(NewPrepaidTopup10.WEB_MERCHANT_CODE); //carga WEB
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3000));
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+      System.out.println("resp:: " + resp);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+      Assert.assertNotNull("debe tener un id", resp.getId());
 
-    BigDecimal impfac = BigDecimal.valueOf(400000); //se agrega saldo de 450.000 en tecnocom
+      prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+      Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    }
+
+    BigDecimal impfac = BigDecimal.valueOf(400000); //se agrega saldo de 400.000 en tecnocom
 
     InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
