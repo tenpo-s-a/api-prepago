@@ -744,6 +744,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
+    SimulationTopup10 simulationTopup = new SimulationTopup10();
+
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // LLAMADA AL CDT
@@ -772,10 +774,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       */
       int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
+          simulationTopup.setCode(lNumError);
+          simulationTopup.setMessage(cdtTransaction.getMsjError());
+        } else {
+          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        }
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
+      return simulationTopup;
     }
 
     //saldo del usuario
@@ -803,7 +811,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Comision: " + fee);
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
-    SimulationTopup10 simulationTopup = new SimulationTopup10();
 
     if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);

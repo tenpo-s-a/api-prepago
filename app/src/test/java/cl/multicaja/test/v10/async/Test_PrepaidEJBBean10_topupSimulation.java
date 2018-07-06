@@ -217,6 +217,195 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   }
 
   @Test
+  public void topupSimulation_not_ok_by_first_topup_max_amount() throws Exception {
+
+    User user = registerUser();
+    user.setNameStatus(NameStatus.UNVERIFIED);
+    updateUser(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(50001));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
+
+    System.out.println("Calcular carga POS: " + simulationNew);
+    try {
+      getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+      Assert.fail("no debe pasar por aca");
+    } catch(ValidationException vex) {
+      System.out.println(vex);
+      Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_PRIMERA_CARGA.getValue(), vex.getCode());
+    }
+  }
+
+  @Test
+  public void topupSimulation_not_ok_by_min_amount() throws Exception {
+    //WEB
+    {
+      User user = registerUser();
+      updateUser(user);
+
+      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+      AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+      Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+      BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
+
+      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+      Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(2999));
+
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+
+      System.out.println("Calcular carga WEB: " + simulationNew);
+      try {
+        getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+        Assert.fail("no debe pasar por aca");
+      } catch(ValidationException vex) {
+        System.out.println(vex);
+        Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_ES_MENOR_AL_MINIMO_DE_CARGA.getValue(), vex.getCode());
+      }
+    }
+    //POS
+    {
+      User user = registerUser();
+      updateUser(user);
+
+      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+      AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+      Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+      BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
+
+      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+      Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(2999));
+
+      SimulationNew10 simulationNew = new SimulationNew10();
+      simulationNew.setAmount(amount);
+      simulationNew.setPaymentMethod(TransactionOriginType.POS);
+
+      System.out.println("Calcular carga POS: " + simulationNew);
+      try {
+        getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+        Assert.fail("no debe pasar por aca");
+      } catch(ValidationException vex) {
+        System.out.println(vex);
+        Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_ES_MENOR_AL_MINIMO_DE_CARGA.getValue(), vex.getCode());
+      }
+    }
+  }
+
+  @Test
+  public void topupSimulation_not_ok_by_max_amount_web() throws Exception {
+    User user = registerUser();
+    updateUser(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    BigDecimal impfac = BigDecimal.valueOf(0);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(500001));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+
+    System.out.println("Calcular carga WEB: " + simulationNew);
+    SimulationTopupGroup10 group = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+    Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue(), group.getSimulationTopupWeb().getCode());
+  }
+
+  @Test
+  public void topupSimulation_not_ok_by_max_amount_pos() throws Exception {
+    User user = registerUser();
+    updateUser(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    BigDecimal impfac = BigDecimal.valueOf(0);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(100001));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
+
+    System.out.println("Calcular carga POS: " + simulationNew);
+    SimulationTopupGroup10 group = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+    Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue(), group.getSimulationTopupPOS().getCode());
+  }
+
+  @Test
   public void topupSimulation_not_ok_by_exceeds_balance() throws Exception {
 
     User user = registerUser();
