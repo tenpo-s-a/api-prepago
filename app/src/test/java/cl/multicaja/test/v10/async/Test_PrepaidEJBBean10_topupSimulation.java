@@ -217,6 +217,41 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   }
 
   @Test
+  public void topupSimulation_ok_first_topup() throws Exception {
+
+    User user = registerUserFirstTopup();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    createPrepaidUser10(prepaidUser10);
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+
+    System.out.println("Calcular carga WEB: " + simulationNew);
+
+    SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+
+    System.out.println("respuesta calculo: " + resp);
+
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(OPENING_FEE));
+
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
+
+    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
+  }
+
+  @Test
   public void topupSimulation_not_ok_by_first_topup_max_amount() throws Exception {
 
     User user = registerUser();
@@ -225,21 +260,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    createPrepaidUser10(prepaidUser10);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(50001));
 

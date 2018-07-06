@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -728,6 +729,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
+
     SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
 
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
@@ -785,7 +787,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
+    PrepaidBalance10 balance;
+    try {
+      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
+    } catch (ValidationException vex){
+      balance = new PrepaidBalance10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      balance.setPcaMain(amount);
+      balance.setBalance(amount);
+      balance.setPcaSecondary(amount);
+      balance.setUsdValue(CalculationsHelper.getUsdValue());
+      balance.setUpdated(Boolean.FALSE);
+    }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
