@@ -243,4 +243,34 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null);
   }
+
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndTipoMovimientoAndEstado(Long idPrepaidUser, PrepaidMovementType tipoMovimiento, PrepaidMovementStatus status) throws Exception {
+    if(idPrepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if(tipoMovimiento == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
+    }
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "estado"));
+    }
+
+    return this.getPrepaidMovements(null, null, idPrepaidUser, null, tipoMovimiento, status, null, null, null, null);
+  }
+
+
+
+  @Override
+  public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {
+    if(idPrepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+
+    List<PrepaidMovement10> movements = this.getPrepaidMovementByIdPrepaidUserAndTipoMovimientoAndEstado(idPrepaidUser,
+      PrepaidMovementType.TOPUP,
+      PrepaidMovementStatus.PROCESS_OK);
+
+    return  !(movements != null && !movements.isEmpty());
+  }
 }

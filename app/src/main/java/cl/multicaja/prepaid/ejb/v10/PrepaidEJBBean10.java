@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -728,6 +729,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
+
     SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
 
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
@@ -742,6 +744,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
+    SimulationTopup10 simulationTopup = new SimulationTopup10();
+    Boolean isFirstTopup = this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId());
+    simulationTopup.setFirstTopup(isFirstTopup);
+
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // LLAMADA AL CDT
@@ -752,7 +758,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
     cdtTransaction.setIndSimulacion(true);
 
-    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
       cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
     } else {
       cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
@@ -770,14 +776,31 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       */
       int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
+          simulationTopup.setCode(lNumError);
+          simulationTopup.setMessage(cdtTransaction.getMsjError());
+        } else {
+          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        }
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
+      return simulationTopup;
     }
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
+    PrepaidBalance10 balance;
+    if(simulationTopup.getFirstTopup()){
+      balance = new PrepaidBalance10();
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      balance.setPcaMain(amount);
+      balance.setBalance(amount);
+      balance.setPcaSecondary(amount);
+      balance.setUsdValue(CalculationsHelper.getUsdValue());
+      balance.setUpdated(Boolean.FALSE);
+    } else {
+      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
+    }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
@@ -801,7 +824,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Comision: " + fee);
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
-    SimulationTopup10 simulationTopup = new SimulationTopup10();
 
     if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);
@@ -916,6 +938,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidUser.setHasPrepaidCard(prepaidCard != null);
 
+    // verifica si el usuario ha realizado cargas anteriormente
+    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId()));
+
     return prepaidUser;
   }
 
@@ -949,6 +974,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidCardStatus.PENDING);
 
     prepaidUser.setHasPrepaidCard(prepaidCard != null);
+
+    // verifica si el usuario ha realizado cargas anteriormente
+    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId()));
 
     return prepaidUser;
   }
