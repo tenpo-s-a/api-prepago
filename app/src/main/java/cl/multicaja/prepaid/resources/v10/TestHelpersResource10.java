@@ -26,6 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -248,5 +249,29 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
 
     return Response.ok(prepaidUser).status(200).build();
+  }
+
+  @GET
+  @Path("/user/{userId}/mail_code")
+  public Response createUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    String sql = String.format("select code from %s.users_email where users_id = %s", UsersEJBBean10.getSchema(), userIdMc);
+
+    String code = UsersEJBBean10.getDbUtils().getJdbcTemplate().queryForObject(sql, String.class);
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("code", code);
+
+    return Response.ok(resp).status(200).build();
   }
 }
