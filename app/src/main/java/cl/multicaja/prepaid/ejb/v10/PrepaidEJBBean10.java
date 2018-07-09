@@ -938,6 +938,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidUser.setHasPrepaidCard(prepaidCard != null);
 
+    // verifica si el usuario ha realizado cargas anteriormente
+    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId()));
+
     return prepaidUser;
   }
 
@@ -971,6 +974,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidCardStatus.PENDING);
 
     prepaidUser.setHasPrepaidCard(prepaidCard != null);
+
+    // verifica si el usuario ha realizado cargas anteriormente
+    prepaidUser.setHasPendingFirstTopup(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId()));
 
     return prepaidUser;
   }
