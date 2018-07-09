@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
@@ -17,7 +18,6 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
-import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -34,7 +34,10 @@ import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
@@ -78,6 +81,22 @@ public class TestBaseUnit extends TestApiBase {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static String getSchema() {
+    return getPrepaidCardEJBBean10().getSchema();
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static DBUtils getDbUtils() {
+    return getPrepaidCardEJBBean10().getDbUtils();
   }
 
   /**
@@ -851,12 +870,10 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidCard10;
   }
-
   public Map<String,Object> getDefaultHeaders(){
     Map<String,Object> header = new HashMap<>();
     header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
   }
-
 }
