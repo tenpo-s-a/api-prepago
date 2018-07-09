@@ -104,4 +104,23 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndTipoMovimiento(Long idPrepaidUser, PrepaidMovementType tipoMovimiento) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
+   * @param tipoMovimiento
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndTipoMovimientoAndEstado(Long idPrepaidUser, PrepaidMovementType tipoMovimiento, PrepaidMovementStatus status) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
+   * @return
+   * @throws Exception
+   */
+  Boolean isFirstTopup(Long idPrepaidUser) throws Exception;
+
 }
