@@ -92,6 +92,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     Assert.assertNotNull("debe tener timestamps.created_at", timestamps.getCreatedAt());
     Assert.assertNotNull("debe tener timestamps.updated_at", timestamps.getUpdatedAt());
     Assert.assertNotNull("debe tener user_level", respUser.getUserLevel());
+    Assert.assertTrue("debe tener primer carga pentiente", respUser.isHasPendingFirstTopup());
   }
 
   @Test
@@ -120,6 +121,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     Assert.assertNotNull("debe tener timestamps.created_at", timestamps.getCreatedAt());
     Assert.assertNotNull("debe tener timestamps.updated_at", timestamps.getUpdatedAt());
     Assert.assertNotNull("debe tener user_level", respUser.getUserLevel());
+    Assert.assertTrue("debe tener primer carga pentiente", respUser.isHasPendingFirstTopup());
   }
 
   @Test
@@ -150,6 +152,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     Assert.assertNotNull("debe tener timestamps.updated_at", timestamps.getUpdatedAt());
     Assert.assertNotNull("debe tener user_level", respUser.getUserLevel());
     Assert.assertEquals("debe tener user_level = LEVEL_1", PrepaidUserLevel.LEVEL_1, respUser.getUserLevel());
+    Assert.assertTrue("debe tener primer carga pentiente", respUser.isHasPendingFirstTopup());
   }
 
   @Test
@@ -178,6 +181,7 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
     Assert.assertNotNull("debe tener timestamps.updated_at", timestamps.getUpdatedAt());
     Assert.assertNotNull("debe tener user_level", respUser.getUserLevel());
     Assert.assertEquals("debe tener user_level = LEVEL_2", PrepaidUserLevel.LEVEL_2, respUser.getUserLevel());
+    Assert.assertTrue("debe tener primer carga pentiente", respUser.isHasPendingFirstTopup());
   }
 
 }
