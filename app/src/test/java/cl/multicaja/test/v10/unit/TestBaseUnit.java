@@ -18,6 +18,8 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJB10;
+import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -34,10 +36,7 @@ import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
@@ -81,22 +80,6 @@ public class TestBaseUnit extends TestApiBase {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static String getSchema() {
-    return getPrepaidCardEJBBean10().getSchema();
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static DBUtils getDbUtils() {
-    return getPrepaidCardEJBBean10().getDbUtils();
   }
 
   /**
@@ -172,7 +155,7 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
-  public static MailEJBBean10 getMailEJBBean10() {
+  public static MailEJBBean10 getMailPrepaidWrappedEJBBean10() {
     if (mailEJBBean10 == null) {
       mailEJBBean10 = new MailEJBBean10();
     }
@@ -870,10 +853,110 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidCard10;
   }
+
   public Map<String,Object> getDefaultHeaders(){
     Map<String,Object> header = new HashMap<>();
     header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
+  }
+
+  /**
+   *
+   * Ejecuta signUp con datos aleatorios
+   * */
+  public SignUp getSignup() throws Exception {
+    String email = getUniqueEmail();
+    Integer rut = getUniqueRutNumber();
+    return getUsersEJBBean10().signUpUser(null, rut, email);
+  }
+
+  /**
+   *
+   * @param address
+   * @param from
+   * @param withAttachment
+   * @return
+   */
+  public EmailBody newEmailBody(String address, String from, boolean withAttachment) {
+    return newEmailBody(address, from, getRandomString(5, 10), withAttachment);
+  }
+
+  /**
+   *
+   * @param address
+   * @param from
+   * @param withAttachment
+   * @return
+   */
+  public EmailBody newEmailBody(String address, String from,String subject, boolean withAttachment) {
+
+    if (withAttachment) {
+
+      String file = "/9j/4AAQSkZJRgABAQEAYA"
+        + "BgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAs"
+        + "KCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAU"
+        + "EBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU"
+        + "FBQUFBQUFBQUFBQUFBT/wgARCAAFAAkDAREAAhEBAxEB/8QAFQABAQAAAAAAAAAAAA"
+        + "AAAAAAAwj/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAGhAj//xAAYE"
+        + "AACAwAAAAAAAAAAAAAAAAADBAAFFf/aAAgBAQABBQItS0QuM3P/xAAUEQEAAA"
+        + "AAAAAAAAAAAAAAAAAQ/9oACAEDAQE/AT//xAAUEQEAAAAAAAAAAAAAAAAAAAAQ/9"
+        + "oACAECAQE/AT//xAAfEAABAwMFAAAAAAAAAAAAAAACAAEDBAURITVhktP/2gAIAQE"
+        + "ABj8CMhvNdELvlgEIMDxrGt9uHSn8l//EABgQAQADAQAAAAAAAAAAAAAAAAEQEWEx/9oA"
+        + "CAEBAAE/IWCjTCXi1o1XYaf/2gAMAwEAAgADAAAAEAP/xAAUEQEAAAAAAAAAAAAAAAAAA"
+        + "AAQ/9oACAEDAQE/ED//xAAUEQEAAAAAAAAAAAAAAAAAAAAQ/9oACAECAQE/ED//xAAWEAE"
+        + "BAQAAAAAAAAAAAAAAAAABEQD/2gAIAQEAAT8QR6LKQirgwZgVNXA//9k=";
+
+      Attached attached = new Attached();
+      List<Attached> attachments = new ArrayList<>();
+      attached.setContentFile(file);
+      attached.setMimeType("image/jpeg");
+      attached.setFileName("imagen.jpeg");
+      attachments.add(attached);
+
+      return newEmailBody(address, from, subject, attachments);
+
+    } else {
+      return newEmailBody(address, from, subject, null);
+    }
+  }
+
+  /**
+   *
+   * @param address
+   * @param from
+   * @param attachments
+   * @return
+   */
+  public EmailBody newEmailBody(String address, String from, List<Attached> attachments) {
+    return newEmailBody(address, from, getRandomString(5, 10), attachments);
+  }
+
+  /**
+   *
+   * @param address
+   * @param from
+   * @param subject
+   * @param attachments
+   * @return
+   */
+  public EmailBody newEmailBody(String address, String from, String subject, List<Attached> attachments) {
+    String sqlTemplate = String.format("INSERT INTO %s.users_mail_template(status, name, app, template) VALUES (?,?,?,?);", getUsersEJBBean10().getSchema());
+    String name = getRandomString(5, 10);
+    String app = getRandomString(5, 10);
+    String template = String.format("Hola ##nombre## %s", getRandomString(5, 10));
+    getUsersEJBBean10().getDbUtils().getJdbcTemplate().update(sqlTemplate, 1000,name,app,template);
+    EmailBody content = new EmailBody();
+    content.setAddress(address);
+    content.setTemplate(app+"/"+name);
+
+    Map<String, Object> templateData = new HashMap<>();
+    templateData.put("nombre", "prueba");
+
+    content.setTemplateData(templateData);
+    content.setFrom(from);
+    content.setSubject(subject);
+    content.setAttachments(attachments);
+    return content;
   }
 }

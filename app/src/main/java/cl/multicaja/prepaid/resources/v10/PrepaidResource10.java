@@ -1,12 +1,16 @@
 package cl.multicaja.prepaid.resources.v10;
 
 import cl.multicaja.core.resources.BaseResource;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.users.model.v10.EmailBody;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import cl.multicaja.core.exceptions.BadRequestException;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
@@ -14,7 +18,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @author vutreras
@@ -34,6 +42,9 @@ public final class PrepaidResource10 extends BaseResource {
 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+  @EJB
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   /*
     Prepaid topup
@@ -163,6 +174,24 @@ public final class PrepaidResource10 extends BaseResource {
   public Response unlockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.unlockPrepaidCard(headersToMap(headers), userIdMc);
     return Response.noContent().build();
+  }
+
+
+  @POST
+  @Path("/{user_id}/mail")
+  public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
+    if (userId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if (emailBody == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "emailBody"));
+    }
+
+    Map<String, String> resp = new HashMap<>();
+    resp.put("messageId", mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody));
+
+    return Response.status(201).entity(resp).build();
   }
 
 }
