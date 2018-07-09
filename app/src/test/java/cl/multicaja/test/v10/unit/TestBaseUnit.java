@@ -63,6 +63,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
+  private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
@@ -155,11 +156,23 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
-  public static MailEJBBean10 getMailPrepaidWrappedEJBBean10() {
+  public static MailEJBBean10 getMailEJBBean10() {
     if (mailEJBBean10 == null) {
       mailEJBBean10 = new MailEJBBean10();
     }
     return mailEJBBean10;
+  }
+
+  /**
+   *
+   * @return
+   */
+  public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
+    if (mailPrepaidEJBBean10 == null) {
+      mailPrepaidEJBBean10 = new MailPrepaidEJBBean10();
+      mailPrepaidEJBBean10.setMailEJBBean10(getMailEJBBean10());
+    }
+    return mailPrepaidEJBBean10;
   }
 
   /**

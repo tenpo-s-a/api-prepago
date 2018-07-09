@@ -22,8 +22,8 @@ public class Test_SendPrepaidEmail extends TestBaseUnitAsync {
 
     SignUp signUp = getSignup();
     EmailBody content = newEmailBody(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(10)), from, true);
-    String messageId = getMailPrepaidWrappedEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
-    ExchangeData<EmailDataAsync10> resp = getMailPrepaidWrappedEJBBean10().getEmailDataAsync10(messageId);
+    String messageId = getMailPrepaidEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
+    ExchangeData<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
     Assert.assertNotNull("debe existir una respuesta", resp);
     EmailDataAsync10 emailDataAsync10 = resp.getData();
     Assert.assertNotNull("Deberia existir datos de envio de email", emailDataAsync10);
@@ -36,8 +36,8 @@ public class Test_SendPrepaidEmail extends TestBaseUnitAsync {
   public void sendEmailAsync_ok_simulated() throws Exception {
     SignUp signUp = getSignup();
     EmailBody content = newEmailBody(getUniqueEmail(), from, true);
-    String messageId = getMailPrepaidWrappedEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
-    ExchangeData<EmailDataAsync10> resp = getMailPrepaidWrappedEJBBean10().getEmailDataAsync10(messageId);
+    String messageId = getMailPrepaidEJBBean10().sendMailAsync(null, signUp.getUserId(), content);
+    ExchangeData<EmailDataAsync10> resp = getMailEJBBean10().getEmailDataAsync10(messageId);
     Assert.assertNotNull("debe existir una respuesta", resp);
     EmailDataAsync10 emailDataAsync10 = resp.getData();
     Assert.assertNotNull("Deberia existir datos de envio de email", emailDataAsync10);

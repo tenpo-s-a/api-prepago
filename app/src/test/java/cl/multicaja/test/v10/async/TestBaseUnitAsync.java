@@ -64,7 +64,7 @@ public class TestBaseUnitAsync extends TestBaseUnit {
       prepaidTopupRoute10.setUsersEJBBean10(getUsersEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
-      prepaidTopupRoute10.setMailEJBBean10(getMailPrepaidWrappedEJBBean10());
+      prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
       /**
        * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
@@ -72,7 +72,7 @@ public class TestBaseUnitAsync extends TestBaseUnit {
 
       UsersEmailRoute10 usersEmailRoute10 = new UsersEmailRoute10();
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
-      usersEmailRoute10.setMailEJBBean10(getMailPrepaidWrappedEJBBean10());
+      usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
 
       camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10);
     }
