@@ -10,7 +10,6 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
@@ -18,7 +17,6 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
-import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJB10;
 import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -63,7 +61,6 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
-  private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
@@ -161,18 +158,6 @@ public class TestBaseUnit extends TestApiBase {
       mailEJBBean10 = new MailEJBBean10();
     }
     return mailEJBBean10;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
-    if (mailPrepaidEJBBean10 == null) {
-      mailPrepaidEJBBean10 = new MailPrepaidEJBBean10();
-      mailPrepaidEJBBean10.setMailEJBBean10(getMailEJBBean10());
-    }
-    return mailPrepaidEJBBean10;
   }
 
   /**
@@ -874,102 +859,4 @@ public class TestBaseUnit extends TestApiBase {
     return header;
   }
 
-  /**
-   *
-   * Ejecuta signUp con datos aleatorios
-   * */
-  public SignUp getSignup() throws Exception {
-    String email = getUniqueEmail();
-    Integer rut = getUniqueRutNumber();
-    return getUsersEJBBean10().signUpUser(null, rut, email);
-  }
-
-  /**
-   *
-   * @param address
-   * @param from
-   * @param withAttachment
-   * @return
-   */
-  public EmailBody newEmailBody(String address, String from, boolean withAttachment) {
-    return newEmailBody(address, from, getRandomString(5, 10), withAttachment);
-  }
-
-  /**
-   *
-   * @param address
-   * @param from
-   * @param withAttachment
-   * @return
-   */
-  public EmailBody newEmailBody(String address, String from,String subject, boolean withAttachment) {
-
-    if (withAttachment) {
-
-      String file = "/9j/4AAQSkZJRgABAQEAYA"
-        + "BgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAs"
-        + "KCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAU"
-        + "EBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU"
-        + "FBQUFBQUFBQUFBQUFBT/wgARCAAFAAkDAREAAhEBAxEB/8QAFQABAQAAAAAAAAAAAA"
-        + "AAAAAAAwj/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAGhAj//xAAYE"
-        + "AACAwAAAAAAAAAAAAAAAAADBAAFFf/aAAgBAQABBQItS0QuM3P/xAAUEQEAAA"
-        + "AAAAAAAAAAAAAAAAAQ/9oACAEDAQE/AT//xAAUEQEAAAAAAAAAAAAAAAAAAAAQ/9"
-        + "oACAECAQE/AT//xAAfEAABAwMFAAAAAAAAAAAAAAACAAEDBAURITVhktP/2gAIAQE"
-        + "ABj8CMhvNdELvlgEIMDxrGt9uHSn8l//EABgQAQADAQAAAAAAAAAAAAAAAAEQEWEx/9oA"
-        + "CAEBAAE/IWCjTCXi1o1XYaf/2gAMAwEAAgADAAAAEAP/xAAUEQEAAAAAAAAAAAAAAAAAA"
-        + "AAQ/9oACAEDAQE/ED//xAAUEQEAAAAAAAAAAAAAAAAAAAAQ/9oACAECAQE/ED//xAAWEAE"
-        + "BAQAAAAAAAAAAAAAAAAABEQD/2gAIAQEAAT8QR6LKQirgwZgVNXA//9k=";
-
-      Attached attached = new Attached();
-      List<Attached> attachments = new ArrayList<>();
-      attached.setContentFile(file);
-      attached.setMimeType("image/jpeg");
-      attached.setFileName("imagen.jpeg");
-      attachments.add(attached);
-
-      return newEmailBody(address, from, subject, attachments);
-
-    } else {
-      return newEmailBody(address, from, subject, null);
-    }
-  }
-
-  /**
-   *
-   * @param address
-   * @param from
-   * @param attachments
-   * @return
-   */
-  public EmailBody newEmailBody(String address, String from, List<Attached> attachments) {
-    return newEmailBody(address, from, getRandomString(5, 10), attachments);
-  }
-
-  /**
-   *
-   * @param address
-   * @param from
-   * @param subject
-   * @param attachments
-   * @return
-   */
-  public EmailBody newEmailBody(String address, String from, String subject, List<Attached> attachments) {
-    String sqlTemplate = String.format("INSERT INTO %s.users_mail_template(status, name, app, template) VALUES (?,?,?,?);", getUsersEJBBean10().getSchema());
-    String name = getRandomString(5, 10);
-    String app = getRandomString(5, 10);
-    String template = String.format("Hola ##nombre## %s", getRandomString(5, 10));
-    getUsersEJBBean10().getDbUtils().getJdbcTemplate().update(sqlTemplate, 1000,name,app,template);
-    EmailBody content = new EmailBody();
-    content.setAddress(address);
-    content.setTemplate(app+"/"+name);
-
-    Map<String, Object> templateData = new HashMap<>();
-    templateData.put("nombre", "prueba");
-
-    content.setTemplateData(templateData);
-    content.setFrom(from);
-    content.setSubject(subject);
-    content.setAttachments(attachments);
-    return content;
-  }
 }

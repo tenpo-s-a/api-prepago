@@ -19,14 +19,4 @@ public interface MailPrepaidEJB10 {
    */
   String sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception;
 
-  /**
-   * Permite enviar un email de pruebas
-   *
-   * @param address
-   * @param withAttachment
-   * @return
-   * @throws Exception
-   */
-  Map<String, Object> sendEmailAsynTest(String address, boolean withAttachment) throws Exception;
-
 }

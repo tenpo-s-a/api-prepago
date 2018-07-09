@@ -20,18 +20,9 @@ public class MailPrepaidEJBBean10 implements MailPrepaidEJB10 {
   @EJB
   private MailEJBBean10 mailEJBBean10;
 
-  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10){
-    this.mailEJBBean10 = mailEJBBean10;
-  }
-
   @Override
   public String sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
     return this.mailEJBBean10.sendMailAsync(headers, userId, content);
-  }
-
-  @Override
-  public Map<String, Object> sendEmailAsynTest(String address, boolean withAttachment) throws Exception {
-    return this.mailEJBBean10.sendEmailAsynTest(address, withAttachment);
   }
 
 }
