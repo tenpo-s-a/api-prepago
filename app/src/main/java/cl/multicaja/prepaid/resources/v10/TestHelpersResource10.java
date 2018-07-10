@@ -7,6 +7,7 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
@@ -27,9 +28,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_BLOQUEADO_O_BORRADO;
@@ -338,5 +337,124 @@ public final class TestHelpersResource10 extends BaseResource {
                               user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
 
     return Response.status(201).entity(true).build();
+  }
+
+  //return this.get(`${this.API_PREPAID_PATH}/${user_id_mc}/bank_accounts`, headers);
+
+  private static Map<String, List<Map<String, Object>>> bankAccounts = new HashMap<>();
+
+  @GET
+  @Path("/{userId}/bank_accounts")
+  public Response getBackAccounts(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    return Response.ok(resp).status(200).build();
+  }
+
+  @POST
+  @Path("/{userId}/bank_accounts")
+  public Response addBankAccount(@PathParam("userId") Long userIdMc, Map<String, Object> bankAccount, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    if (resp == null) {
+      resp = new ArrayList<>();
+    }
+
+    bankAccount.put("id", Utils.uniqueCurrentTimeNano());
+    resp.add(bankAccount);
+
+    bankAccounts.put(String.valueOf(userIdMc), resp);
+
+    return Response.ok(bankAccount).status(200).build();
+  }
+
+  @DELETE
+  @Path("/{userId}/bank_accounts/{bankAccountId}")
+  public Response deleteBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    List<Map<String, Object>> resp2 = new ArrayList<>();
+
+    if (resp != null) {
+      for (int j = 0; j < resp.size(); j++) {
+        Map<String, Object> bankAccount = resp.get(j);
+        if (!bankAccount.get("id").equals(bankAccountId)) {
+          resp2.add(bankAccount);
+        }
+      }
+      bankAccounts.put(String.valueOf(userIdMc), resp2);
+    }
+
+    return Response.ok().status(200).build();
+  }
+
+  @PUT
+  @Path("/{userId}/bank_accounts/{bankAccountId}")
+  public Response updateBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, Map<String, Object> bankAccountNew, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    if (resp != null) {
+      for (int j = 0; j < resp.size(); j++) {
+        Map<String, Object> bankAccount = resp.get(j);
+        if (bankAccount.get("id").equals(bankAccountId)) {
+
+          Set<String> keys = bankAccountNew.keySet();
+
+          for (String k : keys) {
+            bankAccount.put(k, bankAccountNew.get(k));
+          }
+
+          bankAccountNew = bankAccount;
+
+          break;
+        }
+      }
+    }
+    
+    return Response.ok(bankAccountNew).status(200).build();
   }
 }
