@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.resources.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
@@ -217,28 +218,46 @@ public final class TestHelpersResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/prepaiduser/{userId}")
-  public Response createPrepaidUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+  @Path("/prepaiduser")
+  public Response createPrepaidUser(User user, @Context HttpHeaders headers) throws Exception {
 
     validate();
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+    if (user.getId() != null) {
 
-    if(user == null){
+      user = usersEJBBean10.getUserById(mapHeaders, user.getId());
+
+    } else {
+
+      SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
+
+      user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+    }
+
+    if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    user = usersEJBBean10.fillUser(user);
+    if (StringUtils.isBlank(user.getName())) {
+      user.setName(null);
+    }
+    if (StringUtils.isBlank(user.getLastname_1())) {
+      user.setLastname_1(null);
+    }
+    if (StringUtils.isBlank(user.getLastname_2())) {
+      user.setLastname_2(null);
+    }
 
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+    user.setPassword(String.valueOf(1357));
 
-    user = usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+    user = usersEJBBean10.fillUser(user);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(user.getId());
@@ -246,14 +265,14 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
 
-    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
+    prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
 
-    return Response.ok(prepaidUser).status(200).build();
+    return Response.ok(user).status(200).build();
   }
 
   @GET
-  @Path("/user/{userId}/mail_code")
-  public Response createUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+  @Path("/user/{userId}/email_code")
+  public Response getEmailCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
 
     validate();
 
@@ -273,5 +292,51 @@ public final class TestHelpersResource10 extends BaseResource {
     resp.put("code", code);
 
     return Response.ok(resp).status(200).build();
+  }
+
+  @GET
+  @Path("/user/{userId}/sms_code")
+  public Response getSmsCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("code", 123456);
+
+    return Response.ok(resp).status(200).build();
+  }
+
+  @POST
+  @Path("/{user_id}/sms")
+  public Response sendSms(@PathParam("user_id") Long userId, Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
+    return Response.status(201).build();
+  }
+
+  @PUT
+  @Path("{user_id}/sms")
+  public Response verifySms(@PathParam("user_id") Long userId, ParamValue codigo, @Context HttpHeaders headers) throws Exception {
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    if ("111111".equals(codigo.getValue())) {
+      throw new ValidationException(Errors.PARAMETRO_NO_CUMPLE_FORMATO);
+    }
+
+	  User user = usersEJBBean10.getUserById(mapHeaders, userId);
+
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+
+    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
+                              user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    return Response.status(201).entity(true).build();
   }
 }
