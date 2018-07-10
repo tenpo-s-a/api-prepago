@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.resources.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
@@ -252,6 +253,7 @@ public final class TestHelpersResource10 extends BaseResource {
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
     user.setPassword(String.valueOf(1357));
 
@@ -290,5 +292,51 @@ public final class TestHelpersResource10 extends BaseResource {
     resp.put("code", code);
 
     return Response.ok(resp).status(200).build();
+  }
+
+  @GET
+  @Path("/user/{userId}/sms_code")
+  public Response getSmsCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("code", 123456);
+
+    return Response.ok(resp).status(200).build();
+  }
+
+  @POST
+  @Path("/{user_id}/sms")
+  public Response sendSms(@PathParam("user_id") Long userId, Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
+    return Response.status(201).build();
+  }
+
+  @PUT
+  @Path("{user_id}/sms")
+  public Response verifySms(@PathParam("user_id") Long userId, ParamValue codigo, @Context HttpHeaders headers) throws Exception {
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    if ("111111".equals(codigo.getValue())) {
+      throw new ValidationException(Errors.PARAMETRO_NO_CUMPLE_FORMATO);
+    }
+
+	  User user = usersEJBBean10.getUserById(mapHeaders, userId);
+
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+
+    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
+                              user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    return Response.status(201).entity(true).build();
   }
 }
