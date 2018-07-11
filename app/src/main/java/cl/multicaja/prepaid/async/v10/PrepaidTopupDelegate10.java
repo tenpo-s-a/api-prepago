@@ -2,10 +2,13 @@ package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
@@ -14,6 +17,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.jms.Queue;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -144,6 +148,24 @@ public final class PrepaidTopupDelegate10 {
     req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
 
     this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
+
+    return messageId;
+  }
+
+  public String sendPdfCardMail(PrepaidCard10 prepaidCard10) {
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s", prepaidCard10.getProcessorUserId(), Utils.uniqueCurrentTimeNano());
+
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
+    PrepaidTopupData10 data = new PrepaidTopupData10();
+    data.setPrepaidCard10(prepaidCard10);
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
