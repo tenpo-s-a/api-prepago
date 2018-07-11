@@ -24,9 +24,9 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
+import cl.multicaja.users.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -218,28 +218,42 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   * realiza un signUp con rut e email
    *
-   * Ejecuta signUp con datos aleatorios
-   * */
-  public SignUp signupUser() throws Exception {
-    String email = getUniqueEmail();
-    Integer rut = getUniqueRutNumber();
+   * @param rut
+   * @param email
+   * @return
+   * @throws Exception
+   */
+  public SignUp signupUser(Integer rut, String email) throws Exception {
     return getUsersEJBBean10().signUpUser(null, rut, email);
   }
 
   /**
-   * pre-registra a un usuario (solo rut e email)
+   * realiza un signUp con datos aleatorios
+   *
    * @return
    * @throws Exception
    */
-  public User preRegisterUser() throws Exception {
+  public SignUp signupUser() throws Exception {
     Integer rut = getUniqueRutNumber();
     String email = getUniqueEmail();
-    SignUp singUP = getUsersEJBBean10().signUpUser(null, rut, email);
+    return this.signupUser(rut, email);
+  }
+
+  /**
+   * realiza un signUp con datos aleatorios y retorna el usuario creado
+   *
+   * @return
+   * @throws Exception
+   */
+  public User signupUserAndGetUser() throws Exception {
+    SignUp singUP = signupUser();
     return getUsersEJBBean10().getUserById(null, singUP.getUserId());
   }
 
   /**
+   * actualiza un usuario
    *
    * @param u
    * @return
@@ -250,27 +264,27 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   * pre-registra un usuario y además lo deja habilitado completamente
+   * registra un usuario y además lo deja habilitado completamente
+   *
    * @return
    * @throws Exception
    */
   public User registerUser() throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
   }
-  public User registerUserFirstTopup() throws Exception {
-    return registerUserFirstTopup(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
-  }
+
   /**
-   * pre-registra un usuario y además lo deja en algun estado
+   * registra un usuario y además lo deja en algun estado
+   *
    * @return
    * @throws Exception
    */
-
   public User registerUser(UserStatus status) throws Exception {
     return registerUser(String.valueOf(numberUtils.random(1111,9999)),status);
   }
 
   /**
+   * registra un usuario con clave
    *
    * @param password
    * @return
@@ -280,21 +294,8 @@ public class TestBaseUnit extends TestApiBase {
     return registerUser(password ,UserStatus.ENABLED);
   }
 
-  public User registerUserFirstTopup(String password,UserStatus status) throws Exception {
-    User user = preRegisterUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user = getUsersEJBBean10().fillUser(user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(password);
-    user = updateUser(user);
-    return user;
-  }
   /**
+   * registra un usuario con clave y estado especifico
    *
    * @param password
    * @param status
@@ -302,7 +303,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User registerUser(String password,UserStatus status) throws Exception {
-    User user = preRegisterUser();
+    User user = signupUserAndGetUser();
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
@@ -310,6 +311,37 @@ public class TestBaseUnit extends TestApiBase {
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setPassword(password);
+    user = updateUser(user);
+    return user;
+  }
+
+  /**
+   *
+   * @return
+   * @throws Exception
+   */
+  public User registerUserFirstTopup() throws Exception {
+    return registerUserFirstTopup(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+  }
+
+  /**
+   *
+   * @param password
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  public User registerUserFirstTopup(String password, UserStatus status) throws Exception {
+    User user = signupUserAndGetUser();
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
+    user = getUsersEJBBean10().fillUser(user);
+    user.setGlobalStatus(status);
+    user.getRut().setStatus(RutStatus.UNVERIFIED);
+    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
     user.setPassword(password);
     user = updateUser(user);

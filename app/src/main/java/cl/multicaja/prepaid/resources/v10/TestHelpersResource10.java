@@ -13,9 +13,9 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
+import cl.multicaja.users.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,7 +31,6 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cl.multicaja.core.model.Errors.CLIENTE_BLOQUEADO_O_BORRADO;
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 
 /**
@@ -188,12 +187,12 @@ public final class TestHelpersResource10 extends BaseResource {
         user.setLastname_2(".");
       }
 
-      PersonalData personalData = new PersonalData();
-      personalData.setName(user.getName());
-      personalData.setLastname_1(user.getLastname_1());
-      personalData.setLastname_2(user.getLastname_2());
+      UserPersonalDataNew userPersonalDataNew = new UserPersonalDataNew();
+      userPersonalDataNew.setName(user.getName());
+      userPersonalDataNew.setLastname_1(user.getLastname_1());
+      userPersonalDataNew.setLastname_2(user.getLastname_2());
 
-      dataEJBBean10.updatePersonalData(mapHeaders, userIdMc, personalData);
+      dataEJBBean10.updatePersonalData(mapHeaders, userIdMc, userPersonalDataNew);
 
       user.setNameStatus(NameStatus.VERIFIED);
     }
@@ -460,7 +459,7 @@ public final class TestHelpersResource10 extends BaseResource {
         }
       }
     }
-    
+
     return Response.ok(bankAccountNew).status(200).build();
   }
 }

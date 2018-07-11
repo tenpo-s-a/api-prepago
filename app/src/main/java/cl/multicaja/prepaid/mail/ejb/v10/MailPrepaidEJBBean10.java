@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.mail.ejb.v10;
 
-import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.model.v10.EmailBody;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
