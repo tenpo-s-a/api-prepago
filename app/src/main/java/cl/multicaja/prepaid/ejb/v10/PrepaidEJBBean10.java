@@ -13,7 +13,7 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
-import cl.multicaja.users.data.ejb.v10.DataEJBBean10;
+import cl.multicaja.users.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
@@ -291,9 +291,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
     // Se verifica la clave
-    ParamValue passwordParam = new ParamValue();
-    passwordParam.setValue(withdrawRequest.getPassword());
-    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), passwordParam);
+    UserPasswordNew userPasswordNew = new UserPasswordNew();
+    userPasswordNew.setValue(withdrawRequest.getPassword());
+    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,

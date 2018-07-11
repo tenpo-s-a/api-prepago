@@ -13,7 +13,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.mail.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.CamelContext;
 
