@@ -3,9 +3,11 @@ package cl.multicaja.prepaid.resources.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
@@ -26,9 +28,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_BLOQUEADO_O_BORRADO;
@@ -217,28 +217,52 @@ public final class TestHelpersResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/prepaiduser/{userId}")
-  public Response createPrepaidUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+  @Path("/prepaiduser")
+  public Response createPrepaidUser(User user, @Context HttpHeaders headers) throws Exception {
 
     validate();
 
+    NameStatus initialNameStatus = user.getNameStatus();
+
     Map<String, Object> mapHeaders = headersToMap(headers);
 
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+    if (user.getId() != null) {
 
-    if(user == null){
+      user = usersEJBBean10.getUserById(mapHeaders, user.getId());
+
+    } else {
+
+      SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
+
+      user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+    }
+
+    if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    user = usersEJBBean10.fillUser(user);
+    if (StringUtils.isBlank(user.getName())) {
+      user.setName(null);
+    }
+    if (StringUtils.isBlank(user.getLastname_1())) {
+      user.setLastname_1(null);
+    }
+    if (StringUtils.isBlank(user.getLastname_2())) {
+      user.setLastname_2(null);
+    }
+    if(initialNameStatus == null){
+      user.setNameStatus(NameStatus.VERIFIED);
+    } else {
+      user.setNameStatus(initialNameStatus);
+    }
 
     user.setGlobalStatus(UserStatus.ENABLED);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(String.valueOf(numberUtils.random(1111,9999)));
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+    user.setPassword(String.valueOf(1357));
 
-    user = usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(), user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+    user = usersEJBBean10.fillUser(user);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(user.getId());
@@ -246,14 +270,14 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
 
-    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
+    prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
 
-    return Response.ok(prepaidUser).status(200).build();
+    return Response.ok(user).status(200).build();
   }
 
   @GET
-  @Path("/user/{userId}/mail_code")
-  public Response createUser(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+  @Path("/user/{userId}/email_code")
+  public Response getEmailCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
 
     validate();
 
@@ -273,5 +297,170 @@ public final class TestHelpersResource10 extends BaseResource {
     resp.put("code", code);
 
     return Response.ok(resp).status(200).build();
+  }
+
+  @GET
+  @Path("/user/{userId}/sms_code")
+  public Response getSmsCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("code", 123456);
+
+    return Response.ok(resp).status(200).build();
+  }
+
+  @POST
+  @Path("/{user_id}/sms")
+  public Response sendSms(@PathParam("user_id") Long userId, Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
+    return Response.status(201).build();
+  }
+
+  @PUT
+  @Path("{user_id}/sms")
+  public Response verifySms(@PathParam("user_id") Long userId, ParamValue codigo, @Context HttpHeaders headers) throws Exception {
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    if ("111111".equals(codigo.getValue())) {
+      throw new ValidationException(Errors.PARAMETRO_NO_CUMPLE_FORMATO);
+    }
+
+	  User user = usersEJBBean10.getUserById(mapHeaders, userId);
+
+    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+
+    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
+                              user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+
+    return Response.status(201).entity(true).build();
+  }
+
+  //return this.get(`${this.API_PREPAID_PATH}/${user_id_mc}/bank_accounts`, headers);
+
+  private static Map<String, List<Map<String, Object>>> bankAccounts = new HashMap<>();
+
+  @GET
+  @Path("/{userId}/bank_accounts")
+  public Response getBackAccounts(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    return Response.ok(resp).status(200).build();
+  }
+
+  @POST
+  @Path("/{userId}/bank_accounts")
+  public Response addBankAccount(@PathParam("userId") Long userIdMc, Map<String, Object> bankAccount, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    if (resp == null) {
+      resp = new ArrayList<>();
+    }
+
+    bankAccount.put("id", Utils.uniqueCurrentTimeNano());
+    resp.add(bankAccount);
+
+    bankAccounts.put(String.valueOf(userIdMc), resp);
+
+    return Response.ok(bankAccount).status(200).build();
+  }
+
+  @DELETE
+  @Path("/{userId}/bank_accounts/{bankAccountId}")
+  public Response deleteBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    List<Map<String, Object>> resp2 = new ArrayList<>();
+
+    if (resp != null) {
+      for (int j = 0; j < resp.size(); j++) {
+        Map<String, Object> bankAccount = resp.get(j);
+        if (!bankAccount.get("id").equals(bankAccountId)) {
+          resp2.add(bankAccount);
+        }
+      }
+      bankAccounts.put(String.valueOf(userIdMc), resp2);
+    }
+
+    return Response.ok().status(200).build();
+  }
+
+  @PUT
+  @Path("/{userId}/bank_accounts/{bankAccountId}")
+  public Response updateBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, Map<String, Object> bankAccountNew, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
+
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
+
+    if (resp != null) {
+      for (int j = 0; j < resp.size(); j++) {
+        Map<String, Object> bankAccount = resp.get(j);
+        if (bankAccount.get("id").equals(bankAccountId)) {
+
+          Set<String> keys = bankAccountNew.keySet();
+
+          for (String k : keys) {
+            bankAccount.put(k, bankAccountNew.get(k));
+          }
+
+          bankAccountNew = bankAccount;
+
+          break;
+        }
+      }
+    }
+    
+    return Response.ok(bankAccountNew).status(200).build();
   }
 }
