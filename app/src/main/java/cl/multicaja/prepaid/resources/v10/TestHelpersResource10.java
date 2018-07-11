@@ -312,39 +312,15 @@ public final class TestHelpersResource10 extends BaseResource {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
+    String sql = String.format("select code from %s.users_cellphone where users_id = %s", UsersEJBBean10.getSchema(), userIdMc);
+
+    String code = UsersEJBBean10.getDbUtils().getJdbcTemplate().queryForObject(sql, String.class);
+
     Map<String, Object> resp = new HashMap<>();
-    resp.put("code", 123456);
+    resp.put("code", code);
 
     return Response.ok(resp).status(200).build();
   }
-
-  @POST
-  @Path("/{user_id}/sms")
-  public Response sendSms(@PathParam("user_id") Long userId, Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
-    return Response.status(201).build();
-  }
-
-  @PUT
-  @Path("{user_id}/sms")
-  public Response verifySms(@PathParam("user_id") Long userId, ParamValue codigo, @Context HttpHeaders headers) throws Exception {
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    if ("111111".equals(codigo.getValue())) {
-      throw new ValidationException(Errors.PARAMETRO_NO_CUMPLE_FORMATO);
-    }
-
-	  User user = usersEJBBean10.getUserById(mapHeaders, userId);
-
-    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
-
-    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
-                              user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
-
-    return Response.status(201).entity(true).build();
-  }
-
-  //return this.get(`${this.API_PREPAID_PATH}/${user_id_mc}/bank_accounts`, headers);
 
   private static Map<String, List<Map<String, Object>>> bankAccounts = new HashMap<>();
 
