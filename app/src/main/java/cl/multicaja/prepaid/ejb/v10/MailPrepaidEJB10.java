@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.mail.ejb.v10;
+package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.users.model.v10.EmailBody;
 
