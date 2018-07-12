@@ -99,11 +99,11 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidUserSignup10).status(201).build();
   }
 
-  @GET
-  @Path("/signup/{signupId}")
-  public Response getSignup(@PathParam("signupId") Long signupId, @Context HttpHeaders headers) {
-    //TODO falta implementar
-    return Response.ok().status(201).build();
+  @POST
+  @Path("/{userId}/finish_signup")
+  public Response finishSignup(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers),userId);
+    return Response.ok(prepaidUser10).build();
   }
 
   /*
