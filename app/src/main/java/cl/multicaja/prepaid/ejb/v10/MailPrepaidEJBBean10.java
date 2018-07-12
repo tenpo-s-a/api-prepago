@@ -26,7 +26,7 @@ import java.util.Map;
 public class MailPrepaidEJBBean10 implements MailPrepaidEJB10 {
 
   private static Log log = LogFactory.getLog(MailPrepaidEJBBean10.class);
-  public static final String SEND_CARD_TEMPLATE_NAME = "Tarjeta/Envio";
+  public static final String SEND_CARD_TEMPLATE_NAME = "Prepago/EnvioTarjeta";
 
   @Inject
   private PrepaidTopupDelegate10 prepaidTopupDelegate10;
