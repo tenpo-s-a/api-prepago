@@ -14,6 +14,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -152,21 +153,22 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendPdfCardMail(PrepaidCard10 prepaidCard10) {
+  public String sendPdfCardMail(PrepaidCard10 prepaidCard10, User user) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
 
     String messageId = String.format("%s#%s", prepaidCard10.getProcessorUserId(), Utils.uniqueCurrentTimeNano());
-
-    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
-    PrepaidTopupData10 data = new PrepaidTopupData10();
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
+    PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
     data.setPrepaidCard10(prepaidCard10);
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(0);
     req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
-    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
   }
+
 }
