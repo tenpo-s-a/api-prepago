@@ -501,10 +501,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(!user.getHasPassword()){
       throw new ValidationException(CLIENTE_NO_TIENE_CLAVE);
     }
-    if(user.getEmail().getStatus() != EmailStatus.VERIFIED){
+    if(!EmailStatus.VERIFIED.equals(user.getEmail().getStatus())){
       throw new ValidationException(PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO);
     }
-    if(user.getCellphone().getStatus() != CellphoneStatus.VERIFIED) {
+    if(!CellphoneStatus.VERIFIED.equals(user.getCellphone().getStatus())) {
       throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
     }
 
