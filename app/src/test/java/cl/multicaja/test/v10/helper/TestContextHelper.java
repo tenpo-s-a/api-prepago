@@ -15,7 +15,7 @@ public class TestContextHelper extends TestBaseUnit {
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
   protected static BrokerService brokerService;
 
-  public static void initContext() throws  Exception {
+  public static void initCamelContext() throws  Exception {
     SimpleNamingContextBuilder simpleNamingContextBuilder = new SimpleNamingContextBuilder();
     //Por un extraño conflicto con payara cuando no se usa, se debe sobre-escribir el InitialContext por defecto
     //sino se lanza un NullPointerException en camel producto de la existencia de payara.
@@ -54,7 +54,7 @@ public class TestContextHelper extends TestBaseUnit {
     simpleNamingContextBuilder.deactivate();
   }
 
-  public static void destroyContext() throws Exception {
+  public static void destroyCamelContext() throws Exception {
     if (brokerService != null) {
       camelFactory.releaseCamelContext();
       brokerService.stop();

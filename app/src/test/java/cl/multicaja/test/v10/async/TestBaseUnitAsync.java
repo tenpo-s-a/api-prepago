@@ -26,12 +26,12 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    initContext();
+    initCamelContext();
   }
 
   @AfterClass
   public static void afterClass() throws Exception {
-    destroyContext();
+    destroyCamelContext();
   }
 
   @After

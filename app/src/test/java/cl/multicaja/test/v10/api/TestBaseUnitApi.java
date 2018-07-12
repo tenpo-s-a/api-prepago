@@ -1,24 +1,18 @@
 package cl.multicaja.test.v10.api;
 
-import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.test.TestSuite;
 import cl.multicaja.test.v10.helper.TestContextHelper;
-import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
 import cl.multicaja.users.model.v10.User;
-import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
-import javax.naming.spi.NamingManager;
 import java.math.BigDecimal;
 
 /**
@@ -46,7 +40,7 @@ public class TestBaseUnitApi extends TestContextHelper {
         TestSuite.startServer();
       }
     }
-    initContext();
+    initCamelContext();
   }
 
   @AfterClass
@@ -59,7 +53,7 @@ public class TestBaseUnitApi extends TestContextHelper {
       }
     }
 
-    destroyContext();
+    destroyCamelContext();
   }
 
   protected void topupUserBalance(User user, BigDecimal amount) {
