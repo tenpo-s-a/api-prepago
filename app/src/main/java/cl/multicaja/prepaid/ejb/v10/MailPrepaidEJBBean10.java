@@ -1,10 +1,8 @@
-package cl.multicaja.prepaid.mail.ejb.v10;
+package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;

@@ -1,7 +1,7 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.users.model.v10.EmailBody;
 import cl.multicaja.users.model.v10.User;
