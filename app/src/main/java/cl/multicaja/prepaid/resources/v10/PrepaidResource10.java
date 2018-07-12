@@ -5,7 +5,7 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.mail.ejb.v10.MailPrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.EmailBody;
 import org.apache.commons.logging.Log;

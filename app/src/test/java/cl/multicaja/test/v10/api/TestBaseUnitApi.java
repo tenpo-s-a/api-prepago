@@ -1,11 +1,11 @@
 package cl.multicaja.test.v10.api;
 
-import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
+import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.test.TestSuite;
-import cl.multicaja.test.v10.unit.TestBaseUnit;
+import cl.multicaja.test.v10.helper.TestContextHelper;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 /**
  * @autor vutreras
  */
-public class TestBaseUnitApi extends TestBaseUnit {
+public class TestBaseUnitApi extends TestContextHelper {
 
   private static Log log = LogFactory.getLog(TestBaseUnitApi.class);
 
@@ -40,6 +40,7 @@ public class TestBaseUnitApi extends TestBaseUnit {
         TestSuite.startServer();
       }
     }
+    initCamelContext();
   }
 
   @AfterClass
@@ -51,6 +52,8 @@ public class TestBaseUnitApi extends TestBaseUnit {
         log.warn("No es necesario detener el servidor dado que se encuentra en suite");
       }
     }
+
+    destroyCamelContext();
   }
 
   protected void topupUserBalance(User user, BigDecimal amount) {
@@ -62,4 +65,5 @@ public class TestBaseUnitApi extends TestBaseUnit {
     System.out.println("respHttp: " + respHttp);
     Assert.assertEquals("Debe cargar ok", 201, respHttp.getStatus());
   }
+
 }
