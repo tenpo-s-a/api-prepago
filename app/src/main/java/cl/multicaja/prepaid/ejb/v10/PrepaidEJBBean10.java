@@ -488,8 +488,34 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId) {
-    return null;
+  public PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
+
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    User user = getUsersEJB10().getUserById(headers,userIdMc);
+    if(user == null){
+      throw new ValidationException(CLIENTE_NO_EXISTE);
+    }
+    if(!user.getHasPassword()){
+      throw new ValidationException(CLIENTE_NO_TIENE_CLAVE);
+    }
+    if(!EmailStatus.VERIFIED.equals(user.getEmail().getStatus())){
+      throw new ValidationException(PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO);
+    }
+    if(!CellphoneStatus.VERIFIED.equals(user.getCellphone().getStatus())) {
+      throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
+    }
+
+    PrepaidUser10 prepaidUser10 = new PrepaidUser10();
+    prepaidUser10.setUserIdMc(user.getId());
+    prepaidUser10.setRut(user.getRut().getValue());
+    prepaidUser10.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser10.setBalanceExpiration(0L);
+    prepaidUser10 = getPrepaidUserEJB10().createPrepaidUser(headers,prepaidUser10);
+
+    return prepaidUser10;
   }
 
   @Override

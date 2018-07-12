@@ -25,7 +25,8 @@ public interface PrepaidEJB10 {
 
   PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception;
 
-  PrepaidUserSignup10 getUserSignup(Map<String, Object> headers, Long signupId);
+  PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception;
+
 
   /**
    * Retorna la informacion de la ultima tarjeta del usuario

@@ -109,4 +109,6 @@ public interface PrepaidUserEJB10 {
    * @throws Exception
    */
   void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
+
+
 }
