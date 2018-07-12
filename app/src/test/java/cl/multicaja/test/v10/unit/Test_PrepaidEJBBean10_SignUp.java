@@ -90,10 +90,12 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
       PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().finishSignup(null,null);
+      Assert.assertNull(prepaidUser10);
     }catch (BadRequestException e){
+      System.out.println("PARAMETRO_FALTANTE_$VALUE");
       Assert.assertEquals("Debe Fallar ",e.getCode(),PARAMETRO_FALTANTE_$VALUE.getValue());
     } catch (Exception e) {
-
+      Assert.fail("No debe caer aca");
     }
 
     try { //VERIFICA QUE EL EMAIL NO ESTA VALIDADADO
@@ -103,10 +105,12 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
       PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().finishSignup(null,prepaidUserSignup10.getUserId());
-    }catch (BadRequestException e){
-      Assert.assertEquals("Debe Fallar ",e.getCode(),PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO.getValue());
+      Assert.assertNull(prepaidUser10);
+    }catch (ValidationException e){
+      System.out.println("CLIENTE_NO_TIENE_CLAVE");
+      Assert.assertEquals("Debe Fallar ",e.getCode(),CLIENTE_NO_TIENE_CLAVE.getValue());
     } catch (Exception e) {
-
+      Assert.fail("No debe caer aca");
     }
     try {// VERIFICA QUE EL CELULAR NO ESTA VALIDADO
       NewPrepaidUserSignup10 newPrepaidUserSignup10 = new NewPrepaidUserSignup10();
@@ -118,15 +122,16 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       User user = getUsersEJBBean10().getUserById(null,prepaidUserSignup10.getUserId());
       user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
       user.getEmail().setStatus(EmailStatus.VERIFIED);
-      user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+      user.getCellphone().setStatus(CellphoneStatus.UNVERIFIED);
       user.setPassword(null);
       user = updateUser(user);
       PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().finishSignup(null,prepaidUserSignup10.getUserId());
-
-    }catch (BadRequestException e){
+      Assert.assertNull(prepaidUser10);
+    }catch (ValidationException e){
+      System.out.println("PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO");
       Assert.assertEquals("Debe Fallar ",e.getCode(),PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO.getValue());
     } catch (Exception e) {
-
+      Assert.fail("No debe caer aca");
     }
     try { // ERROR SIN PASSWORD
       NewPrepaidUserSignup10 newPrepaidUserSignup10 = new NewPrepaidUserSignup10();
@@ -139,16 +144,17 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       Assert.assertNotNull("Debe existir user ",user);
 
       user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
-      user.getEmail().setStatus(EmailStatus.VERIFIED);
-      user.setPassword(null);
+      user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
+      user.getEmail().setStatus(EmailStatus.UNVERIFIED);
       user = updateUser(user);
 
       PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().finishSignup(null,prepaidUserSignup10.getUserId());
-
-    }catch (BadRequestException e){
-      Assert.assertEquals("Debe Fallar ",e.getCode(),CLIENTE_NO_TIENE_CLAVE.getValue());
+      Assert.assertNull(prepaidUser10);
+    }catch (ValidationException e) {
+      System.out.println("PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO");
+      Assert.assertEquals("Debe Fallar ",e.getCode(),PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO.getValue());
     } catch (Exception e) {
-
+      Assert.fail("No debe caer aca");
     }
 
   }
