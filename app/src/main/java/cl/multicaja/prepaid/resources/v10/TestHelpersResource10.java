@@ -205,8 +205,12 @@ public final class TestHelpersResource10 extends BaseResource {
       user.getEmail().setStatus(EmailStatus.UNVERIFIED);
     }
 
+    if(user.getIdentityStatus() == null) {
+      user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    }
+
     usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
-                            user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData());
+                            user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData(), user.getIdentityStatus());
 
     user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
 
@@ -222,6 +226,7 @@ public final class TestHelpersResource10 extends BaseResource {
     validate();
 
     NameStatus initialNameStatus = user.getNameStatus();
+    UserIdentityStatus initialIdentityStatus = user.getIdentityStatus();
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 
@@ -253,6 +258,12 @@ public final class TestHelpersResource10 extends BaseResource {
       user.setNameStatus(NameStatus.VERIFIED);
     } else {
       user.setNameStatus(initialNameStatus);
+    }
+
+    if(initialIdentityStatus== null){
+      user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    } else {
+      user.setIdentityStatus(initialIdentityStatus);
     }
 
     user.setGlobalStatus(UserStatus.ENABLED);

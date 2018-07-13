@@ -260,7 +260,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User updateUser(User u) throws Exception {
-    return getUsersEJBBean10().updateUser(u, u.getRut(), u.getEmail(), u.getCellphone(), u.getNameStatus(), u.getGlobalStatus(), u.getBirthday(), u.getPassword(), u.getCompanyData());
+    return getUsersEJBBean10().updateUser(u, u.getRut(), u.getEmail(), u.getCellphone(), u.getNameStatus(), u.getGlobalStatus(), u.getBirthday(), u.getPassword(), u.getCompanyData(), u.getIdentityStatus());
   }
 
   /**
