@@ -449,8 +449,75 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isAllBlank(signupRequest.getEmail())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Email"));
     }
+    if(signupRequest.isLogin()) {
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers,signupRequest.getRut());
+      if(prepaidUser10 != null) {
+        throw new ValidationException(CLIENTE_YA_TIENE_PREPAGO);
+      }
+    }
+    else {
 
-    User user = getUsersEJB10().getUserByRut(headers,signupRequest.getRut());
+      User user = getUsersEJB10().getUserByRut(headers, signupRequest.getRut());
+      if (user == null) {
+        user = getUsersEJB10().getUserByEmail(headers, signupRequest.getEmail());
+        if (user != null) {
+          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, signupRequest.getRut());
+            if (prepaidUser10 != null) {
+              List<PrepaidCard10> listPrepaidCard10 = getPrepaidCardEJB10().getPrepaidCards(headers, null, prepaidUser10.getId(), null, null, null);
+              if (listPrepaidCard10.size() != 0) {
+                throw new ValidationException(EXISTE_TARJETA_PARA_CORREO);
+              } else {
+                throw new ValidationException(CORREO_PERTENECE_A_CLIENTE);
+              }
+            } else {
+              throw new ValidationException(CORREO_PERTENECE_A_CLIENTE);
+            }
+
+          }
+          else if (UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
+            throw new ValidationException(CORREO_YA_UTILIZADO);
+          }
+          else {
+            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+          }
+        }
+      } else {
+        if (user.getEmail().getValue().equalsIgnoreCase(signupRequest.getEmail())) {
+          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, signupRequest.getRut());
+            if (prepaidUser10 != null) {
+              List<PrepaidCard10> listPrepaidCard10 = getPrepaidCardEJB10().getPrepaidCards(headers, null, prepaidUser10.getId(), null, null, null);
+              if (listPrepaidCard10.size() != 0) {
+                throw new ValidationException(CLIENTE_YA_TIENE_TARJETA);
+              }
+              else {
+                throw new ValidationException(CLIENTE_YA_TIENE_CLAVE);
+              }
+            }
+          }
+          else if (!UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
+            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+          }
+        }
+        else {
+          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, signupRequest.getRut());
+            if (prepaidUser10 != null) {
+              List<PrepaidCard10> listPrepaidCard10 = getPrepaidCardEJB10().getPrepaidCards(headers, null, prepaidUser10.getId(), null, null, null);
+              if (listPrepaidCard10.size() != 0) {
+                throw new ValidationException(RUT_YA_TIENE_TARJETA);
+              } else {
+                throw new ValidationException(RUT_YA_TIENE_CLAVE);
+              }
+            }
+          } else if (!UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
+            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+          }
+        }
+      }
+    }
+    /*User user = getUsersEJB10().getUserByRut(headers,signupRequest.getRut());
     if(user == null) {
       user = getUsersEJB10().getUserByEmail(headers,signupRequest.getEmail());
       if(user != null){
@@ -465,10 +532,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers,signupRequest.getRut());
-    if(prepaidUser10 != null) {
-      throw new ValidationException(CLIENTE_YA_TIENE_PREPAGO);
-    }
+
+    */
 
     SignUp signUp = getUsersEJB10().signUpUser(headers,signupRequest.getRut(),signupRequest.getEmail());
     //TODO: Revisar proceso.
