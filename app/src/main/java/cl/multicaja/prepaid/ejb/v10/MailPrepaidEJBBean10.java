@@ -47,10 +47,11 @@ public class MailPrepaidEJBBean10 implements MailPrepaidEJB10 {
       log.info("Flujo Envio email con tarjeta en PDF");
       PrepaidUser10 prepaidUser10 = prepaidUserEJBBean10.getPrepaidUserByUserIdMc(headers, userId);
       PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
-      if(prepaidCard10 != null){
+      if(prepaidCard10 != null) {
         User user = usersEJBBean10.getUserById(headers, userId);
         return prepaidTopupDelegate10.sendPdfCardMail(prepaidCard10, user);
-      } else {
+      }
+      else {
         throw new ValidationException(Errors.TARJETA_NO_EXISTE);
       }
     }
