@@ -517,23 +517,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
       }
     }
-    /*User user = getUsersEJB10().getUserByRut(headers,signupRequest.getRut());
-    if(user == null) {
-      user = getUsersEJB10().getUserByEmail(headers,signupRequest.getEmail());
-      if(user != null){
-        throw new ValidationException(CORREO_YA_UTILIZADO);
-      }
-    }else{
-      if(!user.getEmail().getValue().equals(signupRequest.getEmail()) && user.getEmail().getStatus() == EmailStatus.VERIFIED) {
-        throw new ValidationException(CORREO_NO_COINCIDE);
-      }
-      else if (user.getGlobalStatus() == UserStatus.DELETED || user.getGlobalStatus() == UserStatus.LOCKED || user.getGlobalStatus() == UserStatus.DISABLED) {
-        throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-      }
-    }
-
-
-    */
 
     SignUp signUp = getUsersEJB10().signUpUser(headers,signupRequest.getRut(),signupRequest.getEmail());
     //TODO: Revisar proceso.
@@ -572,6 +555,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(!CellphoneStatus.VERIFIED.equals(user.getCellphone().getStatus())) {
       throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
     }
+
+    user = getUsersEJB10().finishSignupUser(headers,userIdMc);
 
     PrepaidUser10 prepaidUser10 = new PrepaidUser10();
     prepaidUser10.setUserIdMc(user.getId());
