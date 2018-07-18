@@ -9,6 +9,8 @@ public class NewPrepaidUserSignup10 extends BaseModel {
 
   private String email;
   private Integer rut;
+  private boolean login;
+
 
   public NewPrepaidUserSignup10() {
     super();
@@ -30,4 +32,11 @@ public class NewPrepaidUserSignup10 extends BaseModel {
     this.rut = rut;
   }
 
+  public boolean isLogin() {
+    return login;
+  }
+
+  public void setLogin(boolean login) {
+    this.login = login;
+  }
 }
