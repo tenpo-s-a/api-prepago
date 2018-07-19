@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.BloqueoDesbloqueoDTO;
 import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
@@ -1202,26 +1203,34 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return listTransaction10;
   }
 
-  //TODO: Revisar implementacion con las historias correspondientes
   @Override
   public void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
-    // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
+    this.getUserMcById(headers, userIdMc);
+    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidCard10 prepaidCard = this.getPrepaidCardToLock(headers, prepaidUser10.getId());
 
-    // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE);
-
-    if(prepaidCard != null) {
-      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.LOCKED);
-      //TODO: Bloquear tarjeta en tecnocom
+    if(prepaidCard.isActive()) {
+      BloqueoDesbloqueoDTO bloqueoDesbloqueoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().bloqueo(prepaidCard.getProcessorUserId(), getEncryptUtil().decrypt(prepaidCard.getEncryptedPan()));
+      if(bloqueoDesbloqueoDTO.isRetornoExitoso()) {
+        getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.LOCKED);
+      } else {
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", bloqueoDesbloqueoDTO.getDescRetorno()));
+      }
     }
+  }
+
+  private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
+    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus()) || PrepaidCardStatus.EXPIRED.equals(prepaidCard.getStatus())){
+      throw new ValidationException(TARJETA_NO_ACTIVA);
+    }
+    return prepaidCard;
   }
 
   //TODO: Revisar implementacion con las historias correspondientes

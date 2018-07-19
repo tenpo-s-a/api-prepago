@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
@@ -18,6 +19,8 @@ public abstract class PrepaidBaseEJBBean10 {
   protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
   private static ConfigUtils configUtils;
+
+  private static EncryptUtil encryptUtil;
 
   private static DBUtils dbUtils;
 
@@ -39,6 +42,18 @@ public abstract class PrepaidBaseEJBBean10 {
     }
     return configUtils;
   }
+
+  /**
+   *
+   * @return
+   */
+  public static EncryptUtil getEncryptUtil() {
+    if (encryptUtil == null) {
+      encryptUtil = new EncryptUtil();
+    }
+    return encryptUtil;
+  }
+
 
   /**
    *
