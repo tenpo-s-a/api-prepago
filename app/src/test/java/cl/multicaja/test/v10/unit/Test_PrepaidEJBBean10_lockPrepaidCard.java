@@ -125,13 +125,13 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
-      Assert.assertEquals("first charge in progress", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
+      Assert.assertEquals("prepaid card not active", TARJETA_NO_ACTIVA.getValue(), ex.getCode());
     }
 
   }
 
   @Test
-  public void shouldReturnExceptionWhen_PendingFirstTopup() throws Exception  {
+  public void shouldReturnExceptionWhen_PrepaidCardNotExists() throws Exception  {
     User user = registerUser();
     updateUser(user);
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -140,24 +140,7 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
-      Assert.assertEquals("pending first charge", TARJETA_PRIMERA_CARGA_PENDIENTE.getValue(), ex.getCode());
-    }
-
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_InProgressFirstTopup() throws Exception  {
-    User user = registerUser();
-    updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    createPrepaidUser10(prepaidUser);
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, buildPrepaidTopup10(user));
-    createPrepaidMovement10(prepaidMovement10);
-
-    try{
-      getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
-    } catch(ValidationException ex) {
-      Assert.assertEquals("first charge in progress", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
+      Assert.assertEquals("prepaid card not exists", TARJETA_NO_EXISTE.getValue(), ex.getCode());
     }
 
   }
