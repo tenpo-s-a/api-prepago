@@ -1,9 +1,11 @@
 package cl.multicaja.test.v10.api;
 
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.users.model.v10.EmailBody;
 import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,6 +44,55 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
     final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
     final HttpResponse httpResponse = sendEmailApi(email, user.getId());
     Assert.assertEquals("status 201", 201, httpResponse.getStatus());
+  }
+  @Test
+  public void sendMailWithCardErrors() throws Exception {
+
+    { // NO EXISTE USUARIO
+      final EmailBody email = new EmailBody();
+      email.setTemplate(TEMPLATE_MAIL_SEND_CARD);
+      final HttpResponse httpResponse = sendEmailApi(email,1L);
+      Assert.assertEquals("Error al llamar 422",422,httpResponse.getStatus());
+      System.out.println("No existe usuario");
+    }
+
+    { // NO EXISTE USUARIO PREPAGO
+      User user = registerUser();
+      user.getEmail().setValue(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(15)).toLowerCase());
+      updateUser(user);
+      final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
+      final HttpResponse httpResponse = sendEmailApi(email, user.getId());
+      Assert.assertEquals("Error al llamar 422",422,httpResponse.getStatus());
+      System.out.println("No existe usuario Prepago");
+    }
+
+    {
+      User user = registerUser();
+      user.getEmail().setValue(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(15)).toLowerCase());
+      updateUser(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
+      final HttpResponse httpResponse = sendEmailApi(email, user.getId());
+      Assert.assertEquals("Error al llamar 422",422,httpResponse.getStatus());
+      System.out.println("Tarjeta no existe");
+    }
+
+    {
+      User user = registerUser();
+      user.getEmail().setValue(String.format("%s@mail.com", RandomStringUtils.randomAlphabetic(15)).toLowerCase());
+      user.setGlobalStatus(UserStatus.LOCKED);
+      updateUser(user);
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
+      final HttpResponse httpResponse = sendEmailApi(email, user.getId());
+      Assert.assertEquals("Error al llamar 422",422,httpResponse.getStatus());
+      System.out.println("Tarjeta no existe");
+    }
   }
 
   private EmailBody getEmailBody(User user, String template) {

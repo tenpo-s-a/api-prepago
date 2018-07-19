@@ -22,6 +22,7 @@ public class Test_getSignup_v10 extends TestBaseUnitApi {
   }
 
   @Ignore
+  @Test
   public void getSignup_ok(){
     HttpResponse resp = getSignup(1L);
     Assert.assertEquals("status 201", 201, resp.getStatus());

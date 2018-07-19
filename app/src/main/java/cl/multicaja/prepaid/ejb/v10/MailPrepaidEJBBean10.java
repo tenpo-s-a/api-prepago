@@ -44,6 +44,25 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
   @EJB
   private UsersEJBBean10 usersEJBBean10;
 
+  public void setPrepaidTopupDelegate10(PrepaidTopupDelegate10 prepaidTopupDelegate10) {
+    this.prepaidTopupDelegate10 = prepaidTopupDelegate10;
+  }
+
+  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
+
+  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
+    this.mailEJBBean10 = mailEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public void setUsersEJBBean10(UsersEJBBean10 usersEJBBean10) {
+    this.usersEJBBean10 = usersEJBBean10;
+  }
 
   @Override
   public String sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
@@ -71,7 +90,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
 
   private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
 
-    User user = usersEJBBean10.getUserById(headers, userId);
+    User user = this.usersEJBBean10.getUserById(headers, userId);
     if(user == null) {
       throw new ValidationException(Errors.CLIENTE_NO_EXISTE);
     }
@@ -88,19 +107,19 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
       throw new  ValidationException(Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(headers, prepaidUser10.getId());
     if(prepaidCard10 == null){
       throw new ValidationException(Errors.TARJETA_NO_EXISTE);
     }
     if(!prepaidCard10.getStatus().equals(PrepaidCardStatus.ACTIVE)) {
 
-      if(!prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED)) {
+      if(prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED)) {
         throw new ValidationException(Errors.TARJETA_CON_BLOQUEO_TEMPORAL);
       }
-      else if(!prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED_HARD)) {
+      else if(prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED_HARD)) {
         throw new ValidationException(Errors.TARJETA_BLOQUEADA_DE_FORMA_DEFINITIVA);
       }
-      else if(!prepaidCard10.getStatus().equals(PrepaidCardStatus.EXPIRED)) {
+      else if(prepaidCard10.getStatus().equals(PrepaidCardStatus.EXPIRED)) {
         throw new ValidationException(Errors.TARJETA_EXPIRADA);
       }
       else {
