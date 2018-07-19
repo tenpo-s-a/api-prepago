@@ -16,31 +16,34 @@ import static cl.multicaja.core.model.Errors.*;
  */
 public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
 
-  @Test
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_McUserIdNull() throws Exception{
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, null);
     } catch(BadRequestException ex) {
       Assert.assertEquals("user null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+      throw ex;
     }
 
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, Long.valueOf(0));
     } catch(BadRequestException ex) {
       Assert.assertEquals("user id null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_McUserNull() throws Exception{
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, Long.MAX_VALUE);
     } catch(NotFoundException ex) {
       Assert.assertEquals("user null", CLIENTE_NO_EXISTE.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
 
     User user = registerUser();
@@ -51,10 +54,11 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("user disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
 
     User user = registerUser();
@@ -65,10 +69,11 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("user locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
 
     User user = registerUser();
@@ -79,10 +84,11 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("user deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 
     User user = registerUser();
@@ -92,10 +98,11 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(NotFoundException ex) {
       Assert.assertEquals("user deleted", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_PrepaidUserDisabled() throws Exception {
 
     User user = registerUser();
@@ -108,10 +115,11 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("user deleted", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
+      throw ex;
     }
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_PrepaidNotActive() throws Exception  {
     User user = registerUser();
     updateUser(user);
@@ -126,11 +134,12 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("prepaid card not active", TARJETA_NO_ACTIVA.getValue(), ex.getCode());
+      throw ex;
     }
 
   }
 
-  @Test
+  @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_PrepaidCardNotExists() throws Exception  {
     User user = registerUser();
     updateUser(user);
@@ -141,6 +150,7 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
       Assert.assertEquals("prepaid card not exists", TARJETA_NO_EXISTE.getValue(), ex.getCode());
+      throw ex;
     }
 
   }
@@ -164,7 +174,6 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     }
 
     prepaidCard = getPrepaidEJBBean10().getPrepaidCard(null, user.getId());
-
     Assert.assertEquals("status ACTIVE", PrepaidCardStatus.LOCKED, prepaidCard.getStatus());
   }
 
