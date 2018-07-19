@@ -13,10 +13,7 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -65,6 +62,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailEJBBean10 mailEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
+  private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
@@ -167,7 +165,17 @@ public class TestBaseUnit extends TestApiBase {
     }
     return prepaidCardEJBBean10;
   }
+  public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10(){
 
+    if (mailPrepaidEJBBean10 == null) {
+      mailPrepaidEJBBean10 = new MailPrepaidEJBBean10();
+      mailPrepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      mailPrepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      mailPrepaidEJBBean10.setUsersEJBBean10(getUsersEJBBean10());
+      mailPrepaidEJBBean10.setPrepaidTopupDelegate10(getPrepaidTopupDelegate10());
+    }
+    return mailPrepaidEJBBean10;
+  }
   /**
    *
    * @return

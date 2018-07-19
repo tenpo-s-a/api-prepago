@@ -2,6 +2,7 @@ package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -20,6 +21,7 @@ public class Test_getSignup_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
+  @Ignore
   @Test
   public void getSignup_ok(){
     HttpResponse resp = getSignup(1L);
