@@ -1225,7 +1225,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+  public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
