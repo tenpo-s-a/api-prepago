@@ -978,7 +978,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a retirar + comision: " + calculatedAmount);
 
     if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
-      throw new ValidationException(SALDO_INSUFICIENTE_$VALUE).setData(new KeyValue("value", balance.getBalance().getValue()));
+      throw new ValidationException(SALDO_INSUFICIENTE_$VALUE).setData(new KeyValue("value", String.format("-%s", balance.getBalance().getValue().add(fee.multiply(BigDecimal.valueOf(-1))))));
     }
 
     SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
