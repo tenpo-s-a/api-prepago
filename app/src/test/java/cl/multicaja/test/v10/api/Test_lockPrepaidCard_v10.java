@@ -34,7 +34,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn204_PrepaidCardActive() throws Exception {
+  public void shouldReturn200_PrepaidCardActive() throws Exception {
 
     User user = registerUser();
 
@@ -69,7 +69,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
 
     HttpResponse lockResp = lockPrepaidCard(user.getId());
 
-    Assert.assertEquals("status 204", 204, lockResp.getStatus());
+    Assert.assertEquals("status 200", 200, lockResp.getStatus());
 
     resp = getPrepaidCard(user.getId());
 
@@ -95,7 +95,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn204_PrepaidCardLocked() throws Exception {
+  public void shouldReturn200_PrepaidCardLocked() throws Exception {
 
     User user = registerUser();
 
@@ -130,7 +130,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
 
     HttpResponse lockResp = lockPrepaidCard(user.getId());
 
-    Assert.assertEquals("status 204", 204, lockResp.getStatus());
+    Assert.assertEquals("status 200", 200, lockResp.getStatus());
 
     resp = getPrepaidCard(user.getId());
 

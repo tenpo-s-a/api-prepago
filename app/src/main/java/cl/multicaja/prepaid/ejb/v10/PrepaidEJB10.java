@@ -129,16 +129,18 @@ public interface PrepaidEJB10 {
    *
    * @param headers
    * @param userIdMc
+   * @return
    * @throws Exception
    */
-  void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
+  PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
    *
    * @param headers
    * @param userIdMc
+   * @return
    * @throws Exception
    */
-  void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
+  PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
 }

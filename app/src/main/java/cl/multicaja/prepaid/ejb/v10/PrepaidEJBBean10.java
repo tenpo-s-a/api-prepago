@@ -1242,10 +1242,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", bloqueoDesbloqueoDTO.getDescRetorno()));
       }
     }
+    return prepaidCard;
   }
 
   @Override
-  public void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+  public PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
@@ -1262,6 +1263,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", bloqueoDesbloqueoDTO.getDescRetorno()));
       }
     }
+    return prepaidCard;
   }
 
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
