@@ -142,4 +142,8 @@ public class PrepaidCard10 extends BaseModel {
   public int hashCode() {
     return Objects.hash(getId(), getIdUser(), getProcessorUserId(), getPan(), getEncryptedPan(), getExpiration(), getNameOnCard(), getStatus());
   }
+
+  public boolean isLockable(){
+    return this.getStatus() != null && !PrepaidCardStatus.LOCKED.equals(this.getStatus());
+  }
 }

@@ -3,13 +3,11 @@ package cl.multicaja.test.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -112,6 +110,57 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     } catch(ValidationException ex) {
       Assert.assertEquals("user deleted", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
     }
+  }
+
+  @Test
+  public void shouldReturnExceptionWhen_PrepaidNotActive() throws Exception  {
+    User user = registerUser();
+    updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10Pending(prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    Assert.assertEquals("status PENDING", PrepaidCardStatus.PENDING, prepaidCard.getStatus());
+
+    try{
+      getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
+    } catch(ValidationException ex) {
+      Assert.assertEquals("first charge in progress", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
+    }
+
+  }
+
+  @Test
+  public void shouldReturnExceptionWhen_PendingFirstCharge() throws Exception  {
+    User user = registerUser();
+    updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    createPrepaidUser10(prepaidUser);
+
+    try{
+      getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
+    } catch(ValidationException ex) {
+      Assert.assertEquals("pending first charge", TARJETA_PRIMERA_CARGA_PENDIENTE.getValue(), ex.getCode());
+    }
+
+  }
+
+  @Test
+  public void shouldReturnExceptionWhen_InProgressFirstCharge() throws Exception  {
+    User user = registerUser();
+    updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    createPrepaidUser10(prepaidUser);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, buildPrepaidTopup10(user));
+    createPrepaidMovement10(prepaidMovement10);
+
+    try{
+      getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
+    } catch(ValidationException ex) {
+      Assert.assertEquals("first charge in progress", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
+    }
+
   }
 
   @Test
