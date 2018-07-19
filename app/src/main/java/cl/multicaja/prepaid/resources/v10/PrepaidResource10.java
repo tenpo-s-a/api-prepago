@@ -180,18 +180,8 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{user_id}/mail")
   public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
-    if (userId == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
-    }
-
-    if (emailBody == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "emailBody"));
-    }
-
-    Map<String, String> resp = new HashMap<>();
-    resp.put("messageId", mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody));
-
-    return Response.status(201).entity(resp).build();
+    this.mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody);
+    return Response.ok().status(201).build();
   }
 
 }
