@@ -75,6 +75,18 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  /**
+   *
+   * @param headers
+   * @param fetchCount
+   * @param id
+   * @param userId
+   * @param expiration
+   * @param status
+   * @param processorUserId
+   * @return
+   * @throws Exception
+   */
   private List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, int fetchCount, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
