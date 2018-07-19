@@ -142,11 +142,11 @@ public class PrepaidCard10 extends BaseModel {
   public int hashCode() {
     return Objects.hash(getId(), getIdUser(), getProcessorUserId(), getPan(), getEncryptedPan(), getExpiration(), getNameOnCard(), getStatus());
   }
-
+  @JsonIgnore
   public boolean isActive(){
     return this.getStatus() != null && PrepaidCardStatus.ACTIVE.equals(this.getStatus());
   }
-
+  @JsonIgnore
   public boolean isLocked(){
     return this.getStatus() != null && PrepaidCardStatus.LOCKED.equals(this.getStatus());
   }

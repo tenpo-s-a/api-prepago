@@ -559,7 +559,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
 
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)) {
+    if(userIdMc == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
@@ -592,7 +592,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+    if(userIdMc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
@@ -814,6 +814,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currencyCode"));
     }
   }
+
   @Override
   public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
@@ -1011,7 +1012,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception {
 
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+    if(userIdMc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
@@ -1085,7 +1086,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate, Integer count) throws Exception {
 
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+    if(userIdMc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
@@ -1225,7 +1226,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+    if(userIdMc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
