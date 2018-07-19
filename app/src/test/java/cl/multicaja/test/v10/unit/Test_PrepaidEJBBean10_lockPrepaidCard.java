@@ -132,7 +132,7 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
   }
 
   @Test
-  public void shouldReturnExceptionWhen_PendingFirstCharge() throws Exception  {
+  public void shouldReturnExceptionWhen_PendingFirstTopup() throws Exception  {
     User user = registerUser();
     updateUser(user);
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -147,7 +147,7 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
   }
 
   @Test
-  public void shouldReturnExceptionWhen_InProgressFirstCharge() throws Exception  {
+  public void shouldReturnExceptionWhen_InProgressFirstTopup() throws Exception  {
     User user = registerUser();
     updateUser(user);
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
