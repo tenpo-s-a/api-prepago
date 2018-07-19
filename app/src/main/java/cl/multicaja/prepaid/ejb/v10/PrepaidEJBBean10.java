@@ -1223,36 +1223,44 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
+  @Override
+  public void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    this.getUserMcById(headers, userIdMc);
+    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidCard10 prepaidCard = this.getPrepaidCardToUnlock(headers, prepaidUser10.getId());
+
+    if(prepaidCard.isLocked()) {
+      BloqueoDesbloqueoDTO bloqueoDesbloqueoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().desbloqueo(prepaidCard.getProcessorUserId(), getEncryptUtil().decrypt(prepaidCard.getEncryptedPan()));
+      if(bloqueoDesbloqueoDTO.isRetornoExitoso()) {
+        getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.ACTIVE);
+      } else {
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", bloqueoDesbloqueoDTO.getDescRetorno()));
+      }
+    }
+  }
+
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
       throw new ValidationException(TARJETA_NO_EXISTE);
-    } else if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus()) || PrepaidCardStatus.EXPIRED.equals(prepaidCard.getStatus())){
+    } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_ACTIVA);
     }
     return prepaidCard;
   }
 
-  //TODO: Revisar implementacion con las historias correspondientes
-  @Override
-  public void unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
-    if (userIdMc == null || Long.valueOf(0).equals(userIdMc)) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+  private PrepaidCard10 getPrepaidCardToUnlock(Map<String, Object> headers, Long userId)throws Exception {
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
+    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
+      throw new ValidationException(TARJETA_NO_BLOQUEADA);
     }
-
-    // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
-
-    // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.LOCKED);
-
-    if (prepaidCard != null) {
-      getPrepaidCardEJB10().updatePrepaidCardStatus(headers, prepaidCard.getId(), PrepaidCardStatus.ACTIVE);
-      //TODO: Desbloquear tarjeta en tecnocom
-    }
+    return prepaidCard;
   }
 
   private User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
