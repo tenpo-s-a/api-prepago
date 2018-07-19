@@ -63,7 +63,7 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       }
     }
 
-    {// USUARIO CON MAILS INCORRECTO
+    {
       try
       {
         User user = registerUser(UserStatus.DELETED);
@@ -166,13 +166,15 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       newPrepaidUserSignup10.setEmail(getUniqueEmail());
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
+
       User user = getUsersEJBBean10().getUserById(null,prepaidUserSignup10.getUserId());
       Assert.assertNotNull("Debe existir user ",user);
+
       System.out.println(user);
       user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
       user.getEmail().setStatus(EmailStatus.VERIFIED);
       user = updateUser(user);
-      System.out.println(user);
+      
       PrepaidUser10 prepaidUser10 = getPrepaidEJBBean10().finishSignup(null,prepaidUserSignup10.getUserId());
       Assert.assertNotNull("Usuario prepago debe ser no nulo",prepaidUser10);
 
@@ -180,6 +182,7 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
         System.out.println(e);
         Assert.fail("No debe caer aca.");
     } catch (Exception e) {
+        e.printStackTrace();
         System.out.println(e);
         Assert.fail("No debe caer aca.");
     }
