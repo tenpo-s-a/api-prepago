@@ -9,15 +9,15 @@ public class SimulationNew10 extends BaseModel {
 
   private NewAmountAndCurrency10 amount;
 
-  private TransactionOriginType paymentMethod;
+  private TransactionOriginType method;
 
   public SimulationNew10(){
     super();
   }
 
-  public SimulationNew10(NewAmountAndCurrency10 amount, TransactionOriginType paymentMethod) {
+  public SimulationNew10(NewAmountAndCurrency10 amount, TransactionOriginType method) {
     this.amount = amount;
-    this.paymentMethod = paymentMethod;
+    this.method = method;
   }
 
   public NewAmountAndCurrency10 getAmount() {
@@ -29,11 +29,11 @@ public class SimulationNew10 extends BaseModel {
   }
 
   public TransactionOriginType getPaymentMethod() {
-    return paymentMethod;
+    return method;
   }
 
   public void setPaymentMethod(TransactionOriginType paymentMethod) {
-    this.paymentMethod = paymentMethod;
+    this.method = paymentMethod;
   }
 
   @JsonIgnore
@@ -47,11 +47,11 @@ public class SimulationNew10 extends BaseModel {
     if (o == null || getClass() != o.getClass()) return false;
     SimulationNew10 that = (SimulationNew10) o;
     return Objects.equals(amount, that.amount) &&
-      paymentMethod == that.paymentMethod;
+      method == that.method;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(amount, paymentMethod);
+    return Objects.hash(amount, method);
   }
 }
