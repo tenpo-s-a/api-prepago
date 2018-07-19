@@ -1,7 +1,6 @@
 package cl.multicaja.test.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.users.model.v10.EmailBody;
 import cl.multicaja.users.model.v10.User;
@@ -11,6 +10,8 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_SEND_CARD;
 
 public class Test_sendEmail_v10 extends TestBaseUnitApi {
 
@@ -38,7 +39,7 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-    final EmailBody email = getEmailBody(user, MailPrepaidEJBBean10.SEND_CARD_TEMPLATE_NAME);
+    final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
     final HttpResponse httpResponse = sendEmailApi(email, user.getId());
     Assert.assertEquals("status 201", 201, httpResponse.getStatus());
   }
