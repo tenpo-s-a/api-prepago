@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
+
 /**
  * @author abarazarte
  */
@@ -33,11 +35,11 @@ public class Test_getPrepaidUser_v10 extends TestBaseUnitApi{
 
     HttpResponse resp = getPrepaidUser(0L);
 
-    Assert.assertEquals("status 400", 400, resp.getStatus());
+    Assert.assertEquals("status 404", 404, resp.getStatus());
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error code = 101004", CLIENTE_NO_EXISTE.getValue(), errorObj.get("code"));
   }
 
   @Test

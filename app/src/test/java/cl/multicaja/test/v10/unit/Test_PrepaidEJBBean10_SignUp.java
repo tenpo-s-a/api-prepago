@@ -73,7 +73,7 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
         getPrepaidEJBBean10().initUserSignup(null, newPrepaidUserSignup10);
       } catch (ValidationException e) {
         System.out.println("CORREO_YA_UTILIZADO");
-        Assert.assertEquals("Error Usuario ya existe", CORREO_YA_UTILIZADO.getValue(), e.getCode());
+        Assert.assertEquals("Error Usuario ya existe", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), e.getCode());
       } catch (Exception e) {
         Assert.fail("No debe llegar aca !!ERROR!!");
       }

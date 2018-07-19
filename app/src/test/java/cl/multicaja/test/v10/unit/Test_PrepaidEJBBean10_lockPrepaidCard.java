@@ -26,8 +26,8 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
 
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, Long.valueOf(0));
-    } catch(BadRequestException ex) {
-      Assert.assertEquals("user id null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+    } catch(NotFoundException ex) {
+      Assert.assertEquals("user id null", CLIENTE_NO_EXISTE.getValue(), ex.getCode());
     }
   }
 
