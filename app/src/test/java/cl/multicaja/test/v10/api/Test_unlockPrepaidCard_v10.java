@@ -34,7 +34,7 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn204_PrepaidCardLocked() throws Exception {
+  public void shouldReturn200_PrepaidCardLocked() throws Exception {
 
     User user = registerUser();
 
@@ -69,14 +69,8 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
 
     HttpResponse lockResp = unlockPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 204", 204, lockResp.getStatus());
-
-    resp = getPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 200", 200, resp.getStatus());
-
-    card1 = resp.toObject(PrepaidCard10.class);
+    Assert.assertEquals("status 200", 200, lockResp.getStatus());
+    card1 = lockResp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
@@ -96,7 +90,7 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn204_PrepaidCardActive() throws Exception {
+  public void shouldReturn200_PrepaidCardActive() throws Exception {
 
     User user = registerUser();
 
@@ -130,14 +124,8 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
 
     HttpResponse lockResp = unlockPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 204", 204, lockResp.getStatus());
-
-    resp = getPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 200", 200, resp.getStatus());
-
-    card1 = resp.toObject(PrepaidCard10.class);
+    Assert.assertEquals("status 200", 200, lockResp.getStatus());
+    card1 = lockResp.toObject(PrepaidCard10.class);
 
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getId(), card1.getId());
     Assert.assertEquals("debe ser la misma tarjeta", prepaidCard10.getProcessorUserId(), card1.getProcessorUserId());
