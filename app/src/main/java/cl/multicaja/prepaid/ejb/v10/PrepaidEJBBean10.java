@@ -478,7 +478,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
               PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser10.getId());
 
               if (prepaidCard10 != null) {
-                throw new ValidationException(EXISTE_TARJETA_PARA_CORREO);
+                throw new ValidationException(CORREO_YA_TIENE_TARJETA);
               } else {
                 throw new ValidationException(CORREO_PERTENECE_A_CLIENTE);
               }
