@@ -155,6 +155,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
 
+    //TODO falta validación de lista negra al usuario
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
@@ -359,7 +360,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Integer codact = prepaidMovement.getCodact();
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
-    String numreffac = prepaidMovement.getId().toString();
+    String numreffac = prepaidMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
     String numaut = numreffac;
 
     //solamente los 6 ultimos digitos de numreffac
@@ -370,7 +371,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
-      if (inclusionMovimientosDTO.isRetornoExitoso()) {
+    if (inclusionMovimientosDTO.isRetornoExitoso()) {
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();
@@ -411,7 +412,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
-      throw  new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     /*
@@ -922,7 +923,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Comision: " + fee);
     log.info("Monto a cargar + comision: " + calculatedAmount);
 
-
+    //TODO es posible que el LEVEL_2 tambien se le cobre comision de apertura, revisar este caso con Felipe
     if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);
       simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));

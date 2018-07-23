@@ -122,7 +122,7 @@ public abstract class BaseProcessor10 {
     //que el mensaje sera con tiempo de espera
     if (delayTimeoutToRedirect > 0) {
       log.debug("Estableciendo delayTimeoutToRedirect: " + delayTimeoutToRedirect);
-      headers.put(ScheduledMessage.AMQ_SCHEDULED_DELAY, delayTimeoutToRedirect);
+      headers.put(ScheduledMessage.AMQ_SCHEDULED_DELAY, delayTimeoutToRedirect); //TODO si se migra a azure se debe investigar como se envian mensajes programados
       headers.remove("scheduledJobId"); //es necesario remover el scheduledJobId si existe con anterioridad en el mensaje
     }
 

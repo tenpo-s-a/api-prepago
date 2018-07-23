@@ -114,7 +114,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         Integer codact = issuanceFeeMovement.getCodact();
         CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
-        String numreffac = issuanceFeeMovement.getId().toString();
+        String numreffac = issuanceFeeMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
         String numaut = numreffac;
 
         //solamente los 6 primeros digitos de numreffac

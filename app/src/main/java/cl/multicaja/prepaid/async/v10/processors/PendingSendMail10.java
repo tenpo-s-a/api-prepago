@@ -76,6 +76,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
             String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
 
             //TODO el passwordOwner quizas debe externalizarse
+            //TODO revisar licencia de itext
             String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
             Map<String, Object> templateData = new HashMap<>();
@@ -121,6 +122,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
       /**
        *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
        */
+      //TODO revisar en detalle este envio de email en caso del error al obtener los datos de la tarjeta
       EmailBody emailBody = new EmailBody();
       emailBody.setTemplate(TEMPLATE_MAIL_CARD_ERROR);
       emailBody.setAddress(data.getUser().getEmail().getValue());
