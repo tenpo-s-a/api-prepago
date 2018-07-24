@@ -106,7 +106,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           Integer codact = prepaidMovement.getCodact();
           CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
-          String numreffac = prepaidMovement.getId().toString();
+          String numreffac = prepaidMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
           String numaut = numreffac;
 
           //solamente los 6 primeros digitos de numreffac
@@ -150,12 +150,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             //TODO que pasa si cdt da error?
             if(!cdtTransaction.isNumErrorOk()){
-              int lNumError = cdtTransaction.getNumErrorInt();
-              if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-                throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-              } else {
-                throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-              }
+              //TODO quizas se debe enviar a otro proceso para saber que hacer en en esta caso, quizas mostrar en log, etc..
             }
 
             //segun la historia: https://www.pivotaltracker.com/story/show/158044562
@@ -164,6 +159,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             } else {
+              //TODO Felipe dice que se debe enviar un correo, se debe revisar con una historia
               return req;
             }
 
