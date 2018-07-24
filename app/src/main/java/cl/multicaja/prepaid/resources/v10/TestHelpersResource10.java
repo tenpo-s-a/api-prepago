@@ -227,7 +227,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     NameStatus initialNameStatus = user.getNameStatus();
     UserIdentityStatus initialIdentityStatus = user.getIdentityStatus();
-    RutStatus initialRutStatus = user.getRut().getStatus();
+    RutStatus initialRutStatus = user.getRut() != null ? user.getRut().getStatus() : null;
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 
