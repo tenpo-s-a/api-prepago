@@ -1,6 +1,11 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
 import cl.multicaja.prepaid.async.v10.processors.*;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.processor.idempotent.FileIdempotentRepository;
+
+import java.io.File;
 
 /**
  * Implementacion personalizada de rutas camel
@@ -48,6 +53,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_REQ = "PrepaidTopupRoute10.errorSendMailWithdraw.req";
   public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "PrepaidTopupRoute10.errorSendMailWithdraw.resp";
 
+  public static final String SFTP_MASTERCARD_T05X = "sftp://localhost/mastercard/T058?username=gsftp&password=123456&move=done&reconnectDelay=30000&throwExceptionOnConnectFailed=true";
 
   @Override
   public void configure() throws Exception {
@@ -156,6 +162,12 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP + confResp)).end();
+
+    /**
+     * Extrae valor dolar
+     */
+    from(SFTP_MASTERCARD_T05X)
+      .process(new PendingCurrencyModification10().process());
 
   }
 }
