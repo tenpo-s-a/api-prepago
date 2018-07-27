@@ -53,7 +53,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_REQ = "PrepaidTopupRoute10.errorSendMailWithdraw.req";
   public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "PrepaidTopupRoute10.errorSendMailWithdraw.resp";
 
-  public static final String SFTP_MASTERCARD_T05X = "sftp://localhost/mastercard/T058?username=gsftp&password=123456&move=done&reconnectDelay=30000&throwExceptionOnConnectFailed=true";
+  public static final String SFTP_MASTERCARD_T05X = "sftp://localhost/mastercard/T058?username=gsftp&password=123456&move=done&moveFailed=error/${file:name.noext}-${date:now:yyyyMMddHHmmssSSS}.${file:ext}&reconnectDelay=30000&throwExceptionOnConnectFailed=true";
 
   @Override
   public void configure() throws Exception {
@@ -167,7 +167,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
      * Extrae valor dolar
      */
     from(SFTP_MASTERCARD_T05X)
-      .process(new PendingCurrencyModification10().process());
+      .process(new PendingCurrencyModification10(this).process());
 
   }
 }

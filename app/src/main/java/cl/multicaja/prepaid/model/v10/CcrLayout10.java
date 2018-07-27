@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
-public class CurrencyConversion10 {
+public class CcrLayout10 {
 
   public static final String DETAIL_PREFIX = "D";
   public static final String TRAILER_PREFIX = "T";
@@ -10,7 +10,7 @@ public class CurrencyConversion10 {
   private Integer length;
   private String format;
 
-  public CurrencyConversion10(Integer start, Integer length, String format) {
+  public CcrLayout10(Integer start, Integer length, String format) {
     this.start = start;
     this.length = length;
     this.format = format;

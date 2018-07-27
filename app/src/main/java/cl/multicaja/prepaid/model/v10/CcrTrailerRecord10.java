@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.model.v10;
 
 public class CcrTrailerRecord10 {
-  private CurrencyConversion10 DATE = new CurrencyConversion10(1, 6, "N");
+  private CcrLayout10 DATE = new CcrLayout10(1, 6, "N");
   private String trailerRecord;
 
   public void setTrailerRecord(String trailerRecord) {

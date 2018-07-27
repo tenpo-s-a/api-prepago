@@ -8,15 +8,15 @@ public class CcrDetailRecord10 {
   private final String CURRENCY_CODE_USD = "840";
 
   private String detailRecord;
-  private final CurrencyConversion10 DETAIL = new CurrencyConversion10(0, 1, "AN");
-  private final CurrencyConversion10 CURRENCY_CODE = new CurrencyConversion10(1, 3, "N");
-  private final CurrencyConversion10 REFERENCE_CURRENCY_CODE = new CurrencyConversion10(4, 3, "N");
-  private final CurrencyConversion10 CURRENCY_EXPONENT = new CurrencyConversion10(7, 1, "N");
-  private final CurrencyConversion10 RATE_CLASS = new CurrencyConversion10(8, 1, "AN");
-  private final CurrencyConversion10 RATE_FORMAT_INDICATOR = new CurrencyConversion10(9, 1, "AN");
-  private final CurrencyConversion10 BUY_CURRENCY_CONVERTION = new CurrencyConversion10(10, 15, "N");
-  private final CurrencyConversion10 MID_CURRENCY_CONVERTION = new CurrencyConversion10(25, 15, "N");
-  private final CurrencyConversion10 SELL_CURRENCY_CONVERTION = new CurrencyConversion10(40, 15, "N");
+  private final CcrLayout10 DETAIL = new CcrLayout10(0, 1, "AN");
+  private final CcrLayout10 CURRENCY_CODE = new CcrLayout10(1, 3, "N");
+  private final CcrLayout10 REFERENCE_CURRENCY_CODE = new CcrLayout10(4, 3, "N");
+  private final CcrLayout10 CURRENCY_EXPONENT = new CcrLayout10(7, 1, "N");
+  private final CcrLayout10 RATE_CLASS = new CcrLayout10(8, 1, "AN");
+  private final CcrLayout10 RATE_FORMAT_INDICATOR = new CcrLayout10(9, 1, "AN");
+  private final CcrLayout10 BUY_CURRENCY_CONVERTION = new CcrLayout10(10, 15, "N");
+  private final CcrLayout10 MID_CURRENCY_CONVERTION = new CcrLayout10(25, 15, "N");
+  private final CcrLayout10 SELL_CURRENCY_CONVERTION = new CcrLayout10(40, 15, "N");
 
   public void setDetailRecord(String detailRecord) {
     this.detailRecord = detailRecord;
@@ -59,7 +59,7 @@ public class CcrDetailRecord10 {
   }
 
   public String getCurrencyClpPrefix() {
-    return CurrencyConversion10.DETAIL_PREFIX.concat(CURRENCY_CODE_CLP).concat(CURRENCY_CODE_USD);
+    return CcrLayout10.DETAIL_PREFIX.concat(CURRENCY_CODE_CLP).concat(CURRENCY_CODE_USD);
   }
 
   private BigDecimal getScaledValue(String currencyValue) {

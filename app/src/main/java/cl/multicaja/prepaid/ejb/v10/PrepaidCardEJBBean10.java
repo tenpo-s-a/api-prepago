@@ -3,9 +3,11 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.users.model.v10.Timestamps;
@@ -241,6 +243,50 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("updatePrepaidCard resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public CurrencyUsd getCurrencyUsd() throws Exception {
+    String sp = getSchema() + ".mc_prp_buscar_valor_usd_v10";
+    RowMapper rm = (Map<String, Object> row) -> {
+      CurrencyUsd c = new CurrencyUsd();
+      c.setId(numberUtils.toLong(row.get("_id"), null));
+      c.setFileName(String.valueOf(row.get("_nombre_archivo")));
+      c.setCreationDate((Timestamp)row.get("_fecha_creacion"));
+      c.setEndDate((Timestamp)row.get("_fecha_termino"));
+      c.setExpirationUsdDate((Timestamp)row.get("_fecha_expiracion_usd"));
+      c.setBuyCurrencyConvertion(numberUtils.toDouble(row.get("_precio_compra"), null));
+      c.setMidCurrencyConvertion(numberUtils.toDouble(row.get("_precio_medio"), null));
+      c.setSellCurrencyConvertion(numberUtils.toDouble(row.get("_precio_venta"), null));
+      c.setCurrencyExponent(numberUtils.toInteger(row.get("_exponente"), null));
+      return c;
+    };
+    Map<String, Object> resp = getDbUtils().execute(sp, rm);
+    return resp.get("result") != null ? (CurrencyUsd) ((List) resp.get("result")).get(0) : null;
+  }
+
+  @Override
+  public void updateUsdValue(CurrencyUsd currencyUsd) throws Exception {
+    Object[] params = {
+      new InParam(currencyUsd.getFileName(), Types.VARCHAR),
+      new InParam(currencyUsd.getCreationDate(), Types.TIMESTAMP),
+      new InParam(currencyUsd.getEndDate(), Types.TIMESTAMP),
+      new InParam(currencyUsd.getExpirationUsdDate(), Types.TIMESTAMP),
+      new InParam(currencyUsd.getBuyCurrencyConvertion(), Types.NUMERIC),
+      new InParam(currencyUsd.getSellCurrencyConvertion(), Types.NUMERIC),
+      new InParam(currencyUsd.getMidCurrencyConvertion(), Types.NUMERIC),
+      new InParam(currencyUsd.getCurrencyExponent(), Types.NUMERIC),
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_valor_usd_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_actualiza_valor_usd_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
