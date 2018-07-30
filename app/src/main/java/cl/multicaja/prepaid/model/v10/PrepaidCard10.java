@@ -121,6 +121,19 @@ public class PrepaidCard10 extends BaseModel {
     this.numeroUnico = numeroUnico;
   }
 
+  @JsonIgnore
+  public String getFormattedExpiration() {
+    String exp = this.getExpiration() != null ? this.getExpiration().toString() : null;
+    String formattedExpiration = exp;
+    if (exp != null && exp.length() > 4) {
+      try {
+        formattedExpiration = exp.substring(4) + "/" + exp.substring(0, 4);
+      } catch(Exception ex) {
+      }
+    }
+    return formattedExpiration;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
