@@ -1,21 +1,28 @@
 package cl.multicaja.test.v10.helper;
 
 import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.test.TestSuite;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
+import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Rule;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import javax.naming.spi.NamingManager;
 
 public class TestContextHelper extends TestBaseUnit {
 
+  private static Log log = LogFactory.getLog(TestContextHelper.class);
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
   protected static BrokerService brokerService;
 
   public static void initCamelContext() throws  Exception {
+
     SimpleNamingContextBuilder simpleNamingContextBuilder = new SimpleNamingContextBuilder();
     //Por un extraño conflicto con payara cuando no se usa, se debe sobre-escribir el InitialContext por defecto
     //sino se lanza un NullPointerException en camel producto de la existencia de payara.
@@ -60,6 +67,5 @@ public class TestContextHelper extends TestBaseUnit {
       brokerService.stop();
     }
   }
-
 
 }
