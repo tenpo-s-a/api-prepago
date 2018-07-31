@@ -10,13 +10,11 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.test.v10.helper.TestContextHelper;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.model.v10.User;
-import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 
 import javax.jms.Queue;
 

@@ -1,49 +1,74 @@
 package cl.multicaja.test.v10.async;
 
-import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
+import cl.multicaja.prepaid.model.v10.CurrencyUsd;
+import cl.multicaja.test.v10.helper.sftp.TestSftpServer;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.file.nativefs.NativeFileSystemFactory;
-import org.apache.sshd.server.Command;
-import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.password.PasswordAuthenticator;
-import org.apache.sshd.server.auth.password.PasswordChangeRequiredException;
-import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.ServerSession;
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.Map;
 
 public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
   private static Log log = LogFactory.getLog(Test_PendingCurrencyModification10.class);
 
   @Test
-  public void shouldUpdateCurrentUsdValue() throws Exception {
-    SshServer server = SshServer.setUpDefaultServer();
-    server.setPort(7001);
-    server.setPasswordAuthenticator(new PasswordAuthenticator() {
-      @Override
-      public boolean authenticate(String username, String password, ServerSession serverSession) throws PasswordChangeRequiredException {
-        return "test".equals(username) && "test".equals(password);
-      }
-    });
+  public void test_when_file_is_ok() throws Exception {
+    final String filename = "TEST.AR.T058.OK";
+    cleanTest(filename);
+    putSuccessFileIntoSftp(filename);
+    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
+  }
 
-    server.setSubsystemFactories(Arrays.<NamedFactory<Command>>asList(new SftpSubsystemFactory()));
-    server.setFileSystemFactory(new NativeFileSystemFactory(true));
-    server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
-    server.start();
+  @Test
+  public void test_when_file_was_processed() throws Exception {
+    final String filename = "TEST.AR.T058.OK";
+    cleanTest(filename);
+    putSuccessFileIntoSftp(filename);
+    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
+    putSuccessFileIntoSftp(filename);
+    CurrencyUsd currencyUsdAfter = getPrepaidCardEJBBean10().getCurrencyUsd();
+    Assert.assertEquals("Deberia ser el mismo registro ", currencyUsd.getCreationDate(), currencyUsdAfter.getCreationDate());
+  }
 
-    CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
-    currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
-    camelFactory.getCamelContext().addRoutes(currencyConvertionRoute10);
+  @Test
+  public void test_when_file_contains_error() throws Exception {
+    final String filename = "TEST.AR.T058.OK";
+    final String filenameError = "TEST.AR.T058.ERR";
+    cleanTest(filename);
+    putSuccessFileIntoSftp(filename);
+    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
+    putSuccessFileIntoSftp(filenameError);
+    CurrencyUsd currencyUsdAfter = getPrepaidCardEJBBean10().getCurrencyUsd();
+    Assert.assertEquals("Deberia ser el archivo archivo sin errores", currencyUsd.getCreationDate(), currencyUsdAfter.getCreationDate());
+  }
 
-    final String fileName = "TEST.AR.T058.OK";
-    InputStream in = this.getClass().getClassLoader().getResourceAsStream(fileName);
-    //String content = IOUtils.toString(in, UTF_8);
+  private void putSuccessFileIntoSftp(String filename) throws Exception {
+    final Map<String, Object> context = TestSftpServer.INSTANCE.openChanel();
+    InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+    ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
+    channelSftp.put(inputStream, TestSftpServer.INSTANCE.BASE_DIR + "mastercard/T058/" + filename);
+    channelSftp.exit();
+    ((Session) context.get("session")).disconnect();
+    log.info("Wait for camel process");
+    Thread.sleep(3000);
+  }
 
+  private void cleanTest(String filename) throws Exception {
+    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    if(currencyUsd != null && filename.equals(currencyUsd.getFileName())){
+      deleteFileByName(filename);
+    }
+  }
+
+  public void deleteFileByName(String filename){
+    getDbUtils().getJdbcTemplate().update(String.format("delete from prepago.prp_valor_usd where nombre_archivo = '%s'", filename));
   }
 
 }

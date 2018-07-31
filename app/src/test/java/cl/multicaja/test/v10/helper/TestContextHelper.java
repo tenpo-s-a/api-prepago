@@ -4,20 +4,17 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.test.TestSuite;
+import cl.multicaja.test.v10.helper.sftp.TestSftpServer;
 import cl.multicaja.test.v10.unit.TestBaseUnit;
 import cl.multicaja.users.async.v10.routes.UsersEmailRoute10;
-import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Rule;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import javax.naming.spi.NamingManager;
 
+
 public class TestContextHelper extends TestBaseUnit {
 
-  private static Log log = LogFactory.getLog(TestContextHelper.class);
   protected static CamelFactory camelFactory = CamelFactory.getInstance();
   protected static BrokerService brokerService;
 
@@ -34,6 +31,11 @@ public class TestContextHelper extends TestBaseUnit {
     //crea e inicia apache camel con las rutas creadas anteriormente
 
     if (!camelFactory.isCamelRunning()) {
+
+      //Inicializa servidor sftp embebido
+      TestSftpServer.INSTANCE.start();
+      TestSftpServer.INSTANCE.createDirectories();
+
       //crea e inicia el activemq
       brokerService = camelFactory.createBrokerService();
       brokerService.start();
@@ -48,6 +50,9 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
       prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
+      CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
+      currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+
       /**
        * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
        */
@@ -56,7 +61,7 @@ public class TestContextHelper extends TestBaseUnit {
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
       usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
 
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10);
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10, currencyConvertionRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
@@ -65,6 +70,7 @@ public class TestContextHelper extends TestBaseUnit {
     if (brokerService != null) {
       camelFactory.releaseCamelContext();
       brokerService.stop();
+      TestSftpServer.INSTANCE.end();
     }
   }
 

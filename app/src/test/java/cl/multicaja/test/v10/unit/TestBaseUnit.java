@@ -22,14 +22,12 @@ import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
-import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Rule;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;

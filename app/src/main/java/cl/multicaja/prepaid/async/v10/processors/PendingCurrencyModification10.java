@@ -6,6 +6,7 @@ import cl.multicaja.prepaid.model.v10.CcrFile10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.ValidationException;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,18 +29,22 @@ public class PendingCurrencyModification10 extends BaseProcessor10 {
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
-        CcrFile10 ccrFile10 = MastercardFileHelper.getInstance().getValidCurrencyDetailRecordClp(inputStream);
-        if(ccrFile10 != null) {
-          log.info(String.format("BUY [%s], MID [%s], SELL [%s]", ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
-          CurrencyUsd currencyUsd = getRoute().getPrepaidCardEJBBean10().getCurrencyUsd();
-          if(currencyUsd != null) {
-            if(currencyUsd.getFileName().equals(fileName)) {
-              throw new Exception("File already processed");
+        try{
+          CcrFile10 ccrFile10 = MastercardFileHelper.getInstance().getValidCurrencyDetailRecordClp(inputStream);
+          if(ccrFile10 != null) {
+            log.info(String.format("BUY [%s], MID [%s], SELL [%s]", ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
+            CurrencyUsd currencyUsd = getRoute().getPrepaidCardEJBBean10().getCurrencyUsd();
+            if(currencyUsd != null) {
+              if(currencyUsd.getFileName().equals(fileName)) {
+                throw new ValidationException(exchange, "File already processed");
+              }
             }
+            currencyUsd = getCurrencyUsd(fileName, ccrFile10);
+            getRoute().getPrepaidCardEJBBean10().updateUsdValue(currencyUsd);
           }
-          currencyUsd = getCurrencyUsd(fileName, ccrFile10);
-          getRoute().getPrepaidCardEJBBean10().updateUsdValue(currencyUsd);
-
+        } catch (Exception ex){
+          log.error(String.format("Error processing file [%s]", fileName), ex);
+          throw new ValidationException(exchange, ex.getMessage());
         }
       }
     };
