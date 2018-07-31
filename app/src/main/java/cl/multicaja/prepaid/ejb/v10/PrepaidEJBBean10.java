@@ -888,12 +888,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
+      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      simulationTopup.setFee(zero);
+      simulationTopup.setPca(zero);
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setAmountToPay(zero);
+      simulationTopup.setOpeningFee(zero);
       return simulationTopup;
     }
 
     //saldo del usuario
     PrepaidBalance10 balance;
-    if(simulationTopup.getFirstTopup()){
+    if(isFirstTopup){
       balance = new PrepaidBalance10();
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       balance.setPcaMain(amount);
@@ -925,13 +931,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     log.info("Comision: " + fee);
-    log.info("Monto a cargar + comision: " + calculatedAmount);
 
-    //TODO es posible que el LEVEL_2 tambien se le cobre comision de apertura, revisar este caso con Felipe
-    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+    if(isFirstTopup) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);
       simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));
+      log.info("Comision de apertura: " + OPENING_FEE);
     }
+
+    log.info("Monto a cargar + comisiones: " + calculatedAmount);
 
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
