@@ -155,9 +155,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
 
-    //TODO falta validación de lista negra al usuario
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
+
+    // Verificar si el usuario esta en lista negra
+    if(user.getIsBlacklisted()) {
+      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR);
+    }
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
