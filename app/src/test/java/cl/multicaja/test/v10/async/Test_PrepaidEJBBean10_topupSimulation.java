@@ -122,24 +122,32 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   public void topupSimulation_ok_WEB() throws Exception {
 
     User user = registerUser();
+    user.setNameStatus(NameStatus.UNVERIFIED);
+    user = updateUser(user);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    //primera carga
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3000));
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+    System.out.println("resp:: " + respTopup);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    Assert.assertTrue("debe ser primera carga", respTopup.isFirstTopup());
 
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+    Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    // actualizo el usuario
+    user.setNameStatus(NameStatus.VERIFIED);
+    user = updateUser(user);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
@@ -171,24 +179,32 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   public void topupSimulation_ok_POS() throws Exception {
 
     User user = registerUser();
+    user.setNameStatus(NameStatus.UNVERIFIED);
+    user = updateUser(user);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    //primera carga
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3000));
 
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+    System.out.println("resp:: " + respTopup);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    Assert.assertTrue("debe ser primera carga", respTopup.isFirstTopup());
 
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+    Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    // actualizo el usuario
+    user.setNameStatus(NameStatus.VERIFIED);
+    user = updateUser(user);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
@@ -249,6 +265,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
+    Assert.assertNotNull("debe tener comision de apertura", resp.getSimulationTopupWeb().getOpeningFee());
+    Assert.assertEquals("debe tener comision de apertura", OPENING_FEE, resp.getSimulationTopupWeb().getOpeningFee().getValue());
   }
 
   @Test
@@ -391,6 +409,17 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
     SimulationTopupGroup10 group = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb().getEed());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupWeb().getEed().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb().getFee());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupWeb().getFee().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb().getPca());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupWeb().getPca().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb().getAmountToPay());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupWeb().getAmountToPay().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupWeb().getOpeningFee());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupWeb().getOpeningFee().getValue());
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue(), group.getSimulationTopupWeb().getCode());
   }
 
@@ -425,6 +454,17 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("Calcular carga POS: " + simulationNew);
     SimulationTopupGroup10 group = getPrepaidEJBBean10().topupSimulationGroup(null, user.getId(), simulationNew);
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS().getEed());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getEed().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS().getFee());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getFee().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS().getPca());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getPca().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS().getAmountToPay());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getAmountToPay().getValue());
+    Assert.assertNotNull("Deberia tener la info en 0", group.getSimulationTopupPOS().getOpeningFee());
+    Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getOpeningFee().getValue());
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue(), group.getSimulationTopupPOS().getCode());
   }
 
