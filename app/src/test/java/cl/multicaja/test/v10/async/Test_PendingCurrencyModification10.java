@@ -22,6 +22,9 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
     putSuccessFileIntoSftp(filename);
     CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
     Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
+    Assert.assertTrue("Deberia ser > 0", currencyUsd.getBuyCurrencyConvertion() > 0);
+    Assert.assertTrue("Deberia ser > 0", currencyUsd.getMidCurrencyConvertion() > 0);
+    Assert.assertTrue("Deberia ser > 0", currencyUsd.getSellCurrencyConvertion() > 0);
   }
 
   @Test
