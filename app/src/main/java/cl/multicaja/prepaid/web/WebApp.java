@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.web;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
@@ -36,7 +37,8 @@ public class WebApp implements ServletContextListener  {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     Locale.setDefault(Constants.DEFAULT_LOCALE);
-    ConfigUtils cu = ConfigUtils.getInstance();
+    ConfigUtils cu = new ConfigUtils("api-prepaid");
+    EncryptUtil.getInstance().setPassword(cu.getProperty("encrypt.password"));
     log.info("Init app: " + cu.getModuleProperties());
     //solamente crea un mq embebido si la conexión es del tipo vm, caso contrario se conecta a un activemq externo
     if (cu.getProperty("activemq.url","").startsWith("vm:")) {

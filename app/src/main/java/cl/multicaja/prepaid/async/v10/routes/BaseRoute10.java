@@ -76,7 +76,7 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public EncryptUtil getEncryptUtil(){
     if(this.encryptUtil == null){
-      this.encryptUtil = new EncryptUtil();
+      this.encryptUtil = EncryptUtil.getInstance();
     }
     return this.encryptUtil;
   }
