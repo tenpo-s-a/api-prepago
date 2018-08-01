@@ -1,11 +1,6 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
 import cl.multicaja.prepaid.async.v10.processors.*;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.processor.idempotent.FileIdempotentRepository;
-
-import java.io.File;
 
 /**
  * Implementacion personalizada de rutas camel
