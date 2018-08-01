@@ -48,7 +48,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_REQ = "PrepaidTopupRoute10.errorSendMailWithdraw.req";
   public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "PrepaidTopupRoute10.errorSendMailWithdraw.resp";
 
-
   @Override
   public void configure() throws Exception {
 
