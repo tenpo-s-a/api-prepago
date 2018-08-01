@@ -94,18 +94,6 @@ public class CurrencyUsd implements Serializable {
     this.currencyExponent = currencyExponent;
   }
 
-  public Timestamp generateEndDate() {
-    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-    Date date = null;
-    try {
-      date = dateFormat.parse("31/12/3000");
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    long time = date.getTime();
-    return new Timestamp(time);
-  }
-
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);

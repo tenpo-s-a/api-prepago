@@ -19,8 +19,6 @@
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_valor_usd_v10
 (
   IN _nombre_archivo       VARCHAR,
-  IN _fecha_creacion       TIMESTAMP,
-  IN _fecha_termino        TIMESTAMP,
   IN _fecha_expiracion_usd TIMESTAMP,
   IN _precio_venta         NUMERIC,
   IN _precio_compra        NUMERIC,
@@ -34,6 +32,36 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_valor_usd_v10
  BEGIN
     _error_code := '0';
     _error_msg := '';
+
+    IF COALESCE(_nombre_archivo, '') = '' THEN
+      _error_code := 'MC001';
+      _error_msg := 'El _nombre_archivo es obligatorio';
+      RETURN;
+    END IF;
+
+    IF COALESCE(_precio_venta, 0) = 0 THEN
+      _error_code := 'MC002';
+      _error_msg := 'El _precio_venta es obligatorio';
+      RETURN;
+    END IF;
+
+    IF COALESCE(_precio_compra, 0) = 0 THEN
+      _error_code := 'MC003';
+      _error_msg := 'El _precio_compra es obligatorio';
+      RETURN;
+    END IF;
+
+    IF COALESCE(_precio_medio, 0) = 0 THEN
+      _error_code := 'MC004';
+      _error_msg := 'El _precio_medio es obligatorio';
+      RETURN;
+    END IF;
+
+    IF COALESCE(_exponente, -1) = -1 THEN
+      _error_code := 'MC005';
+      _error_msg := 'El _exponente es obligatorio';
+      RETURN;
+    END IF;
 
     UPDATE
       ${schema}.prp_valor_usd
@@ -54,8 +82,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_valor_usd_v10
         exponente
       ) VALUES (
         _nombre_archivo,
-        _fecha_creacion,
-        _fecha_termino,
+        now(),
+        to_timestamp('3000-12-31 00:00:00', 'YYYY-MM-DD HH24:MI:SS'),
         _fecha_expiracion_usd,
         _precio_venta,
         _precio_compra,

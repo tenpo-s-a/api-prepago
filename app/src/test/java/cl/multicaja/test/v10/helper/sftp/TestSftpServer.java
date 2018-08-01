@@ -1,5 +1,6 @@
 package cl.multicaja.test.v10.helper.sftp;
 
+import cl.multicaja.prepaid.helpers.MastercardFileHelper;
 import com.jcraft.jsch.*;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
@@ -18,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public enum TestSftpServer {
+public class TestSftpServer {
 
-  INSTANCE;
+  private static TestSftpServer INSTANCE = new TestSftpServer();
   private final SshServer sshd;
   public static String BASE_DIR = "src/test/resources/";
   private String HOST_NAME = "localhost";
@@ -50,6 +51,27 @@ public enum TestSftpServer {
     sshd.setShellFactory(new ProcessShellFactory(new String[] { "/bin/sh", "-i", "-l" }));
     sshd.setCommandFactory(new ScpCommandFactory());
     sshd.setSubsystemFactories(Arrays.<NamedFactory<Command>>asList(new SftpSubsystem.Factory()));
+  }
+
+  private static void createInstance() {
+    if (INSTANCE == null) {
+      synchronized(MastercardFileHelper.class) {
+        if (INSTANCE == null) {
+          INSTANCE = new TestSftpServer();
+        }
+      }
+    }
+  }
+
+  public static TestSftpServer getInstance() {
+    if (INSTANCE == null) {
+      createInstance();
+    }
+    return INSTANCE;
+  }
+
+  public Object clone() throws CloneNotSupportedException {
+    throw new CloneNotSupportedException();
   }
 
   public void createDirectories() throws Exception {

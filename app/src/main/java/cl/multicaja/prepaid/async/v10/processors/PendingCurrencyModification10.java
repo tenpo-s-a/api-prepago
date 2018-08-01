@@ -60,8 +60,6 @@ public class PendingCurrencyModification10 extends BaseProcessor10 {
     currencyUsd.setFileName(fileName);
     currencyUsd.setCurrencyExponent(Integer.parseInt(ccrFile10.getCcrDetailRecord10().getCurrencyExponent()));
     currencyUsd.setExpirationUsdDate(getExpirationUsdDate());
-    currencyUsd.setEndDate(currencyUsd.generateEndDate());
-    currencyUsd.setCreationDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
     currencyUsd.setBuyCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion()));
     currencyUsd.setSellCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
     currencyUsd.setMidCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion()));

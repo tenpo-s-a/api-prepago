@@ -271,8 +271,6 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void updateUsdValue(CurrencyUsd currencyUsd) throws Exception {
     Object[] params = {
       new InParam(currencyUsd.getFileName(), Types.VARCHAR),
-      new InParam(currencyUsd.getCreationDate(), Types.TIMESTAMP),
-      new InParam(currencyUsd.getEndDate(), Types.TIMESTAMP),
       new InParam(currencyUsd.getExpirationUsdDate(), Types.TIMESTAMP),
       new InParam(currencyUsd.getBuyCurrencyConvertion(), Types.NUMERIC),
       new InParam(currencyUsd.getSellCurrencyConvertion(), Types.NUMERIC),
