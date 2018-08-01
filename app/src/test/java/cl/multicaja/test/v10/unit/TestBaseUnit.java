@@ -292,6 +292,16 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   * registra un usuario y además lo deja en algun estado de identidad
+   *
+   * @return
+   * @throws Exception
+   */
+  public User registerUser(UserIdentityStatus status) throws Exception {
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, status);
+  }
+
+  /**
    * registra un usuario con clave
    *
    * @param password
@@ -310,7 +320,19 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public User registerUser(String password,UserStatus status) throws Exception {
+  public User registerUser(String password, UserStatus status) throws Exception {
+    return registerUser(password, status, UserIdentityStatus.NORMAL);
+  }
+
+  /**
+   * registra un usuario con clave y estado especifico
+   *
+   * @param password
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
     User user = signupUserAndGetUser();
     user.setName(null);
     user.setLastname_1(null);
@@ -320,6 +342,7 @@ public class TestBaseUnit extends TestApiBase {
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
+    user.setIdentityStatus(identityStatus);
     user.setPassword(password);
     user = updateUser(user);
     return user;

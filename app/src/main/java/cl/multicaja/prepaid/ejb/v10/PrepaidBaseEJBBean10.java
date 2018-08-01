@@ -49,7 +49,7 @@ public abstract class PrepaidBaseEJBBean10 {
    */
   public static EncryptUtil getEncryptUtil() {
     if (encryptUtil == null) {
-      encryptUtil = new EncryptUtil();
+      encryptUtil = EncryptUtil.getInstance();
     }
     return encryptUtil;
   }
