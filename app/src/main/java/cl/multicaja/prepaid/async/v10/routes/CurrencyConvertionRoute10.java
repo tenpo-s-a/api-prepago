@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.processors.PendingCurrencyModification10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,8 +20,11 @@ public final class CurrencyConvertionRoute10 extends BaseRoute10 {
     /**
      * Extrae valor dolar
      */
-    from(SFTP_HOST_ENDPOINT)
-      .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
+    //TODO: Quitar este if cuando se tenga la configuracion de ambientes para SFTP mastercard
+    if(ConfigUtils.isEnvTest()) {
+      from(SFTP_HOST_ENDPOINT)
+        .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
+    }
   }
 
   private String getSftpEndpoint() {
