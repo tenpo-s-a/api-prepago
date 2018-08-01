@@ -91,11 +91,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_valor_usd_v10
         _exponente
     ) RETURNING id INTO _r_id;
 
-    IF NOT FOUND THEN
-       _error_code := 500;
-       _error_msg := '[mc_prp_actualiza_valor_usd_v10] Registro no encontrado';
-    END if;
-
    EXCEPTION
    WHEN OTHERS THEN
        _error_code := SQLSTATE;
