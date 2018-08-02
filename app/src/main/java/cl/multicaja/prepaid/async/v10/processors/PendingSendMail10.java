@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
@@ -80,7 +81,13 @@ public class PendingSendMail10 extends BaseProcessor10 {
             String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
             Map<String, Object> templateData = new HashMap<>();
-            templateData.put("cliente", data.getUser().getName() + " " + data.getUser().getLastname_1());
+            templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
+            if(data.getIssuanceFeeMovement10() != null){
+              templateData.put("amount", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue().subtract(data.getIssuanceFeeMovement10().getImpfac())));
+            } else {
+              templateData.put("amount", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue()));
+            }
+
 
             EmailBody emailBody = new EmailBody();
             emailBody.setTemplateData(templateData);
