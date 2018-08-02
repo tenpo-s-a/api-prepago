@@ -1,16 +1,17 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
-import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.model.v10.EmailBody;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -18,9 +19,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
 
 /**
  * @autor vutreras
@@ -163,13 +168,26 @@ public class PendingTopup10 extends BaseProcessor10 {
               //TODO quizas se debe enviar a otro proceso para saber que hacer en en esta caso, quizas mostrar en log, etc..
             }
 
-            //segun la historia: https://www.pivotaltracker.com/story/show/158044562
+            //Envio de comprobante de carga por mail
+            Map<String, Object> templateData = new HashMap<>();
 
+            templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+            templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+            templateData.put("transaction_amount", NumberUtils.getInstance().toClp(prepaidTopup.getTotal().getValue()));
+            templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(prepaidTopup.getAmount().getValue()));
+            templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+
+            EmailBody emailBody = new EmailBody();
+            emailBody.setTemplateData(templateData);
+            emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
+            emailBody.setAddress(data.getUser().getEmail().getValue());
+            getRoute().getMailEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
+
+            //segun la historia: https://www.pivotaltracker.com/story/show/158044562
             if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             } else {
-              //TODO Felipe dice que se debe enviar un correo, se debe revisar con una historia
               return req;
             }
 

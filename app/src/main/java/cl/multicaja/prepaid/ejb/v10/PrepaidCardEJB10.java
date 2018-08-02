@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.prepaid.model.v10.CcrDetailRecord10;
+import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 
@@ -98,4 +100,18 @@ public interface PrepaidCardEJB10 {
    * @throws Exception
    */
   void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
+
+  /**
+   * Obtiene valor actual del DOLAR
+   *
+   * @throws Exception
+   */
+  CurrencyUsd getCurrencyUsd() throws Exception;
+
+  /**
+   * Actualiza valor DOLAR
+   *
+   * @throws Exception
+   */
+  void updateUsdValue(CurrencyUsd currencyUsd) throws Exception;
 }

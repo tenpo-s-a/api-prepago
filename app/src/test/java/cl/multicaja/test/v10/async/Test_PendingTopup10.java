@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.jms.Queue;
+import java.math.BigDecimal;
 
 /**
  * @autor vutreras
@@ -156,6 +157,8 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
@@ -261,6 +264,8 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
@@ -351,6 +356,8 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
