@@ -47,3 +47,9 @@ docker-compose.yml
 # Logs
 logs
 *.log
+
+app/hostkey\.ser
+
+app/src/test/resources/mastercard/T058/done/
+
+app/src/test/resources/mastercard/T058/error/
