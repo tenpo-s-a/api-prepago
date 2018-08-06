@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.helpers;
 
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.Percentage10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -8,11 +7,8 @@ import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.EJB;
-import javax.faces.convert.BigDecimalConverter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLException;
 
 /**
  * @autor vutreras

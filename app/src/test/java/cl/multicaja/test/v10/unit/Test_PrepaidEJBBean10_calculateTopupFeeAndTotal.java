@@ -107,8 +107,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, topup.getTransactionOriginType());
     assertNotNull("Deberia tener comision", topup.getFee());
     assertNotNull("Deberia tener total", topup.getTotal());
-    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(297), topup.getFee().getValue());
-    assertEquals("Deberia tener total = 49703", BigDecimal.valueOf(49703), topup.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(298), topup.getFee().getValue());
+    assertEquals("Deberia tener total = 49703", BigDecimal.valueOf(49702), topup.getTotal().getValue());
   }
 
   @Test(expected = BadRequestException.class)
@@ -200,7 +200,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo POS", TransactionOriginType.POS, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(297), withdraw.getFee().getValue());
-    assertEquals("Deberia tener total = 50297", BigDecimal.valueOf(50297), withdraw.getTotal().getValue());
+    assertEquals("Deberia tener monto de comision = 297", BigDecimal.valueOf(298), withdraw.getFee().getValue());
+    assertEquals("Deberia tener total = 50297", BigDecimal.valueOf(50298), withdraw.getTotal().getValue());
   }
 }

@@ -23,7 +23,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
       // MAX(100; 0,5% * amount) + IVA
       BigDecimal commission = getCalculationsHelper().calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply( calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE()).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.DOWN);
+      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply( calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE()).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.HALF_UP);
 
       Assert.assertEquals("deben ser iguales", feeOk, commission);
     }
@@ -39,7 +39,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
       // MAX(100; 0,5% * amount) + IVA
       BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply(calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE()).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.DOWN);
+      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply(calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE()).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.HALF_UP);
 
       Assert.assertEquals("deben ser iguales", feeOk, commission);
     }
@@ -59,7 +59,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
       // MAX(100; 0,5% * amount) + IVA
       BigDecimal commission = calculationsHelper.calculateFee(amount, BigDecimal.valueOf(random));
 
-      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply(BigDecimal.valueOf(random)).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.DOWN);
+      BigDecimal feeOk = BigDecimal.valueOf(100).max((amount.multiply(BigDecimal.valueOf(random)).divide(BigDecimal.valueOf(100)))).multiply(BigDecimal.valueOf(1.19)).setScale(0, RoundingMode.HALF_UP);
 
       Assert.assertEquals("deben ser iguales", feeOk, commission);
     }
@@ -73,7 +73,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(124), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(125), commission);
   }
 
   @Test
@@ -84,7 +84,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1189), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1190), commission);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(998), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(999), commission);
   }
 
   @Test
@@ -106,7 +106,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getPercentage10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(999), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1000), commission);
   }
 
 }
