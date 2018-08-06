@@ -138,7 +138,8 @@ public class PendingSendMail10 extends BaseProcessor10 {
       EmailBody emailBody = new EmailBody();
       emailBody.setTemplateData(templateData);
       emailBody.setTemplate(TEMPLATE_MAIL_CARD_ERROR);
-      emailBody.setAddress(data.getUser().getEmail().getValue());
+      //emailBody.setAddress(data.getUser().getEmail().getValue());
+      emailBody.setAddress("soporte-prepago@multicaja.cl");
       getRoute().getMailEJBBean10().sendMailAsync(null,data.getUser().getId(),emailBody);
 
       return req;
