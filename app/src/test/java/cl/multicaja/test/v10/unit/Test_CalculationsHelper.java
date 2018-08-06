@@ -1,5 +1,8 @@
 package cl.multicaja.test.v10.unit;
 
+import cl.multicaja.core.utils.json.JsonUtils;
+import cl.multicaja.prepaid.model.v10.Percentage10;
+import cl.multicaja.users.utils.ParametersUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,6 +16,27 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateFee;
  * @autor vutreras
  */
 public class Test_CalculationsHelper extends TestBaseUnit {
+
+  private ParametersUtil parameterUtil = ParametersUtil.getInstance();
+  @Test
+  public void example(){
+
+    Percentage10 percentage10 = new Percentage10();
+    percentage10.setTOPUP_POS_FEE_PERCENTAGE(new BigDecimal(0.5));
+    percentage10.setTOPUP_WEB_FEE_PERCENTAGE(new BigDecimal(0));
+    percentage10.setTOPUP_WEB_FEE_AMOUNT(new BigDecimal(0));
+    percentage10.setWITHDRAW_POS_FEE_PERCENTAGE(new BigDecimal(0.5));
+    percentage10.setWITHDRAW_WEB_FEE_PERCENTAGE(new BigDecimal(0.5));
+    percentage10.setWITHDRAW_WEB_FEE_AMOUNT(new BigDecimal(100));
+    percentage10.setCALCULATOR_TOPUP_WEB_FEE_AMOUNT(new BigDecimal(0));
+    percentage10.setCALCULATOR_TOPUP_POS_FEE_PERCENTAGE(new BigDecimal(0.5));
+    percentage10.setCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT(new BigDecimal(100));
+    percentage10.setCALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE(new BigDecimal(0.5));
+    percentage10.setOPENING_FEE(new BigDecimal(990));
+    percentage10.setIVA(1.19);
+    percentage10.setMAX_AMOUNT_BY_USER(500000);
+    System.out.println(JsonUtils.getJsonParser().toJson(percentage10));
+  }
 
   @Test
   public void testCalculatePosTopupFee() {

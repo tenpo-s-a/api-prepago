@@ -2,9 +2,11 @@ package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.EJB;
 import javax.faces.convert.BigDecimalConverter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,6 +42,7 @@ public class CalculationsHelper {
 
   public static final int MAX_AMOUNT_BY_USER = 500000;
 
+  private ParametersUtil parametersUtil;
   /**
    * Calcula comision en la formula: MAX(100; 0,5% * amount) + IVA
    *
@@ -47,6 +50,7 @@ public class CalculationsHelper {
    * @param feePercentage
    * @return
    */
+
   public static BigDecimal calculateFee(BigDecimal amount, BigDecimal feePercentage) {
     BigDecimal percentage = (amount.multiply(feePercentage)).divide(BigDecimal.valueOf(ONE_HUNDRED));
 
@@ -144,5 +148,12 @@ public class CalculationsHelper {
       pcaSecondary.setValue(calculateEed(balance.getValue()));
     }
     return pcaSecondary;
+  }
+
+  public ParametersUtil getParametersUtil() {
+    if(parametersUtil == null){
+      parametersUtil = ParametersUtil.getInstance();
+    }
+    return parametersUtil;
   }
 }
