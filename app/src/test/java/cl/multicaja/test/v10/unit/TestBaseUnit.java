@@ -22,6 +22,7 @@ import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.DataEJBBean10;
+import cl.multicaja.users.ejb.v10.FilesEJBBean10;
 import cl.multicaja.users.ejb.v10.MailEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
@@ -63,6 +64,7 @@ public class TestBaseUnit extends TestApiBase {
   private static MailEJBBean10 mailEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+  private static FilesEJBBean10 filesEJBBean10;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
@@ -201,6 +203,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidEJBBean10.setUsersDataEJB10(getDataEJBBean10());
+      prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
     }
     return prepaidEJBBean10;
   }
@@ -216,6 +219,12 @@ public class TestBaseUnit extends TestApiBase {
     return userDataEJBBean10;
   }
 
+  public static FilesEJBBean10 getFilesEJBBean10() {
+    if(filesEJBBean10 == null) {
+      filesEJBBean10 = new FilesEJBBean10();
+    }
+    return filesEJBBean10;
+  }
 
   /**
    *

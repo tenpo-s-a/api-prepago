@@ -15,6 +15,7 @@ import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.users.ejb.v10.DataEJBBean10;
+import cl.multicaja.users.ejb.v10.FilesEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
 
+  private static String APP_NAME = "api-prepaid";
+  private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
+
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
@@ -63,6 +67,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @EJB
   private DataEJBBean10 usersDataEJB10;
+
+  @EJB
+  private FilesEJBBean10 filesEJBBean10;
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -118,6 +125,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setUsersDataEJB10(DataEJBBean10 usersDataEJB10) {
     this.usersDataEJB10 = usersDataEJB10;
+  }
+
+  public FilesEJBBean10 getFilesEJBBean10() {
+    return filesEJBBean10;
+  }
+
+  public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
+    this.filesEJBBean10 = filesEJBBean10;
   }
 
   @Override
@@ -558,6 +573,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidUserSignup10.setMustChoosePassword(Boolean.TRUE);
     prepaidUserSignup10.setMustValidateCellphone(Boolean.TRUE);
     prepaidUserSignup10.setMustValidateEmail(Boolean.TRUE);
+
+    AppFile tac = this.getLastTermsAndConditions(headers);
+    if(tac != null) {
+      List<String> tacs = new ArrayList<>();
+      tacs.add(tac.getVersion());
+      prepaidUserSignup10.setTermsAndConditionsList(tacs);
+    }
+
     return prepaidUserSignup10;
   }
 
@@ -1307,7 +1330,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus()) && !UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
       throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
     return user;
@@ -1338,4 +1361,74 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     return prepaidUser;
   }
+
+  /**
+   * Obtiene los ultimos terminos y condiciones activos para el producto Prepago
+   * @param headers
+   * @return
+   * @throws Exception
+   */
+  private AppFile getLastTermsAndConditions(Map<String, Object> headers) throws Exception {
+    Optional<AppFile> file = getFilesEJBBean10().getAppFiles(headers, null, APP_NAME, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
+      .stream()
+      .findFirst();
+
+    return (file.isPresent()) ? file.get() : null;
+  }
+
+  public PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception {
+    AppFile tacFile = this.getLastTermsAndConditions(headers);
+
+    if(tacFile == null){
+      throw new NotFoundException(TERMINOS_Y_CONDICIONES_NO_EXISTE);
+    }
+
+    PrepaidTac10 tac = new PrepaidTac10();
+    tac.setLocation(tacFile.getLocation());
+    tac.setVersion(tacFile.getVersion());
+
+    return tac;
+  }
+
+
+  /**
+   *  Aceptar los terminos y condiciones
+   * @param headers
+   * @param userIdMc
+   * @param termsAndConditions10
+   * @throws Exception
+   */
+  public void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+    if(termsAndConditions10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "termsAndConditions"));
+    }
+    if(StringUtils.isBlank(termsAndConditions10.getVersion())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "termsAndConditions.version"));
+    }
+
+    // Se obtiene el usuario MC
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Se verifica que la version que se esta aceptando sea la actual
+    AppFile prepaidTac = this.getLastTermsAndConditions(headers);
+
+    if(!prepaidTac.getVersion().equals(termsAndConditions10.getVersion())) {
+      throw new ValidationException(VERSION_TERMINOS_Y_CONDICIONES_NO_COINCIDEN);
+    }
+
+    // Se verifica si el usuario ya acepto los tac
+    List<UserFile> files = getFilesEJBBean10().getUsersFile(headers, null, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion(), null);
+
+    // Si el usuario ya acepto la version de los tac no se hace nada
+    if (files == null || files.size() == 0) {
+      getFilesEJBBean10().createUserFile(headers, user.getId(), prepaidTac.getId(), null, null, null, null, null, null);
+    }
+
+    //TODO guardar si el usuario acepta recibir beneficios
+
+  }
+
 }
