@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.NameStatus;
 import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserIdentityStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,6 +38,22 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario", CLIENTE_NO_EXISTE.getValue(), nfex.getCode());
+    }
+  }
+
+  @Test
+  public void topupUserBalance_not_ok_by_user_blacklisted() throws Exception {
+
+    User user = registerUser(UserIdentityStatus.TERRORIST);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
+
+    try {
+
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+
+    } catch(ValidationException nfex) {
+      Assert.assertEquals("Cliente en lista negra", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR.getValue(), nfex.getCode());
     }
   }
 

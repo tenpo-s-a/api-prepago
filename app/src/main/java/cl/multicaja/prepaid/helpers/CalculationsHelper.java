@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 /**
  * @autor vutreras
  */
+//TODO revisar los redondeos dado que se habla que deben ser redondeados hacia arriba...
 public class CalculationsHelper {
 
   private static Log log = LogFactory.getLog(CalculationsHelper.class);

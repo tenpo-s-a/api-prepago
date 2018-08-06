@@ -158,6 +158,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
+    // Verificar si el usuario esta en lista negra
+    if(user.getIsBlacklisted()) {
+      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR);
+    }
+
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
@@ -359,7 +364,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Integer codact = prepaidMovement.getCodact();
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
-    String numreffac = prepaidMovement.getId().toString();
+    String numreffac = prepaidMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
     String numaut = numreffac;
 
     //solamente los 6 ultimos digitos de numreffac
@@ -370,7 +375,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
-      if (inclusionMovimientosDTO.isRetornoExitoso()) {
+    if (inclusionMovimientosDTO.isRetornoExitoso()) {
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();
@@ -411,7 +416,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
-      throw  new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     /*
@@ -883,12 +888,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
+      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      simulationTopup.setFee(zero);
+      simulationTopup.setPca(zero);
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setAmountToPay(zero);
+      simulationTopup.setOpeningFee(zero);
       return simulationTopup;
     }
 
     //saldo del usuario
     PrepaidBalance10 balance;
-    if(simulationTopup.getFirstTopup()){
+    if(isFirstTopup){
       balance = new PrepaidBalance10();
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       balance.setPcaMain(amount);
@@ -920,13 +931,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     log.info("Comision: " + fee);
-    log.info("Monto a cargar + comision: " + calculatedAmount);
 
-
-    if(prepaidUser10.getUserLevel() == PrepaidUserLevel.LEVEL_1) {
+    if(isFirstTopup) {
       calculatedAmount = calculatedAmount.add(OPENING_FEE);
       simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));
+      log.info("Comision de apertura: " + OPENING_FEE);
     }
+
+    log.info("Monto a cargar + comisiones: " + calculatedAmount);
 
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));

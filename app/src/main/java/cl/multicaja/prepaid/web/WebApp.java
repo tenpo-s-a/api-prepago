@@ -3,6 +3,8 @@ package cl.multicaja.prepaid.web;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
+import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
@@ -27,6 +29,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private PrepaidTopupRoute10 prepaidTopupRoute10;
 
+  @Inject
+  private CurrencyConvertionRoute10 currencyConvertionRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -36,7 +41,8 @@ public class WebApp implements ServletContextListener  {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     Locale.setDefault(Constants.DEFAULT_LOCALE);
-    ConfigUtils cu = ConfigUtils.getInstance();
+    ConfigUtils cu = new ConfigUtils("api-prepaid");
+    EncryptUtil.getInstance().setPassword(cu.getProperty("encrypt.password"));
     log.info("Init app: " + cu.getModuleProperties());
     //solamente crea un mq embebido si la conexión es del tipo vm, caso contrario se conecta a un activemq externo
     if (cu.getProperty("activemq.url","").startsWith("vm:")) {
@@ -52,7 +58,7 @@ public class WebApp implements ServletContextListener  {
     }
     try {
       if (!camelFactory.isCamelRunning()) {
-        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10);
+        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {

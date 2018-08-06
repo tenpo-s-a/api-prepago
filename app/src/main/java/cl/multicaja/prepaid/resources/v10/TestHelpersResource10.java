@@ -227,6 +227,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     NameStatus initialNameStatus = user.getNameStatus();
     UserIdentityStatus initialIdentityStatus = user.getIdentityStatus();
+    RutStatus initialRutStatus = user.getRut() != null ? user.getRut().getStatus() : null;
 
     Map<String, Object> mapHeaders = headersToMap(headers);
 
@@ -254,20 +255,12 @@ public final class TestHelpersResource10 extends BaseResource {
     if (StringUtils.isBlank(user.getLastname_2())) {
       user.setLastname_2(null);
     }
-    if(initialNameStatus == null){
-      user.setNameStatus(NameStatus.VERIFIED);
-    } else {
-      user.setNameStatus(initialNameStatus);
-    }
 
-    if(initialIdentityStatus== null){
-      user.setIdentityStatus(UserIdentityStatus.NORMAL);
-    } else {
-      user.setIdentityStatus(initialIdentityStatus);
-    }
+    user.setNameStatus(initialNameStatus == null ? NameStatus.VERIFIED : initialNameStatus);
+    user.setIdentityStatus(initialIdentityStatus ==  null ? UserIdentityStatus.NORMAL : initialIdentityStatus);
+    user.getRut().setStatus(initialRutStatus == null ? RutStatus.VERIFIED : initialRutStatus);
 
     user.setGlobalStatus(UserStatus.ENABLED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
     user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
     user.setPassword(String.valueOf(1357));

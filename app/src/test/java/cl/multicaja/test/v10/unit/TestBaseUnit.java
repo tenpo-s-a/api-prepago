@@ -22,8 +22,8 @@ import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.ejb.v10.MailEJBBean10;
+import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -292,6 +292,16 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   * registra un usuario y además lo deja en algun estado de identidad
+   *
+   * @return
+   * @throws Exception
+   */
+  public User registerUser(UserIdentityStatus status) throws Exception {
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, status);
+  }
+
+  /**
    * registra un usuario con clave
    *
    * @param password
@@ -310,7 +320,19 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public User registerUser(String password,UserStatus status) throws Exception {
+  public User registerUser(String password, UserStatus status) throws Exception {
+    return registerUser(password, status, UserIdentityStatus.NORMAL);
+  }
+
+  /**
+   * registra un usuario con clave y estado especifico
+   *
+   * @param password
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
     User user = signupUserAndGetUser();
     user.setName(null);
     user.setLastname_1(null);
@@ -320,6 +342,7 @@ public class TestBaseUnit extends TestApiBase {
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
     user.setNameStatus(NameStatus.VERIFIED);
+    user.setIdentityStatus(identityStatus);
     user.setPassword(password);
     user = updateUser(user);
     return user;
@@ -473,7 +496,8 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) {
 
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
 
     DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
 
@@ -832,7 +856,7 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
     }
 
-    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
   }
 
   /**
