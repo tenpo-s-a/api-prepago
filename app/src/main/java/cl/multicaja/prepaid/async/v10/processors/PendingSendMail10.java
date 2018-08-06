@@ -123,7 +123,13 @@ public class PendingSendMail10 extends BaseProcessor10 {
        *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
        */
       //TODO revisar en detalle este envio de email en caso del error al obtener los datos de la tarjeta
+
+      Map<String, Object> templateData = new HashMap<String, Object>();
+      templateData.put("idUsuario", data.getUser().getId().toString());
+      templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
+
       EmailBody emailBody = new EmailBody();
+      emailBody.setTemplateData(templateData);
       emailBody.setTemplate(TEMPLATE_MAIL_CARD_ERROR);
       emailBody.setAddress(data.getUser().getEmail().getValue());
       getRoute().getMailEJBBean10().sendMailAsync(null,data.getUser().getId(),emailBody);

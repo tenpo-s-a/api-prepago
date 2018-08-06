@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
@@ -160,7 +161,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
     prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
 
     DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
