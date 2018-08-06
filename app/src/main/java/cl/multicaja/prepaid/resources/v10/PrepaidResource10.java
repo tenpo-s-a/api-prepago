@@ -106,6 +106,13 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidUser10).build();
   }
 
+  @POST
+  @Path("/{userId}/signup/tac")
+  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
+    return Response.ok().build();
+  }
+
   /*
     Prepaid User
    */

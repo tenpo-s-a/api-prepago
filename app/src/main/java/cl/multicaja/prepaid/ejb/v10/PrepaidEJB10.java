@@ -143,4 +143,13 @@ public interface PrepaidEJB10 {
    */
   PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
+  /**
+   *  Aceptar los terminos y condiciones
+   * @param headers
+   * @param userIdMc
+   * @param termsAndConditions10
+   * @throws Exception
+   */
+  void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
+
 }
