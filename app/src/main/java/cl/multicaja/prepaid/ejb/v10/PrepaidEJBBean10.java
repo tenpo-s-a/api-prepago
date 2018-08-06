@@ -1385,7 +1385,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   public void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception {
-    if(userIdMc == null){
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
     if(termsAndConditions10 == null) {
@@ -1409,11 +1409,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Se verifica si el usuario ya acepto los tac
-    Optional<UserFile> userTac = getFilesEJBBean10().getUsersFile(headers, null, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion(), null)
-      .stream().findFirst();
+    List<UserFile> files = getFilesEJBBean10().getUsersFile(headers, null, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion(), null);
 
     // Si el usuario ya acepto la version de los tac no se hace nada
-    if (!userTac.isPresent()) {
+    if (files == null || files.size() == 0) {
       getFilesEJBBean10().createUserFile(headers, user.getId(), prepaidTac.getId(), null, null, null, null, null, null);
     }
 
