@@ -496,7 +496,8 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) {
 
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
 
     DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
 
@@ -855,7 +856,7 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
     }
 
-    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT);
+    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
   }
 
   /**
