@@ -1330,7 +1330,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus()) && !UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
       throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
     return user;
@@ -1376,6 +1376,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return (file.isPresent()) ? file.get() : null;
   }
 
+  public PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception {
+    AppFile tacFile = this.getLastTermsAndConditions(headers);
+
+    if(tacFile == null){
+      throw new NotFoundException(TERMINOS_Y_CONDICIONES_NO_EXISTE);
+    }
+
+    PrepaidTac10 tac = new PrepaidTac10();
+    tac.setLocation(tacFile.getLocation());
+    tac.setVersion(tacFile.getVersion());
+
+    return tac;
+  }
+
 
   /**
    *  Aceptar los terminos y condiciones
@@ -1397,9 +1411,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Se obtiene el usuario MC
     User user = this.getUserMcById(headers, userIdMc);
-
-    // Se obtiene el usuario Prepago
-    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
     // Se verifica que la version que se esta aceptando sea la actual
     AppFile prepaidTac = this.getLastTermsAndConditions(headers);
