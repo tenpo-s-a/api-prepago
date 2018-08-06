@@ -1,19 +1,10 @@
 package cl.multicaja.test.v10.async;
 
 import cl.multicaja.camel.ExchangeData;
-import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.BaseModel;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
-import cl.multicaja.prepaid.async.v10.processors.PendingTopup10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -22,10 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.jms.Queue;
-
 import java.io.Serializable;
-
-import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_EMISSION_REQ;
 
 /**
  * Test para probar los mensajes con tiempo de retraso

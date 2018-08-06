@@ -150,9 +150,7 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.cdtEJBBean10 = cdtEJBBean10;
   }
 
-  public MailEJBBean10 getMailEJBBean10() {
-    return mailEJBBean10;
-  }
+  public MailEJBBean10 getMailEJBBean10() { return mailEJBBean10; }
 
   public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
     this.mailEJBBean10 = mailEJBBean10;
@@ -161,4 +159,5 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   public TecnocomService getTecnocomService() {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
+
 }
