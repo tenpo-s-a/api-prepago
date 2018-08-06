@@ -185,14 +185,13 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorEmission - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      //TODO falta implementar, no se sabe que hacer en este caso
       /**
        *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
        */
       Map<String, Object> templateData = new HashMap<String, Object>();
       templateData.put("idUsuario", data.getUser().getId().toString());
       templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
-      getRoute().getMailEJBBean10().sendEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData, "soporte-prepago@multicaja.cl", data.getUser().getId());
+      getRoute().getMailEJBBean10().sendEmailAsync(TEMPLATE_MAIL_EMISSION_ERROR, templateData, "soporte-prepago@multicaja.cl", data.getUser().getId());
 
       return req;
       }
