@@ -24,6 +24,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCardIssuanceFee10.class);
 
+  //TODO: externalizar?
+  private static final BigDecimal ISSUANCE_FEE = BigDecimal.valueOf(990);
+
   public PendingCardIssuanceFee10(BaseRoute10 route) {
     super(route);
   }
@@ -75,6 +78,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
+          issuanceFeeMovement.setImpfac(ISSUANCE_FEE);
 
           issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
 
