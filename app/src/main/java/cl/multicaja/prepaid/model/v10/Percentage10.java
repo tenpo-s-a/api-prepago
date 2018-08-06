@@ -4,19 +4,19 @@ import java.math.BigDecimal;
 
 public class Percentage10 {
 
-  public BigDecimal TOPUP_POS_FEE_PERCENTAGE;
-  public BigDecimal TOPUP_WEB_FEE_PERCENTAGE;
-  public BigDecimal TOPUP_WEB_FEE_AMOUNT;
-  public BigDecimal WITHDRAW_POS_FEE_PERCENTAGE;
-  public BigDecimal WITHDRAW_WEB_FEE_PERCENTAGE;
-  public BigDecimal WITHDRAW_WEB_FEE_AMOUNT;
-  public BigDecimal CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
-  public BigDecimal CALCULATOR_TOPUP_POS_FEE_PERCENTAGE;
-  public BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
-  public BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE;
-  public BigDecimal OPENING_FEE;
-  public double IVA;
-  public int MAX_AMOUNT_BY_USER;
+  private BigDecimal TOPUP_POS_FEE_PERCENTAGE;
+  private BigDecimal TOPUP_WEB_FEE_PERCENTAGE;
+  private BigDecimal TOPUP_WEB_FEE_AMOUNT;
+  private BigDecimal WITHDRAW_POS_FEE_PERCENTAGE;
+  private BigDecimal WITHDRAW_WEB_FEE_PERCENTAGE;
+  private BigDecimal WITHDRAW_WEB_FEE_AMOUNT;
+  private BigDecimal CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
+  private BigDecimal CALCULATOR_TOPUP_POS_FEE_PERCENTAGE;
+  private BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
+  private BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE;
+  private BigDecimal OPENING_FEE;
+  private double IVA;
+  private int MAX_AMOUNT_BY_USER;
 
   public BigDecimal getTOPUP_POS_FEE_PERCENTAGE() {
     return TOPUP_POS_FEE_PERCENTAGE;

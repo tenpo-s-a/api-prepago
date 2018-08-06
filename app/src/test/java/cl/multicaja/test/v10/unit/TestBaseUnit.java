@@ -14,6 +14,7 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -63,7 +64,7 @@ public class TestBaseUnit extends TestApiBase {
   private static MailEJBBean10 mailEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
-
+  protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
     new HttpHeader(Constants.HEADER_USER_LOCALE, Constants.DEFAULT_LOCALE.toString()),
@@ -81,6 +82,10 @@ public class TestBaseUnit extends TestApiBase {
     return configUtils;
   }
 
+  public static CalculationsHelper getCalculationsHelper(){
+    return  CalculationsHelper.getInstance();
+  }
+
   /**
    *
    * @return
@@ -96,7 +101,9 @@ public class TestBaseUnit extends TestApiBase {
   public static DBUtils getDbUtils() {
     return getPrepaidCardEJBBean10().getDbUtils();
   }
-
+  public Percentage10 getPercentage(){
+   return getCalculationsHelper().getPercentage10();
+  }
   /**
    *
    * @return

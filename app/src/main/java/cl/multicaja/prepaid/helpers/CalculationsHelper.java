@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.helpers;
 
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.Percentage10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
@@ -10,40 +12,47 @@ import javax.ejb.EJB;
 import javax.faces.convert.BigDecimalConverter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 
 /**
  * @autor vutreras
  */
-//TODO revisar los redondeos dado que se habla que deben ser redondeados hacia arriba...
 public class CalculationsHelper {
 
+
+  private static CalculationsHelper instance;
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
+  private static final int ONE_HUNDRED = 100;
+  private static Percentage10 percentage10;
+  public CalculationsHelper() {
 
-  public static final int ONE_HUNDRED = 100;
+  }
 
-  // TODO: externalizar estos porcentajes?
-  public static final BigDecimal TOPUP_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
-  public static final BigDecimal TOPUP_WEB_FEE_PERCENTAGE = new BigDecimal(0);
-  public static final BigDecimal TOPUP_WEB_FEE_AMOUNT = new BigDecimal(0);
+  /**
+   * retorna la instancia unica como singleton
+   * @return
+   */
+  public static CalculationsHelper getInstance() {
+    if (instance == null) {
+      instance = new CalculationsHelper();
+      try {
+        percentage10 = getParametersUtil().getObject("api-prepaid", "calculator_percentage", "v10", Percentage10.class);
+      }catch (Exception e){
 
-  public static final BigDecimal WITHDRAW_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
-  public static final BigDecimal WITHDRAW_WEB_FEE_PERCENTAGE = new BigDecimal(0.5);
-  public static final BigDecimal WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
+      }
+    }
+    return instance;
+  }
+
+  public static int getOneHundred() {
+    return ONE_HUNDRED;
+  }
+
+  public Percentage10 getPercentage10() {
+    return percentage10;
+  }
 
 
-  public static final BigDecimal CALCULATOR_TOPUP_WEB_FEE_AMOUNT = new BigDecimal(0);
-  public static final BigDecimal CALCULATOR_TOPUP_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
-
-  public static final BigDecimal CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT = new BigDecimal(100);
-  public static final BigDecimal CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE = new BigDecimal(0.5);
-
-  public static final BigDecimal OPENING_FEE = new BigDecimal(990);
-
-  public static final double IVA = 1.19;
-
-  public static final int MAX_AMOUNT_BY_USER = 500000;
-
-  private ParametersUtil parametersUtil;
   /**
    * Calcula comision en la formula: MAX(100; 0,5% * amount) + IVA
    *
@@ -52,14 +61,14 @@ public class CalculationsHelper {
    * @return
    */
 
-  public static BigDecimal calculateFee(BigDecimal amount, BigDecimal feePercentage) {
+  public BigDecimal calculateFee(BigDecimal amount, BigDecimal feePercentage) {
     BigDecimal percentage = (amount.multiply(feePercentage)).divide(BigDecimal.valueOf(ONE_HUNDRED));
 
     BigDecimal max = BigDecimal.valueOf(100).max(percentage);
 
-    BigDecimal result = max.multiply(BigDecimal.valueOf(IVA));
-
-    BigDecimal rounded = result.setScale(0, RoundingMode.DOWN);
+    BigDecimal result = max.multiply(BigDecimal.valueOf(percentage10.getIVA()));
+    // Se redondea de la mitad hacia arriba
+    BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     log.info("Amount: " + amount + ", feePercentage: " + feePercentage + ", percentage calculated: " + percentage + ", max: " + max + ", with iva: " + result + ", final: " + rounded);
     return rounded;
   }
@@ -151,10 +160,7 @@ public class CalculationsHelper {
     return pcaSecondary;
   }
 
-  public ParametersUtil getParametersUtil() {
-    if(parametersUtil == null){
-      parametersUtil = ParametersUtil.getInstance();
-    }
-    return parametersUtil;
+  public static ParametersUtil getParametersUtil() {
+    return ParametersUtil.getInstance();
   }
 }
