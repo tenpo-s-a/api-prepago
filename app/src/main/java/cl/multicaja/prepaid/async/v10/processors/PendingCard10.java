@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_CARD_ERROR;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_EMISSION_ERROR;
 
 /**
@@ -191,7 +190,7 @@ public class PendingCard10 extends BaseProcessor10 {
       Map<String, Object> templateData = new HashMap<String, Object>();
       templateData.put("idUsuario", data.getUser().getId().toString());
       templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
-      getRoute().getMailEJBBean10().sendEmailAsync(TEMPLATE_MAIL_EMISSION_ERROR, templateData, "soporte-prepago@multicaja.cl", data.getUser().getId());
+      getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
 
       return req;
       }

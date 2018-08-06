@@ -131,7 +131,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<String, Object>();
         templateData.put("idUsuario", data.getUser().getId().toString());
         templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-        getRoute().getMailEJBBean10().sendEmailAsync(TEMPLATE_MAIL_CARD_ERROR, templateData, "soporte-prepago@multicaja.cl", data.getUser().getId());
+        getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
 
         return req;
       }
