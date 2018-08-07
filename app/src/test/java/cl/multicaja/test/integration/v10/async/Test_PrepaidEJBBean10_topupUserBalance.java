@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.NameStatus;
+import cl.multicaja.users.model.v10.RutStatus;
 import cl.multicaja.users.model.v10.User;
 import cl.multicaja.users.model.v10.UserIdentityStatus;
 import org.junit.Assert;
@@ -276,6 +277,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   public void topupUserBalance_ok_first_topup_false_by_level_2() throws Exception {
 
     User user = registerUser();
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user = updateUser(user);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
@@ -307,10 +311,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 1891 pesos (carga inicial - comision (119) - comision de apertura (990))", 1891L, prepaidBalance10.getBalance().getValue().longValue());
+        Assert.assertEquals("El saldo del usuario debe ser 1891 pesos (carga inicial - comision (119) - comision de apertura (990))", BigDecimal.valueOf(1891), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 2010 pesos (carga inicial - comision (0) - comision de apertura (990))", 2010L, prepaidBalance10.getBalance().getValue().longValue());
+        Assert.assertEquals("El saldo del usuario debe ser 2010 pesos (carga inicial - comision (0) - comision de apertura (990))", BigDecimal.valueOf(2010), prepaidBalance10.getBalance().getValue());
         break;
     }
   }
