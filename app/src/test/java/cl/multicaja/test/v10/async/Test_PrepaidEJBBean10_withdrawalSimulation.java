@@ -623,7 +623,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     User user = registerUser(password);
 
     //se actualiza el usuario a nivel 1 para poder realizar la 1ra carga
-    user.setNameStatus(NameStatus.UNVERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
     updateUser(user);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
@@ -656,10 +656,6 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     Assert.assertEquals("El saldo del usuario debe ser 2010 pesos (carga inicial - comision de apertura (990))", 2010L, prepaidBalance10.getBalance().getValue().longValue());
 
-    //se actualiza al usuario a nivel 2
-    user.setNameStatus(NameStatus.VERIFIED);
-    updateUser(user);
-
     long sumBalance = prepaidBalance10.getBalance().getValue().longValue();
 
     //se cargan 900.000 mil pesos, enesimas cargas
@@ -683,9 +679,9 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       System.out.println(prepaidBalance10);
 
-      sumBalance+= prepaidTopup10.getAmount().getValue().longValue();
+      sumBalance += prepaidTopup10.getAmount().getValue().longValue();
 
-      Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
+      Assert.assertEquals("El saldo del usuario debe estar actualizado", BigDecimal.valueOf(sumBalance), prepaidBalance10.getBalance().getValue());
 
       System.out.println("---------------------------------------------------------------------------------------");
     }
