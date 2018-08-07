@@ -65,12 +65,9 @@ public class TestBaseUnit extends TestApiBase {
   private static MailEJBBean10 mailEJBBean10;
   private static DataEJBBean10 userDataEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
-<<<<<<< HEAD
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
-=======
   private static FilesEJBBean10 filesEJBBean10;
 
->>>>>>> master
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
     new HttpHeader(Constants.HEADER_USER_LOCALE, Constants.DEFAULT_LOCALE.toString()),
