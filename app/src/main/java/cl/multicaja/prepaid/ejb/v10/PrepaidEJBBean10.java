@@ -308,7 +308,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
-
+    if(user.getIsBlacklisted()){
+      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR);
+    }
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
