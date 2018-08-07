@@ -99,11 +99,25 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidUserSignup10).status(201).build();
   }
 
+  @GET
+  @Path("/signup/tac")
+  public Response getTermsAndConditions(@Context HttpHeaders headers) throws Exception {
+    PrepaidTac10 tac = this.prepaidEJBBean10.getTermsAndConditions(headersToMap(headers));
+    return Response.ok(tac).build();
+  }
+
   @POST
   @Path("/{userId}/finish_signup")
   public Response finishSignup(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
     PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers),userId);
     return Response.ok(prepaidUser10).build();
+  }
+
+  @POST
+  @Path("/{userId}/signup/tac")
+  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
+    return Response.ok().build();
   }
 
   /*
