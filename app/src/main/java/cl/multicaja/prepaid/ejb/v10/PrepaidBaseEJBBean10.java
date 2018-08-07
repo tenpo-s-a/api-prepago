@@ -5,7 +5,9 @@ import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.model.v10.calculatorParameter10;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.users.utils.ParametersUtil;
 
@@ -32,6 +34,13 @@ public abstract class PrepaidBaseEJBBean10 {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
+
+  public calculatorParameter10 getPercentage(){
+    return CalculationsHelper.getInstance().getPercentage10();
+  }
+  public CalculationsHelper getCalculationsHelper(){
+    return CalculationsHelper.getInstance();
+  }
   /**
    *
    * @return
