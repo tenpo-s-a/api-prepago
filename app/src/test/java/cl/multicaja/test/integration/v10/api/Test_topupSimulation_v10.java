@@ -138,7 +138,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(BigDecimal.ZERO);
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -237,7 +237,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE));
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), BigDecimal.valueOf(0.5)));
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
     prepaidUser10 = getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser10);
