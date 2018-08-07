@@ -1330,7 +1330,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
 
-    if (!UserStatus.ENABLED.equals(user.getGlobalStatus()) && !UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
       throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
     return user;
@@ -1410,7 +1410,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Se obtiene el usuario MC
-    User user = this.getUserMcById(headers, userIdMc);
+    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+
+    if (user == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    if (!UserStatus.ENABLED.equals(user.getGlobalStatus()) && !UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
+      throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
+    }
 
     // Se verifica que la version que se esta aceptando sea la actual
     AppFile prepaidTac = this.getLastTermsAndConditions(headers);
