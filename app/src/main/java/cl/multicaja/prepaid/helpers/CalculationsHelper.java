@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.Percentage10;
+import cl.multicaja.prepaid.model.v10.calculatorParameter10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
@@ -19,7 +19,7 @@ public class CalculationsHelper {
   private static CalculationsHelper instance;
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
   private static final int ONE_HUNDRED = 100;
-  private static Percentage10 percentage10;
+  private static calculatorParameter10 calculatorParameter10;
   public CalculationsHelper() {
 
   }
@@ -32,7 +32,7 @@ public class CalculationsHelper {
     if (instance == null) {
       instance = new CalculationsHelper();
       try {
-        percentage10 = getParametersUtil().getObject("api-prepaid", "calculator_percentage", "v10", Percentage10.class);
+        calculatorParameter10 = getParametersUtil().getObject("api-prepaid", "calculator_percentage", "v10", calculatorParameter10.class);
       }catch (Exception e){
 
       }
@@ -44,8 +44,8 @@ public class CalculationsHelper {
     return ONE_HUNDRED;
   }
 
-  public Percentage10 getPercentage10() {
-    return percentage10;
+  public calculatorParameter10 getPercentage10() {
+    return calculatorParameter10;
   }
 
 
@@ -62,7 +62,7 @@ public class CalculationsHelper {
 
     BigDecimal max = BigDecimal.valueOf(100).max(percentage);
 
-    BigDecimal result = max.multiply(BigDecimal.valueOf(percentage10.getIVA()));
+    BigDecimal result = max.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA()));
     // Se redondea de la mitad hacia arriba
     BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     log.info("Amount: " + amount + ", feePercentage: " + feePercentage + ", percentage calculated: " + percentage + ", max: " + max + ", with iva: " + result + ", final: " + rounded);
