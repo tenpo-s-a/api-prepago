@@ -277,7 +277,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
     //calculo de la comision
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT());
 
     Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
@@ -318,7 +318,7 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
     //calculo de la comision
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE));
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE()));
 
     Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());

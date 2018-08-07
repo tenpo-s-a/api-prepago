@@ -32,7 +32,8 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 
 /**
  * @author vutreras
@@ -676,10 +677,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(TOPUP_WEB_FEE_AMOUNT);
+          fee.setValue(getPercentage().getTOPUP_WEB_FEE_AMOUNT());
         } else {
           // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), TOPUP_POS_FEE_PERCENTAGE);
+          BigDecimal commission = getCalculationsHelper().calculateFee(transaction.getAmount().getValue(),getPercentage().getTOPUP_POS_FEE_PERCENTAGE());
           fee.setValue(commission);
         }
         // Calculo el total
@@ -688,10 +689,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(WITHDRAW_WEB_FEE_AMOUNT);
+          fee.setValue(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT());
         } else {
           // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-          BigDecimal commission = calculateFee(transaction.getAmount().getValue(), WITHDRAW_POS_FEE_PERCENTAGE);
+          BigDecimal commission =getCalculationsHelper().calculateFee(transaction.getAmount().getValue(), getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE());
           fee.setValue(commission);
         }
         // Calculo el total
@@ -936,18 +937,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a cargar: " + amountValue);
-    log.info("Monto maximo a cargar: " + MAX_AMOUNT_BY_USER);
+    log.info("Monto maximo a cargar: " + getPercentage().getMAX_AMOUNT_BY_USER());
 
-    if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > MAX_AMOUNT_BY_USER) {
-      throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(new KeyValue("value", MAX_AMOUNT_BY_USER));
+    if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > getPercentage().getMAX_AMOUNT_BY_USER()) {
+      throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(new KeyValue("value", getPercentage().getMAX_AMOUNT_BY_USER()));
     }
 
     BigDecimal fee;
 
     if(simulationNew.isTransactionWeb()){
-      fee = CALCULATOR_TOPUP_WEB_FEE_AMOUNT;
+      fee = getPercentage().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT();
     } else {
-      fee = calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE);
+      fee = getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE());
     }
 
     //monto a cargar + comision
@@ -956,9 +957,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Comision: " + fee);
 
     if(isFirstTopup) {
-      calculatedAmount = calculatedAmount.add(OPENING_FEE);
-      simulationTopup.setOpeningFee(new NewAmountAndCurrency10(OPENING_FEE));
-      log.info("Comision de apertura: " + OPENING_FEE);
+      calculatedAmount = calculatedAmount.add(getPercentage().getOPENING_FEE());
+      simulationTopup.setOpeningFee(new NewAmountAndCurrency10(getPercentage().getOPENING_FEE()));
+      log.info("Comision de apertura: " + getPercentage().getOPENING_FEE());
     }
 
     log.info("Monto a cargar + comisiones: " + calculatedAmount);
@@ -1017,9 +1018,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal fee;
 
     if (simulationNew.isTransactionWeb()) {
-      fee = CALCULATOR_WITHDRAW_WEB_FEE_AMOUNT;
+      fee = getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT();
     } else {
-      fee = calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE);
+      fee = getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE());
     }
 
     //monto a cargar + comision

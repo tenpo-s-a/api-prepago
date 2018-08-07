@@ -161,7 +161,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -218,7 +218,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE));
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -253,9 +253,9 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getPercentage().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(OPENING_FEE));
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(getPercentage().getOPENING_FEE()));
 
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
@@ -266,7 +266,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
     Assert.assertNotNull("debe tener comision de apertura", resp.getSimulationTopupWeb().getOpeningFee());
-    Assert.assertEquals("debe tener comision de apertura", OPENING_FEE, resp.getSimulationTopupWeb().getOpeningFee().getValue());
+    Assert.assertEquals("debe tener comision de apertura", getPercentage().getOPENING_FEE(), resp.getSimulationTopupWeb().getOpeningFee().getValue());
   }
 
   @Test
