@@ -396,6 +396,24 @@ public class TestBaseUnit extends TestApiBase {
     return user;
   }
 
+  public User registerUserBlackListed() throws Exception {
+    return registerUserBlackListed(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+  }
+  public User registerUserBlackListed(String password, UserStatus status) throws Exception {
+    User user = signupUserAndGetUser();
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
+    user = getUsersEJBBean10().fillUser(user);
+    user.setGlobalStatus(status);
+    user.getRut().setStatus(RutStatus.UNVERIFIED);
+    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setPassword(password);
+    user.setIdentityStatus(UserIdentityStatus.TERRORIST);
+    user = updateUser(user);
+    return user;
+  }
   /**
    *
    * @return
