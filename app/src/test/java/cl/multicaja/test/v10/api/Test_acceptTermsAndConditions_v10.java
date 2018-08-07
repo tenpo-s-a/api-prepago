@@ -139,43 +139,6 @@ public class Test_acceptTermsAndConditions_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn404_When_PrepaidUserNull() throws Exception {
-
-    NewTermsAndConditions10 tac = new NewTermsAndConditions10();
-    tac.setVersion("v1.0");
-    tac.setBenefitsAccepted(Boolean.FALSE);
-
-    User user = registerUser();
-    updateUser(user);
-
-    HttpResponse resp = acceptTermsAndConditions(user.getId(), tac);
-    Assert.assertEquals("resp -> 404", 404, resp.getStatus());
-
-    NotFoundException bex = resp.toObject(NotFoundException.class);
-    Assert.assertEquals("user null", CLIENTE_NO_TIENE_PREPAGO.getValue(), bex.getCode());
-  }
-
-  @Test
-  public void shouldReturn422_When_PrepaidUserDisabled() throws Exception {
-
-    NewTermsAndConditions10 tac = new NewTermsAndConditions10();
-    tac.setVersion("v1.0");
-    tac.setBenefitsAccepted(Boolean.FALSE);
-
-    User user = registerUser();
-    updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-    createPrepaidUser10(prepaidUser);
-
-    HttpResponse resp = acceptTermsAndConditions(user.getId(), tac);
-    Assert.assertEquals("resp -> 422", 422, resp.getStatus());
-
-    ValidationException bex = resp.toObject(ValidationException.class);
-    Assert.assertEquals("user null", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), bex.getCode());
-  }
-
-  @Test
   public void shouldReturn422_When_VersionMismatch() throws Exception {
 
     NewTermsAndConditions10 tac = new NewTermsAndConditions10();

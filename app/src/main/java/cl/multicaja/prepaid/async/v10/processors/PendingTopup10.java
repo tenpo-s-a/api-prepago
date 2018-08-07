@@ -99,6 +99,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           log.error("Error al buscar PrepaidUser10 con rut: " + rut);
           return null;
         }
+        prepaidUser = getRoute().getPrepaidUserEJBBean10().getUserLevel(user, prepaidUser);
 
         data.setPrepaidUser10(prepaidUser);
 

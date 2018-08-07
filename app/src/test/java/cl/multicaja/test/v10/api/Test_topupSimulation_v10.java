@@ -8,6 +8,8 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.model.v10.NameStatus;
+import cl.multicaja.users.model.v10.RutStatus;
 import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,6 +117,51 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
+    // Se hace la primera carga
+    topupUserBalance(user, BigDecimal.valueOf(3000));
+    PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+
+    System.out.println("Calcular carga WEB: " + simulationNew);
+
+    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+    SimulationTopupGroup10 resp = respHttp.toObject(SimulationTopupGroup10.class);
+
+    System.out.println("respuesta calculo: " + resp);
+
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(CALCULATOR_TOPUP_WEB_FEE_AMOUNT);
+
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
+
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
+
+    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
+  }
+
+  @Test
+  public void topupSimulation_ok_firstTopup_WEB() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
     AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
 
     Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
@@ -150,7 +197,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
+    Assert.assertEquals("debe ser monto a pagar + comision", BigDecimal.valueOf(3990), resp.getSimulationTopupWeb().getAmountToPay().getValue());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
@@ -169,19 +216,10 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
-
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
-
-    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    // Se hace la primera carga
+    topupUserBalance(user, BigDecimal.valueOf(3000));
+    PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
@@ -216,13 +254,60 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void topupSimulation_not_ok_exceeds_balance() throws Exception {
+  public void topupSimulation_ok_firstTopup_POS() throws Exception {
 
     User user = registerUser();
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
+
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
+
+    System.out.println("Calcular carga POS: " + simulationNew);
+
+    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+    SimulationTopupGroup10 resp = respHttp.toObject(SimulationTopupGroup10.class);
+
+    System.out.println("respuesta calculo: " + resp);
+
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculateFee(simulationNew.getAmount().getValue(), CALCULATOR_TOPUP_POS_FEE_PERCENTAGE));
+
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
+
+    prepaidUser10 = getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser10);
+    System.out.println(calculatedFee.getValue()+"  "+resp.getSimulationTopupPOS().getFee());
+    Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupPOS().getFee());
+    Assert.assertEquals("debe ser monto a pagar + comision + comision apertura", BigDecimal.valueOf(4109), resp.getSimulationTopupPOS().getAmountToPay().getValue());
+
+    NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(calculatePca(amount.getValue()));
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+
+    Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
+    Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
+    Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
+  }
+
+  @Test
+  public void topupSimulation_not_ok_exceeds_balance() throws Exception {
+
+    User user = registerUser();
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    System.out.println(prepaidUser10.getUserLevel());
 
     // se hace una carga
     topupUserBalance(user, BigDecimal.valueOf(450000)); //se agrega saldo de 450.000 en tecnocom

@@ -154,68 +154,6 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
     }
   }
 
-  @Test(expected = NotFoundException.class)
-  public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
-
-    NewTermsAndConditions10 tac = new NewTermsAndConditions10();
-    tac.setVersion("v1.0");
-    tac.setBenefitsAccepted(Boolean.FALSE);
-
-    User user = registerUser();
-    updateUser(user);
-
-    try{
-      getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
-      Assert.fail("Should not be here");
-    } catch(NotFoundException ex) {
-      Assert.assertEquals("user deleted", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_PrepaidUserDisabled() throws Exception {
-
-    NewTermsAndConditions10 tac = new NewTermsAndConditions10();
-    tac.setVersion("v1.0");
-    tac.setBenefitsAccepted(Boolean.FALSE);
-
-    User user = registerUser();
-    updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-    createPrepaidUser10(prepaidUser);
-
-    try{
-      getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
-      Assert.fail("Should not be here");
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user deleted", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_VersionMismatch() throws Exception {
-
-    NewTermsAndConditions10 tac = new NewTermsAndConditions10();
-    tac.setVersion("v0.9");
-    tac.setBenefitsAccepted(Boolean.FALSE);
-
-    User user = registerUser();
-    updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    createPrepaidUser10(prepaidUser);
-
-    try{
-      getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
-      Assert.fail("Should not be here");
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user deleted", VERSION_TERMINOS_Y_CONDICIONES_NO_COINCIDEN.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
   @Test
   public void shouldAcceptTermsAndConditions() throws Exception {
     NewTermsAndConditions10 tac = new NewTermsAndConditions10();
@@ -224,8 +162,6 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
 
     User user = registerUser();
     updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    createPrepaidUser10(prepaidUser);
 
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
 
@@ -248,8 +184,6 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
 
     User user = registerUser();
     updateUser(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    createPrepaidUser10(prepaidUser);
 
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
