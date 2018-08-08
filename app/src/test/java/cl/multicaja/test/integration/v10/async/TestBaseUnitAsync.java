@@ -145,7 +145,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param prepaidCard
    * @return
    */
-  public String sendPendingCardIssuanceFee(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+  public String sendPendingCardIssuanceFee(User user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -163,7 +163,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
 
     //se crea la el objeto con los datos del proceso
-    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, null, null, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, null, prepaidMovement);
     data.setPrepaidCard10(prepaidCard);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);

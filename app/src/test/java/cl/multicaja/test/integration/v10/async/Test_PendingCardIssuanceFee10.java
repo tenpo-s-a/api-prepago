@@ -35,7 +35,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    String messageId = sendPendingCardIssuanceFee(null, prepaidMovement, prepaidCard, 0);
+    String messageId = sendPendingCardIssuanceFee(user,null, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -66,7 +66,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, null, 0);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -100,7 +100,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, null, 0);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -131,7 +131,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, null, prepaidCard, 0);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -188,7 +188,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -254,7 +254,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 0);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -322,7 +322,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println("prepaidMovement: " + prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(prepaidTopup, prepaidMovement, prepaidCard, 3);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 3);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
