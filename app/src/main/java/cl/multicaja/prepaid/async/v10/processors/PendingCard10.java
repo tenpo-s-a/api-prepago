@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_EMISSION_ERROR;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_CREATE_CARD;
 
 /**
  * @autor vutreras
@@ -204,7 +205,10 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorCreateCard - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      //TODO falta implementar, no se sabe que hacer en este caso
+      Map<String, Object> templateData = new HashMap<String, Object>();
+      templateData.put("idUsuario", data.getUser().getId().toString());
+      templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
+      getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
       return req;
       }
     };
