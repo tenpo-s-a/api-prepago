@@ -10,6 +10,7 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_EMISSION_ERROR = "Prepago/ErrorAltaRapida";
   public static final String TEMPLATE_MAIL_ERROR_TOPUP_RETURN = "Prepago/ErrorDevolucion";
   public static final String TEMPLATE_MAIL_ERROR_ISSUANCE_FEE = "Prepago/ErrorCobroEmision";
+  public static final String TEMPLATE_MAIL_ERROR_CREATE_CARD = "Prepago/ErrorDatosTarjeta";
 
   public static final String TEMPLATE_PDF_CARD = "card_pdf";//Template para el PDF
   public static final String TEMPLATE_MAIL_TOPUP = String.format("%s/RecepcionCarga", APPNAME);
