@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
@@ -18,6 +19,7 @@ import cl.multicaja.users.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.FilesEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
+import org.apache.camel.Endpoint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +34,7 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 
@@ -382,7 +385,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Integer codact = prepaidMovement.getCodact();
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
-    String numreffac = prepaidMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
+    String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
     String numaut = numreffac;
 
     //solamente los 6 ultimos digitos de numreffac
@@ -411,7 +414,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    } else {
+    } else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
+      /**
+       * Esto es para marcar cuando no pude obtener el response de un Retiro.
+       */
+      //Colocar el movimiento en error
+      PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
+
+      //Confirmar el retiro en CDT
+      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
+      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
+    }
+    else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
@@ -564,7 +584,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     SignUp signUp = getUsersEJB10().signUpUser(headers, newPrepaidUserSignup.getRut(), newPrepaidUserSignup.getEmail());
-    //TODO: Revisar proceso.
+
     PrepaidUserSignup10 prepaidUserSignup10 = new PrepaidUserSignup10();
     prepaidUserSignup10.setId(signUp.getId());
     prepaidUserSignup10.setUserId(signUp.getUserId());

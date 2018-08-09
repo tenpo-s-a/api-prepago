@@ -2,7 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import java.math.BigDecimal;
 
-public class calculatorParameter10 {
+public class CalculatorParameter10 {
 
   private BigDecimal TOPUP_POS_FEE_PERCENTAGE;
   private BigDecimal TOPUP_WEB_FEE_PERCENTAGE;
