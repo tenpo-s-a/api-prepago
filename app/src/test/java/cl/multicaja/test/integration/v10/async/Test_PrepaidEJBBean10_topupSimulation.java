@@ -155,7 +155,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -193,7 +193,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -244,7 +244,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
@@ -280,7 +280,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     System.out.println("respuesta calculo: " + resp);
 
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getPercentage10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 

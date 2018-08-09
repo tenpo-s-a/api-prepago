@@ -4,6 +4,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
@@ -29,13 +30,13 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCardIssuanceFee10.class);
 
-  //TODO: externalizar?
-  private static final BigDecimal ISSUANCE_FEE = BigDecimal.valueOf(990);
-
   public PendingCardIssuanceFee10(BaseRoute10 route) {
     super(route);
   }
 
+  private CalculationsHelper getCalculationsHelper(){
+    return CalculationsHelper.getInstance();
+  }
   /**
    *
    * @returnr
@@ -83,7 +84,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
-          issuanceFeeMovement.setImpfac(ISSUANCE_FEE);
+          issuanceFeeMovement.setImpfac(getCalculationsHelper().getCalculatorParameter10().getOPENING_FEE());
 
           issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
 
@@ -123,7 +124,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         Integer codact = issuanceFeeMovement.getCodact();
         CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
-        String numreffac = issuanceFeeMovement.getId().toString(); //TODO esto debe ser enviado en varios 0
+        String numreffac = issuanceFeeMovement.getId().toString(); //Se hace internamente en Tecnocom.
         String numaut = numreffac;
 
         //solamente los 6 primeros digitos de numreffac

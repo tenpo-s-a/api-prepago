@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.model;
 
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -26,6 +27,9 @@ public class PrepaidTopupData10 implements Serializable {
   private CdtTransaction10 cdtTransactionConfirm10;
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
+
+  private Errors numError;
+  private String msjError;
 
   public PrepaidTopupData10() {
     super();
@@ -108,6 +112,22 @@ public class PrepaidTopupData10 implements Serializable {
 
   public void setCdtTransactionConfirm10(CdtTransaction10 cdtTransactionConfirm10) {
     this.cdtTransactionConfirm10 = cdtTransactionConfirm10;
+  }
+
+  public Errors getNumError() {
+    return numError;
+  }
+
+  public void setNumError(Errors numError) {
+    this.numError = numError;
+  }
+
+  public String getMsjError() {
+    return msjError;
+  }
+
+  public void setMsjError(String msjError) {
+    this.msjError = msjError;
   }
 
   @Override
