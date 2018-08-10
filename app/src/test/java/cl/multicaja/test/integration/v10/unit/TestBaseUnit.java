@@ -104,8 +104,8 @@ public class TestBaseUnit extends TestApiBase {
   public static DBUtils getDbUtils() {
     return getPrepaidCardEJBBean10().getDbUtils();
   }
-  public calculatorParameter10 getPercentage(){
-   return getCalculationsHelper().getPercentage10();
+  public CalculatorParameter10 getPercentage(){
+   return getCalculationsHelper().getCalculatorParameter10();
   }
   /**
    *

@@ -11,6 +11,9 @@ public enum PrepaidMovementStatus {
   ERROR_IN_PROCESS_CARD_ISSUANCE_FEE,
   ERROR_POS_WITHDRAW,
   ERROR_WEB_WITHDRAW,
+  ERROR_TIMEOUT_CONEXION,
+  ERROR_TIMEOUT_RESPONSE,
+  ERROR_TECNOCOM,
   REVERSED;
 
   public static PrepaidMovementStatus valueOfEnum(String name) {

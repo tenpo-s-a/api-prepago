@@ -1,7 +1,7 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.calculatorParameter10;
+import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
@@ -19,7 +19,7 @@ public class CalculationsHelper {
   private static CalculationsHelper instance;
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
   private static final int ONE_HUNDRED = 100;
-  private static calculatorParameter10 calculatorParameter10;
+  private static CalculatorParameter10 calculatorParameter10;
   public CalculationsHelper() {
 
   }
@@ -32,7 +32,7 @@ public class CalculationsHelper {
     if (instance == null) {
       instance = new CalculationsHelper();
       try {
-        calculatorParameter10 = getParametersUtil().getObject("api-prepaid", "calculator_percentage", "v10", calculatorParameter10.class);
+        calculatorParameter10 = getParametersUtil().getObject("api-prepaid", "calculator_percentage", "v10", CalculatorParameter10.class);
       }catch (Exception e){
 
       }
@@ -44,7 +44,7 @@ public class CalculationsHelper {
     return ONE_HUNDRED;
   }
 
-  public calculatorParameter10 getPercentage10() {
+  public CalculatorParameter10 getCalculatorParameter10() {
     return calculatorParameter10;
   }
 
