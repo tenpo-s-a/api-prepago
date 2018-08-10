@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class Test_PrepaidEJBBean10_getUserLevel  extends TestBaseUnit {
 
-  @Test(expected = NotFoundException.class)
+  @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_UserNull() throws Exception {
     getPrepaidUserEJBBean10().getUserLevel(null, null);
   }

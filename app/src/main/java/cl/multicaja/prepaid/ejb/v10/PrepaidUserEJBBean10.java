@@ -301,7 +301,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
         throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
       }
 
-      ConsultaSaldoDTO consultaSaldoDTO = tecnocomService.consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+      ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
 
       if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
         pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
