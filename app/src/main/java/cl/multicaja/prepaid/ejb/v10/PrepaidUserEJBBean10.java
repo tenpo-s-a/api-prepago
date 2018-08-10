@@ -12,6 +12,7 @@ import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
@@ -50,6 +51,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
 
+  private TecnocomService tecnocomService;
+
   public UsersEJBBean10 getUsersEJB10() {
     return usersEJB10;
   }
@@ -72,6 +75,14 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
+  }
+
+  @Override
+  public TecnocomService getTecnocomService() {
+    if(tecnocomService == null) {
+      tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
+    }
+    return tecnocomService;
   }
 
   @Override
@@ -206,19 +217,19 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidUser10 getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
 
     if(user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
     }
     if(user.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
     }
     if(user.getRut().getStatus() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut.status"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.status"));
     }
     if(user.getNameStatus() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "nameStatus"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.nameStatus"));
     }
     if(prepaidUser10 == null) {
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
     }
 
     if(RutStatus.VERIFIED.equals(user.getRut().getStatus()) && NameStatus.VERIFIED.equals(user.getNameStatus())) {
@@ -290,7 +301,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
         throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
       }
 
-      ConsultaSaldoDTO consultaSaldoDTO = TecnocomServiceHelper.getInstance().getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+      ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
 
       if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
         pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
