@@ -162,4 +162,13 @@ public interface PrepaidEJB10 {
    */
   void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
 
+  /**
+   * Cargar informacion sobre las fotos de verificacion de identidad del usuario
+   * @param headers
+   * @param userIdMc
+   * @param identityVerificationFiles
+   * @throws Exception
+   */
+  void uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, String> identityVerificationFiles) throws Exception;
+
 }

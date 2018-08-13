@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.EmailBody;
+import cl.multicaja.users.model.v10.UserFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import cl.multicaja.core.exceptions.BadRequestException;
@@ -149,6 +150,19 @@ public final class PrepaidResource10 extends BaseResource {
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userIdMc);
     return Response.ok(prepaidBalance10).build();
+  }
+
+  @POST
+  @Path("/{userId}/identity/files")
+  public Response uploadIdentityVerificationFiles(List<UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+
+    log.debug("============= IDENTITY FILES ===========");
+    identityVerificationFiles.forEach(file -> {
+      log.debug(file.toString());
+    });
+    log.debug("========================================");
+    //this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
+    return Response.ok().build();
   }
 
   /*
