@@ -1503,30 +1503,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
     // CI frontal
-    List<UserFile> userCiFront = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_ID_FRONT, "v1.0", UserFileStatus.ENABLED);
-    if(userCiFront.size() > 0) {
-      throw new ValidationException(CLIENTE_ERROR_GENERICO_$VALUE);
-    }
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(), ciFront.getLocation());
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(), ciFront.getLocation());
 
     // CI posterior
-    List<UserFile> UserCiBack = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_ID_BACK, "v1.0", UserFileStatus.ENABLED);
-    if(UserCiBack.size() > 0) {
-      throw new ValidationException();
-    }
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
 
     // Selfie
-    List<UserFile> userSelfie = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_SELFIE, "v1.0", UserFileStatus.ENABLED);
-    if(userSelfie.size() > 0) {
-      throw new ValidationException();
-    }
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
     // Actualizar el nameStatus a IN_REVIEW
-    return usersDataEJB10.updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
+    return this.getUsersDataEJB10().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
   }
 }

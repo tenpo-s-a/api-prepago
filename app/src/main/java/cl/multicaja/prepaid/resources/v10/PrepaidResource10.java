@@ -155,15 +155,7 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{userId}/identity/files")
   public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-
-    log.info(String.format("============= IDENTITY FILES  - %s ===========", identityVerificationFiles.size()));
-    identityVerificationFiles.forEach((String fileName, UserFile file) -> {
-      log.info(fileName);
-      log.info(file.toString());
-    });
-    log.info("========================================");
-
-    //this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
+    this.prepaidEJBBean10.uploadIdentityVerificationFiles(headersToMap(headers),userId, identityVerificationFiles);
     return Response.ok().build();
   }
 
