@@ -3,7 +3,6 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
-import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
@@ -19,7 +18,6 @@ import cl.multicaja.users.ejb.v10.DataEJBBean10;
 import cl.multicaja.users.ejb.v10.FilesEJBBean10;
 import cl.multicaja.users.ejb.v10.UsersEJBBean10;
 import cl.multicaja.users.model.v10.*;
-import org.apache.camel.Endpoint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +32,6 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_TOPUP_REQ;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 
@@ -50,6 +47,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static String APP_NAME = "api-prepaid";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
+  /**
+   * Foto frontal de la CI del usuario
+   */
+  private static final String USER_ID_FRONT = "USER_ID_FRONT";
+
+  /**
+   * Foto posterior de la CI del usuario
+   */
+  private static final String USER_ID_BACK = "USER_ID_BACK";
+
+  /**
+   * Selfie del usuario con CI
+   */
+  private static final String USER_SELFIE= "USER_SELFIE";
 
   @Inject
   private PrepaidTopupDelegate10 delegate;
@@ -1421,6 +1432,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @param termsAndConditions10
    * @throws Exception
    */
+  @Override
   public void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -1462,4 +1474,47 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   }
 
+  @Override
+  public User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(identityVerificationFiles == null || identityVerificationFiles.isEmpty()){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles"));
+    }
+
+    if(!identityVerificationFiles.containsKey(USER_ID_FRONT) || identityVerificationFiles.get(USER_ID_FRONT) == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_ID_FRONT));
+    }
+
+    if(!identityVerificationFiles.containsKey(USER_ID_BACK) || identityVerificationFiles.get(USER_ID_BACK) == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_ID_BACK));
+    }
+
+    if(!identityVerificationFiles.containsKey(USER_SELFIE) || identityVerificationFiles.get(USER_SELFIE) == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_SELFIE));
+    }
+
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    // CI frontal
+    UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(), ciFront.getLocation());
+
+    // CI posterior
+    UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+
+    // Selfie
+    UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
+    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+
+    // Actualizar el nameStatus a IN_REVIEW
+    return this.getUsersDataEJB10().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
+  }
 }

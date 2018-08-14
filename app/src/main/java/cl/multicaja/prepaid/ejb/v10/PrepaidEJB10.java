@@ -4,6 +4,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserFile;
 
 import java.util.List;
 import java.util.Map;
@@ -161,5 +163,14 @@ public interface PrepaidEJB10 {
    * @throws Exception
    */
   void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
+
+  /**
+   * Cargar informacion sobre las fotos de verificacion de identidad del usuario
+   * @param headers
+   * @param userIdMc
+   * @param identityVerificationFiles
+   * @throws Exception
+   */
+  User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
 
 }
