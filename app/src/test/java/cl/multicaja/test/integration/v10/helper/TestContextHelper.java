@@ -33,8 +33,6 @@ public class TestContextHelper extends TestBaseUnit {
     if (!camelFactory.isCamelRunning()) {
 
       //Inicializa servidor sftp embebido
-      TestSftpServer.getInstance().start();
-      TestSftpServer.getInstance().createDirectories();
 
       //crea e inicia el activemq
       brokerService = camelFactory.createBrokerService();
@@ -70,7 +68,7 @@ public class TestContextHelper extends TestBaseUnit {
     if (brokerService != null) {
       camelFactory.releaseCamelContext();
       brokerService.stop();
-      TestSftpServer.getInstance().end();
+     // TestSftpServer.getInstance().end();
     }
   }
 

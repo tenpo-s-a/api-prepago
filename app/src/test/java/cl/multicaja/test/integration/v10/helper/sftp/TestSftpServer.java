@@ -21,7 +21,7 @@ import java.util.Properties;
 
 public class TestSftpServer {
 
-  private static TestSftpServer INSTANCE = new TestSftpServer();
+  private static TestSftpServer INSTANCE;
   private final SshServer sshd;
   public static String BASE_DIR = "src/test/resources/";
   private String HOST_NAME = "localhost";
@@ -84,6 +84,7 @@ public class TestSftpServer {
 
   public void start() throws Exception {
     sshd.start();
+
   }
 
   public void end() throws Exception {
