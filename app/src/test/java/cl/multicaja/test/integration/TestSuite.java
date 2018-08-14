@@ -1,6 +1,7 @@
 package cl.multicaja.test.integration;
 
 import cl.multicaja.core.test.TestSuiteBase;
+import cl.multicaja.test.integration.v10.helper.sftp.TestSftpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
@@ -25,14 +26,17 @@ public class TestSuite extends TestSuiteBase {
    */
   public static void startServer() throws Exception {
     System.setProperty("project.artifactId", "api-prepaid");
+    TestSftpServer.getInstance().start();
+    TestSftpServer.getInstance().createDirectories();
     testServer.start();
   }
 
   /**
    *
    */
-  public static void stopServer() {
+  public static void stopServer() throws Exception {
     testServer.stop();
+    TestSftpServer.getInstance().end();
   }
 
   @BeforeClass
@@ -42,7 +46,7 @@ public class TestSuite extends TestSuiteBase {
   }
 
   @AfterClass
-  public static void tearDown() {
+  public static void tearDown() throws Exception {
     stopServer();
   }
 
