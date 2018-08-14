@@ -154,13 +154,15 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/{userId}/identity/files")
-  public Response uploadIdentityVerificationFiles(List<UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+  public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
 
-    log.debug("============= IDENTITY FILES ===========");
-    identityVerificationFiles.forEach(file -> {
-      log.debug(file.toString());
+    log.info(String.format("============= IDENTITY FILES  - %s ===========", identityVerificationFiles.size()));
+    identityVerificationFiles.forEach((String fileName, UserFile file) -> {
+      log.info(fileName);
+      log.info(file.toString());
     });
-    log.debug("========================================");
+    log.info("========================================");
+
     //this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
     return Response.ok().build();
   }

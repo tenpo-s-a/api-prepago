@@ -1475,7 +1475,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, String> identityVerificationFiles) throws Exception {
+  public User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
@@ -1484,15 +1484,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles"));
     }
 
-    if(!identityVerificationFiles.containsKey(USER_ID_FRONT)) {
+    if(!identityVerificationFiles.containsKey(USER_ID_FRONT) || identityVerificationFiles.get(USER_ID_FRONT) == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_ID_FRONT));
     }
 
-    if(!identityVerificationFiles.containsKey(USER_ID_BACK)) {
+    if(!identityVerificationFiles.containsKey(USER_ID_BACK) || identityVerificationFiles.get(USER_ID_BACK) == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_ID_BACK));
     }
 
-    if(!identityVerificationFiles.containsKey(USER_SELFIE)) {
+    if(!identityVerificationFiles.containsKey(USER_SELFIE) || identityVerificationFiles.get(USER_SELFIE) == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerificationFiles." + USER_SELFIE));
     }
 
@@ -1505,24 +1505,28 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // CI frontal
     List<UserFile> userCiFront = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_ID_FRONT, "v1.0", UserFileStatus.ENABLED);
     if(userCiFront.size() > 0) {
-      throw new ValidationException();
+      throw new ValidationException(CLIENTE_ERROR_GENERICO_$VALUE);
     }
-
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", "", identityVerificationFiles.get(USER_ID_FRONT));
+    UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
+    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(), ciFront.getLocation());
 
     // CI posterior
     List<UserFile> UserCiBack = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_ID_BACK, "v1.0", UserFileStatus.ENABLED);
     if(UserCiBack.size() > 0) {
       throw new ValidationException();
     }
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", "", identityVerificationFiles.get(USER_ID_BACK));
+    UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
+    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
 
     // Selfie
     List<UserFile> userSelfie = filesEJBBean10.getUsersFile(headers, null, user.getId(), APP_NAME, USER_SELFIE, "v1.0", UserFileStatus.ENABLED);
     if(userSelfie.size() > 0) {
       throw new ValidationException();
     }
-    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", "", identityVerificationFiles.get(USER_SELFIE));
+    UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
+    filesEJBBean10.createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
+    // Actualizar el nameStatus a IN_REVIEW
+    return usersDataEJB10.updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
   }
 }

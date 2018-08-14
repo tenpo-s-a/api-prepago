@@ -4,6 +4,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.users.model.v10.User;
+import cl.multicaja.users.model.v10.UserFile;
 
 import java.util.List;
 import java.util.Map;
@@ -169,6 +171,6 @@ public interface PrepaidEJB10 {
    * @param identityVerificationFiles
    * @throws Exception
    */
-  void uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, String> identityVerificationFiles) throws Exception;
+  User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
 
 }
