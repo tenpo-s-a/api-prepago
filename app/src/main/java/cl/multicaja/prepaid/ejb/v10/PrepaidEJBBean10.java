@@ -160,30 +160,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
 
-    if(topupRequest == null || topupRequest.getAmount() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
-    }
-    if(topupRequest.getAmount().getValue() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
-    }
-    if(topupRequest.getAmount().getCurrencyCode() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
-    }
-    if(topupRequest.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
-    if(StringUtils.isBlank(topupRequest.getMerchantCode())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
-    }
-    if(StringUtils.isBlank(topupRequest.getMerchantName())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
-    }
-    if(topupRequest.getMerchantCategory() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
-    }
-    if(StringUtils.isBlank(topupRequest.getTransactionId())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
-    }
+    this.validateTopupRequest(topupRequest);
 
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
@@ -285,8 +262,113 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) {
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+    this.validateTopupRequest(topupRequest);
 
+    // Obtener usuario Multicaja
+    User user = this.getUserMcByRut(headers, topupRequest.getRut());
+
+    // Verificar si el usuario esta en lista negra
+    if(user.getIsBlacklisted()) {
+      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
+
+    // Obtiene la tarjeta
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.CARGA_TRANSFERENCIA : TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+    TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+
+    // Se verifica si ya se tiene una reversa con los mismos datos
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,
+      tipoFacReverse);
+
+    if(previousReverse == null) {
+
+      // Busca el movimiento de carga original
+      PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,
+        tipoFacTopup);
+
+      // Verifica si existe la carga original topup
+      if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
+
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), headers.get(Constants.HEADER_USER_TIMEZONE).toString())) {
+          // Agrego la reversa al cdt
+          CdtTransaction10 cdtTransaction = new CdtTransaction10();
+          cdtTransaction.setTransactionReference(0L);
+          cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
+
+          PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
+
+          PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          prepaidMovement.setTipofac(tipoFacReverse);
+          prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+          prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+
+          //TODO: enviar la reversa al proceso asincrono para ser procesada
+
+        } else {
+          log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
+          BaseException bex = new BaseException();
+          bex.setStatus(410);
+          bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
+          bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
+          throw bex;
+        }
+      } else {
+        log.info(String.format("No existe una carga con los datos -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), topupRequest.getTransactionId(), topupRequest.getAmount().getValue()));
+        CdtTransaction10 cdtTransaction = new CdtTransaction10();
+        cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
+        cdtTransaction.setTransactionReference(0L);
+
+        PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
+        PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        prepaidMovement.setTipofac(tipoFacReverse);
+        prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+        this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+      }
+    } else {
+      log.info(String.format("Ya existe una reversa para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), topupRequest.getTransactionId(), topupRequest.getAmount().getValue()));
+    }
+
+  }
+
+  private void validateTopupRequest(NewPrepaidTopup10 request) throws Exception {
+    if(request == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "topupRequest"));
+    }
+    if(request.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(request.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
+    }
+    if(request.getAmount().getCurrencyCode() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(request.getRut() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+    if(StringUtils.isBlank(request.getMerchantCode())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(StringUtils.isBlank(request.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(request.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
+    if(StringUtils.isBlank(request.getTransactionId())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
+    }
   }
 
   @Override
@@ -485,6 +567,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidWithdraw.setMessageId(messageId);
 
     return prepaidWithdraw;
+  }
+
+  @Override
+  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+
   }
 
   @Override
