@@ -118,6 +118,18 @@ public interface PrepaidMovementEJB10 {
   /**
    *
    * @param idPrepaidUser
+   * @param idTxExterno
+   * @param tipoMovimiento
+   * @param indnorcor
+   * @param tipofac
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getPrepaidMovementForReverse(Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, TipoFactura tipofac) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
    * @return
    * @throws Exception
    */

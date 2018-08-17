@@ -19,6 +19,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
@@ -150,8 +151,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
       p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
-      //p.setFechaCreacion((Timestamp) row.get("_fecha_creacion"));
-      //p.setFechaActualizacion((Timestamp) row.get("_fecha_actualizacion"));
+      p.setFechaCreacion((Timestamp) row.get("_fecha_creacion"));
+      p.setFechaActualizacion((Timestamp) row.get("_fecha_actualizacion"));
       p.setCodent(String.valueOf(row.get("_codent")));
       p.setCentalta(String.valueOf(row.get("_centalta")));
       p.setCuenta(String.valueOf(row.get("_cuenta")));
@@ -259,7 +260,26 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, tipoMovimiento, status, null, null, null, null);
   }
 
+  public PrepaidMovement10 getPrepaidMovementForReverse(Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, TipoFactura tipofac) throws Exception {
+    if(idPrepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if(idTxExterno == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
+    }
+    if(tipoMovimiento == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
+    }
+    if(indnorcor == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indnorcor"));
+    }
+    if(tipofac == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
+    }
 
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, indnorcor, tipofac);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
 
   @Override
   public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {

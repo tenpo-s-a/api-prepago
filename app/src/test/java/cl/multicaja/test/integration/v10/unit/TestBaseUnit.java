@@ -844,6 +844,67 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovement;
   }
 
+
+  public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidTopup10 reverseRequest) {
+    return buildReversePrepaidMovement10(prepaidUser, reverseRequest, null);
+  }
+
+  public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidTopup10 reverseRequest, PrepaidCard10 prepaidCard) {
+
+    String codent = null;
+    try {
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
+
+    if (reverseRequest != null) {
+      if (TransactionOriginType.POS.equals(reverseRequest.getTransactionOriginType())) {
+        tipoFactura = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+      }
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(reverseRequest.getTransactionId());
+    prepaidMovement.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(reverseRequest != null ? reverseRequest.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(reverseRequest != null ? reverseRequest.getMerchantCode() : null);
+    prepaidMovement.setCodact(reverseRequest != null ? reverseRequest.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+
+    return prepaidMovement;
+  }
+
   /**
    *
    * @param prepaidMovement10
