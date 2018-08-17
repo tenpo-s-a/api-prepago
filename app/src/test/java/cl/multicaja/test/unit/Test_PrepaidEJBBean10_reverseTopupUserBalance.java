@@ -1,6 +1,5 @@
 package cl.multicaja.test.unit;
 
-import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
@@ -438,13 +437,20 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
 
+    // UserMc
     Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-    Mockito.doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
 
-    Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
+    // PrepaidUser
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+
+    // PrepaidCard
+    Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    // Reverse
+    Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.TEN);
@@ -458,6 +464,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
 
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
     Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
   }
 
@@ -478,12 +486,27 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverse = new PrepaidMovement10();
     reverse.setId(Long.MAX_VALUE);
 
+    // UserMc
     Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+
+    // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+
+    // PrepaidCard
+    Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    /*
+      PrepaidMovement
+      1. Reversa
+      2. Carga original
+     */
+    Mockito.doReturn(null)
+    .doReturn(null)
+      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
+
     Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     Mockito.doNothing().when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
@@ -498,10 +521,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
   }
@@ -528,10 +549,16 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-    Mockito.doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
+
+    Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    Mockito.doReturn(null)
+      .doReturn(originalTopup)
+      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
+
     Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     Mockito.doNothing().when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
@@ -548,10 +575,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
 
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
 
@@ -577,10 +602,21 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     // fecha creacion
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().minusHours(24).minusSeconds(1).toInstant()));
 
+    // UserMc
     Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+
+    // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-    Mockito.doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+
+    // PrepaidCard
+    Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    Mockito.doReturn(null)
+      .doReturn(originalTopup)
+      .when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.TEN);
@@ -596,10 +632,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       Assert.fail("Sould not be here");
     } catch (BaseException ex) {
       Assert.assertEquals("Deberia tener error de transaccion", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-        PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-        PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+      Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
       Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
     }
   }
@@ -636,23 +670,33 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     cdtTransaction.setTransactionReference(1234L);
     cdtTransaction.setExternalTransactionId(reverseRequest.getTransactionId());
 
+    // UserMc
     Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+
+    // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-    Mockito.doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
 
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
-      PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-
+    // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
+
+    /*
+      PrepaidMovement
+      1. Busca movimiento de reversa
+      2. Busca movimineto de carga original
+     */
+    Mockito.doReturn(null)
+      .doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
 
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
 
     // Se verifica que se llamaron los metodos
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
+      Mockito.any(PrepaidMovementType.class), Mockito.any(IndicadorNormalCorrector.class), Mockito.any(TipoFactura.class));
     Mockito.verify(prepaidCardEJBBean10, Mockito.times(1)).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
