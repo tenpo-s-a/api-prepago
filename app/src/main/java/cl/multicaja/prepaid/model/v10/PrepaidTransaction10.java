@@ -1,34 +1,28 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 public class PrepaidTransaction10 extends BaseModel {
 
+
   private Date date;
-  private BigDecimal exchangeRate;
+  private String eCommerceName;
   private String commerceCode;
-  private Integer economicConcept1;
-  private String descEconomicConcept1;
-  private String amountDescriptionType1;
-  private BigDecimal applicationAmount1;
-  private BigDecimal grossValue1;
-  private Integer economicConcept2;
-  private String descEconomicConcept2;
-  private String amountDescriptionType2;
-  private BigDecimal applicationAmount2;
-  private BigDecimal grossValue2;
-  private String invoiceDescription;
-  private Integer extractAccount;
-  private Integer extractTransaction;
-  private Integer invoiceType;
+  private String gloss;
+  private String country;
+  private TipoFactura invoiceType;
+  private boolean corrector;
+  private String type;
+  private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 amountPrimary;
   private NewAmountAndCurrency10 amountSecondary;
-
-  private String description;
-  private String operation;
+  private NewAmountAndCurrency10 finalAmount;
+  private NewAmountAndCurrency10 price;
+  private NewAmountAndCurrency10 usdValue;
 
   public Date getDate() {
     return date;
@@ -38,12 +32,20 @@ public class PrepaidTransaction10 extends BaseModel {
     this.date = date;
   }
 
-  public BigDecimal getExchangeRate() {
-    return exchangeRate;
+  public NewAmountAndCurrency10 getUsdValue() {
+    return usdValue;
   }
 
-  public void setExchangeRate(BigDecimal exchangeRate) {
-    this.exchangeRate = exchangeRate;
+  public void setUsdValue(NewAmountAndCurrency10 usdValue) {
+    this.usdValue = usdValue;
+  }
+
+  public String geteCommerceName() {
+    return eCommerceName;
+  }
+
+  public void seteCommerceName(String eCommerceName) {
+    this.eCommerceName = eCommerceName;
   }
 
   public String getCommerceCode() {
@@ -54,116 +56,28 @@ public class PrepaidTransaction10 extends BaseModel {
     this.commerceCode = commerceCode;
   }
 
-  public Integer getEconomicConcept1() {
-    return economicConcept1;
+  public String getGloss() {
+    return gloss;
   }
 
-  public void setEconomicConcept1(Integer economicConcept1) {
-    this.economicConcept1 = economicConcept1;
+  public void setGloss(String gloss) {
+    this.gloss = gloss;
   }
 
-  public String getDescEconomicConcept1() {
-    return descEconomicConcept1;
+  public String getCountry() {
+    return country;
   }
 
-  public void setDescEconomicConcept1(String descEconomicConcept1) {
-    this.descEconomicConcept1 = descEconomicConcept1;
+  public void setCountry(String country) {
+    this.country = country;
   }
 
-  public String getAmountDescriptionType1() {
-    return amountDescriptionType1;
+  public NewAmountAndCurrency10 getFee() {
+    return fee;
   }
 
-  public void setAmountDescriptionType1(String amountDescriptionType1) {
-    this.amountDescriptionType1 = amountDescriptionType1;
-  }
-
-  public BigDecimal getApplicationAmount1() {
-    return applicationAmount1;
-  }
-
-  public void setApplicationAmount1(BigDecimal applicationAmount1) {
-    this.applicationAmount1 = applicationAmount1;
-  }
-
-  public BigDecimal getGrossValue1() {
-    return grossValue1;
-  }
-
-  public void setGrossValue1(BigDecimal grossValue1) {
-    this.grossValue1 = grossValue1;
-  }
-
-  public Integer getEconomicConcept2() {
-    return economicConcept2;
-  }
-
-  public void setEconomicConcept2(Integer economicConcept2) {
-    this.economicConcept2 = economicConcept2;
-  }
-
-  public String getDescEconomicConcept2() {
-    return descEconomicConcept2;
-  }
-
-  public void setDescEconomicConcept2(String descEconomicConcept2) {
-    this.descEconomicConcept2 = descEconomicConcept2;
-  }
-
-  public String getAmountDescriptionType2() {
-    return amountDescriptionType2;
-  }
-
-  public void setAmountDescriptionType2(String amountDescriptionType2) {
-    this.amountDescriptionType2 = amountDescriptionType2;
-  }
-
-  public BigDecimal getApplicationAmount2() {
-    return applicationAmount2;
-  }
-
-  public void setApplicationAmount2(BigDecimal applicationAmount2) {
-    this.applicationAmount2 = applicationAmount2;
-  }
-
-  public BigDecimal getGrossValue2() {
-    return grossValue2;
-  }
-
-  public void setGrossValue2(BigDecimal grossValue2) {
-    this.grossValue2 = grossValue2;
-  }
-
-  public String getInvoiceDescription() {
-    return invoiceDescription;
-  }
-
-  public void setInvoiceDescription(String invoiceDescription) {
-    this.invoiceDescription = invoiceDescription;
-  }
-
-  public Integer getExtractAccount() {
-    return extractAccount;
-  }
-
-  public void setExtractAccount(Integer extractAccount) {
-    this.extractAccount = extractAccount;
-  }
-
-  public Integer getExtractTransaction() {
-    return extractTransaction;
-  }
-
-  public void setExtractTransaction(Integer extractTransaction) {
-    this.extractTransaction = extractTransaction;
-  }
-
-  public Integer getInvoiceType() {
-    return invoiceType;
-  }
-
-  public void setInvoiceType(Integer invoiceType) {
-    this.invoiceType = invoiceType;
+  public void setFee(NewAmountAndCurrency10 fee) {
+    this.fee = fee;
   }
 
   public NewAmountAndCurrency10 getAmountPrimary() {
@@ -182,19 +96,43 @@ public class PrepaidTransaction10 extends BaseModel {
     this.amountSecondary = amountSecondary;
   }
 
-  public String getDescription() {
-    return description;
+  public NewAmountAndCurrency10 getFinalAmount() {
+    return finalAmount;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
+  public void setFinalAmount(NewAmountAndCurrency10 finalAmount) {
+    this.finalAmount = finalAmount;
   }
 
-  public String getOperation() {
-    return operation;
+  public NewAmountAndCurrency10 getPrice() {
+    return price;
   }
 
-  public void setOperation(String operation) {
-    this.operation = operation;
+  public void setPrice(NewAmountAndCurrency10 price) {
+    this.price = price;
+  }
+
+  public TipoFactura getInvoiceType() {
+    return invoiceType;
+  }
+
+  public void setInvoiceType(TipoFactura invoiceType) {
+    this.invoiceType = invoiceType;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public boolean isCorrector() {
+    return corrector;
+  }
+
+  public void setCorrector(boolean corrector) {
+    this.corrector = corrector;
   }
 }
