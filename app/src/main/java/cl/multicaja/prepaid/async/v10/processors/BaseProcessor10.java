@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.*;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.activemq.ScheduledMessage;
@@ -189,7 +190,6 @@ public abstract class BaseProcessor10 {
    * @return
    */
   protected ExchangeData<PrepaidTopupData10> redirectRequest(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidTopupData10> req, boolean withDelay) {
-
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
 
     if (withDelay) {
@@ -198,7 +198,26 @@ public abstract class BaseProcessor10 {
       req.setRetryCount(0);
       redirectRequestObject(endpoint, exchange, req);
     }
+    return req;
+  }
+  /**
+   * envia el mensaje a otra ruta camel, especificamente una instancia de: ExchangeData<PrepaidTopupData10>
+   *
+   * @param endpoint endpoint camel al cual se desea enviar el mensaje
+   * @param exchange instancia del mensaje original camel
+   * @param req instancia del mensaje propio del proceso asincrono
+   * @param withDelay true: es un envio de mensaje con tiempo de espera, false: es un envio simple de mensaje sin tiempo de espera
+   * @return
+   */
+  protected ExchangeData<PrepaidReverseData10> redirectRequestReverse(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidReverseData10> req, boolean withDelay) {
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
 
+    if (withDelay) {
+      redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+    } else {
+      req.setRetryCount(0);
+      redirectRequestObject(endpoint, exchange, req);
+    }
     return req;
   }
 }
