@@ -12,17 +12,14 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 
-  public static final String PENDING_TOPUP_RETURNS_REQ = "PrepaidTopupRoute10.pendingTopupReturns.req";
-  public static final String PENDING_TOPUP_RETURNS_RESP = "PrepaidTopupRoute10.pendingTopupReturns.resp";
+  public static final String ERROR_TOPUP_REQ = "PrepaidTopupRoute10.errorTopup.req";
+  public static final String ERROR_TOPUP_RESP = "PrepaidTopupRoute10.errorTopup.resp";
 
   public static final String PENDING_EMISSION_REQ = "PrepaidTopupRoute10.pendingEmission.req";
   public static final String PENDING_EMISSION_RESP = "PrepaidTopupRoute10.pendingEmission.resp";
 
   public static final String PENDING_CREATE_CARD_REQ = "PrepaidTopupRoute10.pendingCreateCard.req";
   public static final String PENDING_CREATE_CARD_RESP = "PrepaidTopupRoute10.pendingCreateCard.resp";
-
-  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_REQ = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.req";
-  public static final String PENDING_TOPUP_REVERSE_CONFIRMATION_RESP = "PrepaidTopupRoute10.pendingTopupReverseConfirmation.resp";
 
   public static final String ERROR_EMISSION_REQ = "PrepaidTopupRoute10.errorEmission.req";
   public static final String ERROR_EMISSION_RESP = "PrepaidTopupRoute10.errorEmission.resp";
@@ -70,6 +67,13 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processPendingTopup())
       .to(createJMSEndpoint(PENDING_TOPUP_RESP + confResp)).end();
+
+    /**
+     * Error Emisiones
+     */
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_TOPUP_REQ, concurrentConsumers)))
+      .process(new PendingTopup10(this).processErrorTopup())
+      .to(createJMSEndpoint(ERROR_TOPUP_RESP + confResp)).end();
 
     /**
      * Emisiones pendientes

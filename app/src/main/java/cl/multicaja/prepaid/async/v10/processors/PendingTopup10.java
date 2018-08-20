@@ -71,8 +71,8 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
           prepaidMovement.setEstado(status);
-          Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+
+          return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, false);
         }
 
         User user = data.getUser();
@@ -92,9 +92,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
           prepaidMovement.setEstado(status);
-
-          Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, false);
         }
 
         Integer rut = user.getRut().getValue();
@@ -203,27 +201,24 @@ public class PendingTopup10 extends BaseProcessor10 {
             }
 
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
-            return redirectRequest(endpoint, exchange, req, true);
+            return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
           }else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
-            return redirectRequest(endpoint, exchange, req, true);
+            return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
           }else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
-            return redirectRequest(endpoint, exchange, req, true);
+            return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
           }
           else {
             PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
             data.getPrepaidMovement10().setEstado(status);
 
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
+            Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
             return redirectRequest(endpoint, exchange, req, false);
           }
 
@@ -246,16 +241,15 @@ public class PendingTopup10 extends BaseProcessor10 {
         }
         }catch (Exception e){
           log.error(String.format("Error desconocido al realizar carga %s",e.getLocalizedMessage()));
-          Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_REQ);
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());
-          return redirectRequest(endpoint, exchange, req, true);
+          return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, true);
         }
       }
     };
   }
 
-  public ProcessorRoute processPendingTopupReturns() {
+  public ProcessorRoute processErrorTopup() {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
