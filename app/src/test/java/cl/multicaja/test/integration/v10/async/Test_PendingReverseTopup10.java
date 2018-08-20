@@ -15,7 +15,7 @@ import javax.jms.Queue;
 /**
  * @autor abarazarte
  */
-public class Test_PendingTopupReverseConfirmation10 extends TestBaseUnitAsync {
+public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {

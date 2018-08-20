@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.helper;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.test.integration.TestSuite;
 import cl.multicaja.test.integration.v10.helper.sftp.TestSftpServer;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
@@ -48,6 +49,16 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
       prepaidTopupRoute10.setMailEJBBean10(getMailEJBBean10());
 
+      TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
+      transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      transactionReversalRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      transactionReversalRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      transactionReversalRoute10.setUsersEJBBean10(getUsersEJBBean10());
+      transactionReversalRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      transactionReversalRoute10.setCdtEJBBean10(getCdtEJBBean10());
+      transactionReversalRoute10.setMailEJBBean10(getMailEJBBean10());
+
+
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
       currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
 
@@ -59,7 +70,7 @@ public class TestContextHelper extends TestBaseUnit {
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
       usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
 
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10, currencyConvertionRoute10);
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, usersEmailRoute10, currencyConvertionRoute10,transactionReversalRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
