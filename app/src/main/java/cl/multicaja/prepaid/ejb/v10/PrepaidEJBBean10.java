@@ -581,7 +581,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       if(originalwithdraw != null && originalwithdraw.getMonto().equals(withdrawRequest.getAmount().getValue())) {
 
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), headers.get(Constants.HEADER_USER_TIMEZONE).toString())) {
+        String timezone;
+        if(headers.get(Constants.HEADER_USER_TIMEZONE) != null ){
+          timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+        } else {
+          timezone = "America/Santiago";
+        }
+
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone)) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
