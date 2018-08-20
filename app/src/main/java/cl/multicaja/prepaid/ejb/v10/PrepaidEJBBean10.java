@@ -385,33 +385,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
 
-    if(withdrawRequest == null || withdrawRequest.getAmount() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
-    }
-    if(withdrawRequest.getAmount().getValue() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
-    }
-    if(withdrawRequest.getAmount().getCurrencyCode() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
-    }
-    if(withdrawRequest.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
-    if(StringUtils.isBlank(withdrawRequest.getMerchantCode())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
-    }
-    if(StringUtils.isBlank(withdrawRequest.getTransactionId())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
-    }
-    if(StringUtils.isBlank(withdrawRequest.getPassword())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
-    }
-    if(StringUtils.isBlank(withdrawRequest.getMerchantName())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
-    }
-    if(withdrawRequest.getMerchantCategory() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
-    }
+    this.validateWithdrawRequest(withdrawRequest);
 
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
@@ -582,7 +556,121 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+    this.validateWithdrawRequest(withdrawRequest);
 
+    // Obtener usuario Multicaja
+    User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
+    if(user.getIsBlacklisted()){
+      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR);
+    }
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
+
+    // Se verifica la clave
+    UserPasswordNew userPasswordNew = new UserPasswordNew();
+    userPasswordNew.setValue(withdrawRequest.getPassword());
+    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+      PrepaidCardStatus.ACTIVE,
+      PrepaidCardStatus.LOCKED);
+
+    TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.RETIRO_TRANSFERENCIA : TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+    TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+
+    // Se verifica si ya se tiene una reversa con los mismos datos
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+      withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,
+      tipoFacReverse);
+
+    if(previousReverse == null) {
+      // Busca el movimiento de retiro original
+      PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+        withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,
+        tipoFacTopup);
+
+      if(originalwithdraw != null && originalwithdraw.getMonto().equals(withdrawRequest.getAmount().getValue())) {
+
+        String timezone;
+        if(headers.get(Constants.HEADER_USER_TIMEZONE) != null ){
+          timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+        } else {
+          timezone = "America/Santiago";
+        }
+
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone)) {
+          // Agrego la reversa al cdt
+          CdtTransaction10 cdtTransaction = new CdtTransaction10();
+          cdtTransaction.setTransactionReference(0L);
+          cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
+
+          PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
+
+          PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          prepaidMovement.setTipofac(tipoFacReverse);
+          prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+          prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+
+          //TODO: enviar la reversa al proceso asincrono para ser procesada
+        } else {
+          log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalwithdraw.getIdTxExterno(), originalwithdraw.getMonto()));
+          BaseException bex = new BaseException();
+          bex.setStatus(410);
+          bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
+          bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
+          throw bex;
+        }
+
+      } else {
+        log.info(String.format("No existe un retiro con los datos -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), withdrawRequest.getTransactionId(), withdrawRequest.getAmount().getValue()));
+        CdtTransaction10 cdtTransaction = new CdtTransaction10();
+        cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
+        cdtTransaction.setTransactionReference(0L);
+
+        PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
+        PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        prepaidMovement.setTipofac(tipoFacReverse);
+        prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+        this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+      }
+    } else {
+    log.info(String.format("Ya existe una reversa para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), withdrawRequest.getTransactionId(), withdrawRequest.getAmount().getValue()));
+    }
+  }
+
+  private void validateWithdrawRequest(NewPrepaidWithdraw10 request) throws Exception {
+    if(request == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "withdrawRequest"));
+    }
+    if(request.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(request.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
+    }
+    if(request.getAmount().getCurrencyCode() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(request.getRut() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+    if(StringUtils.isBlank(request.getPassword())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
+    }
+    if(StringUtils.isBlank(request.getMerchantCode())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(StringUtils.isBlank(request.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(request.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
+    if(StringUtils.isBlank(request.getTransactionId())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
+    }
   }
 
   @Override
