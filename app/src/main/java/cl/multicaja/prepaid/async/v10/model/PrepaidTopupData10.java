@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.async.v10.model;
 
-import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.model.v10.*;
@@ -9,8 +8,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @autor vutreras

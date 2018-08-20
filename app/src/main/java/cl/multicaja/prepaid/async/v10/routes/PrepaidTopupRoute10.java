@@ -72,13 +72,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
       .to(createJMSEndpoint(PENDING_TOPUP_RESP + confResp)).end();
 
     /**
-     * devoluciones pendientes
-     */
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_RETURNS_REQ, concurrentConsumers)))
-      .process(new PendingTopup10(this).processPendingTopupReturns())
-      .to(createJMSEndpoint(PENDING_TOPUP_RETURNS_RESP + confResp)).end();
-
-    /**
      * Emisiones pendientes
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_EMISSION_REQ, concurrentConsumers)))
@@ -106,15 +99,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
       .process(new PendingCard10(this).processErrorCreateCard())
       .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP + confResp)).end();
 
-    /**
-     * Confirmacion reversa de topup pendientes
-     */
-    from(String.format("seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
-      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_REQ));
-
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_TOPUP_REVERSE_CONFIRMATION_REQ, concurrentConsumers)))
-      .process(new PendingTopupReverseConfirmation10(this).processPendingTopupReverseConfirmation())
-      .to(createJMSEndpoint(PENDING_TOPUP_REVERSE_CONFIRMATION_RESP + confResp)).end();
 
     /**
      * Cobros de emisión pendientes
