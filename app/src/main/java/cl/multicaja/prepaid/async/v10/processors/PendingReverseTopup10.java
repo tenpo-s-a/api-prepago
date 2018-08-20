@@ -4,6 +4,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -15,9 +16,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 /**
  * @autor abarazarte
@@ -116,7 +121,13 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidReverseData10>, ExchangeData<PrepaidReverseData10>>() {
       @Override
       public ExchangeData<PrepaidReverseData10> processExchange(long idTrx, ExchangeData<PrepaidReverseData10> req, Exchange exchange) throws Exception {
-        //TODO: Ver que hacer en las colas de error
+        log.info("processErrorTopupReverse - REQ: " + req);
+        req.retryCountNext();
+        PrepaidReverseData10 data = req.getData();
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("idUsuario", data.getUser().getId().toString());
+        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+        getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         return req;
       }
     };

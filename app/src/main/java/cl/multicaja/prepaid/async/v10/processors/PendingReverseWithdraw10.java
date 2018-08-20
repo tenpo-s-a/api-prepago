@@ -16,7 +16,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_TOPUP_REQ;
-import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_REQ;
 
 public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
