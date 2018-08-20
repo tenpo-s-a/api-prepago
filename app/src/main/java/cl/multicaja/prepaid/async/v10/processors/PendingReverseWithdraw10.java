@@ -65,9 +65,6 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             return redirectRequest(endpoint, exchange, req, false);
           }
 
-          
-
-
           // Se envia TX a CDT para revertir datos de acumuladores
           cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
           cdtTransaction.setGloss(CdtTransactionType.REVERSA_RETIRO.getName());
