@@ -1161,8 +1161,16 @@ public class TestBaseUnit extends TestApiBase {
     if (StringUtils.isBlank(prepaidCard10.getPan())) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
     }
+
+    String numaut = movement10.getId().toString();
+
+    //solamente los 6 primeros digitos de numreffac
+    if (numaut.length() > 6) {
+      numaut = numaut.substring(numaut.length()-6);
+    }
+
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(prepaidCard10.getProcessorUserId(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
-      movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), movement10.getNumaut().substring(movement10.getNumaut().length()-6), movement10.getCodcom(),
+      movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),
       movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
     return inclusionMovimientosDTO;
   }

@@ -68,7 +68,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
           // Busca el movimiento de carga original
           PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
-            prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(),IndicadorNormalCorrector.NORMAL.getValue()));
+            prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(),IndicadorNormalCorrector.NORMAL.getValue()));
           if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
           }

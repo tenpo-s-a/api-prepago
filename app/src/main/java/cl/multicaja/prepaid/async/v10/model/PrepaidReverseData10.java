@@ -35,6 +35,12 @@ public class PrepaidReverseData10 implements Serializable {
     this.prepaidMovementReverse = prepaidMovementReverse;
   }
 
+  public PrepaidReverseData10(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 user, PrepaidMovement10 prepaidMovementReverse) {
+    this.prepaidWithdraw10 = prepaidWithdraw;
+    this.prepaidUser10 = user;
+    this.prepaidMovementReverse = prepaidMovementReverse;
+  }
+
   public PrepaidTopup10 getPrepaidTopup10() {
     return prepaidTopup10;
   }
