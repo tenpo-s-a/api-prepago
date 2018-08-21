@@ -35,8 +35,8 @@ public class TestSuite extends TestSuiteBase {
    *
    */
   public static void stopServer() throws Exception {
-    testServer.stop();
     TestSftpServer.getInstance().end();
+    testServer.stop();
   }
 
   @BeforeClass

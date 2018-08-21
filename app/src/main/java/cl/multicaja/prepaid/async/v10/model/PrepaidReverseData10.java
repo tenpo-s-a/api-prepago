@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.async.v10.model;
 
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
@@ -28,9 +27,11 @@ public class PrepaidReverseData10 implements Serializable {
     super();
   }
 
-  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, User user, PrepaidMovement10 prepaidMovementReverse) {
+  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard10,User user,PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovementReverse) {
     this.prepaidTopup10 = prepaidTopup;
     this.user = user;
+    this.prepaidUser10 = prepaidUser10;
+    this.prepaidCard10 = prepaidCard10;
     this.prepaidMovementReverse = prepaidMovementReverse;
   }
 
