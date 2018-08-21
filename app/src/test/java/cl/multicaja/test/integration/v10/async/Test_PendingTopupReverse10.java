@@ -161,6 +161,7 @@ public class Test_PendingTopupReverse10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    inclusionMovimientosTecnocom(prepaidCard,prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
