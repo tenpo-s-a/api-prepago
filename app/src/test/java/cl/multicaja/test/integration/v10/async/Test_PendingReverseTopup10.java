@@ -17,6 +17,7 @@ import javax.jms.Queue;
  */
 public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
+  /*
   @Test
   public void pendingTopupReverseConfirmation_CdtTransactionIsNull() throws Exception {
 
@@ -71,4 +72,5 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener numError = 0", 0, cdt.getNumErrorInt());
     Assert.assertEquals("No deberia tener mensaje de rror", "", cdt.getMsjError());
   }
+  */
 }

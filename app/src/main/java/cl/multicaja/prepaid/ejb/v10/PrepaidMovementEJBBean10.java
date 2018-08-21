@@ -158,7 +158,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setCuenta(String.valueOf(row.get("_cuenta")));
       p.setClamon(CodigoMoneda.fromValue(numberUtils.toInteger(row.get("_clamon"))));
       p.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInteger(row.get("_indnorcor"))));
-      p.setTipofac(TipoFactura.fromValue(numberUtils.toInteger(row.get("_tipofac"))));
+      p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(numberUtils.toInteger(row.get("_tipofac")), p.getIndnorcor().getValue()));
       p.setFecfac((Date)row.get("_fecfac"));
       p.setNumreffac(String.valueOf(row.get("_numreffac")));
       p.setPan(String.valueOf(row.get("_pan")));
@@ -260,7 +260,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return this.getPrepaidMovements(null, null, idPrepaidUser, null, tipoMovimiento, status, null, null, null, null);
   }
 
-  public PrepaidMovement10 getPrepaidMovementForReverse(Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, TipoFactura tipofac) throws Exception {
+  public PrepaidMovement10 getPrepaidMovementForReverse(Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento, TipoFactura tipofac) throws Exception {
     if(idPrepaidUser == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
@@ -270,14 +270,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(tipoMovimiento == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
     }
-    if(indnorcor == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indnorcor"));
-    }
     if(tipofac == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
     }
 
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, indnorcor, tipofac);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 

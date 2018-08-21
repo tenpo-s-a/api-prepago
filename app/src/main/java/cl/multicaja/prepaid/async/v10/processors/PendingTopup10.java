@@ -173,8 +173,8 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
-            if(!cdtTransaction.isNumErrorOk()){
-              log.error(String.format("Error en CDT %s",cdtTransaction.getMsjError()));
+            if (!cdtTransaction.isNumErrorOk()) {
+              log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
             }
 
             //Envio de comprobante de carga por mail
@@ -193,22 +193,24 @@ public class PendingTopup10 extends BaseProcessor10 {
             getRoute().getMailEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
 
             //segun la historia: https://www.pivotaltracker.com/story/show/158044562
-            if(PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
+            if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             } else {
               return req;
             }
 
-          } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+          //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
+          //} else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())){
+          } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
             return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
-          }else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
+          }else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
             return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
-          }else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
+          } else if (CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
             return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
