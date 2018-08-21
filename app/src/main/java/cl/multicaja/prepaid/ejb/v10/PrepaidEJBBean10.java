@@ -297,15 +297,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Se verifica si ya se tiene una reversa con los mismos datos
     PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,
+      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
       tipoFacReverse);
 
     if(previousReverse == null) {
 
       // Busca el movimiento de carga original
       PrepaidMovement10 originalTopup = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,
-        tipoFacTopup);
+        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
 
       // Verifica si existe la carga original topup
       if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
@@ -492,7 +491,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    } else if  (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
+    } else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
       /**
        * Esto es para marcar cuando no pude obtener el response de un Retiro.
        */
@@ -509,6 +508,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
+    //TODO: que hacer si el retiro devuelve un error de TIME_OUT_RESPONSE?
+    //else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {}
     else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
@@ -530,6 +531,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
+      //TODO: actualizar el status de movimiento a REJECTED
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
@@ -581,14 +583,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Se verifica si ya se tiene una reversa con los mismos datos
     PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,
-      tipoFacReverse);
+      withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, tipoFacReverse);
 
     if(previousReverse == null) {
       // Busca el movimiento de retiro original
       PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-        withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,
-        tipoFacTopup);
+        withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, tipoFacTopup);
 
       if(originalwithdraw != null && originalwithdraw.getMonto().equals(withdrawRequest.getAmount().getValue())) {
 

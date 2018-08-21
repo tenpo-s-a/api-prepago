@@ -56,12 +56,12 @@ public class TransactionReversalRoute10 extends BaseRoute10 {
 
     //consume un mensaje desde una cola de requerimientos y lo envia a una cola de respuestas
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_REVERSAL_WITHDRAW_REQ, concurrentConsumers)))
-      .process(new PendingReverseWithdraw10(this).processPendingWithdrawReverse())
+      .process(new PendingReverseWithdraw10(this).processPendingWithdrawReversal())
       .to(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_RESP + confResp)).end();
 
     //Errores Reversa de Retiro
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_REVERSAL_WITHDRAW_REQ, concurrentConsumers)))
-      .process(new PendingReverseWithdraw10(this).processErrorWithdrawReverse())
+      .process(new PendingReverseWithdraw10(this).processErrorWithdrawReversal())
       .to(createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_RESP + confResp)).end();
 
   }
