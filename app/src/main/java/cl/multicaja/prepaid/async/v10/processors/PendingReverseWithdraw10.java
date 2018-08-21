@@ -71,8 +71,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
 
         } else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
-          req.setRetryCount(0);
-
+          String numaut = originalMovement.getId().toString();
+          //solamente los 6 primeros digitos de numreffac
+          if (numaut.length() > 6) {
+            numaut = numaut.substring(numaut.length()-6);
+          }
           // Se intenta realizar nuevamente la inclusion del movimiento original .
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
             originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
@@ -104,9 +107,15 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
         } else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
 
+          String numaut = prepaidMovementReverse.getId().toString();
+          //solamente los 6 primeros digitos de numreffac
+          if (numaut.length() > 6) {
+            numaut = numaut.substring(numaut.length()-6);
+          }
+
           // Se intenta realizar reversa del movimiento.
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
-            prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
+            prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
             originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
           // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
@@ -114,7 +123,6 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
             req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
-            return req;
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
