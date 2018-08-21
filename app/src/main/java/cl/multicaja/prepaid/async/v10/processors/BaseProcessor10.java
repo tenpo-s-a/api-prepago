@@ -215,7 +215,6 @@ public abstract class BaseProcessor10 {
     if (withDelay) {
       redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
     } else {
-      req.setRetryCount(0);
       redirectRequestObject(endpoint, exchange, req);
     }
     return req;

@@ -1027,7 +1027,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setImpdiv(0L);
     prepaidMovement.setImpfac(reverseRequest != null ? reverseRequest.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
-    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setNumaut(getRandomNumericString(6)); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(reverseRequest != null ? reverseRequest.getMerchantCode() : null);
     prepaidMovement.setCodact(reverseRequest != null ? reverseRequest.getMerchantCategory() : null);
@@ -1144,7 +1144,28 @@ public class TestBaseUnit extends TestApiBase {
 
     return inclusionMovimientosDTO;
   }
+  public InclusionMovimientosDTO inclusionMovimientosTecnocom(PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
 
+    if (prepaidCard10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (movement10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(prepaidCard10.getProcessorUserId(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
+      movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), movement10.getNumaut().substring(movement10.getNumaut().length()-6), movement10.getCodcom(),
+      movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
+    return inclusionMovimientosDTO;
+  }
   /**
    * Espera por 10 intentos cada 1 segundo la existencia de una tarjeta del cliente prepago
    *

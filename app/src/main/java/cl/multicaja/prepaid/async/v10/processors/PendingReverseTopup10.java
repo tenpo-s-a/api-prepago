@@ -73,19 +73,18 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
-              req.setRetryCount(0);
-              // Se intenta realizar nuevamente la inclusion del movimiento original .
+              log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!Deberia pasar por aca !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            // Se intenta realizar nuevamente la inclusion del movimiento original .
               InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
                 originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
                 originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
               // Se verifica la respuesta de tecnocom
               if (inclusionMovimientosDTO.isRetornoExitoso()) {
-
                 // Se actualiza el movimiento original
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+                log.info("Deberia pasar por aca !!!!!!!!!!!!!!!!!!!!!!!!!!!! Movimiento PROCESS_OK");
               } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
-
                 // La inclusion devuelve error, se evalua el error.
                 if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
@@ -103,22 +102,18 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
-            System.out.println(prepaidCard);
-            System.out.println("original: "+originalMovement);
-            System.out.println("reversa: "+prepaidMovementReverse);
+
             // Se intenta realizar reversa del movimiento.
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(),originalMovement.getClamon(),
-              prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
+              prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), prepaidMovementReverse.getNumaut(), originalMovement.getCodcom(),
               originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
             // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
-              log.info("Movimiento exitoso: "+inclusionMovimientosDTO);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
-              log.info("Update Movimiento Original");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
               req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
-              log.info("Update Movimiento Reversa");
+              return req;
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
               req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
