@@ -64,45 +64,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
   }
 
   /**
-   *
-   * @param prepaidTopup
-   * @param user
-   * @return
-   * @throws Exception
-   */
-  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user) throws Exception {
-    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, null, null);
-    return messageId;
-  }
-
-  /**
-   *
-   * @param prepaidTopup
-   * @param user
-   * @param cdtTransaction
-   * @return
-   * @throws Exception
-   */
-  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction) throws Exception {
-    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, null);
-    return messageId;
-  }
-
-  /**
-   *
-   * @param prepaidTopup
-   * @param user
-   * @param cdtTransaction
-   * @param prepaidMovement
-   * @return
-   * @throws Exception
-   */
-  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) throws Exception {
-    String messageId = getPrepaidTopupDelegate10().sendTopUpReverseConfirmation(prepaidTopup, user, cdtTransaction, prepaidMovement);
-    return messageId;
-  }
-
-  /**
    * Envia un mensaje directo al proceso PENDING_TOPUP_REQ
    *
    * @param prepaidTopup

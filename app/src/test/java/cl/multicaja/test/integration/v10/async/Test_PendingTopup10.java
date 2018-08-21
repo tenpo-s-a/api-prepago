@@ -204,7 +204,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       //TODO
       /*
       ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
-      String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_REQ;
+      String endpoint = PrepaidTopupRoute10.ERROR_TOPUP_REQ;
 
       Assert.assertEquals("debe ser intento procesado 5", 5, lastProcessorMetadata.getRetry());
       Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
@@ -217,7 +217,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     /*
     {
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_RESP);
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
       ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un topup", remoteTopup);
@@ -247,7 +247,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
 
       //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_RETURNS_REQ
       ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
-      String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_RETURNS_REQ;
+      String endpoint = PrepaidTopupRoute10.ERROR_TOPUP_REQ;
 
       Assert.assertEquals("debe ser primer intento", 0, lastProcessorMetadata.getRetry());
       Assert.assertFalse("debe ser redirect", lastProcessorMetadata.isRedirect());

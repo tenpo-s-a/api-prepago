@@ -118,41 +118,6 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  /**
-   * Envia un registro de confirmacion de reversa de topup al proceso asincrono
-   *
-   * @param prepaidTopup
-   * @param user
-   * @param cdtTransaction
-   * @param prepaidMovement
-   * @return id del mensaje
-   */
-  //TODO: Verificar donde sera invocado este metodo
-  public String sendTopUpReverseConfirmation(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
-
-    if (!camelFactory.isCamelRunning()) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
-      return null;
-    }
-
-    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
-
-    Map<String, Object> headers = new HashMap<>();
-    headers.put("JMSCorrelationID", messageId);
-    prepaidTopup.setMessageId(messageId);
-
-    String endpoint = "seda:PrepaidTopupRoute10.pendingTopupReverseConfirmation";
-
-    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
-
-    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
-
-    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
-
-    return messageId;
-  }
-
   public String sendPdfCardMail(PrepaidCard10 prepaidCard10, User user) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");

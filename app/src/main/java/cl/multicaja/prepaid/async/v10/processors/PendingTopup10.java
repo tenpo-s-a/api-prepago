@@ -16,11 +16,9 @@ import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.NameStatus;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_RETURN;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
 
 /**
@@ -262,7 +260,7 @@ public class PendingTopup10 extends BaseProcessor10 {
       Map<String, Object> templateData = new HashMap<String, Object>();
       templateData.put("idUsuario", data.getUser().getId().toString());
       templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-      getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_RETURN, templateData);
+      getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
       return req;
       }
     };
