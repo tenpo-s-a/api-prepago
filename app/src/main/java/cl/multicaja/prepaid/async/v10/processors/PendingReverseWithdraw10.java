@@ -60,7 +60,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             }
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
             prepaidMovement.setEstado(status);
-            Endpoint endpoint = createJMSEndpoint(PENDING_TOPUP_RETURNS_REQ);
+            Endpoint endpoint = createJMSEndpoint("");
             return redirectRequest(endpoint, exchange, req, false);
           }
 

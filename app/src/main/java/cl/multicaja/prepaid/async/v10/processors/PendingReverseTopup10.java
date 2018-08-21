@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -67,9 +68,10 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
           // Busca el movimiento de carga original
           PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
-            prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, prepaidMovementReverse.getTipofac());
-
+            prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(),IndicadorNormalCorrector.NORMAL.getValue()));
+          log.info("Movimiento Original   :"+originalMovement);
           if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
+            log.debug("originalMovement: "+originalMovement.getEstado());
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
@@ -78,16 +80,22 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             //Redirect
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
-
+            System.out.println(prepaidCard);
+            System.out.println("original: "+originalMovement);
+            System.out.println("reversa: "+prepaidMovementReverse);
             // Se intenta realizar reversa del movimiento.
-            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), prepaidTopup.getTotal().getCurrencyCode(),
+            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(),originalMovement.getClamon(),
               prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
               originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
             // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
+              log.info("Movimiento exitoso: "+inclusionMovimientosDTO);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
+              log.info("Update Movimiento Original");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+              req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
+              log.info("Update Movimiento Reversa");
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
               req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
@@ -108,7 +116,8 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             }
           }
         }catch (Exception e){
-          log.error(String.format("Error desconocido al realizar carga %s",e.getLocalizedMessage()));
+          e.printStackTrace();
+          log.error(String.format("Error desconocido al realizar carga %s",e.getMessage()));
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());
           return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
