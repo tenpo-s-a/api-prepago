@@ -67,10 +67,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           IndicadorNormalCorrector.NORMAL.getValue()));
 
         if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
-          log.info(String.format("El movimiento original con id %s se encuentra en status: %s", originalMovement.getId(), originalMovement.getEstado()));
+          log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
           return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
 
         } else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
+          log.debug("********** Reintentando movimiento original **********");
           String numaut = originalMovement.getId().toString();
           //solamente los 6 primeros digitos de numreffac
           if (numaut.length() > 6) {
@@ -78,20 +79,22 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           }
           // Se intenta realizar nuevamente la inclusion del movimiento original .
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
-            originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
+            originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
             originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
           // Se verifica la respuesta de tecnocom
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
-
+            log.debug("********** Movimiento original no existia previamente **********");
             // Se actualiza el movimiento original
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
-
             // La inclusion devuelve error, se evalua el error.
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
+              log.debug("********** Movimiento original ya existia **********");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
             } else {
+              log.debug("********** Movimiento original rechazado **********");
+              log.debug(inclusionMovimientosDTO.getDescRetorno());
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
             }
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -106,7 +109,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, false);
 
         } else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
-
+          log.debug("********** Realizando reversa de retiro **********");
           String numaut = prepaidMovementReverse.getId().toString();
           //solamente los 6 primeros digitos de numreffac
           if (numaut.length() > 6) {
@@ -123,6 +126,17 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
             req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
+            log.debug("********** Reversa de retiro realizada exitosamente **********");
+
+          } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
+            if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
+              log.debug("********** Reversa de retiro ya existia **********");
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+            } else {
+              log.debug("********** Reversa de retiro rechazada **********");
+              log.debug(inclusionMovimientosDTO.getDescRetorno());
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.REJECTED);
+            }
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
@@ -142,8 +156,10 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_REQ), exchange, req, false);
           }
         } else {
+          log.debug("********** La reversa no necesita ser ejecutada en Tecnocom **********");
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+          data.getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
         }
       }catch (Exception e){
         log.error(String.format("Error desconocido al realizar la reversa de retiro: %s",e.getMessage()));

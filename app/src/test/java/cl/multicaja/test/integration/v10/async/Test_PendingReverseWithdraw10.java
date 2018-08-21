@@ -84,7 +84,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       ProcessorMetadata lastProcessorMetadata = remoteReverse.getLastProcessorMetadata();
       String endpoint = TransactionReversalRoute10.ERROR_REVERSAL_WITHDRAW_REQ;
 
-      Assert.assertEquals("debe ser intento 0", 0, lastProcessorMetadata.getRetry());
+      Assert.assertEquals("debe ser intento 5", 5, lastProcessorMetadata.getRetry());
       Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
       Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
     }
@@ -231,8 +231,11 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   }
   }
 
+  /*
+    ERROR_TIMEOUT_RESPONSE - Mov Original no se realizo
+   */
   @Test
-  public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse() throws Exception {
+  public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse1() throws Exception {
     User user = registerUser();
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -313,4 +316,175 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
   }
 
+  /*
+    ERROR_TIMEOUT_RESPONSE - Mov Original si se realizo
+   */
+  @Test
+  public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2() throws Exception {
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
+
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
+
+    PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
+
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
+    originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+
+    InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(prepaidCard, originalWithdraw);
+    Assert.assertTrue("Debe ser exitosa", withdrawTecnocom.isRetornoExitoso());
+
+    PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    reverse.setIdTxExterno(withdraw10.getTransactionId());
+    reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse = createPrepaidMovement10(reverse);
+
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
+
+    // primer intento
+    {
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+
+      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+    }
+
+    // segundo intento
+    {
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+
+      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
+
+      PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
+      Assert.assertEquals("Deberia estar con status REVERSED", PrepaidMovementStatus.REVERSED, originalDb.getEstado());
+      PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
+      Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+
+    }
+
+    {
+      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+    }
+  }
+
+  /*
+    ERROR_TIMEOUT_RESPONSE - Mov Original rechazado por monto
+   */
+  @Test
+  public void reverseWithdraw_OriginalMovement_Rejected() throws Exception {
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
+
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
+
+    PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
+
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
+    originalWithdraw.setMonto(BigDecimal.valueOf(100000));
+    originalWithdraw.setImpfac(BigDecimal.valueOf(100000));
+    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+
+    PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    reverse.setIdTxExterno(withdraw10.getTransactionId());
+    reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse = createPrepaidMovement10(reverse);
+
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
+
+    // primer intento
+    {
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+
+      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+    }
+
+    // segundo intento
+    {
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+
+      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+
+
+      PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
+      Assert.assertEquals("Deberia estar con status REVERSED", PrepaidMovementStatus.REVERSED, originalDb.getEstado());
+      PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
+      Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+
+    }
+
+    {
+      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+    }
+  }
 }
