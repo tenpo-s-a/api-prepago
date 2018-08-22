@@ -6,4 +6,5 @@ import java.util.Map;
 
 public interface CdtEJB10 {
   CdtTransaction10 addCdtTransaction(Map<String, Object> headers, CdtTransaction10 cdtTransaction10) throws Exception;
+  CdtTransaction10 buscaMovimientoReferencia(Map<String, Object> headers, Long idRef) throws Exception;
 }

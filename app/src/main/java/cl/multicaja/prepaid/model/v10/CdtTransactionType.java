@@ -23,7 +23,6 @@ public enum CdtTransactionType {
   RETIRO_POS_CONF("Confirmación Retiro POS"),
   REVERSA_RETIRO("Solicitud Reversa de Retiro"),
   REVERSA_RETIRO_CONF("Confirmacion Reversa de Retiro");
-  ;
 
   private String name;
 

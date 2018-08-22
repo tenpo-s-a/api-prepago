@@ -9,7 +9,9 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -138,4 +140,31 @@ public class CdtEJBBean10 implements CdtEJB10 {
     }
     return cdtTransaction10;
   }
+
+  @Override
+  public CdtTransaction10 buscaMovimientoReferencia(Map<String, Object> headers, Long idRef) throws Exception{
+
+    if(idRef == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idCuenta"));
+    }
+
+
+    Object[] params = new Object[] {
+      idRef
+    };
+
+    RowMapper rm = (Map<String, Object> row) -> {
+      CdtTransaction10 tx = new CdtTransaction10();
+      tx.setTransactionReference(numberUtils.toLong(row.get("_id"), null));
+      tx.setTransactionType(CdtTransactionType.valueOfEnum(String.valueOf(row.get("_nombre_fase"))));
+      return tx;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_cdt_busca_movimiento_referencia_v10", rm, params);
+    List<CdtTransaction10> lst = (List)resp.get("result");
+
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+
 }

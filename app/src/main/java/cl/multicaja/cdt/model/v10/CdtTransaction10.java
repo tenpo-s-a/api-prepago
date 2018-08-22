@@ -102,6 +102,26 @@ public class CdtTransaction10 implements Serializable {
     this.indSimulacion = indSimulacion;
   }
 
+  public CdtTransactionType getCdtTransactionTypeConfirm() {
+    if(CdtTransactionType.PRIMERA_CARGA.equals(this.getTransactionType())){
+      return CdtTransactionType.PRIMERA_CARGA_CONF;
+    } else if (CdtTransactionType.CARGA_WEB.equals(this.getTransactionType())){
+      return CdtTransactionType.CARGA_WEB_CONF;
+    } else if (CdtTransactionType.CARGA_POS.equals(this.getTransactionType())) {
+      return CdtTransactionType.CARGA_POS_CONF;
+    }else if(CdtTransactionType.RETIRO_WEB.equals(this.getTransactionType())) {
+      return CdtTransactionType.RETIRO_WEB_CONF;
+    }else if (CdtTransactionType.RETIRO_POS.equals(this.getTransactionType())) {
+      return CdtTransactionType.RETIRO_POS_CONF;
+    } else if (CdtTransactionType.REVERSA_CARGA.equals(this.getTransactionType())) {
+      return CdtTransactionType.REVERSA_CARGA_CONF;
+    } else if (CdtTransactionType.REVERSA_RETIRO.equals(this.getTransactionType())) {
+      return CdtTransactionType.REVERSA_RETIRO_CONF;
+    } else {
+      return CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF;
+    }
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
