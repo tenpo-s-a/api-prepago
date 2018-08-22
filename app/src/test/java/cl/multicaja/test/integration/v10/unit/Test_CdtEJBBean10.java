@@ -168,4 +168,34 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       Assert.assertEquals("indSimulacion null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
+  @Test
+  public void searchMovimientoReferencia() throws Exception {
+
+    CdtTransaction10 oCdtTx10 = new CdtTransaction10();
+    {
+      oCdtTx10.setAccountId(accountId);
+      oCdtTx10.setTransactionReference(0L);
+      oCdtTx10.setExternalTransactionId(getRandomNumericString(10));
+      oCdtTx10.setGloss("RECARGA DE PREPAGO");
+      oCdtTx10.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
+      oCdtTx10.setAmount(new BigDecimal(20000));
+      oCdtTx10.setIndSimulacion(false);
+      oCdtTx10 = getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+
+      Assert.assertNotNull("Debe retornar Una Tx Cdt", oCdtTx10);
+      Assert.assertTrue("debe tener id", oCdtTx10.getTransactionReference() > 0);
+      Assert.assertTrue("debe tener Amount", oCdtTx10.getAmount().doubleValue() > 0);
+      Assert.assertNotNull("debe tener Account ID", oCdtTx10.getAccountId());
+      Assert.assertNotNull("debe tener External Tx Id", oCdtTx10.getExternalTransactionId());
+    }
+    // Busca ID de Referencia con
+    {
+      CdtTransaction10 oCdtTx2 = getCdtEJBBean10().buscaMovimientoReferencia(null,oCdtTx10.getTransactionReference());
+      Assert.assertNotNull("Debe retornar Una Tx Cdt", oCdtTx2);
+      Assert.assertTrue("debe tener id", oCdtTx2.getTransactionReference() > 0);
+      Assert.assertEquals("Deben ser Iguales",oCdtTx10.getTransactionReference(),oCdtTx2.getTransactionReference());
+      Assert.assertEquals("Debes tener Tipo TxPRIMERA_CARGA",CdtTransactionType.PRIMERA_CARGA,oCdtTx10.getTransactionType());
+
+    }
+  }
 }

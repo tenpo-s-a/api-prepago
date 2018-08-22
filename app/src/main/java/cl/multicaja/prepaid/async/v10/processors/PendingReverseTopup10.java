@@ -2,9 +2,9 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 /**
@@ -59,7 +58,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             } else if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(req.getData().getNumError())){
               status = PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE;
             } else {
-              status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
+              status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP_REVERSE;
             }
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), status);
             req.getData().getPrepaidMovementReverse().setEstado(status);
@@ -70,25 +69,39 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
             prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(),IndicadorNormalCorrector.NORMAL.getValue()));
           if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
+            log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
-              log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!Deberia pasar por aca !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            // Se intenta realizar nuevamente la inclusion del movimiento original .
+            log.debug("********** Reintentando movimiento original **********");
+            String numaut = originalMovement.getId().toString();
+              //solamente los 6 primeros digitos de numreffac
+              if (numaut.length() > 6) {
+                numaut = numaut.substring(numaut.length()-6);
+              }
+             // Se intenta realizar nuevamente la inclusion del movimiento original .
               InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
-                originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
+                originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
                 originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
               // Se verifica la respuesta de tecnocom
               if (inclusionMovimientosDTO.isRetornoExitoso()) {
-                // Se actualiza el movimiento original
+                log.debug("********** Movimiento original no existia previamente **********");
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
-                log.info("Deberia pasar por aca !!!!!!!!!!!!!!!!!!!!!!!!!!!! Movimiento PROCESS_OK");
+                // Incluir datos en CDT.
+                CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+                callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
+
               } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
                 // La inclusion devuelve error, se evalua el error.
                 if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
+                  log.debug("********** Movimiento original ya existia **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+                  // Incluir datos en CDT.
+                  CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+                  callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
                 } else {
+                  log.debug("********** Movimiento original rechazado **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
                 }
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
@@ -102,10 +115,15 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
-
+            log.debug("********** Realizando reversa de retiro **********");
+            String numaut = prepaidMovementReverse.getId().toString();
+            //solamente los 6 primeros digitos de numreffac
+            if (numaut.length() > 6) {
+              numaut = numaut.substring(numaut.length()-6);
+            }
             // Se intenta realizar reversa del movimiento.
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(),originalMovement.getClamon(),
-              prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), prepaidMovementReverse.getNumaut(), originalMovement.getCodcom(),
+              prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
               originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
             // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
@@ -113,6 +131,14 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
               req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
+              log.debug("********** Reversa de retiro realizada exitosamente **********");
+              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+              CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L,
+                CdtTransactionType.PRIMERA_CARGA.equals(movRef.getTransactionType())?CdtTransactionType.REVERSA_PRIMERA_CARGA:CdtTransactionType.REVERSA_CARGA);
+              cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
+              if(!"0".equals(cdtTxReversa.getNumError())){
+                log.error("Error al confirmar reversa en CDT");
+              }
               return req;
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
@@ -144,6 +170,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
       }
     };
   }
+
   public ProcessorRoute processErrorTopupReverse() {
     return new ProcessorRoute<ExchangeData<PrepaidReverseData10>, ExchangeData<PrepaidReverseData10>>() {
       @Override
@@ -159,4 +186,6 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
       }
     };
   }
+
+
 }

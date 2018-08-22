@@ -1,10 +1,12 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.*;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.model.v10.*;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -219,4 +221,19 @@ public abstract class BaseProcessor10 {
     }
     return req;
   }
+
+  protected CdtTransaction10 callCDT(NewPrepaidBaseTransaction10 prepaidTopup10, PrepaidUser10 user, Long txRef, CdtTransactionType txType) throws Exception {
+    // Incluir datos en CDT.
+    CdtTransaction10 cdtTx = new CdtTransaction10();
+    cdtTx.setAmount(prepaidTopup10.getAmount().getValue());
+    cdtTx.setAccountId(String.format("PREPAGO_%d",user.getRut().longValue()));
+    cdtTx.setTransactionReference(txRef);
+    cdtTx.setIndSimulacion(false);
+    cdtTx.setExternalTransactionId(prepaidTopup10.getTransactionId());
+    cdtTx.setTransactionType(txType);
+    cdtTx.setGloss(txType.getName() + " " + prepaidTopup10.getAmount().getValue());
+    cdtTx = getRoute().getCdtEJBBean10().addCdtTransaction(null,cdtTx);
+    return cdtTx;
+  }
+
 }

@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
@@ -87,11 +88,17 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             log.debug("********** Movimiento original no existia previamente **********");
             // Se actualiza el movimiento original
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+            // Incluir datos en CDT.
+            CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+            callCDT(prepaidWithdraw,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
             // La inclusion devuelve error, se evalua el error.
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
               log.debug("********** Movimiento original ya existia **********");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+              // Incluir datos en CDT.
+              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+              callCDT(prepaidWithdraw,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
             } else {
               log.debug("********** Movimiento original rechazado **********");
               log.debug(inclusionMovimientosDTO.getDescRetorno());
@@ -127,7 +134,12 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
             req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
             log.debug("********** Reversa de retiro realizada exitosamente **********");
-
+            CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,0L, CdtTransactionType.REVERSA_RETIRO);
+            cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
+            if(!"0".equals(cdtTxReversa.getNumError())){
+              log.error("Error al confirmar reversa en CDT");
+            }
+            return req;
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
               log.debug("********** Reversa de retiro ya existia **********");
