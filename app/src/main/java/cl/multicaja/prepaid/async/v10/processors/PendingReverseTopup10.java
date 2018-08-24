@@ -52,7 +52,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           if(req.getRetryCount() > getMaxRetryCount()) {
             PrepaidMovementStatus status;
             if (Errors.TECNOCOM_ERROR_REINTENTABLE.equals(req.getData().getNumError())){
-              status = PrepaidMovementStatus.ERROR_TECNOCOM;
+              status = PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE;
             } else if(Errors.TECNOCOM_TIME_OUT_CONEXION.equals(req.getData().getNumError())){
               status = PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION;
             } else if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(req.getData().getNumError())){
@@ -72,7 +72,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
           }
-          else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
+          else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
             log.debug("********** Reintentando movimiento original **********");
             String numaut = originalMovement.getId().toString();
               //solamente los 6 primeros digitos de numreffac
@@ -105,7 +105,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
                 }
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
@@ -140,6 +140,21 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.error("Error al confirmar reversa en CDT");
               }
               return req;
+            }else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
+              if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
+                log.debug("********** Reversa de retiro ya existia **********");
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+                CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L, CdtTransactionType.REVERSA_CARGA);
+                cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
+                if(!"0".equals(cdtTxReversa.getNumError())){
+                  log.error("Error al confirmar reversa en CDT");
+                }
+              } else {
+                log.debug("********** Reversa de retiro rechazada **********");
+                log.debug(inclusionMovimientosDTO.getDescRetorno());
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.REJECTED);
+              }
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
               req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());

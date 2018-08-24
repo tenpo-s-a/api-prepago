@@ -59,7 +59,7 @@ public class PendingTopup10 extends BaseProcessor10 {
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;
           if (Errors.TECNOCOM_ERROR_REINTENTABLE.equals(req.getData().getNumError())){
-            status = PrepaidMovementStatus.ERROR_TECNOCOM;
+            status = PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE;
           } else if(Errors.TECNOCOM_TIME_OUT_CONEXION.equals(req.getData().getNumError())){
             status = PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION;
           } else if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(req.getData().getNumError())){
