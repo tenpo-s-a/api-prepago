@@ -173,7 +173,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
-    originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM);
+    originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);

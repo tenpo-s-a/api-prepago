@@ -18,8 +18,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.*;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP_REVERSE;
 
 public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
@@ -46,7 +49,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;
           if (Errors.TECNOCOM_ERROR_REINTENTABLE.equals(req.getData().getNumError())){
-            status = PrepaidMovementStatus.ERROR_TECNOCOM;
+            status = PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE;
           } else if(Errors.TECNOCOM_TIME_OUT_CONEXION.equals(req.getData().getNumError())){
             status = PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION;
           } else if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(req.getData().getNumError())){
@@ -64,14 +67,13 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
           prepaidWithdraw.getTransactionId(),
           PrepaidMovementType.WITHDRAW,
-          TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(),
-          IndicadorNormalCorrector.NORMAL.getValue()));
+          TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
 
         if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
           log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
           return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
 
-        } else if (PrepaidMovementStatus.ERROR_TECNOCOM.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
+        } else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
           log.debug("********** Reintentando movimiento original **********");
           String numaut = originalMovement.getId().toString();
           //solamente los 6 primeros digitos de numreffac
@@ -105,7 +107,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
             }
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
@@ -143,7 +145,13 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
               log.debug("********** Reversa de retiro ya existia **********");
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+              CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,0L, CdtTransactionType.REVERSA_RETIRO);
+              cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
+              if(!"0".equals(cdtTxReversa.getNumError())){
+                log.error("Error al confirmar reversa en CDT");
+              }
             } else {
               log.debug("********** Reversa de retiro rechazada **********");
               log.debug(inclusionMovimientosDTO.getDescRetorno());
@@ -189,6 +197,13 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
     return new ProcessorRoute<ExchangeData<PrepaidReverseData10>, ExchangeData<PrepaidReverseData10>>() {
       @Override
       public ExchangeData<PrepaidReverseData10> processExchange(long idTrx, ExchangeData<PrepaidReverseData10> req, Exchange exchange) throws Exception {
+        log.info("processErrorWithdrawReversal - REQ: " + req);
+        req.retryCountNext();
+        PrepaidReverseData10 data = req.getData();
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("idUsuario", data.getUser().getId().toString());
+        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+        getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         return req;
       }
     };

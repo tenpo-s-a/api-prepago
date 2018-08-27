@@ -16,7 +16,7 @@ public enum PrepaidMovementStatus {
   ERROR_WEB_WITHDRAW,
   ERROR_TIMEOUT_CONEXION,
   ERROR_TIMEOUT_RESPONSE,
-  ERROR_TECNOCOM,
+  ERROR_TECNOCOM_REINTENTABLE,
   REVERSED;
 
   public static PrepaidMovementStatus valueOfEnum(String name) {

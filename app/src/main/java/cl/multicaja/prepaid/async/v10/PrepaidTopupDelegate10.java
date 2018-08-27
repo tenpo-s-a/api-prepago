@@ -6,12 +6,11 @@ import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.Utils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
+import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.users.model.v10.User;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -135,5 +134,61 @@ public final class PrepaidTopupDelegate10 {
 
     return messageId;
   }
+  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 prepaidUser10, PrepaidMovement10 reverse) {
 
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = String.format("%s#%s#%s#%s", prepaidWithdraw.getMerchantCode(), prepaidWithdraw.getTransactionId(), prepaidWithdraw.getId(), Utils.uniqueCurrentTimeNano());
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+    prepaidWithdraw.setMessageId(messageId);
+
+    String endpoint = "seda:TransactionReversalRoute10.pendingReversalWithdraw";
+
+    PrepaidReverseData10 data = new PrepaidReverseData10();
+    data.setPrepaidWithdraw10(prepaidWithdraw);
+    data.setPrepaidUser10(prepaidUser10);
+    data.setPrepaidMovementReverse(reverse);
+
+    ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
+
+    return messageId;
+  }
+
+  public String sendPendingTopupReverse(PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10, PrepaidUser10 prepaidUser10, PrepaidMovement10 reverse) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
+
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+    prepaidTopup.setMessageId(messageId);
+
+    String endpoint = "seda:TransactionReversalRoute10.pendingReversalTopup";
+
+    PrepaidReverseData10 data = new PrepaidReverseData10();
+    data.setPrepaidTopup10(prepaidTopup);
+    data.setPrepaidUser10(prepaidUser10);
+    data.setPrepaidMovementReverse(reverse);
+    data.setPrepaidCard10(prepaidCard10);
+
+    ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
+
+    return messageId;
+  }
 }
