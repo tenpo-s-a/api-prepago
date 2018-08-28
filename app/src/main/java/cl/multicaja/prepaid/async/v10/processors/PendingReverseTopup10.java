@@ -103,6 +103,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 } else {
                   log.debug("********** Movimiento original rechazado **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
+
                 }
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
@@ -154,6 +155,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.debug("********** Reversa de retiro rechazada **********");
                 log.debug(inclusionMovimientosDTO.getDescRetorno());
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.REJECTED);
+
               }
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
@@ -172,7 +174,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovementReverse().getId(), status);
               data.getPrepaidMovementReverse().setEstado(status);
               return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
-            }
+            }  //Todo: Cambiar estado reversa a no realizado
           }
         }catch (Exception e){
           e.printStackTrace();
