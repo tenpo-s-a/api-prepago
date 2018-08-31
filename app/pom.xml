@@ -52,13 +52,6 @@
     </dependency>
 
     <dependency>
-      <groupId>cl.multicaja.users</groupId>
-      <artifactId>api-users</artifactId>
-      <version>1.0.0</version>
-      <classifier>${classifier}</classifier>
-    </dependency>
-
-    <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
       <version>1.0</version>

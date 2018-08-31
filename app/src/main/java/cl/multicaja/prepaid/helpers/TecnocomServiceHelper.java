@@ -1,11 +1,11 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceImpl;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
 import cl.multicaja.tecnocom.constants.HashOrder;
-import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

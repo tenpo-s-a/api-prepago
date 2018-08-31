@@ -5,17 +5,16 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.ejb.v10.MailEJBBean10;
-import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.util.Map;
@@ -37,12 +36,9 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
   private PrepaidTopupDelegate10 prepaidTopupDelegate10;
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
-  @EJB
-  private MailEJBBean10 mailEJBBean10;
+
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
-  @EJB
-  private UsersEJBBean10 usersEJBBean10;
 
   public void setPrepaidTopupDelegate10(PrepaidTopupDelegate10 prepaidTopupDelegate10) {
     this.prepaidTopupDelegate10 = prepaidTopupDelegate10;
@@ -52,20 +48,16 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
-  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
-    this.mailEJBBean10 = mailEJBBean10;
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
   }
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
   }
 
-  public void setUsersEJBBean10(UsersEJBBean10 usersEJBBean10) {
-    this.usersEJBBean10 = usersEJBBean10;
-  }
-
   @Override
-  public String sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
+  public void sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
 
     if (userId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -79,18 +71,17 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
 
     if(TEMPLATE_MAIL_SEND_CARD.equalsIgnoreCase(content.getTemplate())) {
       log.info("Flujo Envio email con tarjeta en PDF");
-      return sendCardAsync(headers,userId);
+      sendCardAsync(headers,userId);
     }
     else {
       log.info("Envio email flujo normal");
-      return this.mailEJBBean10.sendMailAsync(headers, userId, content);
+      getUserClient().sendMail(headers, userId, content);
     }
-
   }
 
   private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
 
-    User user = this.usersEJBBean10.getUserById(headers, userId);
+    User user = getUserClient().getUserById(headers, userId);
     if(user == null) {
       throw new ValidationException(Errors.CLIENTE_NO_EXISTE);
     }
@@ -127,5 +118,13 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
       }
     }
     return prepaidTopupDelegate10.sendPdfCardMail(prepaidCard10, user);
+  }
+
+  public void sendInternalEmail(String template, Map<String, Object> templateData) throws Exception {
+    EmailBody emailBody = new EmailBody();
+    emailBody.setTemplateData(templateData);
+    emailBody.setTemplate(template);
+    emailBody.setAddress("soporte-prepago@multicaja.cl");
+    sendMailAsync(null, null, emailBody);
   }
 }

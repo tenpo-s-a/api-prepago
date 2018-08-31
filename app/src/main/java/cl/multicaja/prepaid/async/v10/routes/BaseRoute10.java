@@ -6,15 +6,11 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.ejb.v10.MailEJBBean10;
-import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.camel.CamelContext;
 
 import javax.ejb.EJB;
@@ -34,22 +30,20 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PrepaidEJBBean10 prepaidEJBBean10;
 
   @EJB
-  private UsersEJBBean10 usersEJBBean10;
-
-  @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
 
   @EJB
-  private MailEJBBean10 mailEJBBean10;
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
   private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
+  private UserClient userClient;
 
   public BaseRoute10() {
     super();
@@ -102,6 +96,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return pdfUtils;
   }
 
+  public UserClient getUserClient(){
+    if(userClient == null){
+      userClient = new UserClient();
+    }
+    return userClient;
+  }
+
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     return prepaidUserEJBBean10;
   }
@@ -126,13 +127,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.prepaidEJBBean10 = prepaidEJBBean10;
   }
 
-  public UsersEJBBean10 getUsersEJBBean10() {
-    return usersEJBBean10;
-  }
-
-  public void setUsersEJBBean10(UsersEJBBean10 usersEJBBean10) {
-    this.usersEJBBean10 = usersEJBBean10;
-  }
 
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
@@ -150,14 +144,15 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.cdtEJBBean10 = cdtEJBBean10;
   }
 
-  public MailEJBBean10 getMailEJBBean10() { return mailEJBBean10; }
-
-  public void setMailEJBBean10(MailEJBBean10 mailEJBBean10) {
-    this.mailEJBBean10 = mailEJBBean10;
-  }
-
   public TecnocomService getTecnocomService() {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
+  public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
+    return mailPrepaidEJBBean10;
+  }
+
+  public void setMailPrepaidEJBBean10(MailPrepaidEJBBean10 mailPrepaidEJBBean10) {
+    this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
+  }
 }

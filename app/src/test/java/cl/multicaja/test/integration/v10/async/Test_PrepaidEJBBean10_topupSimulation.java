@@ -4,12 +4,12 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.helpers.users.model.NameStatus;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.model.v10.NameStatus;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,7 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 
 /**
  * Estos test de topupSimulation requieren del proceso asincrono dado que realizan cargas antes de validar

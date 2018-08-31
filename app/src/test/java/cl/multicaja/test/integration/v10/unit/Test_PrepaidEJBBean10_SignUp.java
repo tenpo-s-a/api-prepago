@@ -2,10 +2,13 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.helpers.users.model.CellphoneStatus;
+import cl.multicaja.prepaid.helpers.users.model.EmailStatus;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.NewPrepaidUserSignup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserSignup10;
-import cl.multicaja.users.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -119,8 +122,8 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
 
-      User user = getUsersEJBBean10().getUserById(null,prepaidUserSignup10.getUserId());
-      user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
+      User user = getUserClient().getUserById(null,prepaidUserSignup10.getUserId());
+      user = getUserClient().fillUser(null,user); // Actualiza los estados del usuario a Validado
       user.getEmail().setStatus(EmailStatus.VERIFIED);
       user.getCellphone().setStatus(CellphoneStatus.UNVERIFIED);
       user.setPassword(null);
@@ -139,11 +142,11 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       newPrepaidUserSignup10.setEmail(getUniqueEmail());
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
-      User user = getUsersEJBBean10().getUserById(null,prepaidUserSignup10.getUserId());
+      User user = getUserClient().getUserById(null,prepaidUserSignup10.getUserId());
 
       Assert.assertNotNull("Debe existir user ",user);
 
-      user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
+      user = getUserClient().fillUser(null,user); // Actualiza los estados del usuario a Validado
       user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
       user.getEmail().setStatus(EmailStatus.UNVERIFIED);
       user = updateUser(user);
@@ -167,11 +170,11 @@ public class Test_PrepaidEJBBean10_SignUp extends TestBaseUnit {
       PrepaidUserSignup10 prepaidUserSignup10 = getPrepaidEJBBean10().initUserSignup(null,newPrepaidUserSignup10);
       Assert.assertNotNull("Debe retornar prepaidSignup",prepaidUserSignup10);
 
-      User user = getUsersEJBBean10().getUserById(null,prepaidUserSignup10.getUserId());
+      User user = getUserClient().getUserById(null,prepaidUserSignup10.getUserId());
       Assert.assertNotNull("Debe existir user ",user);
 
       System.out.println(user);
-      user = getUsersEJBBean10().fillUser(user); // Actualiza los estados del usuario a Validado
+      user = getUserClient().fillUser(null,user); // Actualiza los estados del usuario a Validado
       user.getEmail().setStatus(EmailStatus.VERIFIED);
       user = updateUser(user);
 

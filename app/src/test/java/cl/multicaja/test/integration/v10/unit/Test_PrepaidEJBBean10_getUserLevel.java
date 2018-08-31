@@ -1,13 +1,12 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.prepaid.helpers.users.model.NameStatus;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
+import cl.multicaja.prepaid.helpers.users.model.RutStatus;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
-import cl.multicaja.users.model.v10.NameStatus;
-import cl.multicaja.users.model.v10.Rut;
-import cl.multicaja.users.model.v10.RutStatus;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
-import cl.multicaja.users.model.v10.Timestamps;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;

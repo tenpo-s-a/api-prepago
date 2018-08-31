@@ -4,12 +4,11 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserFile;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.NewTermsAndConditions10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserFile;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -171,7 +170,7 @@ public class Test_acceptTermsAndConditions_v10 extends TestBaseUnitApi {
     HttpResponse resp = acceptTermsAndConditions(user.getId(), tac);
     Assert.assertEquals("resp -> 200", 200, resp.getStatus());
 
-    UserFile userFile = getPrepaidEJBBean10().getFilesEJBBean10().getUsersFile(null, null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null)
+    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion())
       .stream().findFirst()
       .get();
 
@@ -199,7 +198,7 @@ public class Test_acceptTermsAndConditions_v10 extends TestBaseUnitApi {
     resp = acceptTermsAndConditions(user.getId(), tac);
     Assert.assertEquals("resp -> 200", 200, resp.getStatus());
 
-    List<UserFile> files = getPrepaidEJBBean10().getFilesEJBBean10().getUsersFile(null, null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null);
+    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion());
 
     Assert.assertEquals("Debe tener solo 1", 1, files.size());
     UserFile userFile = files.get(0);
