@@ -36,7 +36,7 @@ public final class ParametersUtil {
   private HashMapCache<String, Object> cache = new HashMapCache<>();
 
   private String getSchema() {
-    return this.getConfigUtils().getProperty("db.schema.parameters");
+    return this.getConfigUtils().getProperty("schema");
   }
 
   private ConfigUtils getConfigUtils() {
