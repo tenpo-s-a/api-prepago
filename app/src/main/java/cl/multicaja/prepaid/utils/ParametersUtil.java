@@ -41,7 +41,7 @@ public final class ParametersUtil {
 
   private ConfigUtils getConfigUtils() {
     if (this.configUtils == null) {
-      this.configUtils = new ConfigUtils("api-users");
+      this.configUtils = new ConfigUtils("api-prepaid");
     }
     return this.configUtils;
   }
