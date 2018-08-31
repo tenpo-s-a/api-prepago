@@ -4,13 +4,13 @@ package cl.multicaja.test.integration.v10.api;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.NameStatus;
+import cl.multicaja.prepaid.helpers.users.model.RutStatus;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.model.v10.NameStatus;
-import cl.multicaja.users.model.v10.RutStatus;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 

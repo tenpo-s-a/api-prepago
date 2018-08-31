@@ -1,18 +1,15 @@
 package cl.multicaja.prepaid.resources.v10;
 
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import cl.multicaja.core.exceptions.BadRequestException;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
@@ -20,11 +17,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @author vutreras
@@ -153,12 +147,13 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
+  /*
   @POST
   @Path("/{userId}/identity/files")
   public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
     User user = this.prepaidEJBBean10.uploadIdentityVerificationFiles(headersToMap(headers),userId, identityVerificationFiles);
     return Response.ok(user).build();
-  }
+  }*/
 
   /*
      Prepaid Simulations

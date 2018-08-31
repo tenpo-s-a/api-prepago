@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -15,10 +16,6 @@ import cl.multicaja.tecnocom.dto.BloqueoDesbloqueoDTO;
 import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
-import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.FilesEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,19 +70,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private PrepaidCardEJBBean10 prepaidCardEJB10;
 
   @EJB
-  private UsersEJBBean10 usersEJB10;
-
-  @EJB
   private CdtEJBBean10 cdtEJB10;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
-
-  @EJB
-  private DataEJBBean10 usersDataEJB10;
-
-  @EJB
-  private FilesEJBBean10 filesEJBBean10;
 
   private TecnocomService tecnocomService;
 
@@ -113,14 +101,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.prepaidCardEJB10 = prepaidCardEJB10;
   }
 
-  public UsersEJBBean10 getUsersEJB10() {
-    return usersEJB10;
-  }
-
-  public void setUsersEJB10(UsersEJBBean10 usersEJB10) {
-    this.usersEJB10 = usersEJB10;
-  }
-
   public CdtEJBBean10 getCdtEJB10() {
     return cdtEJB10;
   }
@@ -135,22 +115,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
-  }
-
-  public DataEJBBean10 getUsersDataEJB10() {
-    return usersDataEJB10;
-  }
-
-  public void setUsersDataEJB10(DataEJBBean10 usersDataEJB10) {
-    this.usersDataEJB10 = usersDataEJB10;
-  }
-
-  public FilesEJBBean10 getFilesEJBBean10() {
-    return filesEJBBean10;
-  }
-
-  public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
-    this.filesEJBBean10 = filesEJBBean10;
   }
 
   @Override
@@ -397,7 +361,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Se verifica la clave
     UserPasswordNew userPasswordNew = new UserPasswordNew();
     userPasswordNew.setValue(withdrawRequest.getPassword());
-    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -572,7 +536,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Se verifica la clave
     UserPasswordNew userPasswordNew = new UserPasswordNew();
     userPasswordNew.setValue(withdrawRequest.getPassword());
-    this.getUsersDataEJB10().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -701,11 +665,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     } else {
 
-      User user = getUsersEJB10().getUserByRut(headers, newPrepaidUserSignup.getRut());
+      User user = getUserClient().getUserByRut(headers, newPrepaidUserSignup.getRut());
 
       if (user == null) {
 
-        user = getUsersEJB10().getUserByEmail(headers, newPrepaidUserSignup.getEmail());
+        user = getUserClient().getUserByEmail(headers, newPrepaidUserSignup.getEmail());
 
         if (user != null) {
 
@@ -779,8 +743,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
       }
     }
-
-    SignUp signUp = getUsersEJB10().signUpUser(headers, newPrepaidUserSignup.getRut(), newPrepaidUserSignup.getEmail());
+    SignUPNew signUPNew = new SignUPNew(newPrepaidUserSignup.getEmail(),newPrepaidUserSignup.getRut());
+    SignUp signUp = getUserClient().signUp(headers, signUPNew);
 
     PrepaidUserSignup10 prepaidUserSignup10 = new PrepaidUserSignup10();
     prepaidUserSignup10.setId(signUp.getId());
@@ -811,7 +775,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
-    User user = getUsersEJB10().getUserById(headers,userIdMc);
+    User user = getUserClient().getUserById(headers,userIdMc);
     if(user == null){
       throw new ValidationException(CLIENTE_NO_EXISTE);
     }
@@ -825,7 +789,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
     }
 
-    user = getUsersEJB10().finishSignupUser(headers,userIdMc);
+    user = getUserClient().finishSignup(headers,userIdMc);
 
     PrepaidUser10 prepaidUser10 = new PrepaidUser10();
     prepaidUser10.setUserIdMc(user.getId());
@@ -1272,7 +1236,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Busco el usuario MC
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    User user = getUserClient().getUserById(headers, userIdMc);
 
     if(user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1309,7 +1273,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Busco el usuario MC
-    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+    User user = getUserClient().getUserByRut(headers, rut);
 
     if(user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1693,7 +1657,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   private User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    User user = getUserClient().getUserById(headers, userIdMc);
 
     if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1706,7 +1670,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   private User getUserMcByRut(Map<String, Object> headers, Integer rut) throws Exception {
-    User user = this.getUsersEJB10().getUserByRut(headers, rut);
+    User user = getUserClient().getUserByRut(headers, rut);
 
     if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1738,9 +1702,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   private AppFile getLastTermsAndConditions(Map<String, Object> headers) throws Exception {
-    Optional<AppFile> file = getFilesEJBBean10().getAppFiles(headers, null, APP_NAME, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
-      .stream()
-      .findFirst();
+     //TODO: Verificar esto!!!!!!!
+      Optional<AppFile> file = null; //= getFilesEJBBean10().getAppFiles(headers, null, APP_NAME, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
+     // .stream()
+     // .findFirst();
 
     return (file.isPresent()) ? file.get() : null;
   }
@@ -1780,7 +1745,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Se obtiene el usuario MC
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    User user = getUserClient().getUserById(headers, userIdMc);
 
     if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -1797,12 +1762,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(VERSION_TERMINOS_Y_CONDICIONES_NO_COINCIDEN);
     }
 
+    //TODO: VERIFICAR ESTO CUANDO SE COMIENCE A MIGRAR ESTO A PREPAGO
     // Se verifica si el usuario ya acepto los tac
-    List<UserFile> files = getFilesEJBBean10().getUsersFile(headers, null, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion(), null);
+    List<UserFile> files = getUserClient().getUserFiles(headers, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion());
 
     // Si el usuario ya acepto la version de los tac no se hace nada
     if (files == null || files.size() == 0) {
-      getFilesEJBBean10().createUserFile(headers, user.getId(), prepaidTac.getId(), null, null, null, null, null, null);
+      getUserClient().createUserFile(headers, user.getId(), new UserFile());
     }
 
     //TODO guardar si el usuario acepta recibir beneficios
@@ -1839,17 +1805,29 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // CI frontal
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(), ciFront.getLocation());
+    ciFront.setApp(APP_NAME);
+    ciFront.setName(USER_ID_FRONT);
+    ciFront.setVersion("v1.0");
+    ciFront.setDescription("CI frontal");
+    getUserClient().createUserFile(headers, user.getId(), ciFront);
 
     // CI posterior
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
-
+    ciFront.setApp(APP_NAME);
+    ciFront.setName(USER_ID_BACK);
+    ciFront.setVersion("v1.0");
+    ciFront.setDescription("CI posterior");
+    getUserClient().createUserFile(headers, user.getId(), ciBack);
     // Selfie
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    this.getFilesEJBBean10().createUserFile(headers, user.getId(), null, APP_NAME, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+    ciFront.setApp(APP_NAME);
+    ciFront.setName(USER_SELFIE);
+    ciFront.setVersion("v1.0");
+    ciFront.setDescription("Selfie + CI");
+    getUserClient().createUserFile(headers, user.getId(), selfie);
 
     // Actualizar el nameStatus a IN_REVIEW
-    return this.getUsersDataEJB10().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
+    //TODO: Ver como quedara esto.
+    return  getUserClient().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
   }
 }

@@ -1,13 +1,13 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.model.v10.Timestamps;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

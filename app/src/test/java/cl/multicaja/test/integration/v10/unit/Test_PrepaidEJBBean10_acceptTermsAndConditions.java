@@ -3,14 +3,13 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserFile;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.NewTermsAndConditions10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserFile;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
+
 
 import java.util.List;
 
@@ -165,9 +164,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
 
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
 
-    UserFile userFile = getPrepaidEJBBean10().getFilesEJBBean10().getUsersFile(null, null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null)
-      .stream().findFirst()
-      .get();
+    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion()).stream().findFirst().get();
 
     Assert.assertNotNull("Debe tener un registro", userFile);
     Assert.assertEquals("Debe ser del usuario", user.getId(), userFile.getUserId());
@@ -188,7 +185,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
 
-    List<UserFile> files = getPrepaidEJBBean10().getFilesEJBBean10().getUsersFile(null, null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null);
+    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion());
 
     Assert.assertEquals("Debe tener solo 1", 1, files.size());
     UserFile userFile = files.get(0);

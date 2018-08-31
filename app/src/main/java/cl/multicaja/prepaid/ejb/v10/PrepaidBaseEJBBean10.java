@@ -7,9 +7,10 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.users.utils.ParametersUtil;
 
 /**
  * @autor vutreras
@@ -19,6 +20,8 @@ public abstract class PrepaidBaseEJBBean10 {
   protected static NumberUtils numberUtils = NumberUtils.getInstance();
 
   protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
+
+  protected static UserClient userClient;
 
   private static ConfigUtils configUtils;
 
@@ -51,7 +54,12 @@ public abstract class PrepaidBaseEJBBean10 {
     }
     return configUtils;
   }
-
+  public static UserClient getUserClient(){
+    if(userClient == null){
+      userClient = new UserClient();
+    }
+    return userClient;
+  }
   /**
    *
    * @return

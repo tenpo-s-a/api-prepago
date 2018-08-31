@@ -2,11 +2,11 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.test.integration.TestSuite;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
-import cl.multicaja.users.model.v10.User;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;

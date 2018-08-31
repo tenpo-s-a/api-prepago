@@ -16,18 +16,16 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.FilesEJBBean10;
-import cl.multicaja.users.ejb.v10.MailEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
-import cl.multicaja.users.utils.ParametersUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
@@ -57,16 +55,13 @@ public class TestBaseUnit extends TestApiBase {
   private static ConfigUtils configUtils;
   private static PrepaidTopupDelegate10 prepaidTopupDelegate10;
   private static CdtEJBBean10 cdtEJBBean10;
-  private static UsersEJBBean10 usersEJBBean10;
   private static PrepaidUserEJBBean10 prepaidUserEJBBean10;
   private static PrepaidCardEJBBean10 prepaidCardEJBBean10;
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
-  private static MailEJBBean10 mailEJBBean10;
-  private static DataEJBBean10 userDataEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
-  private static FilesEJBBean10 filesEJBBean10;
+  private static UserClient userClient;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
@@ -83,6 +78,13 @@ public class TestBaseUnit extends TestApiBase {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
+  }
+
+  public static UserClient getUserClient() {
+    if (userClient == null) {
+      userClient = new UserClient();
+    }
+    return userClient;
   }
 
   public static CalculationsHelper getCalculationsHelper(){
@@ -133,17 +135,6 @@ public class TestBaseUnit extends TestApiBase {
    *
    * @return
    */
-  public static UsersEJBBean10 getUsersEJBBean10() {
-    if (usersEJBBean10 == null) {
-      usersEJBBean10 = new UsersEJBBean10();
-    }
-    return usersEJBBean10;
-  }
-
-  /**
-   *
-   * @return
-   */
   public static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
     if (prepaidMovementEJBBean10 == null) {
       prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
@@ -158,7 +149,6 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     if (prepaidUserEJBBean10 == null) {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
-      prepaidUserEJBBean10.setUsersEJB10(getUsersEJBBean10());
       prepaidUserEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidUserEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
     }
@@ -181,20 +171,9 @@ public class TestBaseUnit extends TestApiBase {
       mailPrepaidEJBBean10 = new MailPrepaidEJBBean10();
       mailPrepaidEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
       mailPrepaidEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
-      mailPrepaidEJBBean10.setUsersEJBBean10(getUsersEJBBean10());
       mailPrepaidEJBBean10.setPrepaidTopupDelegate10(getPrepaidTopupDelegate10());
     }
     return mailPrepaidEJBBean10;
-  }
-  /**
-   *
-   * @return
-   */
-  public static MailEJBBean10 getMailEJBBean10() {
-    if (mailEJBBean10 == null) {
-      mailEJBBean10 = new MailEJBBean10();
-    }
-    return mailEJBBean10;
   }
 
   /**
@@ -205,33 +184,12 @@ public class TestBaseUnit extends TestApiBase {
     if (prepaidEJBBean10 == null) {
       prepaidEJBBean10 = new PrepaidEJBBean10();
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
-      prepaidEJBBean10.setUsersEJB10(getUsersEJBBean10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
-      prepaidEJBBean10.setUsersDataEJB10(getDataEJBBean10());
-      prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
     }
     return prepaidEJBBean10;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public static DataEJBBean10 getDataEJBBean10(){
-    if (userDataEJBBean10 == null) {
-      userDataEJBBean10 = new DataEJBBean10();
-    }
-    return userDataEJBBean10;
-  }
-
-  public static FilesEJBBean10 getFilesEJBBean10() {
-    if(filesEJBBean10 == null) {
-      filesEJBBean10 = new FilesEJBBean10();
-    }
-    return filesEJBBean10;
   }
 
   /**
@@ -251,7 +209,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public SignUp signupUser(Integer rut, String email) throws Exception {
-    return getUsersEJBBean10().signUpUser(null, rut, email);
+    return getUserClient().signUp(null, new SignUPNew(email,rut));
   }
 
   /**
@@ -274,7 +232,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public User signupUserAndGetUser() throws Exception {
     SignUp singUP = signupUser();
-    return getUsersEJBBean10().getUserById(null, singUP.getUserId());
+    return getUserClient().getUserById(null, singUP.getUserId());
   }
 
   /**
@@ -285,7 +243,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User updateUser(User u) throws Exception {
-    return getUsersEJBBean10().updateUser(u, u.getRut(), u.getEmail(), u.getCellphone(), u.getNameStatus(), u.getGlobalStatus(), u.getBirthday(), u.getPassword(), u.getCompanyData(), u.getIdentityStatus());
+    return getUserClient().updateUser(null,u.getId(),u);
   }
 
   /**
@@ -295,7 +253,7 @@ public class TestBaseUnit extends TestApiBase {
    * @throws Exception
    */
   public User registerUser() throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
+    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED);
   }
 
   /**
@@ -354,7 +312,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
-    user = getUsersEJBBean10().fillUser(user);
+    user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.getEmail().setStatus(EmailStatus.VERIFIED);
@@ -386,7 +344,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
-    user = getUsersEJBBean10().fillUser(user);
+    user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.UNVERIFIED);
     user.getEmail().setStatus(EmailStatus.UNVERIFIED);
@@ -404,7 +362,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
-    user = getUsersEJBBean10().fillUser(user);
+    user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.UNVERIFIED);
     user.getEmail().setStatus(EmailStatus.UNVERIFIED);

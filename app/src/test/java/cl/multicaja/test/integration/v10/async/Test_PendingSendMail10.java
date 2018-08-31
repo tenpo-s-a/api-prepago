@@ -4,6 +4,8 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.helpers.users.model.Email;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -12,8 +14,6 @@ import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
-import cl.multicaja.users.model.v10.Email;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 

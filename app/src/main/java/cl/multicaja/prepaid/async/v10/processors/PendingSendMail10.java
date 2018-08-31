@@ -6,12 +6,11 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.model.v10.MimeType;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
-import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.MailTemplate;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -67,18 +66,18 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         if (cvv2DTO.isRetornoExitoso()) {
           try {
-
-            MailTemplate mailTemplate = getRoute().getMailEJBBean10().getMailTemplateByAppAndName(null, APPNAME, TEMPLATE_PDF_CARD);
+            // TODO hay que cambiarlo por Parametros de prepago
+            //MailTemplate mailTemplate = getRoute().getMailEJBBean10().getMailTemplateByAppAndName(null, APPNAME, TEMPLATE_PDF_CARD);
             Map<String, String> mailData = new HashMap<>();
             mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
             mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getFormattedExpiration()));
             mailData.put("${cvc}", String.valueOf(cvv2DTO.getClavegen()));
 
-            String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
+            //String template = replaceDataHTML(mailTemplate.getTemplate(), mailData);
 
             //TODO el passwordOwner quizas debe externalizarse
             //TODO revisar licencia de itext
-            String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
+           // String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
@@ -94,9 +93,9 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
             emailBody.setTemplate(TEMPLATE_MAIL_CARD);
             emailBody.setAddress(data.getUser().getEmail().getValue());
-            emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_" + Utils.uniqueCurrentTimeNano() + ".pdf");
+            //emailBody.addAttached(pdfB64,MimeType.PDF.getValue(),"Tarjeta_" + Utils.uniqueCurrentTimeNano() + ".pdf");
 
-            getRoute().getMailEJBBean10().sendMailAsync(null, null, emailBody);
+            getRoute().getUserClient().sendMail(null, null, emailBody);
 
             return req;
 
@@ -131,7 +130,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<String, Object>();
         templateData.put("idUsuario", data.getUser().getId().toString());
         templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-        getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
 
         return req;
       }

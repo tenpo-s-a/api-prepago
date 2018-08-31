@@ -10,14 +10,13 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.Rut;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserIdentityStatus;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO;
 
 /**
  * @author abarazarte
@@ -43,7 +41,7 @@ import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO
 public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Spy
-  private UsersEJBBean10 usersEJBBean10;
+  private UserClient userClient;
 
   @Spy
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -214,7 +212,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   @Test
   public void userMcNull() throws Exception {
 
-    Mockito.doReturn(null).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(null).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -238,7 +236,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -262,7 +260,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.LOCKED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -286,7 +284,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DELETED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -310,7 +308,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.PREREGISTERED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -335,7 +333,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     user.setGlobalStatus(UserStatus.DISABLED);
     user.setIdentityStatus(UserIdentityStatus.TERRORIST);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -364,7 +362,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     user.setId(Long.MAX_VALUE);
     user.setIdentityStatus(UserIdentityStatus.NORMAL);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
@@ -397,7 +395,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
@@ -438,7 +436,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverse = new PrepaidMovement10();
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
@@ -487,7 +485,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverse.setId(Long.MAX_VALUE);
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
@@ -547,7 +545,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverse = new PrepaidMovement10();
     reverse.setId(Long.MAX_VALUE);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -603,7 +601,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().minusHours(24).minusSeconds(1).toInstant()));
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
@@ -671,7 +669,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     cdtTransaction.setExternalTransactionId(reverseRequest.getTransactionId());
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);

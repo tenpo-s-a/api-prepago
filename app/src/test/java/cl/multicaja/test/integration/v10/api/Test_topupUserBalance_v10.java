@@ -2,10 +2,10 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserIdentityStatus;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;

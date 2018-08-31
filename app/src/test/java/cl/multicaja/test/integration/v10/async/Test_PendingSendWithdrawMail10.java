@@ -3,8 +3,8 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 

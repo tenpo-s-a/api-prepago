@@ -11,12 +11,11 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,23 +42,12 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public static Integer BALANCE_CACHE_EXPIRATION_MILLISECONDS = 60000;
 
   @EJB
-  private UsersEJBBean10 usersEJB10;
-
-  @EJB
   private PrepaidCardEJBBean10 prepaidCardEJB10;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
 
   private TecnocomService tecnocomService;
-
-  public UsersEJBBean10 getUsersEJB10() {
-    return usersEJB10;
-  }
-
-  public void setUsersEJB10(UsersEJBBean10 usersEJB10) {
-    this.usersEJB10 = usersEJB10;
-  }
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -248,7 +236,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     // Obtener Usuario MC
-    User user = this.getUsersEJB10().getUserById(headers, userIdMc);
+    User user = getUserClient().getUserById(headers, userIdMc);
 
     if(user == null){
       throw new NotFoundException(CLIENTE_NO_EXISTE);

@@ -4,16 +4,15 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserIdentityStatus;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -21,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
-import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO;
 
 /**
  * @author abarazarte

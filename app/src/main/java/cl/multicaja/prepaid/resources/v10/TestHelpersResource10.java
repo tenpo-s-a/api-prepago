@@ -2,34 +2,31 @@ package cl.multicaja.prepaid.resources.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.ejb.v10.MailEJBBean10;
-import cl.multicaja.users.model.v10.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 
@@ -45,8 +42,6 @@ public final class TestHelpersResource10 extends BaseResource {
 
   private NumberUtils numberUtils = NumberUtils.getInstance();
 
-  @EJB
-  private UsersEJBBean10 usersEJBBean10;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -60,11 +55,7 @@ public final class TestHelpersResource10 extends BaseResource {
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
 
-	@EJB
-  private MailEJBBean10 mailEJBBean10;
-
-	@EJB
-  private DataEJBBean10 dataEJBBean10;
+  private UserClient userClient;
 
 	private void validate() {
     if (ConfigUtils.isEnvProduction()) {
@@ -72,83 +63,11 @@ public final class TestHelpersResource10 extends BaseResource {
     }
   }
 
-  //http://localhost:8080/api-prepaid-1.0/1.0/testhelpers/send/test?address=pepito@mail.com&withAttachment=false
-  @GET
-  @Path("/send/test")
-  public Response sendEmailAsynTest(@QueryParam("address") String address, @QueryParam("withAttachment") String withAttachment) throws Exception {
-    validate();
-    return Response.status(200).entity(this.mailEJBBean10.sendEmailAsynTest(address, numberUtils.toBoolean(withAttachment, false))).build();
-  }
-
-  @POST
-  @Path("/users/reset")
-  public Response usersReset(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    String min = String.valueOf(body.get("min"));
-    String max = String.valueOf(body.get("max"));
-
-    if (StringUtils.isBlank(min)) {
-      min = "0";
+  public UserClient getUserClient() {
+	  if(userClient == null) {
+      userClient = UserClient.getInstance();
     }
-
-    if (StringUtils.isBlank(max)) {
-      max = String.valueOf(Long.MAX_VALUE);
-    }
-
-    log.info(String.format("Borrando todos los datos de usuarios con rut entre %s y %s", min, max));
-
-    List<String> lstAccountsCdt = null;
-
-    //se borran usuarios en api-users
-    {
-      String schema = usersEJBBean10.getSchema();
-      JdbcTemplate jdbcTemplate = usersEJBBean10.getDbUtils().getJdbcTemplate();
-
-      //se buscan los rut dentro del rango y cada rut se transforma a PREPAGO_rut
-      lstAccountsCdt = jdbcTemplate.queryForList(String.format("select rut from %s.users where rut >= %s AND rut <= %s", schema, min, max), String.class);
-      lstAccountsCdt = lstAccountsCdt.stream().map((x) -> "'PREPAGO_" + x + "'").collect(Collectors.toList());
-
-      String subQuery = String.format("select id from %s.users where rut >= %s AND rut <= %s", schema, min, max);
-
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_address where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_bank_account where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_cellphone where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_email where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_rut where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users_signup where users_id in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.users where id in (%s);", schema, subQuery));
-    }
-
-    //se borran usuarios en api-prepaid
-    {
-      String schema = prepaidEJBBean10.getSchema();
-      JdbcTemplate jdbcTemplate = prepaidEJBBean10.getDbUtils().getJdbcTemplate();
-
-      String subQuery = String.format("select id from %s.prp_usuario where rut >= %s AND rut <= %s", schema, min, max);
-
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_tarjeta where id_usuario in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_movimiento where id_usuario in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.prp_usuario where id in (%s);", schema, subQuery));
-    }
-
-    //se borran datos en cdt
-    if (lstAccountsCdt != null && !lstAccountsCdt.isEmpty()) {
-
-      String schema = cdtEJBBean10.getSchema();
-      JdbcTemplate jdbcTemplate = cdtEJBBean10.getDbUtils().getJdbcTemplate();
-
-      String subQuery = String.format("select id from %s.cdt_cuenta where id_externo in (%s)", schema, StringUtils.join(lstAccountsCdt, ","));
-
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_cuenta_acumulador where id_cuenta in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_movimiento_cuenta where id_cuenta in (%s);", schema, subQuery));
-      jdbcExecute(jdbcTemplate, String.format("delete from %s.cdt_cuenta where id in (%s);", schema, subQuery));
-    }
-
-    log.info("Borrado exitoso de datos de usuarios");
-
-    return Response.status(200).build();
+    return userClient;
   }
 
   private void jdbcExecute(JdbcTemplate jdbcTemplate, String sql) {
@@ -156,68 +75,6 @@ public final class TestHelpersResource10 extends BaseResource {
     jdbcTemplate.execute(sql);
   }
 
-  @POST
-  @Path("/user")
-  public Response createUser(User user, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-	  Map<String, Object> mapHeaders = headersToMap(headers);
-
-    SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
-
-    return this.updateUser(user, signUp.getUserId(), headers);
-  }
-
-  @PUT
-  @Path("/user/{userId}")
-  public Response updateUser(User user, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    user.setId(userIdMc);
-
-	  log.info("Before user: " + user);
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    if (StringUtils.isNotBlank(user.getName()) && StringUtils.isNotBlank(user.getLastname_1())) {
-
-      if (StringUtils.isBlank(user.getLastname_2())) {
-        user.setLastname_2(".");
-      }
-
-      UserPersonalDataNew userPersonalDataNew = new UserPersonalDataNew();
-      userPersonalDataNew.setName(user.getName());
-      userPersonalDataNew.setLastname_1(user.getLastname_1());
-      userPersonalDataNew.setLastname_2(user.getLastname_2());
-
-      dataEJBBean10.updatePersonalData(mapHeaders, userIdMc, userPersonalDataNew);
-
-      user.setNameStatus(NameStatus.VERIFIED);
-    }
-
-    if (user.getRut() != null && user.getRut().getStatus() == null) {
-      user.getRut().setStatus(RutStatus.UNVERIFIED);
-    }
-
-    if (user.getEmail() != null && user.getEmail().getStatus() == null) {
-      user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    }
-
-    if(user.getIdentityStatus() == null) {
-      user.setIdentityStatus(UserIdentityStatus.NORMAL);
-    }
-
-    usersEJBBean10.updateUser(user, user.getRut(), user.getEmail(), user.getCellphone(), user.getNameStatus(),
-                            user.getGlobalStatus(), user.getBirthday(), user.getPassword(), user.getCompanyData(), user.getIdentityStatus());
-
-    user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    log.info("After user: " + user);
-
-    return Response.ok(user).status(200).build();
-  }
 
   @POST
   @Path("/prepaiduser")
@@ -232,14 +89,10 @@ public final class TestHelpersResource10 extends BaseResource {
     Map<String, Object> mapHeaders = headersToMap(headers);
 
     if (user.getId() != null) {
-
-      user = usersEJBBean10.getUserById(mapHeaders, user.getId());
-
+      user = getUserClient().getUserById(mapHeaders, user.getId());
     } else {
-
-      SignUp signUp = usersEJBBean10.signUpUser(mapHeaders, user.getRut().getValue(), user.getEmail().getValue());
-
-      user = usersEJBBean10.getUserById(mapHeaders, signUp.getUserId());
+      SignUp signUp = getUserClient().signUp(mapHeaders, new SignUPNew(user.getEmail().getValue(),user.getRut().getValue()));
+      user = getUserClient().getUserById(mapHeaders, signUp.getUserId());
     }
 
     if (user == null) {
@@ -265,7 +118,7 @@ public final class TestHelpersResource10 extends BaseResource {
     user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
     user.setPassword(String.valueOf(1357));
 
-    user = usersEJBBean10.fillUser(user);
+    user = getUserClient().fillUser(null,user);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(user.getId());
@@ -278,168 +131,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(user).status(200).build();
   }
 
-  @GET
-  @Path("/user/{userId}/email_code")
-  public Response getEmailCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
 
-    validate();
 
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    String sql = String.format("select code from %s.users_email where users_id = %s", UsersEJBBean10.getSchema(), userIdMc);
-
-    String code = UsersEJBBean10.getDbUtils().getJdbcTemplate().queryForObject(sql, String.class);
-
-    Map<String, Object> resp = new HashMap<>();
-    resp.put("code", code);
-
-    return Response.ok(resp).status(200).build();
-  }
-
-  @GET
-  @Path("/user/{userId}/sms_code")
-  public Response getSmsCode(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    String sql = String.format("select code from %s.users_cellphone where users_id = %s", UsersEJBBean10.getSchema(), userIdMc);
-
-    String code = UsersEJBBean10.getDbUtils().getJdbcTemplate().queryForObject(sql, String.class);
-
-    Map<String, Object> resp = new HashMap<>();
-    resp.put("code", code);
-
-    return Response.ok(resp).status(200).build();
-  }
-
-  private static Map<String, List<Map<String, Object>>> bankAccounts = new HashMap<>();
-
-  @GET
-  @Path("/{userId}/bank_accounts")
-  public Response getBackAccounts(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
-
-    return Response.ok(resp).status(200).build();
-  }
-
-  @POST
-  @Path("/{userId}/bank_accounts")
-  public Response addBankAccount(@PathParam("userId") Long userIdMc, Map<String, Object> bankAccount, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
-
-    if (resp == null) {
-      resp = new ArrayList<>();
-    }
-
-    bankAccount.put("id", Utils.uniqueCurrentTimeNano());
-    resp.add(bankAccount);
-
-    bankAccounts.put(String.valueOf(userIdMc), resp);
-
-    return Response.ok(bankAccount).status(200).build();
-  }
-
-  @DELETE
-  @Path("/{userId}/bank_accounts/{bankAccountId}")
-  public Response deleteBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
-
-    List<Map<String, Object>> resp2 = new ArrayList<>();
-
-    if (resp != null) {
-      for (int j = 0; j < resp.size(); j++) {
-        Map<String, Object> bankAccount = resp.get(j);
-        if (!bankAccount.get("id").equals(bankAccountId)) {
-          resp2.add(bankAccount);
-        }
-      }
-      bankAccounts.put(String.valueOf(userIdMc), resp2);
-    }
-
-    return Response.ok().status(200).build();
-  }
-
-  @PUT
-  @Path("/{userId}/bank_accounts/{bankAccountId}")
-  public Response updateBankAccount(@PathParam("userId") Long userIdMc, @PathParam("bankAccountId") Long bankAccountId, Map<String, Object> bankAccountNew, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    User user = usersEJBBean10.getUserById(mapHeaders, userIdMc);
-
-    if(user == null){
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    List<Map<String, Object>> resp = bankAccounts.get(String.valueOf(userIdMc));
-
-    if (resp != null) {
-      for (int j = 0; j < resp.size(); j++) {
-        Map<String, Object> bankAccount = resp.get(j);
-        if (bankAccount.get("id").equals(bankAccountId)) {
-
-          Set<String> keys = bankAccountNew.keySet();
-
-          for (String k : keys) {
-            bankAccount.put(k, bankAccountNew.get(k));
-          }
-
-          bankAccountNew = bankAccount;
-
-          break;
-        }
-      }
-    }
-
-    return Response.ok(bankAccountNew).status(200).build();
-  }
 }

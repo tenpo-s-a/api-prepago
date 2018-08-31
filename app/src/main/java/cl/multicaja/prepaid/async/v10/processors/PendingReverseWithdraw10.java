@@ -203,7 +203,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario", data.getUser().getId().toString());
         templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-        getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
+        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         return req;
       }
     };

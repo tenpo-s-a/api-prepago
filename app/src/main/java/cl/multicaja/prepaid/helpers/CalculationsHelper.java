@@ -2,8 +2,8 @@ package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.users.utils.ParametersUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

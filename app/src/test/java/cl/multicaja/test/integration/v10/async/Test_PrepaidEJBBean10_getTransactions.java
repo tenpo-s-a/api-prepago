@@ -1,12 +1,12 @@
 package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidTransaction10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.model.v10.User;
 import org.junit.Assert;
 import org.junit.Test;
 

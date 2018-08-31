@@ -10,12 +10,10 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,17 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO;
-import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 
 /**
  * @author abarazarte
  **/
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
-
-  @Spy
-  private UsersEJBBean10 usersEJBBean10;
 
   @Spy
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -54,7 +47,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
   @Spy
-  private DataEJBBean10 dataEJBBean10;
+  private UserClient userClient;
 
   @Spy
   @InjectMocks
@@ -237,7 +230,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
   @Test
   public void userMcNull() throws Exception {
 
-    Mockito.doReturn(null).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(null).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -262,7 +255,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -287,7 +280,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.LOCKED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -312,7 +305,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DELETED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -337,7 +330,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.PREREGISTERED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -363,7 +356,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     user.setGlobalStatus(UserStatus.ENABLED);
     user.setIdentityStatus(UserIdentityStatus.TERRORIST);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -393,7 +386,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     user.setId(Long.MAX_VALUE);
     user.setIdentityStatus(UserIdentityStatus.NORMAL);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
@@ -427,7 +420,7 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
@@ -469,14 +462,14 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
     Mockito.doReturn(originalWithdraw).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
       PrepaidMovementType.WITHDRAW, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA);
     Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
       PrepaidMovementType.WITHDRAW, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
 
-    Mockito.doNothing().when(dataEJBBean10).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
@@ -515,13 +508,13 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverse.setId(Long.MAX_VALUE);
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     // CheckPassword
-    Mockito.doNothing().when(dataEJBBean10).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -579,13 +572,13 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverse.setId(Long.MAX_VALUE);
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     // CheckPassword
-    Mockito.doNothing().when(dataEJBBean10).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -643,13 +636,13 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().minusHours(24).minusSeconds(1).toInstant()));
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     // CheckPassword
-    Mockito.doNothing().when(dataEJBBean10).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -721,13 +714,13 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     cdtTransaction.setExternalTransactionId(reverseRequest.getTransactionId());
 
     // UserMc
-    Mockito.doReturn(user).when(usersEJBBean10).getUserByRut(headers, Integer.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     // CheckPassword
-    Mockito.doNothing().when(dataEJBBean10).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
 
     //PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),

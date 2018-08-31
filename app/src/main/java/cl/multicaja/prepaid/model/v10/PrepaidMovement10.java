@@ -2,7 +2,6 @@ package cl.multicaja.prepaid.model.v10;
 
 
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.users.model.v10.Timestamps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 

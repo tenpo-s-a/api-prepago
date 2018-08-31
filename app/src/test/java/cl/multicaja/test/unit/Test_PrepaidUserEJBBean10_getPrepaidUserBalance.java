@@ -6,15 +6,15 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.tecnocom.model.response.Response;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.Rut;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ import static cl.multicaja.core.model.Errors.*;
 public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
   @Spy
-  UsersEJBBean10 usersEJBBean10;
+  UserClient userClient;
 
   @Spy
   PrepaidCardEJBBean10 prepaidCardEJBBean10;
@@ -63,7 +63,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
   @Test
   public void userMcNull() throws Exception {
-    Mockito.doReturn(null).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(null).when(userClient).getUserById(null, Long.MAX_VALUE);
 
     try{
       prepaidUserEJB10.getPrepaidUserBalance(null, Long.MAX_VALUE);
@@ -78,7 +78,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
 
     try{
       prepaidUserEJB10.getPrepaidUserBalance(null, Long.MAX_VALUE);
@@ -93,7 +93,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.LOCKED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
 
     try{
       prepaidUserEJB10.getPrepaidUserBalance(null, Long.MAX_VALUE);
@@ -108,7 +108,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DELETED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
 
     try{
       prepaidUserEJB10.getPrepaidUserBalance(null, Long.MAX_VALUE);
@@ -124,7 +124,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     user.setGlobalStatus(UserStatus.PREREGISTERED);
 
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
 
     try{
       prepaidUserEJB10.getPrepaidUserBalance(null, Long.MAX_VALUE);
@@ -142,7 +142,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     user.setRut(rut);
     user.setGlobalStatus(UserStatus.ENABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
 
     try{
@@ -164,7 +164,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
 
     try{
@@ -194,7 +194,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
 
@@ -218,7 +218,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
@@ -246,7 +246,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidMovement).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
@@ -276,7 +276,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard10.setProcessorUserId("1");
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(tecnocomService).consultaSaldo("1", "111111111", TipoDocumento.RUT);
@@ -312,7 +312,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
@@ -356,7 +356,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
@@ -424,7 +424,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
@@ -492,7 +492,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
@@ -559,7 +559,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).getPrepaidUserByRut(null, 11111111);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);

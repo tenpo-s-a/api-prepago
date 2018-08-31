@@ -5,12 +5,10 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.users.ejb.v10.DataEJBBean10;
-import cl.multicaja.users.ejb.v10.FilesEJBBean10;
-import cl.multicaja.users.ejb.v10.UsersEJBBean10;
-import cl.multicaja.users.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO;
 
 /**
  * @author abarazarte
@@ -32,16 +29,10 @@ import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO
 public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
   @Spy
-  private UsersEJBBean10 usersEJBBean10;
-
-  @Spy
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @Spy
-  private FilesEJBBean10 filesEJBBean10;
-
-  @Spy
-  private DataEJBBean10 usersDataEJB10;
+  private UserClient userClient;
 
   @InjectMocks
   @Spy
@@ -137,7 +128,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
   @Test
   public void userMcNull() throws Exception {
-    Mockito.doReturn(null).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(null).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
     files.put("USER_ID_BACK", f);
@@ -157,7 +148,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
     files.put("USER_ID_BACK", f);
@@ -177,7 +168,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.LOCKED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
     files.put("USER_ID_BACK", f);
@@ -197,7 +188,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.DELETED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
     files.put("USER_ID_BACK", f);
@@ -217,7 +208,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     User user = Mockito.mock(User.class);
     user.setGlobalStatus(UserStatus.PREREGISTERED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
     files.put("USER_ID_BACK", f);
@@ -240,7 +231,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     user.setRut(rut);
     user.setGlobalStatus(UserStatus.ENABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
@@ -267,7 +258,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
 
     Map<String, UserFile> files = new HashMap<>();
@@ -303,11 +294,11 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
 
-    Mockito.doReturn(user).when(usersEJBBean10).getUserById(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
-    Mockito.doReturn(user2).when(usersDataEJB10).updateNameStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(NameStatus.class));
+    Mockito.doReturn(user2).when(userClient).updateNameStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(NameStatus.class));
 
-    Mockito.doReturn(f).when(filesEJBBean10).createUserFile(Mockito.any(), Mockito.anyLong(), Mockito.nullable(Long.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.notNull(), Mockito.notNull());
+    //Mockito.doReturn(f).when(filesEJBBean10).createUserFile(Mockito.any(), Mockito.anyLong(), Mockito.nullable(Long.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.notNull(), Mockito.notNull());
 
     Map<String, UserFile> files = new HashMap<>();
     UserFile idFront = new UserFile();

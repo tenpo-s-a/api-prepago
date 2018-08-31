@@ -1,15 +1,13 @@
 package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
-import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.User;
-import cl.multicaja.users.model.v10.UserStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,15 +29,15 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
     createPrepaidCard10(prepaidCard10);
 
     EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD,user.getEmail().getValue());
-    String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(),emailBody);
-    Assert.assertNotNull("Resp no null", resp);
+    getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(),emailBody);
+    //Assert.assertNotNull("Resp no null", resp);
   }
   @Test
   public void sendMailError() throws Exception {
     try { // USUARIO NO EXISTE
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, "");
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,numberUtils.toLong(numberUtils.random(800000,900000)), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,numberUtils.toLong(numberUtils.random(800000,900000)), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Cliente no existe",CLIENTE_NO_EXISTE.getValue(),e.getCode());
       System.out.println("Cliente no existe");
@@ -51,8 +49,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       updateUser(user);
 
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, "");
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Cliente Borrado o bloqueado",CLIENTE_BLOQUEADO_O_BORRADO.getValue(),e.getCode());
       System.out.println("Cliente Borrado o bloqueado");
@@ -61,8 +59,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       User user = registerUser();
       updateUser(user);
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, "");
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Cliente no tiene prepago",CLIENTE_NO_TIENE_PREPAGO.getValue(),e.getCode());
       System.out.println("Cliente no tiene prepago");
@@ -76,8 +74,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       prepaidUser = createPrepaidUser10(prepaidUser);
 
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, user.getEmail().getValue());
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Cliente prepago bloqueado",CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(),e.getCode());
       System.out.println("Cliente prepago bloqueado");
@@ -89,8 +87,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       prepaidUser = createPrepaidUser10(prepaidUser);
 
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, user.getEmail().getValue());
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Cliente no tiene tarjeta",TARJETA_NO_EXISTE.getValue(),e.getCode());
       System.out.println("Cliente no tiene tarjeta");
@@ -107,8 +105,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       createPrepaidCard10(prepaidCard10);
 
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, user.getEmail().getValue());
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Tarjeta bloqueada",TARJETA_CON_BLOQUEO_TEMPORAL.getValue(),e.getCode());
       System.out.println("Tarjeta bloqueada");
@@ -125,8 +123,8 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       createPrepaidCard10(prepaidCard10);
 
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, user.getEmail().getValue());
-      String resp = getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
-      Assert.assertNull(resp);
+      getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(), emailBody);
+      //Assert.assertNull(resp);
     }catch (ValidationException e){
       Assert.assertEquals("Tarjeta expirada",TARJETA_EXPIRADA.getValue(),e.getCode());
       System.out.println("Tarjeta expirada");

@@ -9,14 +9,14 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.model.v10.EmailBody;
-import cl.multicaja.users.model.v10.User;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -188,7 +188,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             emailBody.setTemplateData(templateData);
             emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
             emailBody.setAddress(data.getUser().getEmail().getValue());
-            getRoute().getMailEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
+            getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
 
             //segun la historia: https://www.pivotaltracker.com/story/show/158044562
             if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
@@ -260,7 +260,7 @@ public class PendingTopup10 extends BaseProcessor10 {
       Map<String, Object> templateData = new HashMap<String, Object>();
       templateData.put("idUsuario", data.getUser().getId().toString());
       templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-      getRoute().getMailEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
+      getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
       return req;
       }
     };
