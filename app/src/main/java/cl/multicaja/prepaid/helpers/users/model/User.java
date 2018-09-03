@@ -2,10 +2,11 @@ package cl.multicaja.prepaid.helpers.users.model;
 
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDate;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseModel {
 
   public User() {
@@ -21,7 +22,6 @@ public class User extends BaseModel {
 
   @JsonIgnore
   private String password;
-
   private LocalDate birthday;
   private Character gender;
   private Rut rut;
@@ -30,9 +30,10 @@ public class User extends BaseModel {
   private Timestamps timestamps;
   private UserStatus globalStatus;
   private Boolean hasPassword;
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private UserIdentityStatus identityStatus;
   private String FreshDeskId;
+
+  private Boolean isBlacklisted;
 
   public Long getId() {
     return id;
@@ -154,10 +155,14 @@ public class User extends BaseModel {
     this.hasPassword = hasPassword;
   }
 
-
-  @JsonProperty("is_blacklisted")
+  //@JsonProperty("is_blacklisted")
+  @JsonIgnore
   public Boolean getIsBlacklisted() {
     return this.identityStatus != null ? !UserIdentityStatus.NORMAL.equals(this.identityStatus) : null;
+  }
+
+  public void setIsBlacklisted(Boolean isBlacklisted) {
+    this.isBlacklisted = isBlacklisted;
   }
 
   public UserIdentityStatus getIdentityStatus() {
