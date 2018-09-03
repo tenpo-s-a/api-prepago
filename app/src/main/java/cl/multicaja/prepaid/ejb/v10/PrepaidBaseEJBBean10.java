@@ -21,8 +21,6 @@ public abstract class PrepaidBaseEJBBean10 {
 
   protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
-  protected static UserClient userClient;
-
   private static ConfigUtils configUtils;
 
   private static EncryptUtil encryptUtil;
@@ -36,7 +34,9 @@ public abstract class PrepaidBaseEJBBean10 {
   public TecnocomService getTecnocomService() {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
-
+  public UserClient getUserClient(){
+    return UserClient.getInstance();
+  }
 
   public CalculatorParameter10 getPercentage(){
     return CalculationsHelper.getInstance().getCalculatorParameter10();
@@ -54,12 +54,7 @@ public abstract class PrepaidBaseEJBBean10 {
     }
     return configUtils;
   }
-  public static UserClient getUserClient(){
-    if(userClient == null){
-      userClient = new UserClient();
-    }
-    return userClient;
-  }
+
   /**
    *
    * @return

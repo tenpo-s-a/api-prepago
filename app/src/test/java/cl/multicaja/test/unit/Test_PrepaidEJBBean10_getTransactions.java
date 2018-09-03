@@ -17,9 +17,7 @@ import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
-
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -115,9 +113,8 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   @Test
   public void userMcPreregistered() throws Exception {
-    User user = Mockito.mock(User.class);
+    User user = new User();
     user.setGlobalStatus(UserStatus.PREREGISTERED);
-
 
     Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
 
@@ -129,8 +126,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void prepaidUserNull() throws Exception {
     User user = new User();
@@ -140,18 +135,17 @@ public class Test_PrepaidEJBBean10_getTransactions {
     user.setGlobalStatus(UserStatus.ENABLED);
 
     Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-    Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserById(null, 11111111L);
+    Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserById(null, Long.MAX_VALUE);
 
     try{
-     prepaidEJBBean10.getTransactions(null, 11111111L,"","",Integer.MAX_VALUE);
+     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
       Assert.fail("should not be here");
     } catch (NotFoundException ex) {
-      Assert.assertEquals("Debe retornar error prepaidUser null", CLIENTE_NO_EXISTE.getValue(), ex.getCode());
+      System.out.println(ex);
+      Assert.assertEquals("Debe retornar error prepaidUser null", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void prepaidUserDisabled() throws Exception {
     User user = new User();
@@ -177,9 +171,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
   /*
     Usuario sin balance consultado previamente
    */
-
-  //TODO: verificar porque intenta llamar aal recurso users
-  @Ignore
   @Test
   public void prepaidCardPending() throws Exception {
     User user = new User();
@@ -207,8 +198,7 @@ public class Test_PrepaidEJBBean10_getTransactions {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
+
   @Test
   public void firstTopupPending() throws Exception {
     User user = new User();
@@ -234,8 +224,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void firstTopupInProcess() throws Exception {
     User user = new User();
@@ -265,8 +253,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
 
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void getTransactionOk() throws Exception {
     User user = new User();

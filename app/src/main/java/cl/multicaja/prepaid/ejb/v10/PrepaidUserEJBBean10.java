@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -49,6 +50,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private TecnocomService tecnocomService;
 
+  private UserClient userClient;
+
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
   }
@@ -63,6 +66,14 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
+  }
+
+  @Override
+  public UserClient getUserClient() {
+    if(userClient == null) {
+      userClient = UserClient.getInstance();
+    }
+    return userClient;
   }
 
   @Override
