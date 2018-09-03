@@ -12,9 +12,9 @@
 
 execute:
 cmd:
-    curl -i -X POST --url {KONG_HOST}/services --data 'name=api-testhelpers-1.0' --data 'url={API_HOST}/api-prepaid-1.0/1.0/'
+    curl -i -X POST --url {KONG_HOST}/services --data 'name=api-prepaid-testhelpers-1.0' --data 'url={API_HOST}/api-prepaid-1.0/1.0/'
 cmd:
-    curl -i -X POST --url {KONG_HOST}/services/api-testhelpers-1.0/routes --data 'hosts[]=api-testhelpers-1.0' --data 'paths[]=/testhelpers'
+    curl -i -X POST --url {KONG_HOST}/services/api-prepaid-testhelpers-1.0/routes --data 'hosts[]=api-prepaid-testhelpers-1.0' --data 'paths[]=/prepaid_testhelpers'
 
 rollback:
 cmd:

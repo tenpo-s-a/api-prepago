@@ -10,7 +10,7 @@ public class Test_20180626135222 extends TestKongBase {
   @Test
   public void ping_1_0() {
 
-    HttpResponse resp = kongGET("/testhelpers/testhelpers/ping", "api-testhelpers-1.0");
+    HttpResponse resp = kongGET("/prepaid_testhelpers/prepaid_testhelpers/ping", "api-prepaid-testhelpers-1.0");
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
     Assert.assertEquals("servicio 1.0", "TestHelpersResource10", resp.toMap().get("service"));
