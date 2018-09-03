@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -77,6 +78,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private TecnocomService tecnocomService;
 
+  private UserClient userClient;
+
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
   }
@@ -125,6 +128,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return tecnocomService;
   }
 
+  @Override
+  public UserClient getUserClient() {
+    if(userClient == null) {
+      userClient = UserClient.getInstance();
+    }
+    return userClient;
+  }
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -1310,16 +1320,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
+    User user = getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+    PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(headers, userIdMc);
 
     // Obtener tarjeta
-    PrepaidCard10 prepaidCard = this.getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
     //Obtener ultimo movimiento
-    PrepaidMovement10 movement = this.getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
     PrepaidMovementStatus.PENDING,
     PrepaidMovementStatus.IN_PROCESS);
 
@@ -1656,7 +1666,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
-  private User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
+  public User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
+
     User user = getUserClient().getUserById(headers, userIdMc);
 
     if (user == null) {
@@ -1669,7 +1680,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
-  private User getUserMcByRut(Map<String, Object> headers, Integer rut) throws Exception {
+  public User getUserMcByRut(Map<String, Object> headers, Integer rut) throws Exception {
     User user = getUserClient().getUserByRut(headers, rut);
 
     if (user == null) {

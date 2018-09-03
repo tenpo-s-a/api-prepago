@@ -7,6 +7,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
@@ -33,6 +34,16 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidMovementEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
+
+  private UserClient userClient;
+
+  @Override
+  public UserClient getUserClient() {
+    if(userClient == null) {
+      userClient = UserClient.getInstance();
+    }
+    return userClient;
+  }
 
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {

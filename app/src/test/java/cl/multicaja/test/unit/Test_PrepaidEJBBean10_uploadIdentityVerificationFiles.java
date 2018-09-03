@@ -127,8 +127,6 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void userMcNull() throws Exception {
     Mockito.doReturn(null).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
@@ -226,8 +224,6 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void prepaidUserNull() throws Exception {
     User user = new User();
@@ -252,8 +248,6 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void prepaidUserDisabled() throws Exception {
     User user = new User();
@@ -281,8 +275,6 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
-  //TODO: verificar falla
-  @Ignore
   @Test
   public void uploadIdentityVerificationFiles() throws Exception {
     User user = new User();
