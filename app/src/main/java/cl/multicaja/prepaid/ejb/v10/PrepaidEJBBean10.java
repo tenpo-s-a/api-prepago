@@ -1707,7 +1707,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
      // .stream()
      // .findFirst();
 
-    return (file.isPresent()) ? file.get() : null;
+    //return (file.isPresent()) ? file.get() : null;
+    return null;
   }
 
   public PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception {

@@ -84,7 +84,7 @@ public class UserClient {
   }
 
 
-  public User getUserByRut(Map<String, Object> headers, Integer rut) {
+  public User getUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     log.info("******** getUserByRut IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
     httpResponse.setJsonParser(getJsonMapper());
@@ -92,66 +92,113 @@ public class UserClient {
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
     }
-    response = httpResponse.toObject(User[].class);
-    log.info("******** getUserByRut OUT ********");
-    return response !=  null ? response[0] : null;
-  }
 
-  public User getUserByEmail(Map<String, Object> headers, String email) {
-    log.info("******** getUserByEmail IN ********");
-    HttpResponse httpResponse =  apiGET(String.format("%s?email=%s",UserPath.GET_USERS,email));
-    httpResponse.setJsonParser(getJsonMapper());
-    User response;
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
-      response = new User();
-      return response;
+    int status = httpResponse.getStatus();
+    switch (status) {
+      case 200:
+      case 201:
+        response = httpResponse.toObject(User[].class);
+        log.info("******** getUserByRuts OUT ********");
+        return response != null ? response[0] : null;
+      case 400:
+        BadRequestException brex = httpResponse.toObject(BadRequestException.class);
+        brex.setStatus(status);
+        log.error(brex);
+        throw  brex;
+      case 404:
+        NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
+        nfe.setStatus(status);
+        log.error(nfe);
+        return null;
+      case 422:
+        ValidationException vex = httpResponse.toObject(ValidationException.class);
+        vex.setStatus(status);
+        log.error(vex);
+        throw  vex;
+      case 500:
+        BaseException bex = httpResponse.toObject(BaseException.class);
+        bex.setStatus(status);
+        log.error(bex);
+        throw bex;
+      default:
+        throw new IllegalStateException();
     }
-    response = httpResponse.toObject(User.class);
-    log.info("******** getUserByEmail OUT ********");
-    return response;
   }
 
-  public User getUserById(Map<String, Object> headers, Long userIdMc) {
+  public User getUserByEmail(Map<String, Object> headers, String email) throws Exception {
+    log.info("******** getUserByEmail IN ********");
+    HttpResponse httpResponse =  apiGET(String.format("%s?email=%s", getApiUrl(), email));
+    httpResponse.setJsonParser(getJsonMapper());
+    User[] response;
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      return null;
+    }
+
+    int status = httpResponse.getStatus();
+    switch (status) {
+      case 200:
+      case 201:
+        response = httpResponse.toObject(User[].class);
+        log.info("******** getUserByEmail OUT ********");
+        return response != null ? response[0] : null;
+      case 400:
+        BadRequestException brex = httpResponse.toObject(BadRequestException.class);
+        brex.setStatus(status);
+        log.error(brex);
+        throw  brex;
+      case 404:
+        NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
+        nfe.setStatus(status);
+        log.error(nfe);
+        return null;
+      case 422:
+        ValidationException vex = httpResponse.toObject(ValidationException.class);
+        vex.setStatus(status);
+        log.error(vex);
+        throw  vex;
+      case 500:
+        BaseException bex = httpResponse.toObject(BaseException.class);
+        bex.setStatus(status);
+        log.error(bex);
+        throw bex;
+      default:
+        throw new IllegalStateException();
+    }
+  }
+
+  public User getUserById(Map<String, Object> headers, Long userIdMc) throws Exception {
     log.info("******** getUserById IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s/%d", getApiUrl(), userIdMc));
     httpResponse.setJsonParser(getJsonMapper());
     System.out.println(httpResponse.getResp());
-    User response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
-      response = new User();
-      return response;
+      return null;
     }
-    response = httpResponse.toObject(User.class);
-    log.info("********getUserById OUT ********");
-    return response;
+    return this.processResponse("getUserById", httpResponse, User.class);
   }
 
-  public SignUp signUp(Map<String, Object> headers, SignUPNew signUPNew) {
+  public SignUp signUp(Map<String, Object> headers, SignUPNew signUPNew) throws Exception {
     log.info("******** signUp IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/soft_signup", getApiUrl()),signUPNew);
     httpResponse.setJsonParser(getJsonMapper());
-    SignUp response;
+
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
-      response = new SignUp();
-      return response;
+      return null;
     }
-    response = httpResponse.toObject(SignUp.class);
-    log.info("******** signUp OUT ********");
-    return response;
+    return this.processResponse("signUp", httpResponse, SignUp.class);
   }
 
-  public User finishSignup(Map<String, Object> headers, Long userIdMc) {
-    log.info("******** signUp IN ********");
-    HttpResponse httpResponse =  apiPOST(UserPath.FINISH_SIGNUP(userIdMc),null);
+  public User finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
+    log.info("******** finishSignup IN ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc),null );
     httpResponse.setJsonParser(getJsonMapper());
     User response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       response = new User();
       return response;
     }
-    response = httpResponse.toObject(User.class);
-    log.info("******** signUp OUT ********");
-    return response;
+
+    return this.processResponse("finishSignup", httpResponse, User.class);
   }
 
   public void sendMail(Map<String,Object> headers,Long userId,EmailBody content) {
@@ -376,4 +423,41 @@ public class UserClient {
     }
   }
 
+
+  private <T>T processResponse(String method, HttpResponse response, Class<T> clazz) throws Exception {
+
+    int status = response.getStatus();
+    log.info(String.format("Status: %d", status));
+    log.info(String.format("Response: %s", response.getResp()));
+    switch (status) {
+      case 200:
+      case 201:
+        T u = response.toObject(clazz);
+        log.info(String.format("******** %s OUT ********", method));
+        return u;
+      case 400:
+        BadRequestException brex = response.toObject(BadRequestException.class);
+        brex.setStatus(status);
+        log.error(brex);
+        throw  brex;
+      case 404:
+        NotFoundException nfe = response.toObject(NotFoundException.class);
+        nfe.setStatus(status);
+        log.error(nfe);
+        throw  nfe;
+      case 422:
+        ValidationException vex = response.toObject(ValidationException.class);
+        vex.setStatus(status);
+        log.error(vex);
+        throw  vex;
+      case 500:
+        BaseException bex = response.toObject(BaseException.class);
+        bex.setStatus(status);
+        log.error(bex);
+        throw bex;
+      default:
+        throw new IllegalStateException();
+    }
+  }
 }
+
