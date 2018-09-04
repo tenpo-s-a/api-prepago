@@ -44,6 +44,7 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
+      prepaidTopupRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
       TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
       transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
@@ -51,7 +52,7 @@ public class TestContextHelper extends TestBaseUnit {
       transactionReversalRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       transactionReversalRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       transactionReversalRoute10.setCdtEJBBean10(getCdtEJBBean10());
-
+      transactionReversalRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
       currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());

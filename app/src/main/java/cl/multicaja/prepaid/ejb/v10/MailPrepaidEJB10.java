@@ -19,4 +19,7 @@ public interface MailPrepaidEJB10 {
    */
   void sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception;
 
+
+  void sendMailAsync(Map<String, Object> headers, EmailBody content) throws Exception;
+
 }

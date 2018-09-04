@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.users.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,7 +61,7 @@ public class UserClient {
   }
 
   private HttpResponse apiPOST(String api_route, Object request) {
-    System.out.println("request: "+getJsonMapper().toJson(request));
+    log.debug("request: "+getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.POST,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
@@ -74,12 +75,12 @@ public class UserClient {
   }
 
   private HttpResponse apiPUT(String api_route, Object request) {
-    System.out.println("request: "+getJsonMapper().toJson(request));
+    log.debug("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.PUT,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
-  private HttpResponse apiPATH(String api_route, Object request) {
-    System.out.println("request: "+getJsonMapper().toJson(request));
+  private HttpResponse apiPATCH(String api_route, Object request) {
+    log.debug("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.PATCH,null,TIMEOUT,TIMEOUT,api_url+api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
@@ -204,6 +205,11 @@ public class UserClient {
   public void sendMail(Map<String,Object> headers,Long userId,EmailBody content) {
     log.info("******** sendMail IN ********");
     log.info("******** sendMail OUT ********");
+  }
+
+  public void sendInternalMail(Map<String,Object> headers, EmailBody content) {
+    log.info("******** sendInternalMail IN ********");
+    log.info("******** sendInternalMail OUT ********");
   }
 
   public void checkPassword(Map<String, Object> headers,Long userId, UserPasswordNew userPasswordNew) {

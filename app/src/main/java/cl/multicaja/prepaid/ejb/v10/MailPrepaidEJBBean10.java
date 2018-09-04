@@ -79,6 +79,20 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     }
   }
 
+  @Override
+  public void sendMailAsync(Map<String, Object> headers, EmailBody content) throws Exception {
+
+    if (content == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "emailBody"));
+    }
+    if (content.getTemplate() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "emailBody.template"));
+    }
+
+    log.info("Envio email flujo normal");
+    getUserClient().sendInternalMail(headers, content);
+  }
+
   private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
 
     User user = getUserClient().getUserById(headers, userId);
@@ -125,6 +139,6 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     emailBody.setTemplateData(templateData);
     emailBody.setTemplate(template);
     emailBody.setAddress("soporte-prepago@multicaja.cl");
-    sendMailAsync(null, null, emailBody);
+    sendMailAsync(null, emailBody);
   }
 }
