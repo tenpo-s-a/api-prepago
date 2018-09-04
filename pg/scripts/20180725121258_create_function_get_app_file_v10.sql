@@ -60,5 +60,5 @@ $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_get_app_file_v10(BIGINT, VARCHAR, VARCHAR, INTEGER);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_get_app_file_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR);
 

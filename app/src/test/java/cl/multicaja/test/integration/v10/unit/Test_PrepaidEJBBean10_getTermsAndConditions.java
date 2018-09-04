@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * @author abarazarte
  **/
-public class Test_PrepaidEJBBean10_getTermsAndConditions extends TestBaseUnit{
+public class Test_PrepaidEJBBean10_getTermsAndConditions extends TestBaseUnit {
 
   @Test
   public void shouldAcceptTermsAndConditions() throws Exception {

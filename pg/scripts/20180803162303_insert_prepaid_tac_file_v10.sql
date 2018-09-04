@@ -26,7 +26,7 @@ INSERT INTO ${schema}.prp_app_file(
     created_at,
     updated_at
 ) VALUES (
-    'ACTIVE',
+    'ENABLED',
     'TERMS_AND_CONDITIONS',
     'v1.0',
     'Terminos y Condiciones del producto prepago',

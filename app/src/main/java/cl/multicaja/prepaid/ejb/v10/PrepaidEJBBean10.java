@@ -76,6 +76,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
 
+  @EJB
+  private FilesEJBBean10 filesEJBBean10;
+
   private TecnocomService tecnocomService;
 
   private UserClient userClient;
@@ -118,6 +121,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
+  }
+
+  public FilesEJBBean10 getFilesEJBBean10() {
+    return filesEJBBean10;
+  }
+
+  public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
+    this.filesEJBBean10 = filesEJBBean10;
   }
 
   @Override
@@ -1713,13 +1724,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   private AppFile getLastTermsAndConditions(Map<String, Object> headers) throws Exception {
-     //TODO: Verificar esto!!!!!!!
-      Optional<AppFile> file = null; //= getFilesEJBBean10().getAppFiles(headers, null, APP_NAME, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
-     // .stream()
-     // .findFirst();
+      Optional<AppFile> file =  getFilesEJBBean10().getAppFiles(headers, null, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
+      .stream()
+      .findFirst();
 
-    //return (file.isPresent()) ? file.get() : null;
-    return null;
+    return (file.isPresent()) ? file.get() : null;
   }
 
   public PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception {
