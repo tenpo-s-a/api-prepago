@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,18 @@ import java.util.Map;
 public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
 
   private static Log log = LogFactory.getLog(FilesEJBBean10.class);
+
+  private final String APP_NAME = "api-prepaid";
+
+  private UserClient userClient;
+
+  @Override
+  public UserClient getUserClient() {
+    if(userClient == null) {
+      userClient = UserClient.getInstance();
+    }
+    return userClient;
+  }
 
   @Override
   public Map<String, Object> info() throws Exception {
@@ -80,19 +93,26 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
    */
   @Override
   public List<UserFile> getUsersFile(Map<String, Object> headers, Long id, Long userId, String name, String version, UserFileStatus status) throws Exception {
-    //TODO: implementar
-    throw new IllegalStateException();
+    return this.getUserClient().getUserFiles(headers, userId, APP_NAME, name, version, status);
   }
 
   @Override
   public UserFile getUserFileById(Map<String, Object> headers, Long userIdMc, Long id) throws Exception {
-    //TODO: implementar
-    throw new IllegalStateException();
+    return this.getUserClient().getUserFileById(headers, userIdMc, id);
   }
 
   @Override
   public UserFile createUserFile(Map<String, Object> headers, Long userId, Long appFileId, String name, String version, String description, String mimeType, String location) throws Exception {
-    //TODO: implementar
-    throw new IllegalStateException();
+
+    UserFile file = new UserFile();
+    file.setUserId(userId);
+    file.setApp(APP_NAME);
+    file.setName(name);
+    file.setVersion(version);
+    file.setDescription(description);
+    file.setMimeType(mimeType);
+    file.setLocation(location);
+
+    return this.getUserClient().createUserFile(headers, userId, file);
   }
 }

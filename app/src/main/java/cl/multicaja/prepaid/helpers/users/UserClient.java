@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -220,22 +222,85 @@ public class UserClient {
     return null;
   }
 
-  public UserFile createUserFile(Map<String,Object> headers, Long userId, UserFile newFile) {
-    log.info("******** sendMail IN ********");
-    log.info("******** sendMail OUT ********");
-    return null;
+  /**
+   *  FILES
+   */
+
+  public UserFile createUserFile(Map<String,Object> headers, Long userIdMc, UserFile newFile) throws Exception {
+    log.info("******** createUserFile IN ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%d/files", getApiUrl(), userIdMc), newFile);
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      return null;
+    }
+    return this.processResponse("createUserFile", httpResponse, UserFile.class);
   }
 
-  public UserFile getUserFileById(Map<String,Object> headers,Long userId, Long fileId) {
-    log.info("******** sendMail IN ********");
-    log.info("******** sendMail OUT ********");
-    return null;
+  public UserFile getUserFileById(Map<String,Object> headers,Long userIdMc, Long fileId) throws Exception {
+    log.info("******** getUserFileById IN ********");
+    HttpResponse httpResponse =  apiGET(String.format("%s/%d/files/%d", getApiUrl(), userIdMc, fileId));
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      return null;
+    }
+    return this.processResponse("getUserFileById", httpResponse, UserFile.class);
   }
 
-  public List<UserFile> getUserFiles(Map<String,Object> headers, Long userId, String app, String name, String version) {
-    log.info("******** sendMail IN ********");
-    log.info("******** sendMail OUT ********");
-    return null;
+  public List<UserFile> getUserFiles(Map<String,Object> headers, Long userId, String app, String name, String version, UserFileStatus fileStatus) throws Exception {
+    log.info("******** getUserFiles IN ********");
+    StringBuilder filter = new StringBuilder("");
+    if(!StringUtils.isAllBlank(app)) {
+      filter.append(String.format("app=%s&", app));
+    }
+    if(!StringUtils.isAllBlank(name)) {
+      filter.append(String.format("name=%s&", name));
+    }
+    if(!StringUtils.isAllBlank(version)) {
+      filter.append(String.format("version=%s&", version));
+    }
+    if(fileStatus != null) {
+      filter.append(String.format("status=%s&", fileStatus.toString()));
+    }
+
+    HttpResponse httpResponse =  apiGET(String.format("%s/%d/files?%s", getApiUrl(), userId, filter.toString()));
+    httpResponse.setJsonParser(getJsonMapper());
+    UserFile[] response;
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      return null;
+    }
+
+    int status = httpResponse.getStatus();
+    switch (status) {
+      case 200:
+      case 201:
+        response = httpResponse.toObject(UserFile[].class);
+        log.info("******** getUserByRuts OUT ********");
+        return response != null ? Arrays.asList(response) : Collections.EMPTY_LIST;
+      case 400:
+        BadRequestException brex = httpResponse.toObject(BadRequestException.class);
+        brex.setStatus(status);
+        log.error(brex);
+        throw  brex;
+      case 404:
+        NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
+        nfe.setStatus(status);
+        log.error(nfe);
+        return null;
+      case 422:
+        ValidationException vex = httpResponse.toObject(ValidationException.class);
+        vex.setStatus(status);
+        log.error(vex);
+        throw  vex;
+      case 500:
+        BaseException bex = httpResponse.toObject(BaseException.class);
+        bex.setStatus(status);
+        log.error(bex);
+        throw bex;
+      default:
+        throw new IllegalStateException();
+    }
   }
 
   /**

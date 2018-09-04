@@ -164,7 +164,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
 
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
 
-    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion()).stream().findFirst().get();
+    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null).stream().findFirst().get();
 
     Assert.assertNotNull("Debe tener un registro", userFile);
     Assert.assertEquals("Debe ser del usuario", user.getId(), userFile.getUserId());
@@ -185,7 +185,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
     getPrepaidEJBBean10().acceptTermsAndConditions(null, user.getId(), tac);
 
-    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion());
+    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null);
 
     Assert.assertEquals("Debe tener solo 1", 1, files.size());
     UserFile userFile = files.get(0);

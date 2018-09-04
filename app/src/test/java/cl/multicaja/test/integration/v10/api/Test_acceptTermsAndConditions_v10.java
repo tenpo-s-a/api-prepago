@@ -170,7 +170,7 @@ public class Test_acceptTermsAndConditions_v10 extends TestBaseUnitApi {
     HttpResponse resp = acceptTermsAndConditions(user.getId(), tac);
     Assert.assertEquals("resp -> 200", 200, resp.getStatus());
 
-    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion())
+    UserFile userFile = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null)
       .stream().findFirst()
       .get();
 
@@ -198,7 +198,7 @@ public class Test_acceptTermsAndConditions_v10 extends TestBaseUnitApi {
     resp = acceptTermsAndConditions(user.getId(), tac);
     Assert.assertEquals("resp -> 200", 200, resp.getStatus());
 
-    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion());
+    List<UserFile> files = getUserClient().getUserFiles(null, user.getId(), "api-prepaid", "TERMS_AND_CONDITIONS", tac.getVersion(), null);
 
     Assert.assertEquals("Debe tener solo 1", 1, files.size());
     UserFile userFile = files.get(0);
