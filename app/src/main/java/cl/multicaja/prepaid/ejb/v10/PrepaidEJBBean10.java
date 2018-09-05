@@ -76,6 +76,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJB10;
 
+  @EJB
+  private FilesEJBBean10 filesEJBBean10;
+
   private TecnocomService tecnocomService;
 
   private UserClient userClient;
@@ -118,6 +121,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
+  }
+
+  public FilesEJBBean10 getFilesEJBBean10() {
+    return filesEJBBean10;
+  }
+
+  public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
+    this.filesEJBBean10 = filesEJBBean10;
   }
 
   @Override
@@ -1713,10 +1724,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   private AppFile getLastTermsAndConditions(Map<String, Object> headers) throws Exception {
-     //TODO: Verificar esto!!!!!!!
-      Optional<AppFile> file = null; //= getFilesEJBBean10().getAppFiles(headers, null, APP_NAME, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
-     // .stream()
-     // .findFirst();
+      Optional<AppFile> file =  getFilesEJBBean10().getAppFiles(headers, null, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
+      .stream()
+      .findFirst();
 
     return (file.isPresent()) ? file.get() : null;
   }
@@ -1773,13 +1783,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(VERSION_TERMINOS_Y_CONDICIONES_NO_COINCIDEN);
     }
 
-    //TODO: VERIFICAR ESTO CUANDO SE COMIENCE A MIGRAR ESTO A PREPAGO
     // Se verifica si el usuario ya acepto los tac
-    List<UserFile> files = getUserClient().getUserFiles(headers, user.getId(), APP_NAME, TERMS_AND_CONDITIONS, termsAndConditions10.getVersion());
+    List<UserFile> files = getFilesEJBBean10().getUsersFile(headers, null, user.getId(), TERMS_AND_CONDITIONS, termsAndConditions10.getVersion(), null);
 
     // Si el usuario ya acepto la version de los tac no se hace nada
     if (files == null || files.size() == 0) {
-      getUserClient().createUserFile(headers, user.getId(), new UserFile());
+      getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, TERMS_AND_CONDITIONS, prepaidTac.getVersion(), prepaidTac.getDescription(), prepaidTac.getMimeType(), prepaidTac.getLocation());
     }
 
     //TODO guardar si el usuario acepta recibir beneficios
@@ -1816,29 +1825,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // CI frontal
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    ciFront.setApp(APP_NAME);
-    ciFront.setName(USER_ID_FRONT);
-    ciFront.setVersion("v1.0");
-    ciFront.setDescription("CI frontal");
-    getUserClient().createUserFile(headers, user.getId(), ciFront);
+    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
 
     // CI posterior
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    ciFront.setApp(APP_NAME);
-    ciFront.setName(USER_ID_BACK);
-    ciFront.setVersion("v1.0");
-    ciFront.setDescription("CI posterior");
-    getUserClient().createUserFile(headers, user.getId(), ciBack);
+    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+
     // Selfie
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    ciFront.setApp(APP_NAME);
-    ciFront.setName(USER_SELFIE);
-    ciFront.setVersion("v1.0");
-    ciFront.setDescription("Selfie + CI");
-    getUserClient().createUserFile(headers, user.getId(), selfie);
+    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
     // Actualizar el nameStatus a IN_REVIEW
     //TODO: Ver como quedara esto.
-    return  getUserClient().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
+    //return  getUserClient().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
+    return user;
   }
 }

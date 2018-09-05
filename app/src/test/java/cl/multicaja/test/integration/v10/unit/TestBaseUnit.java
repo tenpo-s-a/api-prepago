@@ -60,6 +60,8 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+  private static FilesEJBBean10 filesEJBBean10;
+
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   private static UserClient userClient;
 
@@ -188,8 +190,16 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
     }
     return prepaidEJBBean10;
+  }
+
+  public static FilesEJBBean10 getFilesEJBBean10() {
+    if(filesEJBBean10 == null) {
+      filesEJBBean10 = new FilesEJBBean10();
+    }
+    return filesEJBBean10;
   }
 
   /**

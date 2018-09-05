@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.async;
 
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -38,7 +39,7 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
       EmailBody emailBody = new EmailBody(TEMPLATE_MAIL_SEND_CARD, "");
       getMailPrepaidEJBBean10().sendMailAsync(null,numberUtils.toLong(numberUtils.random(800000,900000)), emailBody);
       //Assert.assertNull(resp);
-    }catch (ValidationException e){
+    }catch (NotFoundException e){
       Assert.assertEquals("Cliente no existe",CLIENTE_NO_EXISTE.getValue(),e.getCode());
       System.out.println("Cliente no existe");
     }
