@@ -541,6 +541,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -569,6 +570,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -602,6 +604,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -629,6 +632,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -659,6 +663,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -693,6 +698,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -730,6 +736,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -763,6 +770,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       User user = registerUser("1234");
+      user = updateUserPassword(user, "1234");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);

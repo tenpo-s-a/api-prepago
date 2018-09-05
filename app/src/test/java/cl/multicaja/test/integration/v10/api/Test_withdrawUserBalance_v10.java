@@ -35,7 +35,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn201_OnPosWithdraw() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -99,7 +100,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn201_OnWebWithdraw() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -163,7 +165,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -186,7 +189,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -212,7 +216,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     // POS
     {
       String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -235,7 +240,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     //WEB
     {
       String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -260,7 +266,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_OnWithdraw_InsufficientFounds() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -507,6 +514,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
   }
+
   @Test
   public void shouldReturn422_McUserListaNegra() throws Exception {
 
@@ -521,6 +529,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102016", 102016, errorObj.get("code"));
   }
+
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
@@ -559,12 +568,15 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn422_InvalidPassword() throws Exception {
 
-    User user = registerUser("1234");
+    User user = registerUser();
+
+    user = updateUserPassword(user, "1234");
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
+    prepaidWithdraw.setRut(user.getRut().getValue());
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -579,7 +591,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_PrepaidCardNull() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -599,7 +612,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_PrepaidCardPending() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -623,7 +637,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_PrepaidCardExpired() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -647,7 +662,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_PrepaidCardHardLocked() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -671,7 +687,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn500_TecnocomError_UserDoesntExists() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -699,4 +716,5 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, movement.getEstado());
 
   }
+
 }

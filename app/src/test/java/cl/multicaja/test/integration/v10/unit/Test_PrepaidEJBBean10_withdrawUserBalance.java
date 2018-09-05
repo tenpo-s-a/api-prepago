@@ -31,6 +31,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -95,6 +96,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -159,6 +161,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     {
       String password = RandomStringUtils.randomNumeric(4);
       User user = registerUser(password);
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -182,6 +185,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     {
       String password = RandomStringUtils.randomNumeric(4);
       User user = registerUser(password);
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -208,6 +212,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     {
       String password = RandomStringUtils.randomNumeric(4);
       User user = registerUser(password);
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -231,6 +236,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     {
       String password = RandomStringUtils.randomNumeric(4);
       User user = registerUser(password);
+      user = updateUserPassword(user, password);
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -296,6 +302,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
@@ -591,6 +598,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -610,6 +618,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -633,6 +642,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -656,6 +666,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
@@ -679,6 +690,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
