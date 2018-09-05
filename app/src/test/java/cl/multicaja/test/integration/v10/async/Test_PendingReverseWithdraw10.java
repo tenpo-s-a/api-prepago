@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -172,10 +173,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+    Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
+
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
@@ -257,10 +271,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+    Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
+
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
@@ -341,10 +368,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+    Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
+
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw.setIdMovimientoRef(cdtTransaction.getTransactionReference());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(prepaidCard, originalWithdraw);
