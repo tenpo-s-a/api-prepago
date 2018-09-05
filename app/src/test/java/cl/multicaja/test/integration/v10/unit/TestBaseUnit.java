@@ -334,6 +334,21 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
+   * actualiza la clave de un usuario
+   *
+   * @param user
+   * @param newPassword
+   * @return
+   * @throws Exception
+   */
+  public User updateUserPassword(User user, String newPassword) throws Exception {
+    UserPasswordNew pass = new UserPasswordNew();
+    pass.setValue(newPassword);
+    user = getUserClient().updateUserPassword(null, user.getId(), pass);
+    return user;
+  }
+
+  /**
    *
    * @return
    * @throws Exception

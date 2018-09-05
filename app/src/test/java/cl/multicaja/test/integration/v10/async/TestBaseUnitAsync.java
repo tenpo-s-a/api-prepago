@@ -326,6 +326,19 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @return
    */
   public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 user, PrepaidMovement10 reverse, int retryCount) {
+    return sendPendingWithdrawReversal(prepaidWithdraw, null, user, reverse, retryCount);
+  }
+
+  /**
+   * Envia un mensaje directo al proceso PENDING_REVERSAL_WITHDRAW_REQ
+   *
+   * @param prepaidWithdraw
+   * @param user
+   * @param reverse
+   * @param retryCount
+   * @return
+   */
+  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -339,7 +352,10 @@ public class TestBaseUnitAsync extends TestContextHelper {
     Queue qReq = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidWithdraw, user, reverse);
+    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidWithdraw, prepaidUser, reverse);
+    if(user != null) {
+      data.setUser(user);
+    }
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);

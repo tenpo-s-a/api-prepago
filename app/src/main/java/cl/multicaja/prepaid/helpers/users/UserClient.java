@@ -214,8 +214,15 @@ public class UserClient {
     log.info("******** sendInternalMail OUT ********");
   }
 
-  public void checkPassword(Map<String, Object> headers,Long userId, UserPasswordNew userPasswordNew) {
+  public void checkPassword(Map<String, Object> headers,Long userId, UserPasswordNew userPasswordNew) throws Exception {
+    log.info("******** checkPassword IN ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/check_password", getApiUrl(), userId), userPasswordNew);
+    httpResponse.setJsonParser(getJsonMapper());
 
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+    this.processResponse("checkPassword", httpResponse, Boolean.class);
   }
 
   public User updateNameStatus(Map<String, Object> headers,Long userId, NameStatus nameStatus) {
@@ -424,6 +431,21 @@ public class UserClient {
       default:
         throw new IllegalStateException();
     }
+  }
+
+  //updateUserPassword
+  public User updateUserPassword(Map<String,Object> headers, Long userId, UserPasswordNew password) throws Exception {
+    log.info("******** updateUserPassword IN ********");
+    validate();
+
+    HttpResponse httpResponse =  apiPUT(String.format("%s/user/%d/password", getTestApiUrl(), userId), password);
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error de conexion");
+    }
+
+    return this.processResponse("updateUserPassword", httpResponse, User.class);
   }
 
   //getEmailCode
