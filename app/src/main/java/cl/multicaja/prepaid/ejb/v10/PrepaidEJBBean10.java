@@ -1836,8 +1836,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
     // Actualizar el nameStatus a IN_REVIEW
-    //TODO: Ver como quedara esto.
-    //return  getUserClient().updateNameStatus(headers, user.getId(), NameStatus.IN_REVIEW);
-    return user;
+    return getUserClient().updateNameStatus(headers, user.getId());
   }
 }

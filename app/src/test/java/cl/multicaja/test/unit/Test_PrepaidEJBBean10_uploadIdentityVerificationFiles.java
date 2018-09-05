@@ -297,7 +297,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
     Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
-    Mockito.doReturn(user2).when(userClient).updateNameStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(NameStatus.class));
+    Mockito.doReturn(user2).when(userClient).updateNameStatus(Mockito.any(), Mockito.anyLong());
 
     //Mockito.doReturn(f).when(filesEJBBean10).createUserFile(Mockito.any(), Mockito.anyLong(), Mockito.nullable(Long.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.notNull(), Mockito.notNull());
 
