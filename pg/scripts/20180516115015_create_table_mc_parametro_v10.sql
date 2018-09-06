@@ -21,9 +21,9 @@ CREATE SCHEMA IF NOT EXISTS ${schema.parameters};
 
 CREATE TABLE ${schema.parameters}.mc_parametro (
   id                  BIGSERIAL NOT NULL,
-  aplicacion          VARCHAR(15) NOT NULL,
+  aplicacion          VARCHAR(25) NOT NULL,
   nombre              VARCHAR(100) NOT NULL,
-  version             VARCHAR(3) NOT NULL,
+  version             VARCHAR(5) NOT NULL,
   valor               JSON NOT NULL,
   expiracion          BIGINT NOT NULL,
   fecha_creacion      TIMESTAMP NOT NULL,
