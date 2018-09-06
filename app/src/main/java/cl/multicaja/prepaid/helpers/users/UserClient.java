@@ -203,14 +203,28 @@ public class UserClient {
     return this.processResponse("finishSignup", httpResponse, User.class);
   }
 
-  public void sendMail(Map<String,Object> headers,Long userId,EmailBody content) {
+  public void sendMail(Map<String,Object> headers, Long userId, EmailBody content) throws Exception {
     log.info("******** sendMail IN ********");
-    log.info("******** sendMail OUT ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/mail", getApiUrl(), userId), content);
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+
+    this.processResponse("sendMail", httpResponse, Map.class);
   }
 
-  public void sendInternalMail(Map<String,Object> headers, EmailBody content) {
+  public void sendInternalMail(Map<String,Object> headers, EmailBody content) throws Exception {
     log.info("******** sendInternalMail IN ********");
-    log.info("******** sendInternalMail OUT ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/mail", getApiUrl()), content);
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+
+    this.processResponse("sendInternalMail", httpResponse, Map.class);
   }
 
   public void checkPassword(Map<String, Object> headers,Long userId, UserPasswordNew userPasswordNew) throws Exception {
