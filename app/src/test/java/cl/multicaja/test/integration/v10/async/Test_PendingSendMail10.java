@@ -6,10 +6,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.Email;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -18,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.jms.Queue;
+import java.math.BigDecimal;
 
 public class Test_PendingSendMail10 extends TestBaseUnitAsync {
 
@@ -45,7 +43,10 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10,0);
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
+    topup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+
+    String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,0);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
