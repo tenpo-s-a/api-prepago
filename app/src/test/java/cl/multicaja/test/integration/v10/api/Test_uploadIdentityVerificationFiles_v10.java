@@ -168,6 +168,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
   public void uploadIdentityVerificationFiles() throws Exception {
     User user = registerUser();
     user.setBirthday(LocalDate.now());
+    user.setNameStatus(NameStatus.UNVERIFIED);
     user = updateUser(user);
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);

@@ -86,7 +86,6 @@ public class UserClient {
     return httpUtils.execute(HttpUtils.ACTIONS.PATCH,null,TIMEOUT,TIMEOUT,api_url+api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
-
   public User getUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     log.info("******** getUserByRut IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
@@ -225,8 +224,15 @@ public class UserClient {
     this.processResponse("checkPassword", httpResponse, Boolean.class);
   }
 
-  public User updateNameStatus(Map<String, Object> headers,Long userId, NameStatus nameStatus) {
-    return null;
+  public User updateNameStatus(Map<String, Object> headers,Long userId) throws Exception {
+    log.info("******** updateNameStatus IN ********");
+    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/init_identity_validation", getApiUrl(), userId), "{}");
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+    return this.processResponse("updateNameStatus", httpResponse, User.class);
   }
 
   /**
