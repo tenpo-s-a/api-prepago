@@ -17,7 +17,7 @@
 -- // insert_prepaid_parameter_cod_entidad_tecnocom
 -- Migration SQL that makes the change goes here.
 
-INSERT INTO ${schema.parameters}.mc_parametro
+INSERT INTO ${schema}.mc_parametro
  (
    aplicacion,
    nombre,
@@ -39,4 +39,4 @@ INSERT INTO ${schema.parameters}.mc_parametro
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DELETE FROM ${schema.parameters}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'cod_entidad' AND version = 'v10';
+DELETE FROM ${schema}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'cod_entidad' AND version = 'v10';
