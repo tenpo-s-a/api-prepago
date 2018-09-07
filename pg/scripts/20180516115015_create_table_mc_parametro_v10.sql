@@ -17,9 +17,7 @@
 -- // create_table_mc_parametro
 -- Migration SQL that makes the change goes here.
 
-CREATE SCHEMA IF NOT EXISTS ${schema.parameters};
-
-CREATE TABLE ${schema.parameters}.mc_parametro (
+CREATE TABLE ${schema}.mc_parametro (
   id                  BIGSERIAL NOT NULL,
   aplicacion          VARCHAR(25) NOT NULL,
   nombre              VARCHAR(100) NOT NULL,
@@ -31,20 +29,18 @@ CREATE TABLE ${schema.parameters}.mc_parametro (
   CONSTRAINT mc_parametro_u1 UNIQUE(aplicacion, nombre, version)
 );
 
-COMMENT ON COLUMN  ${schema.parameters}.mc_parametro.aplicacion IS 'La aplicacion que utilizara este parametro';
-COMMENT ON COLUMN  ${schema.parameters}.mc_parametro.nombre IS 'El nombre del parametro';
-COMMENT ON COLUMN  ${schema.parameters}.mc_parametro.version IS 'La version del parametro';
-COMMENT ON COLUMN  ${schema.parameters}.mc_parametro.expiracion IS 'Tiempo de expiracion utilizado por el cache. En Milisegundos';
-COMMENT ON COLUMN  ${schema.parameters}.mc_parametro.valor IS 'Valor del parametro en formato JSON';
+COMMENT ON COLUMN  ${schema}.mc_parametro.aplicacion IS 'La aplicacion que utilizara este parametro';
+COMMENT ON COLUMN  ${schema}.mc_parametro.nombre IS 'El nombre del parametro';
+COMMENT ON COLUMN  ${schema}.mc_parametro.version IS 'La version del parametro';
+COMMENT ON COLUMN  ${schema}.mc_parametro.expiracion IS 'Tiempo de expiracion utilizado por el cache. En Milisegundos';
+COMMENT ON COLUMN  ${schema}.mc_parametro.valor IS 'Valor del parametro en formato JSON';
 
-COMMENT ON CONSTRAINT mc_parametro_u1 ON ${schema.parameters}.mc_parametro IS 'La aplicacion junto al nombre y a la version no puede repetirse';
+COMMENT ON CONSTRAINT mc_parametro_u1 ON ${schema}.mc_parametro IS 'La aplicacion junto al nombre y a la version no puede repetirse';
 
-CREATE INDEX mc_parametro_i1 ON ${schema.parameters}.mc_parametro (aplicacion);
-CREATE INDEX mc_parametro_i2 ON ${schema.parameters}.mc_parametro (nombre);
+CREATE INDEX mc_parametro_i1 ON ${schema}.mc_parametro (aplicacion);
+CREATE INDEX mc_parametro_i2 ON ${schema}.mc_parametro (nombre);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP TABLE IF EXISTS ${schema.parameters}.mc_parametro CASCADE;
-
-DROP SCHEMA ${schema.parameters} CASCADE;
+DROP TABLE IF EXISTS ${schema}.mc_parametro CASCADE;

@@ -16,7 +16,7 @@
 
 -- // insert_parameter_percentage
 -- Migration SQL that makes the change goes here.
-INSERT INTO ${schema.parameters}.mc_parametro
+INSERT INTO ${schema}.mc_parametro
 (
    aplicacion,
    nombre,
@@ -39,4 +39,4 @@ VALUES
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DELETE FROM ${schema.parameters}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'calculator_percentage' AND version = 'v10';
+DELETE FROM ${schema}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'calculator_percentage' AND version = 'v10';

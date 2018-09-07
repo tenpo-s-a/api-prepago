@@ -17,7 +17,7 @@
 -- // create_sp_mc_crear_parametro_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema.parameters}.mc_crear_parametro_v10
+CREATE OR REPLACE FUNCTION ${schema}.mc_crear_parametro_v10
 (
  IN _aplicacion      VARCHAR,
  IN _nombre          VARCHAR,
@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION ${schema.parameters}.mc_crear_parametro_v10
       RETURN;
     END IF;
 
-     INSERT INTO ${schema.parameters}.mc_parametro
+     INSERT INTO ${schema}.mc_parametro
      (
        aplicacion,
        nombre,
@@ -94,4 +94,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.parameters}.mc_crear_parametro_v10(VARCHAR, VARCHAR, VARCHAR, TEXT, BIGINT);
+DROP FUNCTION IF EXISTS ${schema}.mc_crear_parametro_v10(VARCHAR, VARCHAR, VARCHAR, TEXT, BIGINT);

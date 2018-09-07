@@ -17,7 +17,7 @@
 -- // create_sp_mc_buscar_parametro_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema.parameters}.mc_buscar_parametro_v10
+CREATE OR REPLACE FUNCTION ${schema}.mc_buscar_parametro_v10
 (
  IN _in_aplicacion      VARCHAR,
  IN _in_nombre          VARCHAR,
@@ -42,7 +42,7 @@ BEGIN
     expiracion,
     fecha_creacion
   FROM
-    ${schema.parameters}.mc_parametro
+    ${schema}.mc_parametro
   WHERE
     (TRIM(COALESCE(_in_aplicacion,'')) = '' OR aplicacion = _in_aplicacion) AND
     (TRIM(COALESCE(_in_nombre,'')) = '' OR nombre = _in_nombre) AND
@@ -54,4 +54,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.parameters}.mc_buscar_parametro_v10(VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_buscar_parametro_v10(VARCHAR, VARCHAR, VARCHAR);
