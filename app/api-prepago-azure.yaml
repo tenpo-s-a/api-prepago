@@ -13,10 +13,12 @@ spec:
     spec:
       containers:
       - name: payara-api-prepaid
-        image: http://mccontainerregistry.azurecr.io/api-prepaid
+        image: mccontainerregistry.azurecr.io/api-prepaid
         ports:
-        - name: payara
+        - name: payara-http
           containerPort: 8080
+        - name: payara-admin
+          containerPort: 4848
       imagePullSecrets:
       - name: regcred
       
@@ -33,6 +35,6 @@ spec:
     # The port that this service should serve on
   - port: 8080
     # the port where application will be exposed on
-    nodePort: 30001
+    nodePort: 30102
   selector:
     name: payara-api-prepaid
