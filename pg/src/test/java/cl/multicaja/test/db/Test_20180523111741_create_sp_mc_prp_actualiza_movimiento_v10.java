@@ -34,8 +34,15 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
 
     Map<String, Object> mapMovimiento = insertRandomMovement();
 
+    String pan = getRandomString(22);
+    String centalta = getRandomNumericString(4);
+    String cuenta = getRandomNumericString(12);
+
     Object[] params = {
       mapMovimiento.get("_id"), //id
+      pan,
+      centalta,
+      cuenta,
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
@@ -56,6 +63,12 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
     Assert.assertEquals("El estado debe ser PROCE", "PROCE", fila.get("estado"));
+    Assert.assertNotNull("El pan debe estar lleno", fila.get("pan"));
+    Assert.assertEquals("El pan debe estar lleno", pan, fila.get("pan"));
+    Assert.assertNotNull("El centalta debe estar lleno", fila.get("centalta"));
+    Assert.assertEquals("El centalta debe estar lleno", centalta, fila.get("centalta"));
+    Assert.assertNotNull("El cuenta debe estar lleno", fila.get("cuenta"));
+    Assert.assertEquals("El cuenta debe estar lleno", cuenta, fila.get("cuenta"));
   }
 
   @Test
