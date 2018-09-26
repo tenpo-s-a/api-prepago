@@ -48,6 +48,12 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
    */
   public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
                                                    String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
+    return insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento,
+      estado, cuenta, clamon, indnorcor, tipofac, new Date(System.currentTimeMillis()));
+  }
+
+  public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                   String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac) throws SQLException {
     Object[] params = {
       setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
       setInParam(idUsuario), //_id_usuario NUMERIC
@@ -61,7 +67,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(clamon),//_clamon NUMERIC
       setInParam(indnorcor),//_indnorcor NUMERIC
       setInParam(tipofac),//_tipofac NUMERIC
-      new Date(System.currentTimeMillis()),//_fecfac DATE
+      fecfac,//_fecfac DATE
       "123",//_numreffac VARCHAR
       getRandomNumericString(16),// _pan VARCHAR,
       setInParam(90),//_clamondiv NUMERIC,
