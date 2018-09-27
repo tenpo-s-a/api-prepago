@@ -31,7 +31,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_v10(
   IN _in_clamon               NUMERIC,
   IN _in_indnorcor            NUMERIC,
   IN _in_tipofac              NUMERIC,
-  IN _in_fecfac             DATE,
+  IN _in_fecfac               DATE,
+  IN _in_numaut               VARCHAR,
   OUT _id                   BIGINT,
   OUT _id_movimiento_ref    BIGINT,
   OUT _id_usuario           BIGINT,
@@ -123,8 +124,9 @@ BEGIN
     (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
     (COALESCE(_in_id_movimiento_ref, 0) = 0 OR id_movimiento_ref = _in_id_movimiento_ref) AND
     (COALESCE(_in_id_usuario, 0) = 0 OR id_usuario = _in_id_usuario) AND
-    (COALESCE(trim(_in_fecfac::text), '') = '' OR fecfac = _in_fecfac) AND
     (TRIM(COALESCE(_in_id_tx_externo,'')) = '' OR id_tx_externo = _in_id_tx_externo) AND
+    (COALESCE(trim(_in_fecfac::text), '') = '' OR fecfac = _in_fecfac) AND
+    (TRIM(COALESCE(_in_numaut,'')) = '' OR numaut = _in_numaut) AND
     (TRIM(COALESCE(_in_tipo_movimiento,'')) = '' OR tipo_movimiento = _in_tipo_movimiento) AND
     (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado) AND
     (TRIM(COALESCE(_in_estado_con_switch,'')) = '' OR estado_con_switch = _in_estado_con_switch) AND
@@ -142,4 +144,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE, VARCHAR);
