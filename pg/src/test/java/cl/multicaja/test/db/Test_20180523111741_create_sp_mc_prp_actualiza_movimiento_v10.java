@@ -19,6 +19,10 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_movimiento_v10";
 
+  private final String pan = getRandomString(22);
+  private final String centalta = getRandomNumericString(4);
+  private final String cuenta = getRandomNumericString(12);
+
   @BeforeClass
   public static void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
@@ -33,10 +37,6 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
   public void updateMovementsOk() throws SQLException {
 
     Map<String, Object> mapMovimiento = insertRandomMovement();
-
-    String pan = getRandomString(22);
-    String centalta = getRandomNumericString(4);
-    String cuenta = getRandomNumericString(12);
 
     Object[] params = {
       mapMovimiento.get("_id"), //id
@@ -76,6 +76,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
 
     Object[] params = {
       new NullParam(Types.NUMERIC), //id
+      pan,
+      centalta,
+      cuenta,
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
@@ -97,6 +100,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
 
     Object[] params = {
       mapMovimiento.get("_id"), //id
+      pan,
+      centalta,
+      cuenta,
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
@@ -118,6 +124,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       Map<String, Object> mapMovimiento = insertRandomMovement();
       Object[] params = {
         mapMovimiento.get("_id"), //id
+        pan,
+        centalta,
+        cuenta,
         new NullParam(Types.NUMERIC),
         new InParam(1, Types.NUMERIC),
         new InParam(1, Types.NUMERIC),
@@ -143,6 +152,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       Map<String, Object> mapMovimiento = insertRandomMovement();
       Object[] params = {
         mapMovimiento.get("_id"), //id
+        pan,
+        centalta,
+        cuenta,
         new InParam(1, Types.NUMERIC),
         new NullParam(Types.NUMERIC),
         new InParam(0, Types.NUMERIC),
@@ -168,6 +180,9 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       Map<String, Object> mapMovimiento = insertRandomMovement();
       Object[] params = {
         mapMovimiento.get("_id"), //id
+        pan,
+        centalta,
+        cuenta,
         new InParam(2, Types.NUMERIC),
         new InParam(3, Types.NUMERIC),
         new NullParam(Types.NUMERIC),

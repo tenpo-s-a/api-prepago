@@ -18,26 +18,32 @@
 -- Migration SQL that makes the change goes here.
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_v10(
-  IN _in_id                 BIGINT,
-  IN _in_id_movimiento_ref  BIGINT,
-  IN _in_id_usuario         BIGINT,
-  IN _in_id_tx_externo      VARCHAR,
-  IN _in_tipo_movimiento    VARCHAR,
-  IN _in_estado             VARCHAR,
-  IN _in_cuenta             VARCHAR,
-  IN _in_clamon             NUMERIC,
-  IN _in_indnorcor          NUMERIC,
-  IN _in_tipofac            NUMERIC,
+  IN _in_id                   BIGINT,
+  IN _in_id_movimiento_ref    BIGINT,
+  IN _in_id_usuario           BIGINT,
+  IN _in_id_tx_externo        VARCHAR,
+  IN _in_tipo_movimiento      VARCHAR,
+  IN _in_estado               VARCHAR,
+  IN _in_estado_con_switch    VARCHAR,
+  IN _in_estado_con_tecnocom  VARCHAR,
+  IN _in_origen_movimiento    VARCHAR,
+  IN _in_cuenta               VARCHAR,
+  IN _in_clamon               NUMERIC,
+  IN _in_indnorcor            NUMERIC,
+  IN _in_tipofac              NUMERIC,
   IN _in_fecfac             DATE,
-  OUT _id                 BIGINT,
-  OUT _id_movimiento_ref  BIGINT,
-  OUT _id_usuario         BIGINT,
-  OUT _id_tx_externo      VARCHAR,
-  OUT _tipo_movimiento    VARCHAR,
-  OUT _monto              NUMERIC,
-  OUT _estado             VARCHAR,
-  OUT _fecha_creacion     TIMESTAMP,
-  OUT _fecha_actualizacion TIMESTAMP,
+  OUT _id                   BIGINT,
+  OUT _id_movimiento_ref    BIGINT,
+  OUT _id_usuario           BIGINT,
+  OUT _id_tx_externo        VARCHAR,
+  OUT _tipo_movimiento      VARCHAR,
+  OUT _monto                NUMERIC,
+  OUT _estado               VARCHAR,
+  OUT _estado_con_switch    VARCHAR,
+  OUT _estado_con_tecnocom  VARCHAR,
+  OUT _origen_movimiento    VARCHAR,
+  OUT _fecha_creacion       TIMESTAMP,
+  OUT _fecha_actualizacion  TIMESTAMP,
   OUT _codent             VARCHAR,
   OUT _centalta           VARCHAR,
   OUT _cuenta             VARCHAR,
@@ -78,6 +84,9 @@ BEGIN
     tipo_movimiento,
     monto,
     estado,
+    estado_con_switch,
+    estado_con_tecnocom,
+    origen_movimiento,
     fecha_creacion,
     fecha_actualizacion,
     codent,
@@ -118,6 +127,9 @@ BEGIN
     (TRIM(COALESCE(_in_id_tx_externo,'')) = '' OR id_tx_externo = _in_id_tx_externo) AND
     (TRIM(COALESCE(_in_tipo_movimiento,'')) = '' OR tipo_movimiento = _in_tipo_movimiento) AND
     (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado) AND
+    (TRIM(COALESCE(_in_estado_con_switch,'')) = '' OR estado_con_switch = _in_estado_con_switch) AND
+    (TRIM(COALESCE(_in_estado_con_tecnocom,'')) = '' OR estado_con_tecnocom = _in_estado_con_tecnocom) AND
+    (TRIM(COALESCE(_in_origen_movimiento,'')) = '' OR origen_movimiento = _in_origen_movimiento) AND
     (TRIM(COALESCE(_in_cuenta,'')) = '' OR cuenta = _in_cuenta) AND
     (COALESCE(_in_clamon, 0) = 0 OR clamon = _in_clamon) AND
     (COALESCE(_in_indnorcor, -1) = -1 OR indnorcor = _in_indnorcor) AND
@@ -130,4 +142,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE);
