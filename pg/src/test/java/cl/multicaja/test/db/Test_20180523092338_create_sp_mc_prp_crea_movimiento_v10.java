@@ -47,7 +47,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
    * @throws SQLException
    */
   public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
-                                                   String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
+                                                   String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
     Object[] params = {
       setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
       setInParam(idUsuario), //_id_usuario NUMERIC
@@ -55,6 +55,9 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       tipoMovimiento, //_tipo_movimiento VARCHAR
       setInParam(getUniqueLong()), //_monto NUMERIC
       estado, //_estado VARCHAR
+      "Pendiente", // estado_con_switch VARCHAR
+      "Pendiente", // estado_con_tecnocom VARCHAR
+      origenMovimiento, // origen_movimiento VARCHAR
       "AA",//_codent VARCHAR
       "CA",//_centalta VARCHAR
       cuenta,//_cuenta VARCHAR
@@ -107,12 +110,13 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
+    String origenMovimiento = "API";
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> mapMovimiento = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMovimiento = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
     return mapMovimiento;
   }
 
@@ -127,12 +131,13 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
+    String origenMovimiento = "API";
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertTrue("Debe retornar un id", numberUtils.toLong(resp.get("_id")) > 0);
@@ -150,12 +155,13 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA";
     String estado = "PRUEBA";
+    String origenMovimiento = "API";
     String cuenta = getRandomNumericString(10);
     Integer clamon = 15200; //maximo largo 3
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
