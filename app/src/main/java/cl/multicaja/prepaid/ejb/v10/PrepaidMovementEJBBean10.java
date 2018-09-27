@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,7 +58,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getEstado().toString(), //_estado_con_switch VARCHAR
       data.getEstado().toString(), //_estado_con_tecnocom VARCHAR
       //TODO REVISAR!
-      "AUT", //_origen_movimiento VARCHAR
+      "API", //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -71,7 +72,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new InParam(data.getImpdiv(), Types.NUMERIC),//_impdiv NUMERIC
       new InParam(data.getImpfac(), Types.NUMERIC),//_impfac NUMERIC
       new InParam(data.getCmbapli(), Types.NUMERIC),//_cmbapli NUMERIC
-      data.getNumaut(),//_numaut    VARCHAR
+      !StringUtils.isBlank(data.getNumaut()) ? data.getNumaut() : "",//_numaut    VARCHAR
       data.getIndproaje().getValue(),//_indproaje VARCHAR
       data.getCodcom(),//_codcom VARCHAR
       data.getCodact(),//_codact VARCHAR
