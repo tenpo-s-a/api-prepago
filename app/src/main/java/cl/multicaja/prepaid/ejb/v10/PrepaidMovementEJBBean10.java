@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
@@ -288,11 +289,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
-  public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno) throws Exception {
+  public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno,PrepaidMovementType prepaidMovementType) throws Exception {
     if(idTxExterno == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, null, null, null, null, null, null);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, prepaidMovementType, null, null, null, null, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
   @Override
@@ -307,4 +308,34 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     return  !(movements != null && !movements.isEmpty());
   }
+
+
+
+
+  public boolean updateStatusMovementConSwitch(Long movementId, ConciliationStatusType status) throws Exception {
+
+    if(movementId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
+    }
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    Object[] params = {
+      movementId,
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_switch_v10",params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+        log.error("updateStatusMovementConSwitch resp: " + resp);
+      return false;
+    }
+
+    return true;
+  }
+
 }
