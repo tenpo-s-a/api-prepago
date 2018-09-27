@@ -9,10 +9,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -207,6 +204,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(numberUtils.toInteger(row.get("_linref")));
       p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
       p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
+      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("origen_movimiento"))));
+      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("estado_con_switch"))));
+      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("estado_con_tecnocom"))));
+
       return p;
     };
 
@@ -307,7 +308,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(idTxExterno == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, prepaidMovementType, null, null, null, null, null);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, prepaidMovementType, null, null, null, null, null,null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
   @Override
@@ -326,7 +327,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
 
 
-  public boolean updateStatusMovementConSwitch(Long movementId, ConciliationStatusType status) throws Exception {
+  public boolean updateStatusMovementConSwitch(Map<String, Object> header,Long movementId, ConciliationStatusType status) throws Exception {
 
     if(movementId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));

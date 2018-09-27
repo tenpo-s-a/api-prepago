@@ -53,6 +53,10 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private Integer numbencta;
   private Long numplastico;
 
+  private ConciliationStatusType conSwitch;
+  private ConciliationStatusType conTecnocom;
+  private MovementOriginType originType;
+
   public Long getId() {
     return id;
   }
@@ -347,6 +351,30 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
 
   public void setNumplastico(Long numplastico) {
     this.numplastico = numplastico;
+  }
+
+  public ConciliationStatusType getConSwitch() {
+    return conSwitch;
+  }
+
+  public void setConSwitch(ConciliationStatusType conSwitch) {
+    this.conSwitch = conSwitch;
+  }
+
+  public ConciliationStatusType getConTecnocom() {
+    return conTecnocom;
+  }
+
+  public void setConTecnocom(ConciliationStatusType conTecnocom) {
+    this.conTecnocom = conTecnocom;
+  }
+
+  public MovementOriginType getOriginType() {
+    return originType;
+  }
+
+  public void setOriginType(MovementOriginType originType) {
+    this.originType = originType;
   }
 
   @Override
