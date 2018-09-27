@@ -288,7 +288,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
-
+  public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno) throws Exception {
+    if(idTxExterno == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, null, null, null, null, null, null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
   @Override
   public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {
     if(idPrepaidUser == null){
