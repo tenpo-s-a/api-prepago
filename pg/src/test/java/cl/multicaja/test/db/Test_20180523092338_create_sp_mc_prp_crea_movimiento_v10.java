@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard;
@@ -49,11 +51,23 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
                                                    String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
     return insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento,
-      estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, new Date(System.currentTimeMillis()));
+      estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, new Date(System.currentTimeMillis()), "");
+  }
+
+  public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                   String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, String numaut) throws SQLException {
+    return insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento,
+      estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, new Date(System.currentTimeMillis()), numaut);
   }
 
   public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
                                                    String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac) throws SQLException {
+    return insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento,
+      estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, fecfac, "");
+  }
+
+  public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                   String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac, String numaut) throws SQLException {
     Object[] params = {
       setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
       setInParam(idUsuario), //_id_usuario NUMERIC
@@ -77,7 +91,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(10),//_impdiv NUMERIC,
       setInParam(10),//_impfac NUMERIC,
       setInParam(10),//_cmbapli NUMERIC,
-      "1231",//_numaut VARCHAR,
+      numaut,//_numaut VARCHAR,
       "A",//_indproaje VARCHAR,
       "123",//_codcom VARCHAR,
       1234,//_codact NUMERIC,
@@ -129,25 +143,57 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   @Test
   public void insertMovementOk() throws SQLException {
 
-    Map<String, Object> mapCard = insertCard("ACTIVA");
+    // numaut = trx id
+    {
+      Map<String, Object> mapCard = insertCard("ACTIVA");
 
-    Long idMovimientoRef = getUniqueLong();
-    Long idUsuario = (Long)mapCard.get("id_usuario");
+      Long idMovimientoRef = getUniqueLong();
+      Long idUsuario = (Long)mapCard.get("id_usuario");
 
-    String idTxExterno = getUniqueLong().toString();
-    String tipoMovimiento = "CARGA";
-    String estado = "PRUEBA";
-    String origenMovimiento = "API";
-    String cuenta = getRandomNumericString(10);
-    Integer clamon = 152;
-    Integer indnorcor = 0;
-    Integer tipofac = 3001;
+      String idTxExterno = getUniqueLong().toString();
+      String tipoMovimiento = "CARGA";
+      String estado = "PRUEBA";
+      String origenMovimiento = "API";
+      String cuenta = getRandomNumericString(10);
+      Integer clamon = 152;
+      Integer indnorcor = 0;
+      Integer tipofac = 3001;
 
-    Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
+      Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
-    Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertTrue("Debe retornar un id", numberUtils.toLong(resp.get("_id")) > 0);
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertTrue("Debe retornar un id", numberUtils.toLong(resp.get("_id")) > 0);
+      Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+
+      Map<String, Object> m = getMovement(numberUtils.toLong(resp.get("_id"), Long.valueOf(0))).get(0);
+      Assert.assertEquals("Debe tener numaut = id", StringUtils.leftPad(m.get("id").toString(), 6, "0"), m.get("numaut").toString());
+    }
+
+    // numaut = 123456
+    {
+      Map<String, Object> mapCard = insertCard("ACTIVA");
+
+      Long idMovimientoRef = getUniqueLong();
+      Long idUsuario = (Long)mapCard.get("id_usuario");
+
+      String idTxExterno = getUniqueLong().toString();
+      String tipoMovimiento = "CARGA";
+      String estado = "PRUEBA";
+      String origenMovimiento = "API";
+      String cuenta = getRandomNumericString(10);
+      Integer clamon = 152;
+      Integer indnorcor = 0;
+      Integer tipofac = 3001;
+
+      Map<String, Object> resp = insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, "123456");
+
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertTrue("Debe retornar un id", numberUtils.toLong(resp.get("_id")) > 0);
+      Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+
+      Map<String, Object> m = getMovement(numberUtils.toLong(resp.get("_id"), Long.valueOf(0))).get(0);
+      Assert.assertEquals("Debe tener numaut = 123456", "123456", m.get("numaut").toString());
+    }
   }
 
   @Test
@@ -171,5 +217,18 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
+  }
+
+
+  private List<Map<String, Object>> getMovement(Long id) {
+    return dbUtils.getJdbcTemplate().queryForList(
+      " SELECT " +
+        "     id, " +
+        "     numaut " +
+        " FROM " +
+        "   "+ SCHEMA +".prp_movimiento"+
+        " WHERE " +
+        " id = "+ id
+    );
   }
 }
