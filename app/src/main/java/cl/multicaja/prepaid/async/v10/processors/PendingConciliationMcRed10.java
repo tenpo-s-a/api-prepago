@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -35,32 +36,31 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         List<ConciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
         if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP);
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(26, 35);
         } else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP);
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(37, 46);
         } else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP);
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.CORRECTORA);
           String sFecha = fileName.substring(37, 46);
         } else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW);
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(27, 36);
         } else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW);
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(39, 48);
         } else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
-          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW
-          );
+          conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.CORRECTORA);
           String sFecha = fileName.substring(39, 48);
         }
       }
     };
   }
-  private void conciliation(List<ConciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType) throws Exception{
+  private void conciliation(List<ConciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector) throws Exception{
      try {
        for (ConciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
-         PrepaidMovement10 prepaidMovement10 = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType);
+         PrepaidMovement10 prepaidMovement10 = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
          if (prepaidMovement10 == null) {
            log.error("No conciliado");
            //Todo: Agregar Movimiento y marcar como a investigar ya que no deberia no existir en nuestra tabla.
