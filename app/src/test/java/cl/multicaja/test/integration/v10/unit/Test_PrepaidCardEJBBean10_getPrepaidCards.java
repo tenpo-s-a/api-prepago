@@ -106,4 +106,25 @@ public class Test_PrepaidCardEJBBean10_getPrepaidCards extends TestBaseUnit {
       id = p.getId();
     }
   }
+
+  @Test
+  public void getPrepaidCards_ok_by_pan_and_processor_user_id () throws Exception {
+    {
+      PrepaidCard10 originalCard = buildPrepaidCard10();
+      createPrepaidCard10(originalCard);
+
+      PrepaidCard10 card = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, originalCard.getEncryptedPan(), originalCard.getProcessorUserId());
+
+      Assert.assertNotNull("debe retornar una tarjeta", card);
+      Assert.assertEquals("debe ser igual al registrado anteriormemte", card, card);
+    }
+    {
+      PrepaidCard10 originalCard = buildPrepaidCard10();
+      createPrepaidCard10(originalCard);
+
+      PrepaidCard10 card = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, getRandomString(100), getRandomString(20));
+
+      Assert.assertNull("no debe retornar una tarjeta", card);
+    }
+  }
 }

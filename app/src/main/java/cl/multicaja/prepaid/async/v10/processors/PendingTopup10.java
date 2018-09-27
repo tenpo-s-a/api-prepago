@@ -143,13 +143,26 @@ public class PendingTopup10 extends BaseProcessor10 {
 
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
+            String centalta = inclusionMovimientosDTO.getCenalta();
+            String cuenta = inclusionMovimientosDTO.getCuenta();
             Integer numextcta = inclusionMovimientosDTO.getNumextcta();
             Integer nummovext = inclusionMovimientosDTO.getNummovext();
             Integer clamone = inclusionMovimientosDTO.getClamone();
             PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK; //realizado
 
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement.getId(), numextcta, nummovext, clamone, status);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+              prepaidMovement.getId(),
+              prepaidCard.getPan(),
+              centalta,
+              cuenta,
+              numextcta,
+              nummovext,
+              clamone,
+              status);
 
+            prepaidMovement.setPan(prepaidCard.getPan());
+            prepaidMovement.setCentalta(centalta);
+            prepaidMovement.setCuenta(cuenta);
             prepaidMovement.setNumextcta(numextcta);
             prepaidMovement.setNummovext(nummovext);
             prepaidMovement.setClamone(clamone);

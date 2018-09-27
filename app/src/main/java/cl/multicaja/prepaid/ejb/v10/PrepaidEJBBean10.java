@@ -303,6 +303,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          prepaidMovement.setCentalta(originalTopup.getCentalta());
+          prepaidMovement.setCuenta(originalTopup.getCuenta());
+          prepaidMovement.setPan(originalTopup.getPan());
           prepaidMovement.setTipofac(tipoFacReverse);
           prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
           prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
@@ -459,6 +462,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
+      String centalta = inclusionMovimientosDTO.getCenalta();
+      String cuenta = inclusionMovimientosDTO.getCuenta();
       Integer numextcta = inclusionMovimientosDTO.getNumextcta();
       Integer nummovext = inclusionMovimientosDTO.getNummovext();
       Integer clamone = inclusionMovimientosDTO.getClamone();
@@ -466,6 +471,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
+        prepaidCard.getPan(),
+        centalta,
+        cuenta,
         numextcta,
         nummovext,
         clamone,
@@ -593,6 +601,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          prepaidMovement.setPan(originalwithdraw.getPan());
+          prepaidMovement.setCentalta(originalwithdraw.getCentalta());
+          prepaidMovement.setCuenta(originalwithdraw.getCuenta());
           prepaidMovement.setTipofac(tipoFacReverse);
           prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
           prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);

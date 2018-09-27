@@ -181,6 +181,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
+      prepaidCard.getPan(),
+      prepaidCard.getProcessorUserId().substring(4, 8),
+      prepaidCard.getProcessorUserId().substring(12),
       123,
       123,
       152,

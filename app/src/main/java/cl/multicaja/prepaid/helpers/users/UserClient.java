@@ -86,6 +86,10 @@ public class UserClient {
     return httpUtils.execute(HttpUtils.ACTIONS.PATCH,null,TIMEOUT,TIMEOUT,api_url+api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
+  /**
+   *  USERS
+   */
+
   public User getUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     log.info("******** getUserByRut IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
@@ -535,7 +539,6 @@ public class UserClient {
         throw new IllegalStateException();
     }
   }
-
 
   private <T>T processResponse(String method, HttpResponse response, Class<T> clazz) throws Exception {
 

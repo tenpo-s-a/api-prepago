@@ -10,7 +10,6 @@ import cl.multicaja.prepaid.model.v10.NewTermsAndConditions10;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 import java.util.List;
 
 import static cl.multicaja.core.model.Errors.*;

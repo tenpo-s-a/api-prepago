@@ -288,4 +288,27 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
+
+  @Override
+  public PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception {
+    if(pan == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "pan"));
+    }
+    if(processorUserId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "processorUserId"));
+    }
+
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId);
+
+    if( lst != null) {
+        PrepaidCard10 prepaidCard10 = lst.stream()
+          .filter(c -> pan.equals(c.getPan()))
+          .findAny()
+          .orElse(null);
+
+        return prepaidCard10;
+    }
+
+    return null;
+  }
 }

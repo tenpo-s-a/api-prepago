@@ -20,6 +20,9 @@
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
   IN _id            NUMERIC,
+  IN _pan           VARCHAR,
+  IN _centalta      VARCHAR,
+  IN _cuenta        VARCHAR,
   IN _numextcta     NUMERIC,
   IN _nummovext     NUMERIC,
   IN _clamone       NUMERIC,
@@ -49,6 +52,27 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
       ${schema}.prp_movimiento
     SET
        estado = _estado,
+       centalta = (
+                   CASE WHEN _centalta IS NOT NULL THEN
+                       _centalta
+                    ELSE
+                       centalta
+                    END
+                  ),
+       cuenta = (
+                   CASE WHEN _cuenta IS NOT NULL THEN
+                       _cuenta
+                    ELSE
+                       cuenta
+                    END
+                  ),
+       pan = (
+                   CASE WHEN _pan IS NOT NULL THEN
+                       _pan
+                    ELSE
+                       pan
+                    END
+                  ),
        numextcta = (
                    CASE WHEN _numextcta IS NOT NULL THEN
                        _numextcta
@@ -84,5 +108,5 @@ $$
 LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC,NUMERIC,NUMERIC,NUMERIC,VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC, VARCHAR, VARCHAR, VARCHAR,NUMERIC, NUMERIC, NUMERIC, VARCHAR);
 
