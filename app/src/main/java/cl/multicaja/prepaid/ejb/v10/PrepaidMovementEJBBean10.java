@@ -56,6 +56,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
+      data.getEstado().toString(), //_estado_con_switch VARCHAR
+      data.getEstado().toString(), //_estado_con_tecnocom VARCHAR
+      //TODO REVISAR!
+      "AUT", //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -151,6 +155,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       idTxExterno != null ? idTxExterno : new NullParam(Types.VARCHAR),
       tipoMovimiento != null ? tipoMovimiento.toString() : new NullParam(Types.VARCHAR),
       estado != null ? estado.toString() : new NullParam(Types.VARCHAR),
+      //TODO: REVISAR
+      new NullParam(Types.VARCHAR), // estado_con_switch
+      new NullParam(Types.VARCHAR), // estado_con_tecnocom
+      new NullParam(Types.VARCHAR), // origen_movimiento
       cuenta != null ? cuenta : new NullParam(Types.VARCHAR),
       clamon != null ? clamon.getValue() : new NullParam(Types.NUMERIC),
       indnorcor != null ? indnorcor.getValue() : new NullParam(Types.NUMERIC),

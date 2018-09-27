@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration;
 
-import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.test.TestSuiteBase;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpError;

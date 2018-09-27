@@ -4,7 +4,6 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

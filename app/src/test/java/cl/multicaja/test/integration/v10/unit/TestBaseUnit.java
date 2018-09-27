@@ -23,7 +23,6 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
