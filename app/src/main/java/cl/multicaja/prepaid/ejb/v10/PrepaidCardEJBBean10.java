@@ -302,7 +302,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     if( lst != null) {
         PrepaidCard10 prepaidCard10 = lst.stream()
-          .filter(c -> pan.equals(c.getEncryptedPan()))
+          .filter(c -> pan.equals(c.getPan()))
           .findAny()
           .orElse(null);
 

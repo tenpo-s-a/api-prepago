@@ -6,10 +6,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.test.TestApiBase;
-import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
-import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
@@ -433,10 +431,12 @@ public class TestBaseUnit extends TestApiBase {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    String pan = getRandomNumericString(16);
+
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
-    prepaidCard.setPan(getRandomNumericString(16));
-    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    prepaidCard.setPan(Utils.replacePan(pan));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
     prepaidCard.setExpiration(expiryDate);
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setProcessorUserId(getRandomNumericString(20));
@@ -512,7 +512,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidUser
    * @return
    */
-  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) {
+  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) throws Exception {
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
     AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
@@ -522,7 +522,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser.getId());
     prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard.setPan(datosTarjetaDTO.getPan());
+    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
@@ -850,6 +850,13 @@ public class TestBaseUnit extends TestApiBase {
       }
     }
 
+    String centalta = "";
+    String cuenta = "";
+    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
+      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
+      cuenta = prepaidCard.getProcessorUserId().substring(12);
+    }
+
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
@@ -858,8 +865,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setCodent(codent);
-    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
-    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
     prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
     prepaidMovement.setTipofac(tipoFactura);

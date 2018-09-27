@@ -7,6 +7,7 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public interface PrepaidMovementEJB10 {
    * @param status
    * @throws Exception
    */
-  void updatePrepaidMovement(Map<String, Object> header, Long id, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
+  void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
 
   /**
    * actualiza solo el estado
@@ -60,7 +61,7 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
-                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac) throws Exception;
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac) throws Exception;
 
   /**
    *
@@ -133,5 +134,16 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   Boolean isFirstTopup(Long idPrepaidUser) throws Exception;
+
+  /**
+   * Busca un movimiento para ser conciliado
+   * @param idPrepaidUser id del usuario
+   * @param numaut numero de autorizacion de la transaccion
+   * @param fecfac fecha de la factura
+   * @param tipofac tipo de factura
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getPrepaidMovementForReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception;
 
 }
