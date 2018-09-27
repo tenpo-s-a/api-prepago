@@ -13,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO;
 
 /**
  * @autor abarazarte

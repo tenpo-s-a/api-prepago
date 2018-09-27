@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -51,9 +52,23 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
 
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    // ACTUALIZA MOVIMIENTO
-    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),1,2, CodigoMoneda.CHILE_CLP.getValue(), PrepaidMovementStatus.PROCESS_OK);
+    String pan = Utils.replacePan(getRandomNumericString(16));
+    String centalta = getRandomNumericString(4);
+    String cuenta = getRandomNumericString(12);
 
+    // ACTUALIZA MOVIMIENTO
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null, prepaidMovement10.getId(),
+      pan,
+      centalta,
+      cuenta,
+      1,
+      2,
+      CodigoMoneda.CHILE_CLP.getValue(),
+      PrepaidMovementStatus.PROCESS_OK);
+
+    prepaidMovement10.setPan(pan);
+    prepaidMovement10.setCentalta(centalta);
+    prepaidMovement10.setCuenta(cuenta);
     prepaidMovement10.setNumextcta(1);
     prepaidMovement10.setNummovext(2);
     prepaidMovement10.setClamone(CodigoMoneda.CHILE_CLP.getValue());

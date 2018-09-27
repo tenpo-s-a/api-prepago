@@ -50,14 +50,14 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     mapMovimiento = insertRandomMovement();
     changeMovementDate(mapMovimiento.get("_id"), "2018-09-04 09:05:31");
 
-    Timestamp firstDate = new Timestamp(2018, 8, 1, 14, 0, 0, 0);
-    Timestamp lastDate = new Timestamp(2018, 9, 4, 23, 59, 59, 0);
+    Timestamp firstDate = Timestamp.valueOf("2018-08-01 14:00:00");
+    Timestamp lastDate = Timestamp.valueOf("2018-09-04 23:59:59");
 
     PGTimestamp firstDatePG = new PGTimestamp(firstDate.getTime());
     PGTimestamp lastDatePG = new PGTimestamp(lastDate.getTime());
 
     Object[] params = {
-      "2018-08-01 14:00:00.0",
+      "2018-08-01 14:00:00",
       "2018-09-04 23:59:59"
     };
 

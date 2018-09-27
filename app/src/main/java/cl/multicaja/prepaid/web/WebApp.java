@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.TecnocomReconciliationRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
@@ -36,6 +37,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private CurrencyConvertionRoute10 currencyConvertionRoute10;
 
+  @Inject
+  private TecnocomReconciliationRoute10 tecnocomReconciliationRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -62,7 +66,7 @@ public class WebApp implements ServletContextListener  {
     }
     try {
       if (!camelFactory.isCamelRunning()) {
-        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10);
+        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10, transactionReversalRoute10, tecnocomReconciliationRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {

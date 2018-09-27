@@ -148,6 +148,17 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
           _numplastico
         ) RETURNING id INTO _r_id;
 
+        UPDATE ${schema}.prp_movimiento
+        SET  numaut = (
+                   CASE WHEN (TRIM(COALESCE(_numaut,'')) = '' OR _numaut = '') THEN
+                       lpad(_r_id::text, 6, '0')
+                    ELSE
+                       _numaut
+                    END
+                  )
+        WHERE
+          id = _r_id;
+
   EXCEPTION
    WHEN OTHERS THEN
        _error_code := SQLSTATE;

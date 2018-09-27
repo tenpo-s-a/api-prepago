@@ -497,7 +497,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("status 201", 201, resp.getStatus());
 
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
       Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -525,7 +525,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
 
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, null, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
       Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -555,7 +555,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       // Se verifica que se tenga un registro de reversa
 
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
       Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -580,7 +580,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
       // Se verifica que se tenga un registro de reversa
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
       Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
@@ -618,7 +618,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       // Se verifica que se tenga un registro de reversa
 
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null);
 
       Assert.assertNull("No debe tener movimientos de reversa", movement);
     }
@@ -650,7 +650,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
       // Se verifica que se tenga un registro de reversa
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null);
 
       Assert.assertNull("No debe tener movimientos de reversa", movement);
     }
@@ -685,7 +685,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       // Se verifica que se tenga un registro de reversa
 
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null);
 
       Assert.assertNotNull("Debe tener movimientos de reversa", movement);
       Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
@@ -716,7 +716,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
       // Se verifica que se tenga un registro de reversa
       List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA);
+        prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PENDING, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_TRANSFERENCIA, null);
 
       Assert.assertNotNull("Debe tener movimientos de reversa", movement);
       Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());

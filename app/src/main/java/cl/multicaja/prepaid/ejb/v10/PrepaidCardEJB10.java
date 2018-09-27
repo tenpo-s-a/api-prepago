@@ -114,4 +114,15 @@ public interface PrepaidCardEJB10 {
    * @throws Exception
    */
   void updateUsdValue(CurrencyUsd currencyUsd) throws Exception;
+
+  /**
+   *  busca una tarjeta por pan y numero de contrato
+   * @param headers
+   * @param pan pan encriptado
+   * @param processorUserId numero de contrato
+   * @return
+   * @throws Exception
+   */
+  PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception;
+
 }

@@ -100,11 +100,15 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
+            prepaidCard.getPan(),
+            null,
+            null,
             numextcta,
             nummovext,
             clamone,
             status);
 
+          issuanceFeeMovement.setPan(prepaidCard.getPan());
           issuanceFeeMovement.setNumextcta(numextcta);
           issuanceFeeMovement.setNummovext(nummovext);
           issuanceFeeMovement.setClamone(clamone);
@@ -137,6 +141,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
+          String centalta = inclusionMovimientosDTO.getCenalta();
+          String cuenta = inclusionMovimientosDTO.getCuenta();
           Integer numextcta = inclusionMovimientosDTO.getNumextcta();
           Integer nummovext = inclusionMovimientosDTO.getNummovext();
           Integer clamone = inclusionMovimientosDTO.getClamone();
@@ -144,11 +150,17 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
+            prepaidCard.getPan(),
+            centalta,
+            cuenta,
             numextcta,
             nummovext,
             clamone,
             status);
 
+          issuanceFeeMovement.setPan(prepaidCard.getPan());
+          issuanceFeeMovement.setCentalta(centalta);
+          issuanceFeeMovement.setCuenta(cuenta);
           issuanceFeeMovement.setNumextcta(numextcta);
           issuanceFeeMovement.setNummovext(nummovext);
           issuanceFeeMovement.setClamone(clamone);
@@ -179,6 +191,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
+            prepaidCard.getPan(),
+            null,
+            null,
             numextcta,
             nummovext,
             clamone,

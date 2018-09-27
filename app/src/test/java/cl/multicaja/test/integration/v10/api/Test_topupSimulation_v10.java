@@ -17,7 +17,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.*;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 
 /**
  * @autor vutreras
