@@ -9,9 +9,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,10 +55,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
-      data.getEstado().toString(), //_estado_con_switch VARCHAR
-      data.getEstado().toString(), //_estado_con_tecnocom VARCHAR
+      data.getConSwitch().toString(), //_estado_con_switch VARCHAR
+      data.getConTecnocom().toString(), //_estado_con_tecnocom VARCHAR
       //TODO REVISAR!
-      "API", //_origen_movimiento VARCHAR
+      data.getOriginType().toString(), //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -207,6 +205,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(numberUtils.toInteger(row.get("_linref")));
       p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
       p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
+      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
+      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
+      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
+
       return p;
     };
 
@@ -303,7 +305,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
-
+  public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno,PrepaidMovementType prepaidMovementType,IndicadorNormalCorrector indicadorNormalCorrector) throws Exception {
+    if(idTxExterno == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, prepaidMovementType, null, null, null, indicadorNormalCorrector, null,null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
   @Override
   public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {
     if(idPrepaidUser == null){
@@ -317,6 +325,34 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return  !(movements != null && !movements.isEmpty());
   }
 
+
+
+
+  public boolean updateStatusMovementConSwitch(Map<String, Object> header,Long movementId, ConciliationStatusType status) throws Exception {
+
+    if(movementId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
+    }
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    Object[] params = {
+      movementId,
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_switch_v10",params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+        log.error("updateStatusMovementConSwitch resp: " + resp);
+      return false;
+    }
+
+    return true;
+  }
 
   public PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception {
     if(idPrepaidUser == null){
