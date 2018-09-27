@@ -48,15 +48,15 @@ public class ReconciliationFileDetail {
     this.detail = detail;
   }
 
-  private String getCodent() {
+  public String getCodent() {
     return this.detail.substring(this.CODENT.getStart(), this.CODENT.getEnd()).trim();
   }
 
-  private String getCentalta() {
+  public String getCentalta() {
     return this.detail.substring(this.CENTALTA.getStart(), this.CENTALTA.getEnd()).trim();
   }
 
-  private String getCuenta() {
+  public String getCuenta() {
     return this.detail.substring(this.CUENTA.getStart(), this.CUENTA.getEnd()).trim();
   }
 
@@ -92,8 +92,8 @@ public class ReconciliationFileDetail {
     return this.detail.substring(this.NUMAUT.getStart(), this.NUMAUT.getEnd());
   }
 
-  public String getImpfac() {
-    return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal()).toString();
+  public BigDecimal getImpfac() {
+    return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal());
   }
 
   public String getOrigenope() {

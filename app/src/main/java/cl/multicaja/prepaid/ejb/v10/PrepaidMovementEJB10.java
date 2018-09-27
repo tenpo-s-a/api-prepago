@@ -144,6 +144,6 @@ public interface PrepaidMovementEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidMovement10 getPrepaidMovementForReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception;
+  PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception;
 
 }
