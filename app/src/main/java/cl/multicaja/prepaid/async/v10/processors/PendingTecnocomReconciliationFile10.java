@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.tecnocom.constants.*;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -97,7 +98,9 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         if(originalMovement == null) {
           // Movimiento original no existe. Se agrega.
           //TODO: Agregar movimiento
-
+          PrepaidMovement10 movement10 = buildMovement(prepaidCard10.getIdUser(), pan, trx);
+          movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+          getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
 
         //} else if(originalMovement.getEstado().equals("sadasd")) {
           //Se verifica que no se ha conciliado anteriormente
@@ -106,7 +109,13 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
             //TODO: Que hacer si no coincide?
           } else {
             //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
+              trx.getCentalta(),
+              trx.getCuenta(),
+              numberUtils.toInteger(trx.getNumextcta()),
+              numberUtils.toInteger(trx.getNummovext()),
+              numberUtils.toInteger(trx.getClamon()),
+              PrepaidMovementStatus.PROCESS_OK);
 
             //todo: Actualizar estado de conciliacion Tecnocom.
           }
@@ -122,6 +131,48 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
     for (ReconciliationFileDetail trx : trxs) {
       log.info(String.format("%s - %s", trx.getNumaut(), trx.toString()));
     }
+  }
+
+  private PrepaidMovement10 buildMovement(Long userId, String pan, ReconciliationFileDetail batchTrx) {
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+
+    prepaidMovement.setIdMovimientoRef(null);
+    prepaidMovement.setIdPrepaidUser(userId);
+    prepaidMovement.setIdTxExterno(null);
+    prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
+    prepaidMovement.setMonto(batchTrx.getImpfac());
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(batchTrx.getCodent());
+    prepaidMovement.setCentalta(batchTrx.getCentalta());
+    prepaidMovement.setCuenta(batchTrx.getCuenta());
+    prepaidMovement.setClamon(CodigoMoneda.fromValue(numberUtils.toInteger(batchTrx.getClamon())));
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
+    prepaidMovement.setTipofac(batchTrx.getTipoFac());
+    prepaidMovement.setFecfac(Date.valueOf(batchTrx.getFecfac()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(pan);
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(batchTrx.getImpfac());
+    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setNumaut(batchTrx.getNumaut());
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom(batchTrx.getCodcom());
+    prepaidMovement.setCodact(numberUtils.toInteger(batchTrx.getCodact()));
+    prepaidMovement.setImpliq(0L);
+    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setCodpais(CodigoPais.fromValue(numberUtils.toInteger(batchTrx.getCodpais())));
+    prepaidMovement.setNompob("");
+    prepaidMovement.setNumextcta(numberUtils.toInteger(batchTrx.getNumextcta()));
+    prepaidMovement.setNummovext(numberUtils.toInteger(batchTrx.getNummovext()));
+    prepaidMovement.setClamone(numberUtils.toInteger(batchTrx.getClamon()));
+    prepaidMovement.setTipolin(batchTrx.getTipolin());
+    prepaidMovement.setLinref(numberUtils.toInteger(batchTrx.getLinref()));
+    prepaidMovement.setNumbencta(1);
+    prepaidMovement.setNumplastico(0L);
+
+    return prepaidMovement;
   }
 
 
