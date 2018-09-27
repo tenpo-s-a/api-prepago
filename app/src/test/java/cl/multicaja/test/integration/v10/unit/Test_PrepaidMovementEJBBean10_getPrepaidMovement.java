@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,12 +40,12 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-
     prepaidMovement1 = createPrepaidMovement10(prepaidMovement1);
+    prepaidMovement1.setNumaut(StringUtils.leftPad(prepaidMovement1.getId().toString(), 6, "0"));
 
     PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-
     prepaidMovement2 = createPrepaidMovement10(prepaidMovement2);
+    prepaidMovement2.setNumaut(StringUtils.leftPad(prepaidMovement2.getId().toString(), 6, "0"));
 
     List<PrepaidMovement10> lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
 

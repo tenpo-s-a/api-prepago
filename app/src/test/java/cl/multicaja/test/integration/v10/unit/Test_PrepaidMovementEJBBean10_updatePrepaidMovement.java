@@ -24,7 +24,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-
+    prepaidMovement10.setNumaut("123456");
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     // ACTUALIZA MOVIMIENTO
@@ -49,7 +49,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-
+    prepaidMovement10.setNumaut("123456");
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     String pan = Utils.replacePan(getRandomNumericString(16));
