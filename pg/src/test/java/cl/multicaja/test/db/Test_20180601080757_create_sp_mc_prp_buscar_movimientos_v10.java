@@ -39,6 +39,9 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
    * @param idTxExterno
    * @param tipoMovimiento
    * @param estado
+   * @param estado_con_switch
+   * @param estado_con_tecnocom
+   * @param origen_movimiento
    * @param cuenta
    * @param clamon
    * @param indnorcor
@@ -47,7 +50,8 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
    * @throws SQLException
    */
   public static Map<String, Object> searchMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, String tipoMovimiento,
-                                                    String estado, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
+                                                    String estado, String estado_con_switch, String estado_con_tecnocom, String origen_movimiento,
+                                                    String cuenta, Integer clamon, Integer indnorcor, Integer tipofac) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idMovimientoRef != null ? idMovimientoRef : new NullParam(Types.BIGINT),
@@ -55,6 +59,9 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       idTxExterno != null ? idTxExterno : new NullParam(Types.VARCHAR),
       tipoMovimiento != null ? tipoMovimiento : new NullParam(Types.VARCHAR),
       estado != null ? estado : new NullParam(Types.VARCHAR),
+      estado_con_switch != null ? estado_con_switch : new NullParam(Types.VARCHAR),
+      estado_con_tecnocom != null ? estado_con_tecnocom : new NullParam(Types.VARCHAR),
+      origen_movimiento != null ? origen_movimiento : new NullParam(Types.VARCHAR),
       cuenta != null ? cuenta : new NullParam(Types.VARCHAR),
       clamon != null ? clamon : new NullParam(Types.NUMERIC),
       indnorcor != null ? indnorcor : new NullParam(Types.NUMERIC),
@@ -78,6 +85,9 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       "_tipo_movimiento",
       "_monto",
       "_estado",
+      "_estado_con_switch",
+      "_estado_con_tecnocom",
+      "_origen_movimiento",
       "_fecha_creacion",
       "_fecha_actualizacion",
       "_codent",
@@ -127,17 +137,18 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = "PRUEBA1";
+    String origenMovimiento = "API";
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    Map<String, Object> mapMov1 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMov1 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
     {
       Long id = numberUtils.toLong(mapMov1.get("_id"));
 
-      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null);
+      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null, null, null, null);
 
       List result = (List)resp.get("result");
 
@@ -153,6 +164,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       Assert.assertEquals("debe ser el mismo registro", idTxExterno, mapMov.get("_id_tx_externo"));
       Assert.assertEquals("debe ser el mismo registro", tipoMovimiento, mapMov.get("_tipo_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", estado, mapMov.get("_estado"));
+      Assert.assertEquals("debe ser el mismo registro", origenMovimiento, mapMov.get("_origen_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", cuenta, mapMov.get("_cuenta"));
       Assert.assertEquals("debe ser el mismo registro", clamon, numberUtils.toInteger(mapMov.get("_clamon")));
       Assert.assertEquals("debe ser el mismo registro", indnorcor, numberUtils.toInteger(mapMov.get("_indnorcor")));
@@ -161,16 +173,17 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
 
     tipoMovimiento = "CARGA2";
     estado = "PRUEBA2";
+    origenMovimiento = "SAT";
     clamon = 153;
     indnorcor = 1;
     tipofac = 3000;
 
-    Map<String, Object> mapMov2 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    Map<String, Object> mapMov2 = insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
     {
       Long id = numberUtils.toLong(mapMov2.get("_id"));
 
-      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null);
+      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null, null, null, null);
 
       List result = (List)resp.get("result");
 
@@ -188,13 +201,14 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       Assert.assertEquals("debe ser el mismo registro", idTxExterno, mapMov.get("_id_tx_externo"));
       Assert.assertEquals("debe ser el mismo registro", tipoMovimiento, mapMov.get("_tipo_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", estado, mapMov.get("_estado"));
+      Assert.assertEquals("debe ser el mismo registro", origenMovimiento, mapMov.get("_origen_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", cuenta, mapMov.get("_cuenta"));
       Assert.assertEquals("debe ser el mismo registro", clamon, numberUtils.toInteger(mapMov.get("_clamon")));
       Assert.assertEquals("debe ser el mismo registro", indnorcor, numberUtils.toInteger(mapMov.get("_indnorcor")));
       Assert.assertEquals("debe ser el mismo registro", tipofac, numberUtils.toInteger(mapMov.get("_tipofac")));
     }
     {
-      Map<String, Object> resp = searchMovements(null, null, null, null, null, null, null, null, null, null);
+      Map<String, Object> resp = searchMovements(null, null, null, null, null, null, null, null, null, null, null, null, null);
       //mapMov1
       //mapMov2
       List result = (List)resp.get("result");
@@ -222,15 +236,16 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = getRandomString(8);
+    String origenMovimiento = getRandomString(3);
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
-    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
-    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null);
+    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null, null, null, null);
 
     List result = (List)resp.get("result");
 
@@ -250,6 +265,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       Assert.assertEquals("debe ser el mismo registro", idTxExterno, mapMov.get("_id_tx_externo"));
       Assert.assertEquals("debe ser el mismo registro", tipoMovimiento, mapMov.get("_tipo_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", estado, mapMov.get("_estado"));
+      Assert.assertEquals("debe ser el mismo registro", origenMovimiento, mapMov.get("_origen_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", cuenta, mapMov.get("_cuenta"));
       Assert.assertEquals("debe ser el mismo registro", clamon, numberUtils.toInteger(mapMov.get("_clamon")));
       Assert.assertEquals("debe ser el mismo registro", indnorcor, numberUtils.toInteger(mapMov.get("_indnorcor")));
@@ -267,15 +283,16 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     String idTxExterno = getUniqueLong().toString();
     String tipoMovimiento = "CARGA1";
     String estado = getRandomString(8);
+    String origenMovimiento = getRandomString(3);
     String cuenta = getRandomNumericString(10);
     Integer clamon = 152;
     Integer indnorcor = 0;
     Integer tipofac = 3001;
 
-    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
-    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
+    insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
-    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null);
+    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null, null, null, null);
 
     List result = (List)resp.get("result");
 
@@ -295,6 +312,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       Assert.assertEquals("debe ser el mismo registro", idTxExterno, mapMov.get("_id_tx_externo"));
       Assert.assertEquals("debe ser el mismo registro", tipoMovimiento, mapMov.get("_tipo_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", estado, mapMov.get("_estado"));
+      Assert.assertEquals("debe ser el mismo registro", origenMovimiento, mapMov.get("_origen_movimiento"));
       Assert.assertEquals("debe ser el mismo registro", cuenta, mapMov.get("_cuenta"));
       Assert.assertEquals("debe ser el mismo registro", clamon, numberUtils.toInteger(mapMov.get("_clamon")));
       Assert.assertEquals("debe ser el mismo registro", indnorcor, numberUtils.toInteger(mapMov.get("_indnorcor")));
