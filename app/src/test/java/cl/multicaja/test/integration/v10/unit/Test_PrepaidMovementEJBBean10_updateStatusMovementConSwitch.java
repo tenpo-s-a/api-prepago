@@ -35,7 +35,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConSwitch extends
 
       PrepaidMovement10 prepaidMovement10_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       Assert.assertNotEquals("Deben Ser diferentes", prepaidMovement10, prepaidMovement10_2);
-      Assert.assertEquals("El status con switch debe ser no conciliado",prepaidMovement10_2.getConSwitch(),ConciliationStatusType.NO_CONCILIADO);
+      Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NO_CONCILIADO,prepaidMovement10_2.getConSwitch());
     }
 
 }

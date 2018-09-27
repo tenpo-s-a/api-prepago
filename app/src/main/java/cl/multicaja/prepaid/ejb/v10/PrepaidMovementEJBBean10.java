@@ -55,10 +55,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
-      data.getEstado().toString(), //_estado_con_switch VARCHAR
-      data.getEstado().toString(), //_estado_con_tecnocom VARCHAR
+      data.getConSwitch().toString(), //_estado_con_switch VARCHAR
+      data.getConTecnocom().toString(), //_estado_con_tecnocom VARCHAR
       //TODO REVISAR!
-      "API", //_origen_movimiento VARCHAR
+      data.getOriginType().toString(), //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -205,9 +205,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(numberUtils.toInteger(row.get("_linref")));
       p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
       p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
-      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("origen_movimiento"))));
-      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("estado_con_switch"))));
-      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("estado_con_tecnocom"))));
+      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
+      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
+      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
 
       return p;
     };

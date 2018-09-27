@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.model.v10;
 
-import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.util.Map;
