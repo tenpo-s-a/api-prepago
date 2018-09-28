@@ -56,7 +56,7 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
     final Map<String, Object> context = TestSftpServer.getInstance().openChanel();
     InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
     ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-    channelSftp.put(inputStream, TestSftpServer.getInstance().BASE_DIR + "mastercard/T058/" + filename);
+    channelSftp.put(inputStream, TestSftpServer.getInstance().BASE_DIR + "upload/T058/" + filename);
     channelSftp.exit();
     ((Session) context.get("session")).disconnect();
     log.info("Wait for camel process");
