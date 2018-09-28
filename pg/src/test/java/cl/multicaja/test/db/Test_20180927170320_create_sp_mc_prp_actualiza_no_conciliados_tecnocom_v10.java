@@ -11,11 +11,10 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement;
+import static cl.multicaja.test.db.Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switch_v10.searchAllMovements;
 
-
-public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switch_v10 extends TestDbBasePg {
-  private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_no_conciliados_switch_v10";
+public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecnocom_v10 extends TestDbBasePg {
+  private static final String SP_NAME = SCHEMA + ".mc_prp_actualiza_no_conciliados_tecnocom_v10";
 
   @BeforeClass
   public static void beforeClass() {
@@ -28,9 +27,9 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void expireSwitchStatus() throws SQLException
+  public void expireTecnocomStatus() throws SQLException
   {
-    fillDb();
+    Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switch_v10.fillDb();
 
     String startDate = "20180803";
     String endDate = "20180803";
@@ -49,6 +48,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
     Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
 
+    System.out.println("Msg error: " + resp.get("_error_msg"));
+
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
 
@@ -63,8 +64,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
       Integer movementTipoFac = ((BigDecimal)movement.get("tipofac")).intValue();
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
 
-      String switchStatus = (String) movement.get("estado_con_switch");
-      if (switchStatus.equals("NO_CONCILIADO")) {
+      String tecnocomStatus = (String) movement.get("estado_con_tecnocom");
+      if (tecnocomStatus.equals("NO_CONCILIADO")) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);
@@ -80,7 +81,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByStartDateNull()throws SQLException {
+  public void updateTecnocomStatusNotOkByStartDateNull()throws SQLException {
     String endDate = "20180803";
 
     Object[] params = {
@@ -99,7 +100,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByEndDateNull()throws SQLException {
+  public void updateTecnocomStatusNotOkByEndDateNull()throws SQLException {
     String startDate = "20180803";
 
     Object[] params = {
@@ -118,7 +119,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByTipoFacNull()throws SQLException {
+  public void updateTecnocomStatusNotOkByTipoFacNull()throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -138,7 +139,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByIndNorCorNull()throws SQLException {
+  public void updateTecnocomStatusNotOkByIndNorCorNull()throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -158,7 +159,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByNewStateNull()throws SQLException {
+  public void updateTecnocomStatusNotOkByNewStateNull()throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -175,49 +176,5 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
 
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
-  }
-
-  public static void fillDb() {
-    try {
-      Map<String, Object> mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-25 15:00:32", 3001, 0);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 21:14:09", 3001, 1);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 17:43:54", 3001, 1);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-01 11:52:10", 3002, 1);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-14 19:21:06", 3001, 1);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 00:43:54", 3001, 0);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-04 09:05:31", 3001, 1);
-
-      mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 19:43:54", 3002, 1);
-    }
-    catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }
-
-  static public void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {
-    dbUtils.getJdbcTemplate().execute(
-      "UPDATE " + SCHEMA + ".prp_movimiento SET fecha_creacion = "
-        + "TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS'), "
-        + "indnorcor = " + indnorcor + ", "
-        + "tipofac = " + tipofac + " "
-        + "WHERE ID = " + idMovimiento.toString());
-  }
-
-  static public List searchAllMovements()  {
-    return dbUtils.getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.prp_movimiento", SCHEMA));
   }
 }

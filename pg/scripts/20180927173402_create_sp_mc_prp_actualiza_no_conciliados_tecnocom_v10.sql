@@ -14,10 +14,10 @@
 --    limitations under the License.
 --
 
--- // create_sp_mc_prp_actualiza_no_conciliados_switch_v10
+-- // create_sp_mc_prp_actualiza_no_conciliados_tecnocom_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_tecnocom_v10(
   IN _in_fecha_inicial  VARCHAR,
   IN _in_fecha_final    VARCHAR,
   IN _in_tipofac        NUMERIC,
@@ -33,31 +33,31 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
 
     IF TRIM(COALESCE(_in_fecha_inicial, '')) = '' THEN
       _error_code := 'MC001';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] La fecha inicial es obligatoria';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] La fecha inicial es obligatoria';
       RETURN;
     END IF;
 
     IF TRIM(COALESCE(_in_fecha_final, '')) = '' THEN
       _error_code := 'MC002';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] La fecha final es obligatoria';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] La fecha final es obligatoria';
       RETURN;
     END IF;
 
     IF COALESCE(_in_tipofac, 0) = 0 THEN
       _error_code := 'MC003';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El tipofac es obligatorio';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] El tipofac es obligatorio';
       RETURN;
     END IF;
 
     IF COALESCE(_in_indnorcor, 0) = 0 THEN
       _error_code := 'MC004';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El indnorcor es obligatorio';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] El indnorcor es obligatorio';
       RETURN;
     END IF;
 
     IF TRIM(COALESCE(_in_nuevo_estado, '')) = '' THEN
       _error_code := 'MC005';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El nuevo estado es obligatorio';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] El nuevo estado es obligatorio';
       RETURN;
     END IF;
 
@@ -67,9 +67,9 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
     UPDATE
         ${schema}.prp_movimiento
       SET
-        estado_con_switch = _in_nuevo_estado
+        estado_con_tecnocom = _in_nuevo_estado
       WHERE
-        estado_con_switch = 'PENDING' AND
+        estado_con_tecnocom = 'PENDING' AND
         tipofac = _in_tipofac AND
         indnorcor = _in_indnorcor AND
         fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS') AND
@@ -78,7 +78,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
      EXCEPTION
        WHEN OTHERS THEN
            _error_code := SQLSTATE;
-           _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] Error al actualizar movimientos pendientes. CAUSA ('|| SQLERRM ||')';
+           _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] Error al actualizar movimientos pendientes. CAUSA ('|| SQLERRM ||')';
        RETURN;
 END;
 $$ LANGUAGE plpgsql;
@@ -86,4 +86,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(VARCHAR, VARCHAR, NUMERIC, NUMERIC, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_no_conciliados_tecnocom_v10(VARCHAR, VARCHAR, NUMERIC, NUMERIC, VARCHAR);
