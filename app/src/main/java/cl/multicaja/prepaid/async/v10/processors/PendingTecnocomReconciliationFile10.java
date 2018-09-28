@@ -6,6 +6,7 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
+import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -97,13 +98,13 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
         if(originalMovement == null) {
           // Movimiento original no existe. Se agrega.
-          //TODO: Agregar movimiento
           PrepaidMovement10 movement10 = buildMovement(prepaidCard10.getIdUser(), pan, trx);
+          movement10.setConTecnocom(ConciliationStatusType.CONCILIADO);
           movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
           getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
 
-        //} else if(originalMovement.getEstado().equals("sadasd")) {
-          //Se verifica que no se ha conciliado anteriormente
+        } else if(ConciliationStatusType.CONCILIADO.equals(originalMovement.getConTecnocom())) {
+          log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
         } else {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             //TODO: Que hacer si no coincide?
@@ -117,20 +118,19 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               numberUtils.toInteger(trx.getClamon()),
               PrepaidMovementStatus.PROCESS_OK);
 
-            //todo: Actualizar estado de conciliacion Tecnocom.
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+              originalMovement.getId(),
+              ConciliationStatusType.CONCILIADO);
           }
         }
       } catch (Exception ex) {
         log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: lanzar excepcion?
+        //TODO: informar de error al procesar la transaccion?
       }
     }
   }
 
   public void validateTransactions(List<ReconciliationFileDetail> trxs) {
-    for (ReconciliationFileDetail trx : trxs) {
-      log.info(String.format("%s - %s", trx.getNumaut(), trx.toString()));
-    }
   }
 
   private PrepaidMovement10 buildMovement(Long userId, String pan, ReconciliationFileDetail batchTrx) {
