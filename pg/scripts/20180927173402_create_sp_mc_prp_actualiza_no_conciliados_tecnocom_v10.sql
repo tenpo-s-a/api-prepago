@@ -61,19 +61,19 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_tecnocom_v1
       RETURN;
     END IF;
 
-    _in_fecha_inicial = _in_fecha_inicial || ' 00:00:00:000';
-    _in_fecha_final = _in_fecha_final || ' 23:59:59:999';
+    _in_fecha_inicial = _in_fecha_inicial || '00000000';
+    _in_fecha_final = _in_fecha_final || '23595999';
 
     UPDATE
         ${schema}.prp_movimiento
       SET
         estado_con_tecnocom = _in_nuevo_estado
       WHERE
-        (estado_con_tecnocom = 'PENDING') AND
-        (tipofac = _in_tipofac) AND
-        (indnorcor = _in_indnorcor) AND
-        (fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYY-MM-DD HH24:MI:SS:MS')) AND
-        (fecha_creacion <= TO_TIMESTAMP(_in_fecha_final, 'YYYY-MM-DD HH24:MI:SS:MS'));
+        estado_con_tecnocom = 'PENDING' AND
+        tipofac = _in_tipofac AND
+        indnorcor = _in_indnorcor AND
+        fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS') AND
+        fecha_creacion <= TO_TIMESTAMP(_in_fecha_final, 'YYYYMMDDHH24MISSMS');
 
      EXCEPTION
        WHEN OTHERS THEN

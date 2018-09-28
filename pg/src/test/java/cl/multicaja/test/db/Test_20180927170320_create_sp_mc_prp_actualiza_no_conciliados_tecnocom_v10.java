@@ -31,8 +31,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
   {
     Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switch_v10.fillDb();
 
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
     Integer tipofac = 3001;
     Integer indnorcor = 1;
 
@@ -47,6 +47,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
     };
 
     Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
+
+    System.out.println("Msg error: " + resp.get("_error_msg"));
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
@@ -80,7 +82,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
   @Test
   public void updateTecnocomStatusNotOkByStartDateNull()throws SQLException {
-    String endDate = "2018-08-03";
+    String endDate = "20180803";
 
     Object[] params = {
       new NullParam(Types.VARCHAR),
@@ -99,7 +101,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
   @Test
   public void updateTecnocomStatusNotOkByEndDateNull()throws SQLException {
-    String startDate = "2018-08-03";
+    String startDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -118,8 +120,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
   @Test
   public void updateTecnocomStatusNotOkByTipoFacNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -138,8 +140,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
   @Test
   public void updateTecnocomStatusNotOkByIndNorCorNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -158,8 +160,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
   @Test
   public void updateTecnocomStatusNotOkByNewStateNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,

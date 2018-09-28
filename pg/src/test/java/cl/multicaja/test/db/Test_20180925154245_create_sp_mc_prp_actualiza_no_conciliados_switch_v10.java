@@ -32,8 +32,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   {
     fillDb();
 
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
     Integer tipofac = 3001;
     Integer indnorcor = 1;
 
@@ -81,7 +81,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
   @Test
   public void updateSwitchStatusNotOkByStartDateNull()throws SQLException {
-    String endDate = "2018-08-03";
+    String endDate = "20180803";
 
     Object[] params = {
       new NullParam(Types.VARCHAR),
@@ -100,7 +100,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
   @Test
   public void updateSwitchStatusNotOkByEndDateNull()throws SQLException {
-    String startDate = "2018-08-03";
+    String startDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -119,8 +119,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
   @Test
   public void updateSwitchStatusNotOkByTipoFacNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -139,8 +139,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
   @Test
   public void updateSwitchStatusNotOkByIndNorCorNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,
@@ -159,8 +159,8 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
   @Test
   public void updateSwitchStatusNotOkByNewStateNull()throws SQLException {
-    String startDate = "2018-08-03";
-    String endDate = "2018-08-03";
+    String startDate = "20180803";
+    String endDate = "20180803";
 
     Object[] params = {
       startDate,
