@@ -24,7 +24,7 @@ import javax.jms.Queue;
  * @autor vutreras
  */
 public class TestBaseUnitAsync extends TestContextHelper {
-  private static Log log = LogFactory.getLog(TestBaseUnit.class);
+  public static Log log = LogFactory.getLog(TestBaseUnit.class);
 
   @BeforeClass
   public static void beforeClass() throws Exception {

@@ -77,7 +77,7 @@ public class TestSftpServer {
   public void createDirectories() throws Exception {
     Map<String, Object> context = openChanel();
     ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-    createIfNotExists(channelSftp, "mastercard", "mastercard/T058", "mastercard/T058/done", "mastercard/T058/error");
+    createIfNotExists(channelSftp, "mastercard", "mastercard/T058", "mastercard/T058/done", "mastercard/T058/error","multicajared","multicajared/done","multicajared/error");
     channelSftp.exit();
     ((Session) context.get("session")).disconnect();
   }

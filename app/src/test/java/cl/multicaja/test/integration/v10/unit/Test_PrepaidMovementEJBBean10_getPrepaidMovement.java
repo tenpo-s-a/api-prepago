@@ -81,7 +81,7 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidMovement10 prepaidMovement1_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement2.getId());
     Assert.assertEquals("deben ser iguales", prepaidMovement2, prepaidMovement1_2);
 
-    PrepaidMovement10 prepaidMovement1_3 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement1_2.getIdTxExterno(),prepaidMovement1_2.getTipoMovimiento());
+    PrepaidMovement10 prepaidMovement1_3 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement1_2.getIdTxExterno(),prepaidMovement1_2.getTipoMovimiento(),prepaidMovement1_2.getIndnorcor());
     Assert.assertEquals("deben ser iguales",  prepaidMovement1_2,prepaidMovement1_3);
 
   }
