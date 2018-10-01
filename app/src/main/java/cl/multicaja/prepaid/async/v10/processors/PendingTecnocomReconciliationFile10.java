@@ -107,8 +107,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NOT_RECONCILED);
-            //TODO: como marcar para investigar?
+              ConciliationStatusType.NEED_VERIFICATION);
           } else {
 
             //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
@@ -163,8 +162,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NOT_RECONCILED);
-            //TODO: Investigar movimiento.
+              ConciliationStatusType.NEED_VERIFICATION);
           } else {
             switch (originalMovement.getEstado()) {
               case PROCESS_OK:
@@ -177,8 +175,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               case REJECTED:
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
-                  ConciliationStatusType.NOT_RECONCILED);
-                //TODO: Investigar movimiento.
+                  ConciliationStatusType.NEED_VERIFICATION);
                 break;
               case ERROR_TECNOCOM_REINTENTABLE:
               case ERROR_TIMEOUT_RESPONSE:
