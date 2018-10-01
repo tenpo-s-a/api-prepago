@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 
 public enum ConciliationStatusType {
 
-  PENDIENTE("PENDING"),
-  CONCILIADO("CONCILATE"),
-  NO_CONCILIADO("NO_CONCILIATE");
+  PENDING("PENDING"),
+  CONCILATE("CONCILATE"),
+  NO_CONCILIATE("NO_CONCILIATE");
 
   public String getValue() {
     return value;

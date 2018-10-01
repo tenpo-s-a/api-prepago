@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.helper;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.TecnocomReconciliationRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.test.integration.TestSuite;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
@@ -57,6 +58,10 @@ public class TestContextHelper extends TestBaseUnit {
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
       currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
 
+      TecnocomReconciliationRoute10 tecnocomReconciliationRoute10 = new TecnocomReconciliationRoute10();
+      tecnocomReconciliationRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      tecnocomReconciliationRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+
       /**
        * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
        */
@@ -65,7 +70,7 @@ public class TestContextHelper extends TestBaseUnit {
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
       usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
       */
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10);
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10, tecnocomReconciliationRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }

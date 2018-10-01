@@ -6,8 +6,6 @@ import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.List;
-
 public class Test_PrepaidMovementEJBBean10_updateStatusMovementConSwitch extends TestBaseUnit {
 
     @Test(expected = BadRequestException.class)
@@ -30,12 +28,12 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConSwitch extends
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
       Assert.assertNotNull("Debe existrie el movimiento",prepaidMovement10);
-      boolean bStatus = getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null,prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
+      boolean bStatus = getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null,prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIATE);
       Assert.assertTrue("Actualizado Correctamente",bStatus);
 
       PrepaidMovement10 prepaidMovement10_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       Assert.assertNotEquals("Deben Ser diferentes", prepaidMovement10, prepaidMovement10_2);
-      Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NO_CONCILIADO,prepaidMovement10_2.getConSwitch());
+      Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NO_CONCILIATE,prepaidMovement10_2.getConSwitch());
     }
 
 }

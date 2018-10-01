@@ -19,6 +19,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.lang.reflect.Type;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -55,10 +56,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
-      data.getConSwitch().toString(), //_estado_con_switch VARCHAR
-      data.getConTecnocom().toString(), //_estado_con_tecnocom VARCHAR
+      new InParam(data.getConSwitch().toString(), Types.VARCHAR), //_estado_con_switch VARCHAR
+      new InParam(data.getConTecnocom().toString(), Types.VARCHAR), //_estado_con_tecnocom VARCHAR
       //TODO REVISAR!
-      data.getOriginType().toString(), //_origen_movimiento VARCHAR
+      new InParam(data.getOriginType().toString(), Types.VARCHAR), //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -146,6 +147,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
 
+    return this.getPrepaidMovements(id, idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta,
+      clamon, indnorcor, tipofac, fecfac, numaut, null, null, null);
+  }
+
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                                     ConciliationStatusType estadoConSwitch, ConciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
+
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idMovimientoRef != null ? idMovimientoRef : new NullParam(Types.BIGINT),
@@ -153,10 +163,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       idTxExterno != null ? idTxExterno : new NullParam(Types.VARCHAR),
       tipoMovimiento != null ? tipoMovimiento.toString() : new NullParam(Types.VARCHAR),
       estado != null ? estado.toString() : new NullParam(Types.VARCHAR),
-      //TODO: REVISAR
-      new NullParam(Types.VARCHAR), // estado_con_switch
-      new NullParam(Types.VARCHAR), // estado_con_tecnocom
-      new NullParam(Types.VARCHAR), // origen_movimiento
+      estadoConSwitch != null ? estadoConSwitch.toString() : new NullParam(Types.VARCHAR), // estado_con_switch
+      estadoConTecnocom != null ? estadoConTecnocom.toString() : new NullParam(Types.VARCHAR), // estado_con_tecnocom
+      origen != null ? origen.toString() : new NullParam(Types.VARCHAR), // origen_movimiento
       cuenta != null ? cuenta : new NullParam(Types.VARCHAR),
       clamon != null ? clamon.getValue() : new NullParam(Types.NUMERIC),
       indnorcor != null ? indnorcor.getValue() : new NullParam(Types.NUMERIC),
@@ -175,6 +184,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
       p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
+      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
+      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
+      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
       p.setFechaCreacion((Timestamp) row.get("_fecha_creacion"));
       p.setFechaActualizacion((Timestamp) row.get("_fecha_actualizacion"));
       p.setCodent(String.valueOf(row.get("_codent")));
@@ -205,9 +217,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(numberUtils.toInteger(row.get("_linref")));
       p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
       p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
-      p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
-      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
-      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
 
       return p;
     };
