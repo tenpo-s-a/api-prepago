@@ -1,13 +1,21 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileHeader;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.CodigoPais;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -258,5 +266,47 @@ public class TecnocomFileHelper {
     }
 
     return file;
+  }
+
+  public PrepaidMovement10 buildMovement(Long userId, String pan, ReconciliationFileDetail batchTrx) {
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+
+    prepaidMovement.setIdMovimientoRef(null);
+    prepaidMovement.setIdPrepaidUser(userId);
+    prepaidMovement.setIdTxExterno(null);
+    prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
+    prepaidMovement.setMonto(batchTrx.getImpfac());
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setCodent(batchTrx.getCodent());
+    prepaidMovement.setCentalta(batchTrx.getCentalta());
+    prepaidMovement.setCuenta(batchTrx.getCuenta());
+    prepaidMovement.setClamon(CodigoMoneda.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getClamon())));
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
+    prepaidMovement.setTipofac(batchTrx.getTipoFac());
+    prepaidMovement.setFecfac(Date.valueOf(batchTrx.getFecfac()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(pan);
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(batchTrx.getImpfac());
+    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setNumaut(batchTrx.getNumaut());
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodcom(batchTrx.getCodcom());
+    prepaidMovement.setCodact(NumberUtils.getInstance().toInteger(batchTrx.getCodact()));
+    prepaidMovement.setImpliq(0L);
+    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setCodpais(CodigoPais.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCodpais())));
+    prepaidMovement.setNompob("");
+    prepaidMovement.setNumextcta(NumberUtils.getInstance().toInteger(batchTrx.getNumextcta()));
+    prepaidMovement.setNummovext(NumberUtils.getInstance().toInteger(batchTrx.getNummovext()));
+    prepaidMovement.setClamone(NumberUtils.getInstance().toInteger(batchTrx.getClamon()));
+    prepaidMovement.setTipolin(batchTrx.getTipolin());
+    prepaidMovement.setLinref(NumberUtils.getInstance().toInteger(batchTrx.getLinref()));
+    prepaidMovement.setNumbencta(1);
+    prepaidMovement.setNumplastico(0L);
+
+    return prepaidMovement;
   }
 }
