@@ -1026,6 +1026,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ConciliationStatusType.NOT_RECONCILED);
+    prepaidMovement.setConSwitch(ConciliationStatusType.NOT_RECONCILED);
+    prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;
   }

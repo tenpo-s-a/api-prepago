@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.helpers.tecnocom.model;
 
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.math.BigDecimal;
@@ -19,7 +20,7 @@ public class ReconciliationFileDetail {
 
   private String detail;
 
-  private final Set<TipoFactura> conciliableInvoiceTypes = new HashSet<>(Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
+  private final Set<TipoFactura> reconcilableInvoiceTypes = new HashSet<>(Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
     TipoFactura.ANULA_CARGA_TRANSFERENCIA,
     TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA,
     TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA,
@@ -33,12 +34,20 @@ public class ReconciliationFileDetail {
   private final ReconciliationFileLayout CUENTA = new ReconciliationFileLayout(128, 12, null);
   private final ReconciliationFileLayout PAN = new ReconciliationFileLayout(140, 22, null);
   private final ReconciliationFileLayout TIPOREG = new ReconciliationFileLayout(162, 2, null);
+  private final ReconciliationFileLayout CLAMON = new ReconciliationFileLayout(176, 3, null);
   private final ReconciliationFileLayout INDNORCOR = new ReconciliationFileLayout(209, 1, null);
   private final ReconciliationFileLayout TIPOFAC = new ReconciliationFileLayout(225, 4, null);
   private final ReconciliationFileLayout FECFAC = new ReconciliationFileLayout(259, 10, null);
   private final ReconciliationFileLayout IMPFAC = new ReconciliationFileLayout(344, 17, 2);
   private final ReconciliationFileLayout NUMAUT = new ReconciliationFileLayout(370, 6, null);
+  private final ReconciliationFileLayout CODCOM = new ReconciliationFileLayout(376, 15, null);
+  private final ReconciliationFileLayout CODACT = new ReconciliationFileLayout(418, 4, null);
+  private final ReconciliationFileLayout CODPAIS = new ReconciliationFileLayout(531, 3, null);
   private final ReconciliationFileLayout ORIGENOPE = new ReconciliationFileLayout(600, 4, null);
+  private final ReconciliationFileLayout NUMMOVEXT = new ReconciliationFileLayout(769, 7, null);
+  private final ReconciliationFileLayout NUMEXTCTA = new ReconciliationFileLayout(776, 3, null);
+  private final ReconciliationFileLayout TIPOLIN = new ReconciliationFileLayout(942, 4, null);
+  private final ReconciliationFileLayout LINREF = new ReconciliationFileLayout(988, 8, null);
 
 
   public ReconciliationFileDetail() {
@@ -72,6 +81,10 @@ public class ReconciliationFileDetail {
     return this.detail.substring(this.TIPOREG.getStart(), this.TIPOREG.getEnd());
   }
 
+  public String getClamon() {
+    return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
+  }
+
   private String getIndnorcor() {
     return this.detail.substring(this.INDNORCOR.getStart(), this.INDNORCOR.getEnd());
   }
@@ -96,16 +109,67 @@ public class ReconciliationFileDetail {
     return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal());
   }
 
+  public String getCodcom() {
+    return this.detail.substring(this.CODCOM.getStart(), this.CODCOM.getEnd());
+  }
+
+  public String getCodact() {
+    return this.detail.substring(this.CODACT.getStart(), this.CODACT.getEnd());
+  }
+
+  public String getCodpais() {
+    return this.detail.substring(this.CODPAIS.getStart(), this.CODPAIS.getEnd());
+  }
+
   public String getOrigenope() {
     return this.detail.substring(this.ORIGENOPE.getStart(), this.ORIGENOPE.getEnd());
   }
+
+  public String getNummovext() {
+    return this.detail.substring(this.NUMMOVEXT.getStart(), this.NUMMOVEXT.getEnd());
+  }
+
+  public String getNumextcta() {
+    return this.detail.substring(this.NUMEXTCTA.getStart(), this.NUMEXTCTA.getEnd());
+  }
+
+  public String getTipolin() {
+    return this.detail.substring(this.TIPOLIN.getStart(), this.TIPOLIN.getEnd());
+  }
+
+  public String getLinref() {
+    return this.detail.substring(this.LINREF.getStart(), this.LINREF.getEnd());
+  }
+
 
   public Boolean isFromSat() {
     return SAT_ORIGIN.equals(this.getOrigenope());
   }
 
-  public Boolean isReconciliable() {
-    return conciliableInvoiceTypes.stream().anyMatch(type -> type.equals(this.getTipoFac()));
+  public Boolean isReconcilable() {
+    return reconcilableInvoiceTypes.stream().anyMatch(type -> type.equals(this.getTipoFac()));
+  }
+
+  public PrepaidMovementType getMovementType() {
+    PrepaidMovementType type = null;
+    switch (this.getTipoFac()) {
+      case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case CARGA_TRANSFERENCIA:
+      case ANULA_CARGA_TRANSFERENCIA:
+        type = PrepaidMovementType.TOPUP;
+        break;
+      case RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case RETIRO_TRANSFERENCIA:
+      case ANULA_RETIRO_TRANSFERENCIA:
+        type = PrepaidMovementType.WITHDRAW;
+        break;
+      case COMISION_APERTURA:
+        type = PrepaidMovementType.ISSUANCE_FEE;
+    }
+
+    return type;
   }
 
   private BigDecimal getScaledValue(String currencyValue, Integer decimal) {
@@ -131,7 +195,7 @@ public class ReconciliationFileDetail {
       "impfac='" + this.getImpfac() + '\'' +
       "origenope='" + this.getOrigenope() + '\'' +
       "isFromSat='" + this.isFromSat() + '\'' +
-      "isReconciliable='" + this.isReconciliable() + '\'' +
+      "isReconcilable='" + this.isReconcilable() + '\'' +
       '}';
   }
 }
