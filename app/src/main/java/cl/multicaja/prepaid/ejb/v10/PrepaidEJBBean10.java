@@ -484,7 +484,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-    } else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
+    }
+    //TODO: manejar el TIME_OUT_CONECTION como error no reintentable (Eliminar este if)
+    else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
       /**
        * Esto es para marcar cuando no pude obtener el response de un Retiro.
        */
@@ -501,7 +503,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
-    //TODO: que hacer si el retiro devuelve un error de TIME_OUT_RESPONSE?
+    //TODO: si el retiro devuelve un error de TIME_OUT_RESPONSE iniciar inmediatamente la reversa del mismo
     //else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {}
     else {
       //Colocar el movimiento en error
@@ -525,6 +527,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //TODO: actualizar el status de movimiento a REJECTED
+      //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
