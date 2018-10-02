@@ -7,15 +7,20 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
@@ -40,18 +45,27 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         log.info("Proccess file name : " + fileName);
         try{
           ReconciliationFile file = TecnocomFileHelper.getInstance().validateFile(inputStream);
+
+          if(file.isSuspicious()) {
+            String msg = String.format("Error processing file [%s]. File seems suspicious", fileName);
+            log.error(msg);
+            processErrorSuspiciousFile(fileName);
+            throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+          }
+
           if(file != null) {
-            insertOrUpdateManualTrx(file.getDetails()
+            insertOrUpdateManualTrx(fileName, file.getDetails()
               .stream()
               .filter(detail -> detail.isFromSat())
               .collect(Collectors.toList())
             );
 
-            validateTransactions(file.getDetails()
+            validateTransactions(fileName, file.getDetails()
               .stream()
               .filter(detail -> !detail.isFromSat())
               .collect(Collectors.toList())
             );
+            //TODO: colocar los movimientos no informados en status NOT_RECONCILED
           } else {
             String msg = String.format("Error processing file [%s]", fileName);
             log.error(msg);
@@ -70,7 +84,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
    * Insertar en la tabla prp_movimientos, las transcacciones realizadas de forma manual por SAT.
    * @param trxs
    */
-  public void insertOrUpdateManualTrx(List<ReconciliationFileDetail> trxs) {
+  private void insertOrUpdateManualTrx(String fileName, List<ReconciliationFileDetail> trxs) {
     for (ReconciliationFileDetail trx : trxs) {
       try{
         //Se obtiene el pan
@@ -82,9 +96,10 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getContrato());
 
         if(prepaidCard10 == null) {
-          //TODO: Que hacer si la tarjeta es null?
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", trx.getContrato());
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
           log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
@@ -128,13 +143,16 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
         }
       } catch (Exception ex) {
-        log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: informar de error al procesar la transaccion?
+        log.error(String.format("Error processing transaction [%s]", trx.toString()));
+        if(StringUtils.isBlank(trx.getErrorDetails())) {
+          trx.setErrorDetails(ex.getMessage());
+        }
+        processErrorTrx(fileName, trx);
       }
     }
   }
 
-  public void validateTransactions(List<ReconciliationFileDetail> trxs) {
+  private void validateTransactions(String fileName, List<ReconciliationFileDetail> trxs) {
     for (ReconciliationFileDetail trx : trxs) {
       try{
         //Se obtiene el pan
@@ -146,9 +164,10 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getContrato());
 
         if(prepaidCard10 == null) {
-          //TODO: Que hacer si la tarjeta es null?
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", trx.getContrato());
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
           log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
@@ -157,7 +176,14 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
 
         if(originalMovement == null) {
-          //TODO: Investigar movimiento
+          TipoFactura tipofac = trx.getTipoFac();
+          String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
+            prepaidCard10.getIdUser(), tipofac.getCode(), tipofac.getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+
         } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
@@ -199,9 +225,32 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         }
       } catch (Exception ex) {
         log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: informar de error al procesar la transaccion?
+        if(StringUtils.isBlank(trx.getErrorDetails())) {
+          trx.setErrorDetails(ex.getMessage());
+        }
+        processErrorTrx(fileName, trx);
       }
     }
+  }
+
+  /* Procesar errores*/
+
+  private void processErrorSuspiciousFile(String fileName) {
+    log.info(String.format("processErrorSuspiciousFile - %s", fileName));
+
+    Map<String, Object> templateData = new HashMap<String, Object>();
+    templateData.put("fileName", fileName);
+    //TODO: definir template de correo
+    //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
+  }
+
+  private void processErrorTrx(String fileName, ReconciliationFileDetail trx) {
+    log.info("processErrorTrx");
+    //TODO: definir como informar las transacciones
+    Map<String, Object> templateData = new HashMap<String, Object>();
+    //templateData.put("fileName", fileName);
+    //TODO: definir template de correo
+    //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
   }
 
 
