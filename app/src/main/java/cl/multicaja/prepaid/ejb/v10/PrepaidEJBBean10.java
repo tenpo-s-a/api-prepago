@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.BloqueoDesbloqueoDTO;
@@ -84,6 +85,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private UserClient userClient;
 
   private EncryptUtil encryptUtil;
+
+  private ParametersUtil parametersUtil;
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -160,6 +163,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       encryptUtil = EncryptUtil.getInstance();
     }
     return encryptUtil;
+  }
+
+  public ParametersUtil getParameterUtil() {
+    if(parametersUtil == null) {
+      parametersUtil = ParametersUtil.getInstance();
+    }
+    return parametersUtil;
   }
 
   public void setEncryptUtil(EncryptUtil encryptUtil) {
@@ -990,7 +1000,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     String codent = null;
     try {
-      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+      codent = getParameterUtil().getString("api-prepaid", "cod_entidad", "v10");
     } catch (SQLException e) {
       log.error("Error al cargar parametro cod_entidad");
       codent = getConfigUtils().getProperty("tecnocom.codEntity");
@@ -1379,13 +1389,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener tarjeta
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
-    //Obtener ultimo movimiento
-    PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
-    PrepaidMovementStatus.PENDING,
-    PrepaidMovementStatus.IN_PROCESS);
-
     if(prepaidCard == null) {
+      //Obtener ultimo movimiento
       // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
+      PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
+        PrepaidMovementStatus.PENDING,
+        PrepaidMovementStatus.IN_PROCESS);
       if(movement != null){
         throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
       }else {

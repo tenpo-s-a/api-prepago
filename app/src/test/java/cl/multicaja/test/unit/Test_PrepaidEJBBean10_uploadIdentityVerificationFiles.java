@@ -3,6 +3,7 @@ package cl.multicaja.test.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.ejb.v10.FilesEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -33,6 +34,9 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
   @Spy
   private UserClient userClient;
+
+  @Spy
+  private FilesEJBBean10 filesEJBBean10;
 
   @InjectMocks
   @Spy
@@ -293,12 +297,14 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setUserIdMc(Long.MAX_VALUE);
 
-    Mockito.doReturn(user).when(userClient).getUserById(Mockito.any(), Mockito.anyLong());
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
-    Mockito.doReturn(user2).when(userClient).updateNameStatus(Mockito.any(), Mockito.anyLong());
+    Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
-    //Mockito.doReturn(f).when(filesEJBBean10).createUserFile(Mockito.any(), Mockito.anyLong(), Mockito.nullable(Long.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.notNull(), Mockito.notNull());
+    Mockito.doReturn(user2).when(userClient).updateNameStatus(headers, Long.MAX_VALUE);
+
+
 
     Map<String, UserFile> files = new HashMap<>();
     UserFile idFront = new UserFile();
@@ -315,6 +321,12 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     selfie.setMimeType("dgdsgdsg");
     selfie.setLocation("werewrewr");
     files.put("USER_SELFIE", selfie);
+
+    Mockito
+      .doReturn(idFront)
+      .doReturn(idBack)
+      .doReturn(selfie)
+      .when(filesEJBBean10).createUserFile(Mockito.any(), Mockito.anyLong(), Mockito.nullable(Long.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.notNull());
 
     User u = prepaidEJBBean10.uploadIdentityVerificationFiles(headers, Long.MAX_VALUE, files);
 
