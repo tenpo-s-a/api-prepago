@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
 
 @Stateless
 @LocalBean
@@ -55,10 +56,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
-      data.getConSwitch().toString(), //_estado_con_switch VARCHAR
-      data.getConTecnocom().toString(), //_estado_con_tecnocom VARCHAR
+      data.getConSwitch().getValue(), //_estado_con_switch VARCHAR
+      data.getConTecnocom().getValue(), //_estado_con_tecnocom VARCHAR
       //TODO REVISAR!
-      data.getOriginType().toString(), //_origen_movimiento VARCHAR
+      data.getOriginType().getValue(), //_origen_movimiento VARCHAR
       data.getCodent(),//_codent VARCHAR
       data.getCentalta(),//_centalta VARCHAR
       data.getCuenta(),//_cuenta VARCHAR
@@ -140,6 +141,95 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
     this.updatePrepaidMovement(null, id, null, null, null, null, null, null, status);
+  }
+
+  @Override
+  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+    if(startDate == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
+    }
+
+    if(endDate == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "endDate"));
+    }
+
+    if(tipofac == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
+    }
+
+    if(indnorcor == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indnorcor"));
+    }
+
+    if(status == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    Object[] params = {
+      startDate,
+      endDate,
+      new InParam(tipofac.getCode(), Types.NUMERIC),
+      new InParam(indnorcor.getValue(), Types.NUMERIC),
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_no_conciliados_switch_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updatePendingPrepaidMovementsSwitchStatus resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  public void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+    if(startDate == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
+    }
+
+    if(endDate == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "endDate"));
+    }
+
+    if(tipofac == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
+    }
+
+    if(indnorcor == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indnorcor"));
+    }
+
+    if(status == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    String allowedFormat = "\\d{8}";
+    if (!startDate.matches(allowedFormat)) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "startDate"));
+    }
+
+    if (!endDate.matches(allowedFormat)) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "endDate"));
+    }
+
+
+    Object[] params = {
+      startDate,
+      endDate,
+      new InParam(tipofac.getCode(), Types.NUMERIC),
+      new InParam(indnorcor.getValue(), Types.NUMERIC),
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_no_conciliados_tecnocom_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updatePendingPrepaidMovementsTecnocomStatus resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
   }
 
   @Override
@@ -305,6 +395,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+
   public PrepaidMovement10 getPrepaidMovementByIdTxExterno(String idTxExterno,PrepaidMovementType prepaidMovementType,IndicadorNormalCorrector indicadorNormalCorrector) throws Exception {
     if(idTxExterno == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTxExterno"));
@@ -312,6 +403,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, null, idTxExterno, prepaidMovementType, null, null, null, indicadorNormalCorrector, null,null);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+
   @Override
   public Boolean isFirstTopup(Long idPrepaidUser) throws Exception {
     if(idPrepaidUser == null){
@@ -325,15 +417,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return  !(movements != null && !movements.isEmpty());
   }
 
-
-
-
-  public boolean updateStatusMovementConSwitch(Map<String, Object> header,Long movementId, ConciliationStatusType status) throws Exception {
-
-    if(movementId == null) {
+  @Override
+  public boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception {
+    if (movementId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
     }
-    if(status == null){
+    if (status == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
@@ -347,12 +436,36 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_switch_v10",params);
 
     if (!"0".equals(resp.get("_error_code"))) {
-        log.error("updateStatusMovementConSwitch resp: " + resp);
+      log.error("updateStatusMovementConSwitch resp: " + resp);
       return false;
     }
-
     return true;
   }
+
+  @Override
+  public void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception {
+    if (movementId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
+    }
+    if (status == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    Object[] params = {
+      movementId,
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_tecnocom_v10",params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updateStatusMovementConTecnocom resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
 
   public PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception {
     if(idPrepaidUser == null){

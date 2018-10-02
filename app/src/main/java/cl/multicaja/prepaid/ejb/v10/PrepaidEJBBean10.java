@@ -998,6 +998,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setConSwitch(ConciliationStatusType.PENDIENTE);
+    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDIENTE);
+    prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
