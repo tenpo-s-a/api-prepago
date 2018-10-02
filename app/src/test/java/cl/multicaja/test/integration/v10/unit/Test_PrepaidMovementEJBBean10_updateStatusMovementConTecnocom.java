@@ -32,7 +32,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConTecnocom exten
 
     Assert.assertNotNull("Debe existir el movimiento",prepaidMovement10);
     try {
-      getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
+      getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
     }
     catch (Exception e){
       Assert.fail("Error al actualizar el estado con tecnocom");
@@ -40,7 +40,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConTecnocom exten
 
     PrepaidMovement10 prepaidMovement10_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
     Assert.assertNotEquals("Deben Ser diferentes", prepaidMovement10, prepaidMovement10_2);
-    Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NO_CONCILIADO,prepaidMovement10_2.getConTecnocom());
+    Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NOT_RECONCILED,prepaidMovement10_2.getConTecnocom());
   }
 
 }

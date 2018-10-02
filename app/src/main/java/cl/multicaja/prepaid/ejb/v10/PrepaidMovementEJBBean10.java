@@ -495,28 +495,4 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
-
-  public Boolean updateStatusMovementConTecnocom(Map<String, Object> header,Long movementId, ConciliationStatusType status) throws Exception {
-    if(movementId == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
-    }
-    if(status == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      movementId,
-      status.getValue(),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_tecnocom_v10",params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updateStatusMovementConSwitch resp: " + resp);
-      return Boolean.FALSE;
-    }
-    return Boolean.TRUE;
-  }
 }

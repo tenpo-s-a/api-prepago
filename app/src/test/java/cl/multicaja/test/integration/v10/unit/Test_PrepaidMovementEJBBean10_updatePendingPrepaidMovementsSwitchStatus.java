@@ -97,11 +97,11 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-07-05 11:59:59", TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.CORRECTORA.getValue());
 
-    prepaidMovement10.setConSwitch(ConciliationStatusType.CONCILIADO);
+    prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-07-05 14:06:13", TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
 
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180705", "20180705", TipoFactura.CARGA_TRANSFERENCIA, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NO_CONCILIADO);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180705", "20180705", TipoFactura.CARGA_TRANSFERENCIA, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
 
     List resultList = searchAllMovements();
 
@@ -110,6 +110,8 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     Timestamp startDateTs = Timestamp.valueOf("2018-07-05 00:00:00");
     Timestamp endDateTs = Timestamp.valueOf("2018-07-05 23:59:59");
 
+    int notReconciledCount = 0;
+
     for (Object object: resultList) {
       Map<String, Object> movement = (Map<String, Object>) object;
       Timestamp movementCreationDate = (Timestamp) movement.get("fecha_creacion");
@@ -117,11 +119,12 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
       String switchStatus = (String) movement.get("estado_con_switch");
 
-      if (switchStatus.equals(ConciliationStatusType.NO_CONCILIADO.getValue())) {
+      if (switchStatus.equals(ConciliationStatusType.NOT_RECONCILED.getValue())) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);
         Assert.assertEquals("Debe tener indnorcor " + indnorcor, indnorcor, movementIndNorCor);
+        notReconciledCount++;
       }
       else {
         boolean excludedFromDates = movementCreationDate.before(startDateTs) || movementCreationDate.after(endDateTs);
@@ -130,6 +133,8 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
         Assert.assertTrue("Debe estar fuera de fecha, distinto tipofac o distinto indnorcor.", excludedFromDates || wrongTipoFac || wrongIndNorCor);
       }
     }
+
+    Assert.assertEquals("Deben haber 5 movimientos no conciliados", 5, notReconciledCount);
   }
 
   static public void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {

@@ -43,15 +43,15 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
       RETURN;
     END IF;
 
-    IF _in_tipofac IS NULL THEN
+    IF COALESCE(_in_tipofac, 0) = 0 THEN
       _error_code := 'MC003';
       _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El tipofac es obligatorio';
       RETURN;
     END IF;
 
-    IF _in_indnorcor IS NULL THEN
+    IF _in_indnorcor != 0 AND _in_indnorcor != 1 THEN
       _error_code := 'MC004';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El indnorcor es obligatorio';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El indnorcor debe ser 0 o 1';
       RETURN;
     END IF;
 
@@ -60,12 +60,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
       _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El nuevo estado es obligatorio';
       RETURN;
     END IF;
-
-    /*
-    _error_code := 'HOLA';
-    _error_msg := 'Recibi estos valores: ' || _in_tipofac || ',' || _in_indnorcor || ',' || _in_fecha_inicial || ',' || _in_fecha_final || ',' || _in_nuevo_estado;
-    RETURN;
-    */
 
     _in_fecha_inicial = _in_fecha_inicial || '00000000';
     _in_fecha_final = _in_fecha_final || '23595999';
