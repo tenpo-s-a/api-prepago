@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.helper.sftp;
 
-import cl.multicaja.prepaid.helpers.MastercardFileHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import com.jcraft.jsch.*;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
@@ -19,18 +19,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class TestSftpServer {
+/**
+ * @author abarazarte
+ **/
+public class TestTecnocomSftpServer {
 
-  private static TestSftpServer INSTANCE;
+  private static TestTecnocomSftpServer INSTANCE;
   private final SshServer sshd;
   public static String BASE_DIR = "src/test/resources/";
   private String HOST_NAME = "localhost";
-  private final Integer PORT = 7001;
+  private final Integer PORT = 7002;
 
   private String user = "test";
   private String pass = "test";
 
-  private TestSftpServer() {
+  private TestTecnocomSftpServer() {
     sshd = SshServer.setUpDefaultServer();
     sshd.setPort(PORT);
     sshd.setHost(HOST_NAME);
@@ -55,15 +58,15 @@ public class TestSftpServer {
 
   private static void createInstance() {
     if (INSTANCE == null) {
-      synchronized(MastercardFileHelper.class) {
+      synchronized(TecnocomFileHelper.class) {
         if (INSTANCE == null) {
-          INSTANCE = new TestSftpServer();
+          INSTANCE = new TestTecnocomSftpServer();
         }
       }
     }
   }
 
-  public static TestSftpServer getInstance() {
+  public static TestTecnocomSftpServer getInstance() {
     if (INSTANCE == null) {
       createInstance();
     }
@@ -77,7 +80,7 @@ public class TestSftpServer {
   public void createDirectories() throws Exception {
     Map<String, Object> context = openChanel();
     ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-    createIfNotExists(channelSftp, "mastercard", "mastercard/T058", "mastercard/T058/done", "mastercard/T058/error","multicajared","multicajared/done","multicajared/error");
+    createIfNotExists(channelSftp, "tecnocom", "tecnocom/done", "tecnocom/error", "tecnocom/upload");
     channelSftp.exit();
     ((Session) context.get("session")).disconnect();
   }
@@ -118,5 +121,4 @@ public class TestSftpServer {
     context.put("channel", channel);
     return context;
   }
-
 }

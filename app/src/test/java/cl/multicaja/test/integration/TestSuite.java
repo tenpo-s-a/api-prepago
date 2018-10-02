@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.http.HttpError;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.test.integration.v10.helper.sftp.TestSftpServer;
+import cl.multicaja.test.integration.v10.helper.sftp.TestTecnocomSftpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
@@ -36,6 +37,8 @@ public class TestSuite extends TestSuiteBase {
     System.setProperty("project.artifactId", "api-prepaid");
     TestSftpServer.getInstance().start();
     TestSftpServer.getInstance().createDirectories();
+    TestTecnocomSftpServer.getInstance().start();
+    TestTecnocomSftpServer.getInstance().createDirectories();
     testServer.start();
   }
 
@@ -44,6 +47,7 @@ public class TestSuite extends TestSuiteBase {
    */
   public static void stopServer() throws Exception {
     TestSftpServer.getInstance().end();
+    TestTecnocomSftpServer.getInstance().end();
     testServer.stop();
   }
 

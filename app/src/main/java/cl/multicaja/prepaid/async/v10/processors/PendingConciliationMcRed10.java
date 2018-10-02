@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
@@ -34,10 +35,13 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
         log.error(exchange.getIn().getBody());
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
+        log.info("Filename: "+fileName);
         List<ConciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
         if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
+          log.info("IN rendicion_cargas_mcpsa_mc");
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(26, 35);
+          log.info("OUT rendicion_cargas_mcpsa_mc");
         } else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
           String sFecha = fileName.substring(37, 46);
@@ -61,23 +65,25 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
      try {
        for (ConciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
          PrepaidMovement10 prepaidMovement10 = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
+         log.info(prepaidMovement10);
          if (prepaidMovement10 == null) {
            log.error("No conciliado");
            //Todo: Agregar Movimiento y marcar como a investigar ya que no deberia no existir en nuestra tabla.
            continue;
+         }else if (!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.PENDING.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.IN_PROCESS.equals(prepaidMovement10.getEstado())) {
+           log.error("No Conciliado x status: "+prepaidMovement10.getEstado());
+           getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
 
-         }else if (!prepaidMovement10.getEstado().equals(PrepaidMovementStatus.PROCESS_OK)||!prepaidMovement10.getEstado().equals(PrepaidMovementStatus.PENDING)||!prepaidMovement10.getEstado().equals(PrepaidMovementStatus.IN_PROCESS)) {
-           getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
            continue;
          }
          else {
             if (!recTmp.getAmount().equals(prepaidMovement10.getMonto().longValue())) {
               log.error("No conciliado");
-              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
+              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
               continue;
             }
             log.info("Conciliado");
-            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.CONCILIADO);
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.RECONCILED);
          }
        }
      }catch (Exception e){
@@ -103,6 +109,7 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
       lstReconciliationMcRed10 = new ArrayList<>();
 
       while ((record = csvReader.readNext()) != null) {
+        log.debug(Arrays.toString(record));
         ConciliationMcRed10 conciliationMcRed10 = new ConciliationMcRed10();
         conciliationMcRed10.setMcCode(record[0]);
         conciliationMcRed10.setDateTrx(record[1]);
