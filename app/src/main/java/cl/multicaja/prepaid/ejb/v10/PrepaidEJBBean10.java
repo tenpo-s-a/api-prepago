@@ -1,11 +1,16 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -23,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -63,6 +69,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Inject
   private PrepaidTopupDelegate10 delegate;
+
+  @Inject
+  private ReprocesQueueDelegate10 delegateReprocesQueue;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJB10;
@@ -1849,4 +1858,51 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Actualizar el nameStatus a IN_REVIEW
     return getUserClient().updateNameStatus(headers, user.getId());
   }
+
+  public void reprocesQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
+
+    if(reprocesQueue == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));
+    }
+    if(reprocesQueue.getIdQueue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue.getIdQueue()"));
+    }
+    if(reprocesQueue.getLastQueue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue.getLastQueue()"));
+    }
+
+    switch (reprocesQueue.getLastQueue()){
+      case TOPUP:{
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInTopupErrorQueue(reprocesQueue.getIdQueue());
+
+        break;
+      }
+      case WITHDRAWAL:{
+
+        break;
+      }
+      case SEND_MAIL:{
+
+        break;
+      }
+      case CREATE_CARD:{
+
+        break;
+      }
+      case REVERSE_TOPUP:{
+
+        break;
+      }
+      case REVERSE_WITHDRAWAL:{
+
+        break;
+      }
+      case PENDING_EMISSION:{
+
+        break;
+      }
+    }
+
+  }
+
 }
