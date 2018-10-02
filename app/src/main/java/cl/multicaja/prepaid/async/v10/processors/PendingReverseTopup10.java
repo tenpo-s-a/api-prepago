@@ -129,6 +129,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
             // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
+              //TODO: la actualizacion del status del movimiento original a REVERSED deberia ser en el status de negocio
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
               req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
@@ -141,9 +142,10 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.error("Error al confirmar reversa en CDT");
               }
               return req;
-            }else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
+            } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
               if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
                 log.debug("********** Reversa de retiro ya existia **********");
+                //TODO: la actualizacion del status del movimiento original a REVERSED deberia ser en el status de negocio
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REVERSED);
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
                 CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L, CdtTransactionType.REVERSA_CARGA);
@@ -174,8 +176,9 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovementReverse().getId(), status);
               data.getPrepaidMovementReverse().setEstado(status);
               return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
-            }  //Todo: Cambiar estado reversa a no realizado
+            }
           }
+          //TODO: Si la reversa no necesita ser ejecutadala, actualizar status
         }catch (Exception e){
           e.printStackTrace();
           log.error(String.format("Error desconocido al realizar carga %s",e.getMessage()));

@@ -72,17 +72,18 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
            continue;
          }else if (!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.PENDING.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.IN_PROCESS.equals(prepaidMovement10.getEstado())) {
            log.error("No Conciliado x status: "+prepaidMovement10.getEstado());
-           getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
+           getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
+
            continue;
          }
          else {
             if (!recTmp.getAmount().equals(prepaidMovement10.getMonto().longValue())) {
               log.error("No conciliado");
-              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NO_CONCILIADO);
+              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
               continue;
             }
             log.info("Conciliado");
-            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.CONCILIADO);
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.RECONCILED);
          }
        }
      }catch (Exception e){

@@ -470,7 +470,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   * CREA TARJETA ESTADO PENDIENTE
+   * CREA TARJETA ESTADO PENDING
    * @param prepaidUser
    * @return
    * @throws Exception
@@ -484,7 +484,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   * CREA TARJETA ESTADO PENDIENTE
+   * CREA TARJETA ESTADO PENDING
    * @return
    * @throws Exception
    */
@@ -891,8 +891,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDIENTE);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDIENTE);
+    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;
@@ -958,8 +958,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDIENTE);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDIENTE);
+    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     return prepaidMovement;
   }
@@ -1036,8 +1036,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDIENTE);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDIENTE);
+    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;

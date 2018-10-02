@@ -6,9 +6,7 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.*;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -96,31 +94,113 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
         if(originalMovement == null) {
           // Movimiento original no existe. Se agrega.
-          //TODO: Agregar movimiento
+          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
+          movement10.setConTecnocom(ConciliationStatusType.RECONCILED);
+          movement10.setConSwitch(ConciliationStatusType.PENDING);
+          movement10.setOriginType(MovementOriginType.SAT);
+          movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+          movement10.setIdMovimientoRef(Long.valueOf(0));
+          movement10.setIdTxExterno("");
+          getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
 
-
-        //} else if(originalMovement.getEstado().equals("sadasd")) {
-          //Se verifica que no se ha conciliado anteriormente
-        } else {
+        } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
-            //TODO: Que hacer si no coincide?
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+              originalMovement.getId(),
+              ConciliationStatusType.NEED_VERIFICATION);
           } else {
-            //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
-            //todo: Actualizar estado de conciliacion Tecnocom.
+            //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
+              trx.getCentalta(),
+              trx.getCuenta(),
+              numberUtils.toInteger(trx.getNumextcta()),
+              numberUtils.toInteger(trx.getNummovext()),
+              numberUtils.toInteger(trx.getClamon()),
+              PrepaidMovementStatus.PROCESS_OK);
+
+            //Actualiza el estado_con_tecnocom a conciliado
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+              originalMovement.getId(),
+              ConciliationStatusType.RECONCILED);
           }
+        } else {
+          log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
         }
       } catch (Exception ex) {
         log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: lanzar excepcion?
+        //TODO: informar de error al procesar la transaccion?
       }
     }
   }
 
   public void validateTransactions(List<ReconciliationFileDetail> trxs) {
     for (ReconciliationFileDetail trx : trxs) {
-      log.info(String.format("%s - %s", trx.getNumaut(), trx.toString()));
+      try{
+        //Se obtiene el pan
+        String pan = Utils.replacePan(trx.getPan());
+
+        //Se busca la tarjeta correspondiente al movimiento
+        PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null,
+          pan,
+          trx.getContrato());
+
+        if(prepaidCard10 == null) {
+          //TODO: Que hacer si la tarjeta es null?
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", trx.getContrato());
+          log.error(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        }
+
+        //Se busca el movimiento
+        PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
+          trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
+
+        if(originalMovement == null) {
+          //TODO: Investigar movimiento
+        } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
+          if(!originalMovement.getMonto().equals(trx.getImpfac())){
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+              originalMovement.getId(),
+              ConciliationStatusType.NEED_VERIFICATION);
+          } else {
+            switch (originalMovement.getEstado()) {
+              case PROCESS_OK:
+                getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+                  originalMovement.getId(),
+                  ConciliationStatusType.RECONCILED);
+                break;
+              case PENDING:
+              case IN_PROCESS:
+              case REJECTED:
+                getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+                  originalMovement.getId(),
+                  ConciliationStatusType.NEED_VERIFICATION);
+                break;
+              case ERROR_TECNOCOM_REINTENTABLE:
+              case ERROR_TIMEOUT_RESPONSE:
+              case ERROR_TIMEOUT_CONEXION:
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
+                  trx.getCentalta(),
+                  trx.getCuenta(),
+                  numberUtils.toInteger(trx.getNumextcta()),
+                  numberUtils.toInteger(trx.getNummovext()),
+                  numberUtils.toInteger(trx.getClamon()),
+                  PrepaidMovementStatus.PROCESS_OK);
+
+                getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+                  originalMovement.getId(),
+                  ConciliationStatusType.RECONCILED);
+                break;
+            }
+          }
+        } else  {
+          log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
+        }
+      } catch (Exception ex) {
+        log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
+        //TODO: informar de error al procesar la transaccion?
+      }
     }
   }
 
