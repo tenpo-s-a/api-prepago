@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -9,8 +8,10 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -28,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -1878,37 +1878,43 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     switch (reprocesQueue.getLastQueue()){
-      case TOPUP:{
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInTopupErrorQueue(reprocesQueue.getIdQueue());
-
+      case TOPUP: {
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_TOPUP_RESP);
+        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case WITHDRAWAL:{
-
+      case WITHDRAWAL: {
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_TOPUP_RESP);
+        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case SEND_MAIL:{
-
+      case SEND_MAIL: {
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
+        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case CREATE_CARD:{
-
+      case CREATE_CARD: {
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
+        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case REVERSE_TOPUP:{
-
+      case PENDING_EMISSION: {
+        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_EMISSION_RESP);
+        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_EMISSION_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case REVERSE_WITHDRAWAL:{
-
+      case REVERSE_TOPUP: {
+        ExchangeData<PrepaidReverseData10> data = delegateReprocesQueue.searchInErroReverse(reprocesQueue.getIdQueue(), TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_RESP);
+        delegateReprocesQueue.redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
-      case PENDING_EMISSION:{
-
+      case REVERSE_WITHDRAWAL: {
+        ExchangeData<PrepaidReverseData10> data = delegateReprocesQueue.searchInErroReverse(reprocesQueue.getIdQueue(),TransactionReversalRoute10.ERROR_REVERSAL_WITHDRAW_RESP);
+        delegateReprocesQueue.redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ,reprocesQueue.getIdQueue(), data);
         break;
       }
     }
-
   }
+
 
 }
