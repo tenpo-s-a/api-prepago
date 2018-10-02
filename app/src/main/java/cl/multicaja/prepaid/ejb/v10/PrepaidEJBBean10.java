@@ -83,6 +83,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private UserClient userClient;
 
+  private EncryptUtil encryptUtil;
+
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
   }
@@ -151,6 +153,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Map<String, Object> map = new HashMap<>();
     map.put("class", this.getClass().getSimpleName());
     return map;
+  }
+
+  public EncryptUtil getEncryptUtil() {
+    if(encryptUtil == null) {
+      encryptUtil = EncryptUtil.getInstance();
+    }
+    return encryptUtil;
+  }
+
+  public void setEncryptUtil(EncryptUtil encryptUtil) {
+    this.encryptUtil = encryptUtil;
   }
 
   @Override
@@ -387,13 +400,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     userPasswordNew.setValue(withdrawRequest.getPassword());
     getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
 
     if (prepaidCard == null) {
 
-      prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
+      prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
         PrepaidCardStatus.LOCKED_HARD,
         PrepaidCardStatus.EXPIRED,
         PrepaidCardStatus.PENDING);
@@ -413,7 +426,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
-    cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+    cdtTransaction = this.getCdtEJB10().addCdtTransaction(headers, cdtTransaction);
 
     // Si no cumple con los limites
     if(!cdtTransaction.isNumErrorOk()){
@@ -432,7 +445,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidWithdraw.setTimestamps(new Timestamps());
 
     String contrato = prepaidCard.getProcessorUserId();
-    String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
+    String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
     /*
       Registra el movimiento en estado pendiente
@@ -458,7 +471,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       numaut = numaut.substring(numaut.length()-6);
     }
 
-    InclusionMovimientosDTO inclusionMovimientosDTO =  TecnocomServiceHelper.getInstance().getTecnocomService()
+    InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
@@ -485,26 +498,37 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     }
-    //TODO: manejar el TIME_OUT_CONECTION como error no reintentable (Eliminar este if)
-    else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
-      /**
-       * Esto es para marcar cuando no pude obtener el response de un Retiro.
-       */
-      //Colocar el movimiento en error
-      PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
-
+    else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+
+      //Inicia la reversa del movimiento
+
+      // Agrego la reversa al cdt
+      CdtTransaction10 cdtTransactionReverse = new CdtTransaction10();
+      cdtTransactionReverse.setTransactionReference(0L);
+      cdtTransactionReverse.setExternalTransactionId(withdrawRequest.getTransactionId());
+
+      PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
+
+      TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+
+      PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
+      prepaidMovementReverse.setPan(prepaidMovement.getPan());
+      prepaidMovementReverse.setCentalta(prepaidMovement.getCentalta());
+      prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
+      prepaidMovementReverse.setTipofac(tipoFacReverse);
+      prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+      prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+
+      this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
-    //TODO: si el retiro devuelve un error de TIME_OUT_RESPONSE iniciar inmediatamente la reversa del mismo
-    //else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {}
     else {
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
@@ -526,9 +550,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-      //TODO: actualizar el status de movimiento a REJECTED
       //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REVERSED);
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
@@ -963,7 +986,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @param cdtTransaction
    * @return
    */
-  private PrepaidMovement10 buildPrepaidMovement(IPrepaidTransaction10 transaction, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
+  public PrepaidMovement10 buildPrepaidMovement(IPrepaidTransaction10 transaction, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
 
     String codent = null;
     try {
