@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.Constants;
+import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -16,6 +17,7 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -51,6 +53,12 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Spy
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+  @Spy
+  private ParametersUtil parametersUtil;
+
+  @Spy
+  private PrepaidTopupDelegate10 delegate;
 
   @Spy
   @InjectMocks
@@ -690,6 +698,11 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
 
+    Mockito.doReturn("0987").when(parametersUtil).getString("api-prepaid", "cod_entidad", "v10");
+
+    Mockito.doReturn("123456789")
+      .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
 
     // Se verifica que se llamaron los metodos
@@ -699,5 +712,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 }
