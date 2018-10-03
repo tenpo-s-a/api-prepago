@@ -3,6 +3,7 @@ package cl.multicaja.test.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -18,6 +19,7 @@ import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,10 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -54,6 +53,14 @@ public class Test_PrepaidEJBBean10_getTransactions {
   @InjectMocks
   @Spy
   PrepaidEJBBean10 prepaidEJBBean10;
+
+  private static Map<String, Object> headers;
+
+  @BeforeClass
+  public static void setup() {
+    headers = new HashMap<>();
+    headers.put(Constants.HEADER_USER_TIMEZONE, "America/Santiago");
+  }
 
   @Test(expected = BadRequestException.class)
   public void userIdMcNull() throws Exception {
@@ -134,11 +141,11 @@ public class Test_PrepaidEJBBean10_getTransactions {
     user.setRut(rut);
     user.setGlobalStatus(UserStatus.ENABLED);
 
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-    Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserById(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
+    Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
+     prepaidEJBBean10.getTransactions(headers, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
       Assert.fail("should not be here");
     } catch (NotFoundException ex) {
       System.out.println(ex);
@@ -186,12 +193,12 @@ public class Test_PrepaidEJBBean10_getTransactions {
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(Mockito.any(), Mockito.anyLong());
-    Mockito.doReturn(prepaidCard).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
+    Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidCard).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(headers, Long.MAX_VALUE);
 
     try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
+     prepaidEJBBean10.getTransactions(headers, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error prepaidCard pending", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
