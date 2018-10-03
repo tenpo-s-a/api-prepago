@@ -23,8 +23,6 @@ public abstract class PrepaidBaseEJBBean10 {
 
   private static ConfigUtils configUtils;
 
-  private static EncryptUtil encryptUtil;
-
   private static DBUtils dbUtils;
 
   private static DateUtils dateUtils;
@@ -54,18 +52,6 @@ public abstract class PrepaidBaseEJBBean10 {
     }
     return configUtils;
   }
-
-  /**
-   *
-   * @return
-   */
-  public static EncryptUtil getEncryptUtil() {
-    if (encryptUtil == null) {
-      encryptUtil = EncryptUtil.getInstance();
-    }
-    return encryptUtil;
-  }
-
 
   /**
    *
