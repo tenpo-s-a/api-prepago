@@ -3,12 +3,8 @@ package cl.multicaja.prepaid.web;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
-import cl.multicaja.prepaid.async.v10.routes.ConciliationMcRedRoute10;
-import cl.multicaja.prepaid.async.v10.routes.CurrencyConvertionRoute10;
+import cl.multicaja.prepaid.async.v10.routes.*;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.async.v10.routes.TecnocomReconciliationRoute10;
-import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +40,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private ConciliationMcRedRoute10 conciliationMcRedRoute10;
 
+  @Inject
+  private ReconciliationSchedulerRoute10 reconciliationSchedulerRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -70,7 +69,13 @@ public class WebApp implements ServletContextListener  {
     }
     try {
       if (!camelFactory.isCamelRunning()) {
-        camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10,conciliationMcRedRoute10,tecnocomReconciliationRoute10);
+        camelFactory.startCamelContextWithRoutes(true,
+          prepaidTopupRoute10,
+          currencyConvertionRoute10,
+          transactionReversalRoute10,
+          conciliationMcRedRoute10,
+          tecnocomReconciliationRoute10,
+          reconciliationSchedulerRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {
