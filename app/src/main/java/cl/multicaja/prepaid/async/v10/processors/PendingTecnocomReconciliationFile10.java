@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -17,10 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
@@ -53,24 +51,37 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
           }
 
-          if(file != null) {
-            insertOrUpdateManualTrx(fileName, file.getDetails()
-              .stream()
-              .filter(detail -> detail.isFromSat())
-              .collect(Collectors.toList())
-            );
+        insertOrUpdateManualTrx(fileName, file.getDetails()
+          .stream()
+          .filter(detail -> detail.isFromSat())
+          .collect(Collectors.toList())
+        );
 
-            validateTransactions(fileName, file.getDetails()
-              .stream()
-              .filter(detail -> !detail.isFromSat())
-              .collect(Collectors.toList())
-            );
-            //TODO: colocar los movimientos no informados en status NOT_RECONCILED
-          } else {
-            String msg = String.format("Error processing file [%s]", fileName);
-            log.error(msg);
-            throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        validateTransactions(fileName, file.getDetails()
+          .stream()
+          .filter(detail -> !detail.isFromSat())
+          .collect(Collectors.toList())
+        );
+
+        String fileDate = file.getHeader().getFecenvio().replaceAll("-", "");
+
+        List<TipoFactura> tipFacs = Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
+          TipoFactura.ANULA_CARGA_TRANSFERENCIA,
+          TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA,
+          TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA,
+          TipoFactura.RETIRO_TRANSFERENCIA,
+          TipoFactura.ANULA_RETIRO_TRANSFERENCIA,
+          TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA,
+          TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
+
+
+          //TODO: colocar los movimientos no informados en status NOT_RECONCILED
+          //TODO: cual sera el manejo de fechas para buscar los movimientos a actualizar
+          /*
+          for (TipoFactura type : tipFacs) {
+            getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ConciliationStatusType.NOT_RECONCILED);
           }
+          */
         } catch (Exception ex){
           String msg = String.format("Error processing file [%s]", fileName);
           log.error(msg, ex);
