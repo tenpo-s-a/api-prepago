@@ -1001,6 +1001,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
     prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
     prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);

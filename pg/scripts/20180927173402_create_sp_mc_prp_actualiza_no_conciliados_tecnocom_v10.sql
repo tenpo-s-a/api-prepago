@@ -43,13 +43,13 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_tecnocom_v1
       RETURN;
     END IF;
 
-    IF COALESCE(_in_tipofac, 0) THEN
+    IF COALESCE(_in_tipofac, 0) = 0 THEN
       _error_code := 'MC003';
       _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] El tipofac es obligatorio';
       RETURN;
     END IF;
 
-    IF _in_indnorcor != 0 AND _in_indnorcor != 1 THEN
+    IF (_in_indnorcor IS NULL) OR (_in_indnorcor != 0 AND _in_indnorcor != 1) THEN
       _error_code := 'MC004';
       _error_msg := '[mc_prp_actualiza_no_conciliados_tecnocom_v10] El indnorcor debe ser 0 o 1';
       RETURN;

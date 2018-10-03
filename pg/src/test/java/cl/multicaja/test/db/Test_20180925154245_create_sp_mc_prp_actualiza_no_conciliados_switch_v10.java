@@ -161,6 +161,26 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
+  public void updateSwitchStatusNotOkByIndNorCorOutOfRange()throws SQLException {
+    String startDate = "20180803";
+    String endDate = "20180803";
+
+    Object[] params = {
+      startDate,
+      endDate,
+      3001,
+      2,
+      "NO_CONCILIADO",
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
+
+    Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
+  }
+
+  @Test
   public void updateSwitchStatusNotOkByNewStateNull()throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";

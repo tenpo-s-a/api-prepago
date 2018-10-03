@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileHeader;
+import cl.multicaja.prepaid.model.v10.BusinessStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -278,6 +279,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
     prepaidMovement.setMonto(batchTrx.getImpfac());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
     prepaidMovement.setCodent(batchTrx.getCodent());
     prepaidMovement.setCentalta(batchTrx.getCentalta());
     prepaidMovement.setCuenta(batchTrx.getCuenta());

@@ -48,6 +48,16 @@ public interface PrepaidMovementEJB10 {
   void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
 
   /**
+   * actualiza solo el estado de negocio
+   *
+   * @param header
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updatePrepaidMovementEstadoNegocio(Map<String, Object> header, Long movementId, BusinessStatusType status) throws Exception;
+
+  /**
    * actualiza solo el estado de conciliacion con switch
    *
    * @param header

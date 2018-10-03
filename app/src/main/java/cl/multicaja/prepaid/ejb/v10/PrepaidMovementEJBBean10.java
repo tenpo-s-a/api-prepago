@@ -57,6 +57,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
+      data.getEstadoNegocio().getValue(), // _estado_de_negocio VARCHAR
       data.getConSwitch().getValue(), //_estado_con_switch VARCHAR
       data.getConTecnocom().getValue(), //_estado_con_tecnocom VARCHAR
       data.getOriginType().getValue(), //_origen_movimiento VARCHAR
@@ -141,6 +142,30 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
     this.updatePrepaidMovement(null, id, null, null, null, null, null, null, status);
+  }
+
+  @Override
+  public void updatePrepaidMovementEstadoNegocio(Map<String, Object> header, Long movementId, BusinessStatusType status) throws Exception {
+    if (movementId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
+    }
+    if (status == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    Object[] params = {
+      movementId,
+      status.getValue(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_negocio_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("updatePrepaidMovementEstadoNegocio resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
   }
 
   @Override
@@ -274,6 +299,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
       p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
+      p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
       p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
       p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
       p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
