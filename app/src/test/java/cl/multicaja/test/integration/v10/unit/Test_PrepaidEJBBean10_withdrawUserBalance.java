@@ -327,11 +327,11 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     PrepaidMovement10 movement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
       PrepaidMovementStatus.ERROR_POS_WITHDRAW,
       PrepaidMovementStatus.ERROR_WEB_WITHDRAW,
-      PrepaidMovementStatus.REVERSED);
+      PrepaidMovementStatus.REJECTED);
 
     Assert.assertNotNull("Debe existir un movimiento", movement);
     Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
-    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, movement.getEstado());
+    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
 
   }
 
@@ -711,11 +711,11 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     PrepaidMovement10 movement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
       PrepaidMovementStatus.ERROR_POS_WITHDRAW,
       PrepaidMovementStatus.ERROR_WEB_WITHDRAW,
-      PrepaidMovementStatus.REVERSED);
+      PrepaidMovementStatus.REJECTED);
 
     Assert.assertNotNull("Debe existir un movimiento", movement);
     Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
-    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, movement.getEstado());
+    Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
 
   }
 }
