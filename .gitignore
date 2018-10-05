@@ -18,9 +18,6 @@ app/.settings
 app/.classpath
 app/.project
 
-app/src/test/resources/multicajared/done/*.csv
-app/src/test/resources/multicajared/error/*.csv 
-
 pg/.idea
 pg/.settings
 pg/.classpath
@@ -56,3 +53,6 @@ app/hostkey\.ser
 app/src/test/resources/mastercard/T058/done/
 
 app/src/test/resources/mastercard/T058/error/
+
+app/src/test/resources/multicajared/done/*.csv
+app/src/test/resources/multicajared/error/*.csv 
