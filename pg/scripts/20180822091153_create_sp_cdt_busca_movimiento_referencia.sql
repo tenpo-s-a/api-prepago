@@ -33,7 +33,7 @@ BEGIN
     FMO.nombre
   FROM
     ${schema.cdt}.cdt_movimiento_cuenta MCT
-  INNER JOIN ctatraspaso.cdt_fase_movimiento FMO ON MCT.id_fase_movimiento = FMO.id
+  INNER JOIN ${schema.cdt}.cdt_fase_movimiento FMO ON MCT.id_fase_movimiento = FMO.id
   WHERE
     MCT.id = _in_idCDT AND
     MCT.id_mov_referencia = 0;

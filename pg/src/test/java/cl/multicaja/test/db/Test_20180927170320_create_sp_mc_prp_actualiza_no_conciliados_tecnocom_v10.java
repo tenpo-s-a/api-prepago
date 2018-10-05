@@ -58,6 +58,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
 
     List lstMov = searchAllMovements();
 
+    int notReconciliateCount = 0;
     for (Object object: lstMov) {
       Map<String, Object> movement = (Map<String, Object>) object;
       Timestamp movementCreationDate = (Timestamp) movement.get("fecha_creacion");
@@ -70,6 +71,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);
         Assert.assertEquals("Debe tener indnorcor " + indnorcor, indnorcor, movementIndNorCor);
+        notReconciliateCount++;
       }
       else {
         boolean excludedFromDates = movementCreationDate.before(startDateTs) || movementCreationDate.after(endDateTs);
@@ -78,6 +80,8 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
         Assert.assertTrue("Debe estar fuera de fecha, distinto tipofac o distinto indnorcor.", excludedFromDates || wrongTipoFac || wrongIndNorCor);
       }
     }
+
+    Assert.assertEquals("Debe haber 2 movimientos no conciliados", 2, notReconciliateCount);
   }
 
   @Test
@@ -148,6 +152,26 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
       endDate,
       3001,
       new NullParam(Types.NUMERIC),
+      "NO_CONCILIADO",
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
+
+    Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
+  }
+
+  @Test
+  public void updateTecnocomStatusNotOkByIndNorCorOutOfRange()throws SQLException {
+    String startDate = "20180803";
+    String endDate = "20180803";
+
+    Object[] params = {
+      startDate,
+      endDate,
+      3001,
+      2,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

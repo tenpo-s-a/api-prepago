@@ -97,6 +97,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       "_tipo_movimiento",
       "_monto",
       "_estado",
+      "_estado_de_negocio",
       "_estado_con_switch",
       "_estado_con_tecnocom",
       "_origen_movimiento",

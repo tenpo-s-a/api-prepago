@@ -1,5 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -31,7 +35,7 @@ public interface PrepaidMovementEJB10 {
    * @param status
    * @throws Exception
    */
-  void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
+  void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, BusinessStatusType businessStatus, PrepaidMovementStatus status) throws Exception;
 
   /**
    * actualiza solo el estado
@@ -42,6 +46,55 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
+
+  /**
+   * actualiza solo el estado de conciliacion con switch
+   *
+   * @param header
+   * @param movementId
+   * @param status nuevo estado de conciliacion con tecnocom
+   * @throws Exception
+   */
+  boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception;
+
+  /**
+   * actualiza solo el estado de conciliacion con tecnocom
+   *
+   * @param header
+   * @param movementId
+   * @param status nuevo estado de conciliacion con tecnocom
+   * @throws Exception
+   */
+  void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception;
+
+  /**
+   * actualiza solo el estado de conciliacion con switch a todos los movimientos
+   * que esten entre las dos fechas entregadas, y que posean el tipofac e indnorcor indicados.
+   *
+   * @param header
+   * @param startDate fecha inicial del intervalo (inclusive)
+   * @param endDate fecha final del intervalo (inclusive)
+   * @param tipofac
+   * @param indnorcor
+   * @param status nuevo estado de conciliacion con switch
+   * @throws Exception
+   */
+  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception;
+
+  /**
+   * actualiza solo el estado de conciliacion con tecnocom a todos los movimientos
+   * que esten entre las dos fechas entregadas, y que posean el tipofac e indnorcor indicados.
+   *
+   * @param header
+   * @param startDate fecha inicial del intervalo (inclusive)
+   * @param endDate fecha final del intervalo (inclusive)
+   * @param tipofac
+   * @param indnorcor
+   * @param status nuevo estado de conciliacion con tecnocom
+   * @throws Exception
+   */
+  void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception;
+
 
   /**
    *
@@ -146,15 +199,4 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception;
-
-  /**
-   * Actualiza el estatus de conciliacion con tecnocom
-   * @param header
-   * @param movementId
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  Boolean updateStatusMovementConTecnocom(Map<String, Object> header,Long movementId, ConciliationStatusType status) throws Exception;
-
 }

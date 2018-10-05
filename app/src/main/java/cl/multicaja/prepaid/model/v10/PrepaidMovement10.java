@@ -53,6 +53,7 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private Integer numbencta;
   private Long numplastico;
 
+  private BusinessStatusType estadoNegocio;
   private ConciliationStatusType conSwitch;
   private ConciliationStatusType conTecnocom;
   private MovementOriginType originType;
@@ -369,6 +370,10 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
     this.conTecnocom = conTecnocom;
   }
 
+  public void setEstadoNegocio(BusinessStatusType estadoNegocio) { this.estadoNegocio = estadoNegocio; }
+
+  public BusinessStatusType getEstadoNegocio() { return estadoNegocio; };
+
   public MovementOriginType getOriginType() {
     return originType;
   }
@@ -399,6 +404,9 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
       getTipoMovimiento() == that.getTipoMovimiento() &&
       eql(getMonto(), that.getMonto()) &&
       getEstado() == that.getEstado() &&
+      eql(getEstadoNegocio(), that.getEstadoNegocio()) &&
+      eql(getConSwitch(), that.getConSwitch()) &&
+      eql(getConTecnocom(), that.getConTecnocom()) &&
       eql(getCodent(), that.getCodent()) &&
       eql(getCentalta(), that.getCentalta()) &&
       eql(getCuenta(), that.getCuenta()) &&

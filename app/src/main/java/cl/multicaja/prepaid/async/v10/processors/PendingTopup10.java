@@ -159,6 +159,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               numextcta,
               nummovext,
               clamone,
+              null,
               status);
 
             prepaidMovement.setPan(prepaidCard.getPan());

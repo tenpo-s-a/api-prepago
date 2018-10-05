@@ -187,6 +187,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
       123,
       123,
       152,
+      null,
       PrepaidMovementStatus.PROCESS_OK);
 
     System.out.println("prepaidMovement: " + prepaidMovement);

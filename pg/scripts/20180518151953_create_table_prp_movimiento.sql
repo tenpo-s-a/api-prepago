@@ -25,6 +25,7 @@ CREATE TABLE ${schema}.prp_movimiento (
   tipo_movimiento     VARCHAR(50) NOT NULL,
   monto               NUMERIC NOT NULL,
   estado              VARCHAR(50) NOT NULL,
+  estado_de_negocio   VARCHAR(50) NOT NULL,
   estado_con_switch   VARCHAR(50) NOT NULL,
   estado_con_tecnocom VARCHAR(50) NOT NULL,
   origen_movimiento   VARCHAR(5) NOT NULL,

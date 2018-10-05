@@ -870,6 +870,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
@@ -901,6 +902,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
 
     return prepaidMovement;
   }
@@ -937,6 +939,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(status);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
@@ -1015,6 +1018,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues

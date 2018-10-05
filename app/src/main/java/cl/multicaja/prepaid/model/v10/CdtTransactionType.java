@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
+import java.util.stream.Stream;
 /**
  * @author abarazarte
  */
@@ -40,4 +41,12 @@ public enum CdtTransactionType {
       return null;
     }
   }
+
+  public static CdtTransactionType fromValue(String value) {
+    return Stream.of(CdtTransactionType.values())
+      .filter(t -> value.equals(t.getName()))
+      .findFirst()
+      .orElse(null);
+  }
+
 }
