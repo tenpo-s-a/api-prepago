@@ -748,22 +748,55 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     String newDate = getNewDateForPastMovement(date, time, Calendar.DAY_OF_WEEK, -1);
 
+    Map<Long, TipoFactura> inserted = new HashMap<>();
+
+    TipoFactura type = TipoFactura.CARGA_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
 
+    type = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
 
+    type = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
 
+    type = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
 
+    type = TipoFactura.RETIRO_TRANSFERENCIA;
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
+
+    type = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
+
+    type = TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
+
+    type = TipoFactura.ANULA_RETIRO_TRANSFERENCIA;
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, type.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+    inserted.put(prepaidMovement10.getId(), type);
 
     newDate = getNewDateForPastMovement(date, time, Calendar.HOUR_OF_DAY, -3);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
@@ -775,7 +808,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 21 movimientos", 21, movements.size());
+    Assert.assertEquals("Debe tener 25 movimientos", 25, movements.size());
 
 
     final String filename = "PLJ61110.FINT0003";
@@ -783,18 +816,23 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     Thread.sleep(1500);
 
+    // Verifica movimientos NO conciliados
+
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 4 movimientos", 4, movements.size());
+    Assert.assertEquals("Debe tener 8 movimientos", 8, movements.size());
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
+      Assert.assertEquals("Debe ser tipofac " + inserted.get(movement.getId()), inserted.get(movement.getId()).getCode(), movement.getTipofac().getCode());
     }
+
+    // Verifica movimientos pendientes de conciliar
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
       null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.PENDING, MovementOriginType.API);
