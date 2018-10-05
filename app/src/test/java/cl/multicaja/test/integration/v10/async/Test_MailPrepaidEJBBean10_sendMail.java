@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cl.multicaja.core.model.Errors.*;

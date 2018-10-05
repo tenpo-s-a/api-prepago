@@ -106,6 +106,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             numextcta,
             nummovext,
             clamone,
+            null,
             status);
 
           issuanceFeeMovement.setPan(prepaidCard.getPan());
@@ -156,6 +157,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             numextcta,
             nummovext,
             clamone,
+            null,
             status);
 
           issuanceFeeMovement.setPan(prepaidCard.getPan());
@@ -197,6 +199,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             numextcta,
             nummovext,
             clamone,
+            null,
             status);
 
           issuanceFeeMovement.setNumextcta(numextcta);

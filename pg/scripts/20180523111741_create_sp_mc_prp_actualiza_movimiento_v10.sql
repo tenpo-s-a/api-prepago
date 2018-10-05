@@ -19,14 +19,15 @@
 
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
-  IN _id            NUMERIC,
-  IN _pan           VARCHAR,
-  IN _centalta      VARCHAR,
-  IN _cuenta        VARCHAR,
-  IN _numextcta     NUMERIC,
-  IN _nummovext     NUMERIC,
-  IN _clamone       NUMERIC,
-  IN _estado        VARCHAR,
+  IN _id                NUMERIC,
+  IN _pan               VARCHAR,
+  IN _centalta          VARCHAR,
+  IN _cuenta            VARCHAR,
+  IN _numextcta         NUMERIC,
+  IN _nummovext         NUMERIC,
+  IN _clamone           NUMERIC,
+  IN _estado_de_negocio VARCHAR,
+  IN _estado            VARCHAR,
   OUT _error_code   VARCHAR,
   OUT _error_msg    VARCHAR
 )AS $$
@@ -94,7 +95,14 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
                       clamone
                    END
                   ),
-        fecha_actualizacion = timezone('utc', now())
+       estado_de_negocio = (
+                  CASE WHEN _estado_de_negocio IS NOT NULL THEN
+                      _estado_de_negocio
+                   ELSE
+                      estado_de_negocio
+                   END
+                  ),
+       fecha_actualizacion = timezone('utc', now())
      WHERE
         id = _id;
 
@@ -108,5 +116,5 @@ $$
 LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC, VARCHAR, VARCHAR, VARCHAR,NUMERIC, NUMERIC, NUMERIC, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_movimiento_v10(NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR);
 

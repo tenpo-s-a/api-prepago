@@ -153,6 +153,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               numberUtils.toInteger(trx.getNumextcta()),
               numberUtils.toInteger(trx.getNummovext()),
               numberUtils.toInteger(trx.getClamon()),
+              null,
               PrepaidMovementStatus.PROCESS_OK);
 
             //Actualiza el estado_con_tecnocom a conciliado
@@ -233,6 +234,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
                   numberUtils.toInteger(trx.getNumextcta()),
                   numberUtils.toInteger(trx.getNummovext()),
                   numberUtils.toInteger(trx.getClamon()),
+                  null,
                   PrepaidMovementStatus.PROCESS_OK);
 
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,

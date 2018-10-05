@@ -23,6 +23,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
   _tipo_movimiento      VARCHAR,
   _monto                NUMERIC,
   _estado               VARCHAR,
+  _estado_de_negocio    VARCHAR,
   _estado_con_switch    VARCHAR,
   _estado_con_tecnocom  VARCHAR,
   _origen_movimiento    VARCHAR,
@@ -72,6 +73,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
           tipo_movimiento,
           monto,
           estado,
+          estado_de_negocio,
           estado_con_switch,
           estado_con_tecnocom,
           origen_movimiento,
@@ -113,6 +115,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
           _tipo_movimiento,
           _monto,
           _estado,
+          _estado_de_negocio,
           _estado_con_switch,
           _estado_con_tecnocom,
           _origen_movimiento,
@@ -173,4 +176,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_v10(NUMERIC, NUMERIC,VARCHAR, VARCHAR, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_v10(NUMERIC, NUMERIC,VARCHAR, VARCHAR, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC);

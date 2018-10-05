@@ -57,6 +57,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
       new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
       data.getEstado().toString(), //_estado VARCHAR
+      data.getEstadoNegocio().getValue(), // _estado_de_negocio VARCHAR
       data.getConSwitch().getValue(), //_estado_con_switch VARCHAR
       data.getConTecnocom().getValue(), //_estado_con_tecnocom VARCHAR
       data.getOriginType().getValue(), //_origen_movimiento VARCHAR
@@ -107,7 +108,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception { ;
+  public void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, BusinessStatusType businessStatus, PrepaidMovementStatus status) throws Exception {
 
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
@@ -125,6 +126,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       numextcta == null ? new NullParam(Types.NUMERIC) : new InParam(numextcta, Types.NUMERIC),
       nummovext == null ? new NullParam(Types.NUMERIC) : new InParam(nummovext, Types.NUMERIC),
       clamone == null ? new NullParam(Types.NUMERIC) : new InParam(clamone, Types.NUMERIC),
+      businessStatus == null ? new NullParam(Types.VARCHAR) : new InParam(businessStatus, Types.VARCHAR),
       status.toString(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -140,7 +142,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
-    this.updatePrepaidMovement(null, id, null, null, null, null, null, null, status);
+    this.updatePrepaidMovement(null, id, null, null, null, null, null, null, null, status);
   }
 
   @Override
@@ -274,6 +276,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
       p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
+      p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
       p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
       p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
       p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
