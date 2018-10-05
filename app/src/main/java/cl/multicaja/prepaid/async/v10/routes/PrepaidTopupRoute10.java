@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.processors.*;
  */
 public final class PrepaidTopupRoute10 extends BaseRoute10 {
 
+  public static final String PENDING_TOPUP_SEDA = "seda:PrepaidTopupRoute10.pendingTopup";
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 

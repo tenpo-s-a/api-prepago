@@ -180,6 +180,6 @@ public interface PrepaidEJB10 {
    * @param reprocesQueue
    * @throws Exception
    */
-   void reprocesQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception;
-   
+  String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception;
+
 }

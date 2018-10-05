@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
@@ -123,7 +124,7 @@ public abstract class BaseProcessor10 {
     //si tiene tiempo de espera establecido como parametro significa que se desea enviar un mensaje con tiempo de espera
     //para esto se usa una caracteristica especial de ActiveMQ, se debe establecer en las cabeceras del mensaje
     //que el mensaje sera con tiempo de espera
-    if (delayTimeoutToRedirect > 0) {
+    if (delayTimeoutToRedirect > 0 && !ConfigUtils.isEnvTest()) {
       log.debug("Estableciendo delayTimeoutToRedirect: " + delayTimeoutToRedirect);
       headers.put(ScheduledMessage.AMQ_SCHEDULED_DELAY, delayTimeoutToRedirect); //TODO si se migra a azure se debe investigar como se envian mensajes programados
       headers.remove("scheduledJobId"); //es necesario remover el scheduledJobId si existe con anterioridad en el mensaje

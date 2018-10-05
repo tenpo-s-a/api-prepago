@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -98,6 +100,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setDelegate(PrepaidTopupDelegate10 delegate) {
     this.delegate = delegate;
+  }
+
+  public ReprocesQueueDelegate10 getDelegateReprocesQueue() {
+    return delegateReprocesQueue;
+  }
+
+  public void setDelegateReprocesQueue(ReprocesQueueDelegate10 delegateReprocesQueue) {
+    this.delegateReprocesQueue = delegateReprocesQueue;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJB10() {
@@ -1865,8 +1875,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return getUserClient().updateNameStatus(headers, user.getId());
   }
 
-  public void reprocesQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
-
+  @Override
+  public String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
+    String messageId = null;
     if(reprocesQueue == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));
     }
@@ -1879,41 +1890,73 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     switch (reprocesQueue.getLastQueue()){
       case TOPUP: {
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_TOPUP_RESP);
-        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        data.setRetryCount(0);
+        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ, data);
         break;
       }
-      case WITHDRAWAL: {
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_TOPUP_RESP);
-        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
-        break;
-      }
+
       case SEND_MAIL: {
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
-        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ,reprocesQueue.getIdQueue(), data);
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
+        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        data.setRetryCount(0);
+        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ, data);
         break;
       }
       case CREATE_CARD: {
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
-        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ,reprocesQueue.getIdQueue(), data);
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
+        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ, data);
         break;
       }
       case PENDING_EMISSION: {
-        ExchangeData<PrepaidTopupData10> data = delegateReprocesQueue.searchInErrorTopup(reprocesQueue.getIdQueue(),PrepaidTopupRoute10.ERROR_EMISSION_RESP);
-        delegateReprocesQueue.redirectRequest(PrepaidTopupRoute10.PENDING_EMISSION_REQ,reprocesQueue.getIdQueue(), data);
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_EMISSION_RESP);
+        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        data.setRetryCount(0);
+        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_EMISSION_REQ,data);
         break;
       }
       case REVERSE_TOPUP: {
-        ExchangeData<PrepaidReverseData10> data = delegateReprocesQueue.searchInErroReverse(reprocesQueue.getIdQueue(), TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_RESP);
-        delegateReprocesQueue.redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ,reprocesQueue.getIdQueue(), data);
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_RESP);
+        ExchangeData<PrepaidReverseData10> data = (ExchangeData<PrepaidReverseData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        log.debug("Data not null "+data);
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        data.setRetryCount(0);
+        messageId = this.getDelegateReprocesQueue().redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ, data);
         break;
       }
       case REVERSE_WITHDRAWAL: {
-        ExchangeData<PrepaidReverseData10> data = delegateReprocesQueue.searchInErroReverse(reprocesQueue.getIdQueue(),TransactionReversalRoute10.ERROR_REVERSAL_WITHDRAW_RESP);
-        delegateReprocesQueue.redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ,reprocesQueue.getIdQueue(), data);
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(TransactionReversalRoute10.ERROR_REVERSAL_WITHDRAW_RESP);
+        ExchangeData<PrepaidReverseData10> data = (ExchangeData<PrepaidReverseData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        data.setRetryCount(0);
+        messageId = this.getDelegateReprocesQueue().redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ, data);
         break;
       }
     }
+    return messageId;
   }
 
 
