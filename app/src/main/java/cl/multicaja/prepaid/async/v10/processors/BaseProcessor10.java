@@ -231,7 +231,7 @@ public abstract class BaseProcessor10 {
     cdtTx.setIndSimulacion(false);
     cdtTx.setExternalTransactionId(prepaidTopup10.getTransactionId());
     cdtTx.setTransactionType(txType);
-    cdtTx.setGloss(txType.getName() + " " + prepaidTopup10.getAmount().getValue());
+    cdtTx.setGloss(txType.getName());
     cdtTx = getRoute().getCdtEJBBean10().addCdtTransaction(null,cdtTx);
     return cdtTx;
   }

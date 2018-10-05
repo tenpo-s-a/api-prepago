@@ -154,7 +154,11 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
         UPDATE ${schema}.prp_movimiento
         SET  numaut = (
                    CASE WHEN (TRIM(COALESCE(_numaut,'')) = '' OR _numaut = '') THEN
-                       lpad(_r_id::text, 6, '0')
+                      CASE WHEN char_length(_r_id::text) > 6 THEN
+                        right(_r_id::text, 6)
+                      ELSE
+                        lpad(_r_id::text, 6, '0')
+                      END
                     ELSE
                        _numaut
                     END

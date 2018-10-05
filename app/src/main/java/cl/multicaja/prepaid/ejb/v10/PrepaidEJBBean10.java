@@ -432,7 +432,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
@@ -462,7 +462,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
@@ -510,11 +512,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
-      //Confirmar el retiro en CDT
-      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
-      cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
 
       //Inicia la reversa del movimiento
@@ -534,11 +531,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+      prepaidMovementReverse.setConSwitch(ConciliationStatusType.PENDING);
+      prepaidMovementReverse.setConTecnocom(ConciliationStatusType.PENDING);
+      prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
 
-      this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
+      String messageId = this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
 
-      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()),
+        new KeyValue("messageId", messageId));
     }
     else {
       //Colocar el movimiento en error
@@ -547,18 +547,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Iniciar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
-      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction.setTransactionReference(0L);
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //Confirmar reversa en CDT
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO_CONF);
-      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+      //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
