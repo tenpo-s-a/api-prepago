@@ -1,24 +1,29 @@
 package cl.multicaja.test.integration.v10.async;
 
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Utils;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.test.integration.v10.helper.sftp.TestTecnocomSftpServer;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.*;
+import org.mockito.internal.verification.Times;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * @author abarazarte
@@ -238,7 +243,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -299,7 +304,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -356,7 +361,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -411,7 +416,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -466,7 +471,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -525,7 +530,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -584,7 +589,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -644,7 +649,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -691,6 +696,114 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     }
   }
 
+  @Test
+  public void processApiTransactions_NotReConciled() throws Exception {
+
+    List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+      null, null, null, null, null, null);
+
+    Assert.assertNull("No debe tener movimientos", movements);
+
+    // Se agregan transacciones con monto diferente
+    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+
+      Long userId = prepaidCards.stream()
+        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+        .findAny()
+        .get()
+        .getIdUser();
+
+
+      String pan = Utils.replacePan(trx.getPan());
+      PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
+      movement10.setConTecnocom(ConciliationStatusType.PENDING);
+      movement10.setConSwitch(ConciliationStatusType.PENDING);
+      movement10.setOriginType(MovementOriginType.API);
+      movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+      movement10.setIdMovimientoRef(Long.valueOf(0));
+      movement10.setIdTxExterno("");
+      getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+
+    }
+
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    prepaidMovement10.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement10.setConSwitch(ConciliationStatusType.PENDING);
+    prepaidMovement10.setOriginType(MovementOriginType.API);
+    prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+
+    String date = apiFile.getHeader().getFecenvio();
+    String time = apiFile.getHeader().getHoraenvio();
+    time = time.replaceAll("\\.", ":");
+
+    System.out.println("============================================");
+    System.out.println("date: " + date);
+    System.out.println("time: " + time);
+    System.out.println("============================================");
+
+    String newDate = getNewDateForPastMovement(date, time, Calendar.DAY_OF_WEEK, -1);
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+
+
+    newDate = getNewDateForPastMovement(date, time, Calendar.HOUR_OF_DAY, -3);
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    changeMovement(prepaidMovement10.getId(), newDate, TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
+
+    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.PENDING, MovementOriginType.API);
+
+    Assert.assertNotNull("Debe tener movimientos", movements);
+    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
+    Assert.assertEquals("Debe tener 21 movimientos", 21, movements.size());
+
+
+    final String filename = "PLJ61110.FINT0003";
+    putSuccessFileIntoSftp(filename);
+
+    Thread.sleep(1500);
+
+    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
+
+    Assert.assertNotNull("Debe tener movimientos", movements);
+    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
+    Assert.assertEquals("Debe tener 4 movimientos", 4, movements.size());
+
+    for (PrepaidMovement10 movement: movements) {
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
+      Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
+    }
+
+    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.PENDING, MovementOriginType.API);
+
+    Assert.assertNotNull("Debe tener movimientos", movements);
+    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
+    Assert.assertEquals("Debe tener 1 movimiento", 1, movements.size());
+  }
+
   private void putSuccessFileIntoSftp(String filename) throws Exception {
     try {
       final Map<String, Object> context = TestTecnocomSftpServer.getInstance().openChanel();
@@ -707,5 +820,25 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
       throw ex;
     }
 
+  }
+
+  private void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {
+    final String SCHEMA = ConfigUtils.getInstance().getProperty("schema");
+    DBUtils.getInstance().getJdbcTemplate().execute(
+      "UPDATE " + SCHEMA + ".prp_movimiento SET fecha_creacion = "
+        + "TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS'), "
+        + "indnorcor = " + indnorcor + ", "
+        + "tipofac = " + tipofac + " "
+        + "WHERE ID = " + idMovimiento.toString());
+  }
+
+  private String getNewDateForPastMovement(String date, String time, Integer unit, Integer amount){
+
+    Timestamp ts = Timestamp.valueOf(String.format("%s %s", date, time));
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(ts);
+    cal.add(unit, amount);
+    ts.setTime(cal.getTime().getTime());
+    return ts.toString();
   }
 }

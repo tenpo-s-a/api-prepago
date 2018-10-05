@@ -18,6 +18,11 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +34,10 @@ import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
 public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCurrencyModification10.class);
+
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss Z");
+  private static DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+  private static ZoneId here = ZoneId.of("America/Santiago");
 
   public PendingTecnocomReconciliationFile10(BaseRoute10 route) {
     super(route);
@@ -63,7 +72,12 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           .collect(Collectors.toList())
         );
 
-        String fileDate = file.getHeader().getFecenvio().replaceAll("-", "");
+          /**
+           * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron
+           * el archivo actual o anterior.
+           */
+
+          String fileDate = getDateForNotReconciledTransactions(file.getHeader().getFecenvio(), file.getHeader().getHoraenvio());
 
         List<TipoFactura> tipFacs = Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
           TipoFactura.ANULA_CARGA_TRANSFERENCIA,
@@ -74,14 +88,10 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA,
           TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
 
-
-          //TODO: colocar los movimientos no informados en status NOT_RECONCILED
-          //TODO: cual sera el manejo de fechas para buscar los movimientos a actualizar
-          /*
           for (TipoFactura type : tipFacs) {
+            log.info(String.format("Changing status to not reconciled transaction from date [%s] and tipofac [%s]", fileDate, type.getDescription()));
             getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ConciliationStatusType.NOT_RECONCILED);
           }
-          */
         } catch (Exception ex){
           String msg = String.format("Error processing file [%s]", fileName);
           log.error(msg, ex);
@@ -265,4 +275,17 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
   }
 
 
+  private String getDateForNotReconciledTransactions(String date, String time) {
+    ZonedDateTime hereAndNow = Instant.now().atZone(here);
+    String timezoneOffset = String.format("%tz", hereAndNow);
+
+    ZonedDateTime zonedDateTime = ZonedDateTime.parse(String.format("%s %s %s", date, time, timezoneOffset), formatter);
+
+    Instant instant = zonedDateTime.toInstant().minus(1,ChronoUnit.DAYS);
+
+    //get date time only
+    LocalDateTime result = LocalDateTime.ofInstant(instant, ZoneId.of(ZoneOffset.UTC.getId()));
+
+    return result.toLocalDate().format(dbFormatter);
+  }
 }
