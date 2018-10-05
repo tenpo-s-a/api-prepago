@@ -190,12 +190,11 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
     }
     // Busca ID de Referencia con
     {
-      CdtTransaction10 oCdtTx2 = getCdtEJBBean10().buscaMovimientoReferencia(null,oCdtTx10.getTransactionReference());
+      CdtTransaction10 oCdtTx2 = getCdtEJBBean10().buscaMovimientoReferencia(null, oCdtTx10.getTransactionReference());
       Assert.assertNotNull("Debe retornar Una Tx Cdt", oCdtTx2);
       Assert.assertTrue("debe tener id", oCdtTx2.getTransactionReference() > 0);
-      Assert.assertEquals("Deben ser Iguales",oCdtTx10.getTransactionReference(),oCdtTx2.getTransactionReference());
-      Assert.assertEquals("Debes tener Tipo TxPRIMERA_CARGA",CdtTransactionType.PRIMERA_CARGA,oCdtTx10.getTransactionType());
-
+      Assert.assertEquals("Deben ser Iguales", oCdtTx10.getTransactionReference(), oCdtTx2.getTransactionReference());
+      Assert.assertEquals("Debes tener Tipo TxPRIMERA_CARGA",CdtTransactionType.PRIMERA_CARGA,oCdtTx2.getTransactionType());
     }
   }
 }

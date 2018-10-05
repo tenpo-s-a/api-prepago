@@ -41,11 +41,25 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement1 = createPrepaidMovement10(prepaidMovement1);
-    prepaidMovement1.setNumaut(StringUtils.leftPad(prepaidMovement1.getId().toString(), 6, "0"));
+    String numaut1 = prepaidMovement1.getId().toString();
+    //solamente los 6 primeros digitos de numreffac
+    if (numaut1.length() > 6) {
+      numaut1 = numaut1.substring(numaut1.length() -6);
+    } else {
+      numaut1 = StringUtils.leftPad(prepaidMovement1.getId().toString(), 6, "0");
+    }
+    prepaidMovement1.setNumaut(numaut1);
 
     PrepaidMovement10 prepaidMovement2 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement2 = createPrepaidMovement10(prepaidMovement2);
-    prepaidMovement2.setNumaut(StringUtils.leftPad(prepaidMovement2.getId().toString(), 6, "0"));
+    String numaut2 = prepaidMovement2.getId().toString();
+    //solamente los 6 primeros digitos de numreffac
+    if (numaut2.length() > 6) {
+      numaut2 = numaut2.substring(numaut2.length() -6);
+    } else {
+      numaut2 = StringUtils.leftPad(prepaidMovement2.getId().toString(), 6, "0");
+    }
+    prepaidMovement2.setNumaut(numaut2);
 
     List<PrepaidMovement10> lst = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUser(prepaidUser.getId());
 
