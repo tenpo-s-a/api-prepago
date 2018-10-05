@@ -87,22 +87,22 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
           // Se verifica la respuesta de tecnocom
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
-            log.debug("********** Movimiento original no existia previamente **********");
+            log.debug("********** Movimiento original no existia previamente en Tecnocom **********");
             // Se actualiza el movimiento original
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
             // Incluir datos en CDT.
-            CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
-            callCDT(prepaidWithdraw,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
+            CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
+            callCDT(prepaidWithdraw, prepaidUser10, originalMovement.getIdMovimientoRef(), movRef.getCdtTransactionTypeConfirm());
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
             // La inclusion devuelve error, se evalua el error.
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
-              log.debug("********** Movimiento original ya existia **********");
+              log.debug("********** Movimiento original ya existia en Tecnocom **********");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
               // Incluir datos en CDT.
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
-              callCDT(prepaidWithdraw,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
+              callCDT(prepaidWithdraw, prepaidUser10, originalMovement.getIdMovimientoRef(), movRef.getCdtTransactionTypeConfirm());
             } else {
-              log.debug("********** Movimiento original rechazado **********");
+              log.debug("********** Movimiento original rechazado por Tecnocom **********");
               log.debug(inclusionMovimientosDTO.getDescRetorno());
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
             }

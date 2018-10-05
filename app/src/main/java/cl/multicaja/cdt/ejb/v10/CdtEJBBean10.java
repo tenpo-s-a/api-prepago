@@ -6,10 +6,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.core.utils.db.NullParam;
-import cl.multicaja.core.utils.db.OutParam;
-import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.core.utils.db.*;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.model.v10.CdtTransactionType;
 import org.apache.commons.lang3.StringUtils;
@@ -150,20 +147,19 @@ public class CdtEJBBean10 implements CdtEJB10 {
 
 
     Object[] params = new Object[] {
-      idRef
+      idRef,
+      new OutParam("_id", Types.BIGINT),
+      new OutParam("_id_fase_movimiento", Types.BIGINT),
+      new OutParam("_nombre_fase", Types.VARCHAR)
     };
 
-    RowMapper rm = (Map<String, Object> row) -> {
-      CdtTransaction10 tx = new CdtTransaction10();
-      tx.setTransactionReference(numberUtils.toLong(row.get("_id"), null));
-      tx.setTransactionType(CdtTransactionType.valueOfEnum(String.valueOf(row.get("_nombre_fase"))));
-      return tx;
-    };
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_cdt_busca_movimiento_referencia_v10", params);
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_cdt_busca_movimiento_referencia_v10", rm, params);
-    List<CdtTransaction10> lst = (List)resp.get("result");
+    CdtTransaction10 tx = new CdtTransaction10();
+    tx.setTransactionReference(numberUtils.toLong(resp.get("_id"), null));
+    tx.setTransactionType(CdtTransactionType.fromValue(String.valueOf(resp.get("_nombre_fase"))));
 
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+    return tx;
   }
 
 
