@@ -402,6 +402,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(user.getIsBlacklisted()){
       throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR);
     }
+
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
@@ -416,7 +417,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if (prepaidCard == null) {
 
-      prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
+        prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
         PrepaidCardStatus.LOCKED_HARD,
         PrepaidCardStatus.EXPIRED,
         PrepaidCardStatus.PENDING);
@@ -506,7 +507,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
       cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       //Confirmar el retiro en CDT
@@ -1754,6 +1754,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if (!UserStatus.ENABLED.equals(user.getGlobalStatus())) {
       throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
     }
+
     return user;
   }
 

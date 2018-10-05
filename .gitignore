@@ -18,6 +18,9 @@ app/.settings
 app/.classpath
 app/.project
 
+app/src/test/resources/multicajared/done/*.csv
+app/src/test/resources/multicajared/error/*.csv 
+
 pg/.idea
 pg/.settings
 pg/.classpath

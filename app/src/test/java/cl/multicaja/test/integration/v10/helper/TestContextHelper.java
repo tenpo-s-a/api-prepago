@@ -70,7 +70,8 @@ public class TestContextHelper extends TestBaseUnit {
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
       usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
       */
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10, tecnocomReconciliationRoute10);
+      //camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, currencyConvertionRoute10,transactionReversalRoute10, tecnocomReconciliationRoute10);
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10, transactionReversalRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
