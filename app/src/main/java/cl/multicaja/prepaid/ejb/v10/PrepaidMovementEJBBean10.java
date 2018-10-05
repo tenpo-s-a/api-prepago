@@ -108,7 +108,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception { ;
+  public void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, BusinessStatusType businessStatus, PrepaidMovementStatus status) throws Exception {
 
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
@@ -126,6 +126,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       numextcta == null ? new NullParam(Types.NUMERIC) : new InParam(numextcta, Types.NUMERIC),
       nummovext == null ? new NullParam(Types.NUMERIC) : new InParam(nummovext, Types.NUMERIC),
       clamone == null ? new NullParam(Types.NUMERIC) : new InParam(clamone, Types.NUMERIC),
+      businessStatus == null ? new NullParam(Types.VARCHAR) : new InParam(businessStatus, Types.VARCHAR),
       status.toString(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -141,31 +142,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
-    this.updatePrepaidMovement(null, id, null, null, null, null, null, null, status);
-  }
-
-  @Override
-  public void updatePrepaidMovementEstadoNegocio(Map<String, Object> header, Long movementId, BusinessStatusType status) throws Exception {
-    if (movementId == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
-    }
-    if (status == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
-    }
-
-    Object[] params = {
-      movementId,
-      status.getValue(),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_actualiza_movimiento_estado_negocio_v10", params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updatePrepaidMovementEstadoNegocio resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
+    this.updatePrepaidMovement(null, id, null, null, null, null, null, null, null, status);
   }
 
   @Override

@@ -501,6 +501,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         numextcta,
         nummovext,
         clamone,
+        null,
         status);
 
       // se confirma la transaccion

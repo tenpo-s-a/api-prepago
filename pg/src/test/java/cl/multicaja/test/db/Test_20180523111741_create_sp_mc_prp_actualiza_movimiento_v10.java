@@ -46,6 +46,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
+      "OK",
       "PROCE",
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -63,6 +64,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
     Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
 
     Assert.assertEquals("El estado debe ser PROCE", "PROCE", fila.get("estado"));
+    Assert.assertEquals("El estado de negocio debe ser OK", "OK", fila.get("estado_de_negocio"));
     Assert.assertNotNull("El pan debe estar lleno", fila.get("pan"));
     Assert.assertEquals("El pan debe estar lleno", pan, fila.get("pan"));
     Assert.assertNotNull("El centalta debe estar lleno", fila.get("centalta"));
@@ -83,6 +85,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       "PROCE",
+      "OK",
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -106,6 +109,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
       new InParam(1,Types.NUMERIC),
+      "OK",
       new NullParam(Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -130,6 +134,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
         new NullParam(Types.NUMERIC),
         new InParam(1, Types.NUMERIC),
         new InParam(1, Types.NUMERIC),
+        "OK",
         "PROCE",
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -158,6 +163,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
         new InParam(1, Types.NUMERIC),
         new NullParam(Types.NUMERIC),
         new InParam(0, Types.NUMERIC),
+        "OK",
         "PROCE",
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -186,6 +192,36 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
         new InParam(2, Types.NUMERIC),
         new InParam(3, Types.NUMERIC),
         new NullParam(Types.NUMERIC),
+        "OK",
+        "PROCE",
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+
+      List lstMov = searchMovement(mapMovimiento.get("_id"));
+
+      Assert.assertNotNull("La lista debe ser not null",lstMov);
+      Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
+
+      Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
+      Assert.assertEquals("El estado debe ser PROCE", "PROCE", fila.get("estado"));
+    }
+
+    {// CUARTO PARAMETRO NULL
+      Map<String, Object> mapMovimiento = insertRandomMovement();
+      Object[] params = {
+        mapMovimiento.get("_id"), //id
+        pan,
+        centalta,
+        cuenta,
+        new InParam(2, Types.NUMERIC),
+        new InParam(3, Types.NUMERIC),
+        new InParam(1, Types.NUMERIC),
+        new NullParam(Types.VARCHAR),
         "PROCE",
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)

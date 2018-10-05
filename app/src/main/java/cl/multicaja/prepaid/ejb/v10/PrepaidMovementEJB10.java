@@ -35,7 +35,7 @@ public interface PrepaidMovementEJB10 {
    * @param status
    * @throws Exception
    */
-  void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, PrepaidMovementStatus status) throws Exception;
+  void updatePrepaidMovement(Map<String, Object> header, Long id, String pan, String centalta, String cuenta, Integer numextcta, Integer nummovext, Integer clamone, BusinessStatusType businessStatus, PrepaidMovementStatus status) throws Exception;
 
   /**
    * actualiza solo el estado
@@ -46,16 +46,6 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception;
-
-  /**
-   * actualiza solo el estado de negocio
-   *
-   * @param header
-   * @param id
-   * @param status
-   * @throws Exception
-   */
-  void updatePrepaidMovementEstadoNegocio(Map<String, Object> header, Long movementId, BusinessStatusType status) throws Exception;
 
   /**
    * actualiza solo el estado de conciliacion con switch

@@ -2,10 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,6 +61,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
       1,
       2,
       CodigoMoneda.CHILE_CLP.getValue(),
+      BusinessStatusType.REVERSED,
       PrepaidMovementStatus.PROCESS_OK);
 
     prepaidMovement10.setPan(pan);
@@ -72,6 +70,7 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
     prepaidMovement10.setNumextcta(1);
     prepaidMovement10.setNummovext(2);
     prepaidMovement10.setClamone(CodigoMoneda.CHILE_CLP.getValue());
+    prepaidMovement10.setEstadoNegocio(BusinessStatusType.REVERSED);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
 
     PrepaidMovement10 prepaidMovement1_1 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
