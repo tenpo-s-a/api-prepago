@@ -75,6 +75,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       tipoMovimiento, //_tipo_movimiento VARCHAR
       setInParam(getUniqueLong()), //_monto NUMERIC
       estado, //_estado VARCHAR
+      "OK", // estado_de_negocio VARCHAR
       "PENDING", // estado_con_switch VARCHAR
       "PENDING", // estado_con_tecnocom VARCHAR
       origenMovimiento, // origen_movimiento VARCHAR
@@ -167,6 +168,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
 
       Map<String, Object> m = getMovement(numberUtils.toLong(resp.get("_id"), Long.valueOf(0))).get(0);
       Assert.assertEquals("Debe tener numaut = id", StringUtils.leftPad(m.get("id").toString(), 6, "0"), m.get("numaut").toString());
+      Assert.assertEquals("Debe tener estado de negocio OK", "OK", m.get("estado_de_negocio"));
     }
 
     // numaut = 123456
@@ -224,7 +226,8 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
     return dbUtils.getJdbcTemplate().queryForList(
       " SELECT " +
         "     id, " +
-        "     numaut " +
+        "     numaut, " +
+        "     estado_de_negocio " +
         " FROM " +
         "   "+ SCHEMA +".prp_movimiento"+
         " WHERE " +
