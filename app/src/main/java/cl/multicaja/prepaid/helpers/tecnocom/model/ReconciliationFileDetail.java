@@ -19,6 +19,8 @@ public class ReconciliationFileDetail {
   public static final String SAT_ORIGIN = "ONLI";
 
   private String detail;
+  private Boolean hasError;
+  private String errorDetails;
 
   private final Set<TipoFactura> reconcilableInvoiceTypes = new HashSet<>(Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
     TipoFactura.ANULA_CARGA_TRANSFERENCIA,
@@ -181,12 +183,26 @@ public class ReconciliationFileDetail {
     return scaled;
   }
 
+  public Boolean getHasError() {
+    return hasError;
+  }
+
+  public void setHasError(Boolean hasError) {
+    this.hasError = hasError;
+  }
+
+  public String getErrorDetails() {
+    return errorDetails;
+  }
+
+  public void setErrorDetails(String errorDetails) {
+    this.errorDetails = errorDetails;
+  }
+
   @Override
   public String toString() {
     return "ReconciliationFileDetail{" +
       "contrato='" + this.getContrato() + '\'' +
-      "pan='" + this.getPan() + '\'' +
-      "tiporeg='" + this.getTiporeg() + '\'' +
       "indnorcor='" + this.getIndnorcor() + '\'' +
       "tipofac='" + this.getTipoFac() + '\'' +
       "desctipofac='" + this.getTipoFac().getDescription() + '\'' +
@@ -194,8 +210,6 @@ public class ReconciliationFileDetail {
       "numaut='" + this.getNumaut() + '\'' +
       "impfac='" + this.getImpfac() + '\'' +
       "origenope='" + this.getOrigenope() + '\'' +
-      "isFromSat='" + this.isFromSat() + '\'' +
-      "isReconcilable='" + this.isReconcilable() + '\'' +
       '}';
   }
 }

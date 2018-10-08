@@ -7,15 +7,23 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.sql.Date;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
@@ -26,6 +34,10 @@ import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
 public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingCurrencyModification10.class);
+
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss Z");
+  private static DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+  private static ZoneId here = ZoneId.of("America/Santiago");
 
   public PendingTecnocomReconciliationFile10(BaseRoute10 route) {
     super(route);
@@ -40,22 +52,45 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         log.info("Proccess file name : " + fileName);
         try{
           ReconciliationFile file = TecnocomFileHelper.getInstance().validateFile(inputStream);
-          if(file != null) {
-            insertOrUpdateManualTrx(file.getDetails()
-              .stream()
-              .filter(detail -> detail.isFromSat())
-              .collect(Collectors.toList())
-            );
 
-            validateTransactions(file.getDetails()
-              .stream()
-              .filter(detail -> !detail.isFromSat())
-              .collect(Collectors.toList())
-            );
-          } else {
-            String msg = String.format("Error processing file [%s]", fileName);
+          if(file.isSuspicious()) {
+            String msg = String.format("Error processing file [%s]. File seems suspicious", fileName);
             log.error(msg);
+            processErrorSuspiciousFile(fileName);
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+          }
+
+        insertOrUpdateManualTrx(fileName, file.getDetails()
+          .stream()
+          .filter(detail -> detail.isFromSat())
+          .collect(Collectors.toList())
+        );
+
+        validateTransactions(fileName, file.getDetails()
+          .stream()
+          .filter(detail -> !detail.isFromSat())
+          .collect(Collectors.toList())
+        );
+
+          /**
+           * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron
+           * el archivo actual o anterior.
+           */
+
+          String fileDate = getDateForNotReconciledTransactions(file.getHeader().getFecenvio(), file.getHeader().getHoraenvio());
+
+        List<TipoFactura> tipFacs = Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
+          TipoFactura.ANULA_CARGA_TRANSFERENCIA,
+          TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA,
+          TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA,
+          TipoFactura.RETIRO_TRANSFERENCIA,
+          TipoFactura.ANULA_RETIRO_TRANSFERENCIA,
+          TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA,
+          TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
+
+          for (TipoFactura type : tipFacs) {
+            log.info(String.format("Changing status to not reconciled transaction from date [%s] and tipofac [%s]", fileDate, type.getDescription()));
+            getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ConciliationStatusType.NOT_RECONCILED);
           }
         } catch (Exception ex){
           String msg = String.format("Error processing file [%s]", fileName);
@@ -70,7 +105,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
    * Insertar en la tabla prp_movimientos, las transcacciones realizadas de forma manual por SAT.
    * @param trxs
    */
-  public void insertOrUpdateManualTrx(List<ReconciliationFileDetail> trxs) {
+  private void insertOrUpdateManualTrx(String fileName, List<ReconciliationFileDetail> trxs) {
     for (ReconciliationFileDetail trx : trxs) {
       try{
         //Se obtiene el pan
@@ -82,9 +117,10 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getContrato());
 
         if(prepaidCard10 == null) {
-          //TODO: Que hacer si la tarjeta es null?
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", trx.getContrato());
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
           log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
@@ -129,13 +165,16 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
         }
       } catch (Exception ex) {
-        log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: informar de error al procesar la transaccion?
+        log.error(String.format("Error processing transaction [%s]", trx.toString()));
+        if(StringUtils.isBlank(trx.getErrorDetails())) {
+          trx.setErrorDetails(ex.getMessage());
+        }
+        processErrorTrx(fileName, trx);
       }
     }
   }
 
-  public void validateTransactions(List<ReconciliationFileDetail> trxs) {
+  private void validateTransactions(String fileName, List<ReconciliationFileDetail> trxs) {
     for (ReconciliationFileDetail trx : trxs) {
       try{
         //Se obtiene el pan
@@ -147,9 +186,10 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getContrato());
 
         if(prepaidCard10 == null) {
-          //TODO: Que hacer si la tarjeta es null?
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", trx.getContrato());
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
           log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
@@ -158,7 +198,14 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
 
         if(originalMovement == null) {
-          //TODO: Investigar movimiento
+          TipoFactura tipofac = trx.getTipoFac();
+          String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
+            prepaidCard10.getIdUser(), tipofac.getCode(), tipofac.getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+
         } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
@@ -201,10 +248,46 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         }
       } catch (Exception ex) {
         log.error(String.format("Error processing transaction [%s]", trx.getNumaut()));
-        //TODO: informar de error al procesar la transaccion?
+        if(StringUtils.isBlank(trx.getErrorDetails())) {
+          trx.setErrorDetails(ex.getMessage());
+        }
+        processErrorTrx(fileName, trx);
       }
     }
   }
 
+  /* Procesar errores*/
 
+  private void processErrorSuspiciousFile(String fileName) {
+    log.info(String.format("processErrorSuspiciousFile - %s", fileName));
+
+    Map<String, Object> templateData = new HashMap<String, Object>();
+    templateData.put("fileName", fileName);
+    //TODO: definir template de correo
+    //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
+  }
+
+  private void processErrorTrx(String fileName, ReconciliationFileDetail trx) {
+    log.info("processErrorTrx");
+    //TODO: definir como informar las transacciones
+    Map<String, Object> templateData = new HashMap<String, Object>();
+    //templateData.put("fileName", fileName);
+    //TODO: definir template de correo
+    //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
+  }
+
+
+  private String getDateForNotReconciledTransactions(String date, String time) {
+    ZonedDateTime hereAndNow = Instant.now().atZone(here);
+    String timezoneOffset = String.format("%tz", hereAndNow);
+
+    ZonedDateTime zonedDateTime = ZonedDateTime.parse(String.format("%s %s %s", date, time, timezoneOffset), formatter);
+
+    Instant instant = zonedDateTime.toInstant().minus(1,ChronoUnit.DAYS);
+
+    //get date time only
+    LocalDateTime result = LocalDateTime.ofInstant(instant, ZoneId.of(ZoneOffset.UTC.getId()));
+
+    return result.toLocalDate().format(dbFormatter);
+  }
 }
