@@ -17,7 +17,7 @@ import static cl.multicaja.core.model.Errors.ERROR_CAMELFACTORY;
 
 public final class ReprocesQueueDelegate10 {
 
-  private static Log log = LogFactory.getLog(PrepaidTopupDelegate10.class);
+  private static Log log = LogFactory.getLog(ReprocesQueueDelegate10.class);
   private CamelFactory camelFactory;
 
   public ReprocesQueueDelegate10() {

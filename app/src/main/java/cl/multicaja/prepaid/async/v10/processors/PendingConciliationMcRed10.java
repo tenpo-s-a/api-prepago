@@ -70,11 +70,6 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
            log.error("No conciliado");
            //Todo: Agregar Movimiento y marcar como a investigar ya que no deberia no existir en nuestra tabla.
            continue;
-         }else if (!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.PENDING.equals(prepaidMovement10.getEstado()) && !PrepaidMovementStatus.IN_PROCESS.equals(prepaidMovement10.getEstado())) {
-           log.error("No Conciliado x status: "+prepaidMovement10.getEstado());
-           getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
-
-           continue;
          }
          else {
             if (!recTmp.getAmount().equals(prepaidMovement10.getMonto().longValue())) {

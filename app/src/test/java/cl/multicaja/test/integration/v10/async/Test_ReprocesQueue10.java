@@ -57,9 +57,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    Thread.sleep(2000);
-    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
 
+    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
+    Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
