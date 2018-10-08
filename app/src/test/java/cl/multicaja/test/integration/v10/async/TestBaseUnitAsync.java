@@ -92,7 +92,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se envia el mensaje a la cola
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
@@ -130,7 +130,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     data.setPrepaidCard10(prepaidCard);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     if (retryCount != null){
       req.setRetryCount(retryCount);
     }
@@ -163,7 +163,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     req.getData().setPrepaidUser10(prepaidUser);
 
     //se envia el mensaje a la cola
@@ -202,7 +202,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     req.getData().setPrepaidCard10(prepaidCard);
     req.getData().setPrepaidUser10(prepaidUser);
 
@@ -238,7 +238,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     req.getData().setPrepaidCard10(prepaidCard10);
     req.getData().setPrepaidUser10(prepaidUser10);
     req.getData().setUser(user);
@@ -274,7 +274,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     req.getData().setUser(user);
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
@@ -309,7 +309,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount == null ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(retryCount, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
 
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
@@ -351,7 +351,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-
+    prepaidWithdraw.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidWithdraw, prepaidUser, reverse);
     if(user != null) {
@@ -361,7 +361,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
@@ -380,14 +380,14 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ);
-
+    prepaidTopup.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10, user,prepaidUser10, prepaidMovement);
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 

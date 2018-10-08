@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
@@ -58,7 +59,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static FilesEJBBean10 filesEJBBean10;
-
+  private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   private static UserClient userClient;
 
@@ -118,7 +119,12 @@ public class TestBaseUnit extends TestApiBase {
     }
     return prepaidTopupDelegate10;
   }
-
+  public static ReprocesQueueDelegate10 getReprocesQueueDelegate10(){
+    if (reprocesQueueDelegate10 == null) {
+      reprocesQueueDelegate10 = new ReprocesQueueDelegate10();
+    }
+    return reprocesQueueDelegate10;
+  }
   /**
    *
    * @return
@@ -188,6 +194,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
+      prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
     }
     return prepaidEJBBean10;
   }
@@ -550,7 +557,7 @@ public class TestBaseUnit extends TestApiBase {
     newAmountAndCurrency.setValue(new BigDecimal(3000));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
-
+    prepaidTopup.setTotal(newAmountAndCurrency);
     prepaidTopup.setMerchantCategory(1);
     prepaidTopup.setMerchantName(getRandomString(6));
 

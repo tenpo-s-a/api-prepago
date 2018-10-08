@@ -71,7 +71,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
         if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
           log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
-          return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
+          return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, true);
 
         } else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
           log.debug("********** Reintentando movimiento original **********");
@@ -162,17 +162,17 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
-            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
+            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, true);
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
-            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
+            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, true);
           } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
-            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
+            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, true);
           } else {
-            PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP_REVERSE;
+            PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_WITHDRAW_REVERSE;
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovementReverse().getId(), status);
             data.getPrepaidMovementReverse().setEstado(status);
             return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_REQ), exchange, req, false);

@@ -41,6 +41,7 @@ public class PendingTopup10 extends BaseProcessor10 {
     super(route);
   }
 
+
   public ProcessorRoute processPendingTopup() {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
@@ -149,7 +150,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             Integer nummovext = inclusionMovimientosDTO.getNummovext();
             Integer clamone = inclusionMovimientosDTO.getClamone();
             PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK; //realizado
-
+            log.info("Prepaid Movement Status: "+status.name() );
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
               prepaidMovement.getId(),
               prepaidCard.getPan(),
@@ -168,7 +169,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             prepaidMovement.setNummovext(nummovext);
             prepaidMovement.setClamone(clamone);
             prepaidMovement.setEstado(status);
-
+            data.setPrepaidMovement10(prepaidMovement);
             CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
             CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
@@ -188,14 +189,14 @@ public class PendingTopup10 extends BaseProcessor10 {
             if (!cdtTransaction.isNumErrorOk()) {
               log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
             }
-
+            log.info(prepaidTopup);
             //Envio de comprobante de carga por mail
             Map<String, Object> templateData = new HashMap<>();
 
             templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
             templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-            templateData.put("transaction_amount", NumberUtils.getInstance().toClp(prepaidTopup.getTotal().getValue()));
-            templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(prepaidTopup.getAmount().getValue()));
+            templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
+            templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
             templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
 
             EmailBody emailBody = new EmailBody();
@@ -209,6 +210,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             } else {
+              req.setData(data);
               return req;
             }
 
@@ -254,7 +256,8 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
         }
         }catch (Exception e){
-          log.error(String.format("Error desconocido al realizar carga %s",e.getLocalizedMessage()));
+          e.printStackTrace();
+          log.error(String.format("Error desconocido al realizar carga %s",e));
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());
           return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, true);

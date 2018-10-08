@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.processors.*;
  */
 public final class PrepaidTopupRoute10 extends BaseRoute10 {
 
+  public static final String PENDING_TOPUP_SEDA = "seda:PrepaidTopupRoute10.pendingTopup";
   public static final String PENDING_TOPUP_REQ = "PrepaidTopupRoute10.pendingTopup.req";
   public static final String PENDING_TOPUP_RESP = "PrepaidTopupRoute10.pendingTopup.resp";
 
@@ -73,7 +74,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingTopup10(this).processErrorTopup())
-      .to(createJMSEndpoint(ERROR_TOPUP_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_TOPUP_RESP)).end();
 
     /**
      * Emisiones pendientes
@@ -94,14 +95,14 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_EMISSION_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processErrorEmission())
-      .to(createJMSEndpoint(ERROR_EMISSION_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_EMISSION_RESP)).end();
 
     /**
      * Error Obtener Datos Tarjeta
      */
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CREATE_CARD_REQ, concurrentConsumers)))
       .process(new PendingCard10(this).processErrorCreateCard())
-      .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_CREATE_CARD_RESP)).end();
 
 
     /**
@@ -114,7 +115,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     // Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
       .process(new PendingCardIssuanceFee10(this).processErrorPendingIssuanceFee())
-      .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
 
     /**
      * Envio Mail Tarjeta
@@ -142,7 +143,7 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     //Errores
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP)).end();
 
   }
 }

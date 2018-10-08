@@ -45,7 +45,7 @@ public class TransactionReversalRoute10 extends BaseRoute10 {
     //Errores Reversa de carga
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_REVERSAL_TOPUP_REQ, concurrentConsumers)))
       .process(new PendingReverseTopup10(this).processErrorTopupReverse())
-      .to(createJMSEndpoint(ERROR_REVERSAL_TOPUP_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_REVERSAL_TOPUP_RESP)).end();
 
     /**
      * Reversa de Retiros
@@ -62,7 +62,7 @@ public class TransactionReversalRoute10 extends BaseRoute10 {
     //Errores Reversa de Retiro
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_REVERSAL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingReverseWithdraw10(this).processErrorWithdrawReversal())
-      .to(createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_RESP + confResp)).end();
+      .to(createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_RESP)).end();
 
   }
 
