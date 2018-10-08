@@ -129,6 +129,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
 
         if(originalMovement == null) {
+          //TODO: verificar si se tiene que hacer esto
           // Movimiento original no existe. Se agrega.
           PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
           movement10.setConTecnocom(ConciliationStatusType.RECONCILED);
@@ -145,7 +146,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               originalMovement.getId(),
               ConciliationStatusType.NEED_VERIFICATION);
           } else {
-
+            //TODO: El estado de movimiento no debe ser actualizado en este proceso.
             //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
               trx.getCentalta(),
@@ -228,6 +229,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               case ERROR_TECNOCOM_REINTENTABLE:
               case ERROR_TIMEOUT_RESPONSE:
               case ERROR_TIMEOUT_CONEXION:
+                //TODO: El estado de movimiento no debe ser actualizado en este proceso.
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
                   trx.getCentalta(),
                   trx.getCuenta(),
