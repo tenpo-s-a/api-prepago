@@ -93,6 +93,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     prepareUsersAndCards();
   }
 
+  @Ignore
   @Test
   public void processOnlineTransactions() throws Exception {
     List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
@@ -220,7 +221,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     putSuccessFileIntoSftp(filename);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NEED_VERIFICATION, MovementOriginType.API);
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -228,7 +229,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NEED_VERIFICATION, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
     }
@@ -339,7 +340,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Thread.sleep(1500);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NEED_VERIFICATION, MovementOriginType.API);
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -347,7 +348,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado PENDING", PrepaidMovementStatus.PENDING, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NEED_VERIFICATION", ConciliationStatusType.NEED_VERIFICATION, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
     }
@@ -394,7 +395,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     putSuccessFileIntoSftp(filename);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NEED_VERIFICATION, MovementOriginType.API);
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -402,7 +403,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado IN_PROCESS", PrepaidMovementStatus.IN_PROCESS, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NEED_VERIFICATION", ConciliationStatusType.NEED_VERIFICATION, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
     }
@@ -449,7 +450,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     putSuccessFileIntoSftp(filename);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NEED_VERIFICATION, MovementOriginType.API);
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -457,7 +458,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado REJECTED", PrepaidMovementStatus.REJECTED, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NEED_VERIFICATION", ConciliationStatusType.NEED_VERIFICATION, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
     }
@@ -511,7 +512,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
 
     for (PrepaidMovement10 movement: movements) {
-      Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
+      Assert.assertEquals("Debe tener estado ERROR_TECNOCOM_REINTENTABLE", PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE, movement.getEstado());
       Assert.assertEquals("Debe tener estado conciliacion tecnocom RECONCILED", ConciliationStatusType.RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
@@ -570,7 +571,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
 
     for (PrepaidMovement10 movement: movements) {
-      Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
+      Assert.assertEquals("Debe tener estado ERROR_TIMEOUT_CONEXION", PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION, movement.getEstado());
       Assert.assertEquals("Debe tener estado conciliacion tecnocom RECONCILED", ConciliationStatusType.RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
@@ -629,7 +630,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
 
     for (PrepaidMovement10 movement: movements) {
-      Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
+      Assert.assertEquals("Debe tener estado ERROR_TIMEOUT_RESPONSE", PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE, movement.getEstado());
       Assert.assertEquals("Debe tener estado conciliacion tecnocom RECONCILED", ConciliationStatusType.RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
@@ -682,7 +683,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     putSuccessFileIntoSftp(filename);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NEED_VERIFICATION, MovementOriginType.API);
+      null, null, null, null, null, null, ConciliationStatusType.PENDING, ConciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
@@ -690,7 +691,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     for (PrepaidMovement10 movement: movements) {
       Assert.assertEquals("Debe tener estado PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, movement.getEstado());
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NEED_VERIFICATION", ConciliationStatusType.NEED_VERIFICATION, movement.getConTecnocom());
+      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ConciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
       Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ConciliationStatusType.PENDING, movement.getConSwitch());
       Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
     }
