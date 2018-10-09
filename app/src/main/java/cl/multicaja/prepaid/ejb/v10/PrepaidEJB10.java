@@ -174,4 +174,12 @@ public interface PrepaidEJB10 {
    */
   User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param reprocesQueue
+   * @throws Exception
+   */
+  String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception;
+
 }

@@ -197,10 +197,9 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
       public ExchangeData<PrepaidReverseData10> processExchange(long idTrx, ExchangeData<PrepaidReverseData10> req, Exchange exchange) throws Exception {
         log.info("processErrorTopupReverse - REQ: " + req);
         req.retryCountNext();
-        PrepaidReverseData10 data = req.getData();
         Map<String, Object> templateData = new HashMap<>();
-        templateData.put("idUsuario", data.getUser().getId().toString());
-        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+        templateData.put("idUsuario", req.getData().getUser().getId().toString());
+        templateData.put("rutCliente", req.getData().getUser().getRut().getValue().toString() + "-" + req.getData().getUser().getRut().getDv());
         getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         return req;
       }
