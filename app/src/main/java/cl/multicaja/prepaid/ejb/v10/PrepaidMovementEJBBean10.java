@@ -549,4 +549,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
+
+  @Override
+  public List<PrepaidMovement10> searchMovementForConciliate(Map<String, Object> headers) throws Exception {
+
+    RowMapper rm = (Map<String, Object> row) -> {
+      PrepaidMovement10 movement10 = new PrepaidMovement10();
+      movement10.setId(numberUtils.toLong(row.get("_id")));
+      movement10.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
+      movement10.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
+      movement10.setConSwitch(ConciliationStatusType.fromValue("_estado_con_switch"));
+      movement10.setConTecnocom(ConciliationStatusType.fromValue("_estado_con_tecnocom"));
+      return movement10;
+    };
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_conciliar_v10",getSchema()), rm);
+    return (List)resp.get("result");
+  }
+
 }

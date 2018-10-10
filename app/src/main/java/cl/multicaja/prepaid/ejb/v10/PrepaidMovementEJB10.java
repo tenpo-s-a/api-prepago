@@ -220,4 +220,11 @@ public interface PrepaidMovementEJB10 {
    */
   void createMovementResearch(Map<String, Object> headers,String movRef,ConciliationOriginType originType,String fileNme) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @return
+   * @throws Exception
+   */
+  List<PrepaidMovement10> searchMovementForConciliate(Map<String, Object> headers) throws Exception;
 }
