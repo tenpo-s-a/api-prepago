@@ -199,4 +199,25 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param idMovRef
+   * @param actionType
+   * @param statusType
+   * @throws Exception
+   */
+  void createMovementConciliate(Map<String, Object> headers,Long idMovRef,ConciliationActionType actionType,ConciliationStatusType statusType) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param movRef
+   * @param originType
+   * @param fileNme
+   * @throws Exception
+   */
+  void createMovementResearch(Map<String, Object> headers,String movRef,ConciliationOriginType originType,String fileNme) throws Exception;
+
 }

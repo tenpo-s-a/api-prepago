@@ -498,4 +498,55 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+
+  @Override
+  public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ConciliationActionType actionType, ConciliationStatusType statusType) throws Exception {
+    if(idMovRef == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMovRef"));
+    }
+    if(actionType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "actionType"));
+    }
+    if(statusType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "statusType"));
+    }
+    Object[] params = {
+      idMovRef,
+      actionType.name(),
+      statusType.name(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_conciliado_v10",getSchema()),params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_crea_movimiento_conciliado_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public void createMovementResearch(Map<String, Object> headers, String movRef, ConciliationOriginType originType, String fileName) throws Exception {
+    if(movRef == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
+    }
+    if(originType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originType"));
+    }
+    if(fileName == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileName"));
+    }
+    Object[] params = {
+      movRef,
+      originType.name(),
+      fileName,
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
 }
