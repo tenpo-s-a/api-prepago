@@ -129,33 +129,32 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
 
         if(originalMovement == null) {
-          // Movimiento original no existe. Se agrega.
-          PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
-          movement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-          movement10.setConSwitch(ConciliationStatusType.PENDING);
-          movement10.setOriginType(MovementOriginType.SAT);
-          movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
-          movement10.setIdMovimientoRef(Long.valueOf(0));
-          movement10.setIdTxExterno("");
-          getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+          // Movimiento original no existe.
+          /**
+           *           PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
+           *           movement10.setConTecnocom(ConciliationStatusType.RECONCILED);
+           *           movement10.setConSwitch(ConciliationStatusType.PENDING);
+           *           movement10.setOriginType(MovementOriginType.SAT);
+           *           movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+           *           movement10.setIdMovimientoRef(Long.valueOf(0));
+           *           movement10.setIdTxExterno("");
+           *           getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
+           */
+
+          String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
+            prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+
+          //TODO: Movimiento original no existe. Agregar informacion en tabla de movimientos a investigar
 
         } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NEED_VERIFICATION);
+              ConciliationStatusType.NOT_RECONCILED);
           } else {
-
-            //Movimiento ya existe. Se actualiza el estado a PROCESS_OK
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
-              trx.getCentalta(),
-              trx.getCuenta(),
-              numberUtils.toInteger(trx.getNumextcta()),
-              numberUtils.toInteger(trx.getNummovext()),
-              numberUtils.toInteger(trx.getClamon()),
-              null,
-              PrepaidMovementStatus.PROCESS_OK);
-
             //Actualiza el estado_con_tecnocom a conciliado
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
@@ -200,17 +199,20 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         if(originalMovement == null) {
           TipoFactura tipofac = trx.getTipoFac();
           String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-            prepaidCard10.getIdUser(), tipofac.getCode(), tipofac.getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
+          prepaidCard10.getIdUser(), tipofac.getCode(), tipofac.getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
+
+          //TODO: Movimiento original no existe. Agregar informacion en tabla de movimientos a investigar
+
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
         } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NEED_VERIFICATION);
+              ConciliationStatusType.NOT_RECONCILED);
           } else {
             switch (originalMovement.getEstado()) {
               case PROCESS_OK:
@@ -223,11 +225,13 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               case REJECTED:
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
-                  ConciliationStatusType.NEED_VERIFICATION);
+                  ConciliationStatusType.NOT_RECONCILED);
                 break;
               case ERROR_TECNOCOM_REINTENTABLE:
               case ERROR_TIMEOUT_RESPONSE:
               case ERROR_TIMEOUT_CONEXION:
+                //TODO: El estado de movimiento no debe ser actualizado en este proceso.
+                /**
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
                   trx.getCentalta(),
                   trx.getCuenta(),
@@ -236,6 +240,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
                   numberUtils.toInteger(trx.getClamon()),
                   null,
                   PrepaidMovementStatus.PROCESS_OK);
+                */
 
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
