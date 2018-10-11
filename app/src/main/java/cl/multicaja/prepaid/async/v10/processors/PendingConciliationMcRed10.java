@@ -4,6 +4,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoFactura;
 import com.opencsv.CSVReader;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -12,6 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,10 +25,11 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
 
   private static Log log = LogFactory.getLog(PendingConciliationMcRed10.class);
 
+  private static final String dateFormat = "yyyyMMdd";
+
   public PendingConciliationMcRed10(BaseRoute10 route) {
     super(route);
   }
-
 
   public Processor processReconciliationsMcRed(){
     return new Processor() {
@@ -40,27 +44,34 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
           log.info("IN rendicion_cargas_mcpsa_mc");
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
-          String sFecha = fileName.substring(26, 35);
+          int datePositionIndex = 26;
+          String sFecha = addDays(fileName.substring(datePositionIndex, datePositionIndex + dateFormat.length()), dateFormat, -1);
+          getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, sFecha, sFecha, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
           log.info("OUT rendicion_cargas_mcpsa_mc");
         } else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
-          String sFecha = fileName.substring(37, 46);
         } else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.CORRECTORA);
-          String sFecha = fileName.substring(37, 46);
+          int datePositionIndex = 37;
+          String sFecha = addDays(fileName.substring(datePositionIndex, datePositionIndex + dateFormat.length()), dateFormat, -1);
+          getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, sFecha, sFecha, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, ConciliationStatusType.NOT_RECONCILED);
         } else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.NORMAL);
-          String sFecha = fileName.substring(27, 36);
+          int datePositionIndex = 27;
+          String sFecha = addDays(fileName.substring(datePositionIndex, datePositionIndex + dateFormat.length()), dateFormat, -1);
+          getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, sFecha, sFecha, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
         } else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.NORMAL);
-          String sFecha = fileName.substring(39, 48);
         } else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.WITHDRAW,IndicadorNormalCorrector.CORRECTORA);
-          String sFecha = fileName.substring(39, 48);
+          int datePositionIndex = 38;
+          String sFecha = addDays(fileName.substring(datePositionIndex, datePositionIndex + dateFormat.length()), dateFormat, -1);
+          getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, sFecha, sFecha, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, ConciliationStatusType.NOT_RECONCILED);
         }
       }
     };
   }
+
   private void conciliation(List<ConciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector) throws Exception{
      try {
        for (ConciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
@@ -123,5 +134,12 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
     }
     log.info("OUT");
     return lstReconciliationMcRed10;
+  }
+
+  private String addDays(String date, String format, int days) {
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    LocalDate localDate = LocalDate.parse(date, timeFormatter);
+    localDate = localDate.plusDays(days);
+    return localDate.format(timeFormatter);
   }
 }

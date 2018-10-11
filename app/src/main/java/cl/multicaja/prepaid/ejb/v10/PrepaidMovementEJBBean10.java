@@ -146,7 +146,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
     if(startDate == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
     }
@@ -155,8 +155,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "endDate"));
     }
 
-    if(tipofac == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
+    if(tipoMovimiento == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoMovimiento"));
     }
 
     if(indnorcor == null) {
@@ -170,7 +170,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Object[] params = {
       startDate,
       endDate,
-      new InParam(tipofac.getCode(), Types.NUMERIC),
+      new InParam(tipoMovimiento.toString(), Types.VARCHAR),
       new InParam(indnorcor.getValue(), Types.NUMERIC),
       status.getValue(),
       new OutParam("_error_code", Types.VARCHAR),

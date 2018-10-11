@@ -54,7 +54,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
     Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
 
     Timestamp startDateTs = Timestamp.valueOf("2018-08-03 00:00:00");
-    Timestamp endDateTs = Timestamp.valueOf("2018-09-03 23:59:59");
+    Timestamp endDateTs = Timestamp.valueOf("2018-08-03 23:59:59");
 
     List lstMov = searchAllMovements();
 

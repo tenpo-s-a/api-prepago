@@ -40,7 +40,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       endDate,
-      tipofac,
+      "CARGA",
       indnorcor,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -51,25 +51,30 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
+    System.out.println("Mensaje error: " + resp.get("_error_msg"));
 
-    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 00:00:00");
-    Timestamp endDateTs = Timestamp.valueOf("2018-09-03 23:59:59");
+    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 04:00:00");
+    Timestamp endDateTs = Timestamp.valueOf("2018-08-04 03:59:59");
 
     List lstMov = searchAllMovements();
     int notReconciliateCount = 0;
+    int i = 0;
     for (Object object: lstMov) {
+      i++;
       Map<String, Object> movement = (Map<String, Object>) object;
       Timestamp movementCreationDate = (Timestamp) movement.get("fecha_creacion");
+      System.out.println(i + "] " + movementCreationDate);
       Integer movementTipoFac = ((BigDecimal)movement.get("tipofac")).intValue();
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
 
       String switchStatus = (String) movement.get("estado_con_switch");
       if (switchStatus.equals("NO_CONCILIADO")) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
-        Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
+        Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03 04:00:00 - 2018/08/04 03:59:59[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);
         Assert.assertEquals("Debe tener indnorcor " + indnorcor, indnorcor, movementIndNorCor);
         notReconciliateCount++;
+        System.out.println("In, before: " + movementCreationDate.before(startDateTs) + ", after: " + movementCreationDate.after(endDateTs));
       }
       else {
         boolean excludedFromDates = movementCreationDate.before(startDateTs) || movementCreationDate.after(endDateTs);
@@ -79,7 +84,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
       }
     }
 
-    Assert.assertEquals("Debe haber 2 movimientos no conciliados", 2, notReconciliateCount);
+    Assert.assertEquals("Debe haber 4 movimientos no conciliados", 4, notReconciliateCount);
   }
 
   @Test
@@ -89,7 +94,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       new NullParam(Types.VARCHAR),
       endDate,
-      3001,
+      "CARGA",
       1,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -108,7 +113,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       new NullParam(Types.VARCHAR),
-      3001,
+      "CARGA",
       1,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -128,7 +133,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       endDate,
-      new NullParam(Types.NUMERIC),
+      new NullParam(Types.VARCHAR),
       1,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -148,7 +153,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       endDate,
-      3001,
+      "CARGA",
       new NullParam(Types.NUMERIC),
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -168,7 +173,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       endDate,
-      3001,
+      "CARGA",
       2,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -188,7 +193,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Object[] params = {
       startDate,
       endDate,
-      3001,
+      "CARGA",
       1,
       new NullParam(Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
@@ -203,40 +208,40 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   public static void fillDb() {
     try {
       Map<String, Object> mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-25 15:00:32", 3001, 0);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 21:14:09", "CARGA", 1); // Dentro
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 21:14:09", 3001, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 17:43:54", "CARGA", 1); // Dentro
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 17:43:54", 3001, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 04:00:00", "CARGA", 1); // Dentro, limite 4am
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-01 11:52:10", 3002, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-04 03:59:59", "CARGA", 1); // Dentro, limite 3:59am del dia sgte
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-14 19:21:06", 3001, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 03:59:32", "CARGA", 1); // Fuera, por fecha (antes 4am)
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 00:43:54", 3001, 0);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-04 04:00:01", "CARGA", 1); // Fuera, por fecha (despues 4am)
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-09-04 09:05:31", 3001, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 11:52:10", "RETIRO", 1); // Fuera, por tipo movimiento
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 19:43:54", 3002, 1);
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 07:43:54", "CARGA", 0); // Fuera, por indnorcor
     }
     catch (SQLException e) {
       e.printStackTrace();
     }
   }
 
-  static public void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {
+  static public void changeMovement(Object idMovimiento, String newDate, String tipoMovimiento, Integer indnorcor)  {
     dbUtils.getJdbcTemplate().execute(
       "UPDATE " + SCHEMA + ".prp_movimiento SET fecha_creacion = "
-        + "TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS'), "
+        + "(TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS')::timestamp without time zone), "
         + "indnorcor = " + indnorcor + ", "
-        + "tipofac = " + tipofac + " "
+        + "tipo_movimiento = '" + tipoMovimiento + "' "
         + "WHERE ID = " + idMovimiento.toString());
   }
 
