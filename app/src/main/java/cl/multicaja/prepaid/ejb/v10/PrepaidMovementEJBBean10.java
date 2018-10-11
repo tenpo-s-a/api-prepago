@@ -498,4 +498,72 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
+
+  @Override
+  public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ConciliationActionType actionType, ConciliationStatusType statusType) throws Exception {
+    if(idMovRef == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMovRef"));
+    }
+    if(actionType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "actionType"));
+    }
+    if(statusType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "statusType"));
+    }
+    Object[] params = {
+      idMovRef,
+      actionType.name(),
+      statusType.name(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_conciliado_v10",getSchema()),params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_crea_movimiento_conciliado_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public void createMovementResearch(Map<String, Object> headers, String movRef, ConciliationOriginType originType, String fileName) throws Exception {
+    if(movRef == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
+    }
+    if(originType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originType"));
+    }
+    if(fileName == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileName"));
+    }
+    Object[] params = {
+      movRef,
+      originType.name(),
+      fileName,
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public List<PrepaidMovement10> searchMovementForConciliate(Map<String, Object> headers) throws Exception {
+
+    RowMapper rm = (Map<String, Object> row) -> {
+      PrepaidMovement10 movement10 = new PrepaidMovement10();
+      movement10.setId(numberUtils.toLong(row.get("_id")));
+      movement10.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
+      movement10.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
+      movement10.setConSwitch(ConciliationStatusType.fromValue("_estado_con_switch"));
+      movement10.setConTecnocom(ConciliationStatusType.fromValue("_estado_con_tecnocom"));
+      return movement10;
+    };
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_conciliar_v10",getSchema()), rm);
+    return (List)resp.get("result");
+  }
+
 }
