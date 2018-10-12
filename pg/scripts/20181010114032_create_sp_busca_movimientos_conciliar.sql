@@ -23,7 +23,9 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_conciliar_v10
     OUT _estado               VARCHAR,
     OUT _estado_de_negocio    VARCHAR,
     OUT _estado_con_switch    VARCHAR,
-    OUT _estado_con_tecnocom  VARCHAR
+    OUT _estado_con_tecnocom  VARCHAR,
+    OUT _tipo_movimiento      VARCHAR,
+    OUT _indnorcor            NUMERIC
 )RETURNS SETOF RECORD AS $$
 BEGIN
   RETURN QUERY
@@ -32,7 +34,9 @@ BEGIN
       prp_movimiento.estado,
       prp_movimiento.estado_de_negocio,
       prp_movimiento.estado_con_switch,
-      prp_movimiento.estado_con_tecnocom
+      prp_movimiento.estado_con_tecnocom,
+      prp_movimiento.tipo_movimiento,
+      prp_movimiento.indnorcor
     FROM
      ${schema}.prp_movimiento
     WHERE

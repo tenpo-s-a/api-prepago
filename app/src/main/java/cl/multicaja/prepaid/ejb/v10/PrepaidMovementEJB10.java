@@ -126,6 +126,13 @@ public interface PrepaidMovementEJB10 {
   PrepaidMovement10 getPrepaidMovementById(Long id) throws Exception;
 
   /**
+   * Buscar una reversa
+   * @param idMovimientoRef
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getPrepaidMovementReverse(Long idMovimientoRef) throws Exception;
+  /**
    *
    * @param idPrepaidUser
    * @return
@@ -226,5 +233,5 @@ public interface PrepaidMovementEJB10 {
    * @return
    * @throws Exception
    */
-  List<PrepaidMovement10> searchMovementForConciliate(Map<String, Object> headers) throws Exception;
+  List<PrepaidMovement10> getMovementsForConciliate(Map<String, Object> headers) throws Exception;
 }

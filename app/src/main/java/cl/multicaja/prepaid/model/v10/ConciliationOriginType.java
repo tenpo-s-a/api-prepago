@@ -3,7 +3,8 @@ package cl.multicaja.prepaid.model.v10;
 public enum ConciliationOriginType {
 
   SWITCH,
-  TECNOCOM;
+  TECNOCOM,
+  MOTOR;
 
   public static ConciliationOriginType valueOfEnum(String name) {
     try {
