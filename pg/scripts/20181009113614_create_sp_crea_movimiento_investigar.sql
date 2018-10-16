@@ -41,11 +41,6 @@ BEGIN
       RETURN;
     END IF;
 
-    IF COALESCE(_nombre_archivo,'') = '' THEN
-	  _error_code := '101000';
-      _error_msg := 'El _nombre_archivo es obligatorio';
-      RETURN;
-    END IF;
 
     INSERT INTO ${schema}.prp_movimiento_investigar
     (
@@ -58,7 +53,7 @@ BEGIN
     (
       _mov_ref,
       _origen,
-      _nombre_archivo,
+      coalesce(_nombre_archivo,''),
       timezone('utc', now())
     );
 

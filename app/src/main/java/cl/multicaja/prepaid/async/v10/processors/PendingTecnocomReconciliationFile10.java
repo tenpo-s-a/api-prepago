@@ -18,8 +18,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -90,7 +88,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
           for (TipoFactura type : tipFacs) {
             log.info(String.format("Changing status to not reconciled transaction from date [%s] and tipofac [%s]", fileDate, type.getDescription()));
-            getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ConciliationStatusType.NOT_RECONCILED);
+            getRoute().getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ReconciliationStatusType.NOT_RECONCILED);
           }
         } catch (Exception ex){
           String msg = String.format("Error processing file [%s]", fileName);
@@ -132,8 +130,8 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
           // Movimiento original no existe.
           /**
            *           PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
-           *           movement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-           *           movement10.setConSwitch(ConciliationStatusType.PENDING);
+           *           movement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+           *           movement10.setConSwitch(ReconciliationStatusType.PENDING);
            *           movement10.setOriginType(MovementOriginType.SAT);
            *           movement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
            *           movement10.setIdMovimientoRef(Long.valueOf(0));
@@ -149,16 +147,16 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
           //TODO: Movimiento original no existe. Agregar informacion en tabla de movimientos a investigar
 
-        } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
+        } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NOT_RECONCILED);
+              ReconciliationStatusType.NOT_RECONCILED);
           } else {
             //Actualiza el estado_con_tecnocom a conciliado
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.RECONCILED);
+              ReconciliationStatusType.RECONCILED);
           }
         } else {
           log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
@@ -208,24 +206,24 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
-        } else if(ConciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
+        } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
             getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
-              ConciliationStatusType.NOT_RECONCILED);
+              ReconciliationStatusType.NOT_RECONCILED);
           } else {
             switch (originalMovement.getEstado()) {
               case PROCESS_OK:
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
-                  ConciliationStatusType.RECONCILED);
+                  ReconciliationStatusType.RECONCILED);
                 break;
               case PENDING:
               case IN_PROCESS:
               case REJECTED:
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
-                  ConciliationStatusType.NOT_RECONCILED);
+                  ReconciliationStatusType.NOT_RECONCILED);
                 break;
               case ERROR_TECNOCOM_REINTENTABLE:
               case ERROR_TIMEOUT_RESPONSE:
@@ -244,7 +242,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
 
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
-                  ConciliationStatusType.RECONCILED);
+                  ReconciliationStatusType.RECONCILED);
                 break;
             }
           }

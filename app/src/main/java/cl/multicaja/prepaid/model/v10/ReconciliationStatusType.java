@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum ConciliationStatusType {
+public enum ReconciliationStatusType {
 
   PENDING("PENDING"),
   RECONCILED("RECONCILED"),
@@ -20,22 +20,22 @@ public enum ConciliationStatusType {
 
   String value;
 
-  ConciliationStatusType(String value) {
+  ReconciliationStatusType(String value) {
     this.value = value;
   }
-  public static ConciliationStatusType valueOfEnum(String name) {
+  public static ReconciliationStatusType valueOfEnum(String name) {
     try {
-      return ConciliationStatusType.valueOf(name);
+      return ReconciliationStatusType.valueOf(name);
     } catch(Exception ex) {
       return null;
     }
   }
-  private static Map<String, ConciliationStatusType> FORMAT_MAP = Stream
-    .of(ConciliationStatusType.values())
+  private static Map<String, ReconciliationStatusType> FORMAT_MAP = Stream
+    .of(ReconciliationStatusType.values())
     .collect(Collectors.toMap(s -> s.value, Function.identity()));
 
   @JsonCreator
-  public static ConciliationStatusType fromValue(String value) {
+  public static ReconciliationStatusType fromValue(String value) {
     return FORMAT_MAP.get(value);
   }
 }

@@ -17,7 +17,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      getPrepaidMovementEJBBean10().createMovementResearch(null, String.format("%s",prepaidMovement10.getId()),ConciliationOriginType.SWITCH,"TABLE");
+      getPrepaidMovementEJBBean10().createMovementResearch(null, String.format("%s",prepaidMovement10.getId()), ReconciliationOriginType.SWITCH,"TABLE");
 
     }catch (Exception e){
       e.printStackTrace();
@@ -49,7 +49,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
     try{
-      getPrepaidMovementEJBBean10().createMovementResearch(null,getRandomString(10), ConciliationOriginType.SWITCH,null);
+      getPrepaidMovementEJBBean10().createMovementResearch(null,getRandomString(10), ReconciliationOriginType.SWITCH,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);

@@ -2,7 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
+import cl.multicaja.prepaid.model.v10.ReconciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -32,7 +32,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConTecnocom exten
 
     Assert.assertNotNull("Debe existir el movimiento",prepaidMovement10);
     try {
-      getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
+      getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
     }
     catch (Exception e){
       Assert.fail("Error al actualizar el estado con tecnocom");
@@ -40,7 +40,7 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConTecnocom exten
 
     PrepaidMovement10 prepaidMovement10_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
     Assert.assertNotEquals("Deben Ser diferentes", prepaidMovement10, prepaidMovement10_2);
-    Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NOT_RECONCILED,prepaidMovement10_2.getConTecnocom());
+    Assert.assertEquals("El status con switch debe ser no conciliado", ReconciliationStatusType.NOT_RECONCILED,prepaidMovement10_2.getConTecnocom());
   }
 
 }
