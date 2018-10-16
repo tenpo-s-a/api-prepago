@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,8 +11,6 @@ import java.math.RoundingMode;
  * @autor vutreras
  */
 public class Test_CalculationsHelper extends TestBaseUnit {
-
-
 
   @Test
   public void testCalculatePosTopupFee() {
@@ -109,4 +108,43 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1000), commission);
   }
 
+  @Test
+  public void testCalculatePca() {
+
+    BigDecimal amount = BigDecimal.valueOf(1000);
+
+    BigDecimal pca = CalculationsHelper.calculatePca(amount);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(743.64), pca);
+  }
+
+  @Test
+  public void testCalculateEed() {
+
+    BigDecimal amount = BigDecimal.valueOf(1000);
+
+    BigDecimal eed = CalculationsHelper.calculateEed(amount);
+
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1.16), eed);
+  }
+
+
+  @Test
+  public void testCalculateAmountFromEed() {
+    {
+      BigDecimal amount = BigDecimal.valueOf(1.16);
+
+      BigDecimal baseAmount = CalculationsHelper.calculateAmountFromEed(amount);
+
+      Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1010), baseAmount);
+    }
+
+    {
+      BigDecimal amount = BigDecimal.valueOf(1.15);
+
+      BigDecimal baseAmount = CalculationsHelper.calculateAmountFromEed(amount);
+
+      Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1000), baseAmount);
+    }
+  }
 }

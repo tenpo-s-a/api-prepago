@@ -11,6 +11,7 @@ public class SimulationTopup10 extends BaseModel {
   private NewAmountAndCurrency10 eed;
   private NewAmountAndCurrency10 amountToPay;
   private NewAmountAndCurrency10 openingFee;
+  private NewAmountAndCurrency10 initialAmount;
   private Integer code;
   private String message;
   private Boolean isFirstTopup;
@@ -91,6 +92,14 @@ public class SimulationTopup10 extends BaseModel {
     isFirstTopup = firstTopup;
   }
 
+  public NewAmountAndCurrency10 getInitialAmount() {
+    return initialAmount;
+  }
+
+  public void setInitialAmount(NewAmountAndCurrency10 initialAmount) {
+    this.initialAmount = initialAmount;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -100,7 +109,8 @@ public class SimulationTopup10 extends BaseModel {
       Objects.equals(getPca(), that.getPca()) &&
       Objects.equals(getEed(), that.getEed()) &&
       Objects.equals(getAmountToPay(), that.getAmountToPay()) &&
-      Objects.equals(getOpeningFee(), that.getOpeningFee());
+      Objects.equals(getOpeningFee(), that.getOpeningFee()) &&
+      Objects.equals(getInitialAmount(), that.getInitialAmount());
   }
 
   @Override
