@@ -18,15 +18,17 @@
 -- Migration SQL that makes the change goes here.
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
-  IN _in_fecha_inicial  VARCHAR,
-  IN _in_fecha_final    VARCHAR,
-  IN _in_tipofac        NUMERIC,
-  IN _in_indnorcor      NUMERIC,
-  IN _in_nuevo_estado   VARCHAR,
-  OUT _error_code       VARCHAR,
-  OUT _error_msg        VARCHAR
+  IN _in_fecha_inicial   VARCHAR,
+  IN _in_fecha_final     VARCHAR,
+  IN _in_tipo_movimiento VARCHAR,
+  IN _in_indnorcor       NUMERIC,
+  IN _in_nuevo_estado    VARCHAR,
+  OUT _error_code        VARCHAR,
+  OUT _error_msg         VARCHAR
 ) AS $$
  DECLARE
+    _fecha_inicial_timestamp TIMESTAMP;
+    _fecha_final_timestamp TIMESTAMP;
  BEGIN
     _error_code := '0';
     _error_msg := '';
@@ -43,9 +45,9 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
       RETURN;
     END IF;
 
-    IF COALESCE(_in_tipofac, 0) = 0 THEN
+    IF TRIM(COALESCE(_in_tipo_movimiento, '')) = '' THEN
       _error_code := 'MC003';
-      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El tipofac es obligatorio';
+      _error_msg := '[mc_prp_actualiza_no_conciliados_switch_v10] El tipo movimiento es obligatorio';
       RETURN;
     END IF;
 
@@ -61,8 +63,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
       RETURN;
     END IF;
 
-    _in_fecha_inicial = _in_fecha_inicial || '00000000';
-    _in_fecha_final = _in_fecha_final || '23595999';
+    _fecha_inicial_timestamp := TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS')::timestamp without time zone;
+    _fecha_final_timestamp := TO_TIMESTAMP(_in_fecha_final, 'YYYYMMDDHH24MISSMS')::timestamp without time zone;
 
     UPDATE
         ${schema}.prp_movimiento
@@ -70,10 +72,10 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
         estado_con_switch = _in_nuevo_estado
       WHERE
         estado_con_switch = 'PENDING' AND
-        tipofac = _in_tipofac AND
+        tipo_movimiento = _in_tipo_movimiento AND
         indnorcor = _in_indnorcor AND
-        fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS') AND
-        fecha_creacion <= TO_TIMESTAMP(_in_fecha_final, 'YYYYMMDDHH24MISSMS');
+        fecha_creacion >= _fecha_inicial_timestamp AND
+        fecha_creacion <= _fecha_final_timestamp;
 
      EXCEPTION
        WHEN OTHERS THEN
@@ -86,4 +88,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(VARCHAR, VARCHAR, NUMERIC, NUMERIC, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(VARCHAR, VARCHAR, VARCHAR, NUMERIC, VARCHAR);

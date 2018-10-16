@@ -11,6 +11,7 @@ import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -18,6 +19,7 @@ import javax.jms.Queue;
 /**
  * @autor vutreras
  */
+
 @SuppressWarnings("unchecked")
 public class Test_PendingCard10 extends TestBaseUnitAsync {
 
