@@ -153,6 +153,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
       timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
       u.setTimestamps(timestamps);
+      u.setIdentityVerificationAttempts(numberUtils.toInteger(row.get("_intentos_validacion")));
       return u;
     };
 
@@ -357,6 +358,33 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("updatePrepaidUserBalance resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
+    if(prepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
+    }
+
+    if(prepaidUser.getId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+    Object[] params = {
+      prepaidUser.getId(),
+      new OutParam("_intentos_validacion", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_incrementa_intento_validacion_v10", params);
+
+    if ("0".equals(resp.get("_error_code"))) {
+      prepaidUser.setIdentityVerificationAttempts(numberUtils.toInteger(resp.get("_intentos_validacion")));
+      return prepaidUser;
+    } else {
+      log.error("incrementIdentityVerificationAttempt resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
