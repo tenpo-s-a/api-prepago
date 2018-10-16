@@ -4,7 +4,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
+import cl.multicaja.prepaid.model.v10.ReconciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
@@ -97,11 +97,11 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-07-05 11:59:59", TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.CORRECTORA.getValue());
 
-    prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
+    prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-07-05 14:06:13", TipoFactura.CARGA_TRANSFERENCIA.getCode(), IndicadorNormalCorrector.NORMAL.getValue());
 
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180705", "20180705", TipoFactura.CARGA_TRANSFERENCIA, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180705", "20180705", TipoFactura.CARGA_TRANSFERENCIA, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
 
     List resultList = searchAllMovements();
 
@@ -119,7 +119,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
       String switchStatus = (String) movement.get("estado_con_switch");
 
-      if (switchStatus.equals(ConciliationStatusType.NOT_RECONCILED.getValue())) {
+      if (switchStatus.equals(ReconciliationStatusType.NOT_RECONCILED.getValue())) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);

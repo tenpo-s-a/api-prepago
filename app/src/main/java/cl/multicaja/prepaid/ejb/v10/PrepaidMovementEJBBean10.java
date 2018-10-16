@@ -15,15 +15,12 @@ import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -183,7 +180,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception {
     if(startDate == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
     }
@@ -223,7 +220,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+  public void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception {
     if(startDate == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
     }
@@ -283,7 +280,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                      PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                                     ConciliationStatusType estadoConSwitch, ConciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
 
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
@@ -314,8 +311,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
       p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
-      p.setConSwitch(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
-      p.setConTecnocom(ConciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
+      p.setConSwitch(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
+      p.setConTecnocom(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
       p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("_origen_movimiento"))));
       p.setFechaCreacion((Timestamp) row.get("_fecha_creacion"));
       p.setFechaActualizacion((Timestamp) row.get("_fecha_actualizacion"));
@@ -475,7 +472,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception {
+  public boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ReconciliationStatusType status) throws Exception {
     if (movementId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
     }
@@ -500,7 +497,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception {
+  public void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ReconciliationStatusType status) throws Exception {
     if (movementId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
     }
@@ -545,7 +542,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ConciliationActionType actionType, ConciliationStatusType statusType) throws Exception {
+  public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception {
     if(idMovRef == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMovRef"));
     }
@@ -571,7 +568,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void createMovementResearch(Map<String, Object> headers, String movRef, ConciliationOriginType originType, String fileName) throws Exception {
+  public void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileName) throws Exception {
     if(movRef == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
     }
@@ -603,8 +600,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       movement10.setId(numberUtils.toLong(row.get("_id")));
       movement10.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
       movement10.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
-      movement10.setConSwitch(ConciliationStatusType.fromValue("_estado_con_switch"));
-      movement10.setConTecnocom(ConciliationStatusType.fromValue("_estado_con_tecnocom"));
+      movement10.setConSwitch(ReconciliationStatusType.fromValue("_estado_con_switch"));
+      movement10.setConTecnocom(ReconciliationStatusType.fromValue("_estado_con_tecnocom"));
       movement10.setTipoMovimiento(PrepaidMovementType.valueOf(String.valueOf(row.get("_tipo_movimiento"))));
       movement10.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInt(row.get("_indnorcor"))));
       return movement10;
@@ -615,14 +612,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void processReconciliation(PrepaidMovement10 mov) throws Exception {
     // Excel fila 1
-    if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
+    if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 1");
-      createMovementConciliate(null,mov.getId(), ConciliationActionType.NONE,ConciliationStatusType.RECONCILED);
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
     }
     // Excel fila 2
-    else if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
+    else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 2");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
       if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){
@@ -630,11 +627,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
           User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
+          // Se llenan los datos de Topup
+          prepaidTopup10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+          prepaidTopup10.setRut(user.getRut().getValue());
+          prepaidTopup10.setMerchantCode(movFull.getCodcom());
+          prepaidTopup10.setMerchantName("");
+          prepaidTopup10.setMerchantCategory(movFull.getCodact());
+          prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
+          prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+
           CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null,movFull.getId());
           delegate.sendTopUp(prepaidTopup10,user,cdtTransaction,movFull);
         }
         else {
-          createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
+          createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         }
       }else{
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())){
@@ -642,61 +648,85 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
           User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
           CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null,movFull.getId());
+
+          prepaidWithdraw10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+          prepaidWithdraw10.setRut(prepaidUser10.getRut());
+          prepaidWithdraw10.setMerchantCode(movFull.getCodcom());
+          prepaidWithdraw10.setMerchantName("");
+          prepaidWithdraw10.setMerchantCategory(movFull.getCodact());
+          prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
+          prepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
+
           delegate.sendWithdraw(prepaidWithdraw10,user,cdtTransaction,movFull);
         }else {
-          createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
+          createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         }
       }
     }
     // Excel fila 3
-    else if(ConciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
+    else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
-      createMovementConciliate(null,mov.getId(),ConciliationActionType.INVESTIGACION,ConciliationStatusType.NEED_VERIFICATION);
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
     // Excel fila 4
-    else if(ConciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
+    else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
-      createMovementConciliate(null,mov.getId(),ConciliationActionType.INVESTIGACION,ConciliationStatusType.NEED_VERIFICATION);
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
     // Excel fila 5
-    else if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&
+    else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&
       ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
         PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
         PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
       ) && mov.getTipoMovimiento().equals(PrepaidMovementType.TOPUP)
     ){
       log.debug("XLS ID 5");
-      createMovementConciliate(null,mov.getId(), ConciliationActionType.NONE,ConciliationStatusType.RECONCILED);
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
     }
     // Excel fila 6
-    else if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
+    else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
     )&& PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
       log.debug("XLS ID 6");
+      // Se obtiene el movimiento completo.--
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-      if (PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
-        if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
-          PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
-          PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
-          User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
-          CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null, movFull.getId());
-          delegate.sendTopUp(prepaidTopup10, user, cdtTransaction, movFull);
-        } else {
-          createMovementResearch(null, String.format("idMov=%s", mov.getId()), ConciliationOriginType.MOTOR, "");
-        }
+
+      if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+
+        PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+        // Se busca al usuario prepago
+        PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
+        // Se busca al usuario
+        User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+        // Se llenan los datos de Topup
+        prepaidTopup10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+        prepaidTopup10.setRut(user.getRut().getValue());
+        prepaidTopup10.setMerchantCode(movFull.getCodcom());
+        prepaidTopup10.setMerchantName("");
+        prepaidTopup10.setMerchantCategory(movFull.getCodact());
+        prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
+        prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+        // Se busca la transaccion del CDT.
+        CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null, movFull.getId());
+        // Se envia el movimiento a la cola.
+        delegate.sendTopUp(prepaidTopup10, user, cdtTransaction, movFull);
       }
+      else {
+        createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
+      }
+
     }
     // Excel fila 7
-    else if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&
+    else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado()) &&
       PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento() )&&
       IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())
@@ -705,13 +735,23 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       PrepaidMovement10 reversa = getPrepaidMovementReverse(mov.getId());
       if(reversa != null ) {
         if(PrepaidMovementStatus.PROCESS_OK.equals(reversa.getEstado())) {
-          createMovementConciliate(null, mov.getId(), ConciliationActionType.NONE, ConciliationStatusType.RECONCILED);
+          createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
         }
       }
       else {
         PrepaidMovement10 movToReverse = getPrepaidMovementById(mov.getId());
         PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movToReverse.getIdPrepaidUser());
+
         PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();
+
+        prepaidWithdraw10.setTotal(new NewAmountAndCurrency10(movToReverse.getMonto(),movToReverse.getClamon()));
+        prepaidWithdraw10.setRut(prepaidUser10.getRut());
+        prepaidWithdraw10.setMerchantCode(movToReverse.getCodcom());
+        prepaidWithdraw10.setMerchantName("");
+        prepaidWithdraw10.setMerchantCategory(movToReverse.getCodact());
+        prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
+        prepaidWithdraw10.setTransactionId(movToReverse.getIdTxExterno());
+
         movToReverse.setIdMovimientoRef(mov.getId());
         movToReverse = addPrepaidMovement(null,movToReverse);
         delegate.sendPendingWithdrawReversal(prepaidWithdraw10,prepaidUser10,movToReverse);
@@ -719,18 +759,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     }
     // Excel fila 8
-    else if(ConciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
+    else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
-      createMovementConciliate(null,mov.getId(),ConciliationActionType.INVESTIGACION,ConciliationStatusType.NEED_VERIFICATION);
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
     // Excel fila 9
-    else if(ConciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ConciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
+    else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
     ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){
@@ -740,8 +780,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ConciliationOriginType.MOTOR,"");
-      createMovementConciliate(null,mov.getId(),ConciliationActionType.INVESTIGACION,ConciliationStatusType.NEED_VERIFICATION);
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
   }
 

@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.model.v10.ConciliationStatusType;
+import cl.multicaja.prepaid.model.v10.ReconciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
@@ -55,7 +55,7 @@ public interface PrepaidMovementEJB10 {
    * @param status nuevo estado de conciliacion con tecnocom
    * @throws Exception
    */
-  boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception;
+  boolean updateStatusMovementConSwitch(Map<String, Object> header, Long movementId, ReconciliationStatusType status) throws Exception;
 
   /**
    * actualiza solo el estado de conciliacion con tecnocom
@@ -65,7 +65,7 @@ public interface PrepaidMovementEJB10 {
    * @param status nuevo estado de conciliacion con tecnocom
    * @throws Exception
    */
-  void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ConciliationStatusType status) throws Exception;
+  void updateStatusMovementConTecnocom(Map<String, Object> header, Long movementId, ReconciliationStatusType status) throws Exception;
 
   /**
    * actualiza solo el estado de conciliacion con switch a todos los movimientos
@@ -79,7 +79,7 @@ public interface PrepaidMovementEJB10 {
    * @param status nuevo estado de conciliacion con switch
    * @throws Exception
    */
-  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception;
+  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception;
 
   /**
    * actualiza solo el estado de conciliacion con tecnocom a todos los movimientos
@@ -93,7 +93,7 @@ public interface PrepaidMovementEJB10 {
    * @param status nuevo estado de conciliacion con tecnocom
    * @throws Exception
    */
-  void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception;
+  void updatePendingPrepaidMovementsTecnocomStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception;
 
 
   /**
@@ -116,7 +116,7 @@ public interface PrepaidMovementEJB10 {
 
   List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                               PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                              ConciliationStatusType estadoConSwitch, ConciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception;
+                                              ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception;
   /**
    *
    * @param id
@@ -215,7 +215,7 @@ public interface PrepaidMovementEJB10 {
    * @param statusType
    * @throws Exception
    */
-  void createMovementConciliate(Map<String, Object> headers,Long idMovRef,ConciliationActionType actionType,ConciliationStatusType statusType) throws Exception;
+  void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception;
 
   /**
    *
@@ -225,7 +225,7 @@ public interface PrepaidMovementEJB10 {
    * @param fileNme
    * @throws Exception
    */
-  void createMovementResearch(Map<String, Object> headers,String movRef,ConciliationOriginType originType,String fileNme) throws Exception;
+  void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileNme) throws Exception;
 
   /**
    *

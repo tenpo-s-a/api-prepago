@@ -29,12 +29,12 @@ public class Test_PrepaidMovementEJBBean10_updateStatusMovementConSwitch extends
 
       Assert.assertNotNull("Debe existir el movimiento",prepaidMovement10);
 
-      boolean bResult = getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
+      boolean bResult = getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
       Assert.assertTrue("Update exitoso", bResult);
 
       PrepaidMovement10 prepaidMovement10_2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       Assert.assertNotEquals("Deben Ser diferentes", prepaidMovement10, prepaidMovement10_2);
-      Assert.assertEquals("El status con switch debe ser no conciliado",ConciliationStatusType.NOT_RECONCILED,prepaidMovement10_2.getConSwitch());
+      Assert.assertEquals("El status con switch debe ser no conciliado", ReconciliationStatusType.NOT_RECONCILED,prepaidMovement10_2.getConSwitch());
     }
 
 }

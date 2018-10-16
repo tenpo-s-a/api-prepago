@@ -24,7 +24,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
     }
   }
 
@@ -35,7 +35,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
     }
   }
 
@@ -46,7 +46,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
     }
   }
   @Test
@@ -56,7 +56,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
     }
   }
   @Test
@@ -66,7 +66,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
     }
   }
   @Test
@@ -76,7 +76,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
     }
   }
   @Test
@@ -86,7 +86,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
     }
   }
   @Test
@@ -96,7 +96,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado",ConciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
+      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
     }
   }
   public ArrayList<PrepaidMovement10> createMovementAndFile(int cantidad, PrepaidMovementType type, IndicadorNormalCorrector indicadorNormalCorrector,Boolean withError) throws Exception {

@@ -36,7 +36,7 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         log.error(exchange.getIn().getBody());
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Filename: "+fileName);
-        List<ConciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
+        List<ReconciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
         if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
           log.info("IN rendicion_cargas_mcpsa_mc");
           conciliation(lstReconciliationMcRed10s,PrepaidMovementType.TOPUP,IndicadorNormalCorrector.NORMAL);
@@ -61,9 +61,9 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
       }
     };
   }
-  private void conciliation(List<ConciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector) throws Exception{
+  private void conciliation(List<ReconciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector) throws Exception{
      try {
-       for (ConciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
+       for (ReconciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
          PrepaidMovement10 prepaidMovement10 = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
          log.info(prepaidMovement10);
          if (prepaidMovement10 == null) {
@@ -74,11 +74,11 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
          else {
             if (!recTmp.getAmount().equals(prepaidMovement10.getMonto().longValue())) {
               log.error("No conciliado");
-              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.NOT_RECONCILED);
+              getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
               continue;
             }
             log.info("Conciliado");
-            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ConciliationStatusType.RECONCILED);
+            getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
          }
        }
      }catch (Exception e){
@@ -93,8 +93,8 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
    * @param is
    * @return
    */
-  public static List<ConciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
-    List<ConciliationMcRed10> lstReconciliationMcRed10;
+  public static List<ReconciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
+    List<ReconciliationMcRed10> lstReconciliationMcRed10;
     log.info("IN");
     try {
       Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
@@ -105,15 +105,15 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
 
       while ((record = csvReader.readNext()) != null) {
         log.debug(Arrays.toString(record));
-        ConciliationMcRed10 conciliationMcRed10 = new ConciliationMcRed10();
-        conciliationMcRed10.setMcCode(record[0]);
-        conciliationMcRed10.setDateTrx(record[1]);
-        conciliationMcRed10.setClientId(Long.valueOf(record[2]));
-        conciliationMcRed10.setAmount(Long.valueOf(record[3]));
+        ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
+        reconciliationMcRed10.setMcCode(record[0]);
+        reconciliationMcRed10.setDateTrx(record[1]);
+        reconciliationMcRed10.setClientId(Long.valueOf(record[2]));
+        reconciliationMcRed10.setAmount(Long.valueOf(record[3]));
         if(!fileName.contains("reversa")) {
-          conciliationMcRed10.setExternalId(Long.valueOf(record[4]));
+          reconciliationMcRed10.setExternalId(Long.valueOf(record[4]));
         }
-        lstReconciliationMcRed10.add(conciliationMcRed10);
+        lstReconciliationMcRed10.add(reconciliationMcRed10);
       }
     }catch (Exception e){
       log.error("Exception: "+e);
