@@ -27,9 +27,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -180,7 +178,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception {
+  public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception {
     if(startDate == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDate"));
     }

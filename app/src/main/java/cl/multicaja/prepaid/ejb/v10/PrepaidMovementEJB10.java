@@ -79,11 +79,7 @@ public interface PrepaidMovementEJB10 {
    * @param status nuevo estado de conciliacion con switch
    * @throws Exception
    */
-<<<<<<< HEAD
-  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception;
-=======
-  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ConciliationStatusType status) throws Exception;
->>>>>>> master
+  void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception;
 
   /**
    * actualiza solo el estado de conciliacion con tecnocom a todos los movimientos

@@ -83,15 +83,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int notReconcilidedCount = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", includedInDates(movTmp.getFechaCreacion()));
           notReconcilidedCount++;
         } else {
@@ -104,7 +100,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         List lstResearchList = findResearchMovements();
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
->>>>>>> master
     }
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
@@ -120,15 +115,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.fail("Nada debe estar conciliado");
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           boolean correctDate = includedInDates(movTmp.getFechaCreacion());
           boolean includedInFile = movementIndex < reconciledExpectedCount;
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas o estar incluidos en el archivo (ser los primeros N)", correctDate || includedInFile);
@@ -144,7 +135,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
       movementIndex++;
->>>>>>> master
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
@@ -159,15 +149,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int notReconcilidedCount = 0;
     for (PrepaidMovement10 mov : movimientos) {
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", includedInDates(movTmp.getFechaCreacion()));
           notReconcilidedCount++;
         } else {
@@ -180,7 +166,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         List lstResearchList = findResearchMovements();
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
->>>>>>> master
     }
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
@@ -195,15 +180,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.fail("Nada debe estar conciliado");
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           boolean correctDate = includedInDates(movTmp.getFechaCreacion());
           boolean includedInFile = movementIndex < reconciledExpectedCount;
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas o estar incluidos en el archivo (ser los primeros N)", correctDate || includedInFile);
@@ -219,7 +200,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
       movementIndex++;
->>>>>>> master
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
@@ -233,15 +213,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int notReconcilidedCount = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", includedInDates(movTmp.getFechaCreacion()));
           notReconcilidedCount++;
         } else {
@@ -254,7 +230,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         List lstResearchList = findResearchMovements();
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
->>>>>>> master
     }
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
@@ -269,15 +244,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.fail("Nada debe estar conciliado");
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           boolean correctDate = includedInDates(movTmp.getFechaCreacion());
           boolean includedInFile = movementIndex < reconciledExpectedCount;
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas o estar incluidos en el archivo (ser los primeros N)", correctDate || includedInFile);
@@ -293,7 +264,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
       movementIndex++;
->>>>>>> master
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
@@ -307,15 +277,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int notReconcilidedCount = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.assertTrue("Conciliado OK", true);
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", includedInDates(movTmp.getFechaCreacion()));
           notReconcilidedCount++;
         } else {
@@ -328,7 +294,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         List lstResearchList = findResearchMovements();
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
->>>>>>> master
     }
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
@@ -343,15 +308,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-<<<<<<< HEAD
-      Assert.assertNotNull("Debe existir el movimiento",movTmp);
-      Assert.assertEquals("Debe estar conciliado", ReconciliationStatusType.NOT_RECONCILED,movTmp.getConSwitch());
-=======
       if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ConciliationStatusType.RECONCILED)) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
           Assert.fail("Nada debe estar conciliado");
           reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ConciliationStatusType.NOT_RECONCILED)) {
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           boolean correctDate = includedInDates(movTmp.getFechaCreacion());
           boolean includedInFile = movementIndex < reconciledExpectedCount;
           Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas o estar incluidos en el archivo (ser los primeros N)", correctDate || includedInFile);
@@ -367,7 +328,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         Assert.assertEquals("Debe haber " + onlyFileMovements + " movimiento en research.", onlyFileMovements, lstResearchList.size());
       }
       movementIndex++;
->>>>>>> master
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
