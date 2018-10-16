@@ -107,6 +107,26 @@ public class CalculationsHelper {
   }
 
   /**
+   * Calcula el monto a partir del equivalente en dolares (eed)
+   * @param eed
+   * @return
+   */
+  public static BigDecimal calculateAmountFromEed(BigDecimal eed) {
+    if (eed == null) {
+      return BigDecimal.valueOf(0d);
+    }
+
+    BigDecimal amount = BigDecimal.valueOf(((eed.doubleValue() * getUsdValue()) * 1.022) + 240).setScale(0, RoundingMode.CEILING);
+
+    // Se redondea el monto al 10 mas cercano
+    if((amount.intValue() % 10 ) > 0) {
+      amount = BigDecimal.valueOf(amount.intValue() + ( 10 - ((amount.intValue() % 10))));
+    }
+
+    return amount;
+  }
+
+  /**
    * @return
    */
   public static Integer getUsdValue() {

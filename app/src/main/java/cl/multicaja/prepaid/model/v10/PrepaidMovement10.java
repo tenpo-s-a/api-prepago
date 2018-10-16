@@ -114,13 +114,9 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
     this.estado = estado;
   }
 
-  public Timestamp getFechaCreacion() {
-    return fechaCreacion;
-  }
+  public Timestamp getFechaCreacion() { return fechaCreacion; }
 
-  public void setFechaCreacion(Timestamp fechaCreacion) {
-    this.fechaCreacion = fechaCreacion;
-  }
+  public void setFechaCreacion(Timestamp fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 
   public Timestamp getFechaActualizacion() {
     return fechaActualizacion;

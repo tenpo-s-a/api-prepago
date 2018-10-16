@@ -1153,7 +1153,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Boolean isFirstTopup = this.getPrepaidMovementEJB10().isFirstTopup(prepaidUser10.getId());
     simulationTopup.setFirstTopup(isFirstTopup);
 
-    final BigDecimal amountValue = simulationNew.getAmount().getValue();
+    BigDecimal amountValue = simulationNew.getAmount().getValue();
+
+    // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
+    if(CodigoMoneda.USA_USN.equals(simulationNew.getAmount().getCurrencyCode())) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USN));
+      amountValue = CalculationsHelper.calculateAmountFromEed(amountValue);
+      simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
+    } else {
+      simulationTopup.setInitialAmount(simulationNew.getAmount());
+    }
 
     // LLAMADA AL CDT
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
@@ -1196,6 +1205,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
       simulationTopup.setAmountToPay(zero);
       simulationTopup.setOpeningFee(zero);
+      simulationTopup.setInitialAmount(zero);
       return simulationTopup;
     }
 
@@ -1226,7 +1236,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(simulationNew.isTransactionWeb()){
       fee = getPercentage().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT();
     } else {
-      fee = getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE());
+      fee = getCalculationsHelper().calculateFee(amountValue, getPercentage().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE());
     }
 
     //monto a cargar + comision
@@ -1244,7 +1254,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
-    simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
+    if(simulationTopup.getEed() == null) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
+    }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
     return simulationTopup;
