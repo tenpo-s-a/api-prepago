@@ -56,6 +56,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
        estado,
        saldo_info,
        saldo_expiracion,
+       intentos_validacion,
        fecha_creacion,
        fecha_actualizacion
      )
@@ -65,6 +66,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crear_usuario_v10
         _rut,
         _estado,
         '',
+        0,
         0,
         timezone('utc', now()),
         timezone('utc', now())

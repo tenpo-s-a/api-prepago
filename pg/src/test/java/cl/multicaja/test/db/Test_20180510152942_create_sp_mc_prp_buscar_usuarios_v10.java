@@ -44,6 +44,7 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
       "_estado",
       "_saldo_info",
       "_saldo_expiracion",
+      "_intentos_validacion",
       "_fecha_creacion",
       "_fecha_actualizacion"
     };
@@ -202,13 +203,13 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
     Set<String> keys = obj1.keySet();
     for (String k : keys) {
       System.out.println(obj1.get(k) + " == "  + mUsu1.get("_" + k));
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu1.get("_" + k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj2.get(k), mUsu1.get("_" + k));
     }
 
     Map mUsu2 = (Map)result.get(1);
     Set<String> keys2 = obj2.keySet();
     for (String k : keys2) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj2.get(k), mUsu2.get("_" + k));
+      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu2.get("_" + k));
     }
 
     //Caso en donde no deberia encontrar un registro
