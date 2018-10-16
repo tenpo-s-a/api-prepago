@@ -32,15 +32,15 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   {
     fillDb();
 
-    String startDate = "20180803";
-    String endDate = "20180803";
-    Integer tipofac = 3001;
+    String startDate = "20180803000000";
+    String endDate = "20180803235959";
+    String tipoMovimiento = "CARGA";
     Integer indnorcor = 1;
 
     Object[] params = {
       startDate,
       endDate,
-      "CARGA",
+      tipoMovimiento,
       indnorcor,
       "NO_CONCILIADO",
       new OutParam("_error_code", Types.VARCHAR),
@@ -50,11 +50,11 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
     Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
     System.out.println("Mensaje error: " + resp.get("_error_msg"));
+    Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
 
-    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 04:00:00");
-    Timestamp endDateTs = Timestamp.valueOf("2018-08-04 03:59:59");
+    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 00:00:00");
+    Timestamp endDateTs = Timestamp.valueOf("2018-08-03 23:59:59");
 
     List lstMov = searchAllMovements();
     int notReconciliateCount = 0;
@@ -64,23 +64,23 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
       Map<String, Object> movement = (Map<String, Object>) object;
       Timestamp movementCreationDate = (Timestamp) movement.get("fecha_creacion");
       System.out.println(i + "] " + movementCreationDate);
-      Integer movementTipoFac = ((BigDecimal)movement.get("tipofac")).intValue();
+      String movementTipoMov = (String) movement.get("tipo_movimiento");
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
 
       String switchStatus = (String) movement.get("estado_con_switch");
       if (switchStatus.equals("NO_CONCILIADO")) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03 04:00:00 - 2018/08/04 03:59:59[", includedBetweenDates);
-        Assert.assertEquals("Debe ser tipo fac " + tipofac, tipofac, movementTipoFac);
+        Assert.assertEquals("Debe ser tipo mov " + tipoMovimiento, tipoMovimiento, movementTipoMov);
         Assert.assertEquals("Debe tener indnorcor " + indnorcor, indnorcor, movementIndNorCor);
         notReconciliateCount++;
         System.out.println("In, before: " + movementCreationDate.before(startDateTs) + ", after: " + movementCreationDate.after(endDateTs));
       }
       else {
         boolean excludedFromDates = movementCreationDate.before(startDateTs) || movementCreationDate.after(endDateTs);
-        boolean wrongTipoFac = !tipofac.equals(movementTipoFac);
-        boolean wrongIndNorCor = !indnorcor.equals(movementTipoFac);
-        Assert.assertTrue("Debe estar fuera de fecha, distinto tipofac o distinto indnorcor.", excludedFromDates || wrongTipoFac || wrongIndNorCor);
+        boolean wrongTipoMov = !tipoMovimiento.equals(movementTipoMov);
+        boolean wrongIndNorCor = !indnorcor.equals(movementIndNorCor);
+        Assert.assertTrue("Debe estar fuera de fecha, distinto tipofac o distinto indnorcor.", excludedFromDates || wrongTipoMov || wrongIndNorCor);
       }
     }
 
@@ -88,7 +88,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByStartDateNull()throws SQLException {
+  public void updateSwitchStatusNotOkByStartDateNull() throws SQLException {
     String endDate = "20180803";
 
     Object[] params = {
@@ -107,7 +107,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByEndDateNull()throws SQLException {
+  public void updateSwitchStatusNotOkByEndDateNull() throws SQLException {
     String startDate = "20180803";
 
     Object[] params = {
@@ -126,7 +126,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByTipoFacNull()throws SQLException {
+  public void updateSwitchStatusNotOkByTipoFacNull() throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -146,7 +146,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByIndNorCorNull()throws SQLException {
+  public void updateSwitchStatusNotOkByIndNorCorNull() throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -166,7 +166,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByIndNorCorOutOfRange()throws SQLException {
+  public void updateSwitchStatusNotOkByIndNorCorOutOfRange() throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -186,7 +186,7 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
   }
 
   @Test
-  public void updateSwitchStatusNotOkByNewStateNull()throws SQLException {
+  public void updateSwitchStatusNotOkByNewStateNull() throws SQLException {
     String startDate = "20180803";
     String endDate = "20180803";
 
@@ -214,16 +214,16 @@ public class Test_20180925154245_create_sp_mc_prp_actualiza_no_conciliados_switc
       changeMovement(mapMovimiento.get("_id"), "2018-08-03 17:43:54", "CARGA", 1); // Dentro
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 04:00:00", "CARGA", 1); // Dentro, limite 4am
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 00:00:00", "CARGA", 1); // Dentro, limite
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-04 03:59:59", "CARGA", 1); // Dentro, limite 3:59am del dia sgte
+      changeMovement(mapMovimiento.get("_id"), "2018-08-03 23:59:59", "CARGA", 1); // Dentro, limite
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-03 03:59:32", "CARGA", 1); // Fuera, por fecha (antes 4am)
+      changeMovement(mapMovimiento.get("_id"), "2018-08-02 23:59:59", "CARGA", 1); // Fuera, por fecha limite
 
       mapMovimiento = insertRandomMovement();
-      changeMovement(mapMovimiento.get("_id"), "2018-08-04 04:00:01", "CARGA", 1); // Fuera, por fecha (despues 4am)
+      changeMovement(mapMovimiento.get("_id"), "2018-08-04 00:00:00", "CARGA", 1); // Fuera, por fecha limite
 
       mapMovimiento = insertRandomMovement();
       changeMovement(mapMovimiento.get("_id"), "2018-08-03 11:52:10", "RETIRO", 1); // Fuera, por tipo movimiento

@@ -27,10 +27,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
   OUT _error_msg         VARCHAR
 ) AS $$
  DECLARE
-  _fecha_inicial_timestamp  TIMESTAMP;
-  _fecha_final_timestamp    TIMESTAMP;
-  _fecha_inicial_utc  TIMESTAMP;
-  _fecha_final_utc    TIMESTAMP;
+    _fecha_inicial_timestamp TIMESTAMP;
+    _fecha_final_timestamp TIMESTAMP;
  BEGIN
     _error_code := '0';
     _error_msg := '';
@@ -65,14 +63,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
       RETURN;
     END IF;
 
-    _in_fecha_inicial := _in_fecha_inicial || '00000000';
-    _in_fecha_final := _in_fecha_final || '23595999';
-
     _fecha_inicial_timestamp := TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS')::timestamp without time zone;
     _fecha_final_timestamp := TO_TIMESTAMP(_in_fecha_final, 'YYYYMMDDHH24MISSMS')::timestamp without time zone;
-
-    _fecha_inicial_utc := timezone('utc', timezone('America/Santiago', _fecha_inicial_timestamp));
-    _fecha_final_utc := timezone('utc', timezone('America/Santiago', _fecha_final_timestamp));
 
     UPDATE
         ${schema}.prp_movimiento
@@ -82,8 +74,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
         estado_con_switch = 'PENDING' AND
         tipo_movimiento = _in_tipo_movimiento AND
         indnorcor = _in_indnorcor AND
-        fecha_creacion >= _fecha_inicial_utc AND
-        fecha_creacion <= _fecha_final_utc;
+        fecha_creacion >= _fecha_inicial_timestamp AND
+        fecha_creacion <= _fecha_final_timestamp;
 
      EXCEPTION
        WHEN OTHERS THEN

@@ -167,6 +167,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
+    String allowedFormat = "\\d{8,17}";
+    if (!startDate.matches(allowedFormat)) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "startDate"));
+    }
+
+    if (!endDate.matches(allowedFormat)) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "endDate"));
+    }
+
     Object[] params = {
       startDate,
       endDate,

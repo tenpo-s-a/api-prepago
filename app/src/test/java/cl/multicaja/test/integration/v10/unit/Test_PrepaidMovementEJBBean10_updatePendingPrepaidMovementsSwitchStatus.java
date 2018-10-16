@@ -31,46 +31,46 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest2() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", null, null, null, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", null, null, null, null);
   }
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest3() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", "20180803", null, null, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803000000", null, null, null);
   }
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest4() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", "20180803", PrepaidMovementType.TOPUP, null, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803000000", PrepaidMovementType.TOPUP, null, null);
   }
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest5() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", "20180803", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803000000", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
   }
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest6() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "2018003", "20180803", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "2018003", "20180803000000", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
   }
 
   @Test(expected = BadRequestException.class)
   public void testUpdateMovementBadRequest7() throws Exception {
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", "2018-08-03", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "2018-08-03", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, null);
   }
 
   @Test
   public void updateOk() throws  Exception {
     fillDB();
 
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803", "20180803", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803235959999", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
 
     List resultList = searchAllMovements();
 
     String tipoMovimiento = PrepaidMovementType.TOPUP.toString();
     Integer indnorcor = IndicadorNormalCorrector.NORMAL.getValue();
-    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 04:00:00");
-    Timestamp endDateTs = Timestamp.valueOf("2018-08-04 03:59:59");
+    Timestamp startDateTs = Timestamp.valueOf("2018-08-03 00:00:00");
+    Timestamp endDateTs = Timestamp.valueOf("2018-08-03 23:59:59.999");
 
     int notReconciledCount = 0;
 
@@ -122,6 +122,8 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
 
+    // Agregamos movimientos con fecha de modo que 4 movimientos validos esten dentro del dia 2018-08-03.
+
     // Dentro
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-08-03 21:14:09", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
@@ -130,29 +132,29 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-08-03 17:43:54", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
-    // Dentro, limite 4am
+    // Dentro, limite
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-03 04:00:00", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), "2018-08-03 00:00:00", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
-    // Dentro, limite 3:59am dia sgte
+    // Dentro, limite
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-04 03:59:59", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
-
-    // Fuera, por fecha
-    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-02 13:32:30", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), "2018-08-03 23:59:59", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
     // Fuera, por fecha
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-04 11:12:13", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), "2018-08-02 10:05:16", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
-    // Fuera, por fecha antes 4am
+    // Fuera, por fecha
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-03 03:59:32", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), "2018-08-04 15:52:42", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
-    // Fuera, por fecha despues 4am
+    // Fuera, por fecha limite
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
-    changeMovement(prepaidMovement10.getId(), "2018-08-04 04:00:01", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+    changeMovement(prepaidMovement10.getId(), "2018-08-02 23:59:59", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
+
+    // Fuera, por fecha limite
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    changeMovement(prepaidMovement10.getId(), "2018-08-04 00:00:00", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
 
     // Fuera, por tipo movimiento
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
@@ -162,7 +164,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-08-03 07:43:54", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA.getValue());
 
-    // Fuera, por ya esta reconciliado
+    // Fuera, porque ya esta reconciliado
     prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-08-03 14:06:13", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
