@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 
 public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUnitAsync {
 
+  // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP)
   @Test
   public void processReconciliationCase2Topup() throws Exception {
 
@@ -48,6 +49,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
   }
+  // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW)
   @Test
   public void processReconciliationCase2Withdraw() throws Exception {
 
@@ -81,7 +83,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse);
     Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse.getData());
   }
-
+  // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP) STATUS ERROR
   @Test
   public void processReconciliationCase6Topup() throws Exception {
 
@@ -115,7 +117,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
   }
-
+  // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW) STATUS ERROR RESPONSE
   @Test
   public void processReconciliationCase7Withdraw() throws Exception {
 

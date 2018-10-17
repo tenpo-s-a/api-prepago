@@ -11,6 +11,7 @@ import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBaseUnit {
 
+  // Movimiento conciliado OK
   @Test
   public void processReconciliationOk() throws Exception {
 
@@ -29,6 +30,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
   }
 
+  //Movimiento No Conciliado tecnocom, conciliado Switch status ok
   @Test
   public void processReconciliationCase3() throws Exception {
 
@@ -55,7 +57,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
-
+  // Movimiento no conciliado por ninguno, procesado ok
   @Test
   public void processReconciliationCase4() throws Exception {
 
@@ -82,7 +84,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
-
+  // Conciliado por todos, con error en nuestra tabla
   @Test
   public void processReconciliationCase5() throws Exception {
 
@@ -103,7 +105,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Estado debe ser Conciliado","RECONCILED",movConciliado.getReconciliationStatusType().getValue());
     Assert.assertEquals("La accion debe ser","NONE",movConciliado.getActionType().toString());
   }
-
+  // Conciliado por todos con error nuestro tipo retiro.
   @Test
   public void processReconciliationCase8() throws Exception {
 
@@ -134,7 +136,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
 
   }
-
+  // Movimientos con status pendiente o en proceso.
   @Test
   public void processReconciliationCase19_24() throws Exception {
 
