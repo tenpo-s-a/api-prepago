@@ -669,7 +669,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
           getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
-          
+
           movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
           movFull = addPrepaidMovement(null,movFull);
 
