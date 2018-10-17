@@ -1947,7 +1947,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
         PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
-        if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch()){
+        if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())){
           messageId = "";
           break;
         }
@@ -2007,7 +2007,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
         PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovementReverse().getId());
-        if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch()){
+        if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())){
           messageId = "";
           break;
         }
