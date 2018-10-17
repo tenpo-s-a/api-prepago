@@ -25,6 +25,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_incrementa_intento_validacion_v10
   OUT _error_msg          VARCHAR
 ) AS $$
 DECLARE
+  _id_usuario BIGINT;
 BEGIN
   _error_code := '0';
   _error_msg := '';
@@ -35,12 +36,28 @@ BEGIN
     RETURN;
   END IF;
 
+  -- BUSCA EL USUARIO
+  SELECT
+     id
+  INTO
+     _id_usuario
+  FROM
+     ${schema}.prp_usuario
+  WHERE
+     id = _in_id;
+
+  IF COALESCE(_id_usuario, 0) = 0 THEN
+    _error_code := 'MC002';
+    _error_msg := '[mc_prp_incrementa_intento_validacion_v10] El usuario  no existe';
+    RETURN;
+  END IF;
+
   UPDATE
     ${schema}.prp_usuario
   SET
     intentos_validacion = intentos_validacion + 1
   WHERE
-    id = _in_id
+    id = _id_usuario
   RETURNING intentos_validacion INTO _intentos_validacion;
 
   EXCEPTION
