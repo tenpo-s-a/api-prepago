@@ -385,7 +385,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return prepaidUser;
     } else {
       log.error("incrementIdentityVerificationAttempt resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+      throw new BaseException(ERROR_INTERNO_BBDD);
     }
   }
 }
