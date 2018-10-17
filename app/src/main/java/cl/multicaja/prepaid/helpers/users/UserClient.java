@@ -15,10 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserClient {
 
@@ -58,31 +55,37 @@ public class UserClient {
   private String getApiUrl() {
     return this.getConfigUtils().getProperty("apis.user.url");
   }
+
   private String getTestApiUrl() {
     return this.getConfigUtils().getProperty("apis.user_test.url");
   }
 
   private HttpResponse apiPOST(String api_route, Object request) {
-    log.debug("request: "+getJsonMapper().toJson(request));
+    log.info("request route: " + api_route);
+    log.info("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.POST,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiGET(String api_route) {
+    log.info("request route: " + api_route);
     return httpUtils.execute(HttpUtils.ACTIONS.GET,null,TIMEOUT,TIMEOUT,api_route, null, DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiDELETE(String api_route, Object request) {
-    System.out.println("request: "+getJsonMapper().toJson(request));
+    log.info("request route: " + api_route);
+    log.info("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.DELETE,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiPUT(String api_route, Object request) {
-    log.debug("request: " + getJsonMapper().toJson(request));
+    log.info("request route: " + api_route);
+    log.info("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.PUT,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiPATCH(String api_route, Object request) {
-    log.debug("request: " + getJsonMapper().toJson(request));
+    log.info("request route: " + api_route);
+    log.info("request: " + getJsonMapper().toJson(request));
     return httpUtils.execute(HttpUtils.ACTIONS.PATCH,null,TIMEOUT,TIMEOUT,api_url+api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
@@ -93,6 +96,7 @@ public class UserClient {
   public User getUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     log.info("******** getUserByRut IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
+    log.info("response: " + httpResponse.getResp());
     httpResponse.setJsonParser(getJsonMapper());
     User[] response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
@@ -135,6 +139,7 @@ public class UserClient {
     log.info("******** getUserByEmail IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s?email=%s", getApiUrl(), email));
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
     User[] response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
@@ -176,6 +181,7 @@ public class UserClient {
     log.info("******** getUserById IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s/%d", getApiUrl(), userIdMc));
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
     System.out.println(httpResponse.getResp());
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
@@ -187,7 +193,7 @@ public class UserClient {
     log.info("******** signUp IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/soft_signup", getApiUrl()),signUPNew);
     httpResponse.setJsonParser(getJsonMapper());
-
+    log.info("response: " + httpResponse.getResp());
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
     }
@@ -198,6 +204,7 @@ public class UserClient {
     log.info("******** finishSignup IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc),null );
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
     User response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       response = new User();
@@ -211,6 +218,7 @@ public class UserClient {
     log.info("******** sendMail IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/%s/mail", getApiUrl(), userId), content);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error timeout");
@@ -223,6 +231,7 @@ public class UserClient {
     log.info("******** sendInternalMail IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/mail", getApiUrl()), content);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error timeout");
@@ -235,6 +244,8 @@ public class UserClient {
     log.info("******** checkPassword IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/%s/check_password", getApiUrl(), userId), userPasswordNew);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error timeout");
@@ -242,15 +253,47 @@ public class UserClient {
     this.processResponse("checkPassword", httpResponse, Boolean.class);
   }
 
-  public User updateNameStatus(Map<String, Object> headers,Long userId) throws Exception {
-    log.info("******** updateNameStatus IN ********");
+  public User initIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
+    log.info("******** initIdentityValidation IN ********");
     HttpResponse httpResponse =  apiPUT(String.format("%s/%s/init_identity_validation", getApiUrl(), userId), "{}");
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error timeout");
     }
-    return this.processResponse("updateNameStatus", httpResponse, User.class);
+    return this.processResponse("initIdentityValidation", httpResponse, User.class);
+  }
+
+  public User finishIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
+    log.info("******** initIdentityValidation IN ********");
+    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/finish_identity_validation?success=true", getApiUrl(), userId), "{}");
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+    return this.processResponse("initIdentityValidation", httpResponse, User.class);
+  }
+
+  public User updatePersonalData(Map<String, Object> headers, Long userId, String name, String lastname) throws Exception {
+    log.info("******** updatePersonalData IN ********");
+
+    Map<String, String> data = new HashMap<>();
+    data.put("name", name);
+    data.put("lastname_1", lastname);
+
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/update_personal_data", getApiUrl(), userId), data);
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+    return this.processResponse("updatePersonalData", httpResponse, User.class);
   }
 
   /**
@@ -261,6 +304,7 @@ public class UserClient {
     log.info("******** createUserFile IN ********");
     HttpResponse httpResponse =  apiPOST(String.format("%s/%d/files", getApiUrl(), userIdMc), newFile);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
@@ -272,6 +316,7 @@ public class UserClient {
     log.info("******** getUserFileById IN ********");
     HttpResponse httpResponse =  apiGET(String.format("%s/%d/files/%d", getApiUrl(), userIdMc, fileId));
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
@@ -297,6 +342,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiGET(String.format("%s/%d/files?%s", getApiUrl(), userId, filter.toString()));
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
     UserFile[] response;
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       return null;
@@ -350,6 +396,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiPOST("/users/reset", body);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -370,6 +417,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiPOST(String.format("%s/users", getTestApiUrl()), user);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -404,6 +452,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiPUT(String.format("%s/users/fill", getTestApiUrl()), user);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -434,6 +483,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiPUT(String.format("%s/user/%d", getTestApiUrl(), userId), user);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -464,6 +514,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiPUT(String.format("%s/user/%d/password", getTestApiUrl(), userId), password);
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -479,6 +530,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiGET("/user/{userId}/email_code");
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");
@@ -513,6 +565,7 @@ public class UserClient {
 
     HttpResponse httpResponse =  apiGET("/user/{userId}/sms_code");
     httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
 
     if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
       throw new Exception("Error de conexion");

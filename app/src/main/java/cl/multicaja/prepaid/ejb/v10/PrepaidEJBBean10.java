@@ -1921,12 +1921,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
     getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
+    //TODO: crear ticket de validacion de identidad
+
     // Actualizar el nameStatus a IN_REVIEW
-    return getUserClient().updateNameStatus(headers, user.getId());
+    return getUserClient().initIdentityValidation(headers, user.getId());
   }
 
   @Override
   public String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
+    //TODO: agregar flag para saber si el mensaje ya se intento reprocesar anteriormente
     String messageId = null;
     if(reprocesQueue == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));
@@ -2009,5 +2012,91 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return messageId;
   }
 
+  @Override
+  public User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityValidation) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(identityValidation == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerification"));
+    }
+
+    //TODO: validar respuestas?
+    log.info("======================== Identity Verification ===================");
+    log.info(identityValidation);
+    log.info("======================== Identity Verification ===================");
+
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    // Incrementar contador de intento de validacion
+    prepaidUser = getPrepaidUserEJB10().incrementIdentityVerificationAttempt(headers, prepaidUser);
+
+    if("Si".equals(identityValidation.getIsCiValid()) &&
+      "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equals(identityValidation.getRutMatchesCi()) &&
+      "Si".equals(identityValidation.getIsGsintelOk()) &&
+      "Si".equals(identityValidation.getNameAndLastnameMatchesCi())) {
+
+      //Cambiar status del usuario
+      user = getUserClient().finishIdentityValidation(headers, user.getId());
+
+      //TODO: llamar servicio de cambio de producto en Tecnocom
+      //TODO: enviar mail al usuario con validacion de identidad Ok
+
+    } else if("Si".equals(identityValidation.getIsCiValid()) &&
+      "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equals(identityValidation.getRutMatchesCi()) &&
+      "Si".equals(identityValidation.getIsGsintelOk()) &&
+      "No".equals(identityValidation.getNameAndLastnameMatchesCi())) {
+
+      Boolean needPersonalDataUpdate = Boolean.FALSE;
+
+      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim())) {
+        //Actualiza el nombre del cliente
+        user.setName(identityValidation.getNewName());
+        needPersonalDataUpdate = Boolean.TRUE;
+      }
+      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim())){
+        //Actualiza el apellido del cliente
+        user.setLastname_1(identityValidation.getNewLastname());
+        needPersonalDataUpdate = Boolean.TRUE;
+      }
+
+      // Si necesita actualizar la ifnormacion
+      if(needPersonalDataUpdate) {
+        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
+      }
+
+      //Cambiar status del usuario
+      user = getUserClient().finishIdentityValidation(headers, user.getId());
+
+      //TODO: llamar servicio de cambio de producto en Tecnocom
+      //TODO: enviar mail al usuario con validacion de identidad Ok
+
+    } else {
+      //TODO: enviar mail al usuario con validacion de identidad fallida
+
+      Integer maxIdentityValidationAttempts;
+      try {
+        maxIdentityValidationAttempts = getParameterUtil().getInteger("api-prepaid", "max_identity_verification_attempts", "v1.0");
+      } catch (SQLException e) {
+        log.error("Error al cargar parametro max_identity_verification_attempts");
+        maxIdentityValidationAttempts = numberUtils.toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
+      }
+
+      if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
+        //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
+        getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
+      }
+
+      //TODO: revisar manejo de archivos para que el usuario pueda volver a subir las imagenes
+    }
+    return user;
+  }
 
 }

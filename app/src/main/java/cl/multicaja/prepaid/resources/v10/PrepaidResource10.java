@@ -204,9 +204,25 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @POST
-@Path("/Queue")
+  @Path("/Queue")
   public Response reprocesQueue(ReprocesQueue reprocesQueue, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.reprocessQueue(headersToMap(headers), reprocesQueue);
+    return Response.ok().status(201).build();
+  }
+
+  /*
+   *  idnetity verification
+   */
+
+  @POST
+  @Path("/{user_id}/identity_validation")
+  public Response processIdentityValidation(IdentityValidation10 identityValidation10, @PathParam("user_id") Long userId, @Context HttpHeaders headers) {
+    try {
+      User user = this.prepaidEJBBean10.processIdentityVerification(headersToMap(headers), userId, identityValidation10);
+      return Response.ok(user).status(201).build();
+    } catch (Exception ex) {
+      log.error("Error processing identity validation for userId: " + userId, ex);
+    }
     return Response.ok().status(201).build();
   }
 

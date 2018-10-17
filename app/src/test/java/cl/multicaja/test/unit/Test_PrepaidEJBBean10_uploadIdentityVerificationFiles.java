@@ -302,7 +302,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
-    Mockito.doReturn(user2).when(userClient).updateNameStatus(headers, Long.MAX_VALUE);
+    Mockito.doReturn(user2).when(userClient).initIdentityValidation(headers, Long.MAX_VALUE);
 
 
 
