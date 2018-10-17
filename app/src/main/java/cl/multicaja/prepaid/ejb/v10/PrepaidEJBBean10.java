@@ -21,10 +21,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.BloqueoDesbloqueoDTO;
-import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.tecnocom.dto.MovimientosDTO;
+import cl.multicaja.tecnocom.dto.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -170,6 +167,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     return userClient;
   }
+
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -2042,11 +2040,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       "Si".equals(identityValidation.getIsGsintelOk()) &&
       "Si".equals(identityValidation.getNameAndLastnameMatchesCi())) {
 
-      //Cambiar status del usuario
-      user = getUserClient().finishIdentityValidation(headers, user.getId());
-
-      //TODO: llamar servicio de cambio de producto en Tecnocom
-      //TODO: enviar mail al usuario con validacion de identidad Ok
+      user = this.processSuccessfulIdentityVerification(headers, user);
 
     } else if("Si".equals(identityValidation.getIsCiValid()) &&
       "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
@@ -2072,11 +2066,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
       }
 
-      //Cambiar status del usuario
-      user = getUserClient().finishIdentityValidation(headers, user.getId());
-
-      //TODO: llamar servicio de cambio de producto en Tecnocom
-      //TODO: enviar mail al usuario con validacion de identidad Ok
+      user = this.processSuccessfulIdentityVerification(headers, user);
 
     } else {
       //TODO: enviar mail al usuario con validacion de identidad fallida
@@ -2096,6 +2086,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //TODO: revisar manejo de archivos para que el usuario pueda volver a subir las imagenes
     }
+    return user;
+  }
+
+  private User processSuccessfulIdentityVerification(Map<String, Object> headers, User user) throws Exception {
+
+    //Cambiar status del usuario
+    user = getUserClient().finishIdentityValidation(headers, user.getId());
+
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, user.getId(), PrepaidCardStatus.ACTIVE);
+
+    //Cambio de producto en Tecnocom
+    //CambioProductoDTO dto = getTecnocomService().cambioProducto(prepaidCard10.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
+
+    //if(!dto.isRetornoExitoso()) {
+      //TODO: que hacer si falla el cambio de producto?
+    //}
+
+
+    //TODO: enviar mail al usuario con validacion de identidad Ok
+
     return user;
   }
 

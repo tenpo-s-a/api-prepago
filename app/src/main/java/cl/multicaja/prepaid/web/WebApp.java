@@ -43,6 +43,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private ReconciliationSchedulerRoute10 reconciliationSchedulerRoute10;
 
+  @Inject
+  private ProductChangeRoute10 productChangeRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -75,7 +78,8 @@ public class WebApp implements ServletContextListener  {
           transactionReversalRoute10,
           conciliationMcRedRoute10,
           tecnocomReconciliationRoute10,
-          reconciliationSchedulerRoute10);
+          reconciliationSchedulerRoute10,
+          productChangeRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {
