@@ -234,4 +234,11 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   List<PrepaidMovement10> getMovementsForConciliate(Map<String, Object> headers) throws Exception;
+
+  /**
+   *
+   * @param mov
+   * @return
+   */
+  String processReconciliation(PrepaidMovement10 mov) throws Exception ;
 }

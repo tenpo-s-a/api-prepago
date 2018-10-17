@@ -55,6 +55,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
+
   @Test
   public void processReconciliationCase4() throws Exception {
 
