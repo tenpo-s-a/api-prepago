@@ -279,6 +279,19 @@ public class UserClient {
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
   }
 
+  public User resetIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
+    log.info("******** initIdentityValidation IN ********");
+    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/reset_identity_validation", getApiUrl(), userId), "{}");
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      throw new Exception("Error timeout");
+    }
+    return this.processResponse("initIdentityValidation", httpResponse, User.class);
+  }
+
   public User updatePersonalData(Map<String, Object> headers, Long userId, String name, String lastname) throws Exception {
     log.info("******** updatePersonalData IN ********");
 

@@ -2053,7 +2053,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       "Si".equals(identityValidation.getIsGsintelOk()) &&
       "Si".equals(identityValidation.getNameAndLastnameMatchesCi())) {
 
-      user = this.processSuccessfulIdentityVerification(headers, user);
+      user = this.processSuccessfulIdentityVerification(headers, prepaidUser);
 
     } else if("Si".equals(identityValidation.getIsCiValid()) &&
       "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
@@ -2079,7 +2079,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
       }
 
-      user = this.processSuccessfulIdentityVerification(headers, user);
+      user = this.processSuccessfulIdentityVerification(headers, prepaidUser);
 
     } else {
 
@@ -2095,6 +2095,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
       }
+
+      user = getUserClient().resetIdentityValidation(headers, user.getId());
 
       Map<String, Object> templateData = new HashMap<>();
 
@@ -2118,12 +2120,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
-  private User processSuccessfulIdentityVerification(Map<String, Object> headers, User user) throws Exception {
+  private User processSuccessfulIdentityVerification(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     //Cambiar status del usuario
-    user = getUserClient().finishIdentityValidation(headers, user.getId());
+    User user = getUserClient().finishIdentityValidation(headers, prepaidUser.getUserIdMc());
 
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, user.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
     getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
 

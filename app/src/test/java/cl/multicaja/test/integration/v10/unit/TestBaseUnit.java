@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
@@ -62,6 +63,7 @@ public class TestBaseUnit extends TestApiBase {
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   private static UserClient userClient;
+  private static ProductChangeDelegate10 productChangeDelegate10;
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),
@@ -124,6 +126,12 @@ public class TestBaseUnit extends TestApiBase {
       reprocesQueueDelegate10 = new ReprocesQueueDelegate10();
     }
     return reprocesQueueDelegate10;
+  }
+  public static ProductChangeDelegate10 getProductChangeDelegate10(){
+    if (productChangeDelegate10 == null) {
+      productChangeDelegate10 = new ProductChangeDelegate10();
+    }
+    return productChangeDelegate10;
   }
   /**
    *
@@ -195,6 +203,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
+      prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());
     }
     return prepaidEJBBean10;
   }

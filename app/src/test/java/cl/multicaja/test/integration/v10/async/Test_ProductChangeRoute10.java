@@ -65,11 +65,11 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     String messageId = sendPendingProductChange(user, prepaidCard, tipoAlta,0);
 
     //se verifica que el mensaje haya sido procesado
-    Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
+    Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_RESP);
     ExchangeData<PrepaidProductChangeData10> data = (ExchangeData<PrepaidProductChangeData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
-    Assert.assertNotNull("Deberia existir un reverse", data);
-    Assert.assertNotNull("Deberia existir un reverse", data.getData());
+    Assert.assertNotNull("Deberia existir un mensaje", data);
+    Assert.assertNotNull("Deberia existir un mensaje", data.getData());
 
     Assert.assertEquals("Debe fallar contener el mensaje de error", "MPA0928 - EL NUEVO PRODUCTO DEBE SER DIFERENTE AL ANTERIOR", data.getData().getMsjError());
 
