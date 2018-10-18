@@ -24,7 +24,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsTecnocom
   @After
   public void afterEachTest() {
     final String SCHEMA = ConfigUtils.getInstance().getProperty("schema");
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", SCHEMA));
   }
 
   @Test(expected = BadRequestException.class)
