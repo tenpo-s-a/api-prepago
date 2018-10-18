@@ -63,7 +63,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
   public void updateOk() throws  Exception {
     fillDB();
 
-    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803235959999", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ConciliationStatusType.NOT_RECONCILED);
+    getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, "20180803000000", "20180803235959999", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
 
     List resultList = searchAllMovements();
 
@@ -81,7 +81,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
       Integer movementIndNorCor = ((BigDecimal)movement.get("indnorcor")).intValue();
       String switchStatus = (String) movement.get("estado_con_switch");
 
-      if (switchStatus.equals(ConciliationStatusType.NOT_RECONCILED.getValue())) {
+      if (switchStatus.equals(ReconciliationStatusType.NOT_RECONCILED.getValue())) {
         boolean includedBetweenDates = !movementCreationDate.before(startDateTs) && !movementCreationDate.after(endDateTs);
         Assert.assertTrue("Debe estar adentro de las fechas [2018/08/03-2018/08/04[", includedBetweenDates);
         Assert.assertEquals("Debe ser tipo mov " + tipoMovimiento, tipoMovimiento, movementTipoMov);
@@ -92,7 +92,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
         boolean excludedFromDates = movementCreationDate.before(startDateTs) || movementCreationDate.after(endDateTs);
         boolean wrongTipoMovimiento = !tipoMovimiento.equals(movementTipoMov);
         boolean wrongIndNorCor = !indnorcor.equals(movementIndNorCor);
-        boolean alreadyReconciled = switchStatus.equals(ConciliationStatusType.RECONCILED.getValue());
+        boolean alreadyReconciled = switchStatus.equals(ReconciliationStatusType.RECONCILED.getValue());
         Assert.assertTrue("Debe estar fuera de fecha, distinto tipofac o distinto indnorcor.", excludedFromDates || wrongTipoMovimiento || wrongIndNorCor || alreadyReconciled);
       }
     }
@@ -165,7 +165,7 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
     changeMovement(prepaidMovement10.getId(), "2018-08-03 07:43:54", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA.getValue());
 
     // Fuera, porque ya esta reconciliado
-    prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
+    prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     changeMovement(prepaidMovement10.getId(), "2018-08-03 14:06:13", PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL.getValue());
   }

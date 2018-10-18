@@ -908,8 +908,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
 
@@ -977,8 +977,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     return prepaidMovement;
   }
@@ -1056,8 +1056,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;

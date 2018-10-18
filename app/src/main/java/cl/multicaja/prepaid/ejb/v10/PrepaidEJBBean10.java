@@ -492,8 +492,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
 
     prepaidWithdraw.setId(prepaidMovement.getId());
@@ -561,8 +561,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse.setConSwitch(ConciliationStatusType.PENDING);
-      prepaidMovementReverse.setConTecnocom(ConciliationStatusType.PENDING);
+      prepaidMovementReverse.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovementReverse.setConTecnocom(ReconciliationStatusType.PENDING);
       prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
 
       String messageId = this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
@@ -1066,8 +1066,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
-    prepaidMovement.setConSwitch(ConciliationStatusType.PENDING);
-    prepaidMovement.setConTecnocom(ConciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
@@ -1097,8 +1097,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ConciliationStatusType.NOT_RECONCILED);
-    prepaidMovement.setConSwitch(ConciliationStatusType.NOT_RECONCILED);
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;

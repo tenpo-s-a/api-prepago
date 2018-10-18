@@ -26,7 +26,7 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
   @Test
   public void searchMovementForConciliate()throws Exception {
     {
-      List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().searchMovementForConciliate(null);
+      List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
       Assert.assertNull("Debe ser null",lstMovement10s);
     }
     {
@@ -35,33 +35,33 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       prepaidUser = createPrepaidUser10(prepaidUser);
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-      prepaidMovement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-      prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       createPrepaidMovement10(prepaidMovement10);
-      List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().searchMovementForConciliate(null);
+      List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
       Assert.assertEquals("Debe ser 1", 1,lstMovement10s.size());
-      getPrepaidMovementEJBBean10().createMovementConciliate(null,prepaidMovement10.getId(), ConciliationActionType.CARGA,ConciliationStatusType.RECONCILED);
+      getPrepaidMovementEJBBean10().createMovementConciliate(null,prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
 
-      lstMovement10s = getPrepaidMovementEJBBean10().searchMovementForConciliate(null);
+      lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
       Assert.assertNull("Debe ser null",lstMovement10s);
 
       // CREA MOVIMIENTOS
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-      prepaidMovement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-      prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       createPrepaidMovement10(prepaidMovement10);
 
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-      prepaidMovement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-      prepaidMovement10.setConSwitch(ConciliationStatusType.RECONCILED);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       createPrepaidMovement10(prepaidMovement10);
 
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-      prepaidMovement10.setConTecnocom(ConciliationStatusType.RECONCILED);
-      prepaidMovement10.setConSwitch(ConciliationStatusType.PENDING);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
       createPrepaidMovement10(prepaidMovement10);
 
-      lstMovement10s = getPrepaidMovementEJBBean10().searchMovementForConciliate(null);
+      lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
       Assert.assertEquals("Debe ser 2 el tercero aun no esta revisado", 2,lstMovement10s.size());
 
     }

@@ -18,7 +18,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementConciliate extends Test
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ConciliationActionType.CARGA, ConciliationStatusType.RECONCILED);
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
 
     }catch (Exception e){
       e.printStackTrace();
@@ -50,7 +50,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementConciliate extends Test
     }
 
     try{
-      getPrepaidMovementEJBBean10().createMovementConciliate(null,getUniqueLong(), ConciliationActionType.CARGA,null);
+      getPrepaidMovementEJBBean10().createMovementConciliate(null,getUniqueLong(), ReconciliationActionType.CARGA,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
@@ -60,7 +60,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementConciliate extends Test
       e.printStackTrace();
     }
       try{
-        getPrepaidMovementEJBBean10().createMovementConciliate(null,getUniqueLong(), ConciliationActionType.CARGA, ConciliationStatusType.PENDING);
+        getPrepaidMovementEJBBean10().createMovementConciliate(null,getUniqueLong(), ReconciliationActionType.CARGA, ReconciliationStatusType.PENDING);
         Assert.fail("No debe caer aca");
       }catch (BadRequestException e){
 

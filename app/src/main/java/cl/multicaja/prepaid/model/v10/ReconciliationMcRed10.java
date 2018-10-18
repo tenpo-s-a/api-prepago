@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
-public class ConciliationMcRed10 {
+public class ReconciliationMcRed10 {
 
 
   private String mcCode;

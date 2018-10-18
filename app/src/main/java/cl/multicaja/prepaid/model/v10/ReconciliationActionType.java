@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
-public enum ConciliationActionType {
+public enum ReconciliationActionType {
   CARGA,
   REVERSA_CARGA,
   RETIRO,
@@ -8,9 +8,9 @@ public enum ConciliationActionType {
   INVESTIGACION,
   NONE;
 
-  public static ConciliationActionType valueOfEnum(String name) {
+  public static ReconciliationActionType valueOfEnum(String name) {
     try {
-      return ConciliationActionType.valueOf(name);
+      return ReconciliationActionType.valueOf(name);
     } catch(Exception ex) {
       return null;
     }
