@@ -40,6 +40,7 @@ import java.util.*;
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
 
 /**
  * @author vutreras
@@ -2108,14 +2109,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       EmailBody emailBody = new EmailBody();
       emailBody.setTemplateData(templateData);
-      //TODO: definir templade de mail validacion de identidad no ok
-      //emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
+      emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
       emailBody.setAddress(user.getEmail().getValue());
 
-      //getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
+      getUserClient().sendMail(null, user.getId(), emailBody);
 
-
-      //TODO: revisar manejo de archivos para que el usuario pueda volver a subir las imagenes
     }
     return user;
   }

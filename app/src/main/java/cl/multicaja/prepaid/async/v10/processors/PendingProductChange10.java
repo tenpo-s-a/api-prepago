@@ -21,6 +21,8 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.ERROR_PRODUCT_CHANGE_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_OK;
 
 /**
  * @author abarazarte
@@ -116,11 +118,10 @@ public class PendingProductChange10 extends BaseProcessor10 {
 
     EmailBody emailBody = new EmailBody();
     emailBody.setTemplateData(templateData);
-    //TODO: definir templade de mail ok validacion de identidad
-    //emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
+    emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_OK);
     emailBody.setAddress(user.getEmail().getValue());
 
-    //getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
+    getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
   }
 
   public ProcessorRoute processErrorProductChange() {
@@ -129,13 +130,10 @@ public class PendingProductChange10 extends BaseProcessor10 {
       public ExchangeData<PrepaidProductChangeData10> processExchange(long idTrx, ExchangeData<PrepaidProductChangeData10> req, Exchange exchange) throws Exception {
         log.info("processErrorProductChange - REQ: " + req);
         req.retryCountNext();
-        //TODO: cola negativa error cambio de producto
-        /*
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario", req.getData().getUser().getId().toString());
         templateData.put("rutCliente", req.getData().getUser().getRut().getValue().toString() + "-" + req.getData().getUser().getRut().getDv());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
-        */
+        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
         return req;
       }
     };

@@ -12,6 +12,9 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_ERROR_TOPUP_REVERSE = "Prepago/ErrorReversaCarga";
   public static final String TEMPLATE_MAIL_ERROR_ISSUANCE_FEE = "Prepago/ErrorCobroEmision";
   public static final String TEMPLATE_MAIL_ERROR_CREATE_CARD = "Prepago/ErrorDatosTarjeta";
+  public static final String TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE = "Prepago/ErrorCambioProducto";
+  public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_OK = "Prepago/ValidacionIdentidadOk";
+  public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK = "Prepago/ValidacionIdentidadNoOk";
 
   public static final String TEMPLATE_PDF_CARD = "card_pdf";//Template para el PDF
   public static final String TEMPLATE_MAIL_TOPUP = String.format("%s/RecepcionCarga", APPNAME);
