@@ -8,6 +8,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
@@ -73,6 +74,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Inject
   private ReprocesQueueDelegate10 delegateReprocesQueue;
 
+  @Inject
+  private ProductChangeDelegate10 productChangeDelegate;
+
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJB10;
 
@@ -110,6 +114,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setDelegateReprocesQueue(ReprocesQueueDelegate10 delegateReprocesQueue) {
     this.delegateReprocesQueue = delegateReprocesQueue;
+  }
+
+  public ProductChangeDelegate10 getProductChangeDelegate() {
+    return productChangeDelegate;
+  }
+
+  public void setProductChangeDelegate(ProductChangeDelegate10 productChangeDelegate) {
+    this.productChangeDelegate = productChangeDelegate;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJB10() {
@@ -2069,7 +2081,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       user = this.processSuccessfulIdentityVerification(headers, user);
 
     } else {
-      //TODO: enviar mail al usuario con validacion de identidad fallida
 
       Integer maxIdentityValidationAttempts;
       try {
@@ -2084,6 +2095,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
       }
 
+      Map<String, Object> templateData = new HashMap<>();
+
+      //TODO: definir variables del template de correo  validacion de identidad no ok
+      /*
+      templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+      templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+      templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
+      templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
+      templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+      */
+
+      EmailBody emailBody = new EmailBody();
+      emailBody.setTemplateData(templateData);
+      //TODO: definir templade de mail validacion de identidad no ok
+      //emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
+      emailBody.setAddress(user.getEmail().getValue());
+
+      //getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
+
+
       //TODO: revisar manejo de archivos para que el usuario pueda volver a subir las imagenes
     }
     return user;
@@ -2096,15 +2127,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, user.getId(), PrepaidCardStatus.ACTIVE);
 
-    //Cambio de producto en Tecnocom
-    //CambioProductoDTO dto = getTecnocomService().cambioProducto(prepaidCard10.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
-
-    //if(!dto.isRetornoExitoso()) {
-      //TODO: que hacer si falla el cambio de producto?
-    //}
-
-
-    //TODO: enviar mail al usuario con validacion de identidad Ok
+    getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
   }
