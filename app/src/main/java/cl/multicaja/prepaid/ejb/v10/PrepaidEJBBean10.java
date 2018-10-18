@@ -1919,17 +1919,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
+    // Incrementar contador de intento de validacion
+    prepaidUser = getPrepaidUserEJB10().incrementIdentityVerificationAttempt(headers, prepaidUser);
+
     // CI frontal
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_FRONT, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
 
     // CI posterior
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_BACK, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
 
     // Selfie
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
     //TODO: crear ticket de validacion de identidad
 
@@ -2042,9 +2045,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    // Incrementar contador de intento de validacion
-    prepaidUser = getPrepaidUserEJB10().incrementIdentityVerificationAttempt(headers, prepaidUser);
 
     if("Si".equals(identityValidation.getIsCiValid()) &&
       "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
