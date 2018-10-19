@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -333,6 +334,22 @@ public class UserClient {
         throw new IllegalStateException();
     }
   }
+
+  /**
+   *  BACKOFFICE
+   */
+  public Ticket createFreshdeskTicket(Map<String, Object> headers, Long userIdMc, NewTicket newTicket) throws Exception {
+    log.info("******** createFreshdeskTicket IN ********");
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%d/backoffice/ticket", getApiUrl(), userIdMc), newTicket);
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+      return null;
+    }
+    return this.processResponse("createFreshdeskTicket", httpResponse, Ticket.class);
+  }
+
 
   /**
    *  TEST HELPERS
