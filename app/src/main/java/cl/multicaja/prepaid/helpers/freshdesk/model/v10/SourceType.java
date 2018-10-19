@@ -35,7 +35,7 @@ public enum  SourceType {
     .collect(Collectors.toMap(s -> s.value, Function.identity()));
 
   @JsonCreator
-  public static SourceType fromValue(String value) {
+  public static SourceType fromValue(Integer value) {
     return FORMAT_MAP.get(value);
   }
 

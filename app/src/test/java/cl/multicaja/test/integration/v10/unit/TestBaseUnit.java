@@ -151,6 +151,12 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10(){
     if (prepaidMovementEJBBean10 == null) {
       prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+      prepaidMovementEJBBean10.setDelegate(getPrepaidTopupDelegate10());
+      prepaidMovementEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
+      prepaidMovementEJBBean10.setCdtEJB10(getCdtEJBBean10());
+      prepaidMovementEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidMovementEJBBean10.setUserClient(getUserClient());
+      prepaidMovementEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }

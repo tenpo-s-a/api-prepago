@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
@@ -49,6 +48,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @EJB
   private CdtEJBBean10 cdtEJB10;
 
+  @EJB
+  private PrepaidEJBBean10 prepaidEJBBean10;
 
   @Override
   public UserClient getUserClient() {
@@ -58,6 +59,17 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return userClient;
   }
 
+  public void setUserClient(UserClient userClient) {
+    this.userClient = userClient;
+  }
+
+  public PrepaidEJBBean10 getPrepaidEJBBean10() {
+    return prepaidEJBBean10;
+  }
+
+  public void setPrepaidEJBBean10(PrepaidEJBBean10 prepaidEJBBean10) {
+    this.prepaidEJBBean10 = prepaidEJBBean10;
+  }
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -77,6 +89,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public CdtEJBBean10 getCdtEJB10() {
     return cdtEJB10;
+  }
+
+  public void setPrepaidUserEJB10(PrepaidUserEJBBean10 prepaidUserEJB10) {
+    this.prepaidUserEJB10 = prepaidUserEJB10;
+  }
+
+  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJB10) {
+    this.prepaidCardEJB10 = prepaidCardEJB10;
+  }
+
+  public void setCdtEJB10(CdtEJBBean10 cdtEJB10) {
+    this.cdtEJB10 = cdtEJB10;
   }
 
   @Override
@@ -617,7 +641,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (List)resp.get("result");
   }
 
-  public void processReconciliation(PrepaidMovement10 mov) throws Exception {
+  public String processReconciliation(PrepaidMovement10 mov) throws Exception {
+    String messageID = "";
     // Excel fila 1
     if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
@@ -634,17 +659,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
           User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
+          PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(null,prepaidUser10.getId());
           // Se llenan los datos de Topup
-          prepaidTopup10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
           prepaidTopup10.setRut(user.getRut().getValue());
           prepaidTopup10.setMerchantCode(movFull.getCodcom());
           prepaidTopup10.setMerchantName("");
           prepaidTopup10.setMerchantCategory(movFull.getCodact());
           prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+          prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
 
-          CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null,movFull.getId());
-          delegate.sendTopUp(prepaidTopup10,user,cdtTransaction,movFull);
+          movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+          movFull = addPrepaidMovement(null,movFull);
+
+          messageID =delegate.sendPendingTopupReverse(prepaidTopup10,prepaidCard10,prepaidUser10,movFull);
         }
         else {
           createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
@@ -653,18 +682,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())){
           PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
-          User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
-          CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null,movFull.getId());
 
-          prepaidWithdraw10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+          prepaidWithdraw10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
           prepaidWithdraw10.setRut(prepaidUser10.getRut());
           prepaidWithdraw10.setMerchantCode(movFull.getCodcom());
           prepaidWithdraw10.setMerchantName("");
           prepaidWithdraw10.setMerchantCategory(movFull.getCodact());
           prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
           prepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
+          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
 
-          delegate.sendWithdraw(prepaidWithdraw10,user,cdtTransaction,movFull);
+          movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+          movFull = addPrepaidMovement(null,movFull);
+
+          messageID = delegate.sendPendingWithdrawReversal(prepaidWithdraw10,prepaidUser10,movFull);
+
         }else {
           createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         }
@@ -709,22 +741,23 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
 
         PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
-        // Se busca al usuario prepago
-        PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
-        // Se busca al usuario
-        User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+        PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
+        User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(null,prepaidUser10.getId());
         // Se llenan los datos de Topup
-        prepaidTopup10.setTotal(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
         prepaidTopup10.setRut(user.getRut().getValue());
         prepaidTopup10.setMerchantCode(movFull.getCodcom());
         prepaidTopup10.setMerchantName("");
         prepaidTopup10.setMerchantCategory(movFull.getCodact());
         prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
         prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
-        // Se busca la transaccion del CDT.
-        CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoReferencia(null, movFull.getId());
-        // Se envia el movimiento a la cola.
-        delegate.sendTopUp(prepaidTopup10, user, cdtTransaction, movFull);
+        prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
+        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+
+        movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+        movFull = addPrepaidMovement(null,movFull);
+
+        messageID =delegate.sendPendingTopupReverse(prepaidTopup10,prepaidCard10,prepaidUser10,movFull);
       }
       else {
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
@@ -751,17 +784,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
         PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();
 
-        prepaidWithdraw10.setTotal(new NewAmountAndCurrency10(movToReverse.getMonto(),movToReverse.getClamon()));
+        prepaidWithdraw10.setAmount(new NewAmountAndCurrency10(movToReverse.getMonto(),movToReverse.getClamon()));
         prepaidWithdraw10.setRut(prepaidUser10.getRut());
         prepaidWithdraw10.setMerchantCode(movToReverse.getCodcom());
         prepaidWithdraw10.setMerchantName("");
         prepaidWithdraw10.setMerchantCategory(movToReverse.getCodact());
         prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
         prepaidWithdraw10.setTransactionId(movToReverse.getIdTxExterno());
+        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
 
         movToReverse.setIdMovimientoRef(mov.getId());
+        movToReverse.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
         movToReverse = addPrepaidMovement(null,movToReverse);
-        delegate.sendPendingWithdrawReversal(prepaidWithdraw10,prepaidUser10,movToReverse);
+
+        messageID = delegate.sendPendingWithdrawReversal(prepaidWithdraw10,prepaidUser10,movToReverse);
         log.info("Se crea el movimiento");
       }
     }
@@ -790,6 +826,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
+    return messageID;
   }
 
 }
