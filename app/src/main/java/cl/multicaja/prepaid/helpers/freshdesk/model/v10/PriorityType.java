@@ -29,7 +29,7 @@ public enum PriorityType {
     .collect(Collectors.toMap(s -> s.value, Function.identity()));
 
   @JsonCreator
-  public static PriorityType fromValue(String value) {
+  public static PriorityType fromValue(Integer value) {
     return FORMAT_MAP.get(value);
   }
 

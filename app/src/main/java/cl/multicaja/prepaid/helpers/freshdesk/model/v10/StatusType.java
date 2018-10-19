@@ -31,7 +31,7 @@ public enum StatusType {
     .collect(Collectors.toMap(s -> s.value, Function.identity()));
 
   @JsonCreator
-  public static StatusType fromValue(String value) {
+  public static StatusType fromValue(Integer value) {
     return FORMAT_MAP.get(value);
   }
 
