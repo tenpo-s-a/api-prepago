@@ -62,6 +62,7 @@ public class TestContextHelper extends TestBaseUnit {
       tecnocomReconciliationRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       tecnocomReconciliationRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
 
+
       /**
        * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
        */
@@ -70,7 +71,7 @@ public class TestContextHelper extends TestBaseUnit {
       usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
       usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
       */
-      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10 ,transactionReversalRoute10,  currencyConvertionRoute10,tecnocomReconciliationRoute10);
+      camelFactory.startCamelContextWithRoutes(true, prepaidTopupRoute10 ,transactionReversalRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
