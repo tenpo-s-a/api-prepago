@@ -196,7 +196,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return encryptUtil;
   }
 
-  public ParametersUtil getParameterUtil() {
+  public ParametersUtil getParametersUtil() {
     if(parametersUtil == null) {
       parametersUtil = ParametersUtil.getInstance();
     }
@@ -1032,7 +1032,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     String codent = null;
     try {
-      codent = getParameterUtil().getString("api-prepaid", "cod_entidad", "v10");
+      codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
     } catch (SQLException e) {
       log.error("Error al cargar parametro cod_entidad");
       codent = getConfigUtils().getProperty("tecnocom.codEntity");
@@ -1937,8 +1937,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
 
-    //TODO: definir template del ticket
-    String template = "<h1>%s</h1><div><p><ul><li>Rut: %s-%s</li><li>Nro de serie: %s</li><li>Nombre: %s</li><li>Apellido: %s</li></ul></p></div><div><p><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img></p></div>";
+    String template = getParametersUtil().getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
+
+    log.info(template);
+
+    Map<String, String> templateData = new HashMap<>();
+    templateData.put("${rut}", String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+    templateData.put("${numSerie}", user.getRut().getSerialNumber() != null ? user.getRut().getSerialNumber() : "");
+    templateData.put("${name}", user.getName());
+    templateData.put("${lastname}", user.getLastname_1());
+
+    //TODO: obtener las url de las imagenes
+    templateData.put("${ciFront}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+    templateData.put("${ciBack}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+    templateData.put("${ciSelfie}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+
+    template = getParametersUtil().replaceDataHTML(template, templateData);
     TicketType type = TicketType.VALIDACION_IDENTIDAD;
 
     NewTicket ticket = new NewTicket();
@@ -1947,13 +1961,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     ticket.setType(type);
     ticket.setSubject(String.format("%s - %s %s",
       type.getValue(), user.getName(), user.getLastname_1()));
-    ticket.setDescription(String.format(template,
-      type.getValue(),
-      user.getRut().getValue(),
-      user.getRut().getDv(),
-      user.getRut().getSerialNumber(),
-      user.getName(),
-      user.getLastname_1()));
+    ticket.setDescription(template);
     ticket.setStatus(StatusType.PENDING);
     ticket.setPriority(PriorityType.HIGH);
 
@@ -2117,7 +2125,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       Integer maxIdentityValidationAttempts;
       try {
-        maxIdentityValidationAttempts = getParameterUtil().getInteger("api-prepaid", "max_identity_verification_attempts", "v1.0");
+        maxIdentityValidationAttempts = getParametersUtil().getInteger("api-prepaid", "max_identity_verification_attempts", "v1.0");
       } catch (SQLException e) {
         log.error("Error al cargar parametro max_identity_verification_attempts");
         maxIdentityValidationAttempts = numberUtils.toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));

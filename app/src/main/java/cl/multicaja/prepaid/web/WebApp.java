@@ -76,9 +76,6 @@ public class WebApp implements ServletContextListener  {
           prepaidTopupRoute10,
           currencyConvertionRoute10,
           transactionReversalRoute10,
-          conciliationMcRedRoute10,
-          tecnocomReconciliationRoute10,
-          reconciliationSchedulerRoute10,
           productChangeRoute10);
         log.info("==== Apache camel iniciado ====");
       }
