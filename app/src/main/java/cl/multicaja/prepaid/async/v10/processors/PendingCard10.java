@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
@@ -185,14 +186,21 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorEmission - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      /**
-       *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
-       */
-      Map<String, Object> templateData = new HashMap<String, Object>();
-      templateData.put("idUsuario", data.getUser().getId().toString());
-      templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
-      getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
 
+      if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+        Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+        Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
+        ){
+
+       }else {
+        /**
+         *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
+         */
+        Map<String, Object> templateData = new HashMap<String, Object>();
+        templateData.put("idUsuario", data.getUser().getId().toString());
+        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
+      }
       return req;
       }
     };

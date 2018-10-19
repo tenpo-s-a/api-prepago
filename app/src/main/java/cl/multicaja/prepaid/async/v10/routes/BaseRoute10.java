@@ -44,6 +44,7 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
   private UserClient userClient;
+  private Fresh
 
   public BaseRoute10() {
     super();
