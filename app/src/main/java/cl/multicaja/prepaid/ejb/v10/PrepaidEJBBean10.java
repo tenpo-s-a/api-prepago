@@ -16,6 +16,7 @@ import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
@@ -1935,7 +1936,28 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
     getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
-    //TODO: crear ticket de validacion de identidad
+
+    //TODO: definir template del ticket
+    String template = "<h1>%s</h1><div><p><ul><li>Rut: %s-%s</li><li>Nro de serie: %s</li><li>Nombre: %s</li><li>Apellido: %s</li></ul></p></div><div><p><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img><img src='https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg'></img></p></div>";
+    TicketType type = TicketType.VALIDACION_IDENTIDAD;
+
+    NewTicket ticket = new NewTicket();
+    ticket.setGroupId(43000159450L);
+    ticket.setUniqueExternalId(user.getRut().getValue().toString());
+    ticket.setType(type);
+    ticket.setSubject(String.format("%s - %s %s",
+      type.getValue(), user.getName(), user.getLastname_1()));
+    ticket.setDescription(String.format(template,
+      type.getValue(),
+      user.getRut().getValue(),
+      user.getRut().getDv(),
+      user.getRut().getSerialNumber(),
+      user.getName(),
+      user.getLastname_1()));
+    ticket.setStatus(StatusType.PENDING);
+    ticket.setPriority(PriorityType.HIGH);
+
+    Ticket t = getUserClient().createFreshdeskTicket(headers, user.getId(), ticket);
 
     // Actualizar el nameStatus a IN_REVIEW
     return getUserClient().initIdentityValidation(headers, user.getId());
@@ -2057,19 +2079,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
-    if("Si".equals(identityValidation.getIsCiValid()) &&
-      "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
-      "Si".equals(identityValidation.getRutMatchesCi()) &&
-      "Si".equals(identityValidation.getIsGsintelOk()) &&
-      "Si".equals(identityValidation.getNameAndLastnameMatchesCi())) {
+    if("Si".equalsIgnoreCase(identityValidation.getIsCiValid()) &&
+      "Si".equalsIgnoreCase(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getRutMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getIsGsintelOk()) &&
+      "Si".equalsIgnoreCase(identityValidation.getNameAndLastnameMatchesCi())) {
 
       user = this.processSuccessfulIdentityVerification(headers, prepaidUser);
 
-    } else if("Si".equals(identityValidation.getIsCiValid()) &&
-      "Si".equals(identityValidation.getUserPhotoMatchesCi()) &&
-      "Si".equals(identityValidation.getRutMatchesCi()) &&
-      "Si".equals(identityValidation.getIsGsintelOk()) &&
-      "No".equals(identityValidation.getNameAndLastnameMatchesCi())) {
+    } else if("Si".equalsIgnoreCase(identityValidation.getIsCiValid()) &&
+      "Si".equalsIgnoreCase(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getRutMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getIsGsintelOk()) &&
+      "No".equalsIgnoreCase(identityValidation.getNameAndLastnameMatchesCi())) {
 
       Boolean needPersonalDataUpdate = Boolean.FALSE;
 

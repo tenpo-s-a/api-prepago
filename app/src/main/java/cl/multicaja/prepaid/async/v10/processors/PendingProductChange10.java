@@ -54,42 +54,49 @@ public class PendingProductChange10 extends BaseProcessor10 {
             return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
           }
 
-          log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
-
-          // se hace el cambio de producto
-          CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
-
-          if(dto.isRetornoExitoso()) {
-            log.debug("********** Cambio de producto realizado **********");
+          if(prepaidCard == null) {
+            log.debug("No se debe realizar cambio de producto ya que el cliente todavia no tiene tarjeta prepago");
 
             //Envio de mail -> validacion de identidad ok
             sendSuccessMail(user);
+          } else {
+            log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
-          } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
-            if(dto.getDescRetorno().contains("MPA0928")) {
-              log.debug("********** Cambio de producto realizado anteriormente **********");
-              req.getData().setMsjError(dto.getDescRetorno());
+            // se hace el cambio de producto
+            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+
+            if(dto.isRetornoExitoso()) {
+              log.debug("********** Cambio de producto realizado **********");
 
               //Envio de mail -> validacion de identidad ok
               sendSuccessMail(user);
-            } else {
-              log.debug("********** Cambio de producto rechazado rechazado **********");
-              req.getData().setNumError(Errors.ERROR_INDETERMINADO);
-              req.getData().setMsjError(dto.getDescRetorno());
-              return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
+
+            } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
+              if(dto.getDescRetorno().contains("MPA0928")) {
+                log.debug("********** Cambio de producto realizado anteriormente **********");
+                req.getData().setMsjError(dto.getDescRetorno());
+
+                //Envio de mail -> validacion de identidad ok
+                sendSuccessMail(user);
+              } else {
+                log.debug("********** Cambio de producto rechazado rechazado **********");
+                req.getData().setNumError(Errors.ERROR_INDETERMINADO);
+                req.getData().setMsjError(dto.getDescRetorno());
+                return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
+              }
+            } else if (CodigoRetorno._1000.equals(dto.getRetorno())) {
+              req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
+              req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
+              return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
+            }else if (CodigoRetorno._1010.equals(dto.getRetorno())) {
+              req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+              req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+              return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
+            } else if (CodigoRetorno._1020.equals(dto.getRetorno())) {
+              req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
+              req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
+              return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
             }
-          } else if (CodigoRetorno._1000.equals(dto.getRetorno())) {
-            req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
-            req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
-            return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
-          }else if (CodigoRetorno._1010.equals(dto.getRetorno())) {
-            req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
-            req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
-            return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
-          } else if (CodigoRetorno._1020.equals(dto.getRetorno())) {
-            req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
-            req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
-            return redirectRequestProductChange(createJMSEndpoint(PENDING_PRODUCT_CHANGE_REQ), exchange, req, true);
           }
         } catch (Exception e) {
           e.printStackTrace();
