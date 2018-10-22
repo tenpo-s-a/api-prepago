@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
@@ -816,9 +817,58 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
-    ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){ //TODO: Hacer otro caso igual con el error REJECT
+    ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
       log.debug("XLS ID 9");
-      //ReinJectar en la cola de carga.
+      PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
+
+      if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+        PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+        PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
+        User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
+        CdtTransaction10 cdtTransaction10 = getCdtEJB10().buscaMovimientoByIdExterno(null, movFull.getIdTxExterno());
+        // Se llenan los datos de Topup
+        prepaidTopup10.setRut(user.getRut().getValue());
+        prepaidTopup10.setMerchantCode(movFull.getCodcom());
+        prepaidTopup10.setMerchantName("");
+        prepaidTopup10.setMerchantCategory(movFull.getCodact());
+        prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
+        prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+        prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
+        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+
+        movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+        movFull = addPrepaidMovement(null, movFull);
+        messageID = delegate.sendTopUp(prepaidTopup10, user, cdtTransaction10, movFull);
+      }
+    }
+    else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  (
+      PrepaidMovementStatus.REJECTED.equals(mov.getEstado())
+    ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
+      log.debug("XLS ID 9");
+        PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
+
+        if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+          PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+          PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
+          User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+          PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
+          CdtTransaction10 cdtTransaction10 = getCdtEJB10().buscaMovimientoByIdExterno(null, movFull.getIdTxExterno());
+          // Se llenan los datos de Topup
+          prepaidTopup10.setRut(user.getRut().getValue());
+          prepaidTopup10.setMerchantCode(movFull.getCodcom());
+          prepaidTopup10.setMerchantName("");
+          prepaidTopup10.setMerchantCategory(movFull.getCodact());
+          prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
+          prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+          prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
+          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+
+          movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+          movFull = addPrepaidMovement(null, movFull);
+          messageID = delegate.sendTopUp(prepaidTopup10, user, cdtTransaction10, movFull);
+        }
     }
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
