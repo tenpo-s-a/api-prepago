@@ -4,6 +4,7 @@ import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
@@ -16,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.Queue;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -214,6 +216,26 @@ public abstract class BaseProcessor10 {
    * @return
    */
   protected ExchangeData<PrepaidReverseData10> redirectRequestReverse(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidReverseData10> req, boolean withDelay) {
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+
+    if (withDelay) {
+      redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+    } else {
+      redirectRequestObject(endpoint, exchange, req);
+    }
+    return req;
+  }
+
+  /**
+   * envia el mensaje a otra ruta camel, especificamente una instancia de: ExchangeData<PrepaidProductChangeData10>
+   *
+   * @param endpoint endpoint camel al cual se desea enviar el mensaje
+   * @param exchange instancia del mensaje original camel
+   * @param req instancia del mensaje propio del proceso asincrono
+   * @param withDelay true: es un envio de mensaje con tiempo de espera, false: es un envio simple de mensaje sin tiempo de espera
+   * @return
+   */
+  protected ExchangeData<PrepaidProductChangeData10> redirectRequestProductChange(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidProductChangeData10> req, boolean withDelay) {
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
 
     if (withDelay) {

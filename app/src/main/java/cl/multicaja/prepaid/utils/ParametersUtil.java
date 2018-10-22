@@ -226,4 +226,13 @@ public final class ParametersUtil {
     return getDbUtils().execute(SP_NAME, params);
   }
 
+
+  public String replaceDataHTML(String template, Map<String, String> data) {
+    for (Map.Entry<String, String> entry : data.entrySet())
+    {
+      template = template.replace(entry.getKey(), entry.getValue());
+    }
+    return template;
+  }
+
 }

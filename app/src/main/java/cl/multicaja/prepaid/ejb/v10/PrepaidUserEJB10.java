@@ -110,5 +110,13 @@ public interface PrepaidUserEJB10 {
    */
   void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
 
+  /**
+   * Incrementa el contador de intentos de verificacion de identidad
+   * @param headers
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
 
 }
