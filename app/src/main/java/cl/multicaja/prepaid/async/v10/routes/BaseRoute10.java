@@ -44,7 +44,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PdfUtils pdfUtils;
   private NumberUtils numberUtils;
   private UserClient userClient;
-  private Fresh
 
   public BaseRoute10() {
     super();
@@ -102,6 +101,10 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
       userClient = new UserClient();
     }
     return userClient;
+  }
+
+  public void setUserClient(UserClient userClient) {
+    this.userClient = userClient;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {

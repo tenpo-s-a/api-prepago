@@ -3,6 +3,8 @@ package cl.multicaja.prepaid.helpers.freshdesk.model.v10;
 import cl.multicaja.core.model.BaseModel;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NewTicket extends BaseModel implements Serializable {
 
@@ -21,7 +23,20 @@ public class NewTicket extends BaseModel implements Serializable {
   private Long groupId;
   private String description;
   private Long responderId;
+  private Map<String,Object> customFields;
 
+  public void addCustomField(String name,String data){
+    if(customFields == null){
+      customFields = new HashMap<>();
+    }
+    customFields.put(name,data);
+  }
+  public void addCustomField(String name,Integer data){
+    if(customFields == null){
+      customFields = new HashMap<>();
+    }
+    customFields.put(name,data);
+  }
   public String getName() {
     return name;
   }
@@ -140,5 +155,13 @@ public class NewTicket extends BaseModel implements Serializable {
 
   public void setResponderId(Long responderId) {
     this.responderId = responderId;
+  }
+
+  public Map<String, Object> getCustomFields() {
+    return customFields;
+  }
+
+  public void setCustomFields(Map<String, Object> customFields) {
+    this.customFields = customFields;
   }
 }

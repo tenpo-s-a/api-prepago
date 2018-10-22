@@ -6,11 +6,10 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -81,10 +80,22 @@ public class PendingCard10 extends BaseProcessor10 {
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
 
-        } else if (altaClienteDTO.getRetorno().equals(CodigoRetorno._1000)) {
+        } else if (CodigoRetorno._1000.equals(altaClienteDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
+          req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
           return redirectRequest(endpoint, exchange, req, true);
-        } else {
+        }else if (CodigoRetorno._1010.equals(altaClienteDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        } else if (CodigoRetorno._1020.equals(altaClienteDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        }  else {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
@@ -162,10 +173,23 @@ public class PendingCard10 extends BaseProcessor10 {
             return redirectRequest(endpoint, exchange, req, false);
           }
 
-        } else if (datosTarjetaDTO.getRetorno().equals(CodigoRetorno._1000)) {
+        } else if (CodigoRetorno._1000.equals(datosTarjetaDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
+          req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
           return redirectRequest(endpoint, exchange, req, true);
-        } else {
+        }else if (CodigoRetorno._1010.equals(datosTarjetaDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        } else if (CodigoRetorno._1020.equals(datosTarjetaDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        }
+        else {
 
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD;
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
@@ -190,13 +214,21 @@ public class PendingCard10 extends BaseProcessor10 {
       if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
         Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
         Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
-        ){
+        ) {
+        String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
+        template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+        .getUser().getRut().getDv()),data.getUser().getId());
 
-       }else {
+        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,String.valueOf(data.getUser().getRut().getValue()),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
+        Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+        if(ticket.getId() != null){
+          log.info("Ticket Creado Exitosamente");
+        }
+      } else {
         /**
          *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
          */
-        Map<String, Object> templateData = new HashMap<String, Object>();
+        Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario", data.getUser().getId().toString());
         templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
         getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
@@ -213,11 +245,34 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorCreateCard - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      Map<String, Object> templateData = new HashMap<String, Object>();
-      templateData.put("idUsuario", data.getUser().getId().toString());
-      templateData.put("rutCliente", data.getUser().getRut().getValue().toString()+ "-" + data.getUser().getRut().getDv());
-      getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
-      return req;
+        if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
+        ) {
+          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al obtener datos tarjeta",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+            .getUser().getRut().getDv()),data.getUser().getId());
+
+
+          NewTicket newTicket = createTicket("Error al obtener datos tarjeta",
+            template,
+            String.valueOf(data.getUser().getRut().getValue()),
+            data.getPrepaidTopup10().getMessageId(),
+            QueuesNameType.CREATE_CARD,
+            req.getReprocesQueue()
+          );
+
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          if(ticket.getId() != null){
+            log.info("Ticket Creado Exitosamente");
+          }
+        } else {
+          Map<String, Object> templateData = new HashMap<>();
+          templateData.put("idUsuario", data.getUser().getId().toString());
+          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
+        }
+        return req;
       }
     };
   }

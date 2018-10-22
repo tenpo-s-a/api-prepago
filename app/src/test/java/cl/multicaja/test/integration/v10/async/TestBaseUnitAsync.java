@@ -86,8 +86,13 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
 
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
@@ -157,9 +162,12 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
-
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
@@ -196,7 +204,9 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ);
     // Realiza alta en tecnocom para que el usuario exista
-
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
 
@@ -232,7 +242,9 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
     // Realiza alta en tecnocom para que el usuario exista
-
+    if(topup != null) {
+      topup.setMessageId(messageId);
+    }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
 
@@ -268,6 +280,8 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la cola de requerimiento
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_REQ);
     // Realiza alta en tecnocom para que el usuario exista
+    PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+    prepaidTopup10.setMessageId(messageId);
 
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);

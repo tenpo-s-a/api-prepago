@@ -1941,7 +1941,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     switch (reprocesQueue.getLastQueue()){
       case TOPUP: {
         log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
-        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
         ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
         if(data == null) {
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
@@ -1952,6 +1952,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           break;
         }
         data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_TOPUP_REQ, data);
         break;
       }
@@ -1964,6 +1965,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
         data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ, data);
         break;
       }
@@ -1974,6 +1976,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         if(data == null) {
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
+        data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ, data);
         break;
       }
@@ -1985,6 +1989,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
         data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_EMISSION_REQ,data);
         break;
       }
@@ -1997,6 +2002,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           throw new ValidationException(ERROR_DATA_NOT_FOUND);
         }
         data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ, data);
         break;
       }
@@ -2012,7 +2018,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           break;
         }
         data.setRetryCount(0);
+        data.reprocesQueueNext();
         messageId = this.getDelegateReprocesQueue().redirectRequestReverse(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ, data);
+        break;
+      }
+      case ISSUANCE_FEE:{
+        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_RESP);
+        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
+        if(data == null) {
+          throw new ValidationException(ERROR_DATA_NOT_FOUND);
+        }
+        PrepaidMovement10  prepaidMovement10 =getPrepaidMovementEJB10().getPrepaidMovementById(data.getData().getPrepaidMovement10().getId());
+        if(!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom())&&!ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConSwitch())){
+          messageId = "";
+          break;
+        }
+        data.setRetryCount(0);
+        data.reprocesQueueNext();
+        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ, data);
         break;
       }
     }

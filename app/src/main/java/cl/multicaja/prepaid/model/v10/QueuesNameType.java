@@ -15,7 +15,8 @@ public enum QueuesNameType {
   REVERSE_TOPUP("ReverseTopup"),
   REVERSE_WITHDRAWAL("ReverseWithdrawal"),
   SEND_MAIL("SendMail"),
-  PENDING_EMISSION("PendingEmision");
+  PENDING_EMISSION("PendingEmision"),
+  ISSUANCE_FEE("IssuanceFee");
 
   String value;
 

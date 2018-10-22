@@ -816,7 +816,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
-    ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){
+    ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){ //TODO: Hacer otro caso igual con el error REJECT
       log.debug("XLS ID 9");
       //ReinJectar en la cola de carga.
     }
@@ -826,6 +826,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
+
     return messageID;
   }
 
