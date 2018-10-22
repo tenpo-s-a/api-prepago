@@ -8,6 +8,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
@@ -15,16 +16,14 @@ import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.BloqueoDesbloqueoDTO;
-import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.tecnocom.dto.MovimientosDTO;
+import cl.multicaja.tecnocom.dto.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +41,7 @@ import java.util.*;
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
 
 /**
  * @author vutreras
@@ -75,6 +75,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Inject
   private ReprocesQueueDelegate10 delegateReprocesQueue;
+
+  @Inject
+  private ProductChangeDelegate10 productChangeDelegate;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJB10;
@@ -113,6 +116,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setDelegateReprocesQueue(ReprocesQueueDelegate10 delegateReprocesQueue) {
     this.delegateReprocesQueue = delegateReprocesQueue;
+  }
+
+  public ProductChangeDelegate10 getProductChangeDelegate() {
+    return productChangeDelegate;
+  }
+
+  public void setProductChangeDelegate(ProductChangeDelegate10 productChangeDelegate) {
+    this.productChangeDelegate = productChangeDelegate;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJB10() {
@@ -170,6 +181,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     return userClient;
   }
+
   @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
@@ -184,7 +196,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return encryptUtil;
   }
 
-  public ParametersUtil getParameterUtil() {
+  public ParametersUtil getParametersUtil() {
     if(parametersUtil == null) {
       parametersUtil = ParametersUtil.getInstance();
     }
@@ -1020,7 +1032,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     String codent = null;
     try {
-      codent = getParameterUtil().getString("api-prepaid", "cod_entidad", "v10");
+      codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
     } catch (SQLException e) {
       log.error("Error al cargar parametro cod_entidad");
       codent = getConfigUtils().getProperty("tecnocom.codEntity");
@@ -1909,24 +1921,59 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
 
+    // Incrementar contador de intento de validacion
+    prepaidUser = getPrepaidUserEJB10().incrementIdentityVerificationAttempt(headers, prepaidUser);
+
     // CI frontal
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_FRONT, "v1.0", "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_FRONT, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
 
     // CI posterior
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_ID_BACK, "v1.0", "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_BACK, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
 
     // Selfie
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), 0L, USER_SELFIE, "v1.0", "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+
+
+    String template = getParametersUtil().getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
+
+    log.info(template);
+
+    Map<String, String> templateData = new HashMap<>();
+    templateData.put("${rut}", String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+    templateData.put("${numSerie}", user.getRut().getSerialNumber() != null ? user.getRut().getSerialNumber() : "");
+    templateData.put("${name}", user.getName());
+    templateData.put("${lastname}", user.getLastname_1());
+
+    //TODO: obtener las url de las imagenes
+    templateData.put("${ciFront}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+    templateData.put("${ciBack}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+    templateData.put("${ciSelfie}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+
+    template = getParametersUtil().replaceDataHTML(template, templateData);
+    TicketType type = TicketType.VALIDACION_IDENTIDAD;
+
+    NewTicket ticket = new NewTicket();
+    ticket.setGroupId(43000159450L);
+    ticket.setUniqueExternalId(user.getRut().getValue().toString());
+    ticket.setType(type);
+    ticket.setSubject(String.format("%s - %s %s",
+      type.getValue(), user.getName(), user.getLastname_1()));
+    ticket.setDescription(template);
+    ticket.setStatus(StatusType.PENDING);
+    ticket.setPriority(PriorityType.HIGH);
+
+    Ticket t = getUserClient().createFreshdeskTicket(headers, user.getId(), ticket);
 
     // Actualizar el nameStatus a IN_REVIEW
-    return getUserClient().updateNameStatus(headers, user.getId());
+    return getUserClient().initIdentityValidation(headers, user.getId());
   }
 
   @Override
   public String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
+    //TODO: agregar flag para saber si el mensaje ya se intento reprocesar anteriormente
     String messageId = null;
     if(reprocesQueue == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));
@@ -2019,5 +2066,110 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return messageId;
   }
 
+  @Override
+  public User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityValidation) throws Exception {
+    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(identityValidation == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerification"));
+    }
+
+    //TODO: validar respuestas?
+    log.info("======================== Identity Verification ===================");
+    log.info(identityValidation);
+    log.info("======================== Identity Verification ===================");
+
+    // Obtener usuario Multicaja
+    User user = this.getUserMcById(headers, userIdMc);
+
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
+
+    if("Si".equalsIgnoreCase(identityValidation.getIsCiValid()) &&
+      "Si".equalsIgnoreCase(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getRutMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getIsGsintelOk()) &&
+      "Si".equalsIgnoreCase(identityValidation.getNameAndLastnameMatchesCi())) {
+
+      user = this.processSuccessfulIdentityVerification(headers, prepaidUser);
+
+    } else if("Si".equalsIgnoreCase(identityValidation.getIsCiValid()) &&
+      "Si".equalsIgnoreCase(identityValidation.getUserPhotoMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getRutMatchesCi()) &&
+      "Si".equalsIgnoreCase(identityValidation.getIsGsintelOk()) &&
+      "No".equalsIgnoreCase(identityValidation.getNameAndLastnameMatchesCi())) {
+
+      Boolean needPersonalDataUpdate = Boolean.FALSE;
+
+      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim())) {
+        //Actualiza el nombre del cliente
+        user.setName(identityValidation.getNewName());
+        needPersonalDataUpdate = Boolean.TRUE;
+      }
+      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim())){
+        //Actualiza el apellido del cliente
+        user.setLastname_1(identityValidation.getNewLastname());
+        needPersonalDataUpdate = Boolean.TRUE;
+      }
+
+      // Si necesita actualizar la ifnormacion
+      if(needPersonalDataUpdate) {
+        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
+      }
+
+      user = this.processSuccessfulIdentityVerification(headers, prepaidUser);
+
+    } else {
+
+      Integer maxIdentityValidationAttempts;
+      try {
+        maxIdentityValidationAttempts = getParametersUtil().getInteger("api-prepaid", "max_identity_verification_attempts", "v1.0");
+      } catch (SQLException e) {
+        log.error("Error al cargar parametro max_identity_verification_attempts");
+        maxIdentityValidationAttempts = numberUtils.toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
+      }
+
+      if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
+        //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
+        getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
+      }
+
+      user = getUserClient().resetIdentityValidation(headers, user.getId());
+
+      Map<String, Object> templateData = new HashMap<>();
+
+      //TODO: definir variables del template de correo  validacion de identidad no ok
+      /*
+      templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+      templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+      templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
+      templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
+      templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+      */
+
+      EmailBody emailBody = new EmailBody();
+      emailBody.setTemplateData(templateData);
+      emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
+      emailBody.setAddress(user.getEmail().getValue());
+
+      getUserClient().sendMail(null, user.getId(), emailBody);
+
+    }
+    return user;
+  }
+
+  private User processSuccessfulIdentityVerification(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
+
+    //Cambiar status del usuario
+    User user = getUserClient().finishIdentityValidation(headers, prepaidUser.getUserIdMc());
+
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+
+    getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
+
+    return user;
+  }
 
 }

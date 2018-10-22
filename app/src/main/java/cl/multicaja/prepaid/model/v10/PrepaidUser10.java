@@ -25,6 +25,8 @@ public class PrepaidUser10 extends BaseModel {
   private Long balanceExpiration;
   private boolean hasPrepaidCard;
   private boolean hasPendingFirstTopup;
+  @JsonIgnore
+  private Integer identityVerificationAttempts;
 
   public PrepaidUser10() {
     super();
@@ -108,6 +110,14 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setHasPendingFirstTopup(boolean hasPendingFirstTopup) {
     this.hasPendingFirstTopup = hasPendingFirstTopup;
+  }
+
+  public Integer getIdentityVerificationAttempts() {
+    return identityVerificationAttempts;
+  }
+
+  public void setIdentityVerificationAttempts(Integer identityVerificationAttempts) {
+    this.identityVerificationAttempts = identityVerificationAttempts;
   }
 
   @Override

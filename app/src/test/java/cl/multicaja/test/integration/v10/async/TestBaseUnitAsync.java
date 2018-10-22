@@ -4,12 +4,15 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.apache.commons.logging.Log;
@@ -386,6 +389,32 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public String sendPendingProductChange(User user, PrepaidCard10 prepaidCard, TipoAlta tipoAlta, int retryCount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(user, prepaidCard, tipoAlta);
+
+    //se envia el mensaje a la cola
+    ExchangeData<PrepaidProductChangeData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
 
