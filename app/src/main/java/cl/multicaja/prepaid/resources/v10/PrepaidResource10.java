@@ -221,7 +221,10 @@ public final class PrepaidResource10 extends BaseResource {
       User user = this.prepaidEJBBean10.processIdentityVerification(headersToMap(headers), userId, identityValidation10);
       return Response.ok(user).status(201).build();
     } catch (Exception ex) {
-      log.error("Error processing identity validation for userId: " + userId, ex);
+      log.error("Error processing identity validation for userId: " + userId);
+      ex.printStackTrace();
+
+      //TODO: informar error?
     }
     return Response.ok().status(201).build();
   }
