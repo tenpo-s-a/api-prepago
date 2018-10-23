@@ -8,28 +8,37 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.tecnocom.TecnocomService;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
+import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
+import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
+import static cl.multicaja.core.model.Errors.ERROR_DATA_NOT_FOUND;
 
 /**
  * @author vutreras
@@ -182,6 +191,45 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(user).status(200).build();
   }
 
+  @POST
+  @Path("/{userId}/randomPurchase")
+	public Response simulatePurchaseForUser(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
 
+	  validate();
 
+    Map<String, Object> mapHeaders = headersToMap(headers);
+    PrepaidUser10 prepaidUser = prepaidUserEJBBean10.getPrepaidUserByUserIdMc(mapHeaders, userId);
+    if (prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(mapHeaders, prepaidUser.getId());
+    if (prepaidCard10 == null) {
+      throw new NotFoundException(ERROR_DATA_NOT_FOUND);
+    }
+
+    TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
+    ConsultaSaldoDTO consultaSaldoDTO = tecnocomService.consultaSaldo(prepaidCard10.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+
+    // Hacer un gasto aleatorio del saldo disponible
+    BigDecimal saldoDisponible = consultaSaldoDTO.getSaldisconp();
+    BigDecimal gastoAleatorio = new BigDecimal(Math.random()).multiply(saldoDisponible);
+
+    // Crear movimiento de compra
+    String numreffac = "9872348974987";
+    String numaut = numreffac;
+    // Los 6 primeros digitos de numreffac
+    if (numaut.length() > 6) {
+      numaut = numaut.substring(numaut.length()-6);
+    }
+
+    // Agregar compra
+    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
+    if (!inclusionMovimientosDTO.isRetornoExitoso()) {
+      log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
+      log.error(inclusionMovimientosDTO.getDescRetorno());
+    }
+
+    return Response.ok(gastoAleatorio).status(201).build();
+  }
 }
