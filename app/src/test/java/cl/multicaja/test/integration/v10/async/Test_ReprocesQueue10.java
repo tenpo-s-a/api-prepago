@@ -1,7 +1,9 @@
 package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
@@ -22,6 +24,7 @@ import org.junit.Test;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
@@ -421,4 +424,105 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
     }
   }
+
+  @Test
+  public void testReinjectIssuanFee() throws Exception {
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+    System.out.println("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
+    prepaidCard.setPan(datosTarjetaDTO.getPan());
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    prepaidCard = createPrepaidCard10(prepaidCard);
+    System.out.println("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
+      prepaidMovement.getId(),
+      prepaidCard.getPan(),
+      prepaidCard.getProcessorUserId().substring(4, 8),
+      prepaidCard.getProcessorUserId().substring(12),
+      123,
+      123,
+      152,
+      null,
+      PrepaidMovementStatus.PROCESS_OK);
+
+    System.out.println("prepaidMovement: " + prepaidMovement);
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
+    Thread.sleep(2000);
+    // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
+    //Se setea para que de error de conexion!
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    ReprocesQueue reprocesQueue = new ReprocesQueue();
+    reprocesQueue.setIdQueue(messageId);
+    reprocesQueue.setLastQueue(QueuesNameType.ISSUANCE_FEE);
+    messageId = getPrepaidEJBBean10().reprocessQueue(null,reprocesQueue);
+    Thread.sleep(2000);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+    Assert.assertNotNull("Deberia existir un mensaje en la cola de cobro de emision", remoteTopup.getData());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+    PrepaidMovement10 issuanceFeeMovement = remoteTopup.getData().getIssuanceFeeMovement10();
+    Assert.assertNotNull("Deberia tener un Movimiento de cobro de comision de emision", issuanceFeeMovement);
+    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceFeeMovement.getEstado());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNumextcta());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNummovext());
+    Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getClamone());
+
+    PrepaidCard10 prepaidCard10 = remoteTopup.getData().getPrepaidCard10();
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
+
+    // Busca el movimiento en la BD
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
+    Assert.assertEquals("Debe tener un movimiento de comision", issuanceFeeMovement.getId(), dbMovements.get(0).getId());
+    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
+
+    // Busca la tarjeta en la BD
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
+    Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
+
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_CARD_REQ
+    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
+    String endpoint = PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ;
+
+    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
+    Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
+  }
+
 }

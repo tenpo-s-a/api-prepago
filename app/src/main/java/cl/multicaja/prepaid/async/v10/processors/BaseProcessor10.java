@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.camel.Endpoint;
@@ -257,6 +258,22 @@ public abstract class BaseProcessor10 {
     cdtTx.setGloss(txType.getName());
     cdtTx = getRoute().getCdtEJBBean10().addCdtTransaction(null,cdtTx);
     return cdtTx;
+  }
+  protected NewTicket createTicket(String subject, String template,String uniqueExternalId,String messgeID,QueuesNameType queuesNameType,Integer intentos){
+    NewTicket newTicket = new NewTicket();
+    newTicket.setDescription(template);
+    newTicket.setGroupId(GroupId.OPERACIONES);
+    newTicket.setUniqueExternalId(uniqueExternalId);
+    newTicket.setType(TicketType.COLAS_NEGATIVAS);
+    newTicket.setStatus(StatusType.OPEN);
+    newTicket.setPriority(PriorityType.URGENT);
+    newTicket.setSubject(subject);
+    newTicket.setProductId(43000001595L);
+    // Ticket Custom Fields:
+    newTicket.addCustomField(CustomFieldsName.ID_COLA, messgeID);
+    newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, queuesNameType.getValue());
+    newTicket.addCustomField(CustomFieldsName.REINTENTOS,intentos);
+    return newTicket;
   }
 
 }

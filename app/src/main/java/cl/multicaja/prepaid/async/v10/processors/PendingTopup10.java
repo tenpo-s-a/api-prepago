@@ -9,9 +9,11 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -273,12 +275,32 @@ public class PendingTopup10 extends BaseProcessor10 {
       log.info("processPendingTopupReturns - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
+        if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
+        ) {
+          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_1","v1.0");
+          template = TemplateUtils.freshDeskTemplateColas1(template,"Error al realizar carga",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+            .getUser().getRut().getDv()),data.getUser().getId(),data.getPrepaidMovement10().getNumaut(),data.getPrepaidTopup10().getAmount().getValue().longValue());
 
-      Map<String, Object> templateData = new HashMap<String, Object>();
-      templateData.put("idUsuario", data.getUser().getId().toString());
-      templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-      getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
-      return req;
+          NewTicket newTicket = createTicket(String.format("Error al realizar carga %s",data.getPrepaidTopup10().getTransactionOriginType().name()),
+            template,
+            String.valueOf(data.getUser().getRut().getValue()),
+            data.getPrepaidTopup10().getMessageId(),
+            QueuesNameType.TOPUP,
+            req.getReprocesQueue());
+
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          if(ticket.getId() != null){
+            log.info("Ticket Creado Exitosamente");
+          }
+        } else {
+          Map<String, Object> templateData = new HashMap<String, Object>();
+          templateData.put("idUsuario", data.getUser().getId().toString());
+          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
+        }
+       return req;
       }
     };
   }

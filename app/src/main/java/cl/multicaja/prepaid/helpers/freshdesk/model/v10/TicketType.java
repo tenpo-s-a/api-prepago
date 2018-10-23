@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 public enum TicketType {
 
   VALIDACION_IDENTIDAD("Validación de identidad"),
-  SOPORTE_GENERAL("");
+  GENERICO("Genérico"),
+  COLAS_NEGATIVAS("Cola Negativa");
 
   private String value;
 
