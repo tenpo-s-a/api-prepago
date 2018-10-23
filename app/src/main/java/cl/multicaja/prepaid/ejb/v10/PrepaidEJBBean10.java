@@ -1926,15 +1926,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // CI frontal
     UserFile ciFront = identityVerificationFiles.get(USER_ID_FRONT);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_FRONT, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
+    ciFront = getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_FRONT, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI frontal", ciFront.getMimeType(),ciFront.getLocation());
 
     // CI posterior
     UserFile ciBack = identityVerificationFiles.get(USER_ID_BACK);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_BACK, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
+    ciBack = getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_ID_BACK, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "CI posterior", ciBack.getMimeType(), ciBack.getLocation());
 
     // Selfie
     UserFile selfie = identityVerificationFiles.get(USER_SELFIE);
-    getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
+    selfie = getFilesEJBBean10().createUserFile(headers, user.getId(), Long.valueOf(0), USER_SELFIE, String.format("v%d", prepaidUser.getIdentityVerificationAttempts()), "Selfie + CI", selfie.getMimeType(), selfie.getLocation());
 
 
     String template = getParametersUtil().getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
@@ -1948,9 +1948,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     templateData.put("${lastname}", user.getLastname_1());
 
     //TODO: obtener las url de las imagenes
-    templateData.put("${ciFront}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
-    templateData.put("${ciBack}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
-    templateData.put("${ciSelfie}", "https://www.multicaja.cl/multicaja-cl-theme/images/header/multicajaCL.jpg");
+    templateData.put("${ciFront}", ciFront.getLocation());
+    templateData.put("${ciBack}", ciBack.getLocation());
+    templateData.put("${ciSelfie}", selfie.getLocation());
 
     template = getParametersUtil().replaceDataHTML(template, templateData);
     TicketType type = TicketType.VALIDACION_IDENTIDAD;

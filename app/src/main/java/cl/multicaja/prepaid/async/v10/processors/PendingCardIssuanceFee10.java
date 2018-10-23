@@ -258,7 +258,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           // Ticket Custom Fields:
           newTicket.addCustomField(CustomFieldsName.ID_COLA,data.getPrepaidTopup10().getMessageId());
           newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.ISSUANCE_FEE.getValue());
-          newTicket.addCustomField(CustomFieldsName.REINTENTOS,req.getReprocesQueue());
+          newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
 
           Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
