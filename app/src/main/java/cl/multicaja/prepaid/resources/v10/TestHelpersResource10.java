@@ -213,15 +213,13 @@ public final class TestHelpersResource10 extends BaseResource {
 
     // Hacer un gasto aleatorio del saldo disponible
     BigDecimal saldoDisponible = consultaSaldoDTO.getSaldisconp();
-    BigDecimal gastoAleatorio = new BigDecimal(Math.random()).multiply(saldoDisponible);
+    BigDecimal gastoAleatorio = new BigDecimal(Math.random()).multiply(saldoDisponible).setScale(0, BigDecimal.ROUND_HALF_UP);
 
     // Crear movimiento de compra
     String numreffac = "9872348974987";
     String numaut = numreffac;
     // Los 6 primeros digitos de numreffac
-    if (numaut.length() > 6) {
-      numaut = numaut.substring(numaut.length()-6);
-    }
+    numaut = numaut.substring(numaut.length()-6);
 
     // Agregar compra
     InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
