@@ -17,12 +17,6 @@ import java.math.BigDecimal;
 
 public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
 
-  @EJB
-  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
-
-  @EJB
-  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
-
   private HttpResponse createRandomPurchase(Long userIdMc) {
     HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid_testhelpers/%s/randomPurchase", userIdMc), null);
     System.out.println("respHttp: " + respHttp);
