@@ -103,6 +103,10 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return userClient;
   }
 
+  public void setUserClient(UserClient userClient) {
+    this.userClient = userClient;
+  }
+
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
     return prepaidUserEJBBean10;
   }

@@ -19,6 +19,7 @@ public class Test_20180510114230_create_table_prp_usuario extends TestDbBasePg {
       new ColumnInfo("estado", "varchar", 20),
       new ColumnInfo("saldo_info", SqlType.TEXT.getGetJavaType()),
       new ColumnInfo("saldo_expiracion", SqlType.BIGINT.getGetJavaType()),
+      new ColumnInfo("intentos_validacion", SqlType.BIGINT.getGetJavaType()),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType())
     );

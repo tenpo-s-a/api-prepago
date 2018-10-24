@@ -4,9 +4,11 @@ import cl.multicaja.camel.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.camel.Endpoint;
@@ -15,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.Queue;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -223,6 +226,26 @@ public abstract class BaseProcessor10 {
     return req;
   }
 
+  /**
+   * envia el mensaje a otra ruta camel, especificamente una instancia de: ExchangeData<PrepaidProductChangeData10>
+   *
+   * @param endpoint endpoint camel al cual se desea enviar el mensaje
+   * @param exchange instancia del mensaje original camel
+   * @param req instancia del mensaje propio del proceso asincrono
+   * @param withDelay true: es un envio de mensaje con tiempo de espera, false: es un envio simple de mensaje sin tiempo de espera
+   * @return
+   */
+  protected ExchangeData<PrepaidProductChangeData10> redirectRequestProductChange(Endpoint endpoint, Exchange exchange, ExchangeData<PrepaidProductChangeData10> req, boolean withDelay) {
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
+
+    if (withDelay) {
+      redirectRequestObject(endpoint, exchange, req, getDelayTimeoutToRedirectForRetryCount(req.getRetryCount()));
+    } else {
+      redirectRequestObject(endpoint, exchange, req);
+    }
+    return req;
+  }
+
   protected CdtTransaction10 callCDT(NewPrepaidBaseTransaction10 prepaidTopup10, PrepaidUser10 user, Long txRef, CdtTransactionType txType) throws Exception {
     // Incluir datos en CDT.
     CdtTransaction10 cdtTx = new CdtTransaction10();
@@ -235,6 +258,22 @@ public abstract class BaseProcessor10 {
     cdtTx.setGloss(txType.getName());
     cdtTx = getRoute().getCdtEJBBean10().addCdtTransaction(null,cdtTx);
     return cdtTx;
+  }
+  protected NewTicket createTicket(String subject, String template,String uniqueExternalId,String messgeID,QueuesNameType queuesNameType,Integer intentos){
+    NewTicket newTicket = new NewTicket();
+    newTicket.setDescription(template);
+    newTicket.setGroupId(GroupId.OPERACIONES);
+    newTicket.setUniqueExternalId(uniqueExternalId);
+    newTicket.setType(TicketType.COLAS_NEGATIVAS);
+    newTicket.setStatus(StatusType.OPEN);
+    newTicket.setPriority(PriorityType.URGENT);
+    newTicket.setSubject(subject);
+    newTicket.setProductId(43000001595L);
+    // Ticket Custom Fields:
+    newTicket.addCustomField(CustomFieldsName.ID_COLA, messgeID);
+    newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, queuesNameType.getValue());
+    newTicket.addCustomField(CustomFieldsName.REINTENTOS,intentos);
+    return newTicket;
   }
 
 }

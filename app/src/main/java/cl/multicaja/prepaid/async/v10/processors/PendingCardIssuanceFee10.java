@@ -2,10 +2,13 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -183,8 +186,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
+          req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
           return redirectRequest(endpoint, exchange, req, true);
-        } else {
+        }
+        else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        } else if (CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        }
+        else {
 
           Integer numextcta = 0;
           Integer nummovext = 0;
@@ -222,10 +239,38 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
       log.info("processErrorPendingIssuanceFee - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      Map<String, Object> templateData = new HashMap<String, Object>();
-      templateData.put("idUsuario", data.getUser().getId().toString());
-      templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-      getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_ISSUANCE_FEE, templateData);
+        if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
+        ) {
+          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al cobrar comisión Apertura",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+            .getUser().getRut().getDv()),data.getUser().getId());
+
+          NewTicket newTicket = new NewTicket();
+          newTicket.setDescription(template);
+          newTicket.setGroupId(GroupId.OPERACIONES);
+          newTicket.setUniqueExternalId(String.valueOf(data.getUser().getRut().getValue()));
+          newTicket.setType(TicketType.COLAS_NEGATIVAS);
+          newTicket.setStatus(StatusType.OPEN);
+          newTicket.setPriority(PriorityType.URGENT);
+          newTicket.setSubject("Error al cobrar comisión Apertura");
+          // Ticket Custom Fields:
+          newTicket.addCustomField(CustomFieldsName.ID_COLA,data.getPrepaidTopup10().getMessageId());
+          newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.ISSUANCE_FEE.getValue());
+          newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
+
+
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          if(ticket.getId() != null){
+            log.info("Ticket Creado Exitosamente");
+          }
+        } else {
+          Map<String, Object> templateData = new HashMap<String, Object>();
+          templateData.put("idUsuario", data.getUser().getId().toString());
+          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_ISSUANCE_FEE, templateData);
+        }
       return req;
       }
     };

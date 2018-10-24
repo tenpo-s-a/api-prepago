@@ -29,6 +29,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v10
   OUT _estado VARCHAR,
   OUT _saldo_info TEXT,
   OUT _saldo_expiracion BIGINT,
+  OUT _intentos_validacion BIGINT,
   OUT _fecha_creacion TIMESTAMP,
   OUT _fecha_actualizacion TIMESTAMP
 )
@@ -42,6 +43,7 @@ BEGIN
     estado,
     saldo_info,
     saldo_expiracion,
+    intentos_validacion,
     fecha_creacion,
     fecha_actualizacion
   FROM

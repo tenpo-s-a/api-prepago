@@ -197,4 +197,53 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe tener nameStatus IN_REVIEW", NameStatus.IN_REVIEW, NameStatus.valueOf(u.get("name_status").toString()));
   }
 
+
+  @Test
+  public void uploadIdentityVerificationFiles_attempts() throws Exception {
+    User user = registerUser();
+    user.setBirthday(LocalDate.now());
+    user.setNameStatus(NameStatus.UNVERIFIED);
+    user = updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    Map<String, UserFile> files = new HashMap<>();
+    UserFile idFront = new UserFile();
+    idFront.setMimeType("asdsadsad");
+    idFront.setLocation("sadsadsa");
+    files.put("USER_ID_FRONT", idFront);
+
+    UserFile idBack= new UserFile();
+    idBack.setMimeType("fasdas");
+    idBack.setLocation("fasdasd");
+    files.put("USER_ID_BACK", idBack);
+
+    UserFile selfie = new UserFile();
+    selfie.setMimeType("dgdsgdsg");
+    selfie.setLocation("werewrewr");
+    files.put("USER_SELFIE", selfie);
+
+    HttpResponse respHttp = uploadFiles(user.getId(), files);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+
+    Map<String, Object> u = respHttp.toObject(Map.class);
+    Assert.assertEquals("Debe tener nameStatus IN_REVIEW", NameStatus.IN_REVIEW, NameStatus.valueOf(u.get("name_status").toString()));
+
+    prepaidUser = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUser.getId());
+
+    Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
+
+    // Intento 2
+    respHttp = uploadFiles(user.getId(), files);
+
+    Assert.assertEquals("status 200", 200, respHttp.getStatus());
+    prepaidUser = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUser.getId());
+
+    Assert.assertEquals("Debe tener intento de validacion = 2", Integer.valueOf(2), prepaidUser.getIdentityVerificationAttempts());
+
+  }
+
+
+
 }

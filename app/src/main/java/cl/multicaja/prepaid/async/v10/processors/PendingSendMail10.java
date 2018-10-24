@@ -2,12 +2,16 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.model.v10.MimeType;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
+import cl.multicaja.prepaid.model.v10.QueuesNameType;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
 import org.apache.camel.Endpoint;
@@ -103,10 +107,24 @@ public class PendingSendMail10 extends BaseProcessor10 {
             return redirectRequest(endpoint, exchange, req, false);
           }
 
-        } else if (cvv2DTO.getRetorno().equals(CodigoRetorno._1000)) {
+        } else if (CodigoRetorno._1000.equals(cvv2DTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
+          req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
           return redirectRequest(endpoint, exchange, req, true);
-        } else {
+        }
+        else if (CodigoRetorno._1010.equals(cvv2DTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        } else if (CodigoRetorno._1020.equals(cvv2DTO.getRetorno())) {
+          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
+          req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
+          return redirectRequest(endpoint, exchange, req, true);
+        }
+        else {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
         }
@@ -122,13 +140,35 @@ public class PendingSendMail10 extends BaseProcessor10 {
         log.info("processErrorPendingSendMailCard - REQ: " + req);
         req.retryCountNext();
         PrepaidTopupData10 data = req.getData();
-        /**
-         *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
-         */
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("idUsuario", data.getUser().getId().toString());
-        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+        if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError()) &&
+            data.getPrepaidTopup10() != null
+        ) {
+          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al enviar tarjeta(CVV)",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+            .getUser().getRut().getDv()),data.getUser().getId());
+
+          NewTicket newTicket = createTicket("Error al enviar tarjeta(CVV)",
+            template,
+            String.valueOf(data.getUser().getRut().getValue()),
+            data.getPrepaidTopup10().getMessageId(),
+            QueuesNameType.SEND_MAIL,
+            req.getReprocesQueue());
+
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          if(ticket.getId() != null){
+            log.info("Ticket Creado Exitosamente");
+          }
+        } else {
+          /**
+           *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
+           */
+          Map<String, Object> templateData = new HashMap<String, Object>();
+          templateData.put("idUsuario", data.getUser().getId().toString());
+          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+        }
 
         return req;
       }
@@ -187,7 +227,36 @@ public class PendingSendMail10 extends BaseProcessor10 {
       log.info("processErrorPendingWithdrawMail - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-      //TODO falta implementar, no se sabe que hacer en este caso
+      log.debug(data.getPrepaidTopup10());
+        /* if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
+          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError()) &&
+            data.getPrepaidTopup10() != null
+        ) {
+          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al enviar mail de retiro",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
+            .getUser().getRut().getDv()),data.getUser().getId());
+
+          NewTicket newTicket = new NewTicket();
+          newTicket.setDescription(template);
+          newTicket.setGroupId(GroupId.OPERACIONES);
+          newTicket.setUniqueExternalId(String.valueOf(data.getUser().getRut().getValue()));
+          newTicket.setType(TicketType.COLAS_NEGATIVAS);
+          newTicket.setStatus(StatusType.OPEN);
+          newTicket.setPriority(PriorityType.URGENT);
+          newTicket.setSubject("Error al enviar tarjeta(CVV)");
+          // Ticket Custom Fields:
+          newTicket.addCustomField(CustomFieldsName.ID_COLA,data.getPrepaidTopup10().getMessageId());
+          newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.SEND_MAIL.getValue());
+          newTicket.addCustomField(CustomFieldsName.REINTENTOS,req.getReprocesQueue());
+
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          if(ticket.getId() != null){
+            log.info("Ticket Creado Exitosamente");
+          }
+        } else {
+          //Todo: se podria enviar mail
+        }*/
       return req;
       }
     };
