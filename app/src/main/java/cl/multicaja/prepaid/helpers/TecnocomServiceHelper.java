@@ -60,6 +60,10 @@ public final class TecnocomServiceHelper {
       String apiUrl = config.getProperty("tecnocom.apiUrl");
       String channel = config.getProperty("tecnocom.channel");
       String codent = null;
+      String order = config.getProperty("tecnocom.order");
+
+      HashOrder hashOrder = order.equals("ASC") ? HashOrder.ASC : HashOrder.DESC;
+
       try {
         codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
       } catch (Exception e) {
@@ -68,9 +72,9 @@ public final class TecnocomServiceHelper {
       }
       boolean useMock = config.getPropertyBoolean("tecnocom.service.mock", false);
       if (useMock) {
-        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, HashOrder.ASC);
+        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder);
       } else {
-        this.tecnocomService = new TecnocomServiceImpl(apiKey, apiUrl, channel, codent, HashOrder.ASC);
+        this.tecnocomService = new TecnocomServiceImpl(apiKey, apiUrl, channel, codent, hashOrder);
       }
     }
     return tecnocomService;
