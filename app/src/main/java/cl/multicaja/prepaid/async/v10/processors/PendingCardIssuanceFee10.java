@@ -140,8 +140,14 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           numaut = numaut.substring(numaut.length()-6);
         }
 
+        log.info(String.format("LLamando cobro emision %s", prepaidCard.getProcessorUserId()));
+
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+        log.info("Respuesta inclusion");
+        log.info(inclusionMovimientosDTO.getRetorno());
+        log.info(inclusionMovimientosDTO.getDescRetorno());
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 

@@ -82,10 +82,17 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           if (numaut.length() > 6) {
             numaut = numaut.substring(numaut.length()-6);
           }
+
+          log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
+
           // Se intenta realizar nuevamente la inclusion del movimiento original .
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
             originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
             originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
+
+          log.info("Respuesta reversa mov original");
+          log.info(inclusionMovimientosDTO.getRetorno());
+          log.info(inclusionMovimientosDTO.getDescRetorno());
 
           // Se verifica la respuesta de tecnocom
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
@@ -127,10 +134,16 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             numaut = numaut.substring(numaut.length()-6);
           }
 
+          log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+
           // Se intenta realizar reversa del movimiento.
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), prepaidCard.getPan(), originalMovement.getClamon(),
             prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), numaut, originalMovement.getCodcom(),
             originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
+
+          log.info("Respuesta reversa");
+          log.info(inclusionMovimientosDTO.getRetorno());
+          log.info(inclusionMovimientosDTO.getDescRetorno());
 
           // Si la reversa se realiza correctamente  se actualiza el movimiento original a reversado.
           if (inclusionMovimientosDTO.isRetornoExitoso()) {

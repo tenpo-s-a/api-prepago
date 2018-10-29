@@ -515,8 +515,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       numaut = numaut.substring(numaut.length()-6);
     }
 
+    log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
+
     InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+    log.info("Respuesta inclusion");
+    log.info(inclusionMovimientosDTO.getRetorno());
+    log.info(inclusionMovimientosDTO.getDescRetorno());
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
       String centalta = inclusionMovimientosDTO.getCenalta();
