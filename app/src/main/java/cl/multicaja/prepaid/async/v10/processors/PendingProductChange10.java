@@ -68,6 +68,9 @@ public class PendingProductChange10 extends BaseProcessor10 {
             if(dto.isRetornoExitoso()) {
               log.debug("********** Cambio de producto realizado **********");
 
+
+              //TODO: actualizar el producto en la tabla de tarjetas
+
               //Envio de mail -> validacion de identidad ok
               sendSuccessMail(user);
 
@@ -75,6 +78,8 @@ public class PendingProductChange10 extends BaseProcessor10 {
               if(dto.getDescRetorno().contains("MPA0928")) {
                 log.debug("********** Cambio de producto realizado anteriormente **********");
                 req.getData().setMsjError(dto.getDescRetorno());
+
+                //TODO: actualizar el producto en la tabla de tarjetas
 
                 //Envio de mail -> validacion de identidad ok
                 sendSuccessMail(user);
