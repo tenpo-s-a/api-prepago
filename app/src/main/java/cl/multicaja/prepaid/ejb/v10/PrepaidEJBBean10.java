@@ -189,7 +189,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return map;
   }
 
-  public EncryptUtil getEncryptUtil() {
+  private EncryptUtil getEncryptUtil() {
     if(encryptUtil == null) {
       encryptUtil = EncryptUtil.getInstance();
     }
@@ -889,7 +889,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
     }
 
-    user = getUserClient().finishSignup(headers,userIdMc);
+    user = getUserClient().finishSignup(headers, userIdMc, "Prepago");
 
     PrepaidUser10 prepaidUser10 = new PrepaidUser10();
     prepaidUser10.setUserIdMc(user.getId());
