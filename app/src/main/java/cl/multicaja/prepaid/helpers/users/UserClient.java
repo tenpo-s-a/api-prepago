@@ -201,9 +201,9 @@ public class UserClient {
     return this.processResponse("signUp", httpResponse, SignUp.class);
   }
 
-  public User finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
+  public User finishSignup(Map<String, Object> headers, Long userIdMc, String product) throws Exception {
     log.info("******** finishSignup IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc),null );
+    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc), product);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     User response;
