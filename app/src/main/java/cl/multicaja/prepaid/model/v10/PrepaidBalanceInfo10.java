@@ -31,9 +31,9 @@ public class PrepaidBalanceInfo10 extends BaseModel {
     this.setClamons(consultaSaldoDTO.getClamons());
     this.setConprod(consultaSaldoDTO.getConprod());
     this.setProducto(consultaSaldoDTO.getProducto());
-    this.setSalautconp(consultaSaldoDTO.getSalautconp());
+    this.setSalautconp(consultaSaldoDTO.getSalautconp().multiply(BigDecimal.valueOf(-1)));
     this.setSalautcons(consultaSaldoDTO.getSalautcons());
-    this.setSaldisconp(consultaSaldoDTO.getSaldisconp());
+    this.setSaldisconp(consultaSaldoDTO.getSaldisconp().multiply(BigDecimal.valueOf(-1)));
     this.setSaldiscons(consultaSaldoDTO.getSaldiscons());
     this.setSubprodu(consultaSaldoDTO.getSubprodu());
   }

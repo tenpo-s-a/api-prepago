@@ -493,9 +493,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+    prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
@@ -508,15 +507,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
-    String numaut = numreffac;
+    String numaut = prepaidMovement.getNumaut();
 
     //solamente los 6 ultimos digitos de numreffac
     if (numaut.length() > 6) {
       numaut = numaut.substring(numaut.length()-6);
     }
 
+    log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
+
     InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+    log.info("Respuesta inclusion");
+    log.info(inclusionMovimientosDTO.getRetorno());
+    log.info(inclusionMovimientosDTO.getDescRetorno());
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
       String centalta = inclusionMovimientosDTO.getCenalta();
@@ -562,8 +567,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse.setConSwitch(ReconciliationStatusType.PENDING);
-      prepaidMovementReverse.setConTecnocom(ReconciliationStatusType.PENDING);
       prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
 
       String messageId = this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
@@ -1098,8 +1101,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;
@@ -1520,8 +1521,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           // Suma de Comisiones
           BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco).multiply(NEGATIVE), movimientosDTO.getClamon()));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco), movimientosDTO.getClamon()));
           break;
         }
         case CARGA_EFECTIVO_COMERCIO_MULTICAJA:{

@@ -88,8 +88,12 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
           issuanceFeeMovement.setImpfac(getCalculationsHelper().getCalculatorParameter10().getOPENING_FEE());
+          issuanceFeeMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+          issuanceFeeMovement.setConSwitch(ReconciliationStatusType.PENDING);
+          issuanceFeeMovement.setNumaut(null);
 
           issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().addPrepaidMovement(null, issuanceFeeMovement);
+          issuanceFeeMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(issuanceFeeMovement.getId());
 
           req.getData().setIssuanceFeeMovement10(issuanceFeeMovement);
         }
@@ -133,15 +137,21 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString(); //Se hace internamente en Tecnocom.
-        String numaut = numreffac;
+        String numaut = issuanceFeeMovement.getNumaut();
 
         //solamente los 6 primeros digitos de numreffac
         if (numaut.length() > 6) {
           numaut = numaut.substring(numaut.length()-6);
         }
 
+        log.info(String.format("LLamando cobro emision %s", prepaidCard.getProcessorUserId()));
+
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+        log.info("Respuesta inclusion");
+        log.info(inclusionMovimientosDTO.getRetorno());
+        log.info(inclusionMovimientosDTO.getDescRetorno());
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
