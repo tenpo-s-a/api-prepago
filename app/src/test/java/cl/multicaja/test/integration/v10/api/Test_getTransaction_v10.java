@@ -11,12 +11,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class Test_getTransaction_v10 extends TestBaseUnitApi {
+
+  @BeforeClass
+  public static void  beforeClass() {
+    getTecnocomService().setAutomaticError(Boolean.FALSE);
+    getTecnocomService().setRetorno(null);
+  }
 
   private HttpResponse getTransactions(Long userIdMc, String fecha_desde, String fecha_hasta) {
 

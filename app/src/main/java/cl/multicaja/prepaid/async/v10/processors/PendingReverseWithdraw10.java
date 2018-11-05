@@ -232,7 +232,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           NewTicket newTicket = createTicket("Error al realizar reversa de Retiro",
             template,
             String.valueOf(data.getUser().getRut().getValue()),
-            data.getPrepaidTopup10().getMessageId(),
+            data.getPrepaidWithdraw10().getMessageId(),
             QueuesNameType.REVERSE_WITHDRAWAL,
             req.getReprocesQueue());
 

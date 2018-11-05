@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -18,6 +19,12 @@ import static cl.multicaja.core.model.Errors.*;
  * @autor vutreras
  */
 public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
+
+  @BeforeClass
+  public static void  beforeClass() {
+    getTecnocomService().setAutomaticError(Boolean.FALSE);
+    getTecnocomService().setRetorno(null);
+  }
 
   /**
    *
@@ -33,6 +40,8 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void getPrepaidUserBalance_ok() throws Exception {
+
+
 
     User user = registerUser();
 

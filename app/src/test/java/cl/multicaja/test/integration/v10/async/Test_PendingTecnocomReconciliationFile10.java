@@ -25,6 +25,7 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
+@Ignore
 public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync {
   private static Log log = LogFactory.getLog(Test_PendingTecnocomReconciliationFile10.class);
 
@@ -90,7 +91,6 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     prepareUsersAndCards();
   }
 
-  @Ignore
   @Test
   public void processOnlineTransactions() throws Exception {
     List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,

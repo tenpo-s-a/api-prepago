@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -24,6 +25,12 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
  * @autor vutreras
  */
 public class Test_topupSimulation_v10 extends TestBaseUnitApi {
+
+  @BeforeClass
+  public static void  beforeClass() {
+    getTecnocomService().setAutomaticError(Boolean.FALSE);
+    getTecnocomService().setRetorno(null);
+  }
 
   /**
    *
