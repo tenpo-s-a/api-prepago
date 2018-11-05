@@ -106,7 +106,7 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{userId}/finish_signup")
   public Response finishSignup(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers),userId);
+    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers), userId);
     return Response.ok(prepaidUser10).build();
   }
 

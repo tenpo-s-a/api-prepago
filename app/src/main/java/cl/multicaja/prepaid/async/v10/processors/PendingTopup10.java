@@ -58,6 +58,7 @@ public class PendingTopup10 extends BaseProcessor10 {
         PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+        prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
 
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;
@@ -133,16 +134,22 @@ public class PendingTopup10 extends BaseProcessor10 {
           CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
-          String numaut = numreffac;
+          String numaut = prepaidMovement.getNumaut();
 
           //solamente los 6 primeros digitos de numreffac
           if (numaut.length() > 6) {
             numaut = numaut.substring(numaut.length()-6);
           }
 
+          log.info(String.format("LLamando carga de saldo %s", prepaidCard.getProcessorUserId()));
+
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
                                                                                                       numreffac, impfac, numaut, codcom,
                                                                                                       nomcomred, codact, clamondiv,impfac);
+
+          log.info("Respuesta inclusion");
+          log.info(inclusionMovimientosDTO.getRetorno());
+          log.info(inclusionMovimientosDTO.getDescRetorno());
 
           if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
