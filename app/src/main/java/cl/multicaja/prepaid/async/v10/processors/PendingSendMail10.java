@@ -16,9 +16,13 @@ import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.commons.codec.binary.Base64;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,12 +78,10 @@ public class PendingSendMail10 extends BaseProcessor10 {
             mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
             mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getFormattedExpiration()));
             mailData.put("${cvc}", String.valueOf(cvv2DTO.getClavegen()));
-
-            String template = replaceDataHTML(mailTemplate, mailData);
-
-            //TODO el passwordOwner quizas debe externalizarse
-            //TODO revisar licencia de itext
-            String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), "MULTICAJA-PREPAGO", "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
+            log.debug(mailTemplate);
+            String template = replaceDataHTML(new String(Base64.decodeBase64(mailTemplate.getBytes())), mailData);
+            log.debug(template);
+            String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), RandomStringUtils.random(15), "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
@@ -202,16 +204,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
         mailData.put("${amount}", String.valueOf(withdraw.getAmount().getValue()));
         mailData.put("${fee}", String.valueOf(withdraw.getFee().getValue()));
 
-        //TODO: Hay que verificar que funcione el obtener plantilla
-        /*MailTemplate mailTemplate = getMailEjbBean10().getMailTemplateByAppAndName(null, "PREPAID", "WITHDRAW");
-        if (mailTemplate == null) {
-          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
-          data.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), endpoint.getEndpointUri(), true));
-          req.setRetryCount(0);
-          redirectRequest(endpoint, exchange, req);
-        }
-        */
-
         String template = replaceDataHTML("", mailData);
         //TODO: se debe llamar al servicio de envio de mail de Users
 
@@ -228,35 +220,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
       log.debug(data.getPrepaidTopup10());
-        /* if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
-          Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
-          Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError()) &&
-            data.getPrepaidTopup10() != null
-        ) {
-          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al enviar mail de retiro",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId());
 
-          NewTicket newTicket = new NewTicket();
-          newTicket.setDescription(template);
-          newTicket.setGroupId(GroupId.OPERACIONES);
-          newTicket.setUniqueExternalId(String.valueOf(data.getUser().getRut().getValue()));
-          newTicket.setType(TicketType.COLAS_NEGATIVAS);
-          newTicket.setStatus(StatusType.OPEN);
-          newTicket.setPriority(PriorityType.URGENT);
-          newTicket.setSubject("Error al enviar tarjeta(CVV)");
-          // Ticket Custom Fields:
-          newTicket.addCustomField(CustomFieldsName.ID_COLA,data.getPrepaidTopup10().getMessageId());
-          newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.SEND_MAIL.getValue());
-          newTicket.addCustomField(CustomFieldsName.REINTENTOS,req.getReprocesQueue());
-
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
-          }
-        } else {
-          //Todo: se podria enviar mail
-        }*/
       return req;
       }
     };

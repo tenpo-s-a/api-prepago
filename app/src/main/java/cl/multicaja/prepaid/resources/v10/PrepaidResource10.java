@@ -205,7 +205,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/Queue")
-  public Response reprocesQueue(ReprocesQueue reprocesQueue, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
+  public Response reprocesQueue(ReprocesQueue reprocesQueue, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.reprocessQueue(headersToMap(headers), reprocesQueue);
     return Response.ok().status(201).build();
   }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
 
-  //TODO: externalizar este numero?
   @JsonIgnore
   public static final String WEB_MERCHANT_CODE = "999999999999991";
 

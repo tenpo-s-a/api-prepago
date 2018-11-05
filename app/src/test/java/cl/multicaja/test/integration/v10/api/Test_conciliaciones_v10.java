@@ -46,6 +46,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
 
   private PrepaidTopup10 createTopup() throws Exception {
     User user = registerUser();
+
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);

@@ -14,20 +14,71 @@ import java.util.Map;
  */
 public interface PrepaidEJB10 {
 
+  /**
+   *
+   * @return
+   * @throws Exception
+   */
   Map<String, Object> info() throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param topupRequest
+   * @return
+   * @throws Exception
+   */
   PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param topupRequest
+   * @throws Exception
+   */
   void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param withdrawRequest
+   * @return
+   * @throws Exception
+   */
   PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param withdrawRequest
+   * @throws Exception
+   */
   void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param userId
+   * @return
+   */
   List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
 
+  /**
+   *
+   * @param headers
+   * @param signupRequest
+   * @return
+   * @throws Exception
+   */
   PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception;
 
+  /**
+   *
+   * @param headers
+   * @param userIdMc
+   * @return
+   * @throws Exception
+   */
   PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception;
 
 
@@ -175,7 +226,7 @@ public interface PrepaidEJB10 {
   User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
 
   /**
-   *
+   * Busca en las colas erroneas el mensaje por el id y lo vuelve a inyectar para ser reprocesado.
    * @param headers
    * @param reprocesQueue
    * @throws Exception
@@ -191,4 +242,6 @@ public interface PrepaidEJB10 {
    * @throws Exception
    */
   User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
+
+
 }
