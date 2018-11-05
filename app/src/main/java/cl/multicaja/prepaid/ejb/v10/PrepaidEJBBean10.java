@@ -1483,7 +1483,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
       transaction10.setCommerceCode(movimientosDTO.getCodcom());
       transaction10.setInvoiceType(TipoFactura.valueOfEnumByCodeAndCorrector(movimientosDTO.getTipofac(),movimientosDTO.getIndnorcor()));
-      transaction10.setCorrector(transaction10.getInvoiceType().getCorrector()==0?false:true);
+      transaction10.setCorrector(transaction10.getInvoiceType().getCorrector()!=0);
       switch (transaction10.getInvoiceType()) {
         case COMISION_APERTURA:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
@@ -1521,8 +1521,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           // Suma de Comisiones
           BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco), movimientosDTO.getClamon()));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco).multiply(NEGATIVE), movimientosDTO.getClamon()));
           break;
         }
         case CARGA_EFECTIVO_COMERCIO_MULTICAJA:{
