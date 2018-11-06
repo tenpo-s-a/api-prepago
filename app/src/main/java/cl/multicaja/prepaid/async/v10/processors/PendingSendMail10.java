@@ -17,6 +17,7 @@ import cl.multicaja.tecnocom.dto.Cvv2DTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -77,7 +78,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
             Map<String, String> mailData = new HashMap<>();
             mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
             mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getFormattedExpiration()));
-            mailData.put("${cvc}", String.valueOf(cvv2DTO.getClavegen()));
+            mailData.put("${cvc}", StringUtils.leftPad(String.valueOf(cvv2DTO.getClavegen()),3,"0"));
             log.debug(mailTemplate);
             String template = replaceDataHTML(new String(Base64.decodeBase64(mailTemplate.getBytes())), mailData);
             log.debug(template);
