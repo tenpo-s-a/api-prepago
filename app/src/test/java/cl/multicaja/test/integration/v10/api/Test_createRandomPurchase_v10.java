@@ -70,7 +70,6 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     BigDecimal fee = randomAmount.multiply(new BigDecimal(0.025)).setScale(0, BigDecimal.ROUND_HALF_UP);
     BigDecimal cardFee = BigDecimal.valueOf(990);
     topupValue = topupValue.subtract(randomAmount).subtract(fee).subtract(cardFee); // Calcular nuevo valor
-    topupValue = topupValue.multiply(new BigDecimal(-1));
     Assert.assertEquals("Debe ser igual", topupValue, prepaidBalance10.getBalance().getValue());
     Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
 
