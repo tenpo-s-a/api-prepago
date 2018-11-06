@@ -201,7 +201,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   public void updatePrepaidMovementStatus(Map<String, Object> header, Long id, PrepaidMovementStatus status) throws Exception {
     this.updatePrepaidMovement(null, id, null, null, null, null, null, null, null, status);
   }
-
+  @Override
+  public void updatePrepaidBusinessStatus(Map<String, Object> header, Long id, BusinessStatusType businessStatusType) throws Exception {
+    this.updatePrepaidMovement(null, id, null, null, null, null, null, null, businessStatusType, null);
+  }
   @Override
   public void updatePendingPrepaidMovementsSwitchStatus(Map<String, Object> header, String startDate, String endDate, PrepaidMovementType tipoMovimiento, IndicadorNormalCorrector indnorcor, ReconciliationStatusType status) throws Exception {
     if(startDate == null) {

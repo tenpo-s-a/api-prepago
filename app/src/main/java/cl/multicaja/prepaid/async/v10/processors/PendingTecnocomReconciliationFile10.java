@@ -228,18 +228,6 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
               case ERROR_TECNOCOM_REINTENTABLE:
               case ERROR_TIMEOUT_RESPONSE:
               case ERROR_TIMEOUT_CONEXION:
-                //TODO: El estado de movimiento no debe ser actualizado en este proceso.
-                /**
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null, originalMovement.getId(), pan,
-                  trx.getCentalta(),
-                  trx.getCuenta(),
-                  numberUtils.toInteger(trx.getNumextcta()),
-                  numberUtils.toInteger(trx.getNummovext()),
-                  numberUtils.toInteger(trx.getClamon()),
-                  null,
-                  PrepaidMovementStatus.PROCESS_OK);
-                */
-
                 getRoute().getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
                   ReconciliationStatusType.RECONCILED);

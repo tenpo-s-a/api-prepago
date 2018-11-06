@@ -39,8 +39,6 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
 
 /**
@@ -101,6 +99,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private EncryptUtil encryptUtil;
 
   private ParametersUtil parametersUtil;
+
+  private CalculationsHelper calculationsHelper;
+
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -164,6 +165,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
     this.filesEJBBean10 = filesEJBBean10;
+  }
+
+  public CalculationsHelper getCalculationsHelper(){
+    if(calculationsHelper ==null){
+      calculationsHelper = CalculationsHelper.getInstance();
+    }
+    return calculationsHelper;
   }
 
   @Override
@@ -597,7 +605,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-
+      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
@@ -1171,7 +1179,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
     if(CodigoMoneda.USA_USN.equals(simulationNew.getAmount().getCurrencyCode())) {
       simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USN));
-      amountValue = CalculationsHelper.calculateAmountFromEed(amountValue);
+      amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
       simulationTopup.setInitialAmount(simulationNew.getAmount());
@@ -1230,7 +1238,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setPcaMain(amount);
       balance.setBalance(amount);
       balance.setPcaSecondary(amount);
-      balance.setUsdValue(CalculationsHelper.getUsdValue());
+      balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
       balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
@@ -1266,9 +1274,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a cargar + comisiones: " + calculatedAmount);
 
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
-    simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
+    simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USN));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
@@ -1974,7 +1982,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
-    //TODO: agregar flag para saber si el mensaje ya se intento reprocesar anteriormente
+
     String messageId = null;
     if(reprocesQueue == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));
