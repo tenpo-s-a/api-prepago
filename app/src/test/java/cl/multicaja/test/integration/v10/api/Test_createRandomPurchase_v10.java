@@ -8,12 +8,17 @@ import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import cl.multicaja.tecnocom.constants.TipoFactura;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.ejb.EJB;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
 
@@ -29,8 +34,15 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     return respHttp;
   }
 
+  private HttpResponse getPrepaidUserTransactions(Long userIdMc, String fecha_desde, String fecha_hasta) {
+    HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/transactions?from=%s&to=%s", userIdMc, fecha_desde, fecha_hasta), DEFAULT_HTTP_HEADERS2);
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
+
   @Test
   public void shouldCreateRandomPurchase() throws Exception {
+
     User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -40,6 +52,8 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     topupUserBalance(user, topupValue);
     PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
+
+
 
     // Crear la compra aleatoria
     HttpResponse resp = createRandomPurchase(user.getId());
@@ -57,6 +71,19 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     BigDecimal cardFee = BigDecimal.valueOf(990);
     Assert.assertEquals("Debe ser igual", topupValue.subtract(randomAmount).subtract(fee).subtract(cardFee), prepaidBalance10.getBalance().getValue());
     Assert.assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
-  }
 
+
+    int internationalPurchaseCounter = 0;
+    HttpResponse transRespHttp = getPrepaidUserTransactions(user.getId(), "", "");
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SnakeCaseStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    List<PrepaidTransaction10> prepaidTransaction10List = mapper.readValue(transRespHttp.getResp(), new TypeReference<List<PrepaidTransaction10>>(){});
+    for (PrepaidTransaction10 prepaidTransaction : prepaidTransaction10List) {
+      System.out.println("Se encontro transaccion: " + prepaidTransaction.getInvoiceType().getCode());
+      if (TipoFactura.COMPRA_INTERNACIONAL.getCode() == prepaidTransaction.getInvoiceType().getCode()) {
+        internationalPurchaseCounter++;
+      }
+    }
+    Assert.assertEquals("Debe haber 1 compra internacional", 1, internationalPurchaseCounter);
+  }
 }
