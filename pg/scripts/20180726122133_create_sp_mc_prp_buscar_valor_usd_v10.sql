@@ -43,8 +43,9 @@ BEGIN
     precio_medio,
     exponente
   FROM
-  ${schema}.prp_valor_usd
-  WHERE now()::date between fecha_creacion::date and fecha_termino::date;
+    ${schema}.prp_valor_usd
+  WHERE
+    now()::date between fecha_creacion::date and fecha_termino::date;
   RETURN;
 END;
 $$ LANGUAGE plpgsql;

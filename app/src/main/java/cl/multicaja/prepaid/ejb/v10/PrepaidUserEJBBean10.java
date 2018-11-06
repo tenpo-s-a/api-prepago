@@ -331,10 +331,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
-    NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-    NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
-    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, CalculationsHelper.getUsdValue(), updated);
+    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
   }
 
   @Override

@@ -224,9 +224,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.setData(data);
               return req;
             }
-
           //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
-          //} else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())){
           } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());

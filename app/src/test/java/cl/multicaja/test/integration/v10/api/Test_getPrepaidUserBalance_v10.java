@@ -58,8 +58,8 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
 
     {
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(2010));
-      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
       HttpResponse respHttp = getPrepaidUserBalance(user.getId(), true);
 
