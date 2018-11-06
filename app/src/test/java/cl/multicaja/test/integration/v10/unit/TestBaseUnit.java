@@ -62,9 +62,13 @@ public class TestBaseUnit extends TestApiBase {
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static FilesEJBBean10 filesEJBBean10;
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
-  protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
+
+  protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
+  {
+    calculationsHelper.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+  }
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
     new HttpHeader("Content-Type", "application/json"),

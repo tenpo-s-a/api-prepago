@@ -146,6 +146,9 @@ public class CalculationsHelper {
    * @return
    */
   public Double getUsdValue() throws Exception {
+    if (getPrepaidCardEJBBean10() == null) {
+      System.out.println("PrepaidCard es null");
+    }
     return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
   }
 
