@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 /**
  * @author abarazarte
  **/
+@Ignore
 public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test

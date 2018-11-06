@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.helpers;
 
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
@@ -146,9 +147,6 @@ public class CalculationsHelper {
    * @return
    */
   public Double getUsdValue() throws Exception {
-    if (getPrepaidCardEJBBean10() == null) {
-      System.out.println("PrepaidCard es null");
-    }
     return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
   }
 

@@ -67,7 +67,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
-    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.REVERSED, PrepaidMovementStatus.REVERSED, dbPrepaidMovement.getEstado());
+    Assert.assertEquals("Deberia tener status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
+    Assert.assertEquals("Deberia Business status " + BusinessStatusType.REVERSED, BusinessStatusType.REVERSED, dbPrepaidMovement.getEstadoNegocio());
 
     Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
     ExchangeData<PrepaidReverseData10> reverseWithdraw = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
