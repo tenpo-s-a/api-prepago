@@ -230,4 +230,5 @@ public final class TestHelpersResource10 extends BaseResource {
 
     return Response.ok(gastoAleatorio).status(201).build();
   }
+
 }

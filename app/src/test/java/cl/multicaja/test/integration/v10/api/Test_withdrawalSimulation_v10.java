@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -21,6 +22,12 @@ import static cl.multicaja.core.model.Errors.*;
  * @autor vutreras
  */
 public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
+
+  @BeforeClass
+  public static void  beforeClass() {
+    getTecnocomService().setAutomaticError(Boolean.FALSE);
+    getTecnocomService().setRetorno(null);
+  }
 
   /**
    *
