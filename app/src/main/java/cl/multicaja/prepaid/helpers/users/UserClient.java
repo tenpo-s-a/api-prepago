@@ -267,9 +267,18 @@ public class UserClient {
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
   }
 
-  public User finishIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
+  public User finishIdentityValidation(Map<String, Object> headers, Long userId, Boolean success, Boolean isBlacklisted) throws Exception {
     log.info("******** initIdentityValidation IN ********");
-    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/finish_identity_validation?success=true", getApiUrl(), userId), "{}");
+
+    StringBuilder url = new StringBuilder(String.format("%s/%s/finish_identity_validation?", getApiUrl(), userId));
+    if(success){
+      url.append("success=true&");
+    }
+    if(isBlacklisted) {
+      url.append("blacklisted=true&");
+    }
+
+    HttpResponse httpResponse =  apiPUT(url.toString(), "{}");
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
