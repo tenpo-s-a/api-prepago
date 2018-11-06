@@ -58,7 +58,6 @@ public class PendingTopup10 extends BaseProcessor10 {
         PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-        prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
 
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;
@@ -119,6 +118,8 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                     PrepaidCardStatus.LOCKED,
                                                                                                     PrepaidCardStatus.PENDING);
 
+        prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
+
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
@@ -126,6 +127,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           String contrato = prepaidCard.getProcessorUserId();
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
           CodigoMoneda clamon = prepaidMovement.getClamon();
+
           IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
           BigDecimal impfac = prepaidMovement.getImpfac();
@@ -222,9 +224,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.setData(data);
               return req;
             }
-
           //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
-          //} else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())){
           } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());

@@ -326,11 +326,15 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       balanceValue = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
     }
 
-    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
-    NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-    NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+    if(balanceValue.compareTo(BigDecimal.ZERO) < 0) {
+      balanceValue = balanceValue.multiply(BigDecimal.valueOf(-1));
+    }
 
-    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, CalculationsHelper.getUsdValue(), updated);
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
+    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
+
+    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
   }
 
   @Override

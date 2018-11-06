@@ -8,10 +8,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -23,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+@Ignore
 public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
   private static String BASE_DIR = "src/test/resources/multicajared/";

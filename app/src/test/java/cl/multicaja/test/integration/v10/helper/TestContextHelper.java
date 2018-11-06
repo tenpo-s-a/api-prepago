@@ -65,14 +65,6 @@ public class TestContextHelper extends TestBaseUnit {
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
-      /**
-       * Agrega rutas de envio de emails de users pero al camel context de prepago necesario para los test
-       */
-      //TODO: Revisar esto, creo que no se podra realizar !
-     /* UsersEmailRoute10 usersEmailRoute10 = new UsersEmailRoute10();
-      usersEmailRoute10.setUsersEJBBean10(getUsersEJBBean10());
-      usersEmailRoute10.setMailEJBBean10(getMailEJBBean10());
-      */
      /*
       camelFactory.startCamelContextWithRoutes(true,
         prepaidTopupRoute10 ,transactionReversalRoute10,
@@ -89,7 +81,6 @@ public class TestContextHelper extends TestBaseUnit {
     if (brokerService != null) {
       camelFactory.releaseCamelContext();
       brokerService.stop();
-     // TestSftpServer.getInstance().end();
     }
   }
 

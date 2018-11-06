@@ -113,28 +113,28 @@ public class Test_CalculationsHelper extends TestBaseUnit {
 
     BigDecimal amount = BigDecimal.valueOf(1000);
 
-    BigDecimal pca = CalculationsHelper.calculatePca(amount);
+    BigDecimal pca = getCalculationsHelper().calculatePca(amount);
 
     Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(743.64), pca);
   }
 
   @Test
-  public void testCalculateEed() {
+  public void testCalculateEed() throws Exception {
 
     BigDecimal amount = BigDecimal.valueOf(1000);
 
-    BigDecimal eed = CalculationsHelper.calculateEed(amount);
+    BigDecimal eed = getCalculationsHelper().calculateEed(amount);
 
     Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1.16), eed);
   }
 
 
   @Test
-  public void testCalculateAmountFromEed() {
+  public void testCalculateAmountFromEed() throws Exception{
     {
       BigDecimal amount = BigDecimal.valueOf(1.16);
 
-      BigDecimal baseAmount = CalculationsHelper.calculateAmountFromEed(amount);
+      BigDecimal baseAmount = getCalculationsHelper().calculateAmountFromEed(amount);
 
       Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1010), baseAmount);
     }
@@ -142,7 +142,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     {
       BigDecimal amount = BigDecimal.valueOf(1.15);
 
-      BigDecimal baseAmount = CalculationsHelper.calculateAmountFromEed(amount);
+      BigDecimal baseAmount = getCalculationsHelper().calculateAmountFromEed(amount);
 
       Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1000), baseAmount);
     }

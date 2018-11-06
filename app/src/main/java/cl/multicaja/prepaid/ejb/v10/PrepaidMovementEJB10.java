@@ -241,4 +241,6 @@ public interface PrepaidMovementEJB10 {
    * @return
    */
   String processReconciliation(PrepaidMovement10 mov) throws Exception ;
+
+  void updatePrepaidBusinessStatus(Map<String, Object> header, Long id, BusinessStatusType businessStatusType) throws Exception;
 }

@@ -43,16 +43,16 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_movimiento_v10(
       RETURN;
     END IF;
 
-    IF TRIM(COALESCE(_estado, '')) = '' THEN
-      _error_code := 'MC002';
-      _error_msg := '[mc_prp_actualiza_movimiento_v10] El Estado es obligatorio';
-      RETURN;
-    END IF;
-
     UPDATE
       ${schema}.prp_movimiento
     SET
-       estado = _estado,
+       estado = (
+                  CASE WHEN _estado IS NOT NULL THEN
+                       _estado
+                  ELSE
+                       estado
+                  END
+                  ),
        centalta = (
                    CASE WHEN _centalta IS NOT NULL THEN
                        _centalta

@@ -62,8 +62,8 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac);
-      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -89,9 +89,13 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
       BigDecimal balanceValue = BigDecimal.valueOf(newBalance.getSaldisconp().longValue() - newBalance.getSalautconp().longValue());
 
+      if(balanceValue.compareTo(BigDecimal.ZERO) < 0) {
+        balanceValue = balanceValue.multiply(BigDecimal.valueOf(-1));
+      }
+
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
-      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
       Assert.assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       Assert.assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
@@ -195,8 +199,8 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     PrepaidUserEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS = 3000;
 
     NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(impfac);
-    NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-    NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
     {
       PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
@@ -244,8 +248,8 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       BigDecimal value = BigDecimal.valueOf(0);
 
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(value);
-      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
       Assert.assertEquals("debe ser igual", value, balance.getValue());
       Assert.assertEquals("debe ser 0", BigDecimal.valueOf(0), pcaMain.getValue());
@@ -256,8 +260,8 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
       BigDecimal value = BigDecimal.valueOf(-1);
 
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(value);
-      NewAmountAndCurrency10 pcaMain = CalculationsHelper.calculatePcaMain(balance);
-      NewAmountAndCurrency10 pcaSecondary = CalculationsHelper.calculatePcaSecondary(balance, pcaMain);
+      NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+      NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
       Assert.assertEquals("debe ser igual", value, balance.getValue());
       Assert.assertEquals("debe ser 0", BigDecimal.valueOf(0), pcaMain.getValue());

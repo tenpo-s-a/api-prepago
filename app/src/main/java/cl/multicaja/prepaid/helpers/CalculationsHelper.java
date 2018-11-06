@@ -1,12 +1,17 @@
 package cl.multicaja.prepaid.helpers;
 
+import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
+import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.EJB;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -18,8 +23,20 @@ public class CalculationsHelper {
 
   private static CalculationsHelper instance;
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
-  private static final int ONE_HUNDRED = 100;
+  private final int ONE_HUNDRED = 100;
   private static CalculatorParameter10 calculatorParameter10;
+  @EJB
+  private  PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+
+  private PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public  void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
+
   public CalculationsHelper() {
 
   }
@@ -28,7 +45,7 @@ public class CalculationsHelper {
    * retorna la instancia unica como singleton
    * @return
    */
-  public static CalculationsHelper getInstance() {
+  public  static CalculationsHelper getInstance() {
     if (instance == null) {
       instance = new CalculationsHelper();
       try {
@@ -40,7 +57,7 @@ public class CalculationsHelper {
     return instance;
   }
 
-  public static int getOneHundred() {
+  public  int getOneHundred() {
     return ONE_HUNDRED;
   }
 
@@ -98,7 +115,7 @@ public class CalculationsHelper {
    * @param amount
    * @return
    */
-  public static BigDecimal calculateEed(BigDecimal amount) {
+  public BigDecimal calculateEed(BigDecimal amount) throws Exception {
     if (amount == null) {
       return BigDecimal.valueOf(0d);
     }
@@ -111,7 +128,7 @@ public class CalculationsHelper {
    * @param eed
    * @return
    */
-  public static BigDecimal calculateAmountFromEed(BigDecimal eed) {
+  public BigDecimal calculateAmountFromEed(BigDecimal eed) throws Exception {
     if (eed == null) {
       return BigDecimal.valueOf(0d);
     }
@@ -129,9 +146,13 @@ public class CalculationsHelper {
   /**
    * @return
    */
-  public static Integer getUsdValue() {
-    //TODO quizas se saca de algun servicio externo
-    return 645;
+  public Double getUsdValue() throws Exception {
+    //TODO: revisar bien esto. Ya que si es null impacta en los tests
+    if(ConfigUtils.isEnvTest()) {
+      return Double.valueOf(645);
+    } else {
+      return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
+    }
   }
 
   /**
@@ -139,7 +160,7 @@ public class CalculationsHelper {
    * @param balance
    * @return
    */
-  public static NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
+  public NewAmountAndCurrency10 calculatePcaMain(NewAmountAndCurrency10 balance) {
     //https://www.pivotaltracker.com/story/show/158367667
     if (balance == null) {
       return null;
@@ -162,7 +183,7 @@ public class CalculationsHelper {
    * @param pcaMain
    * @return
    */
-  public static NewAmountAndCurrency10 calculatePcaSecondary(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain) {
+  public NewAmountAndCurrency10 calculatePcaSecondary(NewAmountAndCurrency10 balance, NewAmountAndCurrency10 pcaMain) throws Exception {
     //https://www.pivotaltracker.com/story/show/158367667
     if (balance == null || pcaMain == null) {
       return null;
