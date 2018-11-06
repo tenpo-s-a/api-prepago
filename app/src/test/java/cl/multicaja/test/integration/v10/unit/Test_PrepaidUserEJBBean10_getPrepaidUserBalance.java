@@ -89,6 +89,10 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
 
       BigDecimal balanceValue = BigDecimal.valueOf(newBalance.getSaldisconp().longValue() - newBalance.getSalautconp().longValue());
 
+      if(balanceValue.compareTo(BigDecimal.ZERO) < 0) {
+        balanceValue = balanceValue.multiply(BigDecimal.valueOf(-1));
+      }
+
       NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
       NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);

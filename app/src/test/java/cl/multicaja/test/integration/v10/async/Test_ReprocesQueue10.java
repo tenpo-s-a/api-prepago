@@ -419,7 +419,8 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
-      Assert.assertEquals("Deberia estar con status REVERSED", PrepaidMovementStatus.REVERSED, originalDb.getEstado());
+      Assert.assertEquals("Deberia tener status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, originalDb.getEstado());
+      Assert.assertEquals("Deberia tener businessStatus REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
     }
