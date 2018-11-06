@@ -65,8 +65,14 @@ public class PendingCard10 extends BaseProcessor10 {
 
         User user = data.getUser();
 
+        log.info(String.format("Realizando alta de cliente %s-%s", user.getRut().getValue(), user.getRut().getDv()));
+        
         final TipoAlta tipoAlta = data.getPrepaidUser10().getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
         AltaClienteDTO altaClienteDTO = getRoute().getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+
+        log.info("Respuesta alta de cliente");
+        log.info(altaClienteDTO.getRetorno());
+        log.info(altaClienteDTO.getDescRetorno());
 
         if (altaClienteDTO.isRetornoExitoso()) {
 
@@ -133,7 +139,13 @@ public class PendingCard10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
+        log.info(String.format("Obeteniendo datos de tarjeta %s", data.getPrepaidCard10().getProcessorUserId()));
+
         DatosTarjetaDTO datosTarjetaDTO = getRoute().getTecnocomService().datosTarjeta(data.getPrepaidCard10().getProcessorUserId());
+
+        log.info("Respuesta datos tarjeta");
+        log.info(datosTarjetaDTO.getRetorno());
+        log.info(datosTarjetaDTO.getDescRetorno());
 
         if (datosTarjetaDTO.isRetornoExitoso()) {
 

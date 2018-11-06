@@ -39,8 +39,6 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculateEed;
-import static cl.multicaja.prepaid.helpers.CalculationsHelper.calculatePca;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
 
 /**
@@ -101,6 +99,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private EncryptUtil encryptUtil;
 
   private ParametersUtil parametersUtil;
+
+  private CalculationsHelper calculationsHelper;
+
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -166,6 +167,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.filesEJBBean10 = filesEJBBean10;
   }
 
+  public CalculationsHelper getCalculationsHelper(){
+    if(calculationsHelper ==null){
+      calculationsHelper = CalculationsHelper.getInstance();
+    }
+    return calculationsHelper;
+  }
+
   @Override
   public TecnocomService getTecnocomService() {
     if(tecnocomService == null) {
@@ -189,7 +197,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return map;
   }
 
-  public EncryptUtil getEncryptUtil() {
+  private EncryptUtil getEncryptUtil() {
     if(encryptUtil == null) {
       encryptUtil = EncryptUtil.getInstance();
     }
@@ -493,9 +501,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+    prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
@@ -508,15 +515,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
-    String numaut = numreffac;
+    String numaut = prepaidMovement.getNumaut();
 
     //solamente los 6 ultimos digitos de numreffac
     if (numaut.length() > 6) {
       numaut = numaut.substring(numaut.length()-6);
     }
 
+    log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
+
     InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
       .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+    log.info("Respuesta inclusion");
+    log.info(inclusionMovimientosDTO.getRetorno());
+    log.info(inclusionMovimientosDTO.getDescRetorno());
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
       String centalta = inclusionMovimientosDTO.getCenalta();
@@ -562,8 +575,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
       prepaidMovementReverse.setTipofac(tipoFacReverse);
       prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-      prepaidMovementReverse.setConSwitch(ReconciliationStatusType.PENDING);
-      prepaidMovementReverse.setConTecnocom(ReconciliationStatusType.PENDING);
       prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
 
       String messageId = this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovementReverse);
@@ -594,7 +605,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-
+      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
@@ -889,7 +900,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
     }
 
-    user = getUserClient().finishSignup(headers,userIdMc);
+    user = getUserClient().finishSignup(headers, userIdMc, "Prepago");
 
     PrepaidUser10 prepaidUser10 = new PrepaidUser10();
     prepaidUser10.setUserIdMc(user.getId());
@@ -1098,8 +1109,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setLinref(0); // se debe actualizar despues
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement.setOriginType(MovementOriginType.API);
 
     return prepaidMovement;
@@ -1170,7 +1179,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
     if(CodigoMoneda.USA_USN.equals(simulationNew.getAmount().getCurrencyCode())) {
       simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USN));
-      amountValue = CalculationsHelper.calculateAmountFromEed(amountValue);
+      amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
       simulationTopup.setInitialAmount(simulationNew.getAmount());
@@ -1229,7 +1238,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setPcaMain(amount);
       balance.setBalance(amount);
       balance.setPcaSecondary(amount);
-      balance.setUsdValue(CalculationsHelper.getUsdValue());
+      balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
       balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
@@ -1265,9 +1274,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a cargar + comisiones: " + calculatedAmount);
 
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
-    simulationTopup.setPca(new NewAmountAndCurrency10(calculatePca(amountValue)));
+    simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(calculateEed(amountValue), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USN));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
@@ -1520,8 +1529,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           // Suma de Comisiones
           BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
-          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));
-          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco).multiply(NEGATIVE), movimientosDTO.getClamon()));
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco), movimientosDTO.getClamon()));
           break;
         }
         case CARGA_EFECTIVO_COMERCIO_MULTICAJA:{
@@ -1973,7 +1982,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception {
-    //TODO: agregar flag para saber si el mensaje ya se intento reprocesar anteriormente
+
     String messageId = null;
     if(reprocesQueue == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "reprocesQueue"));

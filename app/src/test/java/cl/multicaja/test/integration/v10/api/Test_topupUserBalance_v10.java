@@ -25,6 +25,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
    * @return
    */
   private HttpResponse topupUserBalance(NewPrepaidTopup10 newPrepaidTopup10) {
+    System.out.println(toJson(newPrepaidTopup10));
     HttpResponse respHttp = apiPOST("/1.0/prepaid/topup", toJson(newPrepaidTopup10));
     System.out.println("respHttp: " + respHttp);
     return respHttp;

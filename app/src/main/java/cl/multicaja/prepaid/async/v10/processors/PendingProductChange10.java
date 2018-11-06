@@ -62,11 +62,20 @@ public class PendingProductChange10 extends BaseProcessor10 {
           } else {
             log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
+            log.info(String.format("LLamando cambio de producto %s", prepaidCard.getProcessorUserId()));
+
             // se hace el cambio de producto
             CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
 
+            log.info("Respuesta cambio de producto");
+            log.info(dto.getRetorno());
+            log.info(dto.getDescRetorno());
+
             if(dto.isRetornoExitoso()) {
               log.debug("********** Cambio de producto realizado **********");
+
+
+              //TODO: actualizar el producto en la tabla de tarjetas
 
               //Envio de mail -> validacion de identidad ok
               sendSuccessMail(user);
@@ -75,6 +84,8 @@ public class PendingProductChange10 extends BaseProcessor10 {
               if(dto.getDescRetorno().contains("MPA0928")) {
                 log.debug("********** Cambio de producto realizado anteriormente **********");
                 req.getData().setMsjError(dto.getDescRetorno());
+
+                //TODO: actualizar el producto en la tabla de tarjetas
 
                 //Envio de mail -> validacion de identidad ok
                 sendSuccessMail(user);
