@@ -2169,7 +2169,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
       }
 
-      user = getUserClient().resetIdentityValidation(headers, user.getId());
+      if("No".equalsIgnoreCase(identityValidation.getIsGsintelOk())){
+        // Si el usuario no pasa la validacion Gsintel, se finaliza la validacion de identidad y se indica que el usuario esta en lista negra y se bloquea el usuario prepago
+        user = getUserClient().finishIdentityValidation(headers, user.getId(), Boolean.FALSE, Boolean.TRUE);
+        getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
+      } else {
+        user = getUserClient().resetIdentityValidation(headers, user.getId());
+      }
 
       Map<String, Object> templateData = new HashMap<>();
 
@@ -2196,7 +2202,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private User processSuccessfulIdentityVerification(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     //Cambiar status del usuario
-    User user = getUserClient().finishIdentityValidation(headers, prepaidUser.getUserIdMc());
+    User user = getUserClient().finishIdentityValidation(headers, prepaidUser.getUserIdMc(), Boolean.TRUE, Boolean.FALSE);
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
