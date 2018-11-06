@@ -14,6 +14,8 @@ import cl.multicaja.prepaid.model.v10.QueuesNameType;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.dto.Cvv2DTO;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,7 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.util.Base64Utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,14 +80,12 @@ public class PendingSendMail10 extends BaseProcessor10 {
         if (cvv2DTO.isRetornoExitoso()) {
           try {
             String mailTemplate = getRoute().getParametersUtil().getString("api-prepaid", "card_pdf_template", "v1.0");
-            Map<String, String> mailData = new HashMap<>();
-            mailData.put("${numtar}", getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()));
-            mailData.put("${venc}", String.valueOf(data.getPrepaidCard10().getFormattedExpiration()));
-            mailData.put("${cvc}", StringUtils.leftPad(String.valueOf(cvv2DTO.getClavegen()),3,"0"));
-            log.debug(mailTemplate);
-            String template = replaceDataHTML(new String(Base64.decodeBase64(mailTemplate.getBytes())), mailData);
-            log.debug(template);
-            String pdfB64 = getRoute().getPdfUtils().protectedPdfInB64(template, data.getUser().getRut().getValue().toString(), RandomStringUtils.random(15), "Multicaja Prepago", "Tarjeta Cliente", "Multicaja");
+            log.debug(data.getPrepaidCard10());
+            String pdfB64 = createPdf(data.getUser().getRut().getValue().toString(),RandomStringUtils.random(20),
+              getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()),
+              String.valueOf(data.getPrepaidCard10().getFormattedExpiration()),
+              StringUtils.leftPad(String.valueOf(cvv2DTO.getClavegen()),3,"0"),
+              String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()));
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
@@ -212,6 +215,39 @@ public class PendingSendMail10 extends BaseProcessor10 {
       }
     };
   }
+
+  public String createPdf(String passwordUser, String passwordOwner,String numTarjeta,String fecha, String cvc,String name) throws IOException, DocumentException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    Document document = new Document();
+    PdfWriter writer =  PdfWriter.getInstance(document, baos);
+    writer.setEncryption(passwordUser.getBytes(), passwordOwner.getBytes(), PdfWriter.ALLOW_PRINTING, PdfWriter.STANDARD_ENCRYPTION_128);
+    writer.createXmpMetadata();
+    document.addCreationDate();
+
+    document.open();
+    PdfContentByte cb = writer.getDirectContentUnder();
+    Image img = Image.getInstance("https://mcprepaid.blob.core.windows.net/tarjetaprepago/tarjeta.png");
+    img.scaleToFit(500, 600);
+    img.setAlignment(Image.MIDDLE);
+    document.add(getWatermarkedImage(cb, img, numTarjeta,fecha,cvc,name));
+    document.close();
+    return Base64Utils.encodeToString(baos.toByteArray());
+  }
+
+  public Image getWatermarkedImage(PdfContentByte cb, Image img, String numTarjeta,String fecha, String cvc,String name) throws DocumentException, IOException {
+    float width = img.getScaledWidth();
+    float height = img.getScaledHeight();
+    PdfTemplate template = cb.createTemplate(width, height);
+    template.addImage(img, width, 0, 0, height, 0, 0);
+    Font font = FontFactory.getFont("/resources/font/tarjeta/TitilliumWeb-Bold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 30, Font.BOLD, BaseColor.WHITE);
+    ColumnText.showTextAligned(template, Element.ALIGN_CENTER, new Phrase(numTarjeta, font), 220, 150, 0);
+    ColumnText.showTextAligned(template, Element.ALIGN_LEFT, new Phrase(fecha, font), 80, 95, 0);
+    ColumnText.showTextAligned(template, Element.ALIGN_CENTER, new Phrase(cvc, font), 295, 95, 0);
+    Font fontName = FontFactory.getFont("/resources/font/tarjeta/TitilliumWeb-SemiBold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 28, Font.NORMAL, BaseColor.WHITE);
+    ColumnText.showTextAligned(template, Element.ALIGN_LEFT, new Phrase(name, fontName), 70, 50, 0);
+    return Image.getInstance(template);
+  }
+
 
   public ProcessorRoute processErrorPendingWithdrawMail() {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {

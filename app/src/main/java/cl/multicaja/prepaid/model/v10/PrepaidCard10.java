@@ -129,6 +129,7 @@ public class PrepaidCard10 extends BaseModel {
       try {
         formattedExpiration = exp.substring(4) + "/" + exp.substring(0, 4);
       } catch(Exception ex) {
+        ex.printStackTrace();
       }
     }
     return formattedExpiration;
