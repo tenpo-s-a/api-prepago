@@ -147,7 +147,9 @@ public class CalculationsHelper {
    * @return
    */
   public Double getUsdValue() throws Exception {
-    if ()
+    if (ConfigUtils.isEnvTest()) {
+      return new Double(645);
+    }
     return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
   }
 
