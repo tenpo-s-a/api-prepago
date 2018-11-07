@@ -67,6 +67,7 @@ public class TestBaseUnit extends TestApiBase {
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
+    System.out.println("Exist: " + getPrepaidCardEJBBean10());
     calculationsHelper.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
   }
 
