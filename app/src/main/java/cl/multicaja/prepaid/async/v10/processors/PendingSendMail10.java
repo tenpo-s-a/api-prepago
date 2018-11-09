@@ -79,8 +79,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         if (cvv2DTO.isRetornoExitoso()) {
           try {
-            String mailTemplate = getRoute().getParametersUtil().getString("api-prepaid", "card_pdf_template", "v1.0");
-            log.debug(data.getPrepaidCard10());
             String pdfB64 = createPdf(data.getUser().getRut().getValue().toString(),RandomStringUtils.random(20),
               getRoute().getEncryptUtil().decrypt(data.getPrepaidCard10().getEncryptedPan()),
               String.valueOf(data.getPrepaidCard10().getFormattedExpiration()),
@@ -89,12 +87,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
-            if(data.getIssuanceFeeMovement10() != null){
-              templateData.put("amount", getRoute().getNumberUtils().toClp(data.getPrepaidTopup10().getTotal().getValue().subtract(data.getIssuanceFeeMovement10().getImpfac())));
-            } else {
-              templateData.put("amount", getRoute().getNumberUtils().toClp(data.getPrepaidTopup10().getTotal().getValue()));
-            }
-
 
             EmailBody emailBody = new EmailBody();
             emailBody.setTemplateData(templateData);
