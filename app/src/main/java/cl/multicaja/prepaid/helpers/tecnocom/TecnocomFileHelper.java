@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileHeader;
+import cl.multicaja.prepaid.helpers.tecnocom.model.*;
 import cl.multicaja.prepaid.model.v10.BusinessStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -14,8 +12,12 @@ import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.security.Security;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -310,5 +312,36 @@ public class TecnocomFileHelper {
     prepaidMovement.setNumplastico(0L);
 
     return prepaidMovement;
+  }
+
+  public AccountantFile validateAccountantFile(InputStream inputStream) {
+    // Todo: unencrypt file
+
+    Security.addProvider(new BouncyCastleProvider());
+    FileInputStream key = new FileInputStream("res/keys/public.bpg");
+    PGPPublicKey pubKey = KeyBasedFileProcessorUtil.readPublicKey(key);
+    FileOutputStream out = new FileOutputStream("target/enc.bpg");
+    String inputFilename = "src/main/resources/plaintext.txt";
+    boolean armor = false;
+    boolean integrityCheck = false;
+    KeyBasedFileProcessorUtil.encryptFile(out, inputFilename, pubKey, armor, integrityCheck);
+
+
+
+    // Agregar los datos desencriptados a la clase
+    AccountantFile file = new AccountantFile();
+    Scanner scanner = new Scanner(inputStream);
+    try {
+      while (scanner.hasNextLine()) {
+        final String line = scanner.nextLine();
+        AccountantFileDetail detail = new AccountantFileDetail(line);
+        file.getDetails().add(detail);
+      }
+    } catch (Exception ex) {
+      file.setError(Boolean.TRUE);
+      file.setDetails(Collections.EMPTY_LIST);
+    }
+
+    return file;
   }
 }

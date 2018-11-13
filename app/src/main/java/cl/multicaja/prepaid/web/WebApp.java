@@ -41,6 +41,9 @@ public class WebApp implements ServletContextListener  {
   private ConciliationMcRedRoute10 conciliationMcRedRoute10;
 
   @Inject
+  private AccountingBatchRoute10 accountingBatchRoute10;
+
+  @Inject
   private ReconciliationSchedulerRoute10 reconciliationSchedulerRoute10;
 
   @Inject
