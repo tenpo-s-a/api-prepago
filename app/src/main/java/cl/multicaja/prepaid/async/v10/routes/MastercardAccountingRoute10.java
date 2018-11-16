@@ -1,15 +1,15 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.async.v10.processors.AccountingBatchProcessor10;
+import cl.multicaja.prepaid.async.v10.processors.PendingMastercardAccountingFile10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class AccountingBatchRoute10 extends BaseRoute10 {
-  private static Log log = LogFactory.getLog(AccountingBatchRoute10.class);
+public class MastercardAccountingRoute10 extends BaseRoute10 {
+  private static Log log = LogFactory.getLog(MastercardAccountingRoute10.class);
   private final String SFTP_HOST_ENDPOINT;
 
-  public AccountingBatchRoute10 (){
+  public MastercardAccountingRoute10(){
     super();
     SFTP_HOST_ENDPOINT = getSftpEndpoint();
   }
@@ -18,7 +18,7 @@ public class AccountingBatchRoute10 extends BaseRoute10 {
   public void configure() throws Exception {
     if (ConfigUtils.isEnvTest()) {
       from(SFTP_HOST_ENDPOINT)
-        .process(new AccountingBatchProcessor10(this).processAccountingBatch());
+        .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
     }
   }
 
@@ -27,11 +27,11 @@ public class AccountingBatchRoute10 extends BaseRoute10 {
     StringBuilder sb = new StringBuilder();
     sb.append("sftp://");
     sb.append(getConfigUtils().getProperty("sftp.tecnocom.host"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.received.accountant.folder"));
+    sb.append(getConfigUtils().getProperty("sftp.tecnocom.received.accounting.folder"));
     sb.append(getConfigUtils().getProperty("sftp.tecnocom.auth.username"));
     sb.append(getConfigUtils().getProperty("sftp.tecnocom.auth.password"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accountant.done.folder"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accountant.error.folder").concat(fileErrorConfig));
+    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accounting.done.folder"));
+    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accounting.error.folder").concat(fileErrorConfig));
     sb.append(getConfigUtils().getProperty("sftp.tecnocom.reconnectDelay"));
     sb.append(getConfigUtils().getProperty("sftp.tecnocom.throwExceptionOnConnectFailed"));
     log.info(String.format("sftp endpoint -> [%s]", sb.toString()));

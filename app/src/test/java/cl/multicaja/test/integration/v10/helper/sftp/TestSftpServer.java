@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.helper.sftp;
 
-import cl.multicaja.prepaid.helpers.MastercardFileHelper;
+import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import com.jcraft.jsch.*;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;

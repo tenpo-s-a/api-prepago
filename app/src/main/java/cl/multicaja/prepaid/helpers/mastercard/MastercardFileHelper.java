@@ -1,12 +1,19 @@
-package cl.multicaja.prepaid.helpers;
+package cl.multicaja.prepaid.helpers.mastercard;
 
+import cl.multicaja.core.utils.encryption.PgpHelper;
+import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
+import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -128,6 +135,27 @@ public class MastercardFileHelper {
     } catch (ParseException e) {
       return false;
     }
+  }
+
+  public AccountingFile validateAccountantFile(InputStream inputStream) {
+
+    AccountingFile accountingFile = new AccountingFile();
+
+    // Agregar el archivo desencriptado a la clase
+    ByteArrayInputStream unencryptedStream = null;
+    Scanner scanner = new Scanner(unencryptedStream);
+    try {
+      while (scanner.hasNextLine()) {
+        final String line = scanner.nextLine();
+        AccountingFileDetail detail = new AccountingFileDetail(line);
+        accountingFile.getDetails().add(detail);
+      }
+    } catch (Exception ex) {
+      accountingFile.setError(Boolean.TRUE);
+      accountingFile.setDetails(Collections.EMPTY_LIST);
+    }
+
+    return accountingFile;
   }
 
 }

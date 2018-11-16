@@ -1,19 +1,19 @@
-package cl.multicaja.prepaid.helpers.tecnocom.model;
+package cl.multicaja.prepaid.helpers.mastercard.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountantFile {
+public class AccountingFile {
 
-  private List<AccountantFileDetail> details = new ArrayList<>();
+  private List<AccountingFileDetail> details = new ArrayList<>();
 
   private boolean hasError;
 
-  public List<AccountantFileDetail> getDetails() {
+  public List<AccountingFileDetail> getDetails() {
     return details;
   }
 
-  public void setDetails(List<AccountantFileDetail> details) {
+  public void setDetails(List<AccountingFileDetail> details) {
     this.details = details;
   }
 
