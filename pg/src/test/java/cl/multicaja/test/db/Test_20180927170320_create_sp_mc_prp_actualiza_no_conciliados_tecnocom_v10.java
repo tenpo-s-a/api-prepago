@@ -81,7 +81,7 @@ public class Test_20180927170320_create_sp_mc_prp_actualiza_no_conciliados_tecno
       }
     }
 
-    Assert.assertEquals("Debe haber 2 movimientos no conciliados", 2, notReconciliateCount);
+    Assert.assertEquals("Debe haber 5 movimientos no conciliados", 5, notReconciliateCount);
   }
 
   @Test

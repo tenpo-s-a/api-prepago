@@ -34,7 +34,7 @@ public class Test_20181010114032_create_sp_busca_movimientos_conciliar extends T
     // Mov 4 no conciliado
     Map<String,Object> mov2 =Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement();
     Map<String,Object> resp = buscaMovimientosPorConciliar();
-    List result = (List)resp.get("result");
+    List result = (List)resp.get(0); //"result");
     Assert.assertEquals("Debe tener 2 movimientos por conciliar",2,result.size());
 
   }

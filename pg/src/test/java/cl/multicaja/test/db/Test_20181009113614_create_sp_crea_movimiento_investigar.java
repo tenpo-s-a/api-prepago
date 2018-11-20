@@ -35,12 +35,6 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     }
 
     {
-      Map<String, Object> data = creaMovimientoInvestigar(getRandomString(10), "SWITCH", null);
-      Assert.assertNotNull("Data no debe ser null", data);
-      Assert.assertNotEquals("No debe ser 0","0",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","El _nombre_archivo es obligatorio",data.get("_error_msg"));
-    }
-    {
       Map<String, Object> data = creaMovimientoInvestigar(getRandomString(10), "SWITCH", "carga_20123123.csv");
       Assert.assertNotNull("Data no debe ser null", data);
       System.out.println(data.get("_error_msg"));

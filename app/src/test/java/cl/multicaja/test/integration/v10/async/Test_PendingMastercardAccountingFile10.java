@@ -10,38 +10,39 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 
 public class Test_PendingMastercardAccountingFile10 extends TestBaseUnit {
   private static Log log = LogFactory.getLog(Test_PendingMastercardAccountingFile10.class);
 
   @Test
-  public void findAccountingFile() throws InterruptedException {
-    String accountingfileName = "MPJ15015.APUNTES.FCON0002.0987.D20180903";
-    try {
-      putFileIntoAccountingSftp(accountingfileName);
-    } catch (Exception e) {
-      Assert.fail("Fallo colocar el archivo de contabilidad en el sftp");
+  public void findAccountingFile() throws InterruptedException, IOException {
+    String fileName = "reporte_mastercard.txt";
+    String sourceDir = "mastercard/files/";
+    String destDir = "src/test/resources/mastercard/contabilidad/";
+
+    InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(sourceDir + fileName);
+    if (inputStream != null)
+    {
+      System.out.println("Encontré el archivo");
+      File copiedFile = new File(destDir + fileName);
+      OutputStream outputStream = new FileOutputStream(copiedFile);
+      byte[] buffer = new byte[1024];
+      int length;
+      while ((length = inputStream.read(buffer)) > 0) {
+        outputStream.write(buffer, 0, length);
+      }
+      inputStream.close();
+      outputStream.close();
+    }
+    else
+    {
+      Assert.fail("File not found: " + fileName);
     }
 
     Thread.sleep(1500); // Esperar que lo agarre el metodo async
-
     Assert.assertTrue("Funciono", true);
   }
 
-  private void putFileIntoAccountingSftp(String filename) throws Exception {
-    try {
-      final Map<String, Object> context = TestTecnocomSftpServer.getInstance().openChanel();
-      InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
-      ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-      channelSftp.put(inputStream, TestTecnocomSftpServer.getInstance().BASE_DIR + "tecnocom/contabilidad/" + filename);
-      channelSftp.exit();
-      ((Session) context.get("session")).disconnect();
-      inputStream.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
-    }
-  }
 }
