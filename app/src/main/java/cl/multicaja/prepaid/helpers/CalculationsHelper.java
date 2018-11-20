@@ -147,12 +147,10 @@ public class CalculationsHelper {
    * @return
    */
   public Double getUsdValue() throws Exception {
-    //TODO: revisar bien esto. Ya que si es null impacta en los tests
-    if(ConfigUtils.isEnvTest()) {
-      return Double.valueOf(645);
-    } else {
-      return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
+    if (ConfigUtils.isEnvTest()) {
+      return new Double(645);
     }
+    return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
   }
 
   /**

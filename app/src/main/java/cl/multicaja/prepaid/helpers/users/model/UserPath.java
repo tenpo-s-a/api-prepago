@@ -22,12 +22,8 @@ public class UserPath {
   public static String CHECK_PASSWORD(Long userId){
     return String.format("%s/%s/check_password",PATH,userId);
   }
-  public static String UPDATE_PERSONAL_DATA(Long userId){
-    return String.format("%s/%s/update_personal_data",PATH,userId);
-  }
-  public static String VALIDATE_RUT(Long userId){
-    return String.format("%s/%s/validate_rut",PATH,userId);
-  }
+  public static String UPDATE_PERSONAL_DATA(Long userId){ return String.format("%s/%s/update_personal_data",PATH,userId); }
+  public static String VALIDATE_RUT(Long userId){ return String.format("%s/%s/validate_rut",PATH,userId); }
   public static String UPDATE_EMAIL(Long userId){
     return String.format("%s/%s/update_email",PATH,userId);
   }
