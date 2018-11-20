@@ -380,6 +380,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     };
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_v10", rm, params);
+    log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
   }
 

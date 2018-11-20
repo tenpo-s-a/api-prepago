@@ -556,8 +556,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
+      log.info("Error Reintentable");
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-
       //Inicia la reversa del movimiento
 
       // Agrego la reversa al cdt
@@ -583,6 +583,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         new KeyValue("messageId", messageId));
     }
     else {
+      log.info("Error no reintentable");
       //Colocar el movimiento en error
       PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
@@ -606,6 +607,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
       getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
+
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
@@ -1997,6 +1999,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     switch (reprocesQueue.getLastQueue()){
       case TOPUP: {
         log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
+        log.error(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
         Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
         ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
         if(data == null) {

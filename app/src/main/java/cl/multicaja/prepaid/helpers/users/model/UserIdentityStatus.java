@@ -11,7 +11,8 @@ public enum UserIdentityStatus implements Serializable {
 
   UNVERIFIED,
   NORMAL,
-  TERRORIST;
+  TERRORIST,
+  UNVERIFIED;
 
   public static UserIdentityStatus valueOfEnum(String name) {
     try {
