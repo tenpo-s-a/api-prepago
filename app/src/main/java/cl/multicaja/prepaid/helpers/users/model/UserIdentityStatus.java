@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public enum UserIdentityStatus implements Serializable {
 
+  UNVERIFIED,
   NORMAL,
   TERRORIST,
   UNVERIFIED;

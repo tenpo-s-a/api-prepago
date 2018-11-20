@@ -33,6 +33,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -214,6 +215,7 @@ public final class TestHelpersResource10 extends BaseResource {
     // Hacer un gasto aleatorio del saldo disponible
     BigDecimal saldoDisponible = consultaSaldoDTO.getSaldisconp();
     BigDecimal gastoAleatorio = new BigDecimal(Math.random()).multiply(saldoDisponible).setScale(0, BigDecimal.ROUND_HALF_UP);
+    gastoAleatorio = gastoAleatorio.divide(new BigDecimal(1.025), 0, RoundingMode.HALF_UP); // Dejar espacio para el fee internacional
 
     // Crear movimiento de compra
     String numreffac = "9872348974987";

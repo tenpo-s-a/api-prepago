@@ -158,7 +158,7 @@ public class User extends BaseModel {
   //@JsonProperty("is_blacklisted")
   @JsonIgnore
   public Boolean getIsBlacklisted() {
-    return this.identityStatus != null ? !UserIdentityStatus.NORMAL.equals(this.identityStatus) : null;
+    return this.identityStatus != null ? UserIdentityStatus.TERRORIST.equals(this.identityStatus) : null;
   }
 
   public void setIsBlacklisted(Boolean isBlacklisted) {
