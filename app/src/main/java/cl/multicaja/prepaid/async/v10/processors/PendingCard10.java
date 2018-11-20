@@ -48,13 +48,13 @@ public class PendingCard10 extends BaseProcessor10 {
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
 
         log.info("processPendingEmission - REQ: " + req);
-
+        try {
         req.retryCountNext();
 
         PrepaidTopupData10 data = req.getData();
 
         if(req.getRetryCount() > getMaxRetryCount()) {
-
+          log.info("Max Retry count");
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
@@ -102,13 +102,21 @@ public class PendingCard10 extends BaseProcessor10 {
           req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
           return redirectRequest(endpoint, exchange, req, true);
         }  else {
-
+          log.info("Error alta cliente: "+altaClienteDTO);
           PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD;
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
           data.getPrepaidMovement10().setEstado(status);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
           return redirectRequest(endpoint, exchange, req, false);
+        }
+        }catch (Exception e) {
+          log.info(e.getMessage());
+          Endpoint endpoint = createJMSEndpoint(ERROR_EMISSION_REQ);
+          req.getData().setNumError(Errors.ERROR_INDETERMINADO);
+          req.getData().setMsjError(Errors.ERROR_INDETERMINADO.name());
+          e.printStackTrace();
+          return redirectRequest(endpoint, exchange, req, true);
         }
       }
     };

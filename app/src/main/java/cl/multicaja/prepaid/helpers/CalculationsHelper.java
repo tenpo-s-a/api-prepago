@@ -30,6 +30,9 @@ public class CalculationsHelper {
 
 
   private PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
+    if(prepaidCardEJBBean10 == null ){
+      prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
+    }
     return prepaidCardEJBBean10;
   }
 
@@ -150,7 +153,8 @@ public class CalculationsHelper {
     //TODO: revisar bien esto. Ya que si es null impacta en los tests
     if(ConfigUtils.isEnvTest()) {
       return Double.valueOf(645);
-    } else {
+    }
+    else {
       return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
     }
   }

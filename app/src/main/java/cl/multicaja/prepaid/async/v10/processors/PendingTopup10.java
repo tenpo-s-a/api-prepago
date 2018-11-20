@@ -119,14 +119,22 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                     PrepaidCardStatus.PENDING);
 
         prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
-
+        if(prepaidMovement == null){
+          log.error("!!! ERROR AL BUSCAR MOVIMIENTO!!!");
+          prepaidMovement = req.getData().getPrepaidMovement10();
+        }
+        //TODO: Verificar por que en algunos casos este ejb no retorna el movimiento. prepaidMovement == null
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
 
           String contrato = prepaidCard.getProcessorUserId();
+          log.info(String.format("Contrato: %s",contrato));
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+          log.info(String.format("Pan: %s",pan));
           CodigoMoneda clamon = prepaidMovement.getClamon();
+          log.info(String.format("Clamon: %s",clamon));
+
 
           IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
           TipoFactura tipofac = prepaidMovement.getTipofac();
@@ -306,6 +314,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           templateData.put("idUsuario", data.getUser().getId().toString());
           templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
+          //TODO: Realizar proceso de devolucion !!
         }
        return req;
       }

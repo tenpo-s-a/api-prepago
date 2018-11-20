@@ -63,7 +63,7 @@ public final class TecnocomServiceHelper {
       String order = config.getProperty("tecnocom.order");
 
       HashOrder hashOrder = order.equals("ASC") ? HashOrder.ASC : HashOrder.DESC;
-
+      log.info(hashOrder);
       try {
         codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
       } catch (Exception e) {

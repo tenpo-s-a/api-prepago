@@ -223,7 +223,6 @@ public final class PrepaidResource10 extends BaseResource {
     } catch (Exception ex) {
       log.error("Error processing identity validation for userId: " + userId);
       ex.printStackTrace();
-
       //TODO: informar error?
     }
     return Response.ok().status(201).build();
