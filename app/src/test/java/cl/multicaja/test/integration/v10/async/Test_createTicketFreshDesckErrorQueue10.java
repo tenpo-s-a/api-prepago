@@ -26,8 +26,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc = TecnocomServiceHelper.getInstance();
   }
 
-  // LLega todo ok
-  @Test
+
+  //@Test
   public void testReinjectTopup() throws Exception {
 
     tc.getTecnocomService().setAutomaticError(false);
@@ -58,7 +58,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+
   @Test
   public void testReinjectAltaCliente() throws Exception {
 

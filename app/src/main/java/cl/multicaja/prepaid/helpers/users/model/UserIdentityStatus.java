@@ -10,7 +10,8 @@ import java.io.Serializable;
 public enum UserIdentityStatus implements Serializable {
 
   NORMAL,
-  TERRORIST;
+  TERRORIST,
+  UNVERIFIED;
 
   public static UserIdentityStatus valueOfEnum(String name) {
     try {
