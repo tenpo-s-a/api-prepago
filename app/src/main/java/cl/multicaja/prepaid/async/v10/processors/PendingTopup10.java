@@ -9,11 +9,13 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
+import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -118,12 +120,9 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                     PrepaidCardStatus.LOCKED,
                                                                                                     PrepaidCardStatus.PENDING);
 
-        prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
-        if(prepaidMovement == null){
-          log.error("!!! ERROR AL BUSCAR MOVIMIENTO!!!");
-          prepaidMovement = req.getData().getPrepaidMovement10();
-        }
-        //TODO: Verificar por que en algunos casos este ejb no retorna el movimiento. prepaidMovement == null
+         log.info("[BEFORE prepaidMovement] "+prepaidMovement);
+         prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
+         log.info("[AFTER prepaidMovement] "+prepaidMovement);
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
@@ -144,12 +143,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
-          String numaut = prepaidMovement.getNumaut();
-
-          //solamente los 6 primeros digitos de numreffac
-          if (numaut.length() > 6) {
-            numaut = numaut.substring(numaut.length()-6);
-          }
+          String numaut = TecnocomServiceHelper.getNumautFromNumreffac(prepaidMovement.getId().toString());
 
           log.info(String.format("LLamando carga de saldo %s", prepaidCard.getProcessorUserId()));
 
@@ -232,7 +226,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.setData(data);
               return req;
             }
-          //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
+
           } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
             req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
             req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
@@ -242,6 +236,10 @@ public class PendingTopup10 extends BaseProcessor10 {
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
             return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
           } else if (CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
+            if(inclusionMovimientosDTO.getDescRetorno().contains("")){
+              //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
+              return req;
+            }
             req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
             req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
             return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);

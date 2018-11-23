@@ -45,7 +45,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         PrepaidReverseData10 data = req.getData();
         PrepaidWithdraw10 prepaidWithdraw = data.getPrepaidWithdraw10();
         PrepaidMovement10 prepaidMovementReverse = data.getPrepaidMovementReverse();
+        log.info("[processPendingWithdrawReversal] _______________");
+        log.info("[BEFORE prepaidMovementReverse] "+prepaidMovementReverse);
         prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
+        log.info("[AFTER prepaidMovementReverse] "+prepaidMovementReverse);
+
         PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
         PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
 
@@ -73,6 +77,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           prepaidWithdraw.getTransactionId(),
           PrepaidMovementType.WITHDRAW,
           TipoFactura.valueOfEnumByCodeAndCorrector(prepaidMovementReverse.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
+        log.info("[originalMovement] "+originalMovement);
 
         if(PrepaidMovementStatus.PENDING.equals(originalMovement.getEstado()) || PrepaidMovementStatus.IN_PROCESS.equals(originalMovement.getEstado())) {
           log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
@@ -81,11 +86,6 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         } else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
           log.debug("********** Reintentando movimiento original **********");
           String numaut = originalMovement.getNumaut();
-          //solamente los 6 primeros digitos de numreffac
-          if (numaut.length() > 6) {
-            numaut = numaut.substring(numaut.length()-6);
-          }
-
           log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
 
           // Se intenta realizar nuevamente la inclusion del movimiento original .
@@ -132,12 +132,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         } else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
           log.debug("********** Realizando reversa de retiro **********");
           String numaut = prepaidMovementReverse.getNumaut();
-          //solamente los 6 primeros digitos de numreffac
-          if (numaut.length() > 6) {
-            numaut = numaut.substring(numaut.length()-6);
-          }
-
-          log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+                   log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
 
           // Se intenta realizar reversa del movimiento.
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), pan, originalMovement.getClamon(),
@@ -199,7 +194,8 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
           data.getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
         }
-      }catch (Exception e){
+      } catch (Exception e){
+        e.printStackTrace();
         log.error(String.format("Error desconocido al realizar la reversa de retiro: %s",e.getMessage()));
         Endpoint endpoint = createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_REQ);
         req.getData().setNumError(Errors.ERROR_INDETERMINADO);

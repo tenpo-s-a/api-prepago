@@ -2,10 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +22,7 @@ public class Test_PrepaidMovementEJBBean10_isFirstTopup extends TestBaseUnit {
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
-    prepaidMovement1.setEstado(PrepaidMovementStatus.REVERSED);
+    prepaidMovement1.setEstadoNegocio(BusinessStatusType.REVERSED);
 
     createPrepaidMovement10(prepaidMovement1);
 

@@ -6,6 +6,7 @@ import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.TecnocomServiceImpl;
 import cl.multicaja.tecnocom.TecnocomServiceMockImpl;
 import cl.multicaja.tecnocom.constants.HashOrder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -79,4 +80,11 @@ public final class TecnocomServiceHelper {
     }
     return tecnocomService;
   }
+
+  public static String getNumautFromNumreffac(String numreffac) {
+    String numaut = StringUtils.leftPad(numreffac, 6, "0");
+    numaut = numaut.substring(numaut.length() - 6);
+    return numaut;
+  }
+
 }

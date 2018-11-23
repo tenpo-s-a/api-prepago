@@ -515,12 +515,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
-    String numaut = prepaidMovement.getNumaut();
+    String numaut = TecnocomServiceHelper.getNumautFromNumreffac(prepaidMovement.getId().toString());
 
-    //solamente los 6 ultimos digitos de numreffac
-    if (numaut.length() > 6) {
-      numaut = numaut.substring(numaut.length()-6);
-    }
 
     log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
 
@@ -918,7 +914,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     // Obtener usuario Multicaja
@@ -1118,15 +1114,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   /**
    *
-   * @param userIdMc
    * @param simulationNew
    * @throws BaseException
    */
-  private void validateSimulationNew10(Long userIdMc, SimulationNew10 simulationNew) throws BaseException {
+  private void validateSimulationNew10(SimulationNew10 simulationNew) throws BaseException {
 
-    if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
-    }
 
     if(simulationNew == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "simulationNew"));
@@ -1148,7 +1140,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userIdMc, simulationNew);
+    if(userIdMc == null){
+      userIdMc = this.verifiUserAutentication(headers);
+    }
+
+    this.validateSimulationNew10(simulationNew);
 
     // Obtener usuario Multicaja
     User user = this.getUserMcById(headers, userIdMc);
@@ -1288,7 +1284,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
-    this.validateSimulationNew10(userIdMc, simulationNew);
+    if(userIdMc == null){
+      userIdMc = this.verifiUserAutentication(headers);
+    }
+
+    this.validateSimulationNew10(simulationNew);
 
     if(simulationNew.getPaymentMethod() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "method"));
@@ -1362,7 +1362,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public PrepaidUser10 getPrepaidUser(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     // Busco el usuario MC
@@ -1435,8 +1435,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate, Integer count) throws Exception {
 
+
     if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     // Obtener usuario Multicaja
@@ -1723,8 +1724,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
+
     if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     this.getUserMcById(headers, userIdMc);
@@ -1745,11 +1747,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+
+    if(userIdMc == null){
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     this.getUserMcById(headers, userIdMc);
+
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
     PrepaidCard10 prepaidCard = this.getPrepaidCardToUnlock(headers, prepaidUser10.getId());
 
@@ -1906,8 +1910,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception {
-    if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+
+    if(userIdMc == null){
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     if(identityVerificationFiles == null || identityVerificationFiles.isEmpty()){
