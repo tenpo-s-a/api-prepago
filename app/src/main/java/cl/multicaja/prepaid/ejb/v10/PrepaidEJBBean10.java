@@ -515,7 +515,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = prepaidWithdraw.getMerchantName();
     String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
-    String numaut = TecnocomServiceHelper.getNumautFromNumreffac(prepaidMovement.getId().toString());
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
 
     log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));

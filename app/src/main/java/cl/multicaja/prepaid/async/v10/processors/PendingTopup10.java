@@ -15,7 +15,6 @@ import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
-import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -143,7 +142,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
-          String numaut = TecnocomServiceHelper.getNumautFromNumreffac(prepaidMovement.getId().toString());
+          String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
           log.info(String.format("LLamando carga de saldo %s", prepaidCard.getProcessorUserId()));
 

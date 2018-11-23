@@ -1158,7 +1158,7 @@ public class TestBaseUnit extends TestApiBase {
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
-    String numaut = TecnocomServiceHelper.getNumautFromNumreffac(numreffac);
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
     System.out.println("Monto a cargar en tecnocom: " + impfac);
 
@@ -1186,7 +1186,7 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
     }
 
-    String numaut = TecnocomServiceHelper.getNumautFromNumreffac(movement10.getId().toString());
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(movement10.getId().toString());
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(prepaidCard10.getProcessorUserId(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
       movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),

@@ -138,7 +138,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString(); //Se hace internamente en Tecnocom.
-        String numaut = TecnocomServiceHelper.getNumautFromNumreffac( issuanceFeeMovement.getId().toString());
+        String numaut = TecnocomServiceHelper.getNumautFromIdMov( issuanceFeeMovement.getId().toString());
         log.info(String.format("LLamando cobro emision %s", prepaidCard.getProcessorUserId()));
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
