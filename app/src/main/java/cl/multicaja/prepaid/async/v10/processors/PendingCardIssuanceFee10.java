@@ -6,6 +6,7 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -137,15 +138,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         CodigoMoneda clamondiv = CodigoMoneda.NONE;
         String nomcomred = prepaidTopup.getMerchantName();
         String numreffac = issuanceFeeMovement.getId().toString(); //Se hace internamente en Tecnocom.
-        String numaut = issuanceFeeMovement.getNumaut();
-
-        //solamente los 6 primeros digitos de numreffac
-        if (numaut.length() > 6) {
-          numaut = numaut.substring(numaut.length()-6);
-        }
-
+        String numaut = TecnocomServiceHelper.getNumautFromIdMov( issuanceFeeMovement.getId().toString());
         log.info(String.format("LLamando cobro emision %s", prepaidCard.getProcessorUserId()));
-
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
           pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
 

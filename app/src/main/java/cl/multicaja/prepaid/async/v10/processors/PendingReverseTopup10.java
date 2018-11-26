@@ -66,8 +66,10 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             req.getData().getPrepaidMovementReverse().setEstado(status);
             return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
-
+          log.info("[BEFORE prepaidMovement] "+prepaidMovementReverse);
           prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
+          log.info("[AFTER prepaidMovement] "+prepaidMovementReverse);
+
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
           // Busca el movimiento de carga original
@@ -80,12 +82,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           }
           else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
             log.debug("********** Reintentando movimiento original **********");
-            String numaut = originalMovement.getNumaut();
-              //solamente los 6 primeros digitos de numreffac
-              if (numaut.length() > 6) {
-                numaut = numaut.substring(numaut.length()-6);
-              }
-
+              String numaut = originalMovement.getNumaut();
               log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
 
               // Se intenta realizar nuevamente la inclusion del movimiento original .
@@ -131,11 +128,6 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
             log.debug("********** Realizando reversa de retiro **********");
             String numaut = prepaidMovementReverse.getNumaut();
-            //solamente los 6 primeros digitos de numreffac
-            if (numaut.length() > 6) {
-              numaut = numaut.substring(numaut.length()-6);
-            }
-
             log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
 
             // Se intenta realizar reversa del movimiento.

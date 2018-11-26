@@ -244,7 +244,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userIdMc"));
+      userIdMc = this.verifiUserAutentication(headers);
     }
 
     // Obtener Usuario MC
