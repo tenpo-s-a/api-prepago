@@ -21,17 +21,17 @@
   CREATE TABLE ${schema.acc}.accounting (
       id              BIGSERIAL NOT NULL,
       id_tx           INT8 NOT NULL,
-      type            VARCHAR NOT NULL,
-      origin          VARCHAR NOT NULL,
-      amount          NUMERIC NOT NULL,
-      currency        NUMERIC NOT NULL,
-      ammount_usd     NUMERIC NOT NULL,
-      exchange_rate_dif NUMERIC NOT NULL,
-      fee               NUMERIC NOT NULL,
-      fee_iva           NUMERIC NOT NULL,
+      type            VARCHAR(20) NOT NULL,
+      origin          VARCHAR(20) NOT NULL,
+      amount          NUMERIC(3,0) NOT NULL,
+      currency        NUMERIC(3,0) NOT NULL,
+      ammount_usd     NUMERIC(3,0) NOT NULL,
+      exchange_rate_dif NUMERIC(3,0) NOT NULL,
+      fee               NUMERIC(3,0) NOT NULL,
+      fee_iva           NUMERIC(3,0) NOT NULL,
       transaction_date  TIMESTAMP NOT NULL,
-      create_date  TIMESTAMP NULL,
-      update_date  TIMESTAMP NULL,
+      create_date  TIMESTAMP NOT NULL,
+      update_date  TIMESTAMP NOT NULL,
       CONSTRAINT accounting_pk PRIMARY KEY(id)
   );
   CREATE INDEX accounting_i1 ON ${schema.acc}.accounting (id);
