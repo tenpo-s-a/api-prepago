@@ -1,9 +1,8 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.DateUtils;
-import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
@@ -11,6 +10,10 @@ import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
+
+import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @autor vutreras
@@ -78,4 +81,11 @@ public abstract class PrepaidBaseEJBBean10 {
     }
     return dateUtils;
   }
+  public Long verifiUserAutentication(Map<String, Object> headers) throws BaseException {
+    if(headers != null && headers.containsKey("X-Authenticated-Userid")) {
+      return numberUtils.toLong(headers.get("X-Authenticated-Userid"));
+    }
+    throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+  }
+
 }
