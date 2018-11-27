@@ -27,7 +27,7 @@
   _exchange_rate_dif numeric,
   _fee numeric,
   _fee_iva numeric,
-  _transaction_date character varying,
+  _transaction_date timestamp without time zone,
   OUT _id bigint,
   OUT _error_code character varying,
   OUT _error_msg character varying)
