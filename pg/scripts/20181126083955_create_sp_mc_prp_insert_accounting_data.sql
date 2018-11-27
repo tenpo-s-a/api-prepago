@@ -17,7 +17,7 @@
 -- // create_sp_mc_prp_insert_accounting_data
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION prepaid_accounting.mc_prp_insert_accounting_data_v10(
+CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_insert_accounting_data_v10(
 _id_tx bigint,
 _type character varying,
 _origin character varying,
@@ -66,7 +66,7 @@ _error_msg := 'El _transaction_date es obligatorio';
 RETURN;
 END IF;
 
-INSERT INTO prepaid_accounting.accounting
+INSERT INTO ${schema.acc}.accounting
 (
   id_tx,
   type,
