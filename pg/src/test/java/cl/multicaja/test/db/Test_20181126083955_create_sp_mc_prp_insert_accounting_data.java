@@ -10,10 +10,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends TestDbBasePg {
 
@@ -30,48 +27,106 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
   }
 
 
-  public static Map<String, Object> getTestCasesOk(){
-    Map<String, Object> testCases = new HashMap<>();
+  public static List<Map<String, Object>> getTestSuiteOk(){
+
+    List<Map<String, Object>> testSuite  = new ArrayList<Map<String, Object>>();
+    Map<String, Object> testCase = null;
 
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
-    Timestamp _transaction_date = new Timestamp(c.getTime().getTime());
+    Timestamp _transaction_date = null;
 
-    testCases.put("id", getUniqueInteger());
-    testCases.put("id_tx", 2);
-    testCases.put("type", "1");
-    testCases.put("origin", "2");
-    testCases.put("amount", 500);
-    testCases.put("currency", 3);
-    testCases.put("ammount_usd", 23);
-    testCases.put("exchange_rate_dif", 50);
-    testCases.put("fee", 23);
-    testCases.put("fee_iva", 10);
-    testCases.put("transaction_date", _transaction_date);
+    _transaction_date = new Timestamp(c.getTime().getTime());
 
-    return testCases;
+    testCase = new HashMap<>();
+    testCase.put("id", getUniqueInteger());
+    testCase.put("id_tx", 12);
+    testCase.put("type", "1");
+    testCase.put("origin", "2");
+    testCase.put("amount", 500);
+    testCase.put("currency", 3);
+    testCase.put("ammount_usd", 23);
+    testCase.put("exchange_rate_dif", 50);
+    testCase.put("fee", 23);
+    testCase.put("fee_iva", 10);
+    testCase.put("transaction_date", _transaction_date);
+    testSuite.add(testCase);
+
+    return testSuite;
   }
 
-  public static Map<String, Object> getTestCasesErr(){
-    Map<String, Object> testCases = new HashMap<>();
+
+  public static List<Map<String, Object>> getTestSuiteErr(){
+
+    List<Map<String, Object>> testSuite  = new ArrayList<Map<String, Object>>();
+    Map<String, Object> testCase = null;
 
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
-    Timestamp _transaction_date = new Timestamp(c.getTime().getTime());
+    Timestamp _transaction_date = null;
 
-    testCases.put("id", getUniqueInteger());
-    testCases.put("id_tx", 2);
-    testCases.put("type", "");
-    testCases.put("origin", "2");
-    testCases.put("amount", 500);
-    testCases.put("currency", 3);
-    testCases.put("ammount_usd", 23);
-    testCases.put("exchange_rate_dif", 50);
-    testCases.put("fee", 23);
-    testCases.put("fee_iva", 10);
-    testCases.put("transaction_date", _transaction_date);
 
-    return testCases;
+    _transaction_date = new Timestamp(c.getTime().getTime());
+    testCase = new HashMap<>();
+    testCase.put("id", getUniqueInteger());
+    testCase.put("id_tx", 0);
+    testCase.put("type", "1");
+    testCase.put("origin", "2");
+    testCase.put("amount", 500);
+    testCase.put("currency", 3);
+    testCase.put("ammount_usd", 23);
+    testCase.put("exchange_rate_dif", 50);
+    testCase.put("fee", 23);
+    testCase.put("fee_iva", 10);
+    testCase.put("transaction_date", _transaction_date);
+    testSuite.add(testCase);
+
+    _transaction_date = new Timestamp(c.getTime().getTime());
+    testCase = new HashMap<>();
+    testCase.put("id", getUniqueInteger());
+    testCase.put("id_tx", 0);
+    testCase.put("type", "");
+    testCase.put("origin", "2");
+    testCase.put("amount", 0);
+    testCase.put("currency", 3);
+    testCase.put("ammount_usd", 23);
+    testCase.put("exchange_rate_dif", 50);
+    testCase.put("fee", 23);
+    testCase.put("fee_iva", 10);
+    testCase.put("transaction_date", _transaction_date);
+    testSuite.add(testCase);
+
+    _transaction_date = new Timestamp(c.getTime().getTime());
+    testCase = new HashMap<>();
+    testCase.put("id", getUniqueInteger());
+    testCase.put("id_tx", 0);
+    testCase.put("type", "");
+    testCase.put("origin", "");
+    testCase.put("amount", 0);
+    testCase.put("currency", 3);
+    testCase.put("ammount_usd", 23);
+    testCase.put("exchange_rate_dif", 50);
+    testCase.put("fee", 23);
+    testCase.put("fee_iva", 10);
+    testCase.put("transaction_date", _transaction_date);
+    testSuite.add(testCase);
+
+    //_transaction_date = new Timestamp(c.getTime().getTime());
+    testCase = new HashMap<>();
+    testCase.put("id", getUniqueInteger());
+    testCase.put("id_tx", 0);
+    testCase.put("type", "");
+    testCase.put("origin", "");
+    testCase.put("amount", 0);
+    testCase.put("currency", 3);
+    testCase.put("ammount_usd", 23);
+    testCase.put("exchange_rate_dif", 50);
+    testCase.put("fee", 23);
+    testCase.put("fee_iva", 10);
+    testCase.put("transaction_date", null);
+    testSuite.add(testCase);
+
+    return testSuite;
   }
 
 
@@ -131,12 +186,14 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
   @Test
   public void insertAccountOk() throws SQLException {
 
-    Map<String, Object> testCases = getTestCasesOk();
+    List<Map<String, Object>> testSuite = getTestSuiteOk();
 
-    Map<String, Object> resp =  insertAccount(testCases);
-    Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("id")) > 0);
+    for (Map<String, Object> testCase : testSuite) {
+      Map<String, Object> resp =  insertAccount(testCase);
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
+      Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("id")) > 0);
+    }
 
   }
 
@@ -144,12 +201,15 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
   @Test
   public void insertAccountNoOk() throws SQLException {
 
-    Map<String, Object> testCases = getTestCasesErr();
+    List<Map<String, Object>> testSuite = getTestSuiteErr();
 
-    Map<String, Object> resp =  insertAccount(testCases);
-    Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertNotEquals("Codigo de error debe ser !=0", "0", resp.get("_error_code"));
-    Assert.assertTrue("debe retornar un id = 0", numberUtils.toLong(resp.get("id")) == 0);
+    for (Map<String, Object> testCase : testSuite) {
+
+      Map<String, Object> resp = insertAccount(testCase);
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertNotEquals("Codigo de error debe ser !=0", "0", resp.get("_error_code"));
+      Assert.assertTrue("debe retornar un id = 0", numberUtils.toLong(resp.get("id")) == 0);
+    }
 
   }
 
