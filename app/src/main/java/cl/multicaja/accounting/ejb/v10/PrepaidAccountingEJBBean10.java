@@ -114,20 +114,19 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
         account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
         account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
         account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
-        new InParam(account.getTransactionDate(),Types.NUMERIC),
+        new InParam(account.getTransactionDate(),Types.TIMESTAMP),
+        new OutParam("_id ", Types.NUMERIC),
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
       };
-      //TODO: AJUSTAR EN BASE AL SP
-      Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".XXXXXXXX",params);
+
+      Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_insert_accounting_data_v10",params);
 
       if (!"0".equals(resp.get("_error_code"))) {
-        log.error("XX resp: " + resp);
+        log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
         throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
       }
     }
-
   }
-
 
 }
