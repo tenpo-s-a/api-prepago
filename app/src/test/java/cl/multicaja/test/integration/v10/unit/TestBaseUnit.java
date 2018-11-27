@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
@@ -64,6 +65,7 @@ public class TestBaseUnit extends TestApiBase {
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
   private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
+  private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -225,6 +227,13 @@ public class TestBaseUnit extends TestApiBase {
       filesEJBBean10 = new FilesEJBBean10();
     }
     return filesEJBBean10;
+  }
+
+  public static PrepaidAccountingEJBBean10 getPrepaidAccountingEJBBean10() {
+    if (prepaidAccountingEJBBean10 == null) {
+      prepaidAccountingEJBBean10 = new PrepaidAccountingEJBBean10();
+    }
+    return prepaidAccountingEJBBean10;
   }
 
   /**
