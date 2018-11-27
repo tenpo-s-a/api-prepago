@@ -53,8 +53,8 @@ public class PrepaidResourcePrivate10 extends BaseResource {
   }
 
   //TODO VERIFICAR ESTE METODO
-  @GET
-  @Path("/")
+  //@GET
+  //@Path("/")
   public Response findPrepaidUser(@QueryParam("rut") Integer rut, @Context HttpHeaders headers) throws Exception {
     PrepaidUser10 prepaidUser = this.prepaidEJBBean10.findPrepaidUser(headersToMap(headers), rut);
     return Response.ok(prepaidUser).build();
