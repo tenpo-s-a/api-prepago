@@ -110,5 +110,4 @@ $function$
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT,VARCHAR,VARCHAR,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,TIMESTAMP WITHOUT TIME ZONE);
