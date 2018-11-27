@@ -6,10 +6,13 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.FilesEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.utils.ParametersUtil;
+import com.hazelcast.client.impl.protocol.util.ParameterUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +40,9 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
 
   @Spy
   private FilesEJBBean10 filesEJBBean10;
+
+  @Spy
+  private ParametersUtil parametersUtil;
 
   @InjectMocks
   @Spy
@@ -298,13 +304,20 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setUserIdMc(Long.MAX_VALUE);
+    prepaidUser.setIdentityVerificationAttempts(1);
 
     Mockito.doReturn(user).when(userClient).getUserById(headers, Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
 
     Mockito.doReturn(user2).when(userClient).initIdentityValidation(headers, Long.MAX_VALUE);
 
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).incrementIdentityVerificationAttempt(headers, prepaidUser);
 
+    Mockito.doReturn("").when(parametersUtil).getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
+
+    Mockito.doReturn("").when(parametersUtil).replaceDataHTML(Mockito.anyString(), Mockito.anyMap());
+
+    Mockito.doReturn(new Ticket()).when(userClient).createFreshdeskTicket(Mockito.anyMap(), Mockito.anyLong(), Mockito.any());
 
     Map<String, UserFile> files = new HashMap<>();
     UserFile idFront = new UserFile();

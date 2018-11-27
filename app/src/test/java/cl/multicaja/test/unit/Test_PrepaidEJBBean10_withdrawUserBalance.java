@@ -174,6 +174,10 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       .doReturn(withdrawReverseMovement)
       .when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
 
+    Mockito.doReturn(withdrawMovement)
+      .doReturn(withdrawReverseMovement)
+      .when(prepaidMovementEJBBean10).getPrepaidMovementById(Long.MAX_VALUE);
+
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("1020");
     response.getRunServiceResponse().getReturn().setDescRetorno("");
