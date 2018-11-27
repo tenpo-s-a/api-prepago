@@ -91,15 +91,18 @@ public class PrepaidResourcePublic10 extends BaseResource {
 
   @POST
   @Path("/finish_signup")
-  public Response finishSignup(Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers), userId);
-    return Response.ok(prepaidUser10).build();
+  public Response finishSignup(@Context HttpHeaders headers) throws Exception {
+    //TODO: revisar
+    //PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers), userId);
+    //return Response.ok(prepaidUser10).build();
+    return Response.ok().build();
   }
 
   @POST
   @Path("/signup/tac")
-  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, Long userId, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
+  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @Context HttpHeaders headers) throws Exception {
+    //TODO; revisar
+    //this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
     return Response.ok().build();
   }
 
@@ -119,7 +122,9 @@ public class PrepaidResourcePublic10 extends BaseResource {
 
   @POST
   @Path("/identity_validation")
-  public Response processIdentityValidation(IdentityValidation10 identityValidation10, Long userId, @Context HttpHeaders headers) {
+  public Response processIdentityValidation(IdentityValidation10 identityValidation10, @Context HttpHeaders headers) {
+    //TODO: revisar
+    /*
     try {
       User user = this.prepaidEJBBean10.processIdentityVerification(headersToMap(headers), userId, identityValidation10);
       return Response.ok(user).status(201).build();
@@ -127,6 +132,7 @@ public class PrepaidResourcePublic10 extends BaseResource {
       log.error("Error processing identity validation for userId: " + userId);
       ex.printStackTrace();
     }
+    */
     return Response.ok().status(201).build();
   }
 
