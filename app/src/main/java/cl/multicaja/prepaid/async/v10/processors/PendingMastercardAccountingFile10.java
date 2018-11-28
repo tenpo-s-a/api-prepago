@@ -9,6 +9,8 @@ import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.model.v10.MailTemplates;
 import cl.multicaja.prepaid.model.v10.MimeType;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.Session;
 import com.sun.mail.iap.ByteArray;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -19,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
 
@@ -26,12 +29,11 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingMastercardAccountingFile10.class);
 
-  private String privKeyFile = "/tmp/secret.dat";
-  private String passwd = "clavesecreta";
+  private String privKeyFile = "src/test/resources/mastercard/files/private_key.dat";
+  private String tempOutputFileName = "src/test/resources/mastercard/files/decryptedfile.dat";
+  private String passwd = "******";
 
-  public PendingMastercardAccountingFile10(BaseRoute10 route) {
-    super(route);
-  }
+  public PendingMastercardAccountingFile10(BaseRoute10 route) { super(route); }
 
   public Processor processAccountingBatch() {
     return new Processor() {
@@ -39,42 +41,27 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
       public void process(Exchange exchange) throws Exception {
         log.info("Process Accounting Batch");
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
-        log.error(exchange.getIn().getBody());
+        log.info(exchange.getIn().getBody());
+
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
+        log.info(String.format("processAccountingBatch: se encontro el archivo: %s", fileName));
 
-        System.out.println("processAccountingBatch: encontre el archivo: " + fileName);
+        // Desencriptar usando la private key.
+        // Todo: ¿Donde se almacenara esa clave?
+        FileInputStream privKeyIn = new FileInputStream(privKeyFile);
+        File tempFile = new File(tempOutputFileName);
+        FileOutputStream tempOutputFile = new FileOutputStream(tempFile, false);
+        PgpHelper.getInstance().decryptFile(inputStream, tempOutputFile, privKeyIn, passwd.toCharArray());
+        privKeyIn.close();
+        tempOutputFile.close();
 
-        /*
-        // Lanzar un thread que desencripte el archivo y los meta a decryptedInputStream.
-        // Este thread es para evitar hacer duplicado del archivo completo en memoria
-        PipedInputStream decryptedInputStream = new PipedInputStream();
-        PipedOutputStream pipedOutputStream = new PipedOutputStream(decryptedInputStream);
-        new Thread(
-          new Runnable() {
-            public void run() {
-              FileInputStream privKeyIn = null;
-              try {
-                privKeyIn = new FileInputStream(privKeyFile);
-              } catch (FileNotFoundException e) {
-                log.error("AccountingBatch Encryption Thread: Unable to find private key file: " + privKeyFile + ", exception msg: " + e.getMessage());
-                e.printStackTrace();
-              }
-              try {
-                PgpHelper.getInstance().decryptFile(inputStream, pipedOutputStream, privKeyIn, passwd.toCharArray());
-              } catch (Exception e) {
-                log.error("AccountingBatch Encryption Thread: error decrypting the accounting file, msg: " + e.getMessage());
-              }
-              try {
-                privKeyIn.close();
-              } catch (IOException e) {
-                log.error("AccoutingBatch Encryption Thread: error closing private key file, msg: " + e.getMessage());
-              }
-            }
-          }
-        ).start();
-
-        // Extraer los datos del archivo
+        // Procesar los datos del archivo
+        FileInputStream decryptedInputStream = new FileInputStream(tempOutputFileName);
         AccountingFile file = MastercardFileHelper.getInstance().validateAccountantFile(decryptedInputStream);
+
+        // Eliminar el archivo desencriptado
+        decryptedInputStream.close();
+        tempFile.delete();
 
         if (file.hasError()) {
           // Enviar email de soporte avisando error en archivo
@@ -84,7 +71,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
           emailBody.setAddress(ConfigUtils.getInstance().getProperty("accounting.email.support"));
           getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, emailBody);
         } else {
-          // Todo: Write results into database table
+          
         }
 
         // Todo: Read extra data from database
@@ -102,7 +89,6 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
         emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
         emailBodyToSend.setAddress(ConfigUtils.getInstance().getProperty("accounting.email.dailyreport"));
         getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, emailBodyToSend);
-        */
       }
     };
   }

@@ -1,32 +1,44 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.JMSHeader;
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.*;
+import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
+import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
+import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
-import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.constants.*;
+import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
+import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
+import javax.jms.Queue;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -34,12 +46,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
 import static cl.multicaja.core.model.Errors.ERROR_DATA_NOT_FOUND;
+import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
+import static cl.multicaja.core.test.TestBase.*;
+import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
+import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
 
 /**
  * @author vutreras
@@ -49,7 +67,7 @@ import static cl.multicaja.core.model.Errors.ERROR_DATA_NOT_FOUND;
 @Produces(MediaType.APPLICATION_JSON)
 public final class TestHelpersResource10 extends BaseResource {
 
-  private static Log log = LogFactory.getLog(TestHelpersResource10.class);
+  public Log log = LogFactory.getLog(TestHelpersResource10.class);
 
   private NumberUtils numberUtils = NumberUtils.getInstance();
 
@@ -65,6 +83,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
+
+  @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   private UserClient userClient;
 
@@ -219,9 +240,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     // Crear movimiento de compra
     String numreffac = "9872348974987";
-    String numaut = numreffac;
-    // Los 6 primeros digitos de numreffac
-    numaut = numaut.substring(numaut.length()-6);
+    String numaut = TecnocomServiceHelper.getInstance().getNumautFromNumreffac(numreffac);
 
     // Agregar compra
     InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
@@ -233,4 +252,832 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(gastoAleatorio).status(201).build();
   }
 
+
+  @POST
+  @Path("/simulateTecnocomError")
+  public Response simulateTecnocomError(ReprocesQueue reprocesQueue, @Context HttpHeaders headers) throws Exception {
+    log.info(String.format("** LLamada a simulate a TecnocomErrorTopup**"));
+
+    validate();
+
+    // Por parametro el nombre de la cola
+    String queueName = reprocesQueue != null ? reprocesQueue.getLastQueue().getValue() : "[Error: No Queue In Call]";
+    String repeatFail = reprocesQueue != null && reprocesQueue.getIdQueue() != null ? reprocesQueue.getIdQueue() : "[no repeat fail]";
+    log.info(String.format("** En la cola: %s/%s **", queueName, repeatFail));
+
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    QueuesNameType queuesNameType = reprocesQueue.getLastQueue();
+    switch (queuesNameType) {
+      case TOPUP:
+        testReinjectTopup();
+        break;
+      case PENDING_EMISSION:
+        testReinjectAltaCliente();
+        break;
+      case CREATE_CARD:
+        testReinjectCreateCard();
+        break;
+      case SEND_MAIL:
+        testReinjectSendMailCard();
+        break;
+      case REVERSE_TOPUP:
+        testReinjectTopupReverse();
+        break;
+      case REVERSE_WITHDRAWAL:
+        testReinjectWithdrawReversal();
+        break;
+      case ISSUANCE_FEE:
+        testReinjectIssuanceFee();
+        break;
+    }
+
+    Thread.sleep(3000);
+    log.info("** Ticket Creado **");
+
+    if (!repeatFail.equals("fail")) {
+      // Se setea para que no de error de conexion!
+      tc.getTecnocomService().setAutomaticError(false);
+      tc.getTecnocomService().setRetorno(null);
+    }
+
+    return Response.ok("OK").status(201).build();
+  }
+
+
+  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
+    Integer rut = getUniqueRutNumber();
+    String email = getUniqueEmail();
+    SignUp signUp = getUserClient().signUp(null, new SignUPNew(email, rut));
+    User user = getUserClient().getUserById(null, signUp.getUserId());
+    user.setName(null);
+    user.setLastname_1(null);
+    user.setLastname_2(null);
+    user = getUserClient().fillUser(null, user);
+    user.setGlobalStatus(status);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.getEmail().setStatus(EmailStatus.VERIFIED);
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.setIdentityStatus(identityStatus);
+    user.setPassword(password);
+    user = getUserClient().updateUser(null, user.getId(), user);
+    return user;
+  }
+
+  public PrepaidUser10 buildPrepaidUser10(User user) {
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(user != null ? user.getId() : null);
+    prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+    return prepaidUser;
+  }
+
+  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) throws Exception {
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = TecnocomServiceHelper.getInstance().getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    DatosTarjetaDTO datosTarjetaDTO = TecnocomServiceHelper.getInstance().getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser.getId());
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
+    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+
+    return prepaidCard;
+  }
+
+  public PrepaidTopup10 buildPrepaidTopup10(User user) {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidTopup.setMerchantCode(merchantCode);
+    prepaidTopup.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidTopup.setAmount(newAmountAndCurrency);
+    prepaidTopup.setTotal(newAmountAndCurrency);
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(getRandomString(6));
+
+    return prepaidTopup;
+  }
+
+  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
+    cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
+    cdtTransaction.setIndSimulacion(false);
+    return cdtTransaction;
+  }
+
+  public CdtTransaction10 createCdtTransaction10(CdtTransaction10 cdtTransaction) throws Exception {
+
+    cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+    // Si no cumple con los limites
+    if(!cdtTransaction.isNumErrorOk()){
+      int lNumError = cdtTransaction.getNumErrorInt();
+      if(lNumError != -1 && lNumError > 10000) {
+        throw new ValidationException(LIMITES_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      } else {
+        throw new ValidationException(LIMITES_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+    }
+
+    return cdtTransaction;
+  }
+
+  public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
+
+    String codent = null;
+    try {
+      codent = ParametersUtil.getInstance().getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+    }
+
+    if (prepaidTopup != null) {
+      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+        if (PrepaidMovementType.TOPUP.equals(type)) {
+          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+
+    String centalta = "";
+    String cuenta = "";
+    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
+      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
+      cuenta = prepaidCard.getProcessorUserId().substring(12);
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+
+    return prepaidMovement;
+  }
+
+  /**
+   * Envia un mensaje directo al proceso PENDING_TOPUP_REQ
+   *
+   * @param prepaidTopup
+   * @param user
+   * @param cdtTransaction
+   * @param prepaidMovement
+   * @param retryCount
+   * @return
+   */
+  public String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
+
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
+
+    //se envia el mensaje a la cola
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  /******
+   * Envia un mensaje directo al proceso PENDING_EMISSION_REQ
+   * @param user
+   * @return
+   */
+  public String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_REQ);
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+    req.getData().setPrepaidUser10(prepaidUser);
+
+    //se envia el mensaje a la cola
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_REQ);
+    // Realiza alta en tecnocom para que el usuario exista
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+    req.getData().setPrepaidCard10(prepaidCard);
+    req.getData().setPrepaidUser10(prepaidUser);
+
+    //se envia el mensaje a la cola
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
+    // Realiza alta en tecnocom para que el usuario exista
+    if(topup != null) {
+      topup.setMessageId(messageId);
+    }
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+    req.getData().setPrepaidCard10(prepaidCard10);
+    req.getData().setPrepaidUser10(prepaidUser10);
+    req.getData().setUser(user);
+    req.getData().setPrepaidTopup10(topup);
+
+    //se envia el mensaje a la cola
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) {
+
+    String codent = null;
+    try {
+      codent = ParametersUtil.getInstance().getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)){
+      tipoFactura = TipoFactura.ANULA_CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.ANULA_RETIRO_TRANSFERENCIA;
+    }
+
+    if (reverseRequest != null) {
+      if (TransactionOriginType.POS.equals(reverseRequest.getTransactionOriginType())) {
+        if(PrepaidMovementType.TOPUP.equals(type)){
+          tipoFactura = TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+    prepaidMovement.setIdMovimientoRef(getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(reverseRequest.getTransactionId());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.CORRECTORA); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpfac(reverseRequest != null ? reverseRequest.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(getRandomNumericString(6)); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(reverseRequest != null ? reverseRequest.getMerchantCode() : null);
+    prepaidMovement.setCodact(reverseRequest != null ? reverseRequest.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+
+    return prepaidMovement;
+  }
+
+  public String sendPendingTopupReverse(PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10, User user, PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovement, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ);
+    prepaidTopup.setMessageId(messageId);
+    //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
+    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10, user,prepaidUser10, prepaidMovement);
+
+    //se envia el mensaje a la cola
+    ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextDouble(2000,9000)));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidWithdraw.setAmount(newAmountAndCurrency);
+
+    prepaidWithdraw.setMerchantCategory(1);
+    prepaidWithdraw.setMerchantName(getRandomString(6));
+
+    prepaidWithdraw.setPassword(password);
+
+    return prepaidWithdraw;
+  }
+
+  /**
+   * Envia un mensaje directo al proceso PENDING_REVERSAL_WITHDRAW_REQ
+   *
+   * @param prepaidWithdraw
+   * @param user
+   * @param reverse
+   * @param retryCount
+   * @return
+   */
+  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
+    prepaidWithdraw.setMessageId(messageId);
+    //se crea la el objeto con los datos del proceso
+    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidWithdraw, prepaidUser, reverse);
+    if(user != null) {
+      data.setUser(user);
+    }
+
+    //se envia el mensaje a la cola
+    ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser) throws Exception {
+    int expiryYear = numberUtils.random(1000, 9999);
+    int expiryMonth = numberUtils.random(1, 99);
+    int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
+    String pan = getRandomNumericString(16);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setIdUser(prepaidUser != null ? prepaidUser.getId() : null);
+    prepaidCard.setPan(Utils.replacePan(pan));
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(pan));
+    prepaidCard.setExpiration(expiryDate);
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setProcessorUserId(getRandomNumericString(20));
+    prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
+    prepaidCard.setProducto(getRandomNumericString(2));
+    prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    return prepaidCard;
+  }
+
+  /**
+   * Envia un mensaje directo al proceso PENDING_CARD_ISSUANCE_FEE_REQ
+   *
+   * @param prepaidTopup
+   * @param prepaidMovement
+   * @param prepaidCard
+   * @return
+   */
+  public String sendPendingCardIssuanceFee(User user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+
+    if (!CamelFactory.getInstance().isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ);
+
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, null, prepaidMovement);
+    data.setPrepaidCard10(prepaidCard);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+    if (retryCount != null){
+      req.setRetryCount(retryCount);
+    }
+
+    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public void testReinjectTopup() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+    prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+
+    //Se setea para que de error de conexion!
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectAltaCliente() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
+    prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectCreateCard() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
+    prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
+    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard10.setIdUser(prepaidUser.getId());
+    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard10 = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard10);
+
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectSendMailCard() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+    System.out.println("User Rut: "+prepaidUser.getRut());
+    System.out.println("User Mail: "+user.getEmail());
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
+    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard10.setIdUser(prepaidUser.getId());
+    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+
+    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
+    prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard10 = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard10);
+
+    PrepaidTopup10 topup = buildPrepaidTopup10(user);
+    topup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectTopupReverse() throws Exception{
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+    prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+    System.out.println(prepaidMovement);
+
+    PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup, null, PrepaidMovementType.TOPUP);
+    prepaidReverseMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidReverseMovement);
+
+    //Error TimeOut
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectWithdrawReversal() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
+    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+    PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
+
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10, null, null, PrepaidMovementType.WITHDRAW);
+    originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
+    originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw = prepaidMovementEJBBean10.addPrepaidMovement(null, originalWithdraw);
+
+    PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw, null, PrepaidMovementType.WITHDRAW);
+    reverse.setIdTxExterno(withdraw10.getTransactionId());
+    reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse = prepaidMovementEJBBean10.addPrepaidMovement(null, reverse);
+
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+    String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
+    System.out.println("TICKET CREADO");
+  }
+
+  public void testReinjectIssuanceFee() throws Exception {
+    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+
+    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+    log.info("prepaidUser: " + prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+
+    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
+    prepaidCard.setPan(datosTarjetaDTO.getPan());
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+    log.info("prepaidCard: " + prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.WITHDRAW);
+    prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+
+    prepaidMovementEJBBean10.updatePrepaidMovement(null,
+      prepaidMovement.getId(),
+      prepaidCard.getPan(),
+      prepaidCard.getProcessorUserId().substring(4, 8),
+      prepaidCard.getProcessorUserId().substring(12),
+      123,
+      123,
+      152,
+      null,
+      PrepaidMovementStatus.PROCESS_OK);
+
+    log.info("prepaidMovement: " + prepaidMovement);
+    tc.getTecnocomService().setAutomaticError(true);
+    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
+    log.info("TICKET CREADO");
+  }
 }

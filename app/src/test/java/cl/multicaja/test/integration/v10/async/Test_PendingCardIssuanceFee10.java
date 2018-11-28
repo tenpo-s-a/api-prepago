@@ -22,6 +22,7 @@ import java.util.List;
  * @autor abarazarte
  */
 
+@Ignore
 public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
   @Test

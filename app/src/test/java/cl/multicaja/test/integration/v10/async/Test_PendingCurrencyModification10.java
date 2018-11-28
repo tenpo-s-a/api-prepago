@@ -7,11 +7,13 @@ import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.Map;
 
+@Ignore
 public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
   private static Log log = LogFactory.getLog(Test_PendingCurrencyModification10.class);
 

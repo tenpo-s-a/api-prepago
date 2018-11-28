@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
@@ -118,12 +119,15 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                     PrepaidCardStatus.LOCKED,
                                                                                                     PrepaidCardStatus.PENDING);
 
+        //TODO: Verificar por que en algunos casos este ejb no retorna el movimiento. prepaidMovement == null
+        /*
         prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
         if(prepaidMovement == null){
           log.error("!!! ERROR AL BUSCAR MOVIMIENTO!!!");
           prepaidMovement = req.getData().getPrepaidMovement10();
         }
-        //TODO: Verificar por que en algunos casos este ejb no retorna el movimiento. prepaidMovement == null
+        */
+
         if (prepaidCard != null) {
 
           data.setPrepaidCard10(prepaidCard);
@@ -144,12 +148,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           CodigoMoneda clamondiv = CodigoMoneda.NONE;
           String nomcomred = prepaidTopup.getMerchantName();
           String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
-          String numaut = prepaidMovement.getNumaut();
-
-          //solamente los 6 primeros digitos de numreffac
-          if (numaut.length() > 6) {
-            numaut = numaut.substring(numaut.length()-6);
-          }
+          String numaut = TecnocomServiceHelper.getInstance().getNumautFromNumreffac(numreffac);
 
           log.info(String.format("LLamando carga de saldo %s", prepaidCard.getProcessorUserId()));
 

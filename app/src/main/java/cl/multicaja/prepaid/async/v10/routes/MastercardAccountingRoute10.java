@@ -26,14 +26,14 @@ public class MastercardAccountingRoute10 extends BaseRoute10 {
     final String fileErrorConfig = "/${file:name.noext}-${date:now:yyyyMMddHHmmssSSS}.${file:ext}";
     StringBuilder sb = new StringBuilder();
     sb.append("sftp://");
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.host"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.received.accounting.folder"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.auth.username"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.auth.password"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accounting.done.folder"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.move.accounting.error.folder").concat(fileErrorConfig));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.reconnectDelay"));
-    sb.append(getConfigUtils().getProperty("sftp.tecnocom.throwExceptionOnConnectFailed"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.host"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.received.folder"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.auth.username"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.auth.password"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.done.folder"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.error.folder").concat(fileErrorConfig));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.reconnectDelay"));
+    sb.append(getConfigUtils().getProperty("sftp.mastercard.throwExceptionOnConnectFailed"));
     log.info(String.format("sftp endpoint -> [%s]", sb.toString()));
     return sb.toString();
   }

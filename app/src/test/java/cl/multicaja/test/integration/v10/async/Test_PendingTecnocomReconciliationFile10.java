@@ -25,7 +25,7 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-@Ignore
+//@Ignore
 public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync {
   private static Log log = LogFactory.getLog(Test_PendingTecnocomReconciliationFile10.class);
 

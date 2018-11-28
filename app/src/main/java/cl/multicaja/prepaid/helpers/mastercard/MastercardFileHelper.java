@@ -140,7 +140,8 @@ public class MastercardFileHelper {
   public AccountingFile validateAccountantFile(InputStream inputStream) {
 
     AccountingFile accountingFile = new AccountingFile();
-
+    System.out.println(">>> Validating file");
+    /*
     // Agregar el archivo desencriptado a la clase
     ByteArrayInputStream unencryptedStream = null;
     Scanner scanner = new Scanner(unencryptedStream);
@@ -154,7 +155,7 @@ public class MastercardFileHelper {
       accountingFile.setError(Boolean.TRUE);
       accountingFile.setDetails(Collections.EMPTY_LIST);
     }
-
+    */
     return accountingFile;
   }
 

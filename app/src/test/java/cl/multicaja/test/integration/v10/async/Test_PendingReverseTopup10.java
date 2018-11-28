@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -16,6 +17,8 @@ import java.math.BigDecimal;
 /**
  * @autor abarazarte
  */
+
+@Ignore
 public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
   @Test
