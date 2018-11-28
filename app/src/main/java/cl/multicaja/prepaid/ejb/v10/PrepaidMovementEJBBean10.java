@@ -4,6 +4,7 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
@@ -308,6 +309,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clamon, indnorcor, tipofac, fecfac, numaut, null, null, null);
   }
 
+
   @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                      PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
@@ -328,7 +330,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       indnorcor != null ? indnorcor.getValue() : new NullParam(Types.NUMERIC),
       tipofac != null ? tipofac.getCode() : new NullParam(Types.NUMERIC),
       fecfac != null ? fecfac : new NullParam(Types.DATE),
-      numaut != null ? numaut : new NullParam(Types.VARCHAR)
+      numaut != null ? numaut : new NullParam(Types.VARCHAR),
+
     };
     for(Object obj : params){
       log.info("ParIn getPrepaidMovements: "+obj.toString());
@@ -393,6 +396,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
   }
+
 
   @Override
   public PrepaidMovement10 getPrepaidMovementById(Long id) throws Exception {
@@ -739,6 +743,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ) && mov.getTipoMovimiento().equals(PrepaidMovementType.TOPUP)
     ){
       log.debug("XLS ID 5");
+      //Todo: Agregar a investigar
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
     }

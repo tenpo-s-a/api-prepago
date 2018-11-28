@@ -27,7 +27,7 @@ _ammount_usd numeric,
 _exchange_rate_dif numeric,
 _fee numeric,
 _fee_iva numeric,
-_transaction_date timestamp without time zone,
+_transaction_date VARCHAR,
 OUT _id bigint,
 OUT _error_code character varying,
 OUT _error_msg character varying
@@ -60,7 +60,7 @@ _error_msg := 'El _origin es obligatorio';
 RETURN;
 END IF;
 
-IF _transaction_date = NULL THEN
+IF TRIM(COALESCE(_origin, ''))  = '' THEN
 _error_code := 'MC004';
 _error_msg := 'El _transaction_date es obligatorio';
 RETURN;
@@ -92,7 +92,7 @@ VALUES
   _exchange_rate_dif,
   _fee,
   _fee_iva,
-  _transaction_date,
+  to_timestamp(_transaction_date,'yyyy-mm-dd hh24:mi:ss'),
   timezone('utc', now()),
   timezone('utc', now())
 )
@@ -107,7 +107,6 @@ RETURN;
 END;
 $function$
 
-
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT,VARCHAR,VARCHAR,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,TIMESTAMP WITHOUT TIME ZONE);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT,VARCHAR,VARCHAR,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,VARCHAR);
