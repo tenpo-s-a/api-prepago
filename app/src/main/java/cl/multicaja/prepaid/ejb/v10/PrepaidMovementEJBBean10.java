@@ -310,96 +310,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
 
-  public List<PrepaidMovement10> getPrepaidMovements2(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
-                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
-
-    return this.getPrepaidMovements2(id, idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta,
-      clamon, indnorcor, tipofac, fecfac, numaut, null, null, null);
-  }
-
-  public List<PrepaidMovement10> getPrepaidMovements2(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
-                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
-
-      Object[] params = {
-        id != null ? id : new NullParam(Types.BIGINT),
-        idMovimientoRef != null ? idMovimientoRef : new NullParam(Types.BIGINT),
-        idPrepaidUser != null ? idPrepaidUser : new NullParam(Types.BIGINT),
-        idTxExterno != null ? idTxExterno : new NullParam(Types.VARCHAR),
-        tipoMovimiento != null ? tipoMovimiento.toString() : new NullParam(Types.VARCHAR),
-        estado != null ? estado.toString() : new NullParam(Types.VARCHAR),
-        estadoConSwitch != null ? estadoConSwitch.toString() : new NullParam(Types.VARCHAR), // estado_con_switch
-        estadoConTecnocom != null ? estadoConTecnocom.toString() : new NullParam(Types.VARCHAR), // estado_con_tecnocom
-        origen != null ? origen.toString() : new NullParam(Types.VARCHAR), // origen_movimiento
-        cuenta != null ? cuenta : new NullParam(Types.VARCHAR),
-        clamon != null ? clamon.getValue() : new NullParam(Types.NUMERIC),
-        indnorcor != null ? indnorcor.getValue() : new NullParam(Types.NUMERIC),
-        tipofac != null ? tipofac.getCode() : new NullParam(Types.NUMERIC),
-        fecfac != null ? fecfac : new NullParam(Types.DATE),
-        numaut != null ? numaut : new NullParam(Types.VARCHAR),
-        new OutParam("_result", Types.OTHER, (Map<String, Object> row) -> {
-          PrepaidMovement10 p = new PrepaidMovement10();
-          p.setId(numberUtils.toLong(row.get("id")));
-          p.setIdMovimientoRef(numberUtils.toLong(row.get("id_movimiento_ref")));
-          p.setIdPrepaidUser(numberUtils.toLong(row.get("id_usuario")));
-          p.setIdTxExterno(String.valueOf(row.get("id_tx_externo")));
-          p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("tipo_movimiento"))));
-          p.setMonto(numberUtils.toBigDecimal(row.get("monto")));
-          p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("estado"))));
-          p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_stado_de_negocio"))));
-          p.setConSwitch(ReconciliationStatusType.fromValue(String.valueOf(row.get("estado_con_switch"))));
-          p.setConTecnocom(ReconciliationStatusType.fromValue(String.valueOf(row.get("estado_con_tecnocom"))));
-          p.setOriginType(MovementOriginType.fromValue(String.valueOf(row.get("origen_movimiento"))));
-          p.setFechaCreacion((Timestamp) row.get("fecha_creacion"));
-          p.setFechaActualizacion((Timestamp) row.get("fecha_actualizacion"));
-          p.setCodent(String.valueOf(row.get("codent")));
-          p.setCentalta(String.valueOf(row.get("centalta")));
-          p.setCuenta(String.valueOf(row.get("cuenta")));
-          p.setClamon(CodigoMoneda.fromValue(numberUtils.toInteger(row.get("clamon"))));
-          p.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInteger(row.get("indnorcor"))));
-          p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(numberUtils.toInteger(row.get("tipofac")), p.getIndnorcor().getValue()));
-          p.setFecfac((Date)row.get("fecfac"));
-          p.setNumreffac(String.valueOf(row.get("numreffac")));
-          p.setPan(String.valueOf(row.get("pan")));
-          p.setClamondiv(numberUtils.toInteger(row.get("clamondiv")));
-          p.setImpdiv(numberUtils.toLong(row.get("impdiv")));
-          p.setImpfac(numberUtils.toBigDecimal(row.get("impfac")));
-          p.setCmbapli(numberUtils.toInteger(row.get("cmbapli")));
-          p.setNumaut(String.valueOf(row.get("numaut")));
-          p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("indproaje"))));
-          p.setCodcom(String.valueOf(row.get("codcom")));
-          p.setCodact(numberUtils.toInteger(row.get("codact")));
-          p.setImpliq(numberUtils.toLong(row.get("impliq")));
-          p.setClamonliq(numberUtils.toInteger(row.get("clamonliq")));
-          p.setCodpais(CodigoPais.fromValue(numberUtils.toInteger(row.get("codpais"))));
-          p.setNompob(String.valueOf(row.get("nompob")));
-          p.setNumextcta(numberUtils.toInteger(row.get("numextcta")));
-          p.setNummovext(numberUtils.toInteger(row.get("nummovext")));
-          p.setClamone(numberUtils.toInteger(row.get("clamone")));
-          p.setTipolin(String.valueOf(row.get("tipolin")));
-          p.setLinref(numberUtils.toInteger(row.get("linref")));
-          p.setNumbencta(numberUtils.toInteger(row.get("numbencta")));
-          p.setNumplastico(numberUtils.toLong(row.get("numplastico")));
-          log.info("RowMapper getPrepaidMovements");
-          log.info(p);
-
-          return p;
-        }),
-        new OutParam("_error_code", Types.VARCHAR),
-        new OutParam("_error_msg", Types.VARCHAR)
-      };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_v11", params);
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updatePendingPrepaidMovementsSwitchStatus resp: " + resp);
-      log.error(String.format("[%s] [%s]",resp.get("_error_code"),resp.get("_error_msg")));
-      throw new ValidationException(ERROR_DE_COMUNICACION_CON_BBDD).setData(new KeyValue("Error",resp.get("_error_msg")));
-    }
-    log.info("Respuesta Busca Movimiento: "+resp);
-    return (List)resp.get("_result");
-    }
-
-    @Override
+  @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                      PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
                                                      ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
@@ -486,16 +397,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (List)resp.get("result");
   }
 
-  public PrepaidMovement10 getPrepaidMovementById2(Long id) throws Exception {
-    log.info("[getPrepaidMovementById In Id] : "+id);
-    if(id == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-    log.info(String.format("ID IN : %s",id));
-    List<PrepaidMovement10> lst = this.getPrepaidMovements2(id, null, null, null, null, null, null, null, null, null, null, null);
-    log.info("getPrepaidMovementById: "+lst);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
-  }
 
   @Override
   public PrepaidMovement10 getPrepaidMovementById(Long id) throws Exception {

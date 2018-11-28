@@ -120,7 +120,7 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                     PrepaidCardStatus.PENDING);
 
          log.info("[BEFORE prepaidMovement] "+prepaidMovement);
-         prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement.getId());
+         //prepaidMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById2(prepaidMovement.getId());
          log.info("[AFTER prepaidMovement] "+prepaidMovement);
         if (prepaidCard != null) {
 

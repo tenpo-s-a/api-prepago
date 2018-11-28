@@ -23,6 +23,7 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -86,11 +87,12 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
 
   }
 
-  public void saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s ) throws Exception {
-
+  public List<Accounting10> saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s) throws Exception {
+    List<Accounting10> accounting10sFinal;
     if(accounting10s == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accounting10s"));
     }
+    accounting10sFinal = new ArrayList<>();
     for(Accounting10 account : accounting10s) {
 
       if(account.getIdTransaction() == null){
@@ -106,27 +108,32 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getTransactionDate"));
       }
       Object[] params = {
-        new InParam(account.getIdTransaction(), Types.NUMERIC),
+        new InParam(account.getIdTransaction(), Types.BIGINT),
         new InParam(account.getType(), Types.VARCHAR),
         new InParam(account.getOrigin(), Types.VARCHAR),
-        account.getAmount().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
+        account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
+        account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
         account.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
         account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
         account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
         account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
-        new InParam(account.getTransactionDate(),Types.TIMESTAMP),
-        new OutParam("_id ", Types.NUMERIC),
+        new InParam(account.getTransactionDateInFormat(),Types.VARCHAR),
+        new OutParam("_id", Types.BIGINT),
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
       };
 
-      Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_prp_insert_accounting_data_v10",params);
+      Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_prp_insert_accounting_data_v10",params);
 
       if (!"0".equals(resp.get("_error_code"))) {
         log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
         throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
       }
+      account.setId(numberUtils.toLong(resp.get("_id")));
+      log.info("Accounting Insertado Id: "+numberUtils.toLong(resp.get("_id")));
+      accounting10sFinal.add(account);
     }
+    return accounting10sFinal;
   }
 
 }

@@ -1257,9 +1257,9 @@ public class TestBaseUnit extends TestApiBase {
          accounting10.setAmount(amount);
 
          NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-         amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-         amount.setValue(new BigDecimal(getUniqueInteger()));
-         accounting10.setAmount(amountUsd);
+         amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountUsd.setValue(new BigDecimal(getUniqueInteger()));
+         accounting10.setAmountUsd(amountUsd);
 
        }
        else{

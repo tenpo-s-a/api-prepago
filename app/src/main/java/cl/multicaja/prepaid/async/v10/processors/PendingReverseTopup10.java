@@ -67,7 +67,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
           log.info("[BEFORE prepaidMovement] "+prepaidMovementReverse);
-          prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
+          //prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
           log.info("[AFTER prepaidMovement] "+prepaidMovementReverse);
 
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());

@@ -62,8 +62,20 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
   }
 
   @Test
-  public void aveAccountingData() throws Exception {
-
+  public void saveAccountingData() throws Exception {
+    {
+      List<Accounting10> lstAccounts =  generateRandomAccountingList(null,2);
+      try {
+        List<Accounting10> lstAccountsResult = getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
+        for(Accounting10 acount : lstAccountsResult){
+          Assert.assertNotEquals("Id no debe ser 0",new Long(0),acount.getId());
+        }
+        Assert.assertEquals("Las Listas deben ser iguales",lstAccounts,lstAccountsResult);
+      }catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail("No debe caer aca");
+      }
+    }
   }
 
 }
