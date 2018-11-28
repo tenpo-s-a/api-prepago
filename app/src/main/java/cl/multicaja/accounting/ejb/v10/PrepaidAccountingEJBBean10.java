@@ -4,14 +4,12 @@ import cl.multicaja.accounting.model.v10.AccountingOriginType;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.accounting.model.v10.Accounting10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -26,10 +24,9 @@ import javax.ejb.TransactionManagementType;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +44,7 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 @Stateless
 @LocalBean
 @TransactionManagement(value= TransactionManagementType.CONTAINER)
-public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
+public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidAccountingEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidAccountingEJBBean10.class);
 
@@ -108,6 +105,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
     if(accounting10s == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accounting10s"));
     }
+
     for(Accounting10 account : accounting10s) {
 
       if(account.getIdTransaction() == null){
@@ -238,17 +236,22 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
 
+    log.info("Buscando movimientos a agregar en tabla de contabilidad hasta la fecha: " + date.toString());
+
     //Obtiene los movimientos
     List<PrepaidMovement10> movements = this.getReconciledPrepaidMovementsForAccounting(headers, date);
 
     if(movements != null) {
 
+      log.info("Se filtran los movimientos por tipo de factura -> Cargas y Retiros");
       movements = movements.stream().filter(movement -> (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac()) ||
         TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac()) ||
         TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac()) ||
         TipoFactura.RETIRO_TRANSFERENCIA.equals(movement.getTipofac())
       ))
         .collect(Collectors.toList());
+
+      List<Accounting10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
 
@@ -303,11 +306,20 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 {
 
         accounting.setTransactionDate(m.getFechaCreacion());
 
-        log.info(accounting);
+        accountingMovements.add(accounting);
 
       }
-    }
 
+      if(!accountingMovements.isEmpty()) {
+        this.saveAccountingData(headers, accountingMovements);
+      } else {
+        log.info("No hay movimientos para insertar en la tabla de contabilidad");
+      }
+
+    }
+    else {
+      log.info("No hay movimientos para insertar en la tabla de contabilidad a la fecha: " + date.toString());
+    }
 
   }
 
