@@ -100,12 +100,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   }
 
-  public void saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s ) throws Exception {
-
+  public List<Accounting10> saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s) throws Exception {
     if(accounting10s == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accounting10s"));
     }
-
+    List<Accounting10> accounting10sFinal = new ArrayList<>();
     for(Accounting10 account : accounting10s) {
 
       if(account.getIdTransaction() == null){
@@ -121,29 +120,33 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getTransactionDate"));
       }
       Object[] params = {
-        new InParam(account.getIdTransaction(), Types.NUMERIC),
+        new InParam(account.getIdTransaction(), Types.BIGINT),
         new InParam(account.getType(), Types.VARCHAR),
         new InParam(account.getOrigin(), Types.VARCHAR),
-        account.getAmount().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
+        account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
+        account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
         account.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
         account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
         account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
         account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
-        new InParam(account.getTransactionDate(),Types.NUMERIC),
+        new InParam(account.getTransactionDateInFormat(),Types.VARCHAR),
+        new OutParam("_id", Types.BIGINT),
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
       };
-      //TODO: AJUSTAR EN BASE AL SP
-      Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".XXXXXXXX",params);
+
+      Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_prp_insert_accounting_data_v10",params);
 
       if (!"0".equals(resp.get("_error_code"))) {
-        log.error("XX resp: " + resp);
+        log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
         throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
       }
+      account.setId(numberUtils.toLong(resp.get("_id")));
+      log.info("Accounting Insertado Id: "+numberUtils.toLong(resp.get("_id")));
+      accounting10sFinal.add(account);
     }
-
+    return accounting10sFinal;
   }
-
 
   /**
    * Busca los movimientos conciliados para agregarlos en la tabla de contabilidad.
@@ -322,8 +325,5 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
   }
-
-
-
 
 }

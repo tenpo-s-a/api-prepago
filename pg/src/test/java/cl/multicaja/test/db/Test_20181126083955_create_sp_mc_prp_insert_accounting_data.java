@@ -29,14 +29,11 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
 
   public static List<Map<String, Object>> getTestSuiteOk(){
 
-    List<Map<String, Object>> testSuite  = new ArrayList<Map<String, Object>>();
+    List<Map<String, Object>> testSuite  = new ArrayList<>();
     Map<String, Object> testCase = null;
 
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
-    Timestamp _transaction_date = null;
-
-    _transaction_date = new Timestamp(c.getTime().getTime());
 
     testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
@@ -49,7 +46,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", _transaction_date);
+    testCase.put("transaction_date", "2018-01-01 12:00:00");
     testSuite.add(testCase);
 
     return testSuite;
@@ -58,16 +55,13 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
 
   public static List<Map<String, Object>> getTestSuiteErr(){
 
-    List<Map<String, Object>> testSuite  = new ArrayList<Map<String, Object>>();
+    List<Map<String, Object>> testSuite  = new ArrayList<>();
     Map<String, Object> testCase = null;
 
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
-    Timestamp _transaction_date = null;
 
-
-    _transaction_date = new Timestamp(c.getTime().getTime());
-    testCase = new HashMap<>();
+   testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 0);
     testCase.put("type", "1");
@@ -78,10 +72,9 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", _transaction_date);
+    testCase.put("transaction_date", "2018-01-01 12:00:00");
     testSuite.add(testCase);
 
-    _transaction_date = new Timestamp(c.getTime().getTime());
     testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 0);
@@ -93,10 +86,10 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", _transaction_date);
+    testCase.put("transaction_date", "2018-01-01 12:00:00");
     testSuite.add(testCase);
 
-    _transaction_date = new Timestamp(c.getTime().getTime());
+
     testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 0);
@@ -108,10 +101,9 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", _transaction_date);
+    testCase.put("transaction_date", "2018-01-01 12:00:00");
     testSuite.add(testCase);
 
-    //_transaction_date = new Timestamp(c.getTime().getTime());
     testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 0);

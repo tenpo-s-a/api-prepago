@@ -74,7 +74,9 @@ public abstract class PrepaidBaseEJBBean10 {
   public static String getSchema() {
     return getConfigUtils().getProperty("schema");
   }
-
+  public static String getSchemaAccounting() {
+    return getConfigUtils().getProperty("schema.acc");
+  }
   public static DateUtils getDateUtils(){
     if (dateUtils == null) {
       dateUtils = new DateUtils();

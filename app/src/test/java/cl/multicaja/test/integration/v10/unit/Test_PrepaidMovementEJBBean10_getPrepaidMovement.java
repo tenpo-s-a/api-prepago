@@ -101,4 +101,5 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidMovement10 prepaidMovement2_1 = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidUser.getId(), prepaidMovement2.getNumaut(), new java.sql.Date(prepaidMovement2.getFecfac().getTime()), prepaidMovement2.getTipofac());
     Assert.assertEquals("deben ser iguales",  prepaidMovement2,prepaidMovement2_1);
   }
+
 }
