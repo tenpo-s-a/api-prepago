@@ -31,7 +31,8 @@ public interface PrepaidAccountingEJB10 {
    * Procesa los movimientos conciliados para agregarlos en la tabla de contabilidad
    * @param headers
    * @param date la fecha recibida debe estar en UTC
+   * @return
    * @throws Exception
    */
-  void processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
+  List<Accounting10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
 }

@@ -26,10 +26,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
@@ -125,7 +122,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         new InParam(account.getOrigin(), Types.VARCHAR),
         account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
         account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
-        account.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
+        account.getAmountUsd() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
         account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
         account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
         account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
@@ -234,12 +231,12 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
    * @param date la fecha recibida debe estar en UTC
    * @throws Exception
    */
-  public void processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
+  public List<Accounting10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
     if(date == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
 
-    log.info("Buscando movimientos a agregar en tabla de contabilidad hasta la fecha: " + date.toString());
+    log.info("Buscando movimientos a insertar en tabla de contabilidad. -> [fecha]: " + date.toString());
 
     //Obtiene los movimientos
     List<PrepaidMovement10> movements = this.getReconciledPrepaidMovementsForAccounting(headers, date);
@@ -275,9 +272,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         accounting.setType(type);
         accounting.setAmount(new NewAmountAndCurrency10(m.getImpfac()));
 
-        //TODO: que hacer con estos?
-        //accounting.setAmountUsd();
-        //accounting.setExchangeRateDif();
+        //Se colocan en 0 ya que solo se procesan cargas y retiros
+        accounting.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
+        accounting.setExchangeRateDif(BigDecimal.ZERO);
 
         //Se calcula la comision del movimiento
         BigDecimal fee = BigDecimal.ZERO;
@@ -314,14 +311,18 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
 
       if(!accountingMovements.isEmpty()) {
-        this.saveAccountingData(headers, accountingMovements);
+        accountingMovements = this.saveAccountingData(headers, accountingMovements);
+        log.info("Movimientos insertados en la tabla de contabilidad: " + accountingMovements.size());
+        return accountingMovements;
       } else {
-        log.info("No hay movimientos para insertar en la tabla de contabilidad");
+        log.info("No hay movimientos a insertar en la tabla de contabilidad");
+        return Collections.emptyList();
       }
 
     }
     else {
-      log.info("No hay movimientos para insertar en la tabla de contabilidad a la fecha: " + date.toString());
+      log.info("No hay movimientos a insertar en la tabla de contabilidad. -> [fecha]: " + date.toString());
+      return Collections.emptyList();
     }
 
   }
