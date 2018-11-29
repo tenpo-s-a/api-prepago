@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+@Ignore
 public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
 

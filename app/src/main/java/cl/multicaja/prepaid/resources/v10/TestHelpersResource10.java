@@ -241,7 +241,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     // Crear movimiento de compra
     String numreffac = "9872348974987";
-    String numaut = TecnocomServiceHelper.getInstance().getNumautFromNumreffac(numreffac);
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
     // Agregar compra
     InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
