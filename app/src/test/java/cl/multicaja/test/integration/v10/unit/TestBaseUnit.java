@@ -1,5 +1,9 @@
 package cl.multicaja.test.integration.v10.unit;
 
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
+import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingOriginType;
+import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
@@ -31,10 +35,8 @@ import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
@@ -64,6 +66,8 @@ public class TestBaseUnit extends TestApiBase {
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
   private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
+  private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
+
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -139,6 +143,14 @@ public class TestBaseUnit extends TestApiBase {
     }
     return productChangeDelegate10;
   }
+
+  public static PrepaidAccountingEJBBean10 getPrepaidAccountingEJBBean10() {
+   if(prepaidAccountingEJBBean10 == null) {
+     prepaidAccountingEJBBean10 = new PrepaidAccountingEJBBean10();
+   }
+   return prepaidAccountingEJBBean10;
+  }
+
   /**
    *
    * @return
@@ -1158,12 +1170,7 @@ public class TestBaseUnit extends TestApiBase {
     CodigoMoneda clamondiv = CodigoMoneda.NONE;
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
-    String numaut = numreffac;
-
-    //solamente los 6 primeros digitos de numreffac
-    if (numaut.length() > 6) {
-      numaut = numaut.substring(numaut.length()-6);
-    }
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
     System.out.println("Monto a cargar en tecnocom: " + impfac);
 
@@ -1191,12 +1198,7 @@ public class TestBaseUnit extends TestApiBase {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
     }
 
-    String numaut = movement10.getId().toString();
-
-    //solamente los 6 primeros digitos de numreffac
-    if (numaut.length() > 6) {
-      numaut = numaut.substring(numaut.length()-6);
-    }
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(movement10.getId().toString());
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(prepaidCard10.getProcessorUserId(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
       movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),
@@ -1234,5 +1236,117 @@ public class TestBaseUnit extends TestApiBase {
     header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
+  }
+
+  protected List<Accounting10> generateRandomAccountingList(Integer iPositionNull, Integer count){
+    List<Accounting10> accounting10s = new ArrayList<>();
+    for(int i = 0;i<count;i++){
+       Accounting10 accounting10 = new Accounting10();
+       if(iPositionNull == null){
+         accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+         accounting10.setOrigin(AccountingOriginType.IPM);
+         accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
+         accounting10.setIdTransaction(getUniqueLong());
+         accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+         accounting10.setFee(new BigDecimal(getUniqueInteger()));
+         accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+         NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+         amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amount.setValue(new BigDecimal(getUniqueInteger()));
+         accounting10.setAmount(amount);
+
+         NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+         amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountUsd.setValue(new BigDecimal(getUniqueInteger()));
+         accounting10.setAmountUsd(amountUsd);
+
+       }
+       else{
+
+         if(iPositionNull == 1){
+
+           accounting10.setIdTransaction(null);
+           accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+           accounting10.setOrigin(AccountingOriginType.IPM);
+           accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
+
+           accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+           accounting10.setFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amount);
+
+           NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amountUsd);
+         }
+         else if(iPositionNull == 2){
+           accounting10.setType(null);
+           accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+           accounting10.setOrigin(AccountingOriginType.IPM);
+
+           accounting10.setIdTransaction(getUniqueLong());
+           accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+           accounting10.setFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amount);
+
+           NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amountUsd);
+         }
+         else if(iPositionNull == 3){
+           accounting10.setOrigin(null);
+           accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+
+           accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
+           accounting10.setIdTransaction(getUniqueLong());
+           accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+           accounting10.setFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amount);
+
+           NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amountUsd);
+         }
+         else {
+           accounting10.setTransactionDate(null);
+           accounting10.setOrigin(AccountingOriginType.IPM);
+           accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
+           accounting10.setIdTransaction(getUniqueLong());
+           accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+           accounting10.setFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amount);
+
+           NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+           amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amount.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmount(amountUsd);
+         }
+       }
+      accounting10s.add(accounting10);
+    }
+    return accounting10s;
   }
 }

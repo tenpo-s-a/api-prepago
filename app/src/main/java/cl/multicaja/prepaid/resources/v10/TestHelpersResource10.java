@@ -58,6 +58,7 @@ import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
 
 /**
  * @author vutreras

@@ -81,7 +81,7 @@ public final class TecnocomServiceHelper {
     return tecnocomService;
   }
 
-  public String getNumautFromNumreffac(String numreffac) {
+  public static String getNumautFromIdMov(String numreffac) {
     String numaut = StringUtils.leftPad(numreffac, 6, "0");
     numaut = numaut.substring(numaut.length() - 6);
     return numaut;

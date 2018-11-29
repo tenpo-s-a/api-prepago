@@ -68,6 +68,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(2000);
+
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
