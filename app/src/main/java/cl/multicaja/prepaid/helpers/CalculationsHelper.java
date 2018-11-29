@@ -90,6 +90,18 @@ public class CalculationsHelper {
   }
 
   /**
+   * Calcula el IVA
+   *
+   * @param amount
+   * @return
+   */
+  public BigDecimal calculateIva(BigDecimal amount) {
+    BigDecimal iva = amount.subtract(amount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA())));
+    log.info("Amount: " + amount + "iva: " + iva);
+    return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
+  }
+
+  /**
    * Calcula el: para cuanto alcanza (pca)
    *
    * @param amount
