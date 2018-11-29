@@ -166,20 +166,34 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     Map<String, Object> map = new HashMap<>();
 
     map.put("id", numberUtils.toLong(resp.get("_id")));
-    map.put("id_tx", numberUtils.toLong(params[0]));
-    map.put("type", String.valueOf(params[1]));
-    map.put("origin", String.valueOf(params[2]));
-    map.put("amount", numberUtils.toLong(params[3]));
-    map.put("currency", numberUtils.toLong(params[4]));
-    map.put("ammount_usd", numberUtils.toLong(params[5]));
-    map.put("exchange_rate_dif", numberUtils.toLong(params[6]));
-    map.put("fee", numberUtils.toLong(params[7]));
-    map.put("fee_iva", numberUtils.toLong(params[8]));
-    map.put("transaction_date", numberUtils.toLong(params[9]));
+    map.put("id_tx", numberUtils.toLong(paramsIn.get("id_tx")));
+    map.put("type", String.valueOf(paramsIn.get("type")));
+    map.put("origin", String.valueOf(paramsIn.get("origin")));
+    map.put("amount", numberUtils.toLong(paramsIn.get("amount")));
+    map.put("currency", numberUtils.toLong(paramsIn.get("currency")));
+    map.put("ammount_usd", numberUtils.toLong(paramsIn.get("ammount_usd")));
+    map.put("exchange_rate_dif", numberUtils.toLong(paramsIn.get("exchange_rate_dif")));
+    map.put("fee", numberUtils.toLong(paramsIn.get("fee")));
+    map.put("fee_iva", numberUtils.toLong(paramsIn.get("fee_iva")));
+    map.put("transaction_date", paramsIn.get("transaction_date"));
     map.put("_error_code",resp.get("_error_code"));
     map.put("_error_msg",resp.get("_error_msg"));
 
     return map;
+  }
+
+  public static List<Map<String,Object>> insertAccountOkByTestCase() throws SQLException {
+
+    List<Map<String, Object>> respList  = new ArrayList<Map<String, Object>>();
+
+    List<Map<String, Object>> testSuite = getTestSuiteOk();
+    for (Map<String, Object> testCase : testSuite) {
+      Map<String, Object> resp = insertAccount(testCase);
+      respList.add(resp);
+    }
+
+    return respList;
+
   }
 
 
