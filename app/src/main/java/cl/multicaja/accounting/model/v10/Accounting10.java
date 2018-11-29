@@ -2,8 +2,8 @@ package cl.multicaja.accounting.model.v10;
 
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.tecnocom.util.DateUtil;
-
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -118,6 +118,11 @@ public class Accounting10 implements Serializable {
 
   public void setFeeIva(BigDecimal feeIva) {
     this.feeIva = feeIva;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 
 }

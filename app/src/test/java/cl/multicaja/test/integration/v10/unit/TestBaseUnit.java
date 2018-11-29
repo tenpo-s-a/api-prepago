@@ -68,7 +68,6 @@ public class TestBaseUnit extends TestApiBase {
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
-
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     System.out.println("Exist: " + getPrepaidCardEJBBean10());
@@ -143,14 +142,6 @@ public class TestBaseUnit extends TestApiBase {
     }
     return productChangeDelegate10;
   }
-
-  public static PrepaidAccountingEJBBean10 getPrepaidAccountingEJBBean10() {
-   if(prepaidAccountingEJBBean10 == null) {
-     prepaidAccountingEJBBean10 = new PrepaidAccountingEJBBean10();
-   }
-   return prepaidAccountingEJBBean10;
-  }
-
   /**
    *
    * @return
@@ -237,6 +228,13 @@ public class TestBaseUnit extends TestApiBase {
       filesEJBBean10 = new FilesEJBBean10();
     }
     return filesEJBBean10;
+  }
+
+  public static PrepaidAccountingEJBBean10 getPrepaidAccountingEJBBean10() {
+    if (prepaidAccountingEJBBean10 == null) {
+      prepaidAccountingEJBBean10 = new PrepaidAccountingEJBBean10();
+    }
+    return prepaidAccountingEJBBean10;
   }
 
   /**
