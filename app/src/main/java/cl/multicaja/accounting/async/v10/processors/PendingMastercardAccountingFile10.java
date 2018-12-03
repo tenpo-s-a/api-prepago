@@ -1,8 +1,9 @@
-package cl.multicaja.prepaid.async.v10.processors;
+package cl.multicaja.accounting.async.v10.processors;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.encryption.PgpHelper;
+import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
@@ -21,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
@@ -55,40 +58,19 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
         privKeyIn.close();
         tempOutputFile.close();
 
+        /*
         // Procesar los datos del archivo
         FileInputStream decryptedInputStream = new FileInputStream(tempOutputFileName);
-        AccountingFile file = MastercardFileHelper.getInstance().validateAccountantFile(decryptedInputStream);
+
+        //getRoute().getPrepaidAccountingEJBBean10().processIPMFile(decryptedInputStream);
 
         // Eliminar el archivo desencriptado
         decryptedInputStream.close();
         tempFile.delete();
 
-        if (file.hasError()) {
-          // Enviar email de soporte avisando error en archivo
-          EmailBody emailBody = new EmailBody();
-          emailBody.setTemplateData(null);
-          emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_ERROR);
-          emailBody.setAddress(ConfigUtils.getInstance().getProperty("accounting.email.support"));
-          getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, emailBody);
-        } else {
-          
-        }
-
-        // Todo: Read extra data from database
-
-        // Todo: Write all new results into a new file
-
-        // Todo: Convert file to string
-        String fileToSend = "archivo convertido a string";
-
-        // Enviamos el archivo al mail de reportes diarios
-        EmailBody emailBodyToSend = new EmailBody();
-        String fileNameToSend = String.format("reporte_contable_%s.csv", LocalDateTime.now().atZone(ZoneId.of("America/Santiago")));
-        emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileNameToSend);
-        emailBodyToSend.setTemplateData(null);
-        emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
-        emailBodyToSend.setAddress(ConfigUtils.getInstance().getProperty("accounting.email.dailyreport"));
-        getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, emailBodyToSend);
+        getRoute().getPrepaidAccountingEJBBean10().processMovementForAccounting(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
+        getRoute().getPrepaidAccountingEJBBean10().generateAccountingFile(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
+        */
       }
     };
   }

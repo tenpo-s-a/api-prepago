@@ -21,7 +21,6 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
 
   @Test
   public void sendMailOk() throws Exception {
-
     User user = registerUser();
     updateUser(user);
 
@@ -35,6 +34,7 @@ public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
     getMailPrepaidEJBBean10().sendMailAsync(null,user.getId(),emailBody);
     //Assert.assertNotNull("Resp no null", resp);
   }
+
   @Test
   public void sendMailError() throws Exception {
     try { // USUARIO NO EXISTE

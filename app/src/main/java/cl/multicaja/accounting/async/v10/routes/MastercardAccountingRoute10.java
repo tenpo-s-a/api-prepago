@@ -1,7 +1,8 @@
-package cl.multicaja.prepaid.async.v10.routes;
+package cl.multicaja.accounting.async.v10.routes;
 
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.async.v10.processors.PendingMastercardAccountingFile10;
+import cl.multicaja.accounting.async.v10.processors.PendingMastercardAccountingFile10;
+import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
