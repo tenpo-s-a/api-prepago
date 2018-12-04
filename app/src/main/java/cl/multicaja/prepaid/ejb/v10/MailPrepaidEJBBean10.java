@@ -116,12 +116,11 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     if(prepaidCard10 == null){
       throw new ValidationException(Errors.TARJETA_NO_EXISTE);
     }
-    if(!prepaidCard10.getStatus().equals(PrepaidCardStatus.ACTIVE)) {
 
-      if(prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED)) {
-        throw new ValidationException(Errors.TARJETA_CON_BLOQUEO_TEMPORAL);
-      }
-      else if(prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED_HARD)) {
+    // Se permite el envio del PDF de la tarjeta solo si la misma esta activa o con bloqueo blando
+    if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard10.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard10.getStatus())) {
+
+      if(prepaidCard10.getStatus().equals(PrepaidCardStatus.LOCKED_HARD)) {
         throw new ValidationException(Errors.TARJETA_BLOQUEADA_DE_FORMA_DEFINITIVA);
       }
       else if(prepaidCard10.getStatus().equals(PrepaidCardStatus.EXPIRED)) {
