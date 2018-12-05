@@ -58,7 +58,11 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
         privKeyIn.close();
         tempOutputFile.close();
 
-        /*
+        // Borrar estalinea cuando se agregue proceso IPM
+        // este archivo se borra despues en la linea 73
+        tempFile.delete(); 
+
+        /* Esperando proceso de lectura IPM
         // Procesar los datos del archivo
         FileInputStream decryptedInputStream = new FileInputStream(tempOutputFileName);
 
