@@ -21,7 +21,7 @@ import javax.jms.Queue;
  */
 
 @SuppressWarnings("unchecked")
-@Ignore
+
 public class Test_PendingCard10 extends TestBaseUnitAsync {
 
   /********************

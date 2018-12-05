@@ -27,15 +27,12 @@ public class Test_PendingMastercardAccountingFile10 extends TestBaseUnit {
     String sourceDir = "src/test/resources/mastercard/files/";
     String destDir = getConfigUtils().getProperty("sftp.mastercard.accounting.received.folder").concat("/").substring(1);
 
-    //genKeyPair();
-
     createEncryptedFile(sourceDir + fileName, destDir + fileName, pubKeyFileName);
-
-    //decrypt();
 
     Thread.sleep(1500); // Esperar que lo agarre el metodo async
 
     System.out.println("Termino test");
+    // Todo: chequear que el proceso de IPM haya funcionado, se debe esperar la funcion IPM
   }
 
   private String id = "damico";
