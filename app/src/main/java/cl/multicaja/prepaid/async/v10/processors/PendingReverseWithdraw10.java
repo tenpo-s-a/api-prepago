@@ -132,7 +132,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         } else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
           log.debug("********** Realizando reversa de retiro **********");
           String numaut = prepaidMovementReverse.getNumaut();
-                   log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+          log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
 
           // Se intenta realizar reversa del movimiento.
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), pan, originalMovement.getClamon(),
