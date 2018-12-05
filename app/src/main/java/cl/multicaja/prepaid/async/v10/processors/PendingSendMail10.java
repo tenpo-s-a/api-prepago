@@ -86,7 +86,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
               String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()));
 
             Map<String, Object> templateData = new HashMap<>();
-            templateData.put("client", data.getUser().getName() + " " + data.getUser().getLastname_1());
+            templateData.put("cliente", data.getUser().getName());
 
             EmailBody emailBody = new EmailBody();
             emailBody.setTemplateData(templateData);

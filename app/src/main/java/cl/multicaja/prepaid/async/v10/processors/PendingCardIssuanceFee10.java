@@ -82,13 +82,15 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         PrepaidMovement10 issuanceFeeMovement = data.getIssuanceFeeMovement10();
 
+        BigDecimal amount = getCalculationsHelper().getCalculatorParameter10().getOPENING_FEE().intValue() > 1 ? getCalculationsHelper().getCalculatorParameter10().getOPENING_FEE() : BigDecimal.ONE;
+
         if (issuanceFeeMovement == null) {
           issuanceFeeMovement = (PrepaidMovement10) prepaidMovement.clone();
           issuanceFeeMovement.setTipoMovimiento(PrepaidMovementType.ISSUANCE_FEE);
           issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
-          issuanceFeeMovement.setImpfac(getCalculationsHelper().getCalculatorParameter10().getOPENING_FEE());
+          issuanceFeeMovement.setImpfac(amount);
           issuanceFeeMovement.setConTecnocom(ReconciliationStatusType.PENDING);
           issuanceFeeMovement.setConSwitch(ReconciliationStatusType.PENDING);
           issuanceFeeMovement.setNumaut(null);
