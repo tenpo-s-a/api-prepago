@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.ColumnInfo;
+import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 

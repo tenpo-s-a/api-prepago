@@ -1,4 +1,4 @@
-package cl.multicaja.test.db;
+package cl.multicaja.test;
 
 import cl.multicaja.core.test.TestSuiteBase;
 import org.apache.commons.logging.Log;
@@ -24,7 +24,8 @@ public class TestSuite extends TestSuiteBase {
   }
 
   public static Class<?>[] suite() throws Exception {
-    String packageName = new TestSuite().getClass().getPackage().getName();
+
+    String packageName = TestSuite.class.getPackage().getName();
     log.info("packageName: " + packageName);
     Class[] classList = getClasses(packageName);
     log.info("------------ Lista de clases de test ------------");
