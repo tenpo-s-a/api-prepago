@@ -2,6 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.test.TestDbBasePg;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;

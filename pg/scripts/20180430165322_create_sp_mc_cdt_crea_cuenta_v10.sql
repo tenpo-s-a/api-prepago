@@ -52,8 +52,8 @@ CREATE OR REPLACE FUNCTION ${schema.cdt}.mc_cdt_crea_cuenta_v10
            'ACTIVO',
            timezone('utc', now()),
            timezone('utc', now())
-        );
-      SELECT currval('${schema.cdt}.cdt_cuenta_id_seq') INTO _id_cuenta;
+        ) RETURNING id INTO _id_cuenta;
+
       EXCEPTION
           WHEN OTHERS THEN
               _num_error := SQLSTATE;
