@@ -60,7 +60,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
         // Borrar estalinea cuando se agregue proceso IPM
         // este archivo se borra despues en la linea 73
-        tempFile.delete(); 
+        tempFile.delete();
 
         /* Esperando proceso de lectura IPM
         // Procesar los datos del archivo
