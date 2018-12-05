@@ -1,15 +1,15 @@
 package cl.multicaja.test.db;
 
+import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public class Test_20181010114032_create_sp_busca_movimientos_conciliar extends TestDbBasePg{
+public class Test_20181010114032_create_sp_busca_movimientos_conciliar extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_busca_movimientos_conciliar_v10";
 

@@ -2,10 +2,11 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.ColumnInfo;
 import cl.multicaja.core.utils.db.SqlType;
+import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class Test_20181123144009_create_table_acc_accounting extends TestDbBasePg{
+public class Test_20181123144009_create_table_acc_accounting extends TestDbBasePg {
 
   @Test
   public void checkIfExistsTable_accounting() {
