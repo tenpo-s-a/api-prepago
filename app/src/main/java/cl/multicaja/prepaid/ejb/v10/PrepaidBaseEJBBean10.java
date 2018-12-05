@@ -5,7 +5,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
 import cl.multicaja.prepaid.utils.ParametersUtil;

@@ -2,7 +2,7 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.MastercardFileHelper;
+import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.model.v10.CcrFile10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import org.apache.camel.Exchange;

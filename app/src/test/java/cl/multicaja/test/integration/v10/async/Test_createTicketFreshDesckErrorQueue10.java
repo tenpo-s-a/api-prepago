@@ -3,7 +3,7 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
@@ -11,12 +11,14 @@ import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
+import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+
 
 public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
@@ -26,8 +28,20 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc = TecnocomServiceHelper.getInstance();
   }
 
+  @Ignore
+  @Test
+  public void testAlgo() throws Exception {
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
 
-  //@Test
+    ReprocesQueue reprocesQueue = new ReprocesQueue();
+    reprocesQueue.setIdQueue("VSPTirsGmuqFmvTnenaS");
+    reprocesQueue.setLastQueue(QueuesNameType.TOPUP);
+    String messageId = getPrepaidEJBBean10().reprocessQueue(null, reprocesQueue);
+
+  }
+
+  @Test
   public void testReinjectTopup() throws Exception {
 
     tc.getTecnocomService().setAutomaticError(false);
@@ -60,6 +74,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   }
   //Verificado envia todos los dastos
 
+  @Ignore
   @Test
   public void testReinjectAltaCliente() throws Exception {
 

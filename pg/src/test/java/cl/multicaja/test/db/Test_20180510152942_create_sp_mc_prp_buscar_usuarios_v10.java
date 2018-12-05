@@ -7,8 +7,10 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -187,30 +189,29 @@ public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends T
 
     String status = getRandomString(10) + numberUtils.random(11111, 99999);
 
-    Map<String, Object> obj1 = insertUser(status);
-    Map<String, Object> obj2 = insertUser(status);
+    ArrayList<Map<String, Object>> objectList = new ArrayList<Map<String, Object>>();
+    objectList.add(0, insertUser(status));
+    objectList.add(1, insertUser(status));
 
     Map<String, Object> resp = searchUsers(null, null, null, status);
 
     List result = (List)resp.get("result");
 
     Assert.assertNotNull("debe retornar una lista", result);
-    Assert.assertEquals("Debe contener un elemento", 2 , result.size());
+    Assert.assertEquals("Debe contener dos elementos", 2 , result.size());
 
-    Map<String, Object> mUsu1 = (Map)result.get(0);
-
-    checkColumns(mUsu1);
-
-    Set<String> keys = obj1.keySet();
-    for (String k : keys) {
-      System.out.println(obj1.get(k) + " == "  + mUsu1.get("_" + k));
-      Assert.assertEquals("Debe ser el mismo usuario", obj2.get(k), mUsu1.get("_" + k));
-    }
-
-    Map mUsu2 = (Map)result.get(1);
-    Set<String> keys2 = obj2.keySet();
-    for (String k : keys2) {
-      Assert.assertEquals("Debe ser el mismo usuario", obj1.get(k), mUsu2.get("_" + k));
+    for (Map<String, Object> createdUser : objectList) { // Por cada usuario insertado
+      for (Object foundUserObj : result) { // Por cada usuario insertado
+        Map<String, Object> foundUserMap = (Map) foundUserObj;
+        if (foundUserMap.get("_id").equals(createdUser.get("id"))) { // Buscar si tienen el mismo id
+          checkColumns(foundUserMap);
+          Set<String> keys = createdUser.keySet();
+          for (String k : keys) { // Deberian tener lo mismo en el resto de sus campos
+            System.out.println(createdUser.get(k) + " == "  + foundUserMap.get("_" + k));
+            Assert.assertEquals("Debe ser el mismo usuario", createdUser.get(k), foundUserMap.get("_" + k));
+          }
+        }
+      }
     }
 
     //Caso en donde no deberia encontrar un registro

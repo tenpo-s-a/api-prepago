@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 /**
  * @author abarazarte
  **/
-@Ignore
+
 public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test

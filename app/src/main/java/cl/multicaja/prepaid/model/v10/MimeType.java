@@ -11,7 +11,8 @@ public enum MimeType {
   RAR("application/x-rar-compressed"),
   XLS("application/vnd.ms-excel"),
   XML("application/xml"),
-  ZIP("application/zip");
+  ZIP("application/zip"),
+  CSV("text/csv");
 
   MimeType(String value) {
     this.value = value;

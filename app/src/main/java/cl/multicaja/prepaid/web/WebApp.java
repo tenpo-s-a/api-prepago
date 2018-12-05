@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.web;
 
+import cl.multicaja.accounting.async.v10.routes.MastercardAccountingRoute10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Constants;
@@ -36,6 +37,9 @@ public class WebApp implements ServletContextListener  {
 
   @Inject
   private TecnocomReconciliationRoute10 tecnocomReconciliationRoute10;
+
+  @Inject
+  private MastercardAccountingRoute10 mastercardAccountingRoute10;
 
   @Inject
   private ConciliationMcRedRoute10 conciliationMcRedRoute10;
