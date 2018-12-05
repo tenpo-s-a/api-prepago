@@ -8,8 +8,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends TestDbBasePg {
@@ -35,6 +35,9 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
 
+    Date date = new Date();
+    String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+
     testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 12);
@@ -46,7 +49,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", "2018-01-01 12:00:00");
+    testCase.put("transaction_date", currentDate);
     testSuite.add(testCase);
 
     return testSuite;
@@ -61,7 +64,10 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     Calendar c = Calendar.getInstance();
     c.setTime(new Date());
 
-   testCase = new HashMap<>();
+    Date date = new Date();
+    String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+
+    testCase = new HashMap<>();
     testCase.put("id", getUniqueInteger());
     testCase.put("id_tx", 0);
     testCase.put("type", "1");
@@ -72,7 +78,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", "2018-01-01 12:00:00");
+    testCase.put("transaction_date", currentDate);
     testSuite.add(testCase);
 
     testCase = new HashMap<>();
@@ -86,7 +92,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", "2018-01-01 12:00:00");
+    testCase.put("transaction_date", currentDate);
     testSuite.add(testCase);
 
 
@@ -101,7 +107,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("exchange_rate_dif", 50);
     testCase.put("fee", 23);
     testCase.put("fee_iva", 10);
-    testCase.put("transaction_date", "2018-01-01 12:00:00");
+    testCase.put("transaction_date", currentDate);
     testSuite.add(testCase);
 
     testCase = new HashMap<>();

@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -95,7 +96,8 @@ public class Test_20181127171833_create_sp_mc_prp_search_accounting_data extends
   public void getAccountsByDateOk() throws SQLException {
 
     List<Map<String, Object>> testSuite = getTestSuiteOk();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     Map<String, Object> dateToSearch = null;
 
@@ -106,8 +108,18 @@ public class Test_20181127171833_create_sp_mc_prp_search_accounting_data extends
       for (Map<String, Object> acc : acc_created) {
 
         dateToSearch = new HashMap<>();
-        String transaction_date = dateFormat.format(acc.get("transaction_date"));
-        dateToSearch.put("_in_create_date", transaction_date);
+
+        Date transaction_date = null;
+        try {
+          transaction_date = inputFormat.parse(acc.get("transaction_date").toString());
+        } catch (ParseException e) {
+          e.printStackTrace();
+        }
+        String in_transaction_date = dateFormat.format(transaction_date);
+
+        System.out.println(in_transaction_date);
+
+        dateToSearch.put("_in_create_date", in_transaction_date);
 
         Map<String, Object> resp = queryByDate(dateToSearch);
         Assert.assertNotNull("Debe retornar respuesta", resp);
