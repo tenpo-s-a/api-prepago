@@ -266,9 +266,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
     }
+    //Se mueve para que al CDT se ingrese sin comisiones
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
+    prepaidTopup.setUserId(user.getId());
+    prepaidTopup.setStatus("exitoso");
+    prepaidTopup.setTimestamps(new Timestamps());
+
+    /*
+      Calcular monto a cargar y comisiones
+     */
+    this.calculateFeeAndTotal(prepaidTopup);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(topupRequest.getAmount().getValue());
+    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(topupRequest.getAmount().getValue(),prepaidTopup.getFee().getValue()));
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
     cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
@@ -286,16 +296,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
-
-    PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
-    prepaidTopup.setUserId(user.getId());
-    prepaidTopup.setStatus("exitoso");
-    prepaidTopup.setTimestamps(new Timestamps());
-
-    /*
-      Calcular monto a cargar y comisiones
-     */
-    this.calculateFeeAndTotal(prepaidTopup);
 
     /*
       Agrega la informacion par el voucher
@@ -467,9 +467,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
+    //Se cambia para calcular la comision previo al envio al CDT
+    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
+    prepaidWithdraw.setUserId(user.getId());
+    prepaidWithdraw.setStatus("exitoso");
+    prepaidWithdraw.setTimestamps(new Timestamps());
+
+    /*
+      Calcular comisiones
+     */
+    this.calculateFeeAndTotal(prepaidWithdraw);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(withdrawRequest.getAmount().getValue());
+    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(withdrawRequest.getAmount().getValue(),prepaidWithdraw.getFee().getValue()));
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
@@ -488,11 +498,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
 
-    prepaidWithdraw.setUserId(user.getId());
-    prepaidWithdraw.setStatus("exitoso");
-    prepaidWithdraw.setTimestamps(new Timestamps());
 
     String contrato = prepaidCard.getProcessorUserId();
     String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
@@ -600,17 +606,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-      //TODO: actualizar el status de negocio del movimiento indicando que la reversa no necesita ser ejecutada
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
       getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
-
-    /*
-      Calcular comisiones
-     */
-    this.calculateFeeAndTotal(prepaidWithdraw);
 
     /*
       Agrega la informacion par el voucher
@@ -1184,51 +1184,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       simulationTopup.setInitialAmount(simulationNew.getAmount());
     }
 
-    // LLAMADA AL CDT
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(amountValue);
-    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
-    cdtTransaction.setIndSimulacion(true);
-
-    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
-      cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
-    } else {
-      cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
-    }
-
-    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
-    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-    if(!cdtTransaction.isNumErrorOk()){
-      /* Posibles errores:
-      La carga supera el monto máximo de carga web
-      La carga supera el monto máximo de carga pos
-      La carga es menor al mínimo de carga
-      La carga supera el monto máximo de cargas mensuales.
-      */
-      int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
-          simulationTopup.setCode(lNumError);
-          simulationTopup.setMessage(cdtTransaction.getMsjError());
-        } else {
-          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-        }
-      } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      }
-      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
-      simulationTopup.setFee(zero);
-      simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
-      simulationTopup.setAmountToPay(zero);
-      simulationTopup.setOpeningFee(zero);
-      simulationTopup.setInitialAmount(zero);
-      return simulationTopup;
-    }
-
     //saldo del usuario
     PrepaidBalance10 balance;
     if(isFirstTopup){
@@ -1279,6 +1234,52 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
+    // LLAMADA AL CDT
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(amountValue,simulationTopup.getFee().getValue()));
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+
+    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
+      cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
+    } else {
+      cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    }
+
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
+      La carga supera el monto máximo de carga web
+      La carga supera el monto máximo de carga pos
+      La carga es menor al mínimo de carga
+      La carga supera el monto máximo de cargas mensuales.
+      */
+      int lNumError = cdtTransaction.getNumErrorInt();
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
+          simulationTopup.setCode(lNumError);
+          simulationTopup.setMessage(cdtTransaction.getMsjError());
+        } else {
+          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        }
+      } else {
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      simulationTopup.setFee(zero);
+      simulationTopup.setPca(zero);
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setAmountToPay(zero);
+      simulationTopup.setOpeningFee(zero);
+      simulationTopup.setInitialAmount(zero);
+      return simulationTopup;
+    }
+
+
     return simulationTopup;
   }
 
@@ -1303,31 +1304,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(amountValue);
-    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
-    cdtTransaction.setIndSimulacion(true);
-    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
-    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
-
-    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-    if(!cdtTransaction.isNumErrorOk()){
-      /* Posibles errores:
-      El retiro supera el monto máximo de un retiro web
-      El retiro supera el monto máximo de un retiro pos
-      El monto de retiro es menor al monto mínimo de retiros
-      El retiro supera el monto máximo de retiros mensuales.
-     */
-      int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      }
-    }
 
     BigDecimal fee;
 
@@ -1355,6 +1331,32 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
     simulationWithdrawal.setFee(new NewAmountAndCurrency10(fee));
     simulationWithdrawal.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount));
+
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(amountValue,simulationWithdrawal.getFee().getValue()));
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
+
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
+      El retiro supera el monto máximo de un retiro web
+      El retiro supera el monto máximo de un retiro pos
+      El monto de retiro es menor al monto mínimo de retiros
+      El retiro supera el monto máximo de retiros mensuales.
+     */
+      int lNumError = cdtTransaction.getNumErrorInt();
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      } else {
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+    }
 
     return simulationWithdrawal;
   }
@@ -1501,7 +1503,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco.multiply(NEGATIVE), movimientosDTO.getClamon()));//Comisiones
 
@@ -1512,7 +1514,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco,movimientosDTO.getClamon()));//Comisiones
           break;
@@ -1521,7 +1523,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
           transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco), movimientosDTO.getClamon()));
@@ -1531,7 +1533,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));
           transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco).multiply(NEGATIVE), movimientosDTO.getClamon()));
@@ -1542,7 +1544,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
 
           //Monto Carga
@@ -1559,7 +1561,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
                                                               movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));//Monto Carga
@@ -1572,9 +1574,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoDescontar = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
           transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
           transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
@@ -1585,9 +1587,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoDescontar = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
           transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
           transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
@@ -1598,9 +1600,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
                                                       movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoDescontar = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
           transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
           transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
@@ -1611,9 +1613,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoDescontar = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
           transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
           transaction10.setFee(new NewAmountAndCurrency10(fee,CodigoMoneda.CHILE_CLP));
@@ -1623,7 +1625,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco.multiply(NEGATIVE),movimientosDTO.getClamon()));//Comisiones
 
@@ -1633,7 +1635,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
-          BigDecimal sumImpbrueco = numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco,movimientosDTO.getClamon()));//Comisiones
 
@@ -1643,9 +1645,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
                                                       movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -1657,9 +1659,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -1670,9 +1672,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         case COMPRA_INTERNACIONAL:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -1684,9 +1686,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -1697,9 +1699,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         case DEVOLUCION_COMPRA_INTERNACIONAL:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -1711,9 +1713,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+movimientosDTO.getNomcomred());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          BigDecimal fee =  numberUtils.sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
+          BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
             movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
-          BigDecimal montoPesos = numberUtils.sumBigDecimal(movimientosDTO.getImporte(),fee);
+          BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
@@ -2175,7 +2177,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         maxIdentityValidationAttempts = getParametersUtil().getInteger("api-prepaid", "max_identity_verification_attempts", "v1.0");
       } catch (SQLException e) {
         log.error("Error al cargar parametro max_identity_verification_attempts");
-        maxIdentityValidationAttempts = numberUtils.toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
+        maxIdentityValidationAttempts = getNumberUtils().toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
       }
 
       if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {

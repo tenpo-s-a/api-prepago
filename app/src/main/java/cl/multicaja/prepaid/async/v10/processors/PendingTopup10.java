@@ -188,7 +188,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
               CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
-              cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
+              cdtTransactionConfirm.setAmount(getRoute().getNumberUtils().subtractBigDecimal(cdtTransaction.getAmount(),prepaidTopup.getFee().getValue()));
               cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
               cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
               cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());

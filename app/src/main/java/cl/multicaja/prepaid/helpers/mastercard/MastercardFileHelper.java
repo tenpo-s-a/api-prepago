@@ -1,19 +1,14 @@
 package cl.multicaja.prepaid.helpers.mastercard;
 
-import cl.multicaja.core.utils.encryption.PgpHelper;
 import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
-import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFileDetail;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.CcrFile10;
+import cl.multicaja.prepaid.model.v10.CcrLayout10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;

@@ -88,23 +88,23 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     RowMapper rm = (Map<String, Object> row) -> {
       Accounting10 account = new Accounting10();
 
-      account.setIdTransaction(numberUtils.toLong(row.get("id_tx")));
+      account.setIdTransaction(getNumberUtils().toLong(row.get("id_tx")));
 
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setValue(numberUtils.toBigDecimal(row.get("amount")));
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("amount")));
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
 
       account.setAmount(amount);
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-      amount.setValue(numberUtils.toBigDecimal(row.get("ammount_usd")));
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("ammount_usd")));
       amount.setCurrencyCode(CodigoMoneda.USA_USN);
 
       account.setAmountUsd(amountUsd);
 
-      account.setExchangeRateDif(numberUtils.toBigDecimal(row.get("exchange_rate_dif")));
-      account.setFee(numberUtils.toBigDecimal(row.get("fee")));
-      account.setFeeIva(numberUtils.toBigDecimal(row.get("fee_iva")));
+      account.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("exchange_rate_dif")));
+      account.setFee(getNumberUtils().toBigDecimal(row.get("fee")));
+      account.setFeeIva(getNumberUtils().toBigDecimal(row.get("fee_iva")));
 
       account.setType(AccountingTxType.fromValue(String.valueOf(row.get("type"))));
       account.setOrigin(AccountingOriginType.fromValue(String.valueOf(row.get("origin"))));
@@ -164,8 +164,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
         throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
       }
-      account.setId(numberUtils.toLong(resp.get("_id")));
-      log.info("Accounting Insertado Id: "+numberUtils.toLong(resp.get("_id")));
+      account.setId(getNumberUtils().toLong(resp.get("_id")));
+      log.info("Accounting Insertado Id: "+getNumberUtils().toLong(resp.get("_id")));
       accounting10sFinal.add(account);
     }
     return accounting10sFinal;
@@ -194,12 +194,12 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     RowMapper rm = (Map<String, Object> row) -> {
       try{
         PrepaidMovement10 p = new PrepaidMovement10();
-        p.setId(numberUtils.toLong(row.get("_id")));
-        p.setIdMovimientoRef(numberUtils.toLong(row.get("_id_movimiento_ref")));
-        p.setIdPrepaidUser(numberUtils.toLong(row.get("_id_usuario")));
+        p.setId(getNumberUtils().toLong(row.get("_id")));
+        p.setIdMovimientoRef(getNumberUtils().toLong(row.get("_id_movimiento_ref")));
+        p.setIdPrepaidUser(getNumberUtils().toLong(row.get("_id_usuario")));
         p.setIdTxExterno(String.valueOf(row.get("_id_tx_externo")));
         p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
-        p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
+        p.setMonto(getNumberUtils().toBigDecimal(row.get("_monto")));
         p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
         p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
         p.setConSwitch(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
@@ -210,31 +210,31 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         p.setCodent(String.valueOf(row.get("_codent")));
         p.setCentalta(String.valueOf(row.get("_centalta")));
         p.setCuenta(String.valueOf(row.get("_cuenta")));
-        p.setClamon(CodigoMoneda.fromValue(numberUtils.toInteger(row.get("_clamon"))));
-        p.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInteger(row.get("_indnorcor"))));
-        p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(numberUtils.toInteger(row.get("_tipofac")), p.getIndnorcor().getValue()));
+        p.setClamon(CodigoMoneda.fromValue(getNumberUtils().toInteger(row.get("_clamon"))));
+        p.setIndnorcor(IndicadorNormalCorrector.fromValue(getNumberUtils().toInteger(row.get("_indnorcor"))));
+        p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(getNumberUtils().toInteger(row.get("_tipofac")), p.getIndnorcor().getValue()));
         p.setFecfac((java.sql.Date)row.get("_fecfac"));
         p.setNumreffac(String.valueOf(row.get("_numreffac")));
         p.setPan(String.valueOf(row.get("_pan")));
-        p.setClamondiv(numberUtils.toInteger(row.get("_clamondiv")));
-        p.setImpdiv(numberUtils.toLong(row.get("_impdiv")));
-        p.setImpfac(numberUtils.toBigDecimal(row.get("_impfac")));
-        p.setCmbapli(numberUtils.toInteger(row.get("_cmbapli")));
+        p.setClamondiv(getNumberUtils().toInteger(row.get("_clamondiv")));
+        p.setImpdiv(getNumberUtils().toLong(row.get("_impdiv")));
+        p.setImpfac(getNumberUtils().toBigDecimal(row.get("_impfac")));
+        p.setCmbapli(getNumberUtils().toInteger(row.get("_cmbapli")));
         p.setNumaut(String.valueOf(row.get("_numaut")));
         p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("_indproaje"))));
         p.setCodcom(String.valueOf(row.get("_codcom")));
-        p.setCodact(numberUtils.toInteger(row.get("_codact")));
-        p.setImpliq(numberUtils.toLong(row.get("_impliq")));
-        p.setClamonliq(numberUtils.toInteger(row.get("_clamonliq")));
-        p.setCodpais(CodigoPais.fromValue(numberUtils.toInteger(row.get("_codpais"))));
+        p.setCodact(getNumberUtils().toInteger(row.get("_codact")));
+        p.setImpliq(getNumberUtils().toLong(row.get("_impliq")));
+        p.setClamonliq(getNumberUtils().toInteger(row.get("_clamonliq")));
+        p.setCodpais(CodigoPais.fromValue(getNumberUtils().toInteger(row.get("_codpais"))));
         p.setNompob(String.valueOf(row.get("_nompob")));
-        p.setNumextcta(numberUtils.toInteger(row.get("_numextcta")));
-        p.setNummovext(numberUtils.toInteger(row.get("_nummovext")));
-        p.setClamone(numberUtils.toInteger(row.get("_clamone")));
+        p.setNumextcta(getNumberUtils().toInteger(row.get("_numextcta")));
+        p.setNummovext(getNumberUtils().toInteger(row.get("_nummovext")));
+        p.setClamone(getNumberUtils().toInteger(row.get("_clamone")));
         p.setTipolin(String.valueOf(row.get("_tipolin")));
-        p.setLinref(numberUtils.toInteger(row.get("_linref")));
-        p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
-        p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
+        p.setLinref(getNumberUtils().toInteger(row.get("_linref")));
+        p.setNumbencta(getNumberUtils().toInteger(row.get("_numbencta")));
+        p.setNumplastico(getNumberUtils().toLong(row.get("_numplastico")));
         log.info("RowMapper getPrepaidMovements");
         log.info(p);
 

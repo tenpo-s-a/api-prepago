@@ -93,6 +93,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
   }
 
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ProcessOk() throws Exception {
     User user = registerUser();
@@ -151,7 +152,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
     }
   }
-
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTecnocom() throws Exception {
     User user = registerUser();
@@ -250,6 +251,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original no se realizo
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse1() throws Exception {
     User user = registerUser();
@@ -348,6 +350,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original si se realizo
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2() throws Exception {
     User user = registerUser();
@@ -448,6 +451,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original rechazado por monto
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_Rejected() throws Exception {
     User user = registerUser();

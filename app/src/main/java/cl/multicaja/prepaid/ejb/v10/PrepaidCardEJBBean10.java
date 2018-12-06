@@ -69,7 +69,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_tarjeta_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      prepaidCard.setId(numberUtils.toLong(resp.get("_r_id")));
+      prepaidCard.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return prepaidCard;
     } else {
       log.error("createPrepaidCard resp: " + resp);
@@ -102,12 +102,12 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidCard10 c = new PrepaidCard10();
-      c.setId(numberUtils.toLong(row.get("_id"), null));
-      c.setIdUser(numberUtils.toLong(row.get("_id_usuario"), null));
+      c.setId(getNumberUtils().toLong(row.get("_id"), null));
+      c.setIdUser(getNumberUtils().toLong(row.get("_id_usuario"), null));
       c.setPan(String.valueOf(row.get("_pan")));
       c.setEncryptedPan(String.valueOf(row.get("_pan_encriptado")));
       c.setProcessorUserId(String.valueOf(row.get("_contrato")));
-      c.setExpiration(numberUtils.toInteger(row.get("_expiracion"), null));
+      c.setExpiration(getNumberUtils().toInteger(row.get("_expiracion"), null));
       c.setStatus(PrepaidCardStatus.valueOfEnum(row.get("_estado").toString().trim()));
       c.setNameOnCard(String.valueOf(row.get("_nombre_tarjeta")));
       c.setProducto(String.valueOf(row.get("_producto")));
@@ -252,15 +252,15 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     String sp = getSchema() + ".mc_prp_buscar_valor_usd_v10";
     RowMapper rm = (Map<String, Object> row) -> {
       CurrencyUsd c = new CurrencyUsd();
-      c.setId(numberUtils.toLong(row.get("_id"), null));
+      c.setId(getNumberUtils().toLong(row.get("_id"), null));
       c.setFileName(String.valueOf(row.get("_nombre_archivo")));
       c.setCreationDate((Timestamp)row.get("_fecha_creacion"));
       c.setEndDate((Timestamp)row.get("_fecha_termino"));
       c.setExpirationUsdDate((Timestamp)row.get("_fecha_expiracion_usd"));
-      c.setBuyCurrencyConvertion(numberUtils.toDouble(row.get("_precio_compra"), null));
-      c.setMidCurrencyConvertion(numberUtils.toDouble(row.get("_precio_medio"), null));
-      c.setSellCurrencyConvertion(numberUtils.toDouble(row.get("_precio_venta"), null));
-      c.setCurrencyExponent(numberUtils.toInteger(row.get("_exponente"), null));
+      c.setBuyCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_compra"), null));
+      c.setMidCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_medio"), null));
+      c.setSellCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_venta"), null));
+      c.setCurrencyExponent(getNumberUtils().toInteger(row.get("_exponente"), null));
       return c;
     };
     Map<String, Object> resp = getDbUtils().execute(sp, rm);

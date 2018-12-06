@@ -18,6 +18,7 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +35,12 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
      tc = TecnocomServiceHelper.getInstance();
   }
 
+  @AfterClass
+  public static void disableAutomaticErrorTC(){
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+  }
 
   @Test
   public void testPendingTopupInErrorQueue() throws Exception {

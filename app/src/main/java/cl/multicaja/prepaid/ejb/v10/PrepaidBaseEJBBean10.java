@@ -20,7 +20,7 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
  */
 public abstract class PrepaidBaseEJBBean10 {
 
-  protected static NumberUtils numberUtils = NumberUtils.getInstance();
+  protected static NumberUtils numberUtil;
 
   protected static ParametersUtil parametersUtil = ParametersUtil.getInstance();
 
@@ -85,9 +85,15 @@ public abstract class PrepaidBaseEJBBean10 {
   }
   public Long verifiUserAutentication(Map<String, Object> headers) throws BaseException {
     if(headers != null && headers.containsKey("X-Authenticated-Userid")) {
-      return numberUtils.toLong(headers.get("X-Authenticated-Userid"));
+      return getNumberUtils().toLong(headers.get("X-Authenticated-Userid"));
     }
     throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
   }
 
+  protected NumberUtils getNumberUtils(){
+    if(numberUtil == null ){
+      numberUtil = NumberUtils.getInstance();
+    }
+    return numberUtil;
+  }
 }

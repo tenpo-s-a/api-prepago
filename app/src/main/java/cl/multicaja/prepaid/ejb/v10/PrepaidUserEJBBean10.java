@@ -115,7 +115,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crear_usuario_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      prepaidUser.setId(numberUtils.toLong(resp.get("_r_id")));
+      prepaidUser.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return prepaidUser;
     } else {
       log.error("createPrepaidUser resp: " + resp);
@@ -135,16 +135,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidUser10 u = new PrepaidUser10();
-      u.setId(numberUtils.toLong(row.get("_id"), null));
-      u.setUserIdMc(numberUtils.toLong(row.get("_id_usuario_mc"), null));
-      u.setRut(numberUtils.toInteger(row.get("_rut"), null));
+      u.setId(getNumberUtils().toLong(row.get("_id"), null));
+      u.setUserIdMc(getNumberUtils().toLong(row.get("_id_usuario_mc"), null));
+      u.setRut(getNumberUtils().toInteger(row.get("_rut"), null));
       u.setStatus(PrepaidUserStatus.valueOfEnum(row.get("_estado").toString().trim()));
       u.setBalanceExpiration(0L);
       try {
         String saldo = String.valueOf(row.get("_saldo_info"));
         if (StringUtils.isNotBlank(saldo)) {
           u.setBalance(JsonUtils.getJsonParser().fromJson(saldo, PrepaidBalanceInfo10.class));
-          u.setBalanceExpiration(numberUtils.toLong(row.get("_saldo_expiracion")));
+          u.setBalanceExpiration(getNumberUtils().toLong(row.get("_saldo_expiracion")));
         }
       } catch(Exception ex) {
         log.error("Error al convertir el saldo del usuario", ex);
@@ -153,7 +153,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
       timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
       u.setTimestamps(timestamps);
-      u.setIdentityVerificationAttempts(numberUtils.toInteger(row.get("_intentos_validacion")));
+      u.setIdentityVerificationAttempts(getNumberUtils().toInteger(row.get("_intentos_validacion")));
       return u;
     };
 
@@ -270,7 +270,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     //permite refrescar el saldo del usuario de forma obligada, usado principalmente en test o podria usarse desde la web
-    boolean forceRefreshBalance = headers != null ? numberUtils.toBoolean(headers.get("forceRefreshBalance"), false) : false;
+    boolean forceRefreshBalance = headers != null ? getNumberUtils().toBoolean(headers.get("forceRefreshBalance"), false) : false;
 
     Long balanceExpiration = prepaidUser.getBalanceExpiration();
 
@@ -385,7 +385,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_incrementa_intento_validacion_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      prepaidUser.setIdentityVerificationAttempts(numberUtils.toInteger(resp.get("_intentos_validacion")));
+      prepaidUser.setIdentityVerificationAttempts(getNumberUtils().toInteger(resp.get("_intentos_validacion")));
       return prepaidUser;
     } else {
       log.error("incrementIdentityVerificationAttempt resp: " + resp);
