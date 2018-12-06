@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileHeader;
+import cl.multicaja.prepaid.helpers.tecnocom.model.*;
 import cl.multicaja.prepaid.model.v10.BusinessStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -15,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -311,4 +309,6 @@ public class TecnocomFileHelper {
 
     return prepaidMovement;
   }
+
+
 }

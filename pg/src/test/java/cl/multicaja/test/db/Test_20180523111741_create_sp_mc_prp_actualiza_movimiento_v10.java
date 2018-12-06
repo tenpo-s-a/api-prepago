@@ -98,32 +98,7 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
   }
 
   @Test
-  public void updateMovementsNotOkByStatusNull()throws SQLException {
-
-    Map<String, Object> mapMovimiento = insertRandomMovement();
-
-    Object[] params = {
-      mapMovimiento.get("_id"), //id
-      pan,
-      centalta,
-      cuenta,
-      new InParam(1,Types.NUMERIC),
-      new InParam(1,Types.NUMERIC),
-      new InParam(1,Types.NUMERIC),
-      "OK",
-      new NullParam(Types.VARCHAR),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
-
-    Assert.assertNotNull("Debe retornar respuesta", resp);
-    Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
-  }
-
-  @Test
-  public void updateMovementsNotOkByNullParams()throws SQLException {
+  public void updateMovementsOkByNullParams()throws SQLException {
 
     {// PRIMER PARAMETRO NULL
       Map<String, Object> mapMovimiento = insertRandomMovement();
@@ -239,6 +214,35 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
 
       Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
       Assert.assertEquals("El estado debe ser PROCE", "PROCE", fila.get("estado"));
+    }
+
+    {// QUINTO PARAMETRO NULL
+      Map<String, Object> mapMovimiento = insertRandomMovement();
+      Object[] params = {
+        mapMovimiento.get("_id"), //id
+        pan,
+        centalta,
+        cuenta,
+        new InParam(2, Types.NUMERIC),
+        new InParam(3, Types.NUMERIC),
+        new InParam(1, Types.NUMERIC),
+        "OK",
+        new NullParam(Types.VARCHAR),
+        new OutParam("_error_code", Types.VARCHAR),
+        new OutParam("_error_msg", Types.VARCHAR)
+      };
+
+      Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+
+      List lstMov = searchMovement(mapMovimiento.get("_id"));
+
+      Assert.assertNotNull("La lista debe ser not null",lstMov);
+      Assert.assertEquals("El tamaño de la lista debe ser 1",1,lstMov.size());
+      Assert.assertNotNull("Debe retornar respuesta", resp);
+      Assert.assertEquals("Codigo de error debe ser  0", "0", resp.get("_error_code"));
+
+      Map<String ,Object>  fila = (Map<String, Object>) lstMov.get(0);
+      Assert.assertEquals("El estado negocio debe ser OK", "OK", fila.get("estado_de_negocio"));
     }
   }
 

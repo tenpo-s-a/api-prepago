@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
 import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
@@ -7,7 +8,7 @@ import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.ejb.v10.*;
-import cl.multicaja.prepaid.helpers.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -37,6 +38,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
+  @EJB
+  private PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -159,4 +163,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   public void setMailPrepaidEJBBean10(MailPrepaidEJBBean10 mailPrepaidEJBBean10) {
     this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
   }
+
+  public PrepaidAccountingEJBBean10 getPrepaidAccountingEJBBean10() {
+    return prepaidAccountingEJBBean10;
+  }
+
+  public void setPrepaidAccountingEJBBean10(PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10) {
+    this.prepaidAccountingEJBBean10 = prepaidAccountingEJBBean10;
+  }
+
 }

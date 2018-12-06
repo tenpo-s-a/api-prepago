@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.helpers;
+package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -86,5 +86,4 @@ public final class TecnocomServiceHelper {
     numaut = numaut.substring(numaut.length() - 6);
     return numaut;
   }
-
 }
