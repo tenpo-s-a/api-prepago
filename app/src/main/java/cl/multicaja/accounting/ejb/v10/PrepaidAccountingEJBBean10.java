@@ -246,7 +246,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_buscar_movimientos_conciliados_para_contabilidad_v10", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10", rm, params);
     log.info("Respuesta buscar movimientos para accounting: "+resp);
     return (List)resp.get("result");
   }
