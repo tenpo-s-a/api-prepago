@@ -29,7 +29,7 @@ VALUES
  ('api-prepaid',
   'calculator_percentage',
   'v10',
-  '{"type":"Percentage10","value":"{\"topup_pos_fee_percentage\":0.5,\"topup_web_fee_percentage\":0,\"topup_web_fee_amount\":0,\"withdraw_pos_fee_percentage\":0.5,\"withdraw_web_fee_percentage\":0.5,\"withdraw_web_fee_amount\":100,\"calculator_topup_web_fee_amount\":0,\"calculator_topup_pos_fee_percentage\":0.5,\"calculator_withdraw_web_fee_amount\":100,\"calculator_withdraw_pos_fee_percentage\":0.5,\"opening_fee\":666,\"iva\":1.19,\"max_amount_by_user\":500000}"}',
+  '{"type":"Percentage10","value":"{\"topup_pos_fee_percentage\":0.5,\"topup_web_fee_percentage\":0,\"topup_web_fee_amount\":0,\"withdraw_pos_fee_percentage\":0.5,\"withdraw_web_fee_percentage\":0.5,\"withdraw_web_fee_amount\":100,\"calculator_topup_web_fee_amount\":0,\"calculator_topup_pos_fee_percentage\":0.5,\"calculator_withdraw_web_fee_amount\":100,\"calculator_withdraw_pos_fee_percentage\":0.5,\"opening_fee\":0,\"iva\":1.19,\"max_amount_by_user\":500000}"}',
    3600000,
    timezone('utc', now())
  );
