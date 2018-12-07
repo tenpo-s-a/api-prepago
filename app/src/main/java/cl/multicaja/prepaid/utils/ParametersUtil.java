@@ -69,6 +69,8 @@ public final class ParametersUtil {
   }
 
   private Object getParameter(String application, String name, String version) throws SQLException {
+
+
     String key = application + "+" + name + "+" + version;
     if(cache.get(key) != null){
       return cache.get(key);
