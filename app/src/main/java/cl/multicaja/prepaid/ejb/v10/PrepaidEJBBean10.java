@@ -278,7 +278,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.calculateFeeAndTotal(prepaidTopup);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(topupRequest.getAmount().getValue(),prepaidTopup.getFee().getValue()));
+    log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
+    cdtTransaction.setAmount(topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()));
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
     cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
@@ -479,7 +480,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.calculateFeeAndTotal(prepaidWithdraw);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(withdrawRequest.getAmount().getValue(),prepaidWithdraw.getFee().getValue()));
+    cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
     cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
@@ -1184,6 +1185,51 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       simulationTopup.setInitialAmount(simulationNew.getAmount());
     }
 
+    // LLAMADA AL CDT
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(amountValue);
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+
+    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
+      cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
+    } else {
+      cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
+    }
+
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
+      La carga supera el monto máximo de carga web
+      La carga supera el monto máximo de carga pos
+      La carga es menor al mínimo de carga
+      La carga supera el monto máximo de cargas mensuales.
+      */
+      int lNumError = cdtTransaction.getNumErrorInt();
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
+          simulationTopup.setCode(lNumError);
+          simulationTopup.setMessage(cdtTransaction.getMsjError());
+        } else {
+          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        }
+      } else {
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
+      simulationTopup.setFee(zero);
+      simulationTopup.setPca(zero);
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setAmountToPay(zero);
+      simulationTopup.setOpeningFee(zero);
+      simulationTopup.setInitialAmount(zero);
+      return simulationTopup;
+    }
+
     //saldo del usuario
     PrepaidBalance10 balance;
     if(isFirstTopup){
@@ -1234,52 +1280,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
-    // LLAMADA AL CDT
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(amountValue,simulationTopup.getFee().getValue()));
-    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
-    cdtTransaction.setIndSimulacion(true);
-
-    if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
-      cdtTransaction.setTransactionType(CdtTransactionType.PRIMERA_CARGA);
-    } else {
-      cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.CARGA_WEB : CdtTransactionType.CARGA_POS);
-    }
-
-    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
-    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-    if(!cdtTransaction.isNumErrorOk()){
-      /* Posibles errores:
-      La carga supera el monto máximo de carga web
-      La carga supera el monto máximo de carga pos
-      La carga es menor al mínimo de carga
-      La carga supera el monto máximo de cargas mensuales.
-      */
-      int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        if(lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue() || lNumError == LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue()){
-          simulationTopup.setCode(lNumError);
-          simulationTopup.setMessage(cdtTransaction.getMsjError());
-        } else {
-          throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-        }
-      } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      }
-      NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
-      simulationTopup.setFee(zero);
-      simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
-      simulationTopup.setAmountToPay(zero);
-      simulationTopup.setOpeningFee(zero);
-      simulationTopup.setInitialAmount(zero);
-      return simulationTopup;
-    }
-
-
     return simulationTopup;
   }
 
@@ -1304,6 +1304,31 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(amountValue);
+    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setIndSimulacion(true);
+    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
+    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
+
+    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+    if(!cdtTransaction.isNumErrorOk()){
+      /* Posibles errores:
+      El retiro supera el monto máximo de un retiro web
+      El retiro supera el monto máximo de un retiro pos
+      El monto de retiro es menor al monto mínimo de retiros
+      El retiro supera el monto máximo de retiros mensuales.
+     */
+      int lNumError = cdtTransaction.getNumErrorInt();
+      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      } else {
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+      }
+    }
 
     BigDecimal fee;
 
@@ -1331,32 +1356,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
     simulationWithdrawal.setFee(new NewAmountAndCurrency10(fee));
     simulationWithdrawal.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount));
-
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(getNumberUtils().subtractBigDecimal(amountValue,simulationWithdrawal.getFee().getValue()));
-    cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
-    cdtTransaction.setIndSimulacion(true);
-    cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
-    cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
-
-    cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-    if(!cdtTransaction.isNumErrorOk()){
-      /* Posibles errores:
-      El retiro supera el monto máximo de un retiro web
-      El retiro supera el monto máximo de un retiro pos
-      El monto de retiro es menor al monto mínimo de retiros
-      El retiro supera el monto máximo de retiros mensuales.
-     */
-      int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
-        throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
-      }
-    }
 
     return simulationWithdrawal;
   }

@@ -57,7 +57,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
     {
-      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(2010));
+      NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
       NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 

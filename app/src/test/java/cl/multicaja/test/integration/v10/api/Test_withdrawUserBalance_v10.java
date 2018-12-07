@@ -227,7 +227,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
       prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100001));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(101585));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -251,7 +251,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500001));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 

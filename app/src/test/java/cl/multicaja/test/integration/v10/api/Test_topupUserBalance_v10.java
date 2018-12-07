@@ -317,7 +317,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
       prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
-      prepaidTopup.getAmount().setValue(BigDecimal.valueOf(100001));
+      prepaidTopup.getAmount().setValue(BigDecimal.valueOf(101586));
 
       HttpResponse resp = topupUserBalance(prepaidTopup);
 

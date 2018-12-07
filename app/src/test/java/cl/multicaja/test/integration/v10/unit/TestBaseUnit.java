@@ -586,7 +586,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setValue(new BigDecimal(3119));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);
@@ -611,7 +611,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setValue(new BigDecimal(3119));
+
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
 
@@ -668,7 +669,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setValue(new BigDecimal(3119));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
 

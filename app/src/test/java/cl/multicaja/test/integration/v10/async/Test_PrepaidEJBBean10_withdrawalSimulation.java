@@ -496,8 +496,8 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
         Assert.assertEquals("debe ser error de supera saldo", EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue(), vex.getCode());
       }
     }
-    //POS
-    {
+
+    {   //POS
       User user = registerUser();
       updateUser(user);
 
