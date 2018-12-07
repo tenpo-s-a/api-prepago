@@ -12,7 +12,6 @@ import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -143,14 +142,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
     }
-
-    {
-      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
-      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
-    }
   }
   @Ignore
   @Test
@@ -239,13 +230,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     }
 
-    {
-      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
-      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
-  }
   }
 
   /*
@@ -336,14 +320,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
 
-    }
-
-    {
-      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
-      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
     }
   }
 
@@ -438,14 +414,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
 
     }
-
-    {
-      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
-      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
-    }
   }
 
   /*
@@ -523,14 +491,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
 
-    }
-
-    {
-      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
-      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_REQ);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-      Assert.assertNull("No deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
     }
   }
 }
