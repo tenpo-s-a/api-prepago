@@ -92,6 +92,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
   }
 
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ProcessOk() throws Exception {
     User user = registerUser();
@@ -142,7 +143,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
     }
   }
-
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTecnocom() throws Exception {
     User user = registerUser();
@@ -234,6 +235,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original no se realizo
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse1() throws Exception {
     User user = registerUser();
@@ -324,6 +326,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original si se realizo
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2() throws Exception {
     User user = registerUser();
@@ -416,6 +419,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   /*
     ERROR_TIMEOUT_RESPONSE - Mov Original rechazado por monto
    */
+  @Ignore
   @Test
   public void reverseWithdraw_OriginalMovement_Rejected() throws Exception {
     User user = registerUser();

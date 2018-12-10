@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
@@ -22,6 +23,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import javax.jms.Queue;
+import java.math.BigDecimal;
 
 /**
  * @autor vutreras
@@ -170,7 +172,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
-
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
@@ -212,6 +214,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount < 0 ? 0 : retryCount);
@@ -400,6 +403,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     prepaidTopup.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10, user,prepaidUser10, prepaidMovement);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);

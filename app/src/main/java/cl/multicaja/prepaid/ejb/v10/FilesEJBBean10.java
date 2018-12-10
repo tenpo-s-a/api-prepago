@@ -65,7 +65,7 @@ public class FilesEJBBean10 extends PrepaidBaseEJBBean10 implements FilesEJB10 {
     RowMapper rm = (Map<String, Object> row) -> {
 
       AppFile af = new AppFile();
-      af.setId(numberUtils.toLong(row.get("_id"), null));
+      af.setId(getNumberUtils().toLong(row.get("_id"), null));
       af.setName(String.valueOf(row.get("_name")));
       af.setVersion(String.valueOf(row.get("_version")));
       af.setDescription(String.valueOf(row.get("_description")));

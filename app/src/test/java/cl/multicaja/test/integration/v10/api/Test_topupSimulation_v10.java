@@ -203,7 +203,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
 
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupWeb().getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision", BigDecimal.valueOf(3990), resp.getSimulationTopupWeb().getAmountToPay().getValue());
+    Assert.assertEquals("debe ser monto a pagar + comision", BigDecimal.valueOf(3000), resp.getSimulationTopupWeb().getAmountToPay().getValue());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
@@ -291,7 +291,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     prepaidUser10 = getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser10);
     System.out.println(calculatedFee.getValue()+"  "+resp.getSimulationTopupPOS().getFee());
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupPOS().getFee());
-    Assert.assertEquals("debe ser monto a pagar + comision + comision apertura", BigDecimal.valueOf(4109), resp.getSimulationTopupPOS().getAmountToPay().getValue());
+    Assert.assertEquals("debe ser monto a pagar + comision + comision apertura", BigDecimal.valueOf(3119), resp.getSimulationTopupPOS().getAmountToPay().getValue());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
@@ -391,14 +391,14 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     System.out.println("respuesta calculo: " + resp);
 
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
-    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()).add(new BigDecimal(990)));
+    NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()).add(new BigDecimal(0)));
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
     NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
-    Assert.assertEquals("Debe ser 990 comision de apertura", new BigDecimal(990), resp.getSimulationTopupPOS().getOpeningFee().getValue());
+    Assert.assertEquals("Debe ser 0 comision de apertura", new BigDecimal(0), resp.getSimulationTopupPOS().getOpeningFee().getValue());
     Assert.assertEquals("debe ser monto a pagar + comision + 990 Monto Apertura", calculatedAmount.getValue(), resp.getSimulationTopupPOS().getAmountToPay().getValue());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupPOS().getFirstTopup());
   }

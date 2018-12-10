@@ -18,6 +18,7 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +35,12 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
      tc = TecnocomServiceHelper.getInstance();
   }
 
+  @AfterClass
+  public static void disableAutomaticErrorTC(){
+
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
+  }
 
   @Test
   public void testPendingTopupInErrorQueue() throws Exception {
@@ -98,7 +105,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
-    Thread.sleep(2000);
+    Thread.sleep(3000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     // Se setea para que no de error de conexion!
     tc.getTecnocomService().setAutomaticError(false);
@@ -150,7 +157,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,2);
-    Thread.sleep(2000);
+    Thread.sleep(3000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!
     tc.getTecnocomService().setAutomaticError(false);
@@ -160,7 +167,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     reprocesQueue.setIdQueue(messageId);
     reprocesQueue.setLastQueue(QueuesNameType.PENDING_EMISSION);
     messageId = getPrepaidEJBBean10().reprocessQueue(null,reprocesQueue);
-    Thread.sleep(2000);
+    Thread.sleep(6000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
@@ -172,7 +179,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     // Busca la tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
-    Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
+    Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
   }
 
@@ -208,7 +215,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
-    Thread.sleep(2000);
+    Thread.sleep(3000);
 
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!
@@ -219,7 +226,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     reprocesQueue.setIdQueue(messageId);
     reprocesQueue.setLastQueue(QueuesNameType.CREATE_CARD);
     messageId = getPrepaidEJBBean10().reprocessQueue(null,reprocesQueue);
-    Thread.sleep(2000);
+    Thread.sleep(5000);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);

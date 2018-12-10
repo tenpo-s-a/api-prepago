@@ -45,10 +45,6 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         PrepaidReverseData10 data = req.getData();
         PrepaidWithdraw10 prepaidWithdraw = data.getPrepaidWithdraw10();
         PrepaidMovement10 prepaidMovementReverse = data.getPrepaidMovementReverse();
-        log.info("[processPendingWithdrawReversal] _______________");
-        log.info("[BEFORE prepaidMovementReverse] "+prepaidMovementReverse);
-        //prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
-        log.info("[AFTER prepaidMovementReverse] "+prepaidMovementReverse);
 
         PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
         PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());

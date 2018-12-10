@@ -157,7 +157,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     System.out.println(resp);
 
     if ("0".equals(resp.get("_error_code"))) {
-      data.setId(numberUtils.toLong(resp.get("_r_id")));
+      data.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return data;
     } else {
       log.error("addPrepaidMovement resp: " + resp);
@@ -340,12 +340,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     RowMapper rm = (Map<String, Object> row) -> {
       try{
       PrepaidMovement10 p = new PrepaidMovement10();
-      p.setId(numberUtils.toLong(row.get("_id")));
-      p.setIdMovimientoRef(numberUtils.toLong(row.get("_id_movimiento_ref")));
-      p.setIdPrepaidUser(numberUtils.toLong(row.get("_id_usuario")));
+      p.setId(getNumberUtils().toLong(row.get("_id")));
+      p.setIdMovimientoRef(getNumberUtils().toLong(row.get("_id_movimiento_ref")));
+      p.setIdPrepaidUser(getNumberUtils().toLong(row.get("_id_usuario")));
       p.setIdTxExterno(String.valueOf(row.get("_id_tx_externo")));
       p.setTipoMovimiento(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
-      p.setMonto(numberUtils.toBigDecimal(row.get("_monto")));
+      p.setMonto(getNumberUtils().toBigDecimal(row.get("_monto")));
       p.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
       p.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
       p.setConSwitch(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
@@ -356,31 +356,31 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setCodent(String.valueOf(row.get("_codent")));
       p.setCentalta(String.valueOf(row.get("_centalta")));
       p.setCuenta(String.valueOf(row.get("_cuenta")));
-      p.setClamon(CodigoMoneda.fromValue(numberUtils.toInteger(row.get("_clamon"))));
-      p.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInteger(row.get("_indnorcor"))));
-      p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(numberUtils.toInteger(row.get("_tipofac")), p.getIndnorcor().getValue()));
+      p.setClamon(CodigoMoneda.fromValue(getNumberUtils().toInteger(row.get("_clamon"))));
+      p.setIndnorcor(IndicadorNormalCorrector.fromValue(getNumberUtils().toInteger(row.get("_indnorcor"))));
+      p.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(getNumberUtils().toInteger(row.get("_tipofac")), p.getIndnorcor().getValue()));
       p.setFecfac((Date)row.get("_fecfac"));
       p.setNumreffac(String.valueOf(row.get("_numreffac")));
       p.setPan(String.valueOf(row.get("_pan")));
-      p.setClamondiv(numberUtils.toInteger(row.get("_clamondiv")));
-      p.setImpdiv(numberUtils.toLong(row.get("_impdiv")));
-      p.setImpfac(numberUtils.toBigDecimal(row.get("_impfac")));
-      p.setCmbapli(numberUtils.toInteger(row.get("_cmbapli")));
+      p.setClamondiv(getNumberUtils().toInteger(row.get("_clamondiv")));
+      p.setImpdiv(getNumberUtils().toLong(row.get("_impdiv")));
+      p.setImpfac(getNumberUtils().toBigDecimal(row.get("_impfac")));
+      p.setCmbapli(getNumberUtils().toInteger(row.get("_cmbapli")));
       p.setNumaut(String.valueOf(row.get("_numaut")));
       p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("_indproaje"))));
       p.setCodcom(String.valueOf(row.get("_codcom")));
-      p.setCodact(numberUtils.toInteger(row.get("_codact")));
-      p.setImpliq(numberUtils.toLong(row.get("_impliq")));
-      p.setClamonliq(numberUtils.toInteger(row.get("_clamonliq")));
-      p.setCodpais(CodigoPais.fromValue(numberUtils.toInteger(row.get("_codpais"))));
+      p.setCodact(getNumberUtils().toInteger(row.get("_codact")));
+      p.setImpliq(getNumberUtils().toLong(row.get("_impliq")));
+      p.setClamonliq(getNumberUtils().toInteger(row.get("_clamonliq")));
+      p.setCodpais(CodigoPais.fromValue(getNumberUtils().toInteger(row.get("_codpais"))));
       p.setNompob(String.valueOf(row.get("_nompob")));
-      p.setNumextcta(numberUtils.toInteger(row.get("_numextcta")));
-      p.setNummovext(numberUtils.toInteger(row.get("_nummovext")));
-      p.setClamone(numberUtils.toInteger(row.get("_clamone")));
+      p.setNumextcta(getNumberUtils().toInteger(row.get("_numextcta")));
+      p.setNummovext(getNumberUtils().toInteger(row.get("_nummovext")));
+      p.setClamone(getNumberUtils().toInteger(row.get("_clamone")));
       p.setTipolin(String.valueOf(row.get("_tipolin")));
-      p.setLinref(numberUtils.toInteger(row.get("_linref")));
-      p.setNumbencta(numberUtils.toInteger(row.get("_numbencta")));
-      p.setNumplastico(numberUtils.toLong(row.get("_numplastico")));
+      p.setLinref(getNumberUtils().toInteger(row.get("_linref")));
+      p.setNumbencta(getNumberUtils().toInteger(row.get("_numbencta")));
+      p.setNumplastico(getNumberUtils().toLong(row.get("_numplastico")));
       log.info("RowMapper getPrepaidMovements");
       log.info(p);
 
@@ -646,13 +646,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     RowMapper rm = (Map<String, Object> row) -> {
       PrepaidMovement10 movement10 = new PrepaidMovement10();
-      movement10.setId(numberUtils.toLong(row.get("_id")));
+      movement10.setId(getNumberUtils().toLong(row.get("_id")));
       movement10.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
       movement10.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
       movement10.setConSwitch(ReconciliationStatusType.fromValue("_estado_con_switch"));
       movement10.setConTecnocom(ReconciliationStatusType.fromValue("_estado_con_tecnocom"));
       movement10.setTipoMovimiento(PrepaidMovementType.valueOf(String.valueOf(row.get("_tipo_movimiento"))));
-      movement10.setIndnorcor(IndicadorNormalCorrector.fromValue(numberUtils.toInt(row.get("_indnorcor"))));
+      movement10.setIndnorcor(IndicadorNormalCorrector.fromValue(getNumberUtils().toInt(row.get("_indnorcor"))));
       return movement10;
     };
     Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_conciliar_v10",getSchema()), rm);
