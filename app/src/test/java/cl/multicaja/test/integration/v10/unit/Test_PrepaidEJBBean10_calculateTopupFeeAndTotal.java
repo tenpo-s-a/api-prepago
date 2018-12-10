@@ -158,7 +158,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(100), withdraw.getFee().getValue());
+    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(84), withdraw.getFee().getValue());
     assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5100), withdraw.getTotal().getValue());
   }
 
