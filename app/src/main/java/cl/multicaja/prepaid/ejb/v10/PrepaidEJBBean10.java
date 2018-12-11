@@ -1178,8 +1178,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
-    if(CodigoMoneda.USA_USN.equals(simulationNew.getAmount().getCurrencyCode())) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USN));
+    if(CodigoMoneda.USA_USD.equals(simulationNew.getAmount().getCurrencyCode())) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USD));
       amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
@@ -1224,7 +1224,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       simulationTopup.setFee(zero);
       simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USD));
       simulationTopup.setAmountToPay(zero);
       simulationTopup.setOpeningFee(zero);
       simulationTopup.setInitialAmount(zero);
@@ -1277,7 +1277,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USD));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
