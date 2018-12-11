@@ -247,6 +247,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
   @Override
   public CurrencyUsd getCurrencyUsd() throws Exception {
     String sp = getSchema() + ".mc_prp_buscar_valor_usd_v10";
@@ -267,6 +268,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return resp.get("result") != null ? (CurrencyUsd) ((List) resp.get("result")).get(0) : null;
   }
 
+  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
   @Override
   public void updateUsdValue(CurrencyUsd currencyUsd) throws Exception {
     Object[] params = {
