@@ -2209,7 +2209,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
       }
 
-      templateData.put("user_name", StringUtils.capitalize(user.getName().toLowerCase()));
+      templateData.put("user_name", user.getName());
 
       emailBody.setAddress(user.getEmail().getValue());
 

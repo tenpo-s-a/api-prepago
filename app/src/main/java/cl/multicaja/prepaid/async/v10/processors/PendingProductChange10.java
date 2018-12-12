@@ -118,7 +118,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
   private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
-    templateData.put("user_name", user.getName().toUpperCase());
+    templateData.put("user_name", user.getName());
 
     EmailBody emailBody = new EmailBody();
     emailBody.setTemplateData(templateData);
