@@ -586,8 +586,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.assertEquals("debe ser error de supera saldo", SALDO_SUPERARA_LOS_$$VALUE.getValue(), vex.getCode());
     }
   }
-
-  // Ignorado, con la validacion de tecnocom no pudo llegar al limite en este test
+  //No se puede llegar ya que el monbto maximo de tarjeta es 500.000
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
 

@@ -41,6 +41,7 @@ import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION;
 
 /**
  * @author vutreras
@@ -2125,7 +2126,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerification"));
     }
 
-    //TODO: validar respuestas?
     log.info("======================== Identity Verification ===================");
     log.info(identityValidation);
     log.info("======================== Identity Verification ===================");
@@ -2152,12 +2152,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       Boolean needPersonalDataUpdate = Boolean.FALSE;
 
-      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim())) {
+      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim()) && !identityValidation.getNewName().equalsIgnoreCase(user.getName())) {
         //Actualiza el nombre del cliente
         user.setName(identityValidation.getNewName());
         needPersonalDataUpdate = Boolean.TRUE;
       }
-      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim())){
+      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim()) && !identityValidation.getNewLastname().equalsIgnoreCase(user.getLastname_1())){
         //Actualiza el apellido del cliente
         user.setLastname_1(identityValidation.getNewLastname());
         needPersonalDataUpdate = Boolean.TRUE;
@@ -2180,33 +2180,49 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         maxIdentityValidationAttempts = getNumberUtils().toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
       }
 
-      if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
-        //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
-        getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
-      }
+      Map<String, Object> templateData = new HashMap<>();
+      EmailBody emailBody = new EmailBody();
+
+
 
       if("No".equalsIgnoreCase(identityValidation.getIsGsintelOk())){
         // Si el usuario no pasa la validacion Gsintel, se finaliza la validacion de identidad y se indica que el usuario esta en lista negra y se bloquea el usuario prepago
         user = getUserClient().finishIdentityValidation(headers, user.getId(), Boolean.FALSE, Boolean.TRUE);
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
+
+        //TODO: definir template definitivo
+
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
+
       } else {
-        user = getUserClient().resetIdentityValidation(headers, user.getId());
+        if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
+          //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
+          prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+          getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), prepaidUser.getStatus());
+
+          //TODO: definir template definitivo
+
+          emailBody.setTemplateData(templateData);
+          emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
+        } else {
+          user = getUserClient().resetIdentityValidation(headers, user.getId());
+
+          //TODO: definir template definitivo
+
+          emailBody.setTemplateData(templateData);
+          emailBody.setTemplate(TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION);
+        }
       }
 
-      Map<String, Object> templateData = new HashMap<>();
-
-      //TODO: definir variables del template de correo  validacion de identidad no ok
       /*
-      templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-      templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-      templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
-      templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
-      templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
-      */
+        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
+        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
+        templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+        */
 
-      EmailBody emailBody = new EmailBody();
-      emailBody.setTemplateData(templateData);
-      emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
       emailBody.setAddress(user.getEmail().getValue());
 
       getUserClient().sendMail(null, user.getId(), emailBody);
