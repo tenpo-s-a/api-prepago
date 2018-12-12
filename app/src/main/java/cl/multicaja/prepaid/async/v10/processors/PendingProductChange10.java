@@ -21,8 +21,7 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.ERROR_PRODUCT_CHANGE_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_OK;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
 /**
  * @author abarazarte
@@ -58,7 +57,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
             log.debug("No se debe realizar cambio de producto ya que el cliente todavia no tiene tarjeta prepago");
 
             //Envio de mail -> validacion de identidad ok
-            sendSuccessMail(user);
+            sendSuccessMail(user, Boolean.FALSE);
           } else {
             log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
@@ -75,7 +74,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
               log.debug("********** Cambio de producto realizado **********");
 
               //Envio de mail -> validacion de identidad ok
-              sendSuccessMail(user);
+              sendSuccessMail(user, Boolean.TRUE);
 
             } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
               if(dto.getDescRetorno().contains("MPA0928")) {
@@ -83,7 +82,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
                 req.getData().setMsjError(dto.getDescRetorno());
 
                 //Envio de mail -> validacion de identidad ok
-                sendSuccessMail(user);
+                sendSuccessMail(user, Boolean.TRUE);
               } else {
                 log.debug("********** Cambio de producto rechazado rechazado **********");
                 req.getData().setNumError(Errors.ERROR_INDETERMINADO);
@@ -116,23 +115,16 @@ public class PendingProductChange10 extends BaseProcessor10 {
     };
   }
 
-  private void sendSuccessMail(User user) throws Exception {
+  private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
-
-    //TODO: definir variables del template de correo ok validacion de identidad
-    /*
-    templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-    templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-    templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
-    templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
-    templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
-    */
+    templateData.put("user_name", user.getName());
 
     EmailBody emailBody = new EmailBody();
     emailBody.setTemplateData(templateData);
-    emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_OK);
     emailBody.setAddress(user.getEmail().getValue());
+
+    emailBody.setTemplate(hasCard ? TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITH_CARD : TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITHOUT_CARD);
 
     getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
   }

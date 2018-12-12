@@ -2190,8 +2190,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         user = getUserClient().finishIdentityValidation(headers, user.getId(), Boolean.FALSE, Boolean.TRUE);
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
 
-        //TODO: definir template definitivo
-
         emailBody.setTemplateData(templateData);
         emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
 
@@ -2201,27 +2199,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
           getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), prepaidUser.getStatus());
 
-          //TODO: definir template definitivo
-
           emailBody.setTemplateData(templateData);
           emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
         } else {
           user = getUserClient().resetIdentityValidation(headers, user.getId());
-
-          //TODO: definir template definitivo
 
           emailBody.setTemplateData(templateData);
           emailBody.setTemplate(TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION);
         }
       }
 
-      /*
-        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-        templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
-        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
-        templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
-        */
+      templateData.put("user_name", user.getName());
 
       emailBody.setAddress(user.getEmail().getValue());
 
