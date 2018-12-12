@@ -86,7 +86,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
               // Se intenta realizar nuevamente la inclusion del movimiento original .
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), pan, originalMovement.getClamon(),
-                originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), prepaidMovementReverse.getNumaut(), originalMovement.getCodcom(),
+                originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
                 originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
 
             log.info("Respuesta reversa mov original");
