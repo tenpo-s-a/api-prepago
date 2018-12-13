@@ -41,6 +41,7 @@ import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION;
 
 /**
  * @author vutreras
@@ -373,8 +374,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           prepaidMovement.setTipofac(tipoFacReverse);
           prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
           prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-
-         this.getDelegate().sendPendingTopupReverse(reverse,prepaidCard,prepaidUser,prepaidMovement);
+          prepaidMovement.setNumaut(TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString()));
+          this.getDelegate().sendPendingTopupReverse(reverse,prepaidCard,prepaidUser,prepaidMovement);
 
         } else {
           log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
@@ -1178,8 +1179,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal amountValue = simulationNew.getAmount().getValue();
 
     // Si el codigo de moneda es dolar estadounidense se calcula el el monto inicial en pesos
-    if(CodigoMoneda.USA_USN.equals(simulationNew.getAmount().getCurrencyCode())) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USN));
+    if(CodigoMoneda.USA_USD.equals(simulationNew.getAmount().getCurrencyCode())) {
+      simulationTopup.setEed(new NewAmountAndCurrency10(amountValue, CodigoMoneda.USA_USD));
       amountValue = getCalculationsHelper().calculateAmountFromEed(amountValue);
       simulationTopup.setInitialAmount(new NewAmountAndCurrency10(amountValue));
     } else {
@@ -1224,7 +1225,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.valueOf(0));
       simulationTopup.setFee(zero);
       simulationTopup.setPca(zero);
-      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(BigDecimal.valueOf(0), CodigoMoneda.USA_USD));
       simulationTopup.setAmountToPay(zero);
       simulationTopup.setOpeningFee(zero);
       simulationTopup.setInitialAmount(zero);
@@ -1277,7 +1278,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationTopup.setFee(new NewAmountAndCurrency10(fee));
     simulationTopup.setPca(new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amountValue)));
     if(simulationTopup.getEed() == null) {
-      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USN));
+      simulationTopup.setEed(new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amountValue), CodigoMoneda.USA_USD));
     }
     simulationTopup.setAmountToPay(new NewAmountAndCurrency10(calculatedAmount));
 
@@ -2125,7 +2126,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "identityVerification"));
     }
 
-    //TODO: validar respuestas?
     log.info("======================== Identity Verification ===================");
     log.info(identityValidation);
     log.info("======================== Identity Verification ===================");
@@ -2152,12 +2152,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       Boolean needPersonalDataUpdate = Boolean.FALSE;
 
-      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim())) {
+      if(identityValidation.getNewName() != null && !StringUtils.isBlank(identityValidation.getNewName().trim()) && !identityValidation.getNewName().equalsIgnoreCase(user.getName())) {
         //Actualiza el nombre del cliente
         user.setName(identityValidation.getNewName());
         needPersonalDataUpdate = Boolean.TRUE;
       }
-      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim())){
+      if(identityValidation.getNewLastname() != null && !StringUtils.isBlank(identityValidation.getNewLastname().trim()) && !identityValidation.getNewLastname().equalsIgnoreCase(user.getLastname_1())){
         //Actualiza el apellido del cliente
         user.setLastname_1(identityValidation.getNewLastname());
         needPersonalDataUpdate = Boolean.TRUE;
@@ -2180,33 +2180,37 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         maxIdentityValidationAttempts = getNumberUtils().toInteger(getConfigUtils().getProperty("prepaid.maxIdentityValidationAttempts"));
       }
 
-      if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
-        //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
-        getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
-      }
+      Map<String, Object> templateData = new HashMap<>();
+      EmailBody emailBody = new EmailBody();
+
+
 
       if("No".equalsIgnoreCase(identityValidation.getIsGsintelOk())){
         // Si el usuario no pasa la validacion Gsintel, se finaliza la validacion de identidad y se indica que el usuario esta en lista negra y se bloquea el usuario prepago
         user = getUserClient().finishIdentityValidation(headers, user.getId(), Boolean.FALSE, Boolean.TRUE);
         getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), PrepaidUserStatus.DISABLED);
+
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
+
       } else {
-        user = getUserClient().resetIdentityValidation(headers, user.getId());
+        if(maxIdentityValidationAttempts.equals(prepaidUser.getIdentityVerificationAttempts())) {
+          //si el contador de intentos de validacion de identidad es mayor al definido, se bloquea al usuario prepago.
+          prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+          getPrepaidUserEJB10().updatePrepaidUserStatus(headers, prepaidUser.getId(), prepaidUser.getStatus());
+
+          emailBody.setTemplateData(templateData);
+          emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
+        } else {
+          user = getUserClient().resetIdentityValidation(headers, user.getId());
+
+          emailBody.setTemplateData(templateData);
+          emailBody.setTemplate(TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION);
+        }
       }
 
-      Map<String, Object> templateData = new HashMap<>();
+      templateData.put("user_name", user.getName());
 
-      //TODO: definir variables del template de correo  validacion de identidad no ok
-      /*
-      templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-      templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-      templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
-      templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
-      templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
-      */
-
-      EmailBody emailBody = new EmailBody();
-      emailBody.setTemplateData(templateData);
-      emailBody.setTemplate(TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK);
       emailBody.setAddress(user.getEmail().getValue());
 
       getUserClient().sendMail(null, user.getId(), emailBody);

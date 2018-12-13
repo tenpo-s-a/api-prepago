@@ -98,7 +98,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
       amount.setValue(getNumberUtils().toBigDecimal(row.get("ammount_usd")));
-      amount.setCurrencyCode(CodigoMoneda.USA_USN);
+      amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
       account.setAmountUsd(amountUsd);
 

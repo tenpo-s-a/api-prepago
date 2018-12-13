@@ -13,8 +13,10 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_ERROR_ISSUANCE_FEE = "Prepago/ErrorCobroEmision";
   public static final String TEMPLATE_MAIL_ERROR_CREATE_CARD = "Prepago/ErrorDatosTarjeta";
   public static final String TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE = "Prepago/ErrorCambioProducto";
-  public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_OK = "Prepago/ValidacionIdentidadOk";
+  public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITHOUT_CARD = "Prepago/ValidacionIdentidadOk_sinTarjeta";
+  public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITH_CARD = "Prepago/ValidacionIdentidadOk_conTarjeta";
   public static final String TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK = "Prepago/ValidacionIdentidadNoOk";
+  public static final String TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION = "Prepago/ReintentoValidacionIdentidad";
   public static final String TEMPLATE_MAIL_ACCOUNTING_FILE_OK = "Prepago/ArchivoContabilidad";
   public static final String TEMPLATE_MAIL_ACCOUNTING_FILE_ERROR = "Prepago/ErrorArchivoContabilidad";
 

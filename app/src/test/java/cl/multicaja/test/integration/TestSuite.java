@@ -35,10 +35,10 @@ public class TestSuite extends TestSuiteBase {
    */
   public static void startServer() throws Exception {
     System.setProperty("project.artifactId", "api-prepaid");
-    TestSftpServer.getInstance().start();
-    TestSftpServer.getInstance().createDirectories();
-    TestTecnocomSftpServer.getInstance().start();
-    TestTecnocomSftpServer.getInstance().createDirectories();
+    //TestSftpServer.getInstance().start();
+    //TestSftpServer.getInstance().createDirectories();
+    //TestTecnocomSftpServer.getInstance().start();
+    //TestTecnocomSftpServer.getInstance().createDirectories();
     testServer.start();
   }
 
@@ -46,8 +46,8 @@ public class TestSuite extends TestSuiteBase {
    *
    */
   public static void stopServer() throws Exception {
-    TestSftpServer.getInstance().end();
-    TestTecnocomSftpServer.getInstance().end();
+    //TestSftpServer.getInstance().end();
+    //TestTecnocomSftpServer.getInstance().end();
     testServer.stop();
   }
 

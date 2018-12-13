@@ -164,7 +164,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USD);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
@@ -202,7 +202,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser monto a pagar + comision + comision de apertura", BigDecimal.valueOf(3119), resp.getSimulationTopupWeb().getAmountToPay().getValue());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USD);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
@@ -253,7 +253,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupPOS().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USD);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
@@ -290,7 +290,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser monto a pagar + comision + comision de apertura", BigDecimal.valueOf(3119), resp.getSimulationTopupPOS().getAmountToPay().getValue());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USD);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupPOS().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
@@ -326,7 +326,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupWeb().getAmountToPay());
 
     NewAmountAndCurrency10 calculatedPca = new NewAmountAndCurrency10(getCalculationsHelper().calculatePca(amount.getValue()));
-    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USN);
+    NewAmountAndCurrency10 calculatedEee = new NewAmountAndCurrency10(getCalculationsHelper().calculateEed(amount.getValue()), CodigoMoneda.USA_USD);
 
     Assert.assertEquals("debe ser el pca calculado", calculatedPca, resp.getSimulationTopupWeb().getPca());
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
@@ -586,8 +586,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.assertEquals("debe ser error de supera saldo", SALDO_SUPERARA_LOS_$$VALUE.getValue(), vex.getCode());
     }
   }
-
-  // Ignorado, con la validacion de tecnocom no pudo llegar al limite en este test
+  //No se puede llegar ya que el monbto maximo de tarjeta es 500.000
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
 
@@ -715,7 +715,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(5));
-    amount.setCurrencyCode(CodigoMoneda.USA_USN);
+    amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
@@ -770,7 +770,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(5));
-    amount.setCurrencyCode(CodigoMoneda.USA_USN);
+    amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
@@ -825,7 +825,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(775));
-    amount.setCurrencyCode(CodigoMoneda.USA_USN);
+    amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
@@ -873,7 +873,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(155));
-    amount.setCurrencyCode(CodigoMoneda.USA_USN);
+    amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
     SimulationNew10 simulationNew = new SimulationNew10();
     simulationNew.setAmount(amount);
