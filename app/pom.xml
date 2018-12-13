@@ -35,6 +35,12 @@
       <layout>default</layout>
     </repository>
 
+    <repository>
+      <id>multicaja-nexus</id>
+      <name>multicaja-nexus</name>
+      <url>https://nexus.tools.multicajadigital.cloud/repository/maven-releases/</url>
+    </repository>
+
   </repositories>
 
   <dependencies>
@@ -42,7 +48,7 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-base</artifactId>
-      <version>1.0.0</version>
+      <version>5d1dec1772405d9b908d82a6260c95112a954b99</version>
     </dependency>
 
     <dependency>
