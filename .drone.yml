@@ -130,9 +130,9 @@ services:
       event: [ push ]
       branch:
         exclude: master
-        
+
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:test-dc93ab0f11c0b9571b828896003076ac88e12833
+    image: mccontainerregistry.azurecr.io/api-users:ci-dc93ab0f11c0b9571b828896003076ac88e12833
     when:
       event: [ push ]
       branch:
