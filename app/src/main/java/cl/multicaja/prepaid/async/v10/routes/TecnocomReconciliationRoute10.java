@@ -20,10 +20,10 @@ public class TecnocomReconciliationRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    if(ConfigUtils.isEnvTest()){
-      from(SFTP_HOST_ENDPOINT)
-        .process(new PendingTecnocomReconciliationFile10(this).processReconciliationFile());
-    }
+    //if(ConfigUtils.isEnvTest()){
+    //  from(SFTP_HOST_ENDPOINT)
+    //    .process(new PendingTecnocomReconciliationFile10(this).processReconciliationFile());
+    //}
   }
 
   private String getSftpEndpoint() {

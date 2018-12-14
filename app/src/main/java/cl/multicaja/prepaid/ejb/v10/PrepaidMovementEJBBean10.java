@@ -686,7 +686,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
-          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+          prepaidTopup10 = (PrepaidTopup10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
 
           movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
           movFull = addPrepaidMovement(null,movFull);
@@ -708,7 +708,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidWithdraw10.setMerchantCategory(movFull.getCodact());
           prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
           prepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
-          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
+          prepaidWithdraw10 = (PrepaidWithdraw10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
 
           movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
           movFull = addPrepaidMovement(null,movFull);
@@ -771,7 +771,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
         prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
         prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(),movFull.getClamon()));
-        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+        prepaidTopup10 = (PrepaidTopup10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
 
         movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
         movFull = addPrepaidMovement(null,movFull);
@@ -810,7 +810,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         prepaidWithdraw10.setMerchantCategory(movToReverse.getCodact());
         prepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
         prepaidWithdraw10.setTransactionId(movToReverse.getIdTxExterno());
-        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
+        prepaidWithdraw10 = (PrepaidWithdraw10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidWithdraw10);
 
         movToReverse.setIdMovimientoRef(mov.getId());
         movToReverse.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
@@ -853,7 +853,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
         prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
         prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
-        getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+        prepaidTopup10 = (PrepaidTopup10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
 
         movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
         movFull = addPrepaidMovement(null, movFull);
@@ -881,7 +881,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
-          getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
+          prepaidTopup10 = (PrepaidTopup10) getPrepaidEJBBean10().calculateFeeAndTotal(prepaidTopup10);
 
           movFull.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
           movFull = addPrepaidMovement(null, movFull);
