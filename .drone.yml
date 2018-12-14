@@ -137,3 +137,15 @@ services:
       event: [ push ]
       branch:
         exclude: master
+
+  queue:
+    image: webcenter/activemq:5.14.3
+    environment:
+      - ACTIVEMQ_CONFIG_MINMEMORY=256
+      - ACTIVEMQ_CONFIG_MAXMEMORY=512
+      - ACTIVEMQ_ADMIN_LOGIN=system
+      - ACTIVEMQ_ADMIN_PASSWORD=jdxnhyr674Hbf$5cx0
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
