@@ -52,7 +52,9 @@ pipeline:
       - ./drone-mvn-cache.sh
       - ./install.sh
       - cd app
-      - env=ci ./integration-test.sh
+      - ./integration-test.sh
+    environment:
+      - ENV=ci
     when:
       event: [ push ]
       branch:
