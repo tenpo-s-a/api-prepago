@@ -104,6 +104,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private CalculationsHelper calculationsHelper;
 
+  private static CalculatorParameter10 calculatorParameter10;
+
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -170,7 +172,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   public CalculationsHelper getCalculationsHelper(){
-    if(calculationsHelper ==null){
+    if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
     }
     return calculationsHelper;
@@ -211,6 +213,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       parametersUtil = ParametersUtil.getInstance();
     }
     return parametersUtil;
+  }
+
+  public CalculatorParameter10 getPercentage(){
+    if (calculatorParameter10 == null) {
+      calculatorParameter10 = super.getPercentage();
+    }
+    return calculatorParameter10;
   }
 
   public void setEncryptUtil(EncryptUtil encryptUtil) {
@@ -277,7 +286,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateFeeAndTotal(prepaidTopup);
+    prepaidTopup = (PrepaidTopup10) this.calculateFeeAndTotal(prepaidTopup);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
@@ -479,7 +488,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular comisiones
      */
-    this.calculateFeeAndTotal(prepaidWithdraw);
+    prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
@@ -949,7 +958,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
+  public IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
     if(transaction == null || transaction.getAmount() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
@@ -998,6 +1007,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     transaction.setFee(fee);
     transaction.setTotal(total);
+
+    return transaction;
   }
 
   @Override

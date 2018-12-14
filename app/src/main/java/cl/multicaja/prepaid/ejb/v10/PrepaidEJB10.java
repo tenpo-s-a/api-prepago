@@ -107,7 +107,7 @@ public interface PrepaidEJB10 {
    * @throws IllegalStateException cuando transaction.amount.value es null
    * @throws IllegalStateException cuando transaction.merchantCode es null o vacio
    */
-  void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception;
+  IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception;
 
   /**
    *  Agrega la informacion para el voucher requerida por el POS/Switch

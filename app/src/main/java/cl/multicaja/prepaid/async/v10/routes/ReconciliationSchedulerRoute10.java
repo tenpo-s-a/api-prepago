@@ -18,7 +18,7 @@ public class ReconciliationSchedulerRoute10 extends BaseRoute10 {
   @Override
   public void configure() throws Exception {
     //TODO: definir cada cuanto se ejecuta esta tarea
-    from("quartz2://myGroup/myfirstrigger?cron=0/2+*+*+*+*+?")
-      .process(new ReconciliationScheduler10(this).processReconciliation());
+    //from("quartz2://myGroup/myfirstrigger?cron=0/2+*+*+*+*+?")
+     // .process(new ReconciliationScheduler10(this).processReconciliation());
   }
 }

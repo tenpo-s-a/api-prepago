@@ -21,10 +21,10 @@ public final class CurrencyConvertionRoute10 extends BaseRoute10 {
      * Extrae valor dolar
      */
     //TODO: Quitar este if cuando se tenga la configuracion de ambientes para SFTP mastercard
-    if(ConfigUtils.isEnvTest()) {
-      from(SFTP_HOST_ENDPOINT)
-        .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
-    }
+    //if(ConfigUtils.isEnvTest()) {
+    //  from(SFTP_HOST_ENDPOINT)
+    //    .process(new PendingCurrencyModification10(this).processCurrencyConvertionFile());
+    //}
   }
 
   private String getSftpEndpoint() {
