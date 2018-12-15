@@ -1,20 +1,34 @@
-version: '2'
+version: '3'
+
 services:
-  tests:
+  prepago:
     image: maven:3.6.0-jdk-8-alpine
     volumes:
-      - .:/app
+      - .:/prepago
       - ~/.m2:/root/.m2
     entrypoint: "/bin/sh -c"
     command:
-      - sleep 60s && cd /app/ && ./install.sh && cd /app/pg && ./db-create.sh -Denv=ci && ./migrate-up.sh -Denv=ci && cd /app/app && ./test.sh && ./integration-test.sh -Denv=ci
+      - |
+        sleep 60s
+        cd /prepago/ 
+        ./install.sh 
+        cd /prepago/pg 
+        ./db-create.sh -Denv=ci 
+        ./migrate-up.sh -Denv=ci 
+        cd /prepago/app 
+        ./test.sh 
+        ./integration-test.sh -Denv=ci
 
   api-users-migration:
     image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-dc93ab0f11c0b9571b828896003076ac88e12833
     entrypoint: "/bin/sh -c"
     command:
-      - cd /app/pg && ./db-create.sh -Denv=ci && ./migrate-up.sh -Denv=ci
-      - .:/app
+      - | 
+        cd /prepago/pg 
+        ./db-create.sh -Denv=ci 
+        ./migrate-up.sh -Denv=ci 
+        tail -f /dev/null
+    volumes:
       - ~/.m2:/root/.m2
     depends_on:
       - database
@@ -32,7 +46,7 @@ services:
   queue:
     image: webcenter/activemq:5.14.3
     environment:
-      - ACTIVEMQ_CONFIG_MINMEMORY=256
-      - ACTIVEMQ_CONFIG_MAXMEMORY=512
+      - ACTIVEMQ_CONFIG_MINMEMORY=512
+      - ACTIVEMQ_CONFIG_MAXMEMORY=2024
       - ACTIVEMQ_ADMIN_LOGIN=system
       - ACTIVEMQ_ADMIN_PASSWORD=jdxnhyr674Hbf$$5cx0
