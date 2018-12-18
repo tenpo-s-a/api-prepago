@@ -6,7 +6,7 @@ import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class Test_20181218133602_create_table_acc_ipm_file  extends TestDbBasePg {
+public class Test_20181218133602_create_table_acc_ipm_file extends TestDbBasePg {
 
   @Test
   public void checkIfExistsTable_ipm_file() {
