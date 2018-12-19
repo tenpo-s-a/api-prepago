@@ -240,7 +240,7 @@ public final class TestHelpersResource10 extends BaseResource {
     gastoAleatorio = gastoAleatorio.divide(new BigDecimal(1.025), 0, RoundingMode.HALF_UP); // Dejar espacio para el fee internacional
 
     // Crear movimiento de compra
-    String numreffac = "9872348974987";
+    String numreffac = getRandomNumericString(10);
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
     // Agregar compra
