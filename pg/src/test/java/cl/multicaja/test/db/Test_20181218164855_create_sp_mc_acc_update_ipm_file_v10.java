@@ -27,9 +27,11 @@ public class Test_20181218164855_create_sp_mc_acc_update_ipm_file_v10 extends Te
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.ipm_file", SCHEMA_ACCOUNTING));
   }
 
-  public static Map<String, Object> updateIpmFile(Long id, String status) throws SQLException {
+  public static Map<String, Object> updateIpmFile(Long id, String fileId, Integer messageCount , String status) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
+      fileId != null ? fileId : new NullParam(Types.VARCHAR),
+      messageCount != null ? messageCount : new NullParam(Types.NUMERIC),
       status != null ? status : new NullParam(Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR) };
@@ -39,7 +41,7 @@ public class Test_20181218164855_create_sp_mc_acc_update_ipm_file_v10 extends Te
   @Test
   public void shouldFail_id_null() throws SQLException {
 
-    Map<String, Object> data = updateIpmFile(null, "Status");
+    Map<String, Object> data = updateIpmFile(null, "FileId", Integer.MAX_VALUE, "Status");
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser error","MC001",data.get("_error_code"));
     Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
@@ -48,7 +50,7 @@ public class Test_20181218164855_create_sp_mc_acc_update_ipm_file_v10 extends Te
   @Test
   public void shouldFail_status_null() throws SQLException {
 
-    Map<String, Object> data = updateIpmFile(Long.MAX_VALUE, null);
+    Map<String, Object> data = updateIpmFile(Long.MAX_VALUE, "FileId", Integer.MAX_VALUE, null);
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser error","MC002",data.get("_error_code"));
     Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
@@ -93,8 +95,10 @@ public class Test_20181218164855_create_sp_mc_acc_update_ipm_file_v10 extends Te
     }
 
     String newStatus = "NewStatus";
+    String newFileId = "NewFileId";
+    Integer newMessageCount = 2;
 
-    Map<String, Object> update = updateIpmFile(id, newStatus);
+    Map<String, Object> update = updateIpmFile(id, newFileId, newMessageCount, newStatus);
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser error","0", update.get("_error_code"));
     Assert.assertEquals("Deben ser iguales","", update.get("_error_msg"));
@@ -111,8 +115,8 @@ public class Test_20181218164855_create_sp_mc_acc_update_ipm_file_v10 extends Te
 
       Assert.assertEquals("debe tener el mismo id", id, file.get("_id"));
       Assert.assertEquals("debe tener el mismo fileName", fileName, file.get("_file_name"));
-      Assert.assertEquals("debe tener el mismo fileId", fileId, file.get("_file_id"));
-      Assert.assertEquals("debe tener el mismo messageCount", messageCount,  NumberUtils.getInstance().toInteger(file.get("_message_count")));
+      Assert.assertEquals("debe tener el mismo fileId", newFileId, file.get("_file_id"));
+      Assert.assertEquals("debe tener el mismo messageCount", newMessageCount,  NumberUtils.getInstance().toInteger(file.get("_message_count")));
       Assert.assertEquals("debe tener el mismo status", newStatus, file.get("_status"));
       Assert.assertNotNull("debe tener createdDate", file.get("_create_date"));
       Assert.assertNotNull("debe tener updatedDate", file.get("_update_date"));

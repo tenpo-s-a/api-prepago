@@ -18,8 +18,10 @@
 -- Migration SQL that makes the change goes here.
 
 CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_update_ipm_file_v10(
-  IN _id                NUMERIC,
-  IN _status            VARCHAR,
+  IN _id            NUMERIC,
+  IN _file_id       VARCHAR,
+  IN _message_count NUMERIC,
+  IN _status        VARCHAR,
   OUT _error_code   VARCHAR,
   OUT _error_msg    VARCHAR
 )AS $$
@@ -44,6 +46,20 @@ END IF;
 UPDATE
   ${schema.acc}.ipm_file
 SET
+  file_id = (
+    CASE WHEN _file_id IS NOT NULL THEN
+      _file_id
+    ELSE
+      file_id
+    END
+  ),
+  message_count = (
+    CASE WHEN _message_count IS NOT NULL THEN
+      _message_count
+    ELSE
+      message_count
+    END
+  ),
   status = (
     CASE WHEN _status IS NOT NULL THEN
       _status
@@ -67,4 +83,4 @@ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_update_ipm_file_v10(NUMERIC, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_update_ipm_file_v10(NUMERIC, VARCHAR, NUMERIC, VARCHAR);

@@ -26,8 +26,8 @@ public class Test_20181218135154_create_sp_mc_acc_create_ipm_file_v10 extends Te
   public static Map<String, Object> createIpmFile(String fileName, String fileId, Integer messageCount, String status) throws SQLException {
     Object[] params = {
       fileName != null ? fileName : new NullParam(Types.VARCHAR),
-      fileId != null ? fileId : new NullParam(Types.VARCHAR),
-      messageCount != null ? messageCount : new NullParam(Types.NUMERIC),
+      fileId != null ? fileId : "",
+      messageCount != null ? messageCount : 0,
       status != null ? status : new NullParam(Types.VARCHAR),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
@@ -76,28 +76,28 @@ public class Test_20181218135154_create_sp_mc_acc_create_ipm_file_v10 extends Te
   }
 
   @Test
-  public void shouldFail_fileId_null() throws SQLException {
+  public void shouldNotFail_fileId_null() throws SQLException {
     Map<String, Object> data = createIpmFile("FileName4", null, 1, "Status");
     Assert.assertNotNull("Data no debe ser null", data);
-    Assert.assertEquals("No debe ser error","MC002",data.get("_error_code"));
-    Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
-    Assert.assertEquals("No Debe tener ID", 0L, data.get("_r_id"));
+    Assert.assertEquals("No debe ser error","0",data.get("_error_code"));
+    Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
+    Assert.assertTrue("Debe tener ID", NumberUtils.getInstance().toInteger(data.get("_r_id")) > 0);
   }
 
   @Test
-  public void shouldFail_messageCount_null() throws SQLException {
+  public void shouldNotFail_messageCount_null() throws SQLException {
     Map<String, Object> data = createIpmFile("FileName5", "FileId5", null, "Status");
     Assert.assertNotNull("Data no debe ser null", data);
-    Assert.assertEquals("No debe ser error","MC003",data.get("_error_code"));
-    Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
-    Assert.assertEquals("No Debe tener ID", 0L, data.get("_r_id"));
+    Assert.assertEquals("No debe ser error","0",data.get("_error_code"));
+    Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
+    Assert.assertTrue("Debe tener ID", NumberUtils.getInstance().toInteger(data.get("_r_id")) > 0);
   }
 
   @Test
   public void shouldFail_status_null() throws SQLException {
     Map<String, Object> data = createIpmFile("FileName6", "FileId6", 1, null);
     Assert.assertNotNull("Data no debe ser null", data);
-    Assert.assertEquals("No debe ser error","MC004",data.get("_error_code"));
+    Assert.assertEquals("No debe ser error","MC002",data.get("_error_code"));
     Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
     Assert.assertEquals("No Debe tener ID", 0L, data.get("_r_id"));
   }

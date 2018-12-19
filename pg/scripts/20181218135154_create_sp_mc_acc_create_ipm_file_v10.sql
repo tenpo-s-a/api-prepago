@@ -38,20 +38,8 @@ _error_msg := 'El _file_name es obligatorio';
 RETURN;
 END IF;
 
-IF COALESCE(_file_id, '') = '' THEN
-_error_code := 'MC002';
-_error_msg := 'El _file_id es obligatorio';
-RETURN;
-END IF;
-
-IF COALESCE(_message_count, 0) = 0 THEN
-_error_code := 'MC003';
-_error_msg := 'El _message_count es obligatorio';
-RETURN;
-END IF;
-
 IF COALESCE(_status, '') = '' THEN
-_error_code := 'MC004';
+_error_code := 'MC002';
 _error_msg := 'El _status es obligatorio';
 RETURN;
 END IF;
