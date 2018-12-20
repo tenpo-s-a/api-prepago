@@ -41,10 +41,6 @@ production-*.properties
 production_*.properties
 pg/dump.sql
 
-# Docker
-Dockerfile
-docker-compose.yml
-
 # Logs
 logs
 *.log

@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  prepago:
+    image: maven:3.6.0-jdk-8-alpine
+    volumes:
+      - .:/prepago
+      - ~/.m2:/root/.m2
+    entrypoint: "/bin/sh -c"
+    command:
+      - |
+        sleep 60s
+        cd /prepago/
+        rm datos-mock.cache
+        ./install.sh 
+        cd /prepago/pg 
+        ./db-create.sh -Denv=ci 
+        ./migrate-up.sh -Denv=ci 
+        cd /prepago/app 
+        ./test.sh 
+        ./integration-test.sh -Denv=ci
+
+  api-users-migration:
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-dc93ab0f11c0b9571b828896003076ac88e12833
+    entrypoint: "/bin/sh -c"
+    command:
+      - | 
+        cd /app/pg 
+        ./db-create.sh -Denv=ci 
+        ./migrate-up.sh -Denv=ci 
+        tail -f /dev/null
+    volumes:
+      - ~/.m2:/root/.m2
+    depends_on:
+      - database
+
+  database:
+    image: postgres:9.6.3-alpine
+
+  api-users:
+    image: mccontainerregistry.azurecr.io/api-users:ci-dc93ab0f11c0b9571b828896003076ac88e12833
+    depends_on:
+      - database
+      - api-users-migration
+      - queue
+
+  queue:
+    image: webcenter/activemq:5.14.3
+    environment:
+      - ACTIVEMQ_CONFIG_MINMEMORY=1024
+      - ACTIVEMQ_CONFIG_MAXMEMORY=2048
+      - ACTIVEMQ_ADMIN_LOGIN=system
+      - ACTIVEMQ_ADMIN_PASSWORD=jdxnhyr674Hbf$$5cx0
+      - ACTIVEMQ_LOGGER_LOGLEVEL=DEBUG

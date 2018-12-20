@@ -1,0 +1,153 @@
+pipeline:
+
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./.m2
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ push ]
+
+  dbusers_migration:
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-dc93ab0f11c0b9571b828896003076ac88e12833
+    commands:
+      - sleep 15
+      - cd /app/pg && ./db-create.sh -Denv=ci
+      - cd /app/pg && ./migrate-up.sh -Denv=ci
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  db_test:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - ./install.sh
+      - cd pg
+      - ./db-create.sh -Denv=ci
+      - ./migrate-up.sh -Denv=ci
+      - ./test.sh -Denv=ci
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  app_unit-test:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app
+      - ./test.sh
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  app_integration-test:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - ./install.sh
+      - cd app
+      - ./integration-test.sh -Denv=ci &> integration-test.log
+      - tail -n 500 integration-test.log
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  db_migration_staging:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=development
+      - ./migrate-up.sh -Denv=development
+    when:
+      event: [ push ]
+      branch: master
+
+  build:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app && ./package.sh
+    when:
+      event: [ push ]
+      branch: master
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./.m2
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ push ]
+
+  publish_image:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ${DRONE_COMMIT_SHA}
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    cluster: staging
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_to_production:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    cluster: production
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+    when:
+      event: [ tag ]
+
+  slack:
+    image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
+    channel: drone_deployments
+    icon_emoji: ":package:"
+    when:
+      status: [ success, failure ]
+
+services:
+  database:
+    image: postgres:9.6.3-alpine
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  api-users:
+    image: mccontainerregistry.azurecr.io/api-users:ci-dc93ab0f11c0b9571b828896003076ac88e12833
+    log-driver: none
+    when:
+      event: [ push ]
+      branch:
+        exclude: master
+
+  queue:
+    image: webcenter/activemq:5.14.3
+    environment:
+      - ACTIVEMQ_CONFIG_MINMEMORY=256
+      - ACTIVEMQ_CONFIG_MAXMEMORY=512
+      - ACTIVEMQ_ADMIN_LOGIN=system
+      - ACTIVEMQ_ADMIN_PASSWORD=jdxnhyr674Hbf$5cx0
+    when:
+      event: [ push ]
+      branch:
+        exclude: master

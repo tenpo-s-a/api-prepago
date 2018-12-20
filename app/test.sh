@@ -1,4 +1,4 @@
 #!/bin/bash
 
 mvn clean
-mvn test -DskipTests=false $1 $2 $3
+mvn test --quiet -DskipTests=false $1 $2 $3
