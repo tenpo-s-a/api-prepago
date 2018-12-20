@@ -51,11 +51,17 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd app
       - ./integration-test.sh -Denv=ci &> integration-test.log
-      - tail -n 500 integration-test.log
     when:
       event: [ push ]
       branch:
         exclude: master
+
+  print_log:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - tail -n 500 ./app/integration-test.log
+    when:
+      status: [ success, failure ]
 
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
