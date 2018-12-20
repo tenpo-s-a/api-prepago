@@ -243,11 +243,15 @@ public final class TestHelpersResource10 extends BaseResource {
     String numreffac = "9872348974987";
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
+    String[] nomcomreds = {"Uber", "Spotify", "Netflix", "Twitch", "AmazonTV"};
+    int selectedNomcomRed = RandomUtils.nextInt(0, nomcomreds.length - 1);
+
     // Agregar compra
-    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
+    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
     if (!inclusionMovimientosDTO.isRetornoExitoso()) {
       log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
       log.error(inclusionMovimientosDTO.getDescRetorno());
+      // Todo: necesita lanzar una excepcion si algo salio mal
     }
 
     return Response.ok(gastoAleatorio).status(201).build();
