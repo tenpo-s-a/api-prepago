@@ -59,7 +59,7 @@ pipeline:
   print_log:
     image: maven:3.6.0-jdk-8-alpine
     commands:
-      - tail -n 500 integration-test.log
+      - tail -n 500 ./app/integration-test.log
     when:
       status: [ success, failure ]
 
