@@ -1,0 +1,8 @@
+FROM maven:3.6.0-jdk-8-alpine
+
+WORKDIR /app/ 
+
+COPY ./pg /app/pg
+
+RUN /app/install.sh
+RUN cd /app/pg && mvn install
