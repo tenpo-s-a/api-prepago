@@ -89,6 +89,30 @@ pipeline:
     when:
       event: [ push ]
 
+  publish_dbmigration_image:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
+    tags:
+      - dbmigration-${DRONE_COMMIT_SHA}
+    dockerfile: Dockerfile.ci.migration
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ push ]
+      branch: master
+
+  publish_ci_image:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ci-${DRONE_COMMIT_SHA}
+    dockerfile: Dockerfile.ci
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ push ]
+      branch: master
+
   publish_image:
     registry: mccontainerregistry.azurecr.io
     image: plugins/docker
