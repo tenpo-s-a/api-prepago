@@ -4,5 +4,4 @@ WORKDIR /app/
 
 COPY ./pg /app/pg
 
-RUN /app/install.sh
 RUN cd /app/pg && mvn install
