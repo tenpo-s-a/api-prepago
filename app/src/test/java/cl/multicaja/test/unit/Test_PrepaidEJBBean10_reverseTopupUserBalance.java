@@ -676,6 +676,9 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     cdtTransaction.setTransactionReference(1234L);
     cdtTransaction.setExternalTransactionId(reverseRequest.getTransactionId());
 
+    PrepaidMovement10 reverseMovement = new PrepaidMovement10();
+    reverseMovement.setId(Long.MAX_VALUE);
+
     // UserMc
     Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
 
@@ -696,7 +699,9 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       .doReturn(originalTopup).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean10).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+
+    Mockito.doReturn(reverseMovement).when(prepaidMovementEJBBean10).getPrepaidMovementById(reverseMovement.getId());
 
     Mockito.doReturn("0987").when(parametersUtil).getString("api-prepaid", "cod_entidad", "v10");
 

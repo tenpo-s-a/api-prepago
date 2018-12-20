@@ -1,0 +1,74 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: api-prepago
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-prepago
+  template:
+    metadata:
+      labels:
+        app: api-prepago
+    spec:
+      containers:
+      - name: api-prepago
+        image: ${IMAGE}
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+      imagePullSecrets:
+        - name: container-reg-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-prepago
+  labels:
+    app: api-prepago
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: api-prepago
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api-prepago
+  labels:
+    app: api-prepago
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+    http:
+      paths:
+      - path: /prepago
+        backend:
+          serviceName: api-prepago
+          servicePort: 80
+  tls:
+  - hosts: 
+      - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
+    secretName: ${CLUSTER_ENVIRONMENT}-tls
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongIngress
+metadata:
+  name: api-prepago
+  labels:
+    app: api-prepago
+route:
+  preserve_host: true
+  strip_path: true
+  protocols:
+    - https
+    - http 

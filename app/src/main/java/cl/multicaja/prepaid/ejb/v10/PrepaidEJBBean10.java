@@ -104,6 +104,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private CalculationsHelper calculationsHelper;
 
+  private static CalculatorParameter10 calculatorParameter10;
+
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -170,7 +172,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   public CalculationsHelper getCalculationsHelper(){
-    if(calculationsHelper ==null){
+    if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
     }
     return calculationsHelper;
@@ -211,6 +213,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       parametersUtil = ParametersUtil.getInstance();
     }
     return parametersUtil;
+  }
+
+  public CalculatorParameter10 getPercentage(){
+    if (calculatorParameter10 == null) {
+      calculatorParameter10 = super.getPercentage();
+    }
+    return calculatorParameter10;
   }
 
   public void setEncryptUtil(EncryptUtil encryptUtil) {
@@ -277,7 +286,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular monto a cargar y comisiones
      */
-    this.calculateFeeAndTotal(prepaidTopup);
+    prepaidTopup = (PrepaidTopup10) this.calculateFeeAndTotal(prepaidTopup);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
@@ -479,7 +488,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Calcular comisiones
      */
-    this.calculateFeeAndTotal(prepaidWithdraw);
+    prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
@@ -949,7 +958,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
+  public IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
     if(transaction == null || transaction.getAmount() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
@@ -998,6 +1007,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     transaction.setFee(fee);
     transaction.setTotal(total);
+
+    return transaction;
   }
 
   @Override
@@ -1119,7 +1130,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   /**
    *
    * @param simulationNew
-   * @throws BaseException
    */
   private void validateSimulationNew10(SimulationNew10 simulationNew) throws BaseException {
 
@@ -1654,9 +1664,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
-          transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
-          transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv().setScale(2),movimientosDTO.getClamondiv()));
+
+          BigDecimal bd = montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
         case ANULA_SUSCRIPCION_INTERNACIONAL:{
@@ -1669,8 +1682,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
-          transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
+          transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_DOWN)));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
         case COMPRA_INTERNACIONAL:{
@@ -1681,9 +1695,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
-          transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
-          transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv().setScale(2,RoundingMode.HALF_DOWN),movimientosDTO.getClamondiv()));
+          //TODO: Verificar si se tiene que pintar solo en dolares o en otras monedas tb.
+          BigDecimal bd = montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
         case ANULA_COMPRA_INTERNACIONAL:{
@@ -1698,6 +1715,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
         case DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -1711,6 +1729,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
         case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:{
@@ -1725,6 +1744,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv(),movimientosDTO.getClamondiv()));
           transaction10.setUsdValue(new NewAmountAndCurrency10(montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP)));
           transaction10.setCountry(movimientosDTO.getNompais());
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
           break;
         }
       }
@@ -1733,6 +1753,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return listTransaction10;
   }
+
 
   @Override
   public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
