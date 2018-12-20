@@ -25,7 +25,6 @@ pipeline:
     image: maven:3.6.0-jdk-8-alpine
     commands:
       - ./drone-mvn-cache.sh
-      - ./install.sh
       - cd pg
       - ./db-create.sh -Denv=ci
       - ./migrate-up.sh -Denv=ci
@@ -50,7 +49,6 @@ pipeline:
     image: maven:3.6.0-jdk-8-alpine
     commands:
       - ./drone-mvn-cache.sh
-      - ./install.sh
       - cd app
       - ./integration-test.sh -Denv=ci &> integration-test.log
       - tail -n 500 integration-test.log
