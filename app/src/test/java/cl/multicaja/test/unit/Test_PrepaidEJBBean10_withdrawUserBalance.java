@@ -13,6 +13,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -66,6 +67,12 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Spy
   private PrepaidTopupDelegate10 delegate;
+
+  @Spy
+  private ParametersUtil parametersUtil;
+
+  @Spy
+  private CalculatorParameter10 calculatorParameter10;
 
   @Spy
   @InjectMocks
@@ -124,6 +131,10 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     withdrawRequest.setMerchantCategory(1);
     withdrawRequest.setTransactionId("0987654321");
 
+    PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(withdrawRequest);
+    withdraw10.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    withdraw10.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+
     //Cdt transaction
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setNumError("0");
@@ -177,6 +188,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)
       .when(prepaidMovementEJBBean10).getPrepaidMovementById(Long.MAX_VALUE);
+
+    Mockito.doReturn(withdraw10)
+      .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class));
 
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("1020");

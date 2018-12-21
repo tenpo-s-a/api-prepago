@@ -173,7 +173,7 @@ public class CalculationsHelper {
    */
   public Double getUsdValue() throws Exception {
     //TODO: revisar bien esto. Ya que si es null impacta en los tests
-    if(ConfigUtils.isEnvTest()) {
+    if(ConfigUtils.isEnvTest() || ConfigUtils.isEnvCI()) {
       return Double.valueOf(645);
     }
     else {
