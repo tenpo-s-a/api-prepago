@@ -1,18 +1,9 @@
 package cl.multicaja.accounting.async.v10.processors;
 
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.encryption.PgpHelper;
+import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
+import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
-import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.model.v10.MailTemplates;
-import cl.multicaja.prepaid.model.v10.MimeType;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.Session;
-import com.sun.mail.iap.ByteArray;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -20,20 +11,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Map;
-
-import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
+import java.util.List;
 
 public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingMastercardAccountingFile10.class);
 
-  private String privKeyFile = "src/test/resources/mastercard/files/private_key.dat";
-  private String tempOutputFileName = "src/test/resources/mastercard/files/decryptedfile.dat";
+  private String privKeyFile = "./private_key.dat";
   private String passwd = "******";
 
   public PendingMastercardAccountingFile10(BaseRoute10 route) { super(route); }
@@ -44,34 +28,70 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
       public void process(Exchange exchange) throws Exception {
         log.info("Process Accounting Batch");
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
-        log.info(exchange.getIn().getBody());
 
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info(String.format("processAccountingBatch: se encontro el archivo: %s", fileName));
 
         // Desencriptar usando la private key.
         // Todo: ¿Donde se almacenara esa clave?
-        FileInputStream privKeyIn = new FileInputStream(privKeyFile);
-        File tempFile = new File(tempOutputFileName);
-        FileOutputStream tempOutputFile = new FileOutputStream(tempFile, false);
-        PgpHelper.getInstance().decryptFile(inputStream, tempOutputFile, privKeyIn, passwd.toCharArray());
-        privKeyIn.close();
-        tempOutputFile.close();
+        // TODO: revisar esto, quizas externalizar en metodo EJB para testearlo unitariamente
+        //FileInputStream privKeyIn = new FileInputStream(privKeyFile);
+        //File tempFile = new File("./" + fileName);
+        //FileOutputStream tempOutputFile = new FileOutputStream(tempFile, false);
+        //PgpHelper.getInstance().decryptFile(inputStream, tempOutputFile, privKeyIn, passwd.toCharArray());
+        //privKeyIn.close();
+        //tempOutputFile.close();
 
-        // Borrar estalinea cuando se agregue proceso IPM
-        // este archivo se borra despues en la linea 73
-        tempFile.delete();
+        IpmFile csvIpmFile = new IpmFile();
 
-        /* Esperando proceso de lectura IPM
-        // Procesar los datos del archivo
-        FileInputStream decryptedInputStream = new FileInputStream(tempOutputFileName);
+        List<IpmFile> processedFiles = getRoute().getPrepaidAccountingEJBBean10().findIpmFile(null, null, fileName, null, null);
+        if(!processedFiles.isEmpty()) {
+          IpmFile f = processedFiles.get(0);
+          if(!IpmFileStatus.ERROR.equals(f.getStatus())) {
+            log.info(String.format("File [%s] already processed", fileName));
+            return;
+          } else {
+            log.info(String.format("Reprocessing file [%s]", fileName));
+            csvIpmFile = f;
+          }
+        } else {
+          csvIpmFile.setFileName(fileName);
+        }
 
-        //getRoute().getPrepaidAccountingEJBBean10().processIPMFile(decryptedInputStream);
+        byte[] buffer = new byte[inputStream.available()];
+        inputStream.read(buffer);
 
-        // Eliminar el archivo desencriptado
-        decryptedInputStream.close();
-        tempFile.delete();
+        inputStream.close();
 
+        File targetFile = new File("./" + fileName);
+        OutputStream outStream = new FileOutputStream(targetFile);
+        outStream.write(buffer);
+        outStream.close();
+
+        // convertir ipm a csv
+        try {
+          getRoute().getPrepaidAccountingEJBBean10().convertIpmFileToCsv(fileName);
+        } catch(Exception e) {
+          log.error(e);
+          targetFile.delete();
+          throw e;
+        }
+
+        String csvFileName = fileName + ".csv";
+        log.info(String.format("Processing file -> [%s]", csvFileName));
+        File file = new File("./" + csvFileName);
+
+        try {
+          csvIpmFile = getRoute().getPrepaidAccountingEJBBean10().processIpmFile(null, file, csvIpmFile);
+          getRoute().getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, csvIpmFile);
+        } catch (Exception e) {
+          log.error(String.format("Error processing CSV file: [%s]", fileName), e);
+          targetFile.delete();
+          file.delete();
+          throw e;
+        }
+
+        /*
         getRoute().getPrepaidAccountingEJBBean10().processMovementForAccounting(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
         getRoute().getPrepaidAccountingEJBBean10().generateAccountingFile(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
         */
