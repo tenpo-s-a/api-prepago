@@ -17,8 +17,8 @@ public class MastercardAccountingRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    from(SFTP_HOST_ENDPOINT)
-      .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
+    //from(SFTP_HOST_ENDPOINT)
+    //  .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
   }
 
   private String getSftpEndpoint() {

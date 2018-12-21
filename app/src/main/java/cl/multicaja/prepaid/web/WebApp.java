@@ -79,8 +79,7 @@ public class WebApp implements ServletContextListener  {
         camelFactory.startCamelContextWithRoutes(true,
           prepaidTopupRoute10,
           transactionReversalRoute10,
-          productChangeRoute10,
-          mastercardAccountingRoute10);
+          productChangeRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {
