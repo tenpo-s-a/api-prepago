@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJB10;
+import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
@@ -25,19 +27,16 @@ public class CalculationsHelper {
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
   private final int ONE_HUNDRED = 100;
   private static CalculatorParameter10 calculatorParameter10;
+
   @EJB
-  private  PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
-
-  private PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    if(prepaidCardEJBBean10 == null ){
-      prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
-    }
-    return prepaidCardEJBBean10;
+  public MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    return mastercardCurrencyUpdateEJBBean10;
   }
 
-  public  void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setMastercardCurrencyUpdateEJBBean10(MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10) {
+    this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
   }
 
   public CalculationsHelper() {
@@ -167,7 +166,7 @@ public class CalculationsHelper {
       return Double.valueOf(645);
     }
     else {
-      return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
+      return getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
     }
   }
 

@@ -26,7 +26,7 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
         try {
-          getRoute().getPrepaidCardEJBBean10().processMastercardUsdFile(inputStream, fileName);
+          getRoute().getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(inputStream, fileName);
         } catch(Exception ex) {
           inputStream.close();
           throw ex;

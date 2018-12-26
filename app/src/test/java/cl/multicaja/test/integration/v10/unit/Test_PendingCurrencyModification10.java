@@ -28,12 +28,12 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
 
     InputStream is = putSuccessFileIntoSftp(filename);
     try {
-      getPrepaidCardEJBBean10().processMastercardUsdFile(is, filename);
+      getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(is, filename);
     } catch (Exception ex) {
       Assert.fail("Should not be here");
     }
 
-    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    CurrencyUsd currencyUsd = getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd();
     Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
     Assert.assertTrue("Deberia ser > 0", currencyUsd.getBuyCurrencyConvertion() > 0);
     Assert.assertTrue("Deberia ser > 0", currencyUsd.getMidCurrencyConvertion() > 0);
@@ -47,17 +47,17 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
 
     InputStream is = putSuccessFileIntoSftp(filename);
     try {
-      getPrepaidCardEJBBean10().processMastercardUsdFile(is, filename);
+      getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(is, filename);
     } catch (Exception ex) {
       Assert.fail("Should not be here");
     }
 
-    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    CurrencyUsd currencyUsd = getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd();
     Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
 
     InputStream is2 = putSuccessFileIntoSftp(filename);
     try {
-      getPrepaidCardEJBBean10().processMastercardUsdFile(is2, filename);
+      getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(is2, filename);
     } catch (ValidationException ex) {
       Assert.assertEquals("Archivo ya procesado", FILE_ALREADY_PROCESSED.getValue(), ex.getCode());
     }
@@ -70,19 +70,19 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
     cleanTest(filename);
     InputStream is = putSuccessFileIntoSftp(filename);
     try {
-      getPrepaidCardEJBBean10().processMastercardUsdFile(is, filename);
+      getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(is, filename);
     } catch (Exception ex) {
       Assert.fail("Should not be here");
     }
-    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    CurrencyUsd currencyUsd = getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd();
     Assert.assertEquals("Deberia existir el nombre del archivo", currencyUsd.getFileName(), filename);
     InputStream is2 = putSuccessFileIntoSftp(filename);
     try {
-      getPrepaidCardEJBBean10().processMastercardUsdFile(is2, filenameError);
+      getMastercardCurrencyUpdateEJBBean10().processMastercardUsdFile(is2, filenameError);
     } catch (Exception ex) {
       Assert.fail("Should not be here");
     }
-    CurrencyUsd currencyUsdAfter = getPrepaidCardEJBBean10().getCurrencyUsd();
+    CurrencyUsd currencyUsdAfter = getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd();
     Assert.assertEquals("Deberia ser el archivo archivo sin errores", currencyUsd.getCreationDate(), currencyUsdAfter.getCreationDate());
   }
 
@@ -91,7 +91,7 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
   }
 
   private void cleanTest(String filename) throws Exception {
-    CurrencyUsd currencyUsd = getPrepaidCardEJBBean10().getCurrencyUsd();
+    CurrencyUsd currencyUsd = getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd();
     if(currencyUsd != null && filename.equals(currencyUsd.getFileName())){
       getDbUtils().getJdbcTemplate().update(String.format("delete from prepago.prp_valor_usd where nombre_archivo = '%s'", filename));
     }

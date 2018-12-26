@@ -69,11 +69,12 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
   private static McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
+  private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     System.out.println("Exist: " + getPrepaidCardEJBBean10());
-    calculationsHelper.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+    calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
   }
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
@@ -255,6 +256,13 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return mcRedReconciliationEJBBean10;
+  }
+
+  public static MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    if(mastercardCurrencyUpdateEJBBean10 == null) {
+      mastercardCurrencyUpdateEJBBean10 = new MastercardCurrencyUpdateEJBBean10();
+    }
+    return mastercardCurrencyUpdateEJBBean10;
   }
 
   /**
