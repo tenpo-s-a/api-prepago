@@ -45,6 +45,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private  TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
 
+  @EJB
+  private McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
+
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
@@ -181,5 +184,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setTecnocomReconciliationEJBBean10(TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10) {
     this.tecnocomReconciliationEJBBean10 = tecnocomReconciliationEJBBean10;
+  }
+
+  public McRedReconciliationEJBBean10 getMcRedReconciliationEJBBean10() {
+    return mcRedReconciliationEJBBean10;
+  }
+
+  public void setMcRedReconciliationEJBBean10(McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10) {
+    this.mcRedReconciliationEJBBean10 = mcRedReconciliationEJBBean10;
   }
 }

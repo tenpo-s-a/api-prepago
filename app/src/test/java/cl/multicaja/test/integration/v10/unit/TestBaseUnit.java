@@ -68,6 +68,7 @@ public class TestBaseUnit extends TestApiBase {
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
+  private static McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -246,6 +247,14 @@ public class TestBaseUnit extends TestApiBase {
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return tecnocomReconciliationEJBBean10;
+  }
+
+  public static McRedReconciliationEJBBean10 getMcRedReconciliationEJBBean10() {
+    if(mcRedReconciliationEJBBean10 == null) {
+      mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
+      mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+    }
+    return mcRedReconciliationEJBBean10;
   }
 
   /**
