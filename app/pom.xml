@@ -54,7 +54,7 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>1e0f8221d9285929abf3b06fdfe6945b60290ef5</version>
+      <version>f4b8dbccdd7700ef24a6c8ef3affba7752b087dc</version>
     </dependency>
 
     <dependency>
