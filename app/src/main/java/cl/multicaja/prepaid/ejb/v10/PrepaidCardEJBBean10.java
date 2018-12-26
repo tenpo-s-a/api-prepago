@@ -2,12 +2,15 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.prepaid.model.v10.CcrFile10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
@@ -18,13 +21,16 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.FILE_ALREADY_PROCESSED;
 
 /**
  * @author vutreras
@@ -247,6 +253,29 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  @Override
+  public PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception {
+    if(pan == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "pan"));
+    }
+    if(processorUserId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "processorUserId"));
+    }
+
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId);
+
+    if( lst != null) {
+      PrepaidCard10 prepaidCard10 = lst.stream()
+        .filter(c -> pan.equals(c.getPan()))
+        .findAny()
+        .orElse(null);
+
+      return prepaidCard10;
+    }
+
+    return null;
+  }
+
   //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
   @Override
   public CurrencyUsd getCurrencyUsd() throws Exception {
@@ -291,26 +320,49 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  @Override
-  public PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception {
-    if(pan == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "pan"));
+  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
+  public void processMastercardUsdFile(InputStream inputStream, String fileName) throws Exception {
+    try{
+      CcrFile10 ccrFile10 = MastercardFileHelper.getInstance().getValidCurrencyDetailRecordClp(inputStream);
+      inputStream.close();
+      if(ccrFile10 != null) {
+        log.info(String.format("BUY [%s], MID [%s], SELL [%s]", ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion(), ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
+        CurrencyUsd currencyUsd = this.getCurrencyUsd();
+        if(currencyUsd != null) {
+          if(currencyUsd.getFileName().equals(fileName)) {
+            throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), "File already processed");
+          }
+        }
+        currencyUsd = getCurrencyUsd(fileName, ccrFile10);
+        this.updateUsdValue(currencyUsd);
+      }
+    } catch (Exception ex){
+      inputStream.close();
+      String msg = String.format("Error processing file [%s]", fileName);
+      log.error(msg, ex);
+      throw new ValidationException(FILE_ALREADY_PROCESSED.getValue(), msg);
     }
-    if(processorUserId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "processorUserId"));
-    }
-
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId);
-
-    if( lst != null) {
-        PrepaidCard10 prepaidCard10 = lst.stream()
-          .filter(c -> pan.equals(c.getPan()))
-          .findAny()
-          .orElse(null);
-
-        return prepaidCard10;
-    }
-
-    return null;
   }
+
+  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
+  private CurrencyUsd getCurrencyUsd(String fileName, CcrFile10 ccrFile10) {
+    CurrencyUsd currencyUsd = new CurrencyUsd();
+    currencyUsd.setFileName(fileName);
+    currencyUsd.setCurrencyExponent(Integer.parseInt(ccrFile10.getCcrDetailRecord10().getCurrencyExponent()));
+    currencyUsd.setExpirationUsdDate(getExpirationUsdDate());
+    currencyUsd.setBuyCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion()));
+    currencyUsd.setSellCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
+    currencyUsd.setMidCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion()));
+    return currencyUsd;
+  }
+
+  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
+  private Timestamp getExpirationUsdDate(){
+    //TODO: Debe ser reemplazado por el tiemp de expiracion definido por Mastercard
+    Calendar c = Calendar.getInstance();
+    c.setTime(new Date());
+    c.add(Calendar.DATE, 1);
+    return new Timestamp(c.getTime().getTime());
+  }
+
 }

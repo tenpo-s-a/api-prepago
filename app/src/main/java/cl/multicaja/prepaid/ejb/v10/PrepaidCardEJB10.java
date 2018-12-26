@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -114,6 +115,14 @@ public interface PrepaidCardEJB10 {
    * @throws Exception
    */
   void updateUsdValue(CurrencyUsd currencyUsd) throws Exception;
+
+  /**
+   * Procesa el archivo enviado por Mastercard para obtener el valor del dolar
+   * @param inputStream
+   * @param fileName
+   * @throws Exception
+   */
+  void processMastercardUsdFile(InputStream inputStream, String fileName) throws Exception;
 
   /**
    *  busca una tarjeta por pan y numero de contrato

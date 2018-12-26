@@ -10,7 +10,6 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.test.integration.v10.helper.sftp.TestTecnocomSftpServer;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
@@ -842,13 +841,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
   private void putSuccessFileIntoSftp(String filename) throws Exception {
     try {
-      final Map<String, Object> context = TestTecnocomSftpServer.getInstance().openChanel();
-      InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
-      ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-      channelSftp.put(inputStream, TestTecnocomSftpServer.getInstance().BASE_DIR + "tecnocom/upload/" + filename);
-      channelSftp.exit();
-      ((Session) context.get("session")).disconnect();
-      inputStream.close();
+      //final Map<String, Object> context = TestTecnocomSftpServer.getInstance().openChanel();
+      //InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
+      //ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
+      //channelSftp.put(inputStream, TestTecnocomSftpServer.getInstance().BASE_DIR + "tecnocom/upload/" + filename);
+      //channelSftp.exit();
+      //((Session) context.get("session")).disconnect();
+      //inputStream.close();
       log.info("Wait for camel process");
       Thread.sleep(3000);
     } catch (Exception ex) {
