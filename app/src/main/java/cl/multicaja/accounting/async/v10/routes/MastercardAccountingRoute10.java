@@ -17,24 +17,22 @@ public class MastercardAccountingRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    if (ConfigUtils.isEnvTest()) {
-      from(SFTP_HOST_ENDPOINT)
-        .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
-    }
+    //from(SFTP_HOST_ENDPOINT)
+    //  .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
   }
 
   private String getSftpEndpoint() {
     final String fileErrorConfig = "/${file:name.noext}-${date:now:yyyyMMddHHmmssSSS}.${file:ext}";
     StringBuilder sb = new StringBuilder();
-    sb.append("sftp://");
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.host"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.received.folder"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.auth.username"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.auth.password"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.done.folder"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.error.folder").concat(fileErrorConfig));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.reconnectDelay"));
-    sb.append(getConfigUtils().getProperty("sftp.mastercard.throwExceptionOnConnectFailed"));
+    sb.append("sftp://")
+      .append(getConfigUtils().getProperty("sftp.mastercard.host"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.accounting.received.folder"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.auth.username"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.auth.password"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.done.folder"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.accounting.move.error.folder").concat(fileErrorConfig))
+      .append(getConfigUtils().getProperty("sftp.mastercard.reconnectDelay"))
+      .append(getConfigUtils().getProperty("sftp.mastercard.throwExceptionOnConnectFailed"));
     log.info(String.format("sftp endpoint -> [%s]", sb.toString()));
     return sb.toString();
   }
