@@ -1989,7 +1989,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     Map<String, String> templateData = new HashMap<>();
     templateData.put("${rut}", String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
-    templateData.put("${numSerie}", user.getRut().getSerialNumber() != null ? user.getRut().getSerialNumber() : "");
     templateData.put("${name}", user.getName());
     templateData.put("${lastname}", user.getLastname_1());
 
