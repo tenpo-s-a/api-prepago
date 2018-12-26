@@ -67,6 +67,7 @@ public class TestBaseUnit extends TestApiBase {
   private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
+  private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -236,6 +237,15 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
     }
     return prepaidAccountingEJBBean10;
+  }
+
+  public static TecnocomReconciliationEJBBean10 getTecnocomReconciliationEJBBean10() {
+    if(tecnocomReconciliationEJBBean10 == null) {
+      tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
+      tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+    }
+    return tecnocomReconciliationEJBBean10;
   }
 
   /**
