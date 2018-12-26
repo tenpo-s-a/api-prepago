@@ -1,7 +1,10 @@
 package cl.multicaja.prepaid.model.v10;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.math.BigDecimal;
 
+@JsonIgnoreProperties(ignoreUnknown =  true)
 public class CalculatorParameter10 {
 
   private BigDecimal TOPUP_POS_FEE_PERCENTAGE;
