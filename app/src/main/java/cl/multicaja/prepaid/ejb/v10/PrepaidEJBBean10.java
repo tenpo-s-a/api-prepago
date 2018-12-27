@@ -1803,9 +1803,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null)  {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
     } else if (prepaidCard.getStatus() == null) {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    } else if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_ACTIVA);
     }
@@ -1814,8 +1816,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private PrepaidCard10 getPrepaidCardToUnlock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
-    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+    if(prepaidCard == null) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+    } else if (prepaidCard.getStatus() == null) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    } else if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_BLOQUEADA);
     }

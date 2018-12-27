@@ -9,7 +9,6 @@ import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -251,6 +250,27 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 106007", TARJETA_NO_EXISTE.getValue(), errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error code = 106007", TARJETA_PRIMERA_CARGA_PENDIENTE.getValue(), errorObj.get("code"));
+  }
+
+  @Test
+  public void shouldReturn422_FirstTopupInProgress() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
+    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+    HttpResponse resp = unlockPrepaidCard(user.getId());
+
+    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 106007", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), errorObj.get("code"));
   }
 }
