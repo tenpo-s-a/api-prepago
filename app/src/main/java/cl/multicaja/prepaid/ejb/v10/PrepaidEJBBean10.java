@@ -1802,7 +1802,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
-    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
+    if(prepaidCard == null)  {
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    } else if (prepaidCard.getStatus() == null) {
       throw new ValidationException(TARJETA_NO_EXISTE);
     } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_ACTIVA);
