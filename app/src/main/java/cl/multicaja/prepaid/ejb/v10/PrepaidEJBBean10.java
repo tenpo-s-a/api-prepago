@@ -994,7 +994,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT());
+
+          fee.setValue(BigDecimal.valueOf(getCalculationsHelper().addIva(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT()).intValue()));
         } else {
           // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
           BigDecimal commission =getCalculationsHelper().calculateFee(transaction.getAmount().getValue(), getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE());
