@@ -160,7 +160,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3001, 10000)));
 
     PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
 
