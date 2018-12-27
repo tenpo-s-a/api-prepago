@@ -53,7 +53,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
   private static BigDecimal NEGATIVE = new BigDecimal(-1);
-  private static String APP_NAME = "api-prepaid";
+  private static String APP_NAME = "prepaid.appname";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
   /**
    * Foto frontal de la CI del usuario
@@ -292,7 +292,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
     cdtTransaction.setAmount(topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()));
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
     cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
@@ -1203,7 +1203,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAmount(amountValue);
     cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d", prepaidUser10.getRut()));
     cdtTransaction.setIndSimulacion(true);
 
     if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
@@ -1321,7 +1321,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAmount(amountValue);
     cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d", prepaidUser10.getRut()));
     cdtTransaction.setIndSimulacion(true);
     cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
