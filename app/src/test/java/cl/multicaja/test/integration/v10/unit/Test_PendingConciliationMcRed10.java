@@ -1,4 +1,4 @@
-package cl.multicaja.test.integration.v10.async;
+package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.DateUtils;
@@ -6,13 +6,15 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.*;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-@Ignore
 public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
   private static String BASE_DIR = "src/test/resources/multicajared/";
@@ -34,6 +35,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   private int notReconciledExpectedCount;
   private int onlyFileMovements;
 
+  private String fileName = "";
 
   @Before
   public void prepareDates() {
@@ -66,16 +68,33 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   }
 
   @After
-  public void cleanDB() {
+  public void deleteFile() {
+    try{
+      Files.deleteIfExists(Paths.get(BASE_DIR + this.fileName));
+    } catch (Exception e) {
+
+    }
+  }
+
+  @AfterClass
+  public static void cleanDB() {
     final String SCHEMA = ConfigUtils.getInstance().getProperty("schema");
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento_investigar", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", SCHEMA));
   }
 
   @Test
   public void rendicionCargas() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,false, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
+
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -107,6 +126,14 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   public void rendicionCargasNoConcilada() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,true, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -143,6 +170,14 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,false, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
 
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
+
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
     for (PrepaidMovement10 mov : movimientos) {
@@ -168,10 +203,20 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
   }
+
   @Test
   public void rendicionCargasReversadasNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
+
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -202,10 +247,19 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
   }
+
   @Test
   public void rendicionRetiros() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,false, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -232,10 +286,19 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
   }
+
   @Test
   public void rendicionRetirosNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,true, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -266,10 +329,19 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber " + (notReconciledExpectedCount + reconciledExpectedCount) + " no conciliados.", notReconciledExpectedCount + reconciledExpectedCount, notReconcilidedCount);
   }
+
   @Test
   public void rendicionRetirosReversados() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,false, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -296,10 +368,19 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber " + reconciledExpectedCount + " conciliados.", reconciledExpectedCount, reconciledCount);
     Assert.assertEquals("Debe haber " + notReconciledExpectedCount + " no conciliados.", notReconciledExpectedCount, notReconcilidedCount);
   }
+
   @Test
   public void rendicionRetirosReversadosNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, onlyFileMovements);
     Thread.sleep(1500);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+
+      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
@@ -414,6 +495,8 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     } else {
       createCSV(fileName, lstPrepaidMovementInFile);
     }
+
+    this.fileName = fileName;
     return lstPrepaidMovement10s;
   }
 
@@ -533,5 +616,9 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       this.wrongType = wrongType;
       this.wrongIndNorCor = wrongIndNorCor;
     }
+  }
+
+  private InputStream putSuccessFileIntoSftp(String filename) throws Exception {
+    return new FileInputStream(new File(BASE_DIR + filename));
   }
 }

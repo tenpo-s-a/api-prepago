@@ -1,4 +1,4 @@
-package cl.multicaja.test.integration.v10.async;
+package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Utils;
@@ -10,11 +10,7 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import cl.multicaja.test.integration.v10.helper.sftp.TestTecnocomSftpServer;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.Session;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
 import org.junit.*;
 
 import java.io.InputStream;
@@ -25,10 +21,7 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-@Ignore
 public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync {
-  private static Log log = LogFactory.getLog(Test_PendingTecnocomReconciliationFile10.class);
-
 
   private List<String> pans = Arrays.asList("5176081182052131", "5176081118047031", "5176081144225379");
   private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093");
@@ -68,11 +61,6 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     }
   }
 
-  @AfterClass
-  public static void tearDown(){
-
-  }
-
   @Before
   public void beforeEach() throws Exception {
     clearTransactions();
@@ -99,7 +87,15 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     final String filename = "PLJ61110.FINT0003.ONLINE";
-    putSuccessFileIntoSftp(filename);
+
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.SAT);
@@ -155,7 +151,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003.ONLINE";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API);
@@ -215,7 +217,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003.ONLINE";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
@@ -271,7 +279,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     Thread.sleep(1500);
 
@@ -332,7 +346,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     Thread.sleep(1500);
 
@@ -389,7 +409,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
@@ -444,7 +470,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
@@ -499,7 +531,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API);
@@ -558,7 +596,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API);
@@ -617,7 +661,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API);
@@ -677,7 +727,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API);
@@ -810,7 +866,13 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
 
     final String filename = "PLJ61110.FINT0003";
-    putSuccessFileIntoSftp(filename);
+    try {
+      InputStream is = putSuccessFileIntoSftp(filename);
+
+      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
 
     Thread.sleep(1500);
 
@@ -840,22 +902,8 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertEquals("Debe tener 1 movimiento", 1, movements.size());
   }
 
-  private void putSuccessFileIntoSftp(String filename) throws Exception {
-    try {
-      final Map<String, Object> context = TestTecnocomSftpServer.getInstance().openChanel();
-      InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
-      ChannelSftp channelSftp = (ChannelSftp) context.get("channel");
-      channelSftp.put(inputStream, TestTecnocomSftpServer.getInstance().BASE_DIR + "tecnocom/upload/" + filename);
-      channelSftp.exit();
-      ((Session) context.get("session")).disconnect();
-      inputStream.close();
-      log.info("Wait for camel process");
-      Thread.sleep(3000);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
-    }
-
+  private InputStream putSuccessFileIntoSftp(String filename) throws Exception {
+    return this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
   }
 
   private void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {
