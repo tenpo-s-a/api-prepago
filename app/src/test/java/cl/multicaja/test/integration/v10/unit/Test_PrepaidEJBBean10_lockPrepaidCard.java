@@ -129,6 +129,25 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     createPrepaidUser10(prepaidUser);
     PrepaidCard10 prepaidCard = buildPrepaidCard10Pending(prepaidUser);
+    prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    try{
+      getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
+    } catch(ValidationException ex) {
+      Assert.assertEquals("prepaid card not active", TARJETA_NO_ACTIVA.getValue(), ex.getCode());
+      throw ex;
+    }
+
+  }
+
+  @Test(expected = ValidationException.class)
+  public void shouldReturnExceptionWhen_PrepaidCardInProgress() throws Exception  {
+    User user = registerUser();
+    updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10Pending(prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     Assert.assertEquals("status PENDING", PrepaidCardStatus.PENDING, prepaidCard.getStatus());
@@ -136,7 +155,7 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
-      Assert.assertEquals("prepaid card not active", TARJETA_NO_ACTIVA.getValue(), ex.getCode());
+      Assert.assertEquals("prepaid card not active", TARJETA_PRIMERA_CARGA_EN_PROCESO.getValue(), ex.getCode());
       throw ex;
     }
 
@@ -152,10 +171,9 @@ public class Test_PrepaidEJBBean10_lockPrepaidCard extends TestBaseUnit {
     try{
       getPrepaidEJBBean10().lockPrepaidCard(null, user.getId());
     } catch(ValidationException ex) {
-      Assert.assertEquals("prepaid card not exists", TARJETA_NO_EXISTE.getValue(), ex.getCode());
+      Assert.assertEquals("prepaid card not exists", TARJETA_PRIMERA_CARGA_PENDIENTE.getValue(), ex.getCode());
       throw ex;
     }
-
   }
 
   @Test

@@ -1199,8 +1199,6 @@ public class TestBaseUnit extends TestApiBase {
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
-    System.out.println("Monto a cargar en tecnocom: " + impfac);
-
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,
       nomcomred, codact, clamondiv,impfac);

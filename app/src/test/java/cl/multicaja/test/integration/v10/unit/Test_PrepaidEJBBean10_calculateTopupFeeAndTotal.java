@@ -143,10 +143,8 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
   }
 
   /*
-    Calcula la comision WEB -> $0
+    Calcula la comision WEB -> $100
    */
-  //FIXME: revisar calculo
-  @Ignore
   @Test
   public void shouldCalculateWebWithdrawFee()  throws Exception{
     PrepaidWithdraw10 withdraw = new PrepaidWithdraw10();
@@ -161,7 +159,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(84), withdraw.getFee().getValue());
+    assertEquals("Deberia tener monto de comision = 100", BigDecimal.valueOf(100), withdraw.getFee().getValue());
     assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5100), withdraw.getTotal().getValue());
   }
 
