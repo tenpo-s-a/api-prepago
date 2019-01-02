@@ -144,8 +144,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
       Object[] params = {
         new InParam(account.getIdTransaction(), Types.BIGINT),
-        new InParam(account.getType(), Types.VARCHAR),
-        new InParam(account.getOrigin(), Types.VARCHAR),
+        new InParam(account.getType().getValue(), Types.VARCHAR),
+        new InParam(account.getOrigin().getValue(), Types.VARCHAR),
         account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
         account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
         account.getAmountUsd() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
@@ -188,7 +188,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     Object[] params = {
       ts,
-      ReconciliationStatusType.RECONCILED.getValue()
+      ReconciliationStatusType.RECONCILED.getValue(),
+      BusinessStatusType.OK.getValue(),
+      AccountingOriginType.MOVEMENT.getValue()
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -277,6 +279,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       ))
         .collect(Collectors.toList());
 
+
       List<Accounting10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
@@ -290,7 +293,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(m.getTipofac())) {
           type = AccountingTxType.RETIRO_POS;
         }
-
 
         Accounting10 accounting = new Accounting10();
         accounting.setIdTransaction(m.getId());

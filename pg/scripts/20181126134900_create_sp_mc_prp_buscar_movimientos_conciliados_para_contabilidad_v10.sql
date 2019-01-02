@@ -17,8 +17,10 @@
 -- // create_sp_mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10
 -- Migration SQL that makes the change goes here.
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10(
-  IN _in_fecha              VARCHAR,
-  IN _in_status             VARCHAR,
+  IN _in_fecha                      VARCHAR,
+  IN _in_reconciliation_status      VARCHAR,
+  IN _in_business_status            VARCHAR,
+  IN _in_accounting_movement_type   VARCHAR,
   OUT _id                   BIGINT,
   OUT _id_movimiento_ref    BIGINT,
   OUT _id_usuario           BIGINT,
@@ -111,10 +113,11 @@ BEGIN
     INNER JOIN ${schema}.prp_movimiento_conciliado mc
       ON m.id = mc.id_mov_ref
     LEFT JOIN ${schema.acc}.accounting acc
-      ON mc.id_mov_ref = acc.id_tx
+      ON (mc.id_mov_ref = acc.id_tx AND acc.origin = _in_accounting_movement_type )
   WHERE
     acc.id_tx IS NULL AND
-    mc.estado = _in_status AND
+    m.estado_de_negocio = _in_business_status AND
+    mc.estado = _in_reconciliation_status AND
     mc.fecha_registro <= TO_TIMESTAMP(_in_fecha, 'YYYY-MM-DD HH24:MI:SS')
   ORDER BY id DESC;
    RETURN;
@@ -124,5 +127,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10(VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
 

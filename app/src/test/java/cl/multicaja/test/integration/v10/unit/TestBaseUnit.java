@@ -113,6 +113,10 @@ public class TestBaseUnit extends TestApiBase {
     return getPrepaidCardEJBBean10().getSchema();
   }
 
+  public static String getSchemaAccounting() {
+    return getPrepaidCardEJBBean10().getSchemaAccounting();
+  }
+
   /**
    *
    * @return

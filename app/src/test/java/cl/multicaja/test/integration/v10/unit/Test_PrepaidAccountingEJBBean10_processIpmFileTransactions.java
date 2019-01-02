@@ -86,6 +86,21 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
         Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
       }
 
+      {
+        bdIpmFiles = getPrepaidAccountingEJBBean10().findIpmFile(null, null, ipmFile.getFileName(), null, null);
+
+        Assert.assertEquals("Debe tener 1 archivo", Long.valueOf(1), Long.valueOf(bdIpmFiles.size()));
+
+        bdIpmFile = bdIpmFiles.get(0);
+
+        Assert.assertNotNull("Debe tener id", bdIpmFile.getId());
+        Assert.assertNotNull("Debe tener timestamps", bdIpmFile.getTimestamps());
+        Assert.assertNotNull("Debe tener timestamps.created_at", bdIpmFile.getTimestamps().getCreatedAt());
+        Assert.assertNotNull("Debe tener timestamps.updated_at", bdIpmFile.getTimestamps().getUpdatedAt());
+        Assert.assertEquals("Debe tener mismo fileName", ipmFile.getFileName(), bdIpmFile.getFileName());
+        Assert.assertEquals("Debe tener status [PROCESSING]", IpmFileStatus.PROCESSED, bdIpmFile.getStatus());
+      }
+
     } catch (Exception e) {
       Assert.fail("No debe estar aca");
     }
@@ -102,8 +117,8 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
     for (Map row : rows) {
       Accounting10 acc = new Accounting10();
       acc.setId((Long)(row.get("id")));
-      acc.setType(AccountingTxType.valueOfEnum((String)row.get("type")));
-      acc.setOrigin(AccountingOriginType.valueOfEnum((String)row.get("origin")));
+      acc.setType(AccountingTxType.fromValue((String)row.get("type")));
+      acc.setOrigin(AccountingOriginType.fromValue((String)row.get("origin")));
 
       trxs.add(acc);
     }
