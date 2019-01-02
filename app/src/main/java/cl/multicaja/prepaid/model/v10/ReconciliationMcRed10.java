@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.model.v10;
 
+import java.math.BigDecimal;
+
 public class ReconciliationMcRed10 {
 
 
@@ -7,7 +9,7 @@ public class ReconciliationMcRed10 {
 
   private String dateTrx;
 
-  private Long amount;
+  private BigDecimal amount;
 
   private Long clientId;
 
@@ -45,11 +47,11 @@ public class ReconciliationMcRed10 {
     this.externalId = externalId;
   }
 
-  public Long getAmount() {
+  public BigDecimal getAmount() {
     return amount;
   }
 
-  public void setAmount(Long amount) {
+  public void setAmount(BigDecimal amount) {
     this.amount = amount;
   }
 }
