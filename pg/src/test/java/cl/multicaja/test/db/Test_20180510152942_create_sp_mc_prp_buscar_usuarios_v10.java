@@ -23,15 +23,10 @@ import static cl.multicaja.test.db.Test_20180510152848_create_sp_mc_prp_crear_us
 public class Test_20180510152942_create_sp_mc_prp_buscar_usuarios_v10  extends TestDbBasePg {
 
   @BeforeClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
-  }
-
   @AfterClass
-  public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
 
   /**

@@ -35,10 +35,12 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
   }
 
 
-  public static Map<String, Object> searchMovements(String date, String status) throws SQLException {
+  public static Map<String, Object> searchMovements(String date, String reconciliationStatus, String businessStatus, String accountingMovementStatus) throws SQLException {
     Object[] params = {
       date != null ? date :  new NullParam(Types.VARCHAR),
-      status != null ? status : new NullParam(Types.VARCHAR)
+      reconciliationStatus != null ? reconciliationStatus : new NullParam(Types.VARCHAR),
+      businessStatus != null ? businessStatus : new NullParam(Types.VARCHAR),
+      accountingMovementStatus != null ? accountingMovementStatus : new NullParam(Types.VARCHAR)
     };
 
     return dbUtils.execute(SCHEMA + ".mc_prp_buscar_movimientos_conciliados_para_contabilidad_v10", params);
@@ -100,7 +102,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
 
     ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-    Map<String, Object> resp = searchMovements(utc.format(formatter), "OK");
+    Map<String, Object> resp = searchMovements(utc.format(formatter), "OK", "OK", "IPM");
 
     List result = (List)resp.get("result");
 
@@ -157,7 +159,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
 
     ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-    Map<String, Object> resp = searchMovements(utc.format(formatter), "OK");
+    Map<String, Object> resp = searchMovements(utc.format(formatter), "OK","OK", "IPM");
 
     List result = (List)resp.get("result");
 
@@ -197,7 +199,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
 
     ZonedDateTime hereAndNow = Instant.now().atZone(ZoneId.of("America/Santiago"));
 
-    Map<String, Object> resp = searchMovements(hereAndNow.format(formatter), "OK");
+    Map<String, Object> resp = searchMovements(hereAndNow.format(formatter), "OK" ,"OK", "IPM");
 
     List result = (List)resp.get("result");
 

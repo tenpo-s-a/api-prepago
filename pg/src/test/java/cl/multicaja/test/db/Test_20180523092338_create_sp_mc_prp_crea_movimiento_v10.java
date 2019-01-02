@@ -22,13 +22,10 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
   private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_v10";
 
   @BeforeClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
-  }
-
   @AfterClass
-  public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
 
   public static InParam setInParam(Object o){
