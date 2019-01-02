@@ -53,7 +53,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
   private static BigDecimal NEGATIVE = new BigDecimal(-1);
-  private static String APP_NAME = "api-prepaid";
+  private static String APP_NAME = "prepaid.appname";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
   /**
    * Foto frontal de la CI del usuario
@@ -292,7 +292,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
     cdtTransaction.setAmount(topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()));
     cdtTransaction.setTransactionType(topupRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME)+"_"+user.getRut().getValue());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
     cdtTransaction.setGloss(topupRequest.getCdtTransactionType().getName()+" "+topupRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
@@ -994,7 +994,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          fee.setValue(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT());
+
+          fee.setValue(BigDecimal.valueOf(getCalculationsHelper().addIva(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT()).intValue()));
         } else {
           // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
           BigDecimal commission =getCalculationsHelper().calculateFee(transaction.getAmount().getValue(), getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE());
@@ -1202,7 +1203,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAmount(amountValue);
     cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d", prepaidUser10.getRut()));
     cdtTransaction.setIndSimulacion(true);
 
     if(PrepaidUserLevel.LEVEL_1.equals(prepaidUser10.getUserLevel())) {
@@ -1320,7 +1321,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setAmount(amountValue);
     cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
     cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser10.getRut());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d", prepaidUser10.getRut()));
     cdtTransaction.setIndSimulacion(true);
     cdtTransaction.setTransactionType(simulationNew.isTransactionWeb() ? CdtTransactionType.RETIRO_WEB : CdtTransactionType.RETIRO_POS);
     cdtTransaction.setGloss(cdtTransaction.getTransactionType().toString());
@@ -1801,8 +1802,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
-    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+    if(prepaidCard == null)  {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+    } else if (prepaidCard.getStatus() == null) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    } else if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_ACTIVA);
     }
@@ -1811,8 +1816,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private PrepaidCard10 getPrepaidCardToUnlock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
-    if(prepaidCard == null || (prepaidCard != null && prepaidCard.getStatus() == null)) {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+    if(prepaidCard == null) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
+    } else if (prepaidCard.getStatus() == null) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
+    } else if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
+      throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     } else if(!PrepaidCardStatus.ACTIVE.equals(prepaidCard.getStatus()) && !PrepaidCardStatus.LOCKED.equals(prepaidCard.getStatus())){
       throw new ValidationException(TARJETA_NO_BLOQUEADA);
     }

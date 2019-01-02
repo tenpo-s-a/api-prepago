@@ -23,6 +23,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
   @BeforeClass
   @AfterClass
   public static void beforeClass() {
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
   }
@@ -58,6 +59,11 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
+      /**
+       * Agrega movimiento en tabla de contabilidad con el mismo ID de movimiento pero con origen IPM
+       */
+      addAccountingIpmTrx(prepaidMovement10.getId());
+
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -73,6 +79,18 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+
+      // Agrega movimiento reversado
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.REVERSED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+
+
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
@@ -95,5 +113,12 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       "UPDATE " + SCHEMA + ".prp_movimiento_conciliado SET fecha_registro = "
         + "TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS')"
         + "WHERE id_mov_ref = " + idMovimiento.toString());
+  }
+
+  private void addAccountingIpmTrx(Long idMovimiento)  {
+    final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
+
+    DBUtils.getInstance().getJdbcTemplate().execute(
+      String.format("INSERT INTO %s.accounting (id_tx, \"type\", origin, amount, currency, ammount_usd, exchange_rate_dif, fee, fee_iva, transaction_date, create_date, update_date) VALUES(%s, 'CARGA_POS', 'IPM', 3119.00, 152, 0.00, 0.00, 119.00, 19.00, '2019-01-30 08:01:01.000', '2018-12-27 20:01:02.048', '2018-12-27 20:01:02.048');", SCHEMA, idMovimiento));
   }
 }

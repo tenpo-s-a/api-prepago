@@ -113,6 +113,10 @@ public class TestBaseUnit extends TestApiBase {
     return getPrepaidCardEJBBean10().getSchema();
   }
 
+  public static String getSchemaAccounting() {
+    return getPrepaidCardEJBBean10().getSchemaAccounting();
+  }
+
   /**
    *
    * @return
@@ -1198,8 +1202,6 @@ public class TestBaseUnit extends TestApiBase {
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
-
-    System.out.println("Monto a cargar en tecnocom: " + impfac);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,

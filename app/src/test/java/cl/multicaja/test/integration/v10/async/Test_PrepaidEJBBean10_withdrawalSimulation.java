@@ -610,8 +610,6 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  // Ignorado, con la validacion de tecnocom no pudo llegar al limite en este test
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_monthly_limit() throws Exception {
 
@@ -622,27 +620,14 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
-
-    //se actualiza el usuario a nivel 1 para poder realizar la 1ra carga
-    user.setNameStatus(NameStatus.VERIFIED);
-    updateUser(user);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-      prepaidTopup10.setMerchantCode(merchantCodeWEB); //carga WEB
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3000));
-
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-      System.out.println("resp:: " + resp);
-
-      Assert.assertNotNull("debe tener un id", resp.getId());
-    }
+    doTopup(user, 3000, merchantCodeWEB);
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
@@ -655,55 +640,80 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     System.out.println(prepaidBalance10);
 
-    Assert.assertEquals("El saldo del usuario debe ser 2010 pesos (carga inicial - comision de apertura (990))", 2010L, prepaidBalance10.getBalance().getValue().longValue());
+    Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision de apertura (0))", 3000, prepaidBalance10.getBalance().getValue().longValue());
 
     long sumBalance = prepaidBalance10.getBalance().getValue().longValue();
 
-    //se cargan 900.000 mil pesos, enesimas cargas
-    for(int j = 1; j <= 10; j++) {
+    {
+      //se cargan 500.000 mil pesos, enesimas cargas
+      for(int j = 1; j <= 5; j++) {
 
-      System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
+        System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
 
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-      prepaidTopup10.setMerchantCode(merchantCodeWEB); //carga WEB
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(j == 10 ? 97000 : 100000));
+        Integer amount = j == 5 ? 97000 : 100000;
+        doTopup(user, amount, merchantCodeWEB);
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        Thread.sleep(1000);
 
-      System.out.println("resp:: " + resp);
+        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
 
-      Assert.assertNotNull("debe tener un id", resp.getId());
+        System.out.println(prepaidBalance10);
 
-      Thread.sleep(1000);
+        sumBalance += amount;
 
-      prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        Assert.assertEquals("El saldo del usuario debe estar actualizado", BigDecimal.valueOf(sumBalance), prepaidBalance10.getBalance().getValue());
 
-      System.out.println(prepaidBalance10);
+        System.out.println("---------------------------------------------------------------------------------------");
+      }
 
-      sumBalance += prepaidTopup10.getAmount().getValue().longValue();
-
-      Assert.assertEquals("El saldo del usuario debe estar actualizado", BigDecimal.valueOf(sumBalance), prepaidBalance10.getBalance().getValue());
-
-      System.out.println("---------------------------------------------------------------------------------------");
+      // se retiran 400.000
+      doWirhdraw(user, password,450000L, merchantCodeWEB);
+      sumBalance -= 450100;
     }
+
+    {
+      //se cargan 400.000 mil pesos, enesimas cargas
+      for(int j = 1; j <= 4; j++) {
+
+        System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
+
+        Integer amount = 100000;
+        doTopup(user, amount, merchantCodeWEB);
+
+        Thread.sleep(1000);
+
+        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+
+        System.out.println(prepaidBalance10);
+
+        sumBalance += amount;
+
+        Assert.assertEquals("El saldo del usuario debe estar actualizado", BigDecimal.valueOf(sumBalance), prepaidBalance10.getBalance().getValue());
+
+        System.out.println("---------------------------------------------------------------------------------------");
+      }
+
+      // se retiran 400.000
+      doWirhdraw(user, password,400000L, merchantCodeWEB);
+      sumBalance -= 400100;
+    }
+
+    // se cargan 450000 directamente solo para simular
+    {
+      InclusionMovimientosDTO dto = topupInTecnocom(prepaidCard10, BigDecimal.valueOf(450000));
+      Assert.assertTrue("Debe ser exitoso", dto.isRetornoExitoso());
+    }
+
 
     prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
     sumBalance = prepaidBalance10.getBalance().getValue().longValue();
 
-    //se retiran 900.000 mil pesos
-    for(int j = 1; j <= 9; j++) {
+    //se retiran 150.000 mil pesos
+    for(int j = 1; j <= 1; j++) {
 
       System.out.println("------------------------------------ Retiro " + j +" ---------------------------------------------");
 
-      NewPrepaidWithdraw10 prepaidWithdraw10 = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw10.setMerchantCode(merchantCodeWEB); //carga WEB
-      prepaidWithdraw10.getAmount().setValue(BigDecimal.valueOf(100000));
-
-      PrepaidWithdraw10 resp = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw10);
-
-      System.out.println("resp:: " + resp);
-
-      Assert.assertNotNull("debe tener un id", resp.getId());
+      doWirhdraw(user, password, 100000L, merchantCodeWEB);
 
       Thread.sleep(1000);
 
@@ -711,7 +721,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       System.out.println(prepaidBalance10);
 
-      sumBalance-= prepaidWithdraw10.getAmount().getValue().longValue();
+      sumBalance -= 100000;
       sumBalance -= 100;
 
       Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
@@ -739,6 +749,27 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     } catch(ValidationException vex) {
       System.out.println(vex);
       Assert.assertEquals("debe ser error de supera saldo", EL_RETIRO_SUPERA_EL_MONTO_MAXIMO_DE_RETIROS_MENSUALES.getValue(), vex.getCode());
+    }
+  }
+
+  private void doTopup(User user, Integer amount, String merchantCode) throws Exception {
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    prepaidTopup10.setMerchantCode(merchantCode); //carga WEB
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(amount));
+
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+
+    Assert.assertNotNull("debe tener un id", resp.getId());
+  }
+
+  private void doWirhdraw(User user, String password, Long amount, String merchantCode) throws Exception {
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
+    try {
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+    } catch (ValidationException vex) {
+      Assert.fail("No debe pasar por aca");
     }
   }
 }
