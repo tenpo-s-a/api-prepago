@@ -12,22 +12,22 @@ services:
         sleep 60s
         cd /prepago/
         rm datos-mock.cache
-        ./install.sh 
-        cd /prepago/pg 
-        ./db-create.sh -Denv=ci 
-        ./migrate-up.sh -Denv=ci 
-        cd /prepago/app 
-        ./test.sh 
+        ./install.sh
+        cd /prepago/pg
+        ./db-create.sh -Denv=ci
+        ./migrate-up.sh -Denv=ci
+        cd /prepago/app
+        ./test.sh
         ./integration-test.sh -Denv=ci
 
   api-users-migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-dc93ab0f11c0b9571b828896003076ac88e12833
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-b7e0e1fedd82c676407fc69e6655ad603b7a5c02
     entrypoint: "/bin/sh -c"
     command:
-      - | 
-        cd /app/pg 
-        ./db-create.sh -Denv=ci 
-        ./migrate-up.sh -Denv=ci 
+      - |
+        cd /app/pg
+        ./db-create.sh -Denv=ci
+        ./migrate-up.sh -Denv=ci
         tail -f /dev/null
     volumes:
       - ~/.m2:/root/.m2
@@ -38,7 +38,7 @@ services:
     image: postgres:9.6.3-alpine
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-dc93ab0f11c0b9571b828896003076ac88e12833
+    image: mccontainerregistry.azurecr.io/api-users:ci-b7e0e1fedd82c676407fc69e6655ad603b7a5c02
     depends_on:
       - database
       - api-users-migration
