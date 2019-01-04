@@ -75,7 +75,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-  @Ignore
   @Test
   public void testReinjectTopup() throws Exception {
 
