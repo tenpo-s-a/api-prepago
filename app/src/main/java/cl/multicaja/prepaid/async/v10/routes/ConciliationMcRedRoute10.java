@@ -1,7 +1,5 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.async.v10.processors.PendingConciliationMcRed10;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,7 +20,7 @@ public class ConciliationMcRedRoute10 extends BaseRoute10 {
      */
     //TODO: Quitar este if cuando se tenga la configuracion de ambientes para SFTP mastercard
     //if(ConfigUtils.isEnvTest()) {
-    //  from(SFTP_HOST_ENDPOINT).process(new PendingConciliationMcRed10(this).processReconciliationsMcRed());
+      //from(SFTP_HOST_ENDPOINT).process(new PendingConciliationMcRed10(this).processReconciliationsMcRed());
     //}
   }
 

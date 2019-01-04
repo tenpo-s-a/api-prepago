@@ -25,13 +25,10 @@ public class Test_20180523111741_create_sp_mc_prp_actualiza_movimiento_v10 exten
   private final String cuenta = getRandomNumericString(12);
 
   @BeforeClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
-  }
-
   @AfterClass
-  public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento", SCHEMA));
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
 
   @Test

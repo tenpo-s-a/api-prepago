@@ -11,6 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
@@ -91,10 +93,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
           throw e;
         }
 
-        /*
         getRoute().getPrepaidAccountingEJBBean10().processMovementForAccounting(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
-        getRoute().getPrepaidAccountingEJBBean10().generateAccountingFile(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
-        */
       }
     };
   }
