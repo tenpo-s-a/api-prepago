@@ -150,7 +150,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         if(originalMovement == null) {
           // Movimiento original no existe.
-
           PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(prepaidCard10.getIdUser(), pan, trx);
           movement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
           movement10.setConSwitch(ReconciliationStatusType.PENDING);
@@ -166,7 +165,17 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
 
-          //TODO: Movimiento original no existe. Agregar informacion en tabla de movimientos a investigar
+          log.info("Movimiento no encontrado, no conciliado");
+          // Construyendo un Id.
+          String researchId = "ExtId:[";
+          if (trx.getNumaut() != null) {
+            researchId += trx.getNumaut();
+          } else {
+            researchId += "NoExternalId";
+          }
+
+          researchId += "]-";
+          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
@@ -223,37 +232,31 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
 
-          //TODO: Movimiento original no existe. Agregar informacion en tabla de movimientos a investigar
+          log.info("Movimiento no encontrado, no conciliado");
+          // Construyendo un Id.
+          String researchId = "ExtId:[";
+          if (trx.getNumaut() != null) {
+            researchId += trx.getNumaut();
+          } else {
+            researchId += "NoExternalId";
+          }
+
+          researchId += "]-";
+          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
 
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
-          if(!originalMovement.getMonto().equals(trx.getImpfac())){
+          if(originalMovement.getMonto().compareTo(trx.getImpfac()) != 0 ){
+            log.info("Movimiento no conciliado");
             getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
               ReconciliationStatusType.NOT_RECONCILED);
-          } else {
-            switch (originalMovement.getEstado()) {
-              case PROCESS_OK:
-                getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+          }
+          else{
+             getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                   originalMovement.getId(),
                   ReconciliationStatusType.RECONCILED);
-                break;
-              case PENDING:
-              case IN_PROCESS:
-              case REJECTED:
-                getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
-                  originalMovement.getId(),
-                  ReconciliationStatusType.NOT_RECONCILED);
-                break;
-              case ERROR_TECNOCOM_REINTENTABLE:
-              case ERROR_TIMEOUT_RESPONSE:
-              case ERROR_TIMEOUT_CONEXION:
-                getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
-                  originalMovement.getId(),
-                  ReconciliationStatusType.RECONCILED);
-                break;
-            }
           }
         } else  {
           log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));

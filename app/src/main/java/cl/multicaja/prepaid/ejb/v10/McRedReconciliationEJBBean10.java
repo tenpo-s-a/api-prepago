@@ -54,22 +54,33 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 26, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_cargas_mcpsa_mc");
-    } else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
-    } else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
+    }
+    else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
+      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
+    }
+    else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
+      log.info("IN rendicion_cargas_reversadas_mcpsa_mc");
       conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 37, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
-    } else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
+      log.info("OUT rendicion_cargas_reversadas_mcpsa_mc");
+    }
+    else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
+      log.info("IN rendicion_retiros_mcpsa_mc");
       conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 27, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
-    } else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
-    } else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
+      log.info("OUT rendicion_retiros_mcpsa_mc");
+    }
+    else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
+      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
+    }
+    else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
+      log.info("IN rendicion_retiros_reversados_mcpsa_mc");
       conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 38, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
+      log.info("OUT rendicion_retiros_reversados_mcpsa_mc");
     }
   }
 
@@ -78,9 +89,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       for (ReconciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
         log.info(prepaidMovement10);
-        if (prepaidMovement10 == null) {
-          log.info("No conciliado");
-
+        if (prepaidMovement10 == null)
+        {
+          log.info("Movimiento no encontrado, no conciliado");
           // Construyendo un Id.
           String researchId = "ExtId:[";
           if (recTmp.getExternalId() != null) {
@@ -94,17 +105,22 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.SWITCH, fileName);
           continue;
         }
-        else {
-          if (!recTmp.getAmount().equals(prepaidMovement10.getMonto().longValue())) {
-            log.error("No conciliado");
-            getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
-            continue;
-          }
-          log.info("Conciliado");
-          getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
+        else
+          {
+            if (recTmp.getAmount().compareTo(prepaidMovement10.getMonto()) != 0) {
+              log.error("No conciliado");
+              getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
+              continue;
+            }
+            else {
+              log.info("Conciliado");
+              getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
+            }
+
         }
       }
     }catch (Exception e){
+      e.printStackTrace();
       throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
     }
   }
@@ -116,7 +132,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
    * @param is
    * @return
    */
-  private static List<ReconciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
+  private List<ReconciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
     List<ReconciliationMcRed10> lstReconciliationMcRed10;
     log.info("IN");
     try {
@@ -132,7 +148,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         reconciliationMcRed10.setMcCode(record[0]);
         reconciliationMcRed10.setDateTrx(record[1]);
         reconciliationMcRed10.setClientId(Long.valueOf(record[2]));
-        reconciliationMcRed10.setAmount(Long.valueOf(record[3]));
+        reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(record[3]));
         if(!fileName.contains("reversa")) {
           reconciliationMcRed10.setExternalId(Long.valueOf(record[4]));
         }

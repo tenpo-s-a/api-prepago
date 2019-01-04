@@ -74,7 +74,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_switch_v10(
         estado_con_switch = 'PENDING' AND
         tipo_movimiento = _in_tipo_movimiento AND
         indnorcor = _in_indnorcor AND
-        fecha_creacion >= _fecha_inicial_timestamp AND
+        --fecha_creacion >= _fecha_inicial_timestamp AND
         fecha_creacion <= _fecha_final_timestamp;
 
      EXCEPTION
