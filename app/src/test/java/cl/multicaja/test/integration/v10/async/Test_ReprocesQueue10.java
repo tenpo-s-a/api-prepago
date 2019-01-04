@@ -18,10 +18,7 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
@@ -78,6 +75,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
+  @Ignore
   @Test
   public void testReinjectTopup() throws Exception {
 
