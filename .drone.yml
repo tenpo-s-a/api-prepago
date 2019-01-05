@@ -11,7 +11,7 @@ pipeline:
       event: [ push ]
 
   dbusers_migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-b7e0e1fedd82c676407fc69e6655ad603b7a5c02
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-dc93ab0f11c0b9571b828896003076ac88e12833
     commands:
       - sleep 15
       - cd /app/pg && ./db-create.sh -Denv=ci
@@ -162,7 +162,7 @@ services:
         exclude: master
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-b7e0e1fedd82c676407fc69e6655ad603b7a5c02
+    image: mccontainerregistry.azurecr.io/api-users:ci-dc93ab0f11c0b9571b828896003076ac88e12833
     log-driver: none
     when:
       event: [ push ]
