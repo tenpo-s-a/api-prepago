@@ -67,11 +67,14 @@ public class TestBaseUnit extends TestApiBase {
   private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
+  private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
+  private static McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
+  private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     System.out.println("Exist: " + getPrepaidCardEJBBean10());
-    calculationsHelper.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+    calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
   }
 
   protected final static HttpHeader[] DEFAULT_HTTP_HEADERS2 = {
@@ -108,6 +111,10 @@ public class TestBaseUnit extends TestApiBase {
    */
   public static String getSchema() {
     return getPrepaidCardEJBBean10().getSchema();
+  }
+
+  public static String getSchemaAccounting() {
+    return getPrepaidCardEJBBean10().getSchemaAccounting();
   }
 
   /**
@@ -236,6 +243,30 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
     }
     return prepaidAccountingEJBBean10;
+  }
+
+  public static TecnocomReconciliationEJBBean10 getTecnocomReconciliationEJBBean10() {
+    if(tecnocomReconciliationEJBBean10 == null) {
+      tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
+      tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+    }
+    return tecnocomReconciliationEJBBean10;
+  }
+
+  public static McRedReconciliationEJBBean10 getMcRedReconciliationEJBBean10() {
+    if(mcRedReconciliationEJBBean10 == null) {
+      mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
+      mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+    }
+    return mcRedReconciliationEJBBean10;
+  }
+
+  public static MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    if(mastercardCurrencyUpdateEJBBean10 == null) {
+      mastercardCurrencyUpdateEJBBean10 = new MastercardCurrencyUpdateEJBBean10();
+    }
+    return mastercardCurrencyUpdateEJBBean10;
   }
 
   /**
@@ -1171,8 +1202,6 @@ public class TestBaseUnit extends TestApiBase {
     String nomcomred = "prueba";
     String numreffac = getUniqueLong().toString();
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
-
-    System.out.println("Monto a cargar en tecnocom: " + impfac);
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
       numreffac, impfac, numaut, codcom,

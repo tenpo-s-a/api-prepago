@@ -1,11 +1,15 @@
 package cl.multicaja.accounting.ejb.v10;
 
+import cl.multicaja.accounting.helpers.mastercard.MastercardIpmFileHelper;
+import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
+import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
+import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
 import cl.multicaja.accounting.model.v10.AccountingOriginType;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -15,23 +19,19 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.accounting.model.v10.Accounting10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Base64Utils;
 
 import javax.ejb.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.*;
@@ -144,8 +144,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
       Object[] params = {
         new InParam(account.getIdTransaction(), Types.BIGINT),
-        new InParam(account.getType(), Types.VARCHAR),
-        new InParam(account.getOrigin(), Types.VARCHAR),
+        new InParam(account.getType().getValue(), Types.VARCHAR),
+        new InParam(account.getOrigin().getValue(), Types.VARCHAR),
         account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
         account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
         account.getAmountUsd() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
@@ -188,7 +188,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     Object[] params = {
       ts,
-      ReconciliationStatusType.RECONCILED.getValue()
+      ReconciliationStatusType.RECONCILED.getValue(),
+      BusinessStatusType.OK.getValue(),
+      AccountingOriginType.MOVEMENT.getValue()
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -277,6 +279,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       ))
         .collect(Collectors.toList());
 
+
       List<Accounting10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
@@ -290,7 +293,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(m.getTipofac())) {
           type = AccountingTxType.RETIRO_POS;
         }
-
 
         Accounting10 accounting = new Accounting10();
         accounting.setIdTransaction(m.getId());
@@ -327,7 +329,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         accounting.setFee(fee);
 
         // Se calcula el Iva correspondiente a la comision
-        BigDecimal iva = getCalculationsHelper().calculateIva(fee);
+        BigDecimal iva = getCalculationsHelper().calculateIvaFromTotal(fee);
         accounting.setFeeIva(iva);
         accounting.setTransactionDate(m.getFechaCreacion());
         accountingMovements.add(accounting);
@@ -406,4 +408,314 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     emailBodyToSend.setAddress(emailAddress);
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
   }
+
+  @Override
+  public IpmFile saveIpmFileRecord(Map<String, Object> headers, IpmFile file) throws Exception {
+    if(file == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "ipm file"));
+    }
+    if(StringUtils.isAllBlank(file.getFileName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "file.name"));
+    }
+    if(file.getStatus() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "file.status"));
+    }
+    Object[] params = {
+      file.getFileName() == null ? new NullParam(Types.VARCHAR) : new InParam(file.getFileName(), Types.VARCHAR),
+      file.getFileId() == null ?  "" : new InParam(file.getFileId(), Types.VARCHAR),
+      file.getMessageCount() == null ? 0 : new InParam( file.getMessageCount(), Types.NUMERIC),
+      file.getStatus() == null ? new NullParam(Types.VARCHAR) : new InParam(file.getStatus().getValue(), Types.VARCHAR),
+      new OutParam("_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_acc_create_ipm_file_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_acc_create_ipm_file_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+    file.setId(getNumberUtils().toLong(resp.get("_id")));
+
+    return file;
+  }
+
+  @Override
+  public IpmFile updateIpmFileRecord(Map<String, Object> headers, IpmFile file) throws Exception {
+    if(file == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "ipm file"));
+    }
+    if(file.getId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "ipm file.id"));
+    }
+    if(file.getStatus() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "file.status"));
+    }
+
+    Object[] params = {
+      file.getId() == null ? new NullParam(Types.BIGINT) : new InParam(file.getId(), Types.BIGINT),
+      file.getFileId() == null ?  "" : new InParam(file.getFileId(), Types.VARCHAR),
+      file.getMessageCount() == null ? 0 : new InParam( file.getMessageCount(), Types.NUMERIC),
+      file.getStatus() == null ? new NullParam(Types.VARCHAR) : new InParam(file.getStatus().getValue(), Types.VARCHAR),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_ipm_file_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_acc_update_ipm_file_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+    return file;
+  }
+
+  public List<IpmFile> findIpmFile(Map<String, Object> headers, Long id, String fileName, String fileId, IpmFileStatus status) throws Exception {
+    //si viene algun parametro en null se establece NullParam
+    Object[] params = {
+      id != null ? id : new NullParam(Types.BIGINT),
+      fileName != null ? fileName : new NullParam(Types.VARCHAR),
+      fileId != null ? fileId : new NullParam(Types.VARCHAR),
+      status != null ? status.getValue() : new NullParam(Types.VARCHAR)
+    };
+
+    //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
+    RowMapper rm = (Map<String, Object> row) -> {
+      IpmFile c = new IpmFile();
+      c.setId(getNumberUtils().toLong(row.get("_id"), null));
+      c.setFileId(String.valueOf(row.get("_file_id")));
+      c.setFileName(String.valueOf(row.get("_file_name")));
+      c.setStatus(IpmFileStatus.valueOfEnum(row.get("_status").toString().trim()));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_create_date"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_update_date"));
+      c.setTimestamps(timestamps);
+      return c;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_ipm_file_v10",  rm, params);
+    List<IpmFile> res = (List<IpmFile>)resp.get("result");
+    return res != null ? res : Collections.EMPTY_LIST;
+  }
+
+  @Override
+  public void convertIpmFileToCsv(String ipmFileName) throws Exception {
+    if(StringUtils.isAllBlank(ipmFileName)) {
+      throw new Exception("Ipm file name is null or empty");
+    }
+
+    /**
+     * Se procesa el archivo IPM con libreria python
+     * https://github.com/adelosa/mciutil
+     */
+
+    Runtime rt = Runtime.getRuntime();
+    Process pr = rt.exec("mideu extract " + ipmFileName);
+
+    BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+    String line = null;
+
+    while((line=input.readLine()) != null) {
+      System.out.println(line);
+    }
+
+    int exitVal = pr.waitFor();
+    if(exitVal != 0){
+      throw new Exception("Python file conversion exit with code " + exitVal);
+    }
+    log.info("Python file conversion exit with code " + exitVal);
+  }
+
+  @Override
+  public IpmFile processIpmFile(Map<String, Object> headers, File file, IpmFile ipmFile) throws Exception {
+    if(file == null || !file.exists()){
+      throw new Exception("Csv file is null or does not exists");
+    }
+
+    if(ipmFile == null) {
+      throw new Exception("IpmFile object is null");
+    }
+
+    FileReader csvFile = new FileReader(file);
+
+    Boolean isReadSuccess;
+
+    try {
+      ipmFile = MastercardIpmFileHelper.readCsvIpmData(csvFile, ipmFile);
+      ipmFile.setStatus(IpmFileStatus.PROCESSING);
+      csvFile.close();
+      isReadSuccess = Boolean.TRUE;
+    } catch(Exception e) {
+      log.error(String.format("Error reading csv file from IPM file -> [%s]", file.getName()), e);
+      ipmFile = new IpmFile();
+      ipmFile.setStatus(IpmFileStatus.ERROR);
+      csvFile.close();
+      throw e;
+    }
+
+    if(ipmFile.getId() == null) {
+      ipmFile = this.saveIpmFileRecord(null, ipmFile);
+    } else {
+      ipmFile.setStatus(IpmFileStatus.PROCESSING);
+      ipmFile = this.updateIpmFileRecord(null, ipmFile);
+    }
+
+
+    if(!isReadSuccess) {
+      throw new Exception(String.format("Error reading csv file from IPM file -> [%s]", file.getName()));
+    }
+
+    Boolean isSuspicious = Boolean.FALSE;
+    try {
+      MastercardIpmFileHelper.validateFile(ipmFile);
+    } catch(Exception e) {
+      if(ipmFile.getHeader() != null && ipmFile.getHeader().getFileId() != null) {
+        ipmFile.setFileId(ipmFile.getHeader().getFileId());
+      }
+      ipmFile.setStatus(IpmFileStatus.SUSPICIOUS);
+      ipmFile = this.updateIpmFileRecord(null, ipmFile);
+      isSuspicious = Boolean.TRUE;
+      file.delete();
+    }
+
+    if(isSuspicious) {
+      throw new Exception(String.format("IPM file seems suspicious -> [%s]", file.getName()));
+    }
+
+    ipmFile.setFileId(ipmFile.getHeader().getFileId());
+    this.updateIpmFileRecord(null, ipmFile);
+
+    return ipmFile;
+  }
+
+  @Override
+  public void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception {
+    if(ipmFile == null) {
+      throw new Exception("IpmFile object null");
+    }
+
+    if(ipmFile.getTransactions().isEmpty()) {
+      log.info(String.format("There are not transactions to process in file [%s]", ipmFile.getFileName()));
+      return;
+    }
+
+    List<Accounting10> transactions = new ArrayList<>();
+    for (IpmMessage trx: ipmFile.getTransactions()) {
+
+      Accounting10 acc = new Accounting10();
+      acc.setOrigin(AccountingOriginType.IPM);
+      acc.setType(this.getTransactionType(trx));
+      acc.setIdTransaction(Long.valueOf(trx.getApprovalCode()));
+      acc.setTransactionDate(Timestamp.from(trx.getTransactionLocalDate().toInstant()));
+
+      // Monto en pesos
+      acc.setAmount(new NewAmountAndCurrency10(
+        IpmMessage.movePeriod(
+          NumberUtils.getInstance().toLong(trx.getCardholderBillingAmount()),
+          ipmFile.getCurrencyExponents().get(
+            trx.getCardholderBillingCurrencyCode()
+          )
+        )
+      ));
+
+      //Monto en usd
+      acc.setAmountUsd(new NewAmountAndCurrency10(
+        IpmMessage.movePeriod(
+          NumberUtils.getInstance().toLong(trx.getReconciliationAmount()),
+          ipmFile.getCurrencyExponents().get(
+            trx.getReconciliationCurrencyCode()
+          )
+        )
+      ));
+
+      BigDecimal fee = BigDecimal.ZERO;
+      BigDecimal iva = BigDecimal.ZERO;
+      BigDecimal exchangeRateDiff = BigDecimal.ZERO;
+
+      switch (acc.getType()) {
+        case COMPRA_SUSCRIPCION:
+          // 1% del monto CLP (DE6)
+          fee = this.getCalculationsHelper().calculatePercentageValue(acc.getAmount().getValue(), this.getCalculationsHelper().getCalculatorParameter10().getSUBSCRIPTION_PURCHASE_FEE_PERCENTAGE());
+
+          // IVA de la comision
+          iva = this.getCalculationsHelper().calculatePercentageValue(fee, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA()));
+          break;
+        case COMPRA_PESOS:
+          //  Monto fijo
+          BigDecimal fixedAmount = this.getCalculationsHelper().getCalculatorParameter10().getCLP_PURCHASE_FEE_AMOUNT();
+
+          // 1.5% del monto CLP (DE6)
+          BigDecimal percentage = this.getCalculationsHelper().calculatePercentageValue(acc.getAmount().getValue(), this.getCalculationsHelper().getCalculatorParameter10().getCLP_PURCHASE_FEE_PERCENTAGE());
+
+          fee = fixedAmount.add(percentage);
+
+          // IVA monto fijo + IVA monto variable
+          iva = (getCalculationsHelper().calculatePercentageValue(fixedAmount, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA())))
+            .add(getCalculationsHelper().calculatePercentageValue(percentage, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA())));
+
+          break;
+        case COMPRA_MONEDA:
+          //Monto fijo
+          fee = this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_FEE_AMOUNT();
+
+          // IVA monto fijo
+          iva = this.getCalculationsHelper().calculatePercentageValue(fee, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA()));
+
+          //  1.5% del monto CLP (DE6)
+          exchangeRateDiff = this.getCalculationsHelper().calculatePercentageValue(acc.getAmount().getValue(), this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE());
+          break;
+      }
+
+      acc.setFee(fee);
+      acc.setFeeIva(iva);
+      acc.setExchangeRateDif(exchangeRateDiff);
+
+      transactions.add(acc);
+    }
+
+    this.saveAccountingData(null, transactions);
+
+    ipmFile.setStatus(IpmFileStatus.PROCESSED);
+    this.updateIpmFileRecord(null, ipmFile);
+  }
+
+  @Override
+  public AccountingTxType getTransactionType(IpmMessage trx) throws Exception {
+    if(trx == null){
+      throw new Exception("Transaction is null");
+    }
+    if(trx.getTransactionCurrencyCode() == null){
+      throw new Exception("Transaction currency code is null");
+    }
+    if(StringUtils.isAllEmpty(trx.getMerchantName())){
+      throw new Exception("MerchantName is null or empty");
+    }
+
+    if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())
+      && isSubscriptionMerchant(trx.getMerchantName())) {
+      return AccountingTxType.COMPRA_SUSCRIPCION;
+    } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
+      return AccountingTxType.COMPRA_PESOS;
+    } else {
+      return AccountingTxType.COMPRA_MONEDA;
+    }
+  }
+
+  @Override
+  public Boolean isSubscriptionMerchant(final String merchantName) throws Exception {
+    if(StringUtils.isAllBlank(merchantName)) {
+      throw new Exception("merchantName is null or empty");
+    }
+
+    //TODO: externalizar en parametro la lista de comercios?
+    List<String> merchants = Arrays.asList("Netflix", "Spotify", "Uber", "Itunes");
+
+    return merchants
+      .stream()
+      .anyMatch(m -> merchantName.toLowerCase().contains(m.toLowerCase()));
+  }
+
 }

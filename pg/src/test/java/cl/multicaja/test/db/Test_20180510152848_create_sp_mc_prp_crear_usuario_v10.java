@@ -21,17 +21,10 @@ public class Test_20180510152848_create_sp_mc_prp_crear_usuario_v10 extends Test
   private static final String SP_NAME = SCHEMA + ".mc_prp_crear_usuario_v10";
 
   @BeforeClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento",SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
-  }
-
   @AfterClass
-  public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimiento",SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_tarjeta", SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_usuario", SCHEMA));
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
 
   /**

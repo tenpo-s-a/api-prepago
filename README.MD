@@ -200,3 +200,10 @@ $ curl -i http://localhost:8001/
         env: development
 
         Presiona botón [Save]
+
+## Ejecutar CI local
+
+```bash
+./run_local_ci.sh
+```
+

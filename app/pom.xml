@@ -35,6 +35,12 @@
       <layout>default</layout>
     </repository>
 
+    <repository>
+      <id>multicaja-nexus</id>
+      <name>multicaja-nexus</name>
+      <url>https://nexus.tools.multicajadigital.cloud/repository/maven-releases/</url>
+    </repository>
+
   </repositories>
 
   <dependencies>
@@ -42,19 +48,19 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-base</artifactId>
-      <version>1.0.0</version>
+      <version>5d1dec1772405d9b908d82a6260c95112a954b99</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>1.0.0</version>
+      <version>f4b8dbccdd7700ef24a6c8ef3affba7752b087dc</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
-      <version>1.0</version>
+      <version>7d80c38fe1568623913f0e1d4c4edd9578442128</version>
     </dependency>
 
     <dependency>
@@ -121,12 +127,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.jcraft</groupId>
-      <artifactId>jsch</artifactId>
-      <version>0.1.54</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-ftp</artifactId>
       <version>2.21.1</version>
@@ -136,13 +136,6 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-quartz2</artifactId>
       <version>2.21.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.sshd</groupId>
-      <artifactId>sshd-core</artifactId>
-      <version>0.14.0</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

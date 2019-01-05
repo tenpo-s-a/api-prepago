@@ -6,6 +6,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import cl.multicaja.prepaid.model.v10.TransactionOriginType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -142,7 +143,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
   }
 
   /*
-    Calcula la comision WEB -> $0
+    Calcula la comision WEB -> $100
    */
   @Test
   public void shouldCalculateWebWithdrawFee()  throws Exception{
@@ -153,12 +154,12 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
     withdraw.setAmount(amount);
     withdraw.setMerchantCode("999999999999991");
 
-    getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
+    withdraw = (PrepaidWithdraw10) getPrepaidEJBBean10().calculateFeeAndTotal(withdraw);
 
     assertEquals("Deberia ser de tipo WEB", TransactionOriginType.WEB, withdraw.getTransactionOriginType());
     assertNotNull("Deberia tener comision", withdraw.getFee());
     assertNotNull("Deberia tener total", withdraw.getTotal());
-    assertEquals("Deberia tener monto de comision = 0", BigDecimal.valueOf(84), withdraw.getFee().getValue());
+    assertEquals("Deberia tener monto de comision = 100", BigDecimal.valueOf(100), withdraw.getFee().getValue());
     assertEquals("Deberia tener total = 5000", BigDecimal.valueOf(5100), withdraw.getTotal().getValue());
   }
 

@@ -72,7 +72,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_actualiza_no_conciliados_tecnocom_v1
         estado_con_tecnocom = 'PENDING' AND
         tipofac = _in_tipofac AND
         indnorcor = _in_indnorcor AND
-        fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS') AND
+        --fecha_creacion >= TO_TIMESTAMP(_in_fecha_inicial, 'YYYYMMDDHH24MISSMS') AND
         fecha_creacion <= TO_TIMESTAMP(_in_fecha_final, 'YYYYMMDDHH24MISSMS');
 
      EXCEPTION
