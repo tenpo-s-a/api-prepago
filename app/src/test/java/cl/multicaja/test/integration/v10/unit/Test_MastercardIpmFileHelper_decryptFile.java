@@ -118,7 +118,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
   @Test
   public void decryptFile_privateKey_null() throws Exception {
 
-    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log");
+    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
       MastercardIpmFileHelper.decryptFile(fis, null, null, null, null);
     } catch (Exception e) {
@@ -130,7 +130,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
   @Test
   public void decryptFile_publicKey_null() throws Exception {
 
-    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log");
+    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
       MastercardIpmFileHelper.decryptFile(fis, "", null, null, null);
     } catch (Exception e) {
@@ -141,7 +141,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
 
   @Test
   public void decryptFile_output_null() throws Exception {
-    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log");
+    FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
       MastercardIpmFileHelper.decryptFile(fis, "", "", null, null);
     } catch (Exception e) {
@@ -154,7 +154,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
   @Test
   public void decryptFile_password_null() throws Exception {
 
-    File f = new File("src/test/resources/mastercard/files/YTFswitch.log");
+    File f = new File("src/test/resources/mastercard/files/YTFswitch.log.ori");
     FileInputStream fis = new FileInputStream(f);
 
     try {
@@ -171,7 +171,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
     FileInputStream encryptedFileIs = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.upld");
 
     File decryptedFile = new File("src/test/resources/mastercard/files/YTFswitch.log.upld_decrypted");
-    File originalFile =  new File("src/test/resources/mastercard/files/YTFswitch.log");
+    File originalFile =  new File("src/test/resources/mastercard/files/YTFswitch.log.ori");
 
     try {
       MastercardIpmFileHelper.decryptFile(encryptedFileIs, privateKe, publicKey, decryptedFile, passphrase);
