@@ -12,7 +12,8 @@ public enum ReconciliationStatusType {
   PENDING("PENDING"),
   RECONCILED("RECONCILED"),
   NOT_RECONCILED("NOT_RECONCILED"),
-  NEED_VERIFICATION("NEED_VERIFICATION");
+  NEED_VERIFICATION("NEED_VERIFICATION"),
+  NO_CASE("NO_CASE");
 
   public String getValue() {
     return value;
