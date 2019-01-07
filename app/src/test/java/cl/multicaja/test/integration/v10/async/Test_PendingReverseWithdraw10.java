@@ -115,6 +115,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    reverse.setNumaut(null);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
     reverse = createPrepaidMovement10(reverse);

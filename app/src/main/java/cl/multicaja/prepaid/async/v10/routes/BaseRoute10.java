@@ -42,6 +42,15 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
+  @EJB
+  private  TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
+
+  @EJB
+  private McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
+
+  @EJB
+  private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
+
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
   private EncryptUtil encryptUtil;
@@ -172,4 +181,27 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.prepaidAccountingEJBBean10 = prepaidAccountingEJBBean10;
   }
 
+  public TecnocomReconciliationEJBBean10 getTecnocomReconciliationEJBBean10() {
+    return tecnocomReconciliationEJBBean10;
+  }
+
+  public void setTecnocomReconciliationEJBBean10(TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10) {
+    this.tecnocomReconciliationEJBBean10 = tecnocomReconciliationEJBBean10;
+  }
+
+  public McRedReconciliationEJBBean10 getMcRedReconciliationEJBBean10() {
+    return mcRedReconciliationEJBBean10;
+  }
+
+  public void setMcRedReconciliationEJBBean10(McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10) {
+    this.mcRedReconciliationEJBBean10 = mcRedReconciliationEJBBean10;
+  }
+
+  public MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    return mastercardCurrencyUpdateEJBBean10;
+  }
+
+  public void setMastercardCurrencyUpdateEJBBean10(MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10) {
+    this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
+  }
 }

@@ -256,33 +256,52 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       }
     }
   }
-  // No se puede ejecutar por que ahora tecnocomMock tiene limite de saldo al igual que el real
-  @Ignore
+
   @Test
   public void shouldReturnExceptionWhen_OnWithdraw_MaxMonthlyAmount() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
     User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
     prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_2);
 
     PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-    for(int i = 0; i < 3; i++){
+    // Se cargan 500000
+    {
       InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(500000));
       Assert.assertEquals("Carga OK", "000", mov.getRetorno());
     }
-
-    for(int i = 0; i < 10; i++) {
-
+    // Se retiran 450000
+    {
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
       try {
         getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
       } catch(ValidationException vex) {
-        Assert.fail("No debe pasar por acá.     i = " + i);
+        Assert.fail("No debe pasar por acá");
+      }
+    }
+
+    // Se cargan 500000
+    {
+      InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(490000));
+      Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    }
+    // Se retiran 450000
+    {
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
+      try {
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      } catch(ValidationException vex) {
+        Assert.fail("No debe pasar por acá");
       }
     }
 

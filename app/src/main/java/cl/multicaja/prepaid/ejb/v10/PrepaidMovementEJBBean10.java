@@ -154,8 +154,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
 
-    System.out.println(resp);
-
     if ("0".equals(resp.get("_error_code"))) {
       data.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return data;
@@ -333,9 +331,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       numaut != null ? numaut : new NullParam(Types.VARCHAR),
 
     };
-    for(Object obj : params){
-      log.info("ParIn getPrepaidMovements: "+obj.toString());
-    }
+
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
     RowMapper rm = (Map<String, Object> row) -> {
       try{
@@ -381,8 +377,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(getNumberUtils().toInteger(row.get("_linref")));
       p.setNumbencta(getNumberUtils().toInteger(row.get("_numbencta")));
       p.setNumplastico(getNumberUtils().toLong(row.get("_numplastico")));
-      log.info("RowMapper getPrepaidMovements");
-      log.info(p);
 
       return p;
       }catch (Exception e){
@@ -649,8 +643,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       movement10.setId(getNumberUtils().toLong(row.get("_id")));
       movement10.setEstado(PrepaidMovementStatus.valueOfEnum(String.valueOf(row.get("_estado"))));
       movement10.setEstadoNegocio(BusinessStatusType.fromValue(String.valueOf(row.get("_estado_de_negocio"))));
-      movement10.setConSwitch(ReconciliationStatusType.fromValue("_estado_con_switch"));
-      movement10.setConTecnocom(ReconciliationStatusType.fromValue("_estado_con_tecnocom"));
+      movement10.setConSwitch(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_switch"))));
+      movement10.setConTecnocom(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado_con_tecnocom"))));
       movement10.setTipoMovimiento(PrepaidMovementType.valueOf(String.valueOf(row.get("_tipo_movimiento"))));
       movement10.setIndnorcor(IndicadorNormalCorrector.fromValue(getNumberUtils().toInt(row.get("_indnorcor"))));
       return movement10;
@@ -662,6 +656,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   public String processReconciliation(PrepaidMovement10 mov) throws Exception {
     String messageID = "";
     // Excel fila 1
+    log.info("Mov to Reconciliation: "+mov);
     if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 1");
@@ -893,8 +888,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("Movimiento Pendiente o En proceso");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    }else{
+        log.error("No cae en ningun caso");
     }
-
     return messageID;
   }
 

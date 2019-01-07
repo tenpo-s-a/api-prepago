@@ -6,7 +6,9 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.NameStatus;
+import cl.multicaja.prepaid.helpers.users.model.RutStatus;
 import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -130,14 +132,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
-
-    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-    System.out.println("resp:: " + respTopup);
-
-    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    doTopup(user, 3119, getRandomNumericString(15));
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
@@ -219,14 +214,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
-
-    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-    System.out.println("resp:: " + respTopup);
-
-    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    doTopup(user, 3119, getRandomNumericString(15));
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
@@ -545,15 +533,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     PrepaidCard10 prepaidCard10;
     //primera carga
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-      prepaidTopup10.setMerchantCode(NewPrepaidTopup10.WEB_MERCHANT_CODE); //carga WEB
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
-
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-      System.out.println("resp:: " + resp);
-
-      Assert.assertNotNull("debe tener un id", resp.getId());
+      doTopup(user, 3119, NewPrepaidTopup10.WEB_MERCHANT_CODE);
 
       prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
       Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
@@ -586,8 +566,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.assertEquals("debe ser error de supera saldo", SALDO_SUPERARA_LOS_$$VALUE.getValue(), vex.getCode());
     }
   }
-  //No se puede llegar ya que el monbto maximo de tarjeta es 500.000
-  @Ignore
+
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
 
@@ -595,8 +574,9 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     headers.put("forceRefreshBalance", Boolean.TRUE);
 
     String merchantCodeWEB = NewPrepaidTopup10.WEB_MERCHANT_CODE;
-
-    User user = registerUser();
+    String password = "1235";
+    User user = registerUser(password);
+    user = updateUserPassword(user, password);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
@@ -628,39 +608,83 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision de apertura (0))", 3000, prepaidBalance10.getBalance().getValue().longValue());
 
-    //se actualiza al usuario a nivel 2
-    user.setNameStatus(NameStatus.VERIFIED);
-
-    updateUser(user);
-
     long sumBalance = prepaidBalance10.getBalance().getValue().longValue();
+    {
+      //se cargan 400.000 mil pesos, enesimas cargas
+      Integer amount = 100000;
+      for (int j = 1; j <= 4; j++) {
 
-    //se cargan 900.000 mil pesos, enesimas cargas
-    for(int j = 1; j <= 9; j++) {
+        System.out.println("------------------------------------ Carga " + j + " ---------------------------------------------");
 
-      System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
+        doTopup(user, amount, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-      prepaidTopup10.setMerchantCode(merchantCodeWEB); //carga WEB
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(100000));
+        Thread.sleep(1000);
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
 
-      System.out.println("resp:: " + resp);
+        System.out.println(prepaidBalance10);
 
-      Assert.assertNotNull("debe tener un id", resp.getId());
+        sumBalance += amount;
 
-      Thread.sleep(1000);
+        Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
 
-      prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        System.out.println("---------------------------------------------------------------------------------------");
+      }
 
-      System.out.println(prepaidBalance10);
+      // Se retiran 400000
+      {
+        doWirhdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+        sumBalance -= 400100;
+      }
+    }
+    {
+      //se cargan 400.000 mil pesos, enesimas cargas
+      Integer amount = 100000;
+      for (int j = 5; j <= 8; j++) {
 
-      sumBalance+= prepaidTopup10.getAmount().getValue().longValue();
+        System.out.println("------------------------------------ Carga " + j + " ---------------------------------------------");
 
-      Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
+        doTopup(user, amount, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-      System.out.println("---------------------------------------------------------------------------------------");
+        Thread.sleep(1000);
+
+        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+
+        System.out.println(prepaidBalance10);
+
+        sumBalance += amount;
+
+        Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
+
+        System.out.println("---------------------------------------------------------------------------------------");
+      }
+      // Se retiran 400000
+      {
+        doWirhdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+        sumBalance -= 400100;
+      }
+    }
+    {
+      //se cargan 100.000 mil pesos, enesimas cargas
+      Integer amount = 100000;
+      for (int j = 9; j < 10; j++) {
+
+        System.out.println("------------------------------------ Carga " + j + " ---------------------------------------------");
+
+        doTopup(user, amount, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+
+        Thread.sleep(1000);
+
+        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+
+        System.out.println(prepaidBalance10);
+
+        sumBalance += amount;
+
+        Assert.assertEquals("El saldo del usuario debe estar actualizado", sumBalance, prepaidBalance10.getBalance().getValue().longValue());
+
+        System.out.println("---------------------------------------------------------------------------------------");
+      }
     }
 
     //se intenta simular cargar 100.000, debe dar error de cdt
@@ -686,6 +710,26 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
+  private void doTopup(User user, Integer amount, String merchantCode) throws Exception {
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      prepaidTopup10.setMerchantCode(merchantCode); //carga WEB
+      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(amount));
+
+      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+
+      Assert.assertNotNull("debe tener un id", resp.getId());
+  }
+
+  private void doWirhdraw(User user, String password, Long amount, String merchantCode) throws Exception {
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
+    try {
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+    } catch (ValidationException vex) {
+      Assert.fail("No debe pasar por aca");
+    }
+  }
 
   /**
    * Simulacion en USD
@@ -700,14 +744,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
-
-    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-    System.out.println("resp:: " + respTopup);
-
-    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    doTopup(user, 3119, NewPrepaidTopup10.WEB_MERCHANT_CODE);
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
@@ -755,14 +792,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
-
-    PrepaidTopup10 respTopup = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
-
-    System.out.println("resp:: " + respTopup);
-
-    Assert.assertNotNull("debe tener un id", respTopup.getId());
+    doTopup(user, 3119, NewPrepaidTopup10.WEB_MERCHANT_CODE);
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 

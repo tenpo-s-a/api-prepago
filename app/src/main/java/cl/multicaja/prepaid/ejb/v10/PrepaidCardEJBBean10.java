@@ -2,12 +2,15 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.prepaid.model.v10.CcrFile10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
@@ -18,13 +21,16 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.FILE_ALREADY_PROCESSED;
 
 /**
  * @author vutreras
@@ -247,50 +253,6 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
-  @Override
-  public CurrencyUsd getCurrencyUsd() throws Exception {
-    String sp = getSchema() + ".mc_prp_buscar_valor_usd_v10";
-    RowMapper rm = (Map<String, Object> row) -> {
-      CurrencyUsd c = new CurrencyUsd();
-      c.setId(getNumberUtils().toLong(row.get("_id"), null));
-      c.setFileName(String.valueOf(row.get("_nombre_archivo")));
-      c.setCreationDate((Timestamp)row.get("_fecha_creacion"));
-      c.setEndDate((Timestamp)row.get("_fecha_termino"));
-      c.setExpirationUsdDate((Timestamp)row.get("_fecha_expiracion_usd"));
-      c.setBuyCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_compra"), null));
-      c.setMidCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_medio"), null));
-      c.setSellCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_venta"), null));
-      c.setCurrencyExponent(getNumberUtils().toInteger(row.get("_exponente"), null));
-      return c;
-    };
-    Map<String, Object> resp = getDbUtils().execute(sp, rm);
-    return resp.get("result") != null ? (CurrencyUsd) ((List) resp.get("result")).get(0) : null;
-  }
-
-  //TODO: se deberia cambiar este metodo a otro EJB? no tiene nada que ver con las tarjetas.
-  @Override
-  public void updateUsdValue(CurrencyUsd currencyUsd) throws Exception {
-    Object[] params = {
-      new InParam(currencyUsd.getFileName(), Types.VARCHAR),
-      new InParam(currencyUsd.getExpirationUsdDate(), Types.TIMESTAMP),
-      new InParam(currencyUsd.getBuyCurrencyConvertion(), Types.NUMERIC),
-      new InParam(currencyUsd.getSellCurrencyConvertion(), Types.NUMERIC),
-      new InParam(currencyUsd.getMidCurrencyConvertion(), Types.NUMERIC),
-      new InParam(currencyUsd.getCurrencyExponent(), Types.NUMERIC),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_valor_usd_v10", params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_prp_actualiza_valor_usd_v10 resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-  }
-
   @Override
   public PrepaidCard10 getPrepaidCardByPanAndProcessorUserId(Map<String, Object> headers, String pan, String processorUserId) throws Exception {
     if(pan == null){
@@ -303,14 +265,15 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId);
 
     if( lst != null) {
-        PrepaidCard10 prepaidCard10 = lst.stream()
-          .filter(c -> pan.equals(c.getPan()))
-          .findAny()
-          .orElse(null);
+      PrepaidCard10 prepaidCard10 = lst.stream()
+        .filter(c -> pan.equals(c.getPan()))
+        .findAny()
+        .orElse(null);
 
-        return prepaidCard10;
+      return prepaidCard10;
     }
 
     return null;
   }
+
 }

@@ -1,11 +1,11 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJB10;
+import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
@@ -25,19 +25,16 @@ public class CalculationsHelper {
   private static Log log = LogFactory.getLog(CalculationsHelper.class);
   private final int ONE_HUNDRED = 100;
   private static CalculatorParameter10 calculatorParameter10;
+
   @EJB
-  private  PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
-
-  private PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    if(prepaidCardEJBBean10 == null ){
-      prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
-    }
-    return prepaidCardEJBBean10;
+  public MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    return mastercardCurrencyUpdateEJBBean10;
   }
 
-  public  void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setMastercardCurrencyUpdateEJBBean10(MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10) {
+    this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
   }
 
   public CalculationsHelper() {
@@ -90,14 +87,26 @@ public class CalculationsHelper {
   }
 
   /**
-   * Calcula el IVA
+   * Calcula el IVA dado el monto total
    *
    * @param amount
    * @return
    */
-  public BigDecimal calculateIva(BigDecimal amount) {
+  public BigDecimal calculateIvaFromTotal(BigDecimal amount) {
     BigDecimal iva = amount.subtract(amount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA())));
-    log.info("Amount: " + amount + "iva: " + iva);
+    log.info(String.format("Amount: [%s], Iva: [%s]", amount, iva));
+    return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
+  }
+
+  /**
+   * Agrega el IVA al monto
+   *
+   * @param amount
+   * @return
+   */
+  public BigDecimal addIva(BigDecimal amount) {
+    BigDecimal iva = amount.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA()));
+    log.info(String.format("Amount: [%s], Iva: [%s]", amount, iva));
     return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
   }
 
@@ -167,7 +176,7 @@ public class CalculationsHelper {
       return Double.valueOf(645);
     }
     else {
-      return getPrepaidCardEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
+      return getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
     }
   }
 
@@ -216,4 +225,24 @@ public class CalculationsHelper {
   public static ParametersUtil getParametersUtil() {
     return ParametersUtil.getInstance();
   }
+
+  /**
+   * Calcula el monto de un porcentaje
+   * @param amount
+   * @return
+   */
+  public BigDecimal calculatePercentageValue(BigDecimal amount, BigDecimal percentage) throws Exception {
+    if(amount == null) {
+      throw new Exception("Amount is null");
+    }
+    if(percentage == null) {
+      throw new Exception("Percentage is null");
+    }
+
+    if(percentage.doubleValue() > 1){
+      percentage = percentage.subtract(BigDecimal.ONE);
+    }
+    return amount.multiply(percentage);
+  }
+
 }
