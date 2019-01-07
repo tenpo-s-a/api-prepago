@@ -368,7 +368,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       // Verifica si existe la carga original topup
       if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
 
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), headers.get(Constants.HEADER_USER_TIMEZONE).toString())) {
+        String timezone;
+        if(headers.get(Constants.HEADER_USER_TIMEZONE) != null ){
+          timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+        } else {
+          timezone = "America/Santiago";
+        }
+
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone)) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
@@ -1261,9 +1268,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto maximo a cargar: " + getPercentage().getMAX_AMOUNT_BY_USER());
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > getPercentage().getMAX_AMOUNT_BY_USER()) {
+      // Darle formato al numero
+      Locale chileLocale = new Locale("es", "CL");
+      DecimalFormat decimalFormat = new DecimalFormat("###,###.##", DecimalFormatSymbols.getInstance(chileLocale));
+
       // Responde mensaje de error, con el saldo total maximo y el monto maximo posible a cargar para no superarlo
-      KeyValue maxAmount = new KeyValue("value", getPercentage().getMAX_AMOUNT_BY_USER());
-      KeyValue topupAmount = new KeyValue("topup_amount", new BigDecimal(getPercentage().getMAX_AMOUNT_BY_USER()).subtract(balance.getBalance().getValue()));
+      KeyValue maxAmount = new KeyValue("value", decimalFormat.format(getPercentage().getMAX_AMOUNT_BY_USER()));
+      KeyValue topupAmount = new KeyValue("topup_amount", decimalFormat.format(new BigDecimal(getPercentage().getMAX_AMOUNT_BY_USER()).subtract(balance.getBalance().getValue())));
       throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(maxAmount, topupAmount);
     }
 

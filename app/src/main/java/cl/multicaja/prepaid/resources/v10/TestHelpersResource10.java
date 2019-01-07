@@ -8,6 +8,7 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
@@ -52,9 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
-import static cl.multicaja.core.model.Errors.ERROR_DATA_NOT_FOUND;
-import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
@@ -251,7 +250,7 @@ public final class TestHelpersResource10 extends BaseResource {
     if (!inclusionMovimientosDTO.isRetornoExitoso()) {
       log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
       log.error(inclusionMovimientosDTO.getDescRetorno());
-      // Todo: necesita lanzar una excepcion si algo salio mal
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     return Response.ok(gastoAleatorio).status(201).build();
