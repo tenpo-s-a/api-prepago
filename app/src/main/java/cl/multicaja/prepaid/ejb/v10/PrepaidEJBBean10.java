@@ -513,8 +513,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-
-
     String contrato = prepaidCard.getProcessorUserId();
     String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
@@ -564,7 +562,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         numextcta,
         nummovext,
         clamone,
-        null,
+        BusinessStatusType.OK,
         status);
 
       // se confirma la transaccion
@@ -622,7 +620,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
+      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(), BusinessStatusType.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
