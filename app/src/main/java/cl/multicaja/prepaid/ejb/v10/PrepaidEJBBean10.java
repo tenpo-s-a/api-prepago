@@ -227,7 +227,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
 
     this.validateTopupRequest(topupRequest);
 
@@ -318,6 +318,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
+    if(!fromEndPoint){
+      prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
     prepaidTopup.setId(prepaidMovement.getId());
@@ -332,7 +335,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
     this.validateTopupRequest(topupRequest);
 
     // Obtener usuario Multicaja
@@ -377,6 +380,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          if(!fromEndPoint){
+            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+          }
           prepaidMovement.setCentalta(originalTopup.getCentalta());
           prepaidMovement.setCuenta(originalTopup.getCuenta());
           prepaidMovement.setPan(originalTopup.getPan());
@@ -402,6 +408,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
         PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        if(!fromEndPoint){
+          prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+        }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
@@ -444,7 +453,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
     this.validateWithdrawRequest(withdrawRequest);
 
@@ -457,10 +466,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
-    // Se verifica la clave
-    UserPasswordNew userPasswordNew = new UserPasswordNew();
-    userPasswordNew.setValue(withdrawRequest.getPassword());
-    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    // La clave solo se verifica cuando el movimiento viene desde el endpoint
+    if(fromEndPoint){
+      // Se verifica la clave
+      UserPasswordNew userPasswordNew = new UserPasswordNew();
+      userPasswordNew.setValue(withdrawRequest.getPassword());
+      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    }
+
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -519,6 +532,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
+    if(!fromEndPoint){
+      prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
     prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
 
@@ -584,6 +600,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
       PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
+      if(!fromEndPoint){
+        prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      }
       prepaidMovementReverse.setPan(prepaidMovement.getPan());
       prepaidMovementReverse.setCentalta(prepaidMovement.getCentalta());
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
@@ -639,7 +658,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
     this.validateWithdrawRequest(withdrawRequest);
 
     // Obtener usuario Multicaja
@@ -650,11 +669,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
-
-    // Se verifica la clave
-    UserPasswordNew userPasswordNew = new UserPasswordNew();
-    userPasswordNew.setValue(withdrawRequest.getPassword());
-    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    if(fromEndPoint) {
+      // Se verifica la clave
+      UserPasswordNew userPasswordNew = new UserPasswordNew();
+      userPasswordNew.setValue(withdrawRequest.getPassword());
+      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    }
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -681,7 +701,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           timezone = "America/Santiago";
         }
 
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone)) {
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
@@ -690,6 +710,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          if(!fromEndPoint){
+            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+          }
           prepaidMovement.setPan(originalwithdraw.getPan());
           prepaidMovement.setCentalta(originalwithdraw.getCentalta());
           prepaidMovement.setCuenta(originalwithdraw.getCuenta());
@@ -716,6 +739,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
         PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        if(!fromEndPoint){
+          prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+        }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);

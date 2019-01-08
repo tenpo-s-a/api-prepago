@@ -49,14 +49,14 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/topup")
   public Response topupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest);
+    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest,true);
     return Response.ok(prepaidTopup).status(201).build();
   }
 
   @POST
   @Path("/topup/reverse")
   public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseTopupUserBalance(headersToMap(headers), topupRequest);
+    this.prepaidEJBBean10.reverseTopupUserBalance(headersToMap(headers), topupRequest,true);
     return Response.ok().status(201).build();
   }
 
@@ -74,14 +74,14 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/withdrawal")
   public Response withdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), withdrawRequest);
+    PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), withdrawRequest,true);
     return Response.ok(withdrawTopup).status(201).build();
   }
 
   @POST
   @Path("/withdrawal/reverse")
   public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), withdrawRequest);
+    this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), withdrawRequest,true);
     return Response.ok().status(201).build();
   }
 

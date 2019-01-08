@@ -13,7 +13,8 @@ public enum ReconciliationStatusType {
   RECONCILED("RECONCILED"),
   NOT_RECONCILED("NOT_RECONCILED"),
   NEED_VERIFICATION("NEED_VERIFICATION"),
-  NO_CASE("NO_CASE");
+  NO_CASE("NO_CASE"),
+  COUNTER_MOVEMENT("COUNTER_MOVEMENT");
 
   public String getValue() {
     return value;
