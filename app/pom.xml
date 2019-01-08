@@ -48,19 +48,19 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-base</artifactId>
-      <version>5d1dec1772405d9b908d82a6260c95112a954b99</version>
+      <version>9550172755a10cc3e3273c1018ef878c117889dd</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>f4b8dbccdd7700ef24a6c8ef3affba7752b087dc</version>
+      <version>ff05b49040d5869b7bda9c756aa1439bed627da0</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
-      <version>7d80c38fe1568623913f0e1d4c4edd9578442128</version>
+      <version>c5e0362b410cb18c5305d36ac571bbb5892aea59</version>
     </dependency>
 
     <dependency>
