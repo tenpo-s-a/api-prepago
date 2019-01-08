@@ -206,7 +206,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
 
     try{
-      prepaidEJBBean10.withdrawUserBalance(headers, withdrawRequest);
+      prepaidEJBBean10.withdrawUserBalance(headers, withdrawRequest,true);
     } catch (RunTimeValidationException vex) {
       // Se verifica que se llamaron los metodos
       Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));

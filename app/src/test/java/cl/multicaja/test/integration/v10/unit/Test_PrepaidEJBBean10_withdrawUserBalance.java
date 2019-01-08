@@ -49,7 +49,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     PrepaidWithdraw10 withdraw = null;
 
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
 
     } catch(Exception vex) {
       Assert.fail("No debe pasar por acá");
@@ -113,7 +113,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     PrepaidWithdraw10 withdraw = null;
 
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
 
     } catch(Exception vex) {
       Assert.fail("No debe pasar por acá");
@@ -174,7 +174,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108303), vex.getCode());
@@ -198,7 +198,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108303), vex.getCode());
@@ -225,7 +225,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(101560));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108302), vex.getCode());
@@ -249,7 +249,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108301), vex.getCode());
@@ -282,7 +282,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       } catch(ValidationException vex) {
         Assert.fail("No debe pasar por acá");
       }
@@ -299,7 +299,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       } catch(ValidationException vex) {
         Assert.fail("No debe pasar por acá");
       }
@@ -309,7 +309,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108304), vex.getCode());
@@ -336,7 +336,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(10000));
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(RunTimeValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", Integer.valueOf(106001), vex.getCode());
@@ -358,7 +358,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   public void shouldReturnExceptionWhen_WithdrawRequestNull() throws Exception {
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, null);
+      getPrepaidEJBBean10().withdrawUserBalance(null, null,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -376,7 +376,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -395,7 +395,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -414,7 +414,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -430,7 +430,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setMerchantCode("987654321");
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -449,7 +449,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -468,7 +468,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -488,7 +488,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setPassword(null);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -503,7 +503,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(NotFoundException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
@@ -520,7 +520,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
@@ -537,7 +537,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
@@ -554,7 +554,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
@@ -568,7 +568,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(NotFoundException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
@@ -587,7 +587,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
@@ -605,7 +605,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLAVE_NO_COINCIDE.getValue(), vex.getCode());
@@ -625,7 +625,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
@@ -649,7 +649,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -673,7 +673,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -697,7 +697,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -720,7 +720,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(RunTimeValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_ERROR_GENERICO_$VALUE.getValue(), vex.getCode());
