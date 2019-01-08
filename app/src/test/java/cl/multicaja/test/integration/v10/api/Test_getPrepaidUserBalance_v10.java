@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,8 +21,8 @@ import static cl.multicaja.core.model.Errors.*;
  */
 public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
 
-  @BeforeClass
-  public static void  beforeClass() {
+  @Before
+  public void  before() {
     getTecnocomService().setAutomaticError(Boolean.FALSE);
     getTecnocomService().setRetorno(null);
   }
