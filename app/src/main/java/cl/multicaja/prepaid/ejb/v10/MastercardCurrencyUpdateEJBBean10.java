@@ -27,10 +27,14 @@ import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
-@TransactionManagement(value= TransactionManagementType.CONTAINER)
+@TransactionManagement(value=TransactionManagementType.CONTAINER)
 public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 implements MastercardCurrencyUpdateEJB10 {
 
   private static Log log = LogFactory.getLog(MastercardCurrencyUpdateEJBBean10.class);
+
+  public MastercardCurrencyUpdateEJBBean10() {
+    super();
+  }
 
   @Override
   public CurrencyUsd getCurrencyUsd() throws Exception {

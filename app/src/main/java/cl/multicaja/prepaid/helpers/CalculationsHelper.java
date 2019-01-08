@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.helpers;
 
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJB10;
 import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -30,6 +28,9 @@ public class CalculationsHelper {
   private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
   public MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
+    if(mastercardCurrencyUpdateEJBBean10 == null) {
+      mastercardCurrencyUpdateEJBBean10 = new MastercardCurrencyUpdateEJBBean10();
+    }
     return mastercardCurrencyUpdateEJBBean10;
   }
 
