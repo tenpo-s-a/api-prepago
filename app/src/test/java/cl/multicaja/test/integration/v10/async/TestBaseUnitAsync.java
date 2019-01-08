@@ -308,7 +308,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param retryCount
    * @return
    */
-  public String sendPendingWithdrawMail(User user, PrepaidWithdraw10 prepaidWithdraw10, Integer retryCount) {
+  public String sendPendingWithdrawMail(User user, PrepaidWithdraw10 prepaidWithdraw10, PrepaidMovement10 prepaidWithdrawMovement,  Integer retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -326,6 +326,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setUser(user);
     data.setPrepaidWithdraw10(prepaidWithdraw10);
+    data.setPrepaidMovement10(prepaidWithdrawMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(retryCount == null ? 0 : retryCount);

@@ -5,3 +5,4 @@ USER payara
 COPY ./pg/drivers/postgresql-42.2.2.jre7.jar /opt/payara5/glassfish/domains/domain1/lib
 COPY ./domain.ci.xml /opt/payara5/glassfish/domains/domain1/config/domain.xml
 COPY ./app/target/*.war /opt/payara5/glassfish/domains/domain1/autodeploy
+COPY ./mideu.yml /opt/payara5

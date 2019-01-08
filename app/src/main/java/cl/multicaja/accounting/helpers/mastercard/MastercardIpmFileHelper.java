@@ -2,7 +2,9 @@ package cl.multicaja.accounting.helpers.mastercard;
 
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
+import cl.multicaja.core.utils.encryption.PgpHelper;
 import com.opencsv.CSVReader;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +14,45 @@ import java.io.*;
 public class MastercardIpmFileHelper {
 
   private static Log log = LogFactory.getLog(MastercardIpmFileHelper.class);
+
+  public static void decryptFile(InputStream inputFile, String  privateKey, String publicKey, File outputFile, String pass) throws Exception {
+    if(inputFile == null) {
+      throw new Exception("Input File is null");
+    }
+    if(privateKey == null) {
+      throw new Exception("Private Key is null");
+    }
+    if(publicKey == null) {
+      throw new Exception("Public Key is null");
+    }
+    if(outputFile == null) {
+      throw new Exception("Output file is null");
+    }
+    if(pass == null) {
+      throw new Exception("Password is null");
+    }
+
+    log.info("Decrypting file");
+
+    try {
+      ByteArrayOutputStream decryptedFile = PgpHelper.getInstance().decrypt(
+        IOUtils.toByteArray(inputFile),
+        pass,
+        PgpHelper.ArmoredKeyPair.of(privateKey, publicKey));
+
+      OutputStream outputStream = new FileOutputStream(outputFile);
+      decryptedFile.writeTo(outputStream);
+
+      outputStream.flush();
+      outputStream.close();
+      decryptedFile.close();
+
+      log.info("File decrypted");
+    } catch(Exception e) {
+      log.error("Error decrypting file");
+      throw e;
+    }
+  }
 
   public static IpmFile readCsvIpmData(FileReader file, IpmFile ipmFile) throws Exception {
     if(file == null) {
@@ -48,7 +89,6 @@ public class MastercardIpmFileHelper {
           ipmFile.addOtherMessage(message);
         }
       }
-
       return ipmFile;
     } catch (Exception e) {
       log.error(String.format("Error processing IPM file -> [%s]", ipmFile.getFileName()), e);
@@ -56,50 +96,6 @@ public class MastercardIpmFileHelper {
       throw e;
     }
   }
-
-  /*
-  public static void main2(String[] args) throws Exception {
-    MastercardIpmFileHelper ipmFileHelper = new MastercardIpmFileHelper();
-
-
-    String csvFile = "YTF.AR.T120.M.E0073610.D180815.T030212.A004.ipm.csv";
-
-    FileReader fr = new FileReader(csvFile);
-    IpmFile ipmFile = new IpmFile();
-    ipmFile = MastercardIpmFileHelper.readCsvIpmData(fr, ipmFile);
-    fr.close();
-
-    ipmFileHelper.processFile(ipmFile);
-
-  }
-
-  public static void main(String[] args) throws Exception {
-    String pubKeyFileName = "src/test/resources/mastercard/files/public_key.dat";
-    String privKeyFileName = "src/test/resources/mastercard/files/private_key.dat";
-    String fileName = "YTF.AR.T120.M.E0073610.D180815.T030212.A004.ipm";
-    String sourceDir = "src/test/resources/mastercard/files/";
-    String destDir = "src/test/resources/mastercard/";
-
-    MastercardIpmFileHelper t = new MastercardIpmFileHelper();
-
-    t.createEncryptedFile(sourceDir + fileName, destDir + fileName, pubKeyFileName);
-  }
-
-  private void createEncryptedFile(String sourceFile, String destinationFile, String publicKey) throws Exception {
-    FileInputStream pubKeyIs = new FileInputStream(publicKey);
-    FileOutputStream cipheredFileIs = new FileOutputStream(destinationFile);
-    PgpHelper.getInstance().encryptFile(cipheredFileIs, sourceFile, PgpHelper.getInstance().readPublicKey(pubKeyIs), false, false);
-    cipheredFileIs.close();
-    pubKeyIs.close();
-  }
-
-  public void processFile(IpmFile ipmFile) throws Exception{
-      this.validateFile(ipmFile);
-
-
-  }
-
-  */
 
   public static void validateFile(IpmFile file) throws Exception {
     if(file == null) {
