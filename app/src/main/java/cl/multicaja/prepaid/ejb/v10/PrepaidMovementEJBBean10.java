@@ -684,7 +684,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
           newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
           newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
-          newPrepaidTopup10.setMerchantName("");
+          newPrepaidTopup10.setMerchantName("Conciliacion");
           newPrepaidTopup10.setRut(user.getRut().getValue());
           newPrepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           // Se envia movimiento a reversar
@@ -714,7 +714,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           newPrepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
           newPrepaidWithdraw10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
           newPrepaidWithdraw10.setMerchantCode(movFull.getCodcom());
-          newPrepaidWithdraw10.setMerchantName("");
+          newPrepaidWithdraw10.setMerchantName("Conciliacion");
           getPrepaidEJBBean10().reverseWithdrawUserBalance(null,newPrepaidWithdraw10,false);
           // Se agega a la tabla para que no vuelva a ser enviado
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
@@ -780,7 +780,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
         newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
-        newPrepaidTopup10.setMerchantName("");
+        newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         newPrepaidTopup10.setTransactionId(movFull.getIdTxExterno());
         // Se envia movimiento a reversar
@@ -825,7 +825,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
         newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
-        newPrepaidTopup10.setMerchantName("");
+        newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         newPrepaidTopup10.setTransactionId(movFull.getNumaut());
         // Se envia movimiento a reversar
@@ -869,7 +869,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
         newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
-        newPrepaidTopup10.setMerchantName("");
+        newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
         newPrepaidTopup10.setTransactionId(newTxId);
@@ -902,7 +902,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
           newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
           newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
-          newPrepaidTopup10.setMerchantName("");
+          newPrepaidTopup10.setMerchantName("Conciliacion" );
           newPrepaidTopup10.setRut(user.getRut().getValue());
           String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
           newPrepaidTopup10.setTransactionId(newTxId);
