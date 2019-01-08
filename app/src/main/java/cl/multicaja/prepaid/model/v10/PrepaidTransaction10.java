@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.constants.TipoOrigen;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class PrepaidTransaction10 extends BaseModel {
   private NewAmountAndCurrency10 finalAmount;
   private NewAmountAndCurrency10 price;
   private NewAmountAndCurrency10 usdValue;
+  private TipoOrigen originType;
 
   public Date getDate() {
     return date;
@@ -134,5 +136,13 @@ public class PrepaidTransaction10 extends BaseModel {
 
   public void setCorrector(boolean corrector) {
     this.corrector = corrector;
+  }
+
+  public TipoOrigen getOriginType() {
+    return originType;
+  }
+
+  public void setOriginType(TipoOrigen originType) {
+    this.originType = originType;
   }
 }
