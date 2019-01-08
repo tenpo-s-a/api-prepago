@@ -24,11 +24,6 @@ import static cl.multicaja.core.model.Errors.*;
  */
 public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
-  @BeforeClass
-  public static void  beforeClass() {
-    getTecnocomService().setAutomaticError(Boolean.FALSE);
-    getTecnocomService().setRetorno(null);
-  }
 
   /**
    *

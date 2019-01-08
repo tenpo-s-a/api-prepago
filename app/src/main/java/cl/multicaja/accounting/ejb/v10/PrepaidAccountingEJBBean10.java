@@ -32,6 +32,9 @@ import org.springframework.util.Base64Utils;
 import javax.ejb.*;
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.*;
@@ -506,6 +509,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       throw new Exception("Ipm file name is null or empty");
     }
 
+    // Se valida que este el archivo yml con las propiedades a extraer del IPM
+    if(!Files.exists(Paths.get("./mideu.yml"), LinkOption.NOFOLLOW_LINKS)) {
+      throw new Exception("config file [./mideu.yml] file does not exists");
+    }
+
     /**
      * Se procesa el archivo IPM con libreria python
      * https://github.com/adelosa/mciutil
@@ -578,7 +586,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       ipmFile.setStatus(IpmFileStatus.SUSPICIOUS);
       ipmFile = this.updateIpmFileRecord(null, ipmFile);
       isSuspicious = Boolean.TRUE;
-      file.delete();
     }
 
     if(isSuspicious) {
