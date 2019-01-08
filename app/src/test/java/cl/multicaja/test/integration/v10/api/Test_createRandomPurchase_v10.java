@@ -53,8 +53,6 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
 
-
-
     // Crear la compra aleatoria
     HttpResponse resp = createRandomPurchase(user.getId());
     Assert.assertEquals("status 201", 201, resp.getStatus());

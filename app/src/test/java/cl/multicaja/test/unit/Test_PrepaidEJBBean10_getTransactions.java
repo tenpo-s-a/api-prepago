@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
@@ -15,6 +16,8 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.TecnocomService;
+import cl.multicaja.tecnocom.dto.AutorizacionesDTO;
+import cl.multicaja.tecnocom.dto.ConsultaAutorizacionesDTO;
 import cl.multicaja.tecnocom.dto.ConsultaMovimientosDTO;
 import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
@@ -23,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -32,6 +36,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.test.TestBase.getRandomNumericString;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class Test_PrepaidEJBBean10_getTransactions {
@@ -285,7 +290,9 @@ public class Test_PrepaidEJBBean10_getTransactions {
     response.getRunServiceResponse().getReturn().setRetorno("000");
     response.getRunServiceResponse().getReturn().setTotalRegistros(2L);
     ConsultaMovimientosDTO dto = new ConsultaMovimientosDTO(response);
+    ConsultaAutorizacionesDTO authDto = new ConsultaAutorizacionesDTO(response);
     List<MovimientosDTO> movimientosDTOS = new ArrayList<>();
+    List<AutorizacionesDTO> autorizacionesDTOS = new ArrayList<>();
 
     HashMap<String,Object> fecFac = new HashMap<>();
     fecFac.put("valueDate","17-07-2018");
@@ -317,16 +324,28 @@ public class Test_PrepaidEJBBean10_getTransactions {
     movimientosDTO.setFecfac(fecFac);
     dto.setMovimientos(movimientosDTOS);
 
+    AutorizacionesDTO autorizacionesDTO = new AutorizacionesDTO();
+    autorizacionesDTO.setTipofac(3003);
+    autorizacionesDTO.setIndnorcor(new BigDecimal(0));
+    autorizacionesDTO.setImptrn(new BigDecimal( 3000));
+    autorizacionesDTO.setDestipfac("Compra");
+    autorizacionesDTOS.add(autorizacionesDTO);
+    autorizacionesDTO.setFectrn(fecFac);
+    authDto.setListAutorizacionesDTOS(autorizacionesDTOS);
+
     Mockito.doReturn(user).when(userClient).getUserById(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(new HashMap<>(),Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
+
     Mockito.doReturn(dto).when(tecnocomService).consultaMovimientos(Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
+
+    Mockito.doReturn(authDto).when(tecnocomService).consultaAutorizaciones(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
 
     try {
       List<PrepaidTransaction10> prepaidTransaction10 = prepaidEJBBean10.getTransactions(new HashMap<>(), Long.MAX_VALUE,"","",Integer.MAX_VALUE);
       Assert.assertNotNull("Deberia retornar el listado de transacciones", prepaidTransaction10);
-      Assert.assertEquals("Deberian ser 3",3, prepaidTransaction10.size());
+      Assert.assertEquals("Deberian ser 4",4, prepaidTransaction10.size());
     } catch (Exception ex) {
       ex.printStackTrace();
       Assert.fail("should not be here "+ex);
