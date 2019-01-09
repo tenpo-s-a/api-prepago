@@ -25,7 +25,7 @@ import static cl.multicaja.core.model.Errors.*;
  * @autor abarazarte
  */
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
-
+  //TODO: Hacer test withdrawUserBalance fromEndPoint False
   @Test
   public void PosWithdraw() throws Exception {
 

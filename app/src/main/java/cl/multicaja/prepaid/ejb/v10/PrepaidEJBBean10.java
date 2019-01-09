@@ -232,6 +232,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
 
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     this.validateTopupRequest(topupRequest);
 
     // Obtener usuario Multicaja
@@ -340,7 +343,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
     this.validateTopupRequest(topupRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
@@ -464,7 +469,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
     this.validateWithdrawRequest(withdrawRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
@@ -666,7 +673,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
     this.validateWithdrawRequest(withdrawRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
