@@ -28,7 +28,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception;
+  PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception;
 
   /**
    *
@@ -36,7 +36,7 @@ public interface PrepaidEJB10 {
    * @param topupRequest
    * @throws Exception
    */
-  void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception;
+  void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception;
 
   /**
    *
@@ -45,7 +45,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception;
+  PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndpoint) throws Exception;
 
   /**
    *
@@ -53,7 +53,7 @@ public interface PrepaidEJB10 {
    * @param withdrawRequest
    * @throws Exception
    */
-  void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception;
+  void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndpoint) throws Exception;
 
   /**
    *

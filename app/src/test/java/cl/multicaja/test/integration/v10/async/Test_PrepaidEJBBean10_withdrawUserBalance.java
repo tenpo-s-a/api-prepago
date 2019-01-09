@@ -49,7 +49,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     TecnocomServiceHelper.getInstance().getTecnocomService().setAutomaticError(Boolean.TRUE);
     TecnocomServiceHelper.getInstance().getTecnocomService().setRetorno("1020");
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá");
     } catch(RunTimeValidationException rvex) {
 

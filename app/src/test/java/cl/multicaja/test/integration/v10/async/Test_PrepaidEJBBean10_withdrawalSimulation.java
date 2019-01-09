@@ -757,7 +757,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     prepaidTopup10.setMerchantCode(merchantCode); //carga WEB
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(amount));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
   }
@@ -767,7 +767,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     prepaidWithdraw.setMerchantCode(merchantCode);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw);
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
     } catch (ValidationException vex) {
       Assert.fail("No debe pasar por aca");
     }
