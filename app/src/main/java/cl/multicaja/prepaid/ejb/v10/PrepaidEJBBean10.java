@@ -373,8 +373,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // Verifica si existe la carga original topup
       if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
-
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), headers.get(Constants.HEADER_USER_TIMEZONE).toString())) {
+        String timezone;
+        if(headers == null){
+          timezone="America/Santiago";
+        }else{
+          timezone=headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+        }
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);

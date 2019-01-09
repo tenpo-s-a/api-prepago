@@ -240,7 +240,7 @@ public interface PrepaidMovementEJB10 {
    * @param mov
    * @return
    */
-  String processReconciliation(PrepaidMovement10 mov) throws Exception ;
+  void processReconciliation(PrepaidMovement10 mov) throws Exception ;
 
   void updatePrepaidBusinessStatus(Map<String, Object> header, Long id, BusinessStatusType businessStatusType) throws Exception;
 }

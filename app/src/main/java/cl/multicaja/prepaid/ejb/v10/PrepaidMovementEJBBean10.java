@@ -654,7 +654,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (List)resp.get("result");
   }
 
-  public String processReconciliation(PrepaidMovement10 mov) throws Exception {
+  public void processReconciliation(PrepaidMovement10 mov) throws Exception {
     String messageID = "";
     // Excel fila 1
     log.info("Mov to Reconciliation: "+mov);
@@ -666,10 +666,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Excel fila 2
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())) {
-      log.debug("XLS ID 2");
+      log.info("XLS ID 2");
+      log.info("Get Prepaid by ID: "+mov.getId());
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
+      log.info(movFull);
       if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+
           //Se busca usuario prepago para obtener user
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
           if(prepaidUser10 == null){
@@ -680,13 +683,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           if(user == null){
             log.info("user null");
           }
+          PrepaidMovement10 movToReverse = getPrepaidMovementForReverse(prepaidUser10.getId(),movFull.getIdTxExterno(),PrepaidMovementType.TOPUP,movFull.getTipofac());
           // Se crea movimiento de reversa
           NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
           newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-          newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
+          newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
+          newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
           newPrepaidTopup10.setMerchantName("Conciliacion");
           newPrepaidTopup10.setRut(user.getRut().getValue());
           newPrepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+          log.info(newPrepaidTopup10);
+          log.info(movToReverse);
+          log.info(movFull);
           // Se envia movimiento a reversar
           getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -699,22 +707,32 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
       else{
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())){
+
           //Se busca usuario prepago para obtener user
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
           if(prepaidUser10 == null){
             log.info("prepaidTopup10 null");
+            throw new ValidationException();
           }
           //Se busca user para obterner rut
           User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
           if(user == null){
             log.info("user null");
           }
+          //PrepaidMovement10 movToReverse = getPrepaidMovementForReverse(prepaidUser10.getId(),movFull.getIdTxExterno(),PrepaidMovementType.TOPUP,movFull.getTipofac());
+
           //Se envia a reversar el retiro
           NewPrepaidWithdraw10 newPrepaidWithdraw10 = new NewPrepaidWithdraw10();
           newPrepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
           newPrepaidWithdraw10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
+
           newPrepaidWithdraw10.setMerchantCode(movFull.getCodcom());
+          newPrepaidWithdraw10.setMerchantCategory(movFull.getCodact());
           newPrepaidWithdraw10.setMerchantName("Conciliacion");
+          newPrepaidWithdraw10.setRut(user.getRut().getValue());
+          newPrepaidWithdraw10.setPassword("CONCI");
+          log.info(newPrepaidWithdraw10);
+          //log.info(movToReverse);
           getPrepaidEJBBean10().reverseWithdrawUserBalance(null,newPrepaidWithdraw10,false);
           // Se agega a la tabla para que no vuelva a ser enviado
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
@@ -779,7 +797,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se crea movimiento de reversa
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-        newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
+        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
+        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
         newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         newPrepaidTopup10.setTransactionId(movFull.getIdTxExterno());
@@ -824,7 +843,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se crea movimiento de reversa
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-        newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
+        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
+        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
         newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         newPrepaidTopup10.setTransactionId(movFull.getNumaut());
@@ -868,7 +888,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se crea movimiento de reversa
         NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
         newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-        newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
+        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
+        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
         newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
         String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
@@ -901,7 +922,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Se crea movimiento de reversa
           NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
           newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-          newPrepaidTopup10.setMerchantCategory(Integer.parseInt(movFull.getCodcom()));
+          newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
+          newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
           newPrepaidTopup10.setMerchantName("Conciliacion" );
           newPrepaidTopup10.setRut(user.getRut().getValue());
           String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
@@ -923,9 +945,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.error("No cae en ningun caso: "+mov);
         createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NO_CASE);
-
     }
-    return messageID;
+
   }
 
 }

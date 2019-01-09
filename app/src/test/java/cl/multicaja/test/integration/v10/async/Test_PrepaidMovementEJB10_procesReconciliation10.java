@@ -1,16 +1,10 @@
 package cl.multicaja.test.integration.v10.async;
 
-import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
-import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.junit.Assert;
 import org.junit.Test;
 
-import javax.jms.Queue;
 import java.math.BigDecimal;
 
 public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUnitAsync {
@@ -38,16 +32,9 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    String messageID = getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    Thread.sleep(2000);
+    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    Assert.assertNotEquals("No debe ser vacio","",messageID);
 
-    Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageID);
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
   }
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW)
   @Test
@@ -72,16 +59,8 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    String messageID = getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    Thread.sleep(2000);
+    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    Assert.assertNotEquals("No debe ser vacio","",messageID);
-
-    Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
-    ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageID);
-
-    Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse);
-    Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse.getData());
   }
   // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP) STATUS ERROR
   @Test
@@ -106,16 +85,8 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    String messageID = getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    Thread.sleep(2000);
+    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    Assert.assertNotEquals("No debe ser vacio","",messageID);
-
-    Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageID);
-
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
-    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
   }
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW) STATUS ERROR RESPONSE
   @Test
@@ -140,16 +111,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    String messageID = getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    Thread.sleep(2000);
 
-    Assert.assertNotEquals("No debe ser vacio","",messageID);
-
-    Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
-    ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageID);
-
-    Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse);
-    Assert.assertNotNull("Deberia existir un remoteReverse", remoteReverse.getData());
   }
 
 
