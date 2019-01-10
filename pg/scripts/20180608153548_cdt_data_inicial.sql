@@ -41,65 +41,65 @@ INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 1
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Primera Carga', 'Solicitud Primera Carga', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 2
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 2
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(1,'Confirmación Primera Carga', 'Confirmación Primera Carga', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 3
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 3
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Reversa Primera Carga', 'Solicitud Reversa Primera Carga', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 4
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 4
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(3,'Confirmación Reversa Primera Carga', 'Confirmación Reversa Primera Carga', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
 -- SOLICITUD CARGA
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 5
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 5
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Carga Web', 'Solicitud Carga Web', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 6
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 6
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(5,'Confirmación Carga Web', 'Confirmación Carga Web', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 7
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 7
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Carga POS', 'Solicitud Carga POS', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 8
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 8
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(7, 'Confirmación Carga POS', 'Confirmación Carga POS', 'S', 'ACTIVO', LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 9
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 9
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Reversa Carga', 'Solicitud Reversa Carga WEB y POS', 'N', 'ACTIVO', LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 10
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 10
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(9,'Confirmación Reversa Carga', 'Confirmación Reversa Carga WEB y POS', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
 -- RETIRO
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 11
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 11
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0, 'Solicitud Retiro Web', 'Solicitud Retiro Web', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 12
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 12
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(11,'Confirmación Retiro Web', 'Confirmación Retiro Web', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 13
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 13
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Retiro POS', 'Solicitud Retiro POS', 'N', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 14
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 14
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(13,'Confirmación Retiro POS', 'Confirmación Retiro POS', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 15
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 15
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(0,'Solicitud Reversa de Retiro', 'Solicitud Reversa de Retiro', 'N', 'ACTIVO', LOCALTIMESTAMP,LOCALTIMESTAMP);
 
-INSERT INTO ${schema.cdt}.cdt_fase_movimiento-- ID 16
+INSERT INTO ${schema.cdt}.cdt_fase_movimiento -- ID 16
 (id_fase_padre,nombre, descripcion, ind_confirmacion, estado, fecha_estado, fecha_creacion)
 VALUES(15,'Confirmacion Reversa de Retiro', 'Confirmacion Reversa de Retiro', 'S', 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
@@ -193,7 +193,7 @@ VALUES(11, -1, 'El retiro supera el monto máximo de un retiro web', 500000, 'ME
 
 INSERT INTO ${schema.cdt}.cdt_limite
 (id_fase_movimiento, id_regla_acumulacion, descripcion, valor, cod_operacion, cod_error, estado, fecha_estado, fecha_creacion)
-VALUES(11, -1, 'El monto de retiro es menor al monto mínimo de retiros', 1000, 'MAYORQIG', 108303, 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
+VALUES(11, -1, 'El monto de retiro es menor al monto mínimo de retiros', 500, 'MAYORQIG', 108303, 'ACTIVO',  LOCALTIMESTAMP,LOCALTIMESTAMP);
 
 INSERT INTO ${schema.cdt}.cdt_limite
 (id_fase_movimiento, id_regla_acumulacion, descripcion, valor, cod_operacion, cod_error, estado, fecha_estado, fecha_creacion)
