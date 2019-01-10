@@ -86,4 +86,21 @@ public final class TecnocomServiceHelper {
     numaut = numaut.substring(numaut.length() - 6);
     return numaut;
   }
+
+  public static Boolean isAuthorizationOk(String response){
+    Boolean isOk = true;
+    if(!response.equalsIgnoreCase("000")){
+      isOk = false;
+    }
+    return isOk;
+  }
+
+  public static Boolean isMovementOk(String response){
+    Boolean isOk = true;
+    if(!response.equalsIgnoreCase("000")){
+      isOk = false;
+    }
+    return isOk;
+  }
+
 }
