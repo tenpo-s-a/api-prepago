@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,8 +24,8 @@ import static cl.multicaja.core.model.Errors.*;
  */
 public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
 
-  @BeforeClass
-  public static void  beforeClass() {
+  @Before
+  public void before() {
     getTecnocomService().setAutomaticError(Boolean.FALSE);
     getTecnocomService().setRetorno(null);
   }
@@ -283,7 +284,9 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("debe retornar una comision", resp.getFee());
 
     //calculo de la comision
-    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT());
+    NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(BigDecimal.valueOf(
+      getCalculationsHelper().addIva(getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT()).intValue()
+    ));
 
     Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
@@ -435,79 +438,77 @@ public class Test_withdrawalSimulation_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void withdrawalSimulation_not_ok_by_min_amount() throws Exception {
-    //WEB
-    {
-      User user = registerUser();
-      updateUser(user);
+  public void withdrawalSimulation_not_ok_by_min_amount_web() throws Exception {
+    User user = registerUser();
+    updateUser(user);
 
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-      AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
 
-      Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
 
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-      BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
+    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
 
-      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
-      Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(999));
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(499));
 
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(TransactionOriginType.WEB);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-      HttpResponse respHttp = withdrawalSimulation(user.getId(), simulationNew);
+    HttpResponse respHttp = withdrawalSimulation(user.getId(), simulationNew);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+    Assert.assertEquals("status 422", 422, respHttp.getStatus());
+    ValidationException vex = respHttp.toObject(ValidationException.class);
 
-      Assert.assertEquals("debe ser error de supera saldo", EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue(), vex.getCode());
-    }
-    //POS
-    {
-      User user = registerUser();
-      updateUser(user);
+    Assert.assertEquals("debe ser error de supera saldo", EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue(), vex.getCode());
+  }
 
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+  @Test
+  public void withdrawalSimulation_not_ok_by_min_amount_pos() throws Exception {
+    User user = registerUser();
+    updateUser(user);
 
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
-      AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-      Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
+    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
+    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
 
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
 
-      BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
+    prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-      InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+    BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
 
-      Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
 
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(999));
+    Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(TransactionOriginType.POS);
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(999));
 
-      HttpResponse respHttp = withdrawalSimulation(user.getId(), simulationNew);
+    SimulationNew10 simulationNew = new SimulationNew10();
+    simulationNew.setAmount(amount);
+    simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
-      ValidationException vex = respHttp.toObject(ValidationException.class);
+    HttpResponse respHttp = withdrawalSimulation(user.getId(), simulationNew);
 
-      Assert.assertEquals("debe ser error de supera saldo", EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue(), vex.getCode());
-    }
+    Assert.assertEquals("status 422", 422, respHttp.getStatus());
+    ValidationException vex = respHttp.toObject(ValidationException.class);
+
+    Assert.assertEquals("debe ser error de supera saldo", EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue(), vex.getCode());
   }
 
   @Test
