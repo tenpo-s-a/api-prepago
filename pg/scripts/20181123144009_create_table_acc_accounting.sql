@@ -19,18 +19,26 @@
   CREATE SCHEMA IF NOT EXISTS ${schema.acc};
 
   CREATE TABLE ${schema.acc}.accounting (
-      id              BIGSERIAL NOT NULL,
-      id_tx           INT8 NOT NULL,
-      type            VARCHAR(20) NOT NULL,
-      origin          VARCHAR(20) NOT NULL,
-      amount          NUMERIC(15,2) NOT NULL,
-      currency        NUMERIC(3,0) NOT NULL,
-      ammount_usd     NUMERIC(15,2) NOT NULL,
-      exchange_rate_dif NUMERIC(15,2) NOT NULL,
-      fee               NUMERIC(15,2) NOT NULL,
-      fee_iva           NUMERIC(15,2) NOT NULL,
-      transaction_date  TIMESTAMP NOT NULL,
-      create_date  TIMESTAMP NOT NULL,
+      id                    BIGSERIAL NOT NULL,
+      id_tx                 BIGINT NOT NULL,
+      type                  VARCHAR(20) NOT NULL,
+      accounting_mov        VARCHAR(20) NOT NULL,
+      origin                VARCHAR(20) NOT NULL,
+      amount                NUMERIC(15,2) NOT NULL,
+      currency              NUMERIC(3,0) NOT NULL,
+      amount_usd            NUMERIC(15,2) NOT NULL,
+      amount_mcar           NUMERIC(15,2) NOT NULL,
+      exchange_rate_dif     NUMERIC(15,2) NOT NULL,
+      fee                   NUMERIC(15,2) NOT NULL,
+      fee_iva               NUMERIC(15,2) NOT NULL,
+      collerctor_fee        NUMERIC(15,2) NOT NULL,
+      collerctor_fee_iva    NUMERIC(15,2) NOT NULL,
+      amount_balance        NUMERIC(15,2) NOT NULL,
+      status                VARCHAR(20) NOT NULL,
+      file_id               BIGINT NOT NULL, -- Puede ser null
+      transaction_date      TIMESTAMP NOT NULL,
+      conciliation_date     TIMESTAMP NOT NULL,
+      create_date           TIMESTAMP NOT NULL,
       update_date  TIMESTAMP NOT NULL,
       CONSTRAINT accounting_pk PRIMARY KEY(id)
   );
