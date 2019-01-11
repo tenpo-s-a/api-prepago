@@ -3,12 +3,16 @@ package cl.multicaja.prepaid.async.v10.processors;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.core.model.Errors;
+import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.model.v10.MimeType;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import cl.multicaja.prepaid.model.v10.QueuesNameType;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -34,6 +38,7 @@ import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
+import static cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE;
 
 /**
  * @autor abarazarte
@@ -193,15 +198,22 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
-        PrepaidWithdraw10 withdraw = data.getPrepaidWithdraw10();
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
 
-        Map<String, String> mailData = new HashMap<>();
+        Map<String, Object> templateData = new HashMap<>();
 
-        mailData.put("${amount}", String.valueOf(withdraw.getAmount().getValue()));
-        mailData.put("${fee}", String.valueOf(withdraw.getFee().getValue()));
+        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+        templateData.put("transaction_type_gloss", WEB_MERCHANT_CODE.equals(data.getPrepaidWithdraw10().getMerchantCode()) ? "Retiro por transferencia" : "Retiro en comercio");
+        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
+        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue()));
+        templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
 
-        String template = replaceDataHTML("", mailData);
-        //TODO: se debe llamar al servicio de envio de mail de Users
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
 
         return req;
       }

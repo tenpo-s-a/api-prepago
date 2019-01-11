@@ -27,10 +27,9 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
-import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.tecnocom.dto.*;
+import cl.multicaja.tecnocom.model.response.Contratos;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,10 +47,7 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.core.test.TestBase.*;
@@ -254,6 +250,97 @@ public final class TestHelpersResource10 extends BaseResource {
     }
 
     return Response.ok(gastoAleatorio).status(201).build();
+  }
+
+  @POST
+  @Path("/{userId}/randomAuthorization")
+  public Response simulateAuthorizationForUser(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+
+    validate();
+
+    String codcom = "codcom";
+    Integer codact = 123;
+    String nomcomred = "nomcomred";
+    BigDecimal impfac = BigDecimal.valueOf(3000);
+    BigDecimal impliq = BigDecimal.valueOf(3000);
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    PrepaidUser10 prepaidUser = prepaidUserEJBBean10.getPrepaidUserByUserIdMc(mapHeaders, userId);
+    if (prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(mapHeaders, prepaidUser.getId());
+    if (prepaidCard10 == null) {
+      throw new NotFoundException(ERROR_DATA_NOT_FOUND);
+    }
+
+    TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
+
+    String numreffac = getRandomNumericString(10);
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
+
+    //add authorization
+    InclusionMovimientosDTO inclusionAutorizacionesDTO = tecnocomService.inclusionAutorizaciones(
+      prepaidCard10.getProcessorUserId(),
+      prepaidCard10.getPan(),
+      CodigoMoneda.CHILE_CLP,
+      IndicadorNormalCorrector.NORMAL,
+      TipoFactura.COMPRA_INTERNACIONAL,
+      numreffac,
+      impfac,
+      numaut,
+      codcom,
+      nomcomred,
+      codact,
+      CodigoMoneda.CHILE_CLP,
+      impliq
+    );
+
+    if (!inclusionAutorizacionesDTO.isRetornoExitoso()) {
+      log.error("* Compra autorizada rechazada por Tecnocom * Error: " + inclusionAutorizacionesDTO.getRetorno());
+      log.error(inclusionAutorizacionesDTO.getDescRetorno());
+      return Response.ok(impliq).status(400).build();
+    }else{
+      System.out.println("Compra autorizada aprobada por Tecnocom");
+      return Response.ok(impliq).status(200).build();
+    }
+
+  }
+    
+  @GET
+  @Path("/{userId}/authorizations")
+  public Response getAuthorizationByPrepaidUserId(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+
+    Map<String, Object> mapHeaders = headersToMap(headers);
+
+    PrepaidUser10 prepaidUser = prepaidUserEJBBean10.getPrepaidUserByUserIdMc(mapHeaders, userId);
+    if (prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean10.getLastPrepaidCardByUserId(mapHeaders, prepaidUser.getId());
+    if (prepaidCard10 == null) {
+      throw new NotFoundException(ERROR_DATA_NOT_FOUND);
+    }
+
+    String contrato = prepaidCard10.getProcessorUserId();
+
+    TecnocomService tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
+
+    ConsultaAutorizacionesDTO autorizacionesDTO = tecnocomService.consultaAutorizaciones(
+      contrato,null,new Date(),new Date());
+
+    Iterator<AutorizacionesDTO> iterator = autorizacionesDTO.getListAutorizacionesDTOS().iterator();
+    BigDecimal impTrn = null;
+    while (iterator.hasNext()) {
+      if(iterator.hasNext()){
+        impTrn = iterator.next().getImptrn();
+      }
+    }
+
+    return Response.ok(impTrn).status(200).build();
   }
 
 

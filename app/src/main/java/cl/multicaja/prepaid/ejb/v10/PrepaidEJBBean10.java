@@ -5,6 +5,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
@@ -37,7 +38,10 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
@@ -227,8 +231,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
 
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     this.validateTopupRequest(topupRequest);
 
     // Obtener usuario Multicaja
@@ -318,6 +325,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
+    if(!fromEndPoint){
+      prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
     prepaidTopup.setId(prepaidMovement.getId());
@@ -332,9 +342,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
     this.validateTopupRequest(topupRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
@@ -367,15 +379,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // Verifica si existe la carga original topup
       if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
-
         String timezone;
-        if(headers.get(Constants.HEADER_USER_TIMEZONE) != null ){
-          timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
-        } else {
-          timezone = "America/Santiago";
+        if(headers == null){
+          timezone="America/Santiago";
+        }else{
+          timezone=headers.get(Constants.HEADER_USER_TIMEZONE).toString();
         }
-
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone)) {
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
@@ -384,6 +394,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          if(!fromEndPoint){
+            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+          }
           prepaidMovement.setCentalta(originalTopup.getCentalta());
           prepaidMovement.setCuenta(originalTopup.getCuenta());
           prepaidMovement.setPan(originalTopup.getPan());
@@ -409,6 +422,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
         PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        if(!fromEndPoint){
+          prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+        }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
@@ -451,10 +467,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
     this.validateWithdrawRequest(withdrawRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
@@ -464,10 +482,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
-    // Se verifica la clave
-    UserPasswordNew userPasswordNew = new UserPasswordNew();
-    userPasswordNew.setValue(withdrawRequest.getPassword());
-    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    // La clave solo se verifica cuando el movimiento viene desde el endpoint
+    if(fromEndPoint){
+      // Se verifica la clave
+      UserPasswordNew userPasswordNew = new UserPasswordNew();
+      userPasswordNew.setValue(withdrawRequest.getPassword());
+      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    }
+
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -517,8 +539,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-
-
     String contrato = prepaidCard.getProcessorUserId();
     String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
@@ -526,6 +546,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
+    if(!fromEndPoint){
+      prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
     prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
 
@@ -568,7 +591,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         numextcta,
         nummovext,
         clamone,
-        null,
+        BusinessStatusType.OK,
         status);
 
       // se confirma la transaccion
@@ -591,6 +614,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
       PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
+      if(!fromEndPoint){
+        prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      }
       prepaidMovementReverse.setPan(prepaidMovement.getPan());
       prepaidMovementReverse.setCentalta(prepaidMovement.getCentalta());
       prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
@@ -626,7 +652,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(),BusinessStatusType.REVERSED);
+      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(), BusinessStatusType.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
@@ -646,9 +672,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest) throws Exception {
+  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
     this.validateWithdrawRequest(withdrawRequest);
-
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
@@ -657,11 +685,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
-
-    // Se verifica la clave
-    UserPasswordNew userPasswordNew = new UserPasswordNew();
-    userPasswordNew.setValue(withdrawRequest.getPassword());
-    getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    if(fromEndPoint) {
+      // Se verifica la clave
+      UserPasswordNew userPasswordNew = new UserPasswordNew();
+      userPasswordNew.setValue(withdrawRequest.getPassword());
+      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    }
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -688,7 +717,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           timezone = "America/Santiago";
         }
 
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone)) {
+        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
@@ -697,6 +726,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
 
           PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+          if(!fromEndPoint){
+            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+          }
           prepaidMovement.setPan(originalwithdraw.getPan());
           prepaidMovement.setCentalta(originalwithdraw.getCentalta());
           prepaidMovement.setCuenta(originalwithdraw.getCuenta());
@@ -723,6 +755,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
         PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+        if(!fromEndPoint){
+          prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+        }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
@@ -1331,6 +1366,20 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     final BigDecimal amountValue = simulationNew.getAmount().getValue();
 
+    BigDecimal fee;
+
+    if (simulationNew.isTransactionWeb()) {
+      fee = BigDecimal.valueOf(getCalculationsHelper().addIva(getPercentage().getWITHDRAW_WEB_FEE_AMOUNT()).intValue());
+    } else {
+      fee = getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE());
+    }
+
+    //monto a cargar + comision
+    BigDecimal calculatedAmount = amountValue.add(fee);
+
+    //saldo del usuario
+    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
+
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(amountValue);
     cdtTransaction.setExternalTransactionId(String.valueOf(Utils.uniqueCurrentTimeNano()));
@@ -1351,25 +1400,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
      */
       int lNumError = cdtTransaction.getNumErrorInt();
       if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+        if(lNumError == EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS.getValue()) {
+          this.withdrawSimulationAmountValidation(EL_MONTO_DE_RETIRO_ES_MENOR_AL_MONTO_MINIMO_DE_RETIROS, balance, fee);
+        }
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       }
     }
-
-    BigDecimal fee;
-
-    if (simulationNew.isTransactionWeb()) {
-      fee = getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT();
-    } else {
-      fee = getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), getPercentage().getCALCULATOR_WITHDRAW_POS_FEE_PERCENTAGE());
-    }
-
-    //monto a cargar + comision
-    BigDecimal calculatedAmount = amountValue.add(fee);
-
-    //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
     log.info("Monto a retirar: " + amountValue);
@@ -1377,7 +1415,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto a retirar + comision: " + calculatedAmount);
 
     if(balance.getBalance().getValue().doubleValue() < calculatedAmount.doubleValue()) {
-      throw new ValidationException(SALDO_INSUFICIENTE_$VALUE).setData(new KeyValue("value", String.format("-%s", balance.getBalance().getValue().add(fee.multiply(BigDecimal.valueOf(-1))))));
+      this.withdrawSimulationAmountValidation(SALDO_INSUFICIENTE_$VALUE, balance, fee);
     }
 
     SimulationWithdrawal10 simulationWithdrawal = new SimulationWithdrawal10();
@@ -1385,6 +1423,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     simulationWithdrawal.setAmountToDiscount(new NewAmountAndCurrency10(calculatedAmount));
 
     return simulationWithdrawal;
+  }
+
+  private void withdrawSimulationAmountValidation(Errors error, PrepaidBalance10 balance, BigDecimal fee) throws Exception {
+    throw new ValidationException(error).setData(new KeyValue("value", String.format("-%s", balance.getBalance().getValue().add(fee.multiply(BigDecimal.valueOf(-1))))));
   }
 
   @Override
@@ -1493,8 +1535,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
     }
 
-    Date _startDate;
-    Date _endDate;
+    Date _startDate, _startDateFilter;
+    Date _endDate, _endDateFilter;
 
     if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
       String timeZone = "";
@@ -1510,27 +1552,65 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       _endDate = getDateUtils().dateStringToDate(endDate,"dd-MM-yyyy");
     }
 
-    ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),TipoDocumento.RUT,_startDate,_endDate);
+    _startDateFilter = new Date(_startDate.getTime() - TimeUnit.HOURS.toMillis(5));
+    _endDateFilter = new Date(_endDate.getTime());
+
+    List<PrepaidTransaction10> listTransactionMovimientos10 = new ArrayList<>();
+    List<PrepaidTransaction10> listTransactionAutorizaciones10 = new ArrayList<>();
+    List<PrepaidTransaction10> listMergeTransaction10 = new ArrayList<>();
+
+    listTransactionMovimientos10 = createConsultaMovimientoToList(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
+      TipoDocumento.RUT,_startDate,_endDate);
+    listMergeTransaction10.addAll(listTransactionMovimientos10);
+
+    listTransactionAutorizaciones10 = createConsultaAutorizacionesToList(prepaidCard.getProcessorUserId(),
+      CodigoMoneda.CHILE_CLP,_startDate,_endDate);
+    listMergeTransaction10.addAll(listTransactionAutorizaciones10);
+
+    //Get betwen start and end date filter
+    listMergeTransaction10.stream()
+      .filter(date -> date.getDate().after(_startDateFilter) && date.getDate().before(_endDateFilter))
+      .collect(Collectors.toList());
+
+    //then sort by date desc
+    listMergeTransaction10.sort(Comparator.comparing(PrepaidTransaction10::getDate).reversed());
+
+    //truncate to 7 records
+    listMergeTransaction10 = listMergeTransaction10.stream().limit(7).collect(Collectors.toList());
+
+    return listMergeTransaction10;
+  }
+
+
+  private List<PrepaidTransaction10> createConsultaMovimientoToList(String contrato,String numDoc,TipoDocumento tipoDoc,
+                                              Date fechaDesde, Date fechaHasta) throws Exception {
+
+    ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(contrato,numDoc,tipoDoc,
+      fechaDesde,fechaHasta);
 
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
 
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
 
       PrepaidTransaction10 transaction10 = new PrepaidTransaction10();
+
+      transaction10.setOriginType(TipoOrigen.MOVI);
       // Get Date and parse
       String sDate = (String) movimientosDTO.getFecfac().get("valueDate");
       String sFormat = (String) movimientosDTO.getFecfac().get("format");
+
       transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
       transaction10.setCommerceCode(movimientosDTO.getCodcom());
       transaction10.setInvoiceType(TipoFactura.valueOfEnumByCodeAndCorrector(movimientosDTO.getTipofac(),movimientosDTO.getIndnorcor()));
       transaction10.setCorrector(transaction10.getInvoiceType().getCorrector()!=0);
+
       switch (transaction10.getInvoiceType()) {
         case COMISION_APERTURA:{
           transaction10.setGloss(transaction10.getInvoiceType().getDescription());
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco.multiply(NEGATIVE), movimientosDTO.getClamon()));//Comisiones
 
           break;
@@ -1541,7 +1621,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco,movimientosDTO.getClamon()));//Comisiones
           break;
         }
@@ -1550,7 +1630,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
           transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco), movimientosDTO.getClamon()));
           break;
@@ -1560,7 +1640,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));
           transaction10.setFinalAmount(new NewAmountAndCurrency10(movimientosDTO.getImporte().subtract(sumImpbrueco).multiply(NEGATIVE), movimientosDTO.getClamon()));
           break;
@@ -1571,7 +1651,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
 
           //Monto Carga
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(), movimientosDTO.getClamon()));
@@ -1588,7 +1668,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
           // Suma de Comisiones
           BigDecimal sumImpbrueco = getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(), movimientosDTO.getImpbrueco2(),
-                                                              movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(), movimientosDTO.getImpbrueco4());
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte().multiply(NEGATIVE), movimientosDTO.getClamon()));//Monto Carga
           transaction10.setFee(new NewAmountAndCurrency10(sumImpbrueco, movimientosDTO.getClamon()));//Comisiones
@@ -1627,7 +1707,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(movimientosDTO.getImporte(),CodigoMoneda.CHILE_CLP));
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
-                                                      movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoDescontar = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
 
           transaction10.setFinalAmount(new NewAmountAndCurrency10(montoDescontar,CodigoMoneda.CHILE_CLP));
@@ -1672,7 +1752,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setType(transaction10.getInvoiceType().getType());
 
           BigDecimal fee =  getNumberUtils().sumBigDecimal(movimientosDTO.getImpbrueco1(),movimientosDTO.getImpbrueco2(),
-                                                      movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
+            movimientosDTO.getImpbrueco3(),movimientosDTO.getImpbrueco4());
           BigDecimal montoPesos = getNumberUtils().sumBigDecimal(movimientosDTO.getImporte(),fee);
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1764,6 +1844,152 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     return listTransaction10;
+  }
+
+  private List<PrepaidTransaction10> createConsultaAutorizacionesToList(String contrato,CodigoMoneda codigoMoneda,
+                                                  Date fechaDesde,Date fechaHasta) throws Exception {
+
+    ConsultaAutorizacionesDTO consultaAutorizacionesDTO = getTecnocomService().consultaAutorizaciones(contrato,
+      codigoMoneda,fechaDesde,fechaHasta);
+
+    List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
+
+    for(AutorizacionesDTO autorizacionesDTO : consultaAutorizacionesDTO.getListAutorizacionesDTOS()) {
+
+      PrepaidTransaction10 transaction10 = new PrepaidTransaction10();
+
+      transaction10.setOriginType(TipoOrigen.AUTH);
+      // Get Date and parse
+      String sDate = (String) autorizacionesDTO.getFectrn().get("valueDate");
+      String sFormat = (String) autorizacionesDTO.getFectrn().get("format");
+      transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
+      transaction10.setCommerceCode(autorizacionesDTO.getCodcom());
+
+      transaction10.setInvoiceType(TipoFactura.valueOfEnumByCodeAndCorrector(autorizacionesDTO.getTipofac(),
+        autorizacionesDTO.getIndnorcor().intValue()));
+
+      transaction10.setCorrector(transaction10.getInvoiceType().getCorrector()!=0);
+
+      switch (transaction10.getInvoiceType()) {
+
+        case SUSCRIPCION_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.ge,autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(autorizacionesDTO.getImpdiv().setScale(2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+        case ANULA_SUSCRIPCION_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(autorizacionesDTO.getImpdiv().setScale(2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+        case COMPRA_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(
+            autorizacionesDTO.getImpdiv().setScale(2,2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+        case ANULA_COMPRA_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(
+            autorizacionesDTO.getImpdiv().setScale(2,2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+        case DEVOLUCION_COMPRA_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(
+            autorizacionesDTO.getImpdiv().setScale(2,2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+        case ANULA_DEVOLUCION_COMPRA_INTERNACIONAL:{
+          transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
+          transaction10.setType(transaction10.getInvoiceType().getType());
+
+          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
+            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
+          BigDecimal montoPesos = autorizacionesDTO.getImptrn();
+          transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+
+          transaction10.setAmountSecondary(new NewAmountAndCurrency10(
+            autorizacionesDTO.getImpdiv().setScale(2,2),
+            CodigoMoneda.fromValue(autorizacionesDTO.getClamondiv())));
+
+          BigDecimal bd = montoPesos.divide(autorizacionesDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
+          transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
+          transaction10.setCountry("");
+          transaction10.setFinalAmount(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
+          break;
+        }
+      }
+      listTransaction10.add(transaction10);
+    }
+
+    return listTransaction10;
+
   }
 
 

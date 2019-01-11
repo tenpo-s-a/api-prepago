@@ -35,7 +35,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario", CLIENTE_NO_EXISTE.getValue(), nfex.getCode());
@@ -51,7 +51,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(ValidationException nfex) {
       Assert.assertEquals("Cliente en lista negra", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR.getValue(), nfex.getCode());
@@ -67,7 +67,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), nfex.getCode());
@@ -89,7 +89,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(ValidationException nfex) {
       Assert.assertEquals("el usuario prepago esta bloqueado", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), nfex.getCode());
@@ -115,7 +115,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -141,7 +141,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -162,7 +162,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3119, 10000)));
 
-    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
@@ -201,7 +201,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
 
-    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup);
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
@@ -245,7 +245,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     {
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
       System.out.println("resp:: " + resp);
 
@@ -290,7 +290,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     {
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
       System.out.println("resp:: " + resp);
 
@@ -339,7 +339,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -359,7 +359,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -390,7 +390,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -407,7 +407,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -434,7 +434,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -451,7 +451,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10);
+        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 

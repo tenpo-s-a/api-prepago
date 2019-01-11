@@ -75,7 +75,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   @Test
   public void reverseRequestNull() throws Exception {
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, null);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, null,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error request null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -88,7 +88,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   public void reverseRequestAmountNull() throws Exception {
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -103,7 +103,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     reverseRequest.setAmount(amount);
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -119,7 +119,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     amount.setValue(BigDecimal.ZERO);
     reverseRequest.setAmount(amount);
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -134,7 +134,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
     reverseRequest.setAmount(amount);
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -151,7 +151,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setRut(0);
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -169,7 +169,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantCode("1234567890");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -188,7 +188,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantName("Test");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -208,7 +208,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantCategory(1);
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -232,7 +232,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (NotFoundException ex) {
       Assert.assertEquals("Debe retornar error user null", CLIENTE_NO_EXISTE.getValue(), ex.getCode());
@@ -256,7 +256,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error userMc disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -280,7 +280,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error userMc locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -304,7 +304,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error userMc deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -328,7 +328,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error userMc preregistered", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -353,7 +353,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error userMc disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -383,7 +383,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (NotFoundException ex) {
       Assert.assertEquals("Debe retornar error prepaidUser null", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
@@ -416,7 +416,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error prepaidUser disabled", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -468,7 +468,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
 
-    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
@@ -525,7 +525,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantCategory(1);
     reverseRequest.setTransactionId("0987654321");
 
-    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
@@ -579,7 +579,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
 
-    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
@@ -634,7 +634,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try {
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("Sould not be here");
     } catch (BaseException ex) {
       Assert.assertEquals("Deberia tener error de transaccion", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
@@ -708,7 +708,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     Mockito.doReturn("123456789")
       .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
-    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest);
+    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
     // Se verifica que se llamaron los metodos
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
