@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidTransaction10;
+import cl.multicaja.prepaid.model.v10.PrepaidTransactionExtend10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -70,9 +71,13 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
 
       ObjectMapper mapper = new ObjectMapper();
       mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SnakeCaseStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-      List<PrepaidTransaction10> prepaidTransaction10List = mapper.readValue(respHttp.getResp(),
-        new TypeReference<List<PrepaidTransaction10>>(){});
 
+      PrepaidTransactionExtend10 prepaidTransactionExtend10 = mapper.readValue(respHttp.getResp(),
+        new TypeReference<PrepaidTransactionExtend10>(){});
+
+      Assert.assertEquals("Transacciones sin errores: ",true,prepaidTransactionExtend10.getSuccess());
+
+      List<PrepaidTransaction10> prepaidTransaction10List = prepaidTransactionExtend10.getData();
       Assert.assertNotNull("Response Not Null",prepaidTransaction10List);
       Assert.assertEquals("ArrayList.size() = 2",2,prepaidTransaction10List.size());
       Assert.assertEquals("Debe  coincidir el monto ",amount,
@@ -80,4 +85,6 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
 
     }
   }
+
+
 }

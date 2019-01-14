@@ -73,10 +73,16 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
 
 
     int internationalPurchaseCounter = 0;
+
     HttpResponse transRespHttp = getPrepaidUserTransactions(user.getId(), "", "");
     ObjectMapper mapper = new ObjectMapper();
     mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SnakeCaseStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-    List<PrepaidTransaction10> prepaidTransaction10List = mapper.readValue(transRespHttp.getResp(), new TypeReference<List<PrepaidTransaction10>>(){});
+
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = mapper.readValue(transRespHttp.getResp(),
+      new TypeReference<PrepaidTransactionExtend10>(){});
+    Assert.assertEquals("Transacciones sin errores: ",true,prepaidTransactionExtend10.getSuccess());
+
+    List<PrepaidTransaction10> prepaidTransaction10List = prepaidTransactionExtend10.getData();
     for (PrepaidTransaction10 prepaidTransaction : prepaidTransaction10List) {
       System.out.println("Se encontro transaccion: " + prepaidTransaction.getInvoiceType().getCode());
       if (TipoFactura.COMPRA_INTERNACIONAL.getCode() == prepaidTransaction.getInvoiceType().getCode()) {
