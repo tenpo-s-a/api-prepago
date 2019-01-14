@@ -102,6 +102,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       }
 
     } catch (Exception e) {
+      e.printStackTrace();
       Assert.fail("No debe estar aca");
     }
 
