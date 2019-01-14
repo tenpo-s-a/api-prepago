@@ -1625,7 +1625,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if(!consultaMovimientosDTO.isRetornoExitoso() && !consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
 
-      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO);
+      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.getValue(),
+        TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.name());
 
     }else if(!consultaMovimientosDTO.isRetornoExitoso() && consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
 
