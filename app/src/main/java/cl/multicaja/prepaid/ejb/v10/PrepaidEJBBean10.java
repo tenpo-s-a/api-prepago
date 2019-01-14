@@ -1304,13 +1304,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto maximo a cargar: " + getPercentage().getMAX_AMOUNT_BY_USER());
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > getPercentage().getMAX_AMOUNT_BY_USER()) {
-      // Darle formato al numero
-      Locale chileLocale = new Locale("es", "CL");
-      DecimalFormat decimalFormat = new DecimalFormat("###,###.##", DecimalFormatSymbols.getInstance(chileLocale));
-
       // Responde mensaje de error, con el saldo total maximo y el monto maximo posible a cargar para no superarlo
-      KeyValue maxAmount = new KeyValue("value", decimalFormat.format(getPercentage().getMAX_AMOUNT_BY_USER()));
-      KeyValue topupAmount = new KeyValue("topup_amount", decimalFormat.format(new BigDecimal(getPercentage().getMAX_AMOUNT_BY_USER()).subtract(balance.getBalance().getValue())));
+      KeyValue maxAmount = new KeyValue("value", getPercentage().getMAX_AMOUNT_BY_USER());
+      KeyValue topupAmount = new KeyValue("topup_amount", new BigDecimal(getPercentage().getMAX_AMOUNT_BY_USER()).subtract(balance.getBalance().getValue()));
       throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(maxAmount, topupAmount);
     }
 
