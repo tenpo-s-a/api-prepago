@@ -1,9 +1,7 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
-import cl.multicaja.accounting.model.v10.Accounting10;
-import cl.multicaja.accounting.model.v10.AccountingOriginType;
-import cl.multicaja.accounting.model.v10.AccountingTxType;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
@@ -1281,6 +1279,23 @@ public class TestBaseUnit extends TestApiBase {
          accounting10.setFee(new BigDecimal(getUniqueInteger()));
          accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
+         accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+         accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+         accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+         accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+         NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+         amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+         accounting10.setAmountBalance(amountBalance);
+         accounting10.setStatus(AccountingStatusType.OK);
+         accounting10.setFileId(0L);
+
+         NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+         amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+         amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+         accounting10.setAmountMastercard(amountMcar);
+
          NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
          amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
          amount.setValue(new BigDecimal(getUniqueInteger()));
@@ -1314,6 +1329,23 @@ public class TestBaseUnit extends TestApiBase {
            amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
+
+           accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountBalance(amountBalance);
+           accounting10.setStatus(AccountingStatusType.OK);
+           accounting10.setFileId(0L);
+
+           NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountMastercard(amountMcar);
          }
          else if(iPositionNull == 2){
            accounting10.setType(null);
@@ -1334,6 +1366,23 @@ public class TestBaseUnit extends TestApiBase {
            amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
+
+           accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountBalance(amountBalance);
+           accounting10.setStatus(AccountingStatusType.OK);
+           accounting10.setFileId(0L);
+
+           NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountMastercard(amountMcar);
          }
          else if(iPositionNull == 3){
            accounting10.setOrigin(null);
@@ -1354,6 +1403,23 @@ public class TestBaseUnit extends TestApiBase {
            amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
+
+           accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountBalance(amountBalance);
+           accounting10.setStatus(AccountingStatusType.OK);
+           accounting10.setFileId(0L);
+
+           NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountMastercard(amountMcar);
          }
          else {
            accounting10.setTransactionDate(null);
@@ -1373,6 +1439,23 @@ public class TestBaseUnit extends TestApiBase {
            amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
            amount.setValue(new BigDecimal(getUniqueInteger()));
            accounting10.setAmount(amountUsd);
+
+           accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+           accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+           accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+           accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+           NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+           amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountBalance(amountBalance);
+           accounting10.setStatus(AccountingStatusType.OK);
+           accounting10.setFileId(0L);
+
+           NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+           amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+           amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+           accounting10.setAmountMastercard(amountMcar);
          }
        }
       accounting10s.add(accounting10);
