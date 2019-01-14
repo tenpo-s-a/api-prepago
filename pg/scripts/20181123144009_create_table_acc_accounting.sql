@@ -31,19 +31,18 @@
       exchange_rate_dif     NUMERIC(15,2) NOT NULL,
       fee                   NUMERIC(15,2) NOT NULL,
       fee_iva               NUMERIC(15,2) NOT NULL,
-      collerctor_fee        NUMERIC(15,2) NOT NULL,
-      collerctor_fee_iva    NUMERIC(15,2) NOT NULL,
+      collector_fee        NUMERIC(15,2) NOT NULL,
+      collector_fee_iva    NUMERIC(15,2) NOT NULL,
       amount_balance        NUMERIC(15,2) NOT NULL,
       status                VARCHAR(20) NOT NULL,
       file_id               BIGINT NOT NULL, -- Puede ser null
       transaction_date      TIMESTAMP NOT NULL,
       conciliation_date     TIMESTAMP NOT NULL,
       create_date           TIMESTAMP NOT NULL,
-      update_date  TIMESTAMP NOT NULL,
+      update_date           TIMESTAMP NOT NULL,
       CONSTRAINT accounting_pk PRIMARY KEY(id)
   );
   CREATE INDEX accounting_i1 ON ${schema.acc}.accounting (id);
-
 
 -- //@UNDO
 -- SQL to undo the change goes here.

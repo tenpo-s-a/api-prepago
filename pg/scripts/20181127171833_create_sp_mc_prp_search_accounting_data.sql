@@ -16,32 +16,66 @@
 
 -- // create_sp_mc_prp_search_accounting_data
 -- Migration SQL that makes the change goes here.
-CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_search_accounting_data_v10(_in_create_date character varying, OUT id bigint, OUT _id_tx bigint, OUT _type character varying, OUT _origin character varying, OUT _amount numeric, OUT _currency numeric, OUT _ammount_usd numeric, OUT _exchange_rate_dif numeric, OUT _fee numeric, OUT _fee_iva numeric, OUT _transaction_date timestamp without time zone, OUT _create_date timestamp without time zone, OUT _update_date timestamp without time zone)
+CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_search_accounting_data_v10
+(
+  IN _in_create_date VARCHAR,
+  OUT _id BIGINT,
+  OUT _id_tx BIGINT,
+  OUT _type VARCHAR,
+  OUT _accounting_mov VARCHAR,
+  OUT _origin VARCHAR,
+  OUT _amount NUMERIC,
+  OUT _currency NUMERIC,
+  OUT _amount_usd NUMERIC,
+  OUT _amount_mcar NUMERIC,
+  OUT _exchange_rate_dif NUMERIC,
+  OUT _fee NUMERIC,
+  OUT _fee_iva NUMERIC,
+  OUT _collector_fee NUMERIC,
+  OUT _collector_fee_iva NUMERIC,
+  OUT _amount_balance NUMERIC,
+  OUT _status VARCHAR,
+  OUT _file_id BIGINT,
+  OUT _transaction_date TIMESTAMP without time zone,
+  OUT _conciliation_date TIMESTAMP without time zone,
+  OUT _create_date TIMESTAMP without time zone,
+  OUT _update_date TIMESTAMP without time zone
+)
 RETURNS SETOF record
 LANGUAGE plpgsql
 AS $function$
 BEGIN
+
 RETURN QUERY
-SELECT
-  accounting.id,
-  accounting.id_tx,
-  accounting.type,
-  accounting.origin,
-  accounting.amount,
-  accounting.currency,
-  accounting.ammount_usd,
-  accounting.exchange_rate_dif,
-  accounting.fee,
-  accounting.fee_iva,
-  accounting.transaction_date,
-  accounting.create_date,
-  accounting.update_date
-FROM
-  ${schema.acc}.accounting
-WHERE accounting.create_date::date >= _in_create_date::date
-  AND accounting.create_date::date <= _in_create_date::date
-ORDER BY
-  accounting.create_date DESC;
+  SELECT
+    id,
+	  id_tx,
+	  type,
+	  accounting_mov,
+	  origin,
+	  amount,
+	  currency,
+	  amount_usd,
+    amount_mcar,
+    exchange_rate_dif,
+    fee,
+    fee_iva,
+    collector_fee,
+    collector_fee_iva,
+    amount_balance,
+    status,
+    file_id,
+    transaction_date,
+    conciliation_date,
+    create_date,
+    update_date
+  FROM
+    ${schema.acc}.accounting
+  WHERE
+    create_date::DATE >= _in_create_date::DATE AND
+    create_date::DATE <= _in_create_date::DATE
+  ORDER BY
+    create_date DESC;
 RETURN;
 END;
 $function$

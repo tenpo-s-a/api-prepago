@@ -17,9 +17,18 @@
 -- // create_table_clearing
 -- Migration SQL that makes the change goes here.
 
-
+  CREATE TABLE ${schema.acc}.clearing (
+      id                    BIGSERIAL NOT NULL,
+      accounting_id         BIGINT NOT NULL,
+      user_account_id       BIGINT NOT NULL,
+      file_id               BIGINT NOT NULL,
+      status                VARCHAR(20) NOT NULL,
+      created               TIMESTAMP NOT NULL,
+      updated               TIMESTAMP NOT NULL,
+      CONSTRAINT clearing_pk PRIMARY KEY(id)
+  );
+  CREATE INDEX clearing_i1 ON ${schema.acc}.clearing (id);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-
-
+  DROP TABLE IF EXISTS ${schema.acc}.clearing;

@@ -52,14 +52,22 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
     Object[] params = {
       new InParam(idTrx, Types.BIGINT), //id_tx
       new InParam(type, Types.VARCHAR), //type
+      new InParam(type,Types.VARCHAR),
       new InParam(origin, Types.VARCHAR), //origin
       new InParam(amount, Types.NUMERIC), //amount
       new InParam(currency, Types.NUMERIC), //currency
       new InParam(amountUsd, Types.NUMERIC), //_ammount_usd
+      new InParam(amountUsd, Types.NUMERIC), //_ammount_mcar
       new InParam(exchangeRateDiff, Types.NUMERIC), //_exchange_rate_dif
       new InParam(fee, Types.NUMERIC), //_fee
       new InParam(feeIva, Types.NUMERIC), //_fee_iva
+      new InParam(fee, Types.NUMERIC), //_collector_fee
+      new InParam(feeIva, Types.NUMERIC), //_collector_fee_iva
+      new InParam(amount, Types.NUMERIC), //amount_balance
       new InParam(trxDate, Types.TIMESTAMP), //_transaction_date
+      new InParam(trxDate, Types.TIMESTAMP), //conciliation date
+      new InParam("OK",Types.VARCHAR),
+      new InParam(0, Types.BIGINT),// File ID
       new OutParam("_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

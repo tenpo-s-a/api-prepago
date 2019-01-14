@@ -4,8 +4,7 @@ import cl.multicaja.accounting.helpers.mastercard.MastercardIpmFileHelper;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
-import cl.multicaja.accounting.model.v10.AccountingOriginType;
-import cl.multicaja.accounting.model.v10.AccountingTxType;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;
@@ -16,7 +15,6 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
-import cl.multicaja.accounting.model.v10.Accounting10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
@@ -91,34 +89,39 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     RowMapper rm = (Map<String, Object> row) -> {
       Accounting10 account = new Accounting10();
 
-      account.setIdTransaction(getNumberUtils().toLong(row.get("id_tx")));
-
+      account.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("amount")));
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount")));
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
 
       account.setAmount(amount);
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("ammount_usd")));
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
       amount.setCurrencyCode(CodigoMoneda.USA_USD);
 
       account.setAmountUsd(amountUsd);
 
-      account.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("exchange_rate_dif")));
-      account.setFee(getNumberUtils().toBigDecimal(row.get("fee")));
-      account.setFeeIva(getNumberUtils().toBigDecimal(row.get("fee_iva")));
-
-      account.setType(AccountingTxType.fromValue(String.valueOf(row.get("type"))));
-      account.setOrigin(AccountingOriginType.fromValue(String.valueOf(row.get("origin"))));
-      account.setTransactionDate((Timestamp) row.get("transaction_date"));
-
+      account.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
+      account.setFee(getNumberUtils().toBigDecimal(row.get("_fee")));
+      account.setFeeIva(getNumberUtils().toBigDecimal(row.get("_fee_iva")));
+      account.setType(AccountingTxType.fromValue(String.valueOf(row.get("_type"))));
+      account.setOrigin(AccountingOriginType.fromValue(String.valueOf(row.get("_origin"))));
+      account.setTransactionDate((Timestamp) row.get("_transaction_date"));
+      account.setAccountingMovementType(AccountingMovementType.fromValue(String.valueOf(row.get("_accounting_mov"))));
+      account.setConciliationDate((Timestamp) row.get("_conciliation_date"));
+      account.setCollectorFee(getNumberUtils().toBigDecimal(row.get("_collector_fee")));
+      account.setCollectorFeeIva(getNumberUtils().toBigDecimal(row.get("_collector_fee_iva")));
+      account.setAmountMastercard(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_mcar"))));
+      account.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_balance"))));
+      account.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      account.setFileId(getNumberUtils().toLong(row.get("file_id")));
       return account;
     };
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".XXX", rm, params);
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_search_accounting_data_v10", rm, params);
     log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
-
   }
 
   @Override
@@ -145,17 +148,29 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       if(account.getTransactionDate() == null){
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getTransactionDate"));
       }
+      if(account.getStatus() == null){
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getStatus"));
+      }
+
       Object[] params = {
         new InParam(account.getIdTransaction(), Types.BIGINT),
         new InParam(account.getType().getValue(), Types.VARCHAR),
+        new InParam(account.getAccountingMovementType().getValue(), Types.VARCHAR),
         new InParam(account.getOrigin().getValue(), Types.VARCHAR),
         account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
-        account.getAmount()== null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
-        account.getAmountUsd() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
+        account.getAmount().getCurrencyCode() == null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
+        account.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
+        account.getAmountMastercard().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountMastercard().getValue(), Types.NUMERIC),
         account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
         account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
         account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
+        account.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getCollectorFee(), Types.NUMERIC),
+        account.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getCollectorFeeIva(),Types.NUMERIC),
+        account.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountBalance().getValue(),Types.NUMERIC),
         new InParam(account.getTransactionDateInFormat(),Types.VARCHAR),
+        new InParam(account.getConciliationDateInFormat(),Types.VARCHAR),
+        new InParam(account.getStatus().getValue(), Types.VARCHAR),
+        new InParam(account.getFileId(), Types.BIGINT),
         new OutParam("_id", Types.BIGINT),
         new OutParam("_error_code", Types.VARCHAR),
         new OutParam("_error_msg", Types.VARCHAR)
@@ -288,19 +303,24 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       for (PrepaidMovement10 m : movements) {
 
         AccountingTxType type = AccountingTxType.RETIRO_WEB;;
+        AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
 
         if(TipoFactura.CARGA_TRANSFERENCIA.equals(m.getTipofac())) {
           type = AccountingTxType.CARGA_WEB;
+          movementType = AccountingMovementType.CARGA_WEB;
         } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(m.getTipofac())) {
           type = AccountingTxType.CARGA_POS;
+          movementType =AccountingMovementType.CARGA_POS;
         } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(m.getTipofac())) {
           type = AccountingTxType.RETIRO_POS;
+          movementType =AccountingMovementType.RETIRO_POS;
         }
 
         Accounting10 accounting = new Accounting10();
         accounting.setIdTransaction(m.getId());
         accounting.setOrigin(AccountingOriginType.MOVEMENT);
         accounting.setType(type);
+        accounting.setAccountingMovementType(movementType);
         accounting.setAmount(new NewAmountAndCurrency10(m.getImpfac()));
 
         //Se colocan en 0 ya que solo se procesan cargas y retiros
@@ -335,6 +355,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         BigDecimal iva = getCalculationsHelper().calculateIvaFromTotal(fee);
         accounting.setFeeIva(iva);
         accounting.setTransactionDate(m.getFechaCreacion());
+
+        accounting.setStatus(AccountingStatusType.OK);
+        //TODO: Llenar con los valores que corresponda.
+        accounting.setFileId(0L);
+        accounting.setAmountBalance(new NewAmountAndCurrency10(new BigDecimal(0)));
+        accounting.setAmountMastercard(new NewAmountAndCurrency10(new BigDecimal(0)));
+        accounting.setCollectorFee(new BigDecimal(0));
+        accounting.setCollectorFeeIva(new BigDecimal(0));
+        accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+
         accountingMovements.add(accounting);
       }
 
@@ -615,6 +645,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       Accounting10 acc = new Accounting10();
       acc.setOrigin(AccountingOriginType.IPM);
       acc.setType(this.getTransactionType(trx));
+      acc.setAccountingMovementType(this.getMovementType(trx));
       acc.setIdTransaction(Long.valueOf(trx.getApprovalCode()));
       acc.setTransactionDate(Timestamp.from(trx.getTransactionLocalDate().toInstant()));
 
@@ -679,6 +710,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setFee(fee);
       acc.setFeeIva(iva);
       acc.setExchangeRateDif(exchangeRateDiff);
+      //TODO: Llenar con los valores que corresponda.
+      acc.setFileId(0L);
+      acc.setAmountBalance(new NewAmountAndCurrency10(new BigDecimal(0)));
+      acc.setAmountMastercard(new NewAmountAndCurrency10(new BigDecimal(0)));
+      acc.setCollectorFee(new BigDecimal(0));
+      acc.setCollectorFeeIva(new BigDecimal(0));
+      acc.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+      acc.setStatus(AccountingStatusType.OK);
 
       transactions.add(acc);
     }
@@ -711,6 +750,26 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
+  public AccountingMovementType getMovementType(IpmMessage trx) throws Exception {
+    if(trx == null){
+      throw new Exception("Transaction is null");
+    }
+    if(trx.getTransactionCurrencyCode() == null){
+      throw new Exception("Transaction currency code is null");
+    }
+    if(StringUtils.isAllEmpty(trx.getMerchantName())){
+      throw new Exception("MerchantName is null or empty");
+    }
+
+    if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())
+      && isSubscriptionMerchant(trx.getMerchantName())) {
+      return AccountingMovementType.SUSCRIPCION;
+    } else if(CodigoMoneda.CHILE_CLP.getValue().equals(trx.getTransactionCurrencyCode())) {
+      return AccountingMovementType.COMPRA_PESOS;
+    } else {
+      return AccountingMovementType.COMPRA_MONEDA;
+    }
+  }
   @Override
   public Boolean isSubscriptionMerchant(final String merchantName) throws Exception {
     if(StringUtils.isAllBlank(merchantName)) {

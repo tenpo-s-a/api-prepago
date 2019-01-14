@@ -17,9 +17,21 @@
 -- // create_table_accounting_files
 -- Migration SQL that makes the change goes here.
 
-
+  CREATE TABLE ${schema.acc}.accounting_files (
+      id            BIGSERIAL NOT NULL,
+      name          VARCHAR(100) NOT NULL,
+      file_id       VARCHAR(30) NOT NULL,
+      type          VARCHAR(20) NOT NULL,
+      format        VARCHAR(20) NOT NULL,
+      url           VARCHAR(200) NOT NULL,
+      status        VARCHAR(20) NOT NULL,
+      created       TIMESTAMP NOT NULL,
+      updated       TIMESTAMP NOT NULL,
+      CONSTRAINT accounting_files_pk PRIMARY KEY(id)
+  );
+  CREATE INDEX accounting_file_i1 ON ${schema.acc}.accounting_files (id);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-
+ DROP TABLE IF EXISTS ${schema.acc}.accounting_files;
 
