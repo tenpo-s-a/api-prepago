@@ -336,16 +336,18 @@ public class Test_PrepaidEJBBean10_getTransactions {
     Mockito.doReturn(user).when(userClient).getUserById(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(new HashMap<>(), Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(new HashMap<>(),Long.MAX_VALUE);
-    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
+    Mockito.doReturn(null).when(prepaidMovementEJBBean10).
+      getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
 
     Mockito.doReturn(dto).when(tecnocomService).consultaMovimientos(Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
 
     Mockito.doReturn(authDto).when(tecnocomService).consultaAutorizaciones(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
 
     try {
-      List<PrepaidTransaction10> prepaidTransaction10 = prepaidEJBBean10.getTransactions(new HashMap<>(), Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.assertNotNull("Deberia retornar el listado de transacciones", prepaidTransaction10);
-      Assert.assertEquals("Deberian ser 4",4, prepaidTransaction10.size());
+      PrepaidTransactionExtend10 prepaidTransactionExtend10 = prepaidEJBBean10.getTransactions(
+        new HashMap<>(), Long.MAX_VALUE,"","",Integer.MAX_VALUE);
+      Assert.assertNotNull("Deberia retornar el listado de transacciones", prepaidTransactionExtend10);
+      Assert.assertEquals("Deberian ser 4",4, prepaidTransactionExtend10.getData().size());
     } catch (Exception ex) {
       ex.printStackTrace();
       Assert.fail("should not be here "+ex);

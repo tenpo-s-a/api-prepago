@@ -1500,7 +1500,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
 
   @Override
-  public List<PrepaidTransaction10> getTransactions(
+  public PrepaidTransactionExtend10 getTransactions(
     Map<String,Object> headers,
     Long userIdMc,
     String startDate,
@@ -1563,22 +1563,38 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidTransactionExtend10 = createConsultaMovimientoToList(
         prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
         TipoDocumento.RUT,_startDate,_endDate);
-    }catch(PrepaidTransactionExtend10.InnerPrepaidTransactionException e){
-      prepaidTransactionExtend10.setListPrepaidTransactions10(
-        e.getPrepaidTransactionExtend10().getListPrepaidTransactions10());
+
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setSuccess(true);
+      prepaidTransactionExtend10.setErrorMessage("");
+      listMergeTransaction10.addAll(prepaidTransactionExtend10.getData());
+
+    }catch(Exception e){
+
+      prepaidTransactionExtend10.setErrorCode(Errors.TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.getValue());
+      prepaidTransactionExtend10.setErrorMessage(e.getLocalizedMessage());
+      prepaidTransactionExtend10.setSuccess(false);
+
       log.error(String.format("Movimientos: %s ",e.getMessage()));
     }
-    listMergeTransaction10.addAll(prepaidTransactionExtend10.getListPrepaidTransactions10());
 
     try{
       prepaidTransactionExtend10 = createConsultaAutorizacionesToList(prepaidCard.getProcessorUserId(),
         CodigoMoneda.CHILE_CLP,_startDate,_endDate);
-    }catch(PrepaidTransactionExtend10.InnerPrepaidTransactionException e){
-      prepaidTransactionExtend10.setListPrepaidTransactions10(
-        e.getPrepaidTransactionExtend10().getListPrepaidTransactions10());
+
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setSuccess(true);
+      prepaidTransactionExtend10.setErrorMessage("");
+      listMergeTransaction10.addAll(prepaidTransactionExtend10.getData());
+
+    }catch(Exception e){
+
+      prepaidTransactionExtend10.setErrorCode(Errors.TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.getValue());
+      prepaidTransactionExtend10.setErrorMessage(e.getLocalizedMessage());
+      prepaidTransactionExtend10.setSuccess(false);
+
       log.error(String.format("Autorizaciones: %s ",e.getMessage()));
     }
-    listMergeTransaction10.addAll(prepaidTransactionExtend10.getListPrepaidTransactions10());
 
     //Get betwen start and end date filter
     listMergeTransaction10.stream()
@@ -1591,7 +1607,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     //truncate to 7 records
     listMergeTransaction10 = listMergeTransaction10.stream().limit(7).collect(Collectors.toList());
 
-    return listMergeTransaction10;
+    prepaidTransactionExtend10.setData(listMergeTransaction10);
+
+    return prepaidTransactionExtend10;
   }
 
 
@@ -1606,17 +1624,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
 
     if(!consultaMovimientosDTO.isRetornoExitoso() && !consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
-      prepaidTransactionExtend10.setListPrepaidTransactions10(listTransaction10);
-      prepaidTransactionExtend10.setErrorCode(Integer.valueOf(consultaMovimientosDTO.getRetorno()));
-      prepaidTransactionExtend10.setErrorMessage("Error En Consulta de Movimientos");
 
-      PrepaidTransactionExtend10.InnerPrepaidTransactionException innerPrepaidTransactionException =
-        new PrepaidTransactionExtend10().invokeInner(prepaidTransactionExtend10.getErrorMessage(),
-          prepaidTransactionExtend10.getErrorCode().toString());
+      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO);
 
-      innerPrepaidTransactionException.setPrepaidTransactionExtend10(prepaidTransactionExtend10);
+    }else if(!consultaMovimientosDTO.isRetornoExitoso() && consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
 
-      throw innerPrepaidTransactionException;
+      prepaidTransactionExtend10.setData(listTransaction10);
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setErrorMessage("");
+      return prepaidTransactionExtend10;
     }
 
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
@@ -1872,8 +1888,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       listTransaction10.add(transaction10);
     }
 
-    prepaidTransactionExtend10.setErrorCode(0);
-    prepaidTransactionExtend10.setListPrepaidTransactions10(listTransaction10);
+    prepaidTransactionExtend10.setData(listTransaction10);
     return prepaidTransactionExtend10;
   }
 
@@ -1888,17 +1903,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
 
     if(!consultaAutorizacionesDTO.isRetornoExitoso() && !consultaAutorizacionesDTO.getRetorno().equals(CodigoRetorno._210)){
-      prepaidTransactionExtend10.setListPrepaidTransactions10(listTransaction10);
-      prepaidTransactionExtend10.setErrorCode(Integer.valueOf(consultaAutorizacionesDTO.getRetorno()));
-      prepaidTransactionExtend10.setErrorMessage("Error En Consulta de Autorizaciones");
 
-      PrepaidTransactionExtend10.InnerPrepaidTransactionException innerPrepaidTransactionException =
-        new PrepaidTransactionExtend10().invokeInner(prepaidTransactionExtend10.getErrorMessage(),
-          prepaidTransactionExtend10.getErrorCode().toString());
+      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.getValue(),
+        TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.name());
 
-      innerPrepaidTransactionException.setPrepaidTransactionExtend10(prepaidTransactionExtend10);
+    }else if(!consultaAutorizacionesDTO.isRetornoExitoso() && consultaAutorizacionesDTO.getRetorno().equals(CodigoRetorno._210)){
 
-      throw innerPrepaidTransactionException;
+      prepaidTransactionExtend10.setData(listTransaction10);
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setErrorMessage("");
+      return prepaidTransactionExtend10;
     }
 
     for(AutorizacionesDTO autorizacionesDTO : consultaAutorizacionesDTO.getListAutorizacionesDTOS()) {
@@ -2024,8 +2038,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       listTransaction10.add(transaction10);
     }
 
-    prepaidTransactionExtend10.setErrorCode(0);
-    prepaidTransactionExtend10.setListPrepaidTransactions10(listTransaction10);
+    prepaidTransactionExtend10.setData(listTransaction10);
     return prepaidTransactionExtend10;
   }
 

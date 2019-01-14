@@ -5,7 +5,7 @@ import java.util.List;
 
 public class PrepaidTransactionExtend10 extends BaseModel {
 
-  public class InnerPrepaidTransactionException extends Exception{
+  /*public class InnerPrepaidTransactionException extends Exception{
 
     private PrepaidTransactionExtend10 prepaidTransactionExtend10;
 
@@ -21,18 +21,19 @@ public class PrepaidTransactionExtend10 extends BaseModel {
     public void setPrepaidTransactionExtend10(PrepaidTransactionExtend10 prepaidTransactionExtend10) {
       this.prepaidTransactionExtend10 = prepaidTransactionExtend10;
     }
-  }
+  }*/
 
-  private List<PrepaidTransaction10> ListPrepaidTransactions10;
+  private List<PrepaidTransaction10> data;
   private Integer errorCode;
   private String errorMessage;
+  private Boolean success;
 
-  public List<PrepaidTransaction10> getListPrepaidTransactions10() {
-    return ListPrepaidTransactions10;
+  public List<PrepaidTransaction10> getData() {
+    return data;
   }
 
-  public void setListPrepaidTransactions10(List<PrepaidTransaction10> listPrepaidTransactions10) {
-    ListPrepaidTransactions10 = listPrepaidTransactions10;
+  public void setData(List<PrepaidTransaction10> data) {
+    this.data = data;
   }
 
   public Integer getErrorCode() {
@@ -51,8 +52,16 @@ public class PrepaidTransactionExtend10 extends BaseModel {
     this.errorMessage = errorMessage;
   }
 
-  public InnerPrepaidTransactionException invokeInner (String errorMessage, String errorCode) throws Exception{
-    return new InnerPrepaidTransactionException(errorMessage, errorCode);
+  public Boolean getSuccess() {
+    return success;
   }
+
+  public void setSuccess(Boolean success) {
+    this.success = success;
+  }
+
+/*public InnerPrepaidTransactionException invokeInner (String errorMessage, String errorCode) throws Exception{
+    return new InnerPrepaidTransactionException(errorMessage, errorCode);
+  }*/
 
 }

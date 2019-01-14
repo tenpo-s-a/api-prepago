@@ -4,6 +4,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidTransaction10;
+import cl.multicaja.prepaid.model.v10.PrepaidTransactionExtend10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -42,10 +43,11 @@ public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
     inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
     Assert.assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
-    List<PrepaidTransaction10> transaction10List =getPrepaidEJBBean10().getTransactions(getDefaultHeaders(),user.getId(),null,null, null);
-    Assert.assertNotNull("List<PrepaidTransaction10> Not Null ",transaction10List);
-    System.out.println(transaction10List.size());
-    Assert.assertEquals("Size = a 2", 2,transaction10List.size() );
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = getPrepaidEJBBean10().getTransactions(
+      getDefaultHeaders(),user.getId(),null,null, null);
+
+    Assert.assertNotNull("List<PrepaidTransaction10> or Data Not Null ",prepaidTransactionExtend10.getData());
+    Assert.assertEquals("Size = a 2", 2,prepaidTransactionExtend10.getData().size() );
 
   }
 
