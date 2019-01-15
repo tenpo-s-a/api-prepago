@@ -92,6 +92,7 @@ public class Test_20190114155847_mc_acc_update_accounting_data_v10 extends TestD
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser error","404",data.get("_error_code"));
     Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
+
   }
 
 
