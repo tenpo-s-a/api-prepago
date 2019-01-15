@@ -1304,7 +1304,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     log.info("Monto maximo a cargar: " + getPercentage().getMAX_AMOUNT_BY_USER());
 
     if((balance.getBalance().getValue().doubleValue() + amountValue.doubleValue()) > getPercentage().getMAX_AMOUNT_BY_USER()) {
-      throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(new KeyValue("value", getPercentage().getMAX_AMOUNT_BY_USER()));
+      // Responde mensaje de error, con el saldo total maximo y el monto maximo posible a cargar para no superarlo
+      KeyValue maxAmount = new KeyValue("value", getPercentage().getMAX_AMOUNT_BY_USER());
+      KeyValue topupAmount = new KeyValue("topup_amount", new BigDecimal(getPercentage().getMAX_AMOUNT_BY_USER()).subtract(balance.getBalance().getValue()));
+      throw new ValidationException(SALDO_SUPERARA_LOS_$$VALUE).setData(maxAmount, topupAmount);
     }
 
     BigDecimal fee;
@@ -1496,8 +1499,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidUser;
   }
 
+
+
+
   @Override
-  public List<PrepaidTransaction10> getTransactions(Map<String,Object> headers, Long userIdMc, String startDate, String endDate, Integer count) throws Exception {
+  public PrepaidTransactionExtend10 getTransactions(
+    Map<String,Object> headers,
+    Long userIdMc,
+    String startDate,
+    String endDate,
+    Integer count) throws Exception {
 
 
     if(userIdMc == null){
@@ -1548,17 +1559,45 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     _startDateFilter = new Date(_startDate.getTime() - TimeUnit.HOURS.toMillis(5));
     _endDateFilter = new Date(_endDate.getTime());
 
-    List<PrepaidTransaction10> listTransactionMovimientos10 = new ArrayList<>();
-    List<PrepaidTransaction10> listTransactionAutorizaciones10 = new ArrayList<>();
     List<PrepaidTransaction10> listMergeTransaction10 = new ArrayList<>();
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = new PrepaidTransactionExtend10();
 
-    listTransactionMovimientos10 = createConsultaMovimientoToList(prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
-      TipoDocumento.RUT,_startDate,_endDate);
-    listMergeTransaction10.addAll(listTransactionMovimientos10);
+    try{
+      prepaidTransactionExtend10 = createConsultaMovimientoToList(
+        prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
+        TipoDocumento.RUT,_startDate,_endDate);
 
-    listTransactionAutorizaciones10 = createConsultaAutorizacionesToList(prepaidCard.getProcessorUserId(),
-      CodigoMoneda.CHILE_CLP,_startDate,_endDate);
-    listMergeTransaction10.addAll(listTransactionAutorizaciones10);
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setSuccess(true);
+      prepaidTransactionExtend10.setErrorMessage("");
+      listMergeTransaction10.addAll(prepaidTransactionExtend10.getData());
+
+    }catch(Exception e){
+
+      prepaidTransactionExtend10.setErrorCode(Errors.TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.getValue());
+      prepaidTransactionExtend10.setErrorMessage(e.getLocalizedMessage());
+      prepaidTransactionExtend10.setSuccess(false);
+
+      log.error(String.format("Movimientos: %s ",e.getMessage()));
+    }
+
+    try{
+      prepaidTransactionExtend10 = createConsultaAutorizacionesToList(prepaidCard.getProcessorUserId(),
+        CodigoMoneda.CHILE_CLP,_startDate,_endDate);
+
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setSuccess(true);
+      prepaidTransactionExtend10.setErrorMessage("");
+      listMergeTransaction10.addAll(prepaidTransactionExtend10.getData());
+
+    }catch(Exception e){
+
+      prepaidTransactionExtend10.setErrorCode(Errors.TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.getValue());
+      prepaidTransactionExtend10.setErrorMessage(e.getLocalizedMessage());
+      prepaidTransactionExtend10.setSuccess(false);
+
+      log.error(String.format("Autorizaciones: %s ",e.getMessage()));
+    }
 
     //Get betwen start and end date filter
     listMergeTransaction10.stream()
@@ -1571,17 +1610,34 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     //truncate to 7 records
     listMergeTransaction10 = listMergeTransaction10.stream().limit(7).collect(Collectors.toList());
 
-    return listMergeTransaction10;
+    prepaidTransactionExtend10.setData(listMergeTransaction10);
+
+    return prepaidTransactionExtend10;
   }
 
 
-  private List<PrepaidTransaction10> createConsultaMovimientoToList(String contrato,String numDoc,TipoDocumento tipoDoc,
-                                              Date fechaDesde, Date fechaHasta) throws Exception {
+  private PrepaidTransactionExtend10 createConsultaMovimientoToList(String contrato,String numDoc,TipoDocumento tipoDoc,
+      Date fechaDesde, Date fechaHasta) throws Exception {
+
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = new PrepaidTransactionExtend10();
 
     ConsultaMovimientosDTO consultaMovimientosDTO = getTecnocomService().consultaMovimientos(contrato,numDoc,tipoDoc,
       fechaDesde,fechaHasta);
 
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
+
+    if(!consultaMovimientosDTO.isRetornoExitoso() && !consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
+
+      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.getValue(),
+        TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.name());
+
+    }else if(!consultaMovimientosDTO.isRetornoExitoso() && consultaMovimientosDTO.getRetorno().equals(CodigoRetorno._210)){
+
+      prepaidTransactionExtend10.setData(listTransaction10);
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setErrorMessage("");
+      return prepaidTransactionExtend10;
+    }
 
     for(MovimientosDTO movimientosDTO : consultaMovimientosDTO.getMovimientos()) {
 
@@ -1836,16 +1892,32 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       listTransaction10.add(transaction10);
     }
 
-    return listTransaction10;
+    prepaidTransactionExtend10.setData(listTransaction10);
+    return prepaidTransactionExtend10;
   }
 
-  private List<PrepaidTransaction10> createConsultaAutorizacionesToList(String contrato,CodigoMoneda codigoMoneda,
-                                                  Date fechaDesde,Date fechaHasta) throws Exception {
+  private PrepaidTransactionExtend10 createConsultaAutorizacionesToList(String contrato,CodigoMoneda codigoMoneda,
+      Date fechaDesde,Date fechaHasta) throws Exception {
+
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = new PrepaidTransactionExtend10();
 
     ConsultaAutorizacionesDTO consultaAutorizacionesDTO = getTecnocomService().consultaAutorizaciones(contrato,
       codigoMoneda,fechaDesde,fechaHasta);
 
     List<PrepaidTransaction10> listTransaction10 = new ArrayList<>();
+
+    if(!consultaAutorizacionesDTO.isRetornoExitoso() && !consultaAutorizacionesDTO.getRetorno().equals(CodigoRetorno._210)){
+
+      throw new BaseException(TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.getValue(),
+        TRANSACCION_ERROR_EN_CONSULTA_DE_AUTORIZACION.name());
+
+    }else if(!consultaAutorizacionesDTO.isRetornoExitoso() && consultaAutorizacionesDTO.getRetorno().equals(CodigoRetorno._210)){
+
+      prepaidTransactionExtend10.setData(listTransaction10);
+      prepaidTransactionExtend10.setErrorCode(0);
+      prepaidTransactionExtend10.setErrorMessage("");
+      return prepaidTransactionExtend10;
+    }
 
     for(AutorizacionesDTO autorizacionesDTO : consultaAutorizacionesDTO.getListAutorizacionesDTOS()) {
 
@@ -1855,6 +1927,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       // Get Date and parse
       String sDate = (String) autorizacionesDTO.getFectrn().get("valueDate");
       String sFormat = (String) autorizacionesDTO.getFectrn().get("format");
+
       transaction10.setDate(getDateUtils().dateStringToDate(sDate,sFormat));
       transaction10.setCommerceCode(autorizacionesDTO.getCodcom());
 
@@ -1869,8 +1942,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.ge,autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1887,8 +1958,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1905,8 +1974,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1924,8 +1991,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1943,8 +2008,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1962,8 +2025,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setGloss(transaction10.getInvoiceType().getDescription()+" en "+autorizacionesDTO.getNomcom());
           transaction10.setType(transaction10.getInvoiceType().getType());
 
-          /*BigDecimal fee =  getNumberUtils().sumBigDecimal(autorizacionesDTO.getImpbrueco1(),autorizacionesDTO.getImpbrueco2(),
-            autorizacionesDTO.getImpbrueco3(),autorizacionesDTO.getImpbrueco4());*/
           BigDecimal montoPesos = autorizacionesDTO.getImptrn();
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
@@ -1981,8 +2042,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       listTransaction10.add(transaction10);
     }
 
-    return listTransaction10;
-
+    prepaidTransactionExtend10.setData(listTransaction10);
+    return prepaidTransactionExtend10;
   }
 
 

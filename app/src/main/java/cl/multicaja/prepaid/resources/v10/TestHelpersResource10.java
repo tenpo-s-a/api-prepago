@@ -8,6 +8,7 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
@@ -48,9 +49,7 @@ import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.CLIENTE_NO_EXISTE;
-import static cl.multicaja.core.model.Errors.ERROR_DATA_NOT_FOUND;
-import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
@@ -239,11 +238,15 @@ public final class TestHelpersResource10 extends BaseResource {
     String numreffac = getRandomNumericString(10);
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
 
+    String[] nomcomreds = {"Uber", "Spotify", "Netflix", "Twitch", "AmazonTV"};
+    int selectedNomcomRed = RandomUtils.nextInt(0, nomcomreds.length - 1);
+
     // Agregar compra
-    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, "codcom", "nomcomred", 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
+    InclusionMovimientosDTO inclusionMovimientosDTO = tecnocomService.inclusionMovimientos(prepaidCard10.getProcessorUserId(), prepaidCard10.getPan(), CodigoMoneda.CHILE_CLP, IndicadorNormalCorrector.NORMAL, TipoFactura.COMPRA_INTERNACIONAL, numreffac, gastoAleatorio, numaut, nomcomreds[selectedNomcomRed], nomcomreds[selectedNomcomRed], 123, CodigoMoneda.CHILE_CLP, gastoAleatorio);
     if (!inclusionMovimientosDTO.isRetornoExitoso()) {
       log.error("* Compra rechazada por Tecnocom * Error: " + inclusionMovimientosDTO.getRetorno());
       log.error(inclusionMovimientosDTO.getDescRetorno());
+      throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
     return Response.ok(gastoAleatorio).status(201).build();

@@ -86,4 +86,5 @@ public final class TecnocomServiceHelper {
     numaut = numaut.substring(numaut.length() - 6);
     return numaut;
   }
+
 }

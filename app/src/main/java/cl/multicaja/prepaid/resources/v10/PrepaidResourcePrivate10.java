@@ -103,8 +103,8 @@ public class PrepaidResourcePrivate10 extends BaseResource {
   @GET
   @Path("/me/transactions")
   public Response getTransactions(@QueryParam("from") String from, @QueryParam("to") String to, @QueryParam("count") Integer count, @Context HttpHeaders headers) throws Exception {
-    List<PrepaidTransaction10> transaction10List = this.prepaidEJBBean10.getTransactions(headersToMap(headers),null,from,to, count);
-    return Response.ok(transaction10List).build();
+    PrepaidTransactionExtend10 prepaidTransactionExtend10 = this.prepaidEJBBean10.getTransactions(headersToMap(headers),null,from,to, count);
+    return Response.ok(prepaidTransactionExtend10).build();
   }
 
   @PUT
