@@ -25,7 +25,8 @@
       status                VARCHAR(20) NOT NULL,
       created               TIMESTAMP NOT NULL,
       updated               TIMESTAMP NOT NULL,
-      CONSTRAINT clearing_pk PRIMARY KEY(id)
+      CONSTRAINT clearing_pk PRIMARY KEY(id),
+      CONSTRAINT clearing_u1 UNIQUE(accounting_id,user_account_id)
   );
   CREATE INDEX clearing_i1 ON ${schema.acc}.clearing (id);
 
