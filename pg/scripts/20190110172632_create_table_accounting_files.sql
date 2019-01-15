@@ -27,7 +27,8 @@
       status        VARCHAR(20) NOT NULL,
       created       TIMESTAMP NOT NULL,
       updated       TIMESTAMP NOT NULL,
-      CONSTRAINT accounting_files_pk PRIMARY KEY(id)
+      CONSTRAINT accounting_files_pk PRIMARY KEY(id),
+      CONSTRAINT accounting_files_u1 UNIQUE(name, file_id,type)
   );
   CREATE INDEX accounting_file_i1 ON ${schema.acc}.accounting_files (id);
 
