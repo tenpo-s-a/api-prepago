@@ -56,17 +56,6 @@ pipeline:
       branch:
         exclude: master
         
-  upload_to_sonar:
-    image: maven:3.6.0-jdk-8-alpine
-    commands:
-      - ./drone-mvn-cache.sh
-      - cd app
-      - mvn sonar:sonar
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
   print_log:
     image: maven:3.6.0-jdk-8-alpine
     commands:
