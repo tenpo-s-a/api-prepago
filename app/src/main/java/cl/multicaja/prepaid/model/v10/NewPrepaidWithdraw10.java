@@ -1,10 +1,12 @@
 package cl.multicaja.prepaid.model.v10;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author abarazarte
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
   private String password;
