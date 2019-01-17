@@ -473,6 +473,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
+
+    Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
+
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
@@ -519,20 +522,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
      */
     prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw);
 
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    CdtTransaction10 cdtTransaction = null;
+    cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(String.format("PREPAGO_%d",user.getRut().getValue()));
-    cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName()+" "+withdrawRequest.getAmount().getValue());
+    cdtTransaction.setAccountId(String.format("PREPAGO_%d", user.getRut().getValue()));
+    cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(headers, cdtTransaction);
 
     // Si no cumple con los limites
-    if(!cdtTransaction.isNumErrorOk()){
+    if (!cdtTransaction.isNumErrorOk()) {
       int lNumError = cdtTransaction.getNumErrorInt();
-      if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
+      if (lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
@@ -546,7 +550,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
-    if(!fromEndPoint){
+    // Estos dos tipos de retiros no viene del SWITCH, por lo que no requieren esa conciliacion
+    if(!fromEndPoint || isWebWithdraw){
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
@@ -594,10 +599,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         BusinessStatusType.OK,
         status);
 
-      // se confirma la transaccion
-      cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
-      cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
-      cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+      if(isWebWithdraw) {
+        // Lanzar async a clearing
+        this.getDelegate().sendWithdrawToAccounting(prepaidWithdraw, user);
+      } else {
+        // se confirma la transaccion para los retiros no web
+        cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
+        cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
+        cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+      }
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Reintentable");
@@ -614,8 +624,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
       PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
-      if(!fromEndPoint){
-        prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      if(!fromEndPoint || isWebWithdraw) {
+        prepaidMovementReverse.setConSwitch(ReconciliationStatusType.RECONCILED);
       }
       prepaidMovementReverse.setPan(prepaidMovement.getPan());
       prepaidMovementReverse.setCentalta(prepaidMovement.getCentalta());
@@ -658,7 +668,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     /*
-      Agrega la informacion par el voucher
+      Agrega la informacion para el voucher
      */
     this.addVoucherData(prepaidWithdraw);
 
@@ -798,6 +808,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     if(StringUtils.isBlank(request.getTransactionId())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
+    }
+    // Solo los retiros web deberian venir con el id de la cuenta donde hacer el retiro
+    if(TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
+      if (request.getBankAccountId() == null) {
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
+      }
     }
   }
 

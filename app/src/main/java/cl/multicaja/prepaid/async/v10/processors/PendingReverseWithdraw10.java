@@ -107,7 +107,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               log.debug("********** Movimiento original ya existia en Tecnocom **********");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
               // Incluir datos en CDT.
-              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
               callCDT(prepaidWithdraw, prepaidUser10, originalMovement.getIdMovimientoRef(), movRef.getCdtTransactionTypeConfirm());
             } else {
               log.debug("********** Movimiento original rechazado por Tecnocom **********");
@@ -145,9 +145,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
             req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
             log.debug("********** Reversa de retiro realizada exitosamente **********");
-            CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,0L, CdtTransactionType.REVERSA_RETIRO);
-            cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
-            if(!"0".equals(cdtTxReversa.getNumError())){
+            CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, 0L, CdtTransactionType.REVERSA_RETIRO);
+            cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, cdtTxReversa.getTransactionReference(), cdtTxReversa.getCdtTransactionTypeConfirm());
+            if (!"0".equals(cdtTxReversa.getNumError())) {
               log.error("Error al confirmar reversa en CDT");
             }
             return req;
@@ -156,9 +156,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               log.debug("********** Reversa de retiro ya existia **********");
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
-              CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,0L, CdtTransactionType.REVERSA_RETIRO);
-              cdtTxReversa = callCDT(prepaidWithdraw,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
-              if(!"0".equals(cdtTxReversa.getNumError())){
+              CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, 0L, CdtTransactionType.REVERSA_RETIRO);
+              cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, cdtTxReversa.getTransactionReference(), cdtTxReversa.getCdtTransactionTypeConfirm());
+              if (!"0".equals(cdtTxReversa.getNumError())) {
                 log.error("Error al confirmar reversa en CDT");
               }
             } else {
@@ -190,7 +190,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
           data.getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
         }
-      } catch (Exception e){
+      } catch (Exception e) {
         e.printStackTrace();
         log.error(String.format("Error desconocido al realizar la reversa de retiro: %s",e.getMessage()));
         Endpoint endpoint = createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_REQ);
