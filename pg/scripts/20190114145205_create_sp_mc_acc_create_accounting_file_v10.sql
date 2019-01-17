@@ -37,12 +37,6 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_create_accounting_file_v10
       RETURN;
     END IF;
 
-    IF COALESCE(_file_id, '') = '' THEN
-      _error_code := 'MC002';
-      _error_msg := '[mc_acc_create_accounting_file_v10] El file_id es obligatorio';
-      RETURN;
-    END IF;
-
     IF COALESCE(_type, '') = '' THEN
       _error_code := 'MC003';
       _error_msg := '[mc_acc_create_accounting_file_v10] El type es obligatorio';
@@ -78,7 +72,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_create_accounting_file_v10
      _file_id,
      _type,
      _format,
-     _url,
+     COALESCE(_url,''),
      _status,
      timezone('utc', now()),
      timezone('utc', now())
