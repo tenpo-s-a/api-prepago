@@ -25,7 +25,7 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
   @Test
   public void sendMailDefault() throws Exception {
     User user = registerUser();
-    final String template = "Prepago/Activacion";
+    final String template = "Users/EmailValidation";
     final EmailBody email = getEmailBody(user, template);
     final HttpResponse httpResponse = sendEmailApi(email, user.getId());
     Assert.assertEquals("status 201", 201, httpResponse.getStatus());

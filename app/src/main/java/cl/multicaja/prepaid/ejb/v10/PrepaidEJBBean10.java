@@ -482,14 +482,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
-    // La clave solo se verifica cuando el movimiento viene desde el endpoint
-    if(fromEndPoint){
+    // La clave solo se verifica cuando el movimiento viene desde el endpoint y si es de origen POS
+    if(fromEndPoint && TransactionOriginType.POS.equals(withdrawRequest.getTransactionOriginType())){
       // Se verifica la clave
       UserPasswordNew userPasswordNew = new UserPasswordNew();
       userPasswordNew.setValue(withdrawRequest.getPassword());
       getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
     }
-
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -784,9 +783,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(request.getRut() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
-    if(StringUtils.isBlank(request.getPassword())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
-    }
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
@@ -798,6 +794,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     if(StringUtils.isBlank(request.getTransactionId())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
+    }
+    if(TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
     }
   }
 

@@ -603,6 +603,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaiduser = createPrepaidUser10(prepaiduser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
+    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
 
     try {
       getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
