@@ -69,7 +69,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_create_accounting_file_v10
   VALUES
   (
      _name,
-     _file_id,
+     coalesce(_file_id,''),
      _type,
      _format,
      COALESCE(_url,''),
