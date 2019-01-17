@@ -19,7 +19,7 @@
 
   CREATE TABLE ${schema.acc}.clearing (
       id                    BIGSERIAL NOT NULL,
-      accounting_id         BIGINT NOT NULL,
+      accounting_id         BIGINT  REFERENCES ${schema.acc}.accounting(id),
       user_account_id       BIGINT NOT NULL,
       file_id               BIGINT NOT NULL,
       status                VARCHAR(20) NOT NULL,

@@ -11,6 +11,10 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Test_20190114151738_mc_acc_create_clearing_data_v10 extends TestDbBasePg {
@@ -40,8 +44,12 @@ public class Test_20190114151738_mc_acc_create_clearing_data_v10 extends TestDbB
 
   @Test
   public void createAccountingFile() throws SQLException {
+    // Crea Accounting para obtener el ID
+    Map<String, Object> randomAccounting = Test_20181126083955_create_sp_mc_prp_insert_accounting_data.createRandomAccounting();
+    Map<String, Object> resp = Test_20181126083955_create_sp_mc_prp_insert_accounting_data.insertAccount(randomAccounting);
+    //Create Clearing Data
 
-    Map<String, Object> data = createClearingData(numberUtils.random(1L,9999L),numberUtils.random(1L,9999L),numberUtils.random(1L,9999L),"OK");
+    Map<String, Object> data = createClearingData(numberUtils.toLong(resp.get("id")),numberUtils.random(1L,9999L),numberUtils.random(1L,9999L),"OK");
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser error","0",data.get("_error_code"));
     Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
@@ -51,8 +59,11 @@ public class Test_20190114151738_mc_acc_create_clearing_data_v10 extends TestDbB
 
   @Test
   public void shouldFail_duplicated() throws SQLException {
+    // Crea Accounting para obtener el ID
+    Map<String, Object> randomAccounting = Test_20181126083955_create_sp_mc_prp_insert_accounting_data.createRandomAccounting();
+    Map<String, Object> resp = Test_20181126083955_create_sp_mc_prp_insert_accounting_data.insertAccount(randomAccounting);
     {
-      Map<String, Object> data = createClearingData(1L,1L,numberUtils.random(1L,9999L),"OK");
+      Map<String, Object> data = createClearingData(numberUtils.toLong(resp.get("id")),1L,numberUtils.random(1L,9999L),"OK");
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser error","0",data.get("_error_code"));
       Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
@@ -60,7 +71,7 @@ public class Test_20190114151738_mc_acc_create_clearing_data_v10 extends TestDbB
       Assert.assertTrue("Debe tener ID", NumberUtils.getInstance().toInteger(data.get("_r_id")) > 0);
     }
     {
-      Map<String, Object> data = createClearingData(1L,1L,numberUtils.random(1L,9999L),"OK");
+      Map<String, Object> data = createClearingData(numberUtils.toLong(resp.get("id")),1L,numberUtils.random(1L,9999L),"OK");
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertNotEquals("No debe ser error","0",data.get("_error_code"));
       Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));

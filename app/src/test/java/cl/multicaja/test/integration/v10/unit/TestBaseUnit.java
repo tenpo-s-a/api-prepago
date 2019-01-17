@@ -1,6 +1,9 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingFileEJB10;
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingFileEJBBean10;
+import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -68,7 +71,8 @@ public class TestBaseUnit extends TestApiBase {
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
   private static McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
   private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
-
+  private static PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJB10;
+  private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     System.out.println("Exist: " + getPrepaidCardEJBBean10());
@@ -207,6 +211,18 @@ public class TestBaseUnit extends TestApiBase {
       mailPrepaidEJBBean10.setPrepaidTopupDelegate10(getPrepaidTopupDelegate10());
     }
     return mailPrepaidEJBBean10;
+  }
+  public static PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10(){
+    if(prepaidAccountingFileEJB10 == null){
+      prepaidAccountingFileEJB10 = new PrepaidAccountingFileEJBBean10();
+    }
+    return prepaidAccountingFileEJB10;
+  }
+  public static PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10(){
+    if(prepaidClearingEJBBean10 == null){
+      prepaidClearingEJBBean10 = new PrepaidClearingEJBBean10();
+    }
+    return prepaidClearingEJBBean10;
   }
 
   /**
@@ -1265,7 +1281,44 @@ public class TestBaseUnit extends TestApiBase {
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
   }
+  protected Accounting10 buildRandomAccouting(){
+    Accounting10 accounting10 = new Accounting10();
+    accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+    accounting10.setOrigin(AccountingOriginType.IPM);
+    accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
+    accounting10.setIdTransaction(getUniqueLong());
+    accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+    accounting10.setFee(new BigDecimal(getUniqueInteger()));
+    accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
 
+    accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+    accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+    accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+    NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+    amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountBalance(amountBalance);
+    accounting10.setStatus(AccountingStatusType.OK);
+    accounting10.setFileId(0L);
+
+    NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+    amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountMastercard(amountMcar);
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmount(amount);
+
+    NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+    amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountUsd.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountUsd(amountUsd);
+    return accounting10;
+  }
   protected List<Accounting10> generateRandomAccountingList(Integer iPositionNull, Integer count){
     List<Accounting10> accounting10s = new ArrayList<>();
     for(int i = 0;i<count;i++){
