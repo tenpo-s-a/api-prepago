@@ -25,7 +25,7 @@
     <sonar.projectName>api-prepago</sonar.projectName>
     <sonar.projectKey>api-prepago</sonar.projectKey>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-    <sonar.inclusions>src/main/java/cl/multicaja/**/*</sonar.inclusions>
+    <sonar.inclusions>src/main/java/cl/multicaja/*</sonar.inclusions>
     <sonar.jacoco.reportPaths>unit-tests/jacoco.exec,integration-tests/jacoco.exec</sonar.jacoco.reportPaths>
   </properties>
 

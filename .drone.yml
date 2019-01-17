@@ -40,6 +40,7 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd app
       - ./test.sh
+      - mkdir -p unit-tests && cp ./target/jacoco.exec ./unit-tests
     when:
       event: [ push ]
       branch:
@@ -51,6 +52,7 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd app
       - ./integration-test.sh -Denv=ci &> integration-test.log
+      - mkdir -p integration-tests && cp ./target/jacoco.exec ./integration-tests
     when:
       event: [ push ]
       branch:
