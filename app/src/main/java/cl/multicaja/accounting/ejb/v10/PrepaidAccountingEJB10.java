@@ -19,7 +19,7 @@ public interface PrepaidAccountingEJB10 {
 
   List<Accounting10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception;
 
-  public List<Accounting10> saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s) throws Exception;
+  List<Accounting10> saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s) throws Exception;
 
   /**
    * Busca los movimientos conciliados para agregarlos en la tabla de contabilidad.

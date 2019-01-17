@@ -80,14 +80,6 @@ public class Test_20190114145205_create_sp_mc_acc_create_accounting_file_v10 ext
     Assert.assertEquals("No Debe tener ID", 0L, data.get("_r_id"));
   }
 
-  @Test
-  public void shouldNotFail_fileId_null() throws SQLException {
-    Map<String, Object> data = createAccountingFile("FileName", null, "Accounting", "csv","www.sdasdasd.com/FileName.csv","OK");
-    Assert.assertNotNull("Data no debe ser null", data);
-    Assert.assertEquals("No debe ser error","MC002",data.get("_error_code"));
-    Assert.assertNotEquals("Deben ser iguales","",data.get("_error_msg"));
-    Assert.assertEquals("No Debe tener ID", 0L, data.get("_r_id"));
-  }
 
   @Test
   public void shouldNotFail_type_null() throws SQLException {

@@ -55,7 +55,7 @@ pipeline:
       event: [ push ]
       branch:
         exclude: master
-
+      
   print_log:
     image: maven:3.6.0-jdk-8-alpine
     commands:
