@@ -20,6 +20,13 @@
     <postgresql.version>42.2.1</postgresql.version>
     <spring.version>5.0.0.RELEASE</spring.version>
     <mockito.version>2.21.0</mockito.version>
+    <sonar.host.url>https://sonar.tools.multicajadigital.cloud</sonar.host.url>
+    <sonar.login>983b840c42ce2877751dfb2dd206fecc85333945</sonar.login>
+    <sonar.projectName>api-prepago</sonar.projectName>
+    <sonar.projectKey>api-prepago</sonar.projectKey>
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.inclusions>src/main/java/cl/multicaja/**/*</sonar.inclusions>
+    <sonar.jacoco.reportPaths>unit-tests/jacoco.exec,integration-tests/jacoco.exec</sonar.jacoco.reportPaths>
   </properties>
 
   <repositories>
@@ -222,8 +229,35 @@
           </packagingExcludes>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.5.0.1254</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>

@@ -7,34 +7,34 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum AccountingStatusType {
+public enum AccountingFileFormatType {
 
-  PENDING("PENDING"),
-  OK("OK"),
-  REVERSED("REVERSED");
+  CSV("CSV"),
+  XLS("XLS"),
+  XLSX("XLSX");
   String value;
 
-  AccountingStatusType(String value) {
+  AccountingFileFormatType(String value) {
     this.value = value;
   }
 
   public String getValue() {
     return value;
   }
-  public static AccountingStatusType valueOfEnum(String name) {
+  public static AccountingFileFormatType valueOfEnum(String name) {
     try {
-      return AccountingStatusType.valueOf(name);
+      return AccountingFileFormatType.valueOf(name);
     } catch(Exception ex) {
       return null;
     }
   }
 
-  private static Map<String, AccountingStatusType> FORMAT_MAP = Stream
-    .of(AccountingStatusType.values())
+  private static Map<String, AccountingFileFormatType> FORMAT_MAP = Stream
+    .of(AccountingFileFormatType.values())
     .collect(Collectors.toMap(s -> s.value, Function.identity()));
 
   @JsonCreator
-  public static AccountingStatusType fromValue(String value) {
+  public static AccountingFileFormatType fromValue(String value) {
     return FORMAT_MAP.get(value);
   }
 }
