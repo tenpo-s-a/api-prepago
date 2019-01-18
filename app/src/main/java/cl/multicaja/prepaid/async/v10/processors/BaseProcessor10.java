@@ -1,6 +1,9 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
-import cl.multicaja.camel.*;
+import cl.multicaja.camel.CamelFactory;
+import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.JMSMessenger;
+import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
@@ -9,7 +12,10 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.CdtTransactionType;
+import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.QueuesNameType;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -17,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.Queue;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
