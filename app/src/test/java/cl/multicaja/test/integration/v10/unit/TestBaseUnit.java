@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
-import cl.multicaja.accounting.ejb.v10.PrepaidAccountingFileEJB10;
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingFileEJBBean10;
 import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.*;
@@ -30,8 +29,10 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import cl.multicaja.users.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.security.common.FileRealmHelper;
 import org.junit.Assert;
 
 import java.math.BigDecimal;
@@ -672,13 +673,16 @@ public class TestBaseUnit extends TestApiBase {
    * @param user
    * @return
    */
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) {
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) throws Exception {
     return buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
   }
 
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) {
-
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) throws Exception {
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    return buildNewPrepaidWithdraw10(user, password, merchantCode);
+  }
+
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password, String merchantCode) throws Exception {
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
@@ -695,7 +699,17 @@ public class TestBaseUnit extends TestApiBase {
 
     prepaidWithdraw.setPassword(password);
 
+    // Los retiros web requieren que el usuario tenga una cuenta asociada
+    if (NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE.equals(merchantCode)) {
+      UserAccount bankAccount = createBankAccount(user);
+      prepaidWithdraw.setBankAccountId(bankAccount.getId());
+    }
+
     return prepaidWithdraw;
+  }
+
+  public void buildAccountForPrepaid(User user, NewPrepaidWithdraw10 prepaidWithdraw10) {
+
   }
 
   /**
@@ -1275,6 +1289,22 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidCard10;
   }
+
+  protected UserAccount createBankAccount(User user) throws Exception {
+    return createBankAccount(user, 1L, "Cuenta corriente", "mi cuenta de test", getRandomNumericString(8), user.getRut().getValue());
+  }
+
+  protected UserAccount createBankAccount(User user, Long bankId, String type, String name, String number, Integer rut) throws Exception {
+    UserAccountNew newAccountRequest = new UserAccountNew();
+    newAccountRequest.setBankId(bankId);
+    newAccountRequest.setAccountType(type);
+    newAccountRequest.setAccountAlias(name);
+    newAccountRequest.setAccountNumber(number);
+    newAccountRequest.setRut(rut);
+    UserAccount newAccount = getUserClient().createUserBankAccount(null, user.getId(), newAccountRequest);
+    return newAccount;
+  }
+
   public Map<String,Object> getDefaultHeaders(){
     Map<String,Object> header = new HashMap<>();
     header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());

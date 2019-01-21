@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
@@ -191,19 +192,20 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendWithdrawToAccounting(PrepaidWithdraw10 prepaidWithdraw, User user) {
+  public String sendWithdrawToAccounting(PrepaidMovement10 prepaidWithdraw, User user, UserAccount userAccount) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
 
     // Se crea un messageId unico
-    String messageId = String.format("%s#%s#%s#%s", prepaidWithdraw.getMerchantCode(), prepaidWithdraw.getTransactionId(), prepaidWithdraw.getId(), Utils.uniqueCurrentTimeNano());
+    String messageId = String.format("%s#%s", prepaidWithdraw.getId(), Utils.uniqueCurrentTimeNano());
 
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ);
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setUser(user);
-    data.setPrepaidWithdraw10(prepaidWithdraw);
+    data.setPrepaidMovement10(prepaidWithdraw);
+    data.setUserAccount(userAccount);
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(0);
     req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));

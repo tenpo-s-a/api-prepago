@@ -4,6 +4,7 @@ import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 
 public class Clearing10 extends Accounting10 {
 
+  //TODO: Revisar estos 3 atributos y la herencia
   private Long clearingId;
   private Long clearingFileId;
   private AccountingStatusType clearingStatus;

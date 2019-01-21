@@ -763,8 +763,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
   }
 
   private void doWirhdraw(User user, String password, Long amount, String merchantCode) throws Exception {
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-    prepaidWithdraw.setMerchantCode(merchantCode);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, merchantCode);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
     try {
       getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);

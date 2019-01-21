@@ -1,20 +1,17 @@
 package cl.multicaja.test.integration.v10.async;
 
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.NameStatus;
-import cl.multicaja.prepaid.helpers.users.model.RutStatus;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -577,6 +574,8 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     String password = "1235";
     User user = registerUser(password);
     user = updateUserPassword(user, password);
+    UserAccount bankAccount = createBankAccount(user);
+    System.out.println(String.format("Creada bank accout con id: %d", bankAccount.getId()));
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
@@ -633,7 +632,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
       // Se retiran 400000
       {
-        doWirhdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+        doWithdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE, bankAccount.getId());
         sumBalance -= 400100;
       }
     }
@@ -660,7 +659,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       }
       // Se retiran 400000
       {
-        doWirhdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+        doWithdraw(user, password, 400000L, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE, bankAccount.getId());
         sumBalance -= 400100;
       }
     }
@@ -720,9 +719,21 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un id", resp.getId());
   }
 
-  private void doWirhdraw(User user, String password, Long amount, String merchantCode) throws Exception {
+  private void doWithdraw(User user, String password, Long amount, String merchantCode) throws Exception {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
+    try {
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+    } catch (ValidationException vex) {
+      Assert.fail("No debe pasar por aca");
+    }
+  }
+
+  private void doWithdraw(User user, String password, Long amount, String merchantCode, Long bankAccountId) throws Exception {
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.setBankAccountId(bankAccountId);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
     try {
       getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);

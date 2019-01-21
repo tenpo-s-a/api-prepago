@@ -48,8 +48,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -113,8 +112,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-    prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -174,8 +172,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
@@ -198,8 +195,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
@@ -225,8 +221,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(101585));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
@@ -249,8 +244,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
 
       HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
@@ -430,9 +424,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn400_OnMissingPassword() {
+  public void shouldReturn400_OnMissingPassword() throws Exception {
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, null, RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(null);
 
@@ -446,9 +440,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn404_McUserNull() {
+  public void shouldReturn404_McUserNull() throws Exception {
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, null, RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
 
@@ -468,7 +462,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.DELETED);
     user = updateUser(user);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -486,7 +480,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.LOCKED);
     user = updateUser(user);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -504,7 +498,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     user.setGlobalStatus(UserStatus.DISABLED);
     user = updateUser(user);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -519,7 +513,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_McUserListaNegra() throws Exception {
 
     User user = registerUserBlackListed();
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -534,7 +528,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
     User user = registerUser();
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -554,7 +548,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaiduser.setStatus(PrepaidUserStatus.DISABLED);
     prepaiduser = createPrepaidUser10(prepaiduser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -575,7 +569,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321", RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.setRut(user.getRut().getValue());
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
@@ -597,7 +591,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
     prepaiduser = createPrepaidUser10(prepaiduser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -622,7 +616,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -647,7 +641,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -672,7 +666,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -696,7 +690,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     createPrepaidCard10(buildPrepaidCard10(prepaidUser));
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 

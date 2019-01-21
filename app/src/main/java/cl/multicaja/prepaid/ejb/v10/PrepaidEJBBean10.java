@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
@@ -469,12 +470,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
-    this.validateWithdrawRequest(withdrawRequest);
+    this.validateWithdrawRequest(withdrawRequest, false);
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
-
-    Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
 
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
@@ -493,6 +492,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
     }
 
+    Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
+
+    if(isWebWithdraw) {
+      UserAccount userAccount = getUserClient().getUserBankAccountById(null, user.getId(), withdrawRequest.getBankAccountId());
+      if(userAccount == null) {
+        throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
+      }
+    }
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -601,7 +608,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       if(isWebWithdraw) {
         // Lanzar async a clearing
-        this.getDelegate().sendWithdrawToAccounting(prepaidWithdraw, user);
+        UserAccount userAccount = new UserAccount();
+        userAccount.setId(withdrawRequest.getBankAccountId());
+        this.getDelegate().sendWithdrawToAccounting(prepaidMovement, user, userAccount);
       } else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -683,7 +692,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
-    this.validateWithdrawRequest(withdrawRequest);
+    this.validateWithdrawRequest(withdrawRequest, true);
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
@@ -778,7 +787,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
-  private void validateWithdrawRequest(NewPrepaidWithdraw10 request) throws Exception {
+  private void validateWithdrawRequest(NewPrepaidWithdraw10 request, Boolean isReverse) throws Exception {
     if(request == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "withdrawRequest"));
     }
@@ -810,7 +819,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
     // Solo los retiros web deberian venir con el id de la cuenta donde hacer el retiro
-    if(TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
+    if(!isReverse && TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
       if (request.getBankAccountId() == null) {
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
       }

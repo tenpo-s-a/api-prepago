@@ -94,7 +94,8 @@ public class CalculationsHelper {
    * @return
    */
   public BigDecimal calculateIvaFromTotal(BigDecimal amount) {
-    BigDecimal iva = amount.subtract(amount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA())));
+    //TODO: Fue necesario agregar un limite de digitos despues de la coma, 4 esta bien?
+    BigDecimal iva = amount.subtract(amount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA()), 4,  RoundingMode.HALF_UP));
     log.info(String.format("Amount: [%s], Iva: [%s]", amount, iva));
     return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
   }
