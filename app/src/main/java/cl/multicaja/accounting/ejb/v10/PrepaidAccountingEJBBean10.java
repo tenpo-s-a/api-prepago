@@ -330,91 +330,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       List<Accounting10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
-<<<<<<< HEAD
         Accounting10 accounting = buildAccounting10(m, AccountingStatusType.OK);
-=======
-
-        AccountingTxType type = AccountingTxType.RETIRO_WEB;;
-        AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
-
-        if(TipoFactura.CARGA_TRANSFERENCIA.equals(m.getTipofac())) {
-          type = AccountingTxType.CARGA_WEB;
-          movementType = AccountingMovementType.CARGA_WEB;
-        } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(m.getTipofac())) {
-          type = AccountingTxType.CARGA_POS;
-          movementType =AccountingMovementType.CARGA_POS;
-        } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(m.getTipofac())) {
-          type = AccountingTxType.RETIRO_POS;
-          movementType =AccountingMovementType.RETIRO_POS;
-        }
-
-        Accounting10 accounting = new Accounting10();
-        accounting.setIdTransaction(m.getId());
-        accounting.setOrigin(AccountingOriginType.MOVEMENT);
-        accounting.setType(type);
-        accounting.setAccountingMovementType(movementType);
-        accounting.setAmount(new NewAmountAndCurrency10(m.getImpfac()));
-
-        //Se colocan en 0 ya que solo se procesan cargas y retiros
-        accounting.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
-        accounting.setExchangeRateDif(BigDecimal.ZERO);
-
-        //Se calcula la comision del movimiento
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal feeIva = BigDecimal.ZERO;
-        switch (m.getTipoMovimiento()) {
-          case TOPUP:
-            // Calcula las comisiones segun el tipo de carga (WEB o POS)
-            if (TransactionOriginType.WEB.equals(m.getOriginType())) {
-              fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-
-              accounting.setFee(fee);
-              accounting.setFeeIva(feeIva);
-              accounting.setCollectorFee(BigDecimal.ZERO);
-              accounting.setCollectorFeeIva(BigDecimal.ZERO);
-            }
-            else {
-              // Comision es Fija $200
-              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(BigDecimal.ZERO);
-              accounting.setFeeIva(BigDecimal.ZERO);
-              accounting.setCollectorFee(fee);
-              accounting.setCollectorFeeIva(feeIva);
-            }
-            break;
-          case WITHDRAW:
-            // Calcula las comisiones segun el tipo de carga (WEB o POS)
-            if (TransactionOriginType.WEB.equals(m.getOriginType())) {
-              fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(fee);
-              accounting.setFeeIva(feeIva);
-              accounting.setCollectorFee(BigDecimal.ZERO);
-              accounting.setCollectorFeeIva(BigDecimal.ZERO);
-            }
-            else {
-              // Comision es Fija $200
-              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(BigDecimal.ZERO);
-              accounting.setFeeIva(BigDecimal.ZERO);
-              accounting.setCollectorFee(fee);
-              accounting.setCollectorFeeIva(feeIva);
-            }
-            break;
-        }
-        accounting.setTransactionDate(m.getFechaCreacion());
-        accounting.setStatus(AccountingStatusType.OK);
-        accounting.setFileId(0L);
-        accounting.setAmountBalance(new NewAmountAndCurrency10(m.getImpfac().subtract(fee).subtract(feeIva)));
-        accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
-        //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
-        //de conciliacion
-        accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
-
->>>>>>> master
         accountingMovements.add(accounting);
       }
 
@@ -439,9 +355,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   }
 
   public Accounting10 buildAccounting10(PrepaidMovement10 movement, AccountingStatusType accountingStatus) {
-    Accounting10 accounting10 = new Accounting10();
-
-    AccountingTxType type = AccountingTxType.RETIRO_WEB;
+    AccountingTxType type = AccountingTxType.RETIRO_WEB;;
     AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
 
     if(TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
@@ -455,55 +369,73 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       movementType =AccountingMovementType.RETIRO_POS;
     }
 
-    accounting10.setIdTransaction(movement.getId());
-    accounting10.setOrigin(AccountingOriginType.MOVEMENT);
-    accounting10.setType(type);
-    accounting10.setAccountingMovementType(movementType);
-    accounting10.setAmount(new NewAmountAndCurrency10(movement.getImpfac()));
+    Accounting10 accounting = new Accounting10();
+    accounting.setIdTransaction(movement.getId());
+    accounting.setOrigin(AccountingOriginType.MOVEMENT);
+    accounting.setType(type);
+    accounting.setAccountingMovementType(movementType);
+    accounting.setAmount(new NewAmountAndCurrency10(movement.getImpfac()));
 
     //Se colocan en 0 ya que solo se procesan cargas y retiros
-    accounting10.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    accounting10.setExchangeRateDif(BigDecimal.ZERO);
+    accounting.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    accounting.setExchangeRateDif(BigDecimal.ZERO);
 
     //Se calcula la comision del movimiento
     BigDecimal fee = BigDecimal.ZERO;
+    BigDecimal feeIva = BigDecimal.ZERO;
     switch (movement.getTipoMovimiento()) {
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
           fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-        } else {
-          // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-          fee = getCalculationsHelper().calculateFee(movement.getImpfac(), getPercentage().getTOPUP_POS_FEE_PERCENTAGE());
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+
+          accounting.setFee(fee);
+          accounting.setFeeIva(feeIva);
+          accounting.setCollectorFee(BigDecimal.ZERO);
+          accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        }
+        else {
+          // Comision es Fija $200
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(BigDecimal.ZERO);
+          accounting.setFeeIva(BigDecimal.ZERO);
+          accounting.setCollectorFee(fee);
+          accounting.setCollectorFeeIva(feeIva);
         }
         break;
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
           fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-        } else {
-          // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-          fee = getCalculationsHelper().calculateFee(movement.getImpfac(), getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE());
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(fee);
+          accounting.setFeeIva(feeIva);
+          accounting.setCollectorFee(BigDecimal.ZERO);
+          accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        }
+        else {
+          // Comision es Fija $200
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(BigDecimal.ZERO);
+          accounting.setFeeIva(BigDecimal.ZERO);
+          accounting.setCollectorFee(fee);
+          accounting.setCollectorFeeIva(feeIva);
         }
         break;
     }
-    accounting10.setFee(fee);
+    accounting.setTransactionDate(movement.getFechaCreacion());
+    accounting.setStatus(accountingStatus);
+    accounting.setFileId(0L);
+    accounting.setAmountBalance(new NewAmountAndCurrency10(movement.getImpfac().subtract(fee).subtract(feeIva)));
+    accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
+    //de conciliacion
+    accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
 
-    // Se calcula el Iva correspondiente a la comision
-    BigDecimal iva = getCalculationsHelper().calculateIvaFromTotal(fee);
-    accounting10.setFeeIva(iva);
-    accounting10.setTransactionDate(movement.getFechaCreacion());
-
-    accounting10.setStatus(accountingStatus);
-    //TODO: Llenar con los valores que corresponda.
-    accounting10.setFileId(0L);
-    accounting10.setAmountBalance(new NewAmountAndCurrency10(new BigDecimal(0)));
-    accounting10.setAmountMastercard(new NewAmountAndCurrency10(new BigDecimal(0)));
-    accounting10.setCollectorFee(new BigDecimal(0));
-    accounting10.setCollectorFeeIva(new BigDecimal(0));
-    accounting10.setConciliationDate(new Timestamp(System.currentTimeMillis()));
-
-    return accounting10;
+    return accounting;
   }
 
   /**
