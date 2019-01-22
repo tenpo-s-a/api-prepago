@@ -1,6 +1,7 @@
 package cl.multicaja.accounting.ejb.v10;
 
-import cl.multicaja.accounting.model.v10.*;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.Clearing10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.KeyValue;

@@ -133,8 +133,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
+    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
     prepaidWithdraw.setAmount(amount);
     prepaidWithdraw.setRut(0);
+    prepaidWithdraw.setTransactionId("1234");
+    prepaidWithdraw.setMerchantCode("1234");
+    prepaidWithdraw.setMerchantName("asdasdasd");
+    prepaidWithdraw.setMerchantCategory(1);
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -143,6 +148,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     BadRequestException bex = resp.toObject(BadRequestException.class);
     Assert.assertNotNull("Deberia tener error", bex);
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
+    System.out.println(bex.getMessage());
     Assert.assertTrue("Debe tener error: password", bex.getMessage().contains("password"));
   }
 

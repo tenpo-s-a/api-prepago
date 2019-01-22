@@ -429,6 +429,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, null, RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(null);
+    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 
@@ -571,6 +572,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321", RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.setRut(user.getRut().getValue());
+    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
 
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
 

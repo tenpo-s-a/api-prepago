@@ -146,6 +146,10 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
     reverseRequest.setAmount(amount);
     reverseRequest.setRut(0);
+    reverseRequest.setMerchantCode("1234567890");
+    reverseRequest.setMerchantName("Test");
+    reverseRequest.setMerchantCategory(1);
+    reverseRequest.setTransactionId("0987654321");
 
     try{
       prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);

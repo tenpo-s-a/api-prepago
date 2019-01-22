@@ -2,9 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
-import cl.multicaja.accounting.model.v10.Accounting10;
-import cl.multicaja.accounting.model.v10.AccountingOriginType;
-import cl.multicaja.accounting.model.v10.AccountingTxType;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import org.junit.AfterClass;
@@ -24,6 +22,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   @BeforeClass
   @AfterClass
   public static void clearData() {
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
   }
@@ -77,8 +76,11 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, ipmFile);
 
       List<Accounting10> trxs = getDbTransactions();
+      List<Clearing10> trxcle = getDbClearingTransactions();
 
       Assert.assertEquals("Debe tener 50 transacciones", Integer.valueOf(50), Integer.valueOf(trxs.size()));
+      Assert.assertEquals("Debe tener 50 tx", Integer.valueOf(50),Integer.valueOf(trxcle.size()));
+      Assert.assertEquals("Tamaños Iguales",trxs.size(),trxcle.size());
 
       for(Accounting10 trx : trxs) {
         Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
@@ -108,7 +110,22 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
 
   }
+  private List<Clearing10> getDbClearingTransactions() {
+    List<Clearing10> trxs = new ArrayList<>();
 
+    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", SCHEMA));
+
+    for (Map row : rows) {
+      Clearing10 cle = new Clearing10();
+
+      cle.setClearingId((Long)(row.get("id")));
+      cle.setId((Long)(row.get("accounting_id")));
+      cle.setClearingStatus(AccountingStatusType.fromValue((String)row.get("status")));
+      trxs.add(cle);
+    }
+
+    return trxs;
+  }
   private List<Accounting10> getDbTransactions() {
     List<Accounting10> trxs = new ArrayList<>();
 

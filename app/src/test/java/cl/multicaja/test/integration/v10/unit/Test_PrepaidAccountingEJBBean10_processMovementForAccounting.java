@@ -1,6 +1,8 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.Clearing10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
@@ -12,13 +14,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extends TestBaseUnit {
+
+  private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
+
 
   @BeforeClass
   @AfterClass
@@ -98,7 +106,26 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
         Assert.assertNotNull("Debe estar entre los movimientos insertados", originalMovement);
 
       }
+      List<Clearing10> clearing10s = getDbClearingTransactions();
+      Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
     }
+  }
+
+  private List<Clearing10> getDbClearingTransactions() {
+    List<Clearing10> trxs = new ArrayList<>();
+
+    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", SCHEMA));
+
+    for (Map row : rows) {
+      Clearing10 cle = new Clearing10();
+
+      cle.setClearingId((Long)(row.get("id")));
+      cle.setId((Long)(row.get("accounting_id")));
+      cle.setClearingStatus(AccountingStatusType.fromValue((String)row.get("status")));
+      trxs.add(cle);
+    }
+
+    return trxs;
   }
 
   @Test

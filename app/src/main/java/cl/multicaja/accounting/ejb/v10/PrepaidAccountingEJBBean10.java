@@ -35,7 +35,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,6 +62,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
+  @EJB
+  private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
+
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
@@ -74,6 +78,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setMailPrepaidEJBBean10(MailPrepaidEJBBean10 mailPrepaidEJBBean10) {
     this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
+  }
+
+  public PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10() {
+    return prepaidClearingEJBBean10;
+  }
+
+  public void setPrepaidClearingEJBBean10(PrepaidClearingEJBBean10 prepaidClearingEJBBean10) {
+    this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
   public List<Accounting10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
@@ -315,10 +327,13 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
       if(!accountingMovements.isEmpty()) {
         accountingMovements = this.saveAccountingData(headers, accountingMovements);
-        log.info("Movimientos insertados en la tabla de contabilidad: " + accountingMovements.size());
+        //Se agrega insert de Clearing
+        this.saveClearingData(accountingMovements);
+
+        log.info("Movimientos insertados en la tabla de contabilidad y liquidacion: " + accountingMovements.size());
         return accountingMovements;
       } else {
-        log.info("No hay movimientos a insertar en la tabla de contabilidad");
+        log.info("No hay movimientos a insertar en la tabla de contabilidad y liquidacion");
         return Collections.emptyList();
       }
 
@@ -736,9 +751,28 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     this.saveAccountingData(null, transactions);
+    // Se guarda la data en Clearing.
+    this.saveClearingData(transactions);
 
     ipmFile.setStatus(IpmFileStatus.PROCESSED);
     this.updateIpmFileRecord(null, ipmFile);
+  }
+
+  private void saveClearingData(List<Accounting10> accounting10s){
+    for(Accounting10 data: accounting10s){
+      try {
+        Clearing10 clearing10 = new Clearing10();
+        clearing10.setId(data.getId());
+        clearing10.setClearingFileId(0L);
+        clearing10.setUserAccountId(0L);
+        clearing10.setClearingStatus(AccountingStatusType.OK);
+        getPrepaidClearingEJBBean10().insertClearingData(null,clearing10);
+        log.info("Save Clearing data OK");
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.info("Error, Verificar movimiento: "+data.getId());
+      }
+    }
   }
 
   @Override

@@ -9,8 +9,8 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -23,12 +23,10 @@ import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
-import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 

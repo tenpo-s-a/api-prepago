@@ -484,14 +484,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
-    // La clave solo se verifica cuando el movimiento viene desde el endpoint
-    if(fromEndPoint){
+    // La clave solo se verifica cuando el movimiento viene desde el endpoint y si es de origen POS
+    if(fromEndPoint && TransactionOriginType.POS.equals(withdrawRequest.getTransactionOriginType())){
       // Se verifica la clave
       UserPasswordNew userPasswordNew = new UserPasswordNew();
       userPasswordNew.setValue(withdrawRequest.getPassword());
       getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
     }
 
+<<<<<<< HEAD
     Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
 
     if(isWebWithdraw) {
@@ -501,6 +502,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
+=======
+>>>>>>> master
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
@@ -803,9 +806,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(request.getRut() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
-    if(StringUtils.isBlank(request.getPassword())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
-    }
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
@@ -818,11 +818,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(request.getTransactionId())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
+<<<<<<< HEAD
     // Solo los retiros web deberian venir con el id de la cuenta donde hacer el retiro
     if(!isReverse && TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
       if (request.getBankAccountId() == null) {
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
       }
+=======
+    if(TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
+>>>>>>> master
     }
   }
 
