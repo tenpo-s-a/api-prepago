@@ -22,6 +22,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
   @BeforeClass
   @AfterClass
   public static void beforeAndAfterClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", SCHEMA_ACCOUNTING));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", SCHEMA_ACCOUNTING));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", SCHEMA));
@@ -29,6 +30,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
 
   @Before
   public void clearData() {
+    dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", SCHEMA_ACCOUNTING));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", SCHEMA_ACCOUNTING));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", SCHEMA));
