@@ -691,7 +691,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextDouble(2000,9000)));
+    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
 

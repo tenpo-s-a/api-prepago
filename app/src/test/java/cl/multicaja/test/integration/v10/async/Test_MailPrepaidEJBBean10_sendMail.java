@@ -16,7 +16,6 @@ import org.junit.Test;
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_SEND_CARD;
 
-
 public class Test_MailPrepaidEJBBean10_sendMail extends TestBaseUnitAsync {
 
   @Test

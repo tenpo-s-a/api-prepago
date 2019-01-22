@@ -18,7 +18,6 @@ import java.math.BigDecimal;
  * @autor abarazarte
  */
 
-
 public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
   @Test

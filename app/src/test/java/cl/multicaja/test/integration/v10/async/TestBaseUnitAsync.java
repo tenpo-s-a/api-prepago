@@ -18,6 +18,7 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -450,8 +451,10 @@ public class TestBaseUnitAsync extends TestContextHelper {
       return null;
     }
 
+    // Si prepaid movement viene null (util solo para tests fallidos) agregar un id cualquier
+    Long id = prepaidMovement10 == null ? RandomUtils.nextInt(1, 100) : prepaidMovement10.getId();
     // Se crea un messageId unico
-    String messageId = String.format("%s#%s", prepaidMovement10.getId(), Utils.uniqueCurrentTimeNano());
+    String messageId = String.format("%s#%s", id, Utils.uniqueCurrentTimeNano());
 
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ);
     PrepaidTopupData10 data = new PrepaidTopupData10();

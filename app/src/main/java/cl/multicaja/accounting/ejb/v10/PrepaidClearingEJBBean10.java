@@ -91,6 +91,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchClearingDataById(header,getNumberUtils().toLong(id));
   }
 
+  //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<Clearing10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
 
@@ -100,7 +101,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
-      status != null ? status : new NullParam(Types.VARCHAR),
+      status != null ? status.getValue() : new NullParam(Types.VARCHAR),
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
@@ -109,6 +110,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setClearingId(getNumberUtils().toLong(row.get("_id")));
       clearing10.setId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
+      System.out.println("User accounti id: " + clearing10.getUserAccount().getId());
       clearing10.setClearingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_created"));

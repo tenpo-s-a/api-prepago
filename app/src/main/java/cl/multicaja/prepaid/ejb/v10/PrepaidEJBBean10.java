@@ -492,7 +492,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
     }
 
-<<<<<<< HEAD
     Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
 
     if(isWebWithdraw) {
@@ -502,8 +501,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-=======
->>>>>>> master
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
@@ -818,16 +815,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(request.getTransactionId())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
-<<<<<<< HEAD
     // Solo los retiros web deberian venir con el id de la cuenta donde hacer el retiro
     if(!isReverse && TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
       if (request.getBankAccountId() == null) {
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
       }
-=======
+    }
     if(TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
->>>>>>> master
     }
   }
 

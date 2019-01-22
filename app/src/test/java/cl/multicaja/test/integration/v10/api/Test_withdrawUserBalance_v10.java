@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.api;
 
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -9,10 +10,14 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,6 +34,13 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     HttpResponse respHttp = apiPOST("/1.0/prepaid/withdrawal", toJson(newPrepaidWithdraw10));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
+  }
+
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
   }
 
   @Test
@@ -156,6 +168,40 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(500);
+      List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    if (dataFound) {
+      List<Accounting10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+
+      Accounting10 accounting10 = accounting10s.get(0);
+      Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_WEB, accounting10.getType());
+      Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_WEB, accounting10.getAccountingMovementType());
+      Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+      Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
+
+      List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+
+      Clearing10 clearing10 = clearing10s.get(0);
+      Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getId());
+      Assert.assertEquals("Debe tener el id de la cuenta", prepaidWithdraw.getBankAccountId(), clearing10.getUserAccount().getId());
+      Assert.assertEquals("Debe estar en estado PENDING", AccountingStatusType.PENDING, clearing10.getClearingStatus());
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
+    }
   }
 
   @Test

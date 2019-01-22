@@ -35,6 +35,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -88,30 +89,43 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
+  //TODO: este metodo no tiene tests
   public List<Accounting10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
 
     if(dateToSearch == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
     }
 
+    Date date = Date.from(dateToSearch.atZone(ZoneId.of("UTC")).toInstant());
+    return searchAccountingData(null, date);
+  }
+
+  //TODO: este metodo no tiene tests
+  @Override
+  public List<Accounting10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
+    if(dateToSearch == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
+    }
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    String dateString = dateFormatter.format(new Date());
+
     Object[] params = {
-      dateToSearch
+      new InParam(dateString, Types.VARCHAR)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
       Accounting10 account = new Accounting10();
+      account.setId(getNumberUtils().toLong(row.get("_id")));
 
       account.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount")));
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-
       account.setAmount(amount);
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
-      amount.setCurrencyCode(CodigoMoneda.USA_USD);
-
+      amountUsd.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
+      amountUsd.setCurrencyCode(CodigoMoneda.USA_USD);
       account.setAmountUsd(amountUsd);
 
       account.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
@@ -131,14 +145,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       return account;
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_search_accounting_data_v10", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_prp_search_accounting_data_v10", rm, params);
     log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
-  }
-
-  @Override
-  public List<Accounting10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
-    return null;
   }
 
   public List<Accounting10> saveAccountingData(Map<String, Object> header, List<Accounting10> accounting10s) throws Exception {

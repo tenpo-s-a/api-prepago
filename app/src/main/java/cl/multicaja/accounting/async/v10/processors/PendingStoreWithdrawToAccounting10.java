@@ -42,6 +42,17 @@ public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
         PrepaidTopupData10 data = req.getData();
         PrepaidMovement10 prepaidWithdraw = data.getPrepaidMovement10();
         UserAccount userAccount = data.getUserAccount();
+        System.out.print("Recibi una user account con id: " + userAccount.getId());
+
+        if (prepaidWithdraw == null) {
+          log.error("Error movement es null");
+          return null;
+        }
+
+        if (userAccount == null || userAccount.getId() == null) {
+          log.error("Error userAccountId es null");
+          return null;
+        }
 
         // Insertar en accounting como PENDING
         Accounting10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(prepaidWithdraw, AccountingStatusType.PENDING);
