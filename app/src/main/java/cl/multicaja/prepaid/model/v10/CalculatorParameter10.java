@@ -10,6 +10,7 @@ public class CalculatorParameter10 {
   private BigDecimal TOPUP_POS_FEE_PERCENTAGE;
   private BigDecimal TOPUP_WEB_FEE_PERCENTAGE;
   private BigDecimal TOPUP_WEB_FEE_AMOUNT;
+  private BigDecimal TOPUP_POS_FEE_AMOUNT;
   private BigDecimal WITHDRAW_POS_FEE_PERCENTAGE;
   private BigDecimal WITHDRAW_WEB_FEE_PERCENTAGE;
   private BigDecimal WITHDRAW_WEB_FEE_AMOUNT;
@@ -168,5 +169,13 @@ public class CalculatorParameter10 {
 
   public void setOTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE(BigDecimal OTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE) {
     this.OTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE = OTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE;
+  }
+
+  public BigDecimal getTOPUP_POS_FEE_AMOUNT() {
+    return TOPUP_POS_FEE_AMOUNT;
+  }
+
+  public void setTOPUP_POS_FEE_AMOUNT(BigDecimal TOPUP_POS_FEE_AMOUNT) {
+    this.TOPUP_POS_FEE_AMOUNT = TOPUP_POS_FEE_AMOUNT;
   }
 }
