@@ -44,8 +44,6 @@ public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
         UserAccount userAccount = data.getUserAccount();
 
         // Insertar en accounting como PENDING
-        System.out.println("Get prepaid accounting ejb: " + getRoute().getPrepaidAccountingEJBBean10());
-        System.out.println("prepaidwithdraw: " + prepaidWithdraw);
         Accounting10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(prepaidWithdraw, AccountingStatusType.PENDING);
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 

@@ -26,6 +26,8 @@ import static cl.multicaja.core.model.Errors.*;
  * @autor abarazarte
  */
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
+
+
   //TODO: Hacer test withdrawUserBalance fromEndPoint False
   @Test
   public void PosWithdraw() throws Exception {
@@ -497,6 +499,60 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(NotFoundException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
+    }
+  }
+
+  @Test
+  public void shouldReturnExceptionWhen_AccountIdNull_onWebWithdraw() throws Exception {
+
+    String password = RandomStringUtils.randomNumeric(4);
+    User user = registerUser(password);
+    user = updateUserPassword(user, password);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    prepaidWithdraw.setBankAccountId(null);
+
+    try {
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+    } catch(BadRequestException vex) {
+      Assert.assertEquals("Debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
+    }
+  }
+
+  @Test
+  public void shouldReturnExceptionWhen_AccountIdDoesNotBelongToUser_onWebWithdraw() throws Exception {
+
+    String password = RandomStringUtils.randomNumeric(4);
+    User user = registerUser(password);
+    user = updateUserPassword(user, password);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    prepaidWithdraw.setBankAccountId(prepaidWithdraw.getBankAccountId() + 1L); // Change the id
+
+    try {
+      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
+    } catch(ValidationException vex) {
+      Assert.assertEquals("Debe ser error de validacion", CUENTA_NO_ASOCIADA_A_USUARIO.getValue(), vex.getCode());
     }
   }
 

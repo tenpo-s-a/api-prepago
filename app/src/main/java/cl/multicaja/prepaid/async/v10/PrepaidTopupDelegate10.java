@@ -192,7 +192,7 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendWithdrawToAccounting(PrepaidMovement10 prepaidWithdraw, User user, UserAccount userAccount) {
+  public String sendWithdrawToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
@@ -203,7 +203,6 @@ public final class PrepaidTopupDelegate10 {
 
     Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ);
     PrepaidTopupData10 data = new PrepaidTopupData10();
-    data.setUser(user);
     data.setPrepaidMovement10(prepaidWithdraw);
     data.setUserAccount(userAccount);
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);

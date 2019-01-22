@@ -610,7 +610,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         // Lanzar async a clearing
         UserAccount userAccount = new UserAccount();
         userAccount.setId(withdrawRequest.getBankAccountId());
-        this.getDelegate().sendWithdrawToAccounting(prepaidMovement, user, userAccount);
+        this.getDelegate().sendWithdrawToAccounting(prepaidMovement, userAccount);
       } else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
