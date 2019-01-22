@@ -21,8 +21,6 @@ import javax.jms.Queue;
  */
 
 @SuppressWarnings("unchecked")
-// borrame
-@Ignore
 public class Test_PendingCard10 extends TestBaseUnitAsync {
 
   /********************

@@ -23,8 +23,6 @@ import static cl.multicaja.core.model.Errors.*;
 /**
  * @autor vutreras
  */
-// borrame
-@Ignore
 public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
 

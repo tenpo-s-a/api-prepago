@@ -24,9 +24,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author abarazarte
- **/
 public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
   private static Log log = LogFactory.getLog(AccountingScheduler10.class);
 

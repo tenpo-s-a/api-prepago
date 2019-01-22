@@ -35,21 +35,21 @@ public class UserClient {
   };
 
   private JsonMapper getJsonMapper() {
-    if (jsonMapper == null) {
+    if(jsonMapper == null) {
       jsonMapper = new JsonMapper();
     }
     return jsonMapper;
   }
 
   public static UserClient getInstance() {
-    if (instance == null) {
+    if(instance == null) {
       instance = new UserClient();
     }
     return instance;
   }
 
   private ConfigUtils getConfigUtils() {
-    if (configUtils == null) {
+    if(configUtils == null) {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
@@ -102,7 +102,7 @@ public class UserClient {
     log.info("response: " + httpResponse.getResp());
     httpResponse.setJsonParser(getJsonMapper());
     User[] response;
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -144,7 +144,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     User[] response;
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -186,7 +186,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     System.out.println(httpResponse.getResp());
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("getUserById", httpResponse, User.class);
@@ -197,7 +197,7 @@ public class UserClient {
     HttpResponse httpResponse = apiPOST(String.format("%s/soft_signup", getApiUrl()), signUPNew);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("signUp", httpResponse, SignUp.class);
@@ -223,7 +223,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
 
@@ -236,7 +236,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
 
@@ -250,7 +250,7 @@ public class UserClient {
     log.info("response: " + httpResponse.getResp());
 
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     this.processResponse("checkPassword", httpResponse, Boolean.class);
@@ -263,7 +263,7 @@ public class UserClient {
     log.info("response: " + httpResponse.getResp());
 
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -273,10 +273,10 @@ public class UserClient {
     log.info("******** initIdentityValidation IN ********");
 
     StringBuilder url = new StringBuilder(String.format("%s/%s/finish_identity_validation?", getApiUrl(), userId));
-    if (success) {
+    if(success) {
       url.append("success=true&");
     }
-    if (isBlacklisted) {
+    if(isBlacklisted) {
       url.append("blacklisted=true&");
     }
 
@@ -285,7 +285,7 @@ public class UserClient {
     log.info("response: " + httpResponse.getResp());
 
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -298,7 +298,7 @@ public class UserClient {
     log.info("response: " + httpResponse.getResp());
 
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -315,7 +315,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("updatePersonalData", httpResponse, User.class);
@@ -331,7 +331,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("createUserFile", httpResponse, UserFile.class);
@@ -343,7 +343,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("getUserFileById", httpResponse, UserFile.class);
@@ -352,16 +352,16 @@ public class UserClient {
   public List<UserFile> getUserFiles(Map<String, Object> headers, Long userId, String app, String name, String version, UserFileStatus fileStatus) throws Exception {
     log.info("******** getUserFiles IN ********");
     StringBuilder filter = new StringBuilder("");
-    if (!StringUtils.isAllBlank(app)) {
+    if(!StringUtils.isAllBlank(app)) {
       filter.append(String.format("app=%s&", app));
     }
-    if (!StringUtils.isAllBlank(name)) {
+    if(!StringUtils.isAllBlank(name)) {
       filter.append(String.format("name=%s&", name));
     }
-    if (!StringUtils.isAllBlank(version)) {
+    if(!StringUtils.isAllBlank(version)) {
       filter.append(String.format("version=%s&", version));
     }
-    if (fileStatus != null) {
+    if(fileStatus != null) {
       filter.append(String.format("status=%s&", fileStatus.toString()));
     }
 
@@ -369,7 +369,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     UserFile[] response;
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -414,7 +414,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("createFreshdeskTicket", httpResponse, Ticket.class);
@@ -429,7 +429,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("getUserAccountById", httpResponse, UserAccount.class);
@@ -441,7 +441,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("createUserBankAccount", httpResponse, UserAccount.class);
@@ -454,7 +454,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     UserAccount[] response;
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -496,7 +496,7 @@ public class UserClient {
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("deleteUserAccount", httpResponse, UserAccount.class);
@@ -506,7 +506,7 @@ public class UserClient {
    *  TEST HELPERS
    */
   private void validate() {
-    if (ConfigUtils.isEnvProduction()) {
+    if(ConfigUtils.isEnvProduction()) {
       throw new SecurityException("Este método no puede ser ejecutado en un ambiente de producción");
     }
   }
