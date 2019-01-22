@@ -380,10 +380,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       // Verifica si existe la carga original topup
       if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
         String timezone;
-        if(headers == null){
+        if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
           timezone="America/Santiago";
-        }else{
-          timezone=headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+        } else{
+          timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
         }
         if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
@@ -710,10 +710,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if(originalwithdraw != null && originalwithdraw.getMonto().equals(withdrawRequest.getAmount().getValue())) {
 
         String timezone;
-        if(headers.get(Constants.HEADER_USER_TIMEZONE) != null ){
+        if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
+          timezone ="America/Santiago";
+        } else{
           timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
-        } else {
-          timezone = "America/Santiago";
         }
 
         if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone) || !fromEndPoint) {
