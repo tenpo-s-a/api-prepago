@@ -88,7 +88,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
-  public List<Accounting10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
+  public List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
 
     if(dateToSearch == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
@@ -99,7 +99,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
-      Accounting10 account = new Accounting10();
+      AccountingData10 account = new AccountingData10();
 
       account.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
@@ -137,16 +137,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   }
 
   @Override
-  public List<Accounting10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
+  public List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
     return null;
   }
 
-  public List<Accounting10> saveAccountingData (Map<String, Object> header, List<Accounting10> accounting10s) throws Exception {
+  public List<AccountingData10> saveAccountingData (Map<String, Object> header, List<AccountingData10> accounting10s) throws Exception {
     if(accounting10s == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accounting10s"));
     }
-    List<Accounting10> accounting10sFinal = new ArrayList<>();
-    for(Accounting10 account : accounting10s) {
+    List<AccountingData10> accounting10sFinal = new ArrayList<>();
+    for(AccountingData10 account : accounting10s) {
 
       if(account.getIdTransaction() == null){
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getIdTransaction"));
@@ -289,7 +289,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
    * @param date la fecha recibida debe estar en UTC
    * @throws Exception
    */
-  public List<Accounting10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
+  public List<AccountingData10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
     if(date == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
@@ -310,7 +310,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         .collect(Collectors.toList());
 
 
-      List<Accounting10> accountingMovements = new ArrayList<>();
+      List<AccountingData10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
 
@@ -328,7 +328,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           movementType =AccountingMovementType.RETIRO_POS;
         }
 
-        Accounting10 accounting = new Accounting10();
+        AccountingData10 accounting = new AccountingData10();
         accounting.setIdTransaction(m.getId());
         accounting.setOrigin(AccountingOriginType.MOVEMENT);
         accounting.setType(type);
@@ -413,14 +413,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
 
-    List<Accounting10> movements = this.searchAccountingData(null, date);
+    List<AccountingData10> movements = this.searchAccountingData(null, date);
     String fileName = "src/main/resources/accounting_file.csv";
     createAccountingCSV(fileName, movements); // Crear archivo csv temporal
     sendFile(fileName, getConfigUtils().getProperty("accounting.email.dailyreport")); // envia archivo al email de reportes
     new File(fileName).delete(); // borra el archivo creado
   }
 
-  public void createAccountingCSV(String filename, List<Accounting10> lstAccountingMovement10s) throws IOException {
+  public void createAccountingCSV(String filename, List<AccountingData10> lstAccountingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -428,8 +428,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     String[] header = new String[]{"ID", "FECHA", "TIPO", "MONTO_IPM", "MONTO_USD", "DIF_TIPO_CAMBIO", "COMISION", "IVA"};
     writer.writeNext(header);
 
-    for (Accounting10 mov : lstAccountingMovement10s) {
-      System.out.println("Mov: " + mov);
+    for (AccountingData10 mov : lstAccountingMovement10s) {
       String[] data = new String[]{ mov.getId().toString(),
                                     mov.getTransactionDateInFormat(),
                                     mov.getType().getValue(),
@@ -654,10 +653,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       return;
     }
 
-    List<Accounting10> transactions = new ArrayList<>();
+    List<AccountingData10> transactions = new ArrayList<>();
     for (IpmMessage trx: ipmFile.getTransactions()) {
 
-      Accounting10 acc = new Accounting10();
+      AccountingData10 acc = new AccountingData10();
       acc.setOrigin(AccountingOriginType.IPM);
       acc.setType(this.getTransactionType(trx));
       acc.setAccountingMovementType(this.getMovementType(trx));
@@ -745,14 +744,13 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.updateIpmFileRecord(null, ipmFile);
   }
 
-  private void saveClearingData(List<Accounting10> accounting10s){
-    for(Accounting10 data: accounting10s){
+  private void saveClearingData(List<AccountingData10> accounting10s){
+    for(AccountingData10 data: accounting10s){
       try {
-        Clearing10 clearing10 = new Clearing10();
-        clearing10.setId(data.getId());
-        clearing10.setClearingFileId(0L);
+        ClearingData10 clearing10 = new ClearingData10();
+        clearing10.setAccountingId(data.getId());
         clearing10.setUserAccountId(0L);
-        clearing10.setClearingStatus(AccountingStatusType.OK);
+        clearing10.setStatus(AccountingStatusType.OK);
         getPrepaidClearingEJBBean10().insertClearingData(null,clearing10);
         log.info("Save Clearing data OK");
       } catch (Exception e) {
@@ -804,6 +802,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       return AccountingMovementType.COMPRA_MONEDA;
     }
   }
+
   @Override
   public Boolean isSubscriptionMerchant(final String merchantName) throws Exception {
     if(StringUtils.isAllBlank(merchantName)) {

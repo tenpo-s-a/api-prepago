@@ -1,6 +1,5 @@
 package cl.multicaja.accounting.async.v10.routes;
 
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.accounting.async.v10.processors.PendingMastercardAccountingFile10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.commons.logging.Log;
@@ -17,8 +16,8 @@ public class MastercardAccountingRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    //from(SFTP_HOST_ENDPOINT)
-    //  .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
+    from(SFTP_HOST_ENDPOINT)
+      .process(new PendingMastercardAccountingFile10(this).processAccountingBatch());
   }
 
   private String getSftpEndpoint() {
