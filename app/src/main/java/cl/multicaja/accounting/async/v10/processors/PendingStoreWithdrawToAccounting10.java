@@ -1,8 +1,8 @@
 package cl.multicaja.accounting.async.v10.processors;
 
-import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.Clearing10;
+import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
@@ -52,14 +52,14 @@ public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
         }
 
         // Insertar en accounting como PENDING
-        Accounting10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(prepaidWithdraw, AccountingStatusType.PENDING);
+        AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(prepaidWithdraw, AccountingStatusType.PENDING);
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
         // Insertar en clearing
-        Clearing10 clearing10 = new Clearing10();
-        clearing10.setClearingStatus(AccountingStatusType.PENDING);
-        clearing10.setUserAccount(userAccount);
-        clearing10.setId(accounting10.getId());
+        ClearingData10 clearing10 = new ClearingData10();
+        clearing10.setStatus(AccountingStatusType.PENDING);
+        clearing10.setUserBankAccount(userAccount);
+        clearing10.setAccountingId(accounting10.getId());
         getRoute().getPrepaidClearingEJBBean10().insertClearingData(null, clearing10);
 
         return req;

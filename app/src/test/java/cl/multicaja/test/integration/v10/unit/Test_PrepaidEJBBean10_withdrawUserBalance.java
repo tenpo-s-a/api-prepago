@@ -551,7 +551,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     try {
       getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
+    } catch(NotFoundException vex) {
       Assert.assertEquals("Debe ser error de validacion", CUENTA_NO_ASOCIADA_A_USUARIO.getValue(), vex.getCode());
     }
   }

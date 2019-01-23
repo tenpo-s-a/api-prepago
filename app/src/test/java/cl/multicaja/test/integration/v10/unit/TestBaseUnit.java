@@ -1312,8 +1312,8 @@ public class TestBaseUnit extends TestApiBase {
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
   }
-  protected Accounting10 buildRandomAccouting(){
-    Accounting10 accounting10 = new Accounting10();
+  protected AccountingData10 buildRandomAccouting(){
+    AccountingData10 accounting10 = new AccountingData10();
     accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
     accounting10.setOrigin(AccountingOriginType.IPM);
     accounting10.setType(AccountingTxType.COMPRA_SUSCRIPCION);
@@ -1350,10 +1350,10 @@ public class TestBaseUnit extends TestApiBase {
     accounting10.setAmountUsd(amountUsd);
     return accounting10;
   }
-  protected List<Accounting10> generateRandomAccountingList(Integer iPositionNull, Integer count){
-    List<Accounting10> accounting10s = new ArrayList<>();
+  protected List<AccountingData10> generateRandomAccountingList(Integer iPositionNull, Integer count){
+    List<AccountingData10> accounting10s = new ArrayList<>();
     for(int i = 0;i<count;i++){
-       Accounting10 accounting10 = new Accounting10();
+       AccountingData10 accounting10 = new AccountingData10();
        if(iPositionNull == null){
          accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
          accounting10.setOrigin(AccountingOriginType.IPM);

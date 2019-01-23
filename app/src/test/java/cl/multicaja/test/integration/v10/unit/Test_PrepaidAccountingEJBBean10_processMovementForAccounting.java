@@ -1,8 +1,8 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.Clearing10;
+import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
@@ -91,11 +91,11 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       Thread.sleep(1000);
 
-      List<Accounting10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+      List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
       Assert.assertEquals("Debe ser 3 ", 3,accountinMovements.size());
 
-      for (Accounting10 m : accountinMovements) {
+      for (AccountingData10 m : accountinMovements) {
         Assert.assertNotNull("Debe tener id", m.getId());
 
         Long originalMovement = originalMovementsIds.stream()
@@ -106,22 +106,22 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
         Assert.assertNotNull("Debe estar entre los movimientos insertados", originalMovement);
 
       }
-      List<Clearing10> clearing10s = getDbClearingTransactions();
+      List<ClearingData10> clearing10s = getDbClearingTransactions();
       Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
     }
   }
 
-  private List<Clearing10> getDbClearingTransactions() {
-    List<Clearing10> trxs = new ArrayList<>();
+  private List<ClearingData10> getDbClearingTransactions() {
+    List<ClearingData10> trxs = new ArrayList<>();
 
     List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", SCHEMA));
 
     for (Map row : rows) {
-      Clearing10 cle = new Clearing10();
+      ClearingData10 cle = new ClearingData10();
 
-      cle.setClearingId((Long)(row.get("id")));
+      cle.setId((Long)(row.get("id")));
       cle.setId((Long)(row.get("accounting_id")));
-      cle.setClearingStatus(AccountingStatusType.fromValue((String)row.get("status")));
+      cle.setStatus(AccountingStatusType.fromValue((String)row.get("status")));
       trxs.add(cle);
     }
 
@@ -178,7 +178,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       Thread.sleep(1000);
 
-      List<Accounting10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+      List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
       Assert.assertEquals("Debe ser 0", 0, accountinMovements.size());
     }

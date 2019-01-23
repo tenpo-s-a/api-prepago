@@ -57,24 +57,24 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Deberia existir un topup", remoteData);
 
-    List<Accounting10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
-    Accounting10 accounting10 = accounting10s.get(0);
+    AccountingData10 accounting10 = accounting10s.get(0);
     Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_WEB, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_WEB, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
     Assert.assertEquals("Debe tener el mismo id", prepaidMovement.getId(), accounting10.getIdTransaction());
 
-    List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
 
-    Clearing10 clearing10 = clearing10s.get(0);
-    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getId());
-    Assert.assertEquals("Debe tener el id de la cuenta", new Long(10), clearing10.getUserAccount().getId());
-    Assert.assertEquals("Debe estar en estado PENDING", AccountingStatusType.PENDING, clearing10.getClearingStatus());
+    ClearingData10 clearing10 = clearing10s.get(0);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", new Long(10), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado PENDING", AccountingStatusType.PENDING, clearing10.getStatus());
   }
 
   @Test
@@ -92,10 +92,10 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<Accounting10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
@@ -121,10 +121,10 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<Accounting10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
@@ -151,10 +151,10 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<Accounting10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<Clearing10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 }
