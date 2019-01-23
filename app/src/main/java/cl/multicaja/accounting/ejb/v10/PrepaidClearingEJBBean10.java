@@ -159,7 +159,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Object[] params = {
       f,
-      t
+      t,
+      AccountingStatusType.PENDING.getValue()
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
