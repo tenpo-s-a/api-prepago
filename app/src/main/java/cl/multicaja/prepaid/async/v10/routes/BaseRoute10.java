@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
+import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.camel.CamelRouteBuilder;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.core.utils.ConfigUtils;
@@ -50,6 +51,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   @EJB
   private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
+
+  @EJB
+  private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -203,5 +207,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setMastercardCurrencyUpdateEJBBean10(MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10) {
     this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
+  }
+
+  public PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10() {
+    return prepaidClearingEJBBean10;
+  }
+
+  public void setPrepaidClearingEJBBean10(PrepaidClearingEJBBean10 prepaidClearingEJBBean10) {
+    this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 }

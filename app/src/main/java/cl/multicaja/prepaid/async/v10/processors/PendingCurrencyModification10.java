@@ -22,9 +22,11 @@ public class PendingCurrencyModification10 extends BaseProcessor10 {
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
-        try {
-          getRoute().getMcRedReconciliationEJBBean10().processFile(inputStream, fileName);
-        } catch(Exception ex) {
+        try
+        {
+          getRoute().getPrepaidClearingEJBBean10().processClearingResponse(inputStream, fileName);
+        }
+        catch(Exception ex) {
           inputStream.close();
           throw ex;
         }

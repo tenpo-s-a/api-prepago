@@ -3,6 +3,7 @@ package cl.multicaja.accounting.ejb.v10;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -11,27 +12,24 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -299,5 +297,49 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
     writer.close();
   }
+  public void processClearingResponse(InputStream inputStream, String fileName) throws Exception {
+    log.info("processClearingResponse IN");
+    List<ClearingData10> clearingData10s = processClearingResponseDataFile(inputStream,fileName);
+    log.info(String.format("Registro procesados: %d",clearingData10s.size()));
+    updateClearingBankResponse(clearingData10s);
+    log.info("processClearingResponse OUT");
+  }
 
+  public List<ClearingData10> processClearingResponseDataFile(InputStream inputStream, String fileName) throws IOException, ValidationException {
+
+    List<ClearingData10> clearingData10s;
+      log.info("IN");
+      try {
+        Reader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        CSVReader csvReader = new CSVReader(reader,';');
+        csvReader.readNext();
+        String[] record;
+        clearingData10s = new ArrayList<>();
+
+        while ((record = csvReader.readNext()) != null) {
+          log.debug(Arrays.toString(record));
+          ClearingData10 clearingData = new ClearingData10();
+          clearingData.setAccountingId(numberUtil.toLong(record[0]));
+          clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[0])));
+          clearingData.setUserAccountId(getNumberUtils().toLong(record[0]));
+          clearingData10s.add(clearingData);
+        }
+        inputStream.close();
+      }catch (Exception e){
+        inputStream.close();
+        log.error("Exception: "+e);
+        e.printStackTrace();
+        System.out.println("Exception: "+e);
+        throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
+      }
+      log.info("OUT");
+      return clearingData10s;
+
+  }
+  public void updateClearingBankResponse( List<ClearingData10> clearingData10s) throws Exception {
+    for (ClearingData10 data : clearingData10s){
+      ClearingData10 dataUpdated = updateClearingData(null,data.getId(),null,data.getStatus());
+      log.info("Updated ClearingData: "+dataUpdated);
+    }
+  }
 }

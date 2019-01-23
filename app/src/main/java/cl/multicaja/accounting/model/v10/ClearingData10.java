@@ -5,6 +5,7 @@ public class ClearingData10 extends AccountingData10 {
   private Long accountingId;
   private UserAccount userBankAccount;
 
+
   public ClearingData10() {
     super();
   }

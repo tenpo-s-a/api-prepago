@@ -1,7 +1,5 @@
 package cl.multicaja.accounting.model.v10;
 
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-
 public class UserAccount {
 
   private Long id;
