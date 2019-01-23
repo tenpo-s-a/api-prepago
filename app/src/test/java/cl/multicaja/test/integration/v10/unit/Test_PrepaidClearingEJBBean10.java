@@ -23,8 +23,8 @@ public class Test_PrepaidClearingEJBBean10 extends TestBaseUnit {
 
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
-  //@BeforeClass
-  //@AfterClass
+  @BeforeClass
+  @AfterClass
   public static void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", SCHEMA));
