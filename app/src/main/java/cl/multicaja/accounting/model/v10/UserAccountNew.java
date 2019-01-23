@@ -1,4 +1,4 @@
-package cl.multicaja.users.model.v10;
+package cl.multicaja.accounting.model.v10;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

@@ -27,12 +27,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_TOPUP;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
+import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
 /**
  * @autor vutreras
@@ -312,9 +312,23 @@ public class PendingTopup10 extends BaseProcessor10 {
           templateData.put("idUsuario", data.getUser().getId().toString());
           templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
-          //TODO: Realizar proceso de devolucion !!
+
+          // Comienza del proceso de devolucion
+          // Se le envia un correo al usuario notificandole que hubo un problema con la carga
+          Map<String, Object> templateDataToUser = new HashMap<String, Object>();
+          templateDataToUser.put("user_name", data.getUser().getName());
+          templateDataToUser.put("monto_carga", String.valueOf(data.getPrepaidTopup10().getTotal().getValue().doubleValue()));
+          LocalDateTime topupDateTime = data.getPrepaidTopup10().getTimestamps().getCreatedAt().toLocalDateTime();
+          templateDataToUser.put("fecha_topup", topupDateTime.toLocalDate());
+          templateDataToUser.put("hora_topup", topupDateTime.toLocalTime());
+
+          EmailBody emailBody = new EmailBody();
+          emailBody.setTemplateData(templateData);
+          emailBody.setTemplate(TEMPLATE_MAIL_ERROR_TOPUP_TO_USER);
+          emailBody.setAddress(data.getUser().getEmail().getValue());
+          getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
         }
-       return req;
+        return req;
       }
     };
   }
