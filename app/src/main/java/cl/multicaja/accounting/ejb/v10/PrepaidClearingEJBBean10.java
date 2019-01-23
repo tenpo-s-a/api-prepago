@@ -177,13 +177,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.setAmount(amount);
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
-      amount.setCurrencyCode(CodigoMoneda.USA_USD);
+      amountUsd.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
+      amountUsd.setCurrencyCode(CodigoMoneda.USA_USD);
       data.setAmountUsd(amountUsd);
 
       NewAmountAndCurrency10 amountMc = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_mcar")));
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      amountMc.setValue(getNumberUtils().toBigDecimal(row.get("_amount_mcar")));
+      amountMc.setCurrencyCode(CodigoMoneda.CHILE_CLP);
       data.setAmountMastercard(amountMc);
 
       data.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
@@ -193,8 +193,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.setCollectorFeeIva(getNumberUtils().toBigDecimal(row.get("_collector_fee_iva")));
 
       NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_balance")));
-      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      amountBalance.setValue(getNumberUtils().toBigDecimal(row.get("_amount_balance")));
+      amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
       data.setAmountBalance(amountBalance);
 
       data.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
