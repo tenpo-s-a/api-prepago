@@ -18,6 +18,7 @@ public class PendingClearingFile10 extends BaseProcessor10 {
       @Override
       public void process(Exchange exchange) throws Exception {
         log.info("Process Clearing Batch");
+        getRoute().getPrepaidClearingEJBBean10().processClearingResponse(null,null);
       }
     };
   }

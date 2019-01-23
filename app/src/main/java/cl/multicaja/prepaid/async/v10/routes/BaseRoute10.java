@@ -55,8 +55,6 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
-  @EJB
-  private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -220,11 +218,5 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
   }
 
-  public PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10() {
-    return prepaidClearingEJBBean10;
-  }
 
-  public void setPrepaidClearingEJBBean10(PrepaidClearingEJBBean10 prepaidClearingEJBBean10) {
-    this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
-  }
 }
