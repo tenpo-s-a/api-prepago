@@ -97,6 +97,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchClearingDataById(header,getNumberUtils().toLong(id));
   }
 
+  //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
 
@@ -106,7 +107,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
-      status != null ? status : new NullParam(Types.VARCHAR),
+      status != null ? status.getValue() : new NullParam(Types.VARCHAR),
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario

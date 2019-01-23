@@ -44,6 +44,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
   @EJB
+  private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
+
+  @EJB
   private  TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
 
   @EJB
@@ -183,6 +186,14 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setPrepaidAccountingEJBBean10(PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10) {
     this.prepaidAccountingEJBBean10 = prepaidAccountingEJBBean10;
+  }
+
+  public PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10() {
+    return prepaidClearingEJBBean10;
+  }
+
+  public void setPrepaidClearingEJBBean10(PrepaidClearingEJBBean10 prepaidClearingEJBBean10) {
+    this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
   public TecnocomReconciliationEJBBean10 getTecnocomReconciliationEJBBean10() {
