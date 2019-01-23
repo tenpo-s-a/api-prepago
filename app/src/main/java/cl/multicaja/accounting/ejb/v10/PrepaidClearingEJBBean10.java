@@ -141,24 +141,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
-  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to) throws Exception {
-    if(from == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "from"));
-    }
+  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime to) throws Exception {
     if(to == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
     }
 
     String format = "yyyy-MM-dd HH:mm:ss";
 
-    String f = from.format(DateTimeFormatter.ofPattern(format));
     String t = to.format(DateTimeFormatter.ofPattern(format));
 
-    log.info(String.format("From: %s", f));
-    log.info(String.format("To: %s", t));
-
     Object[] params = {
-      f,
       t,
       AccountingStatusType.PENDING.getValue()
     };
@@ -232,16 +224,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
 
-    ZonedDateTime midnight = date.withHour(0).withMinute(0).withSecond(0).withNano(0);
     ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
 
-    ZonedDateTime fromUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
     ZonedDateTime toUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
 
-    LocalDateTime from = fromUtc.toLocalDateTime();
     LocalDateTime to = toUtc.toLocalDateTime();
 
-    List<ClearingData10> movements = this.searchClearingDataToFile(null, from, to);
+    List<ClearingData10> movements = this.searchClearingDataToFile(null, to);
 
     String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
     createAccountingCSV(fileName, movements); // Crear archivo csv temporal

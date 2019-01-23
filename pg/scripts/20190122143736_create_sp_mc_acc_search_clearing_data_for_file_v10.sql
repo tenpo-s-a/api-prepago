@@ -19,7 +19,6 @@
 
 CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_search_clearing_data_for_file_v10
 (
-  IN _in_from VARCHAR,
   IN _in_to VARCHAR,
   IN _in_status VARCHAR,
   OUT _id BIGINT,
@@ -79,7 +78,6 @@ RETURN QUERY
     INNER JOIN ${schema.acc}.accounting a
       ON a.id = c.accounting_id
   WHERE
-    c.created >= TO_TIMESTAMP(_in_from, 'YYYY-MM-DD HH24:MI:SS') AND
     c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS') AND
     c.status = _in_status
   ORDER BY
@@ -91,4 +89,4 @@ $function$
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_clearing_data_for_file_v10(VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_clearing_data_for_file_v10(VARCHAR, VARCHAR);
