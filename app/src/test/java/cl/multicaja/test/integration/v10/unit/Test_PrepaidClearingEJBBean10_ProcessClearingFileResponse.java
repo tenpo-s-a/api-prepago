@@ -83,6 +83,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
     InputStream is = createAccountingCSV(fileName, movements); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null",is);
+
   }
 
   public InputStream createAccountingCSV(String filename, List<ClearingData10> lstClearingMovement10s) throws IOException {
