@@ -6,10 +6,15 @@ import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.swing.text.DateFormatter;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static cl.multicaja.test.db.Test_20190114151738_mc_acc_create_clearing_data_v10.createClearingData;
@@ -36,7 +41,9 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
   public static Map<String, Object> buildQuery(Map<String, Object> paramsIn) throws SQLException {
 
     Object[] params = {
-      new InParam(paramsIn.get("_in_create_date"), Types.VARCHAR),
+      new InParam(paramsIn.get("_in_from"), Types.VARCHAR),
+      new InParam(paramsIn.get("_in_to"), Types.VARCHAR),
+      new InParam(paramsIn.get("_in_status"), Types.VARCHAR),
       new OutParam("id", Types.BIGINT),
       new OutParam("id_tx", Types.BIGINT),
       new OutParam("type", Types.VARCHAR),
@@ -104,6 +111,7 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
   public void getAccountsByDateOk() throws SQLException {
 
     List<Map<String, Object>> testSuite = getTestSuiteOk();
+
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -127,9 +135,25 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
         }
         String in_transaction_date = dateFormat.format(transaction_date);
 
-        System.out.println(in_transaction_date);
 
-        dateToSearch.put("_in_create_date", in_transaction_date);
+        ZonedDateTime zd = ZonedDateTime.now();
+        ZonedDateTime midnight = zd.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endDay = zd.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+        ZonedDateTime midnightUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
+        ZonedDateTime endDayUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
+
+        LocalDateTime from = midnightUtc.toLocalDateTime();
+        LocalDateTime to = endDayUtc.toLocalDateTime();
+
+        String format = "yyyy-MM-dd HH:mm:ss";
+
+        String f = from.format(DateTimeFormatter.ofPattern(format));
+        String t = to.format(DateTimeFormatter.ofPattern(format));
+
+        dateToSearch.put("_in_from", f);
+        dateToSearch.put("_in_to", t);
+        dateToSearch.put("_in_status", "OK");
 
         Map<String, Object> resp = queryByDate(dateToSearch);
         Assert.assertNotNull("Debe retornar respuesta", resp);
