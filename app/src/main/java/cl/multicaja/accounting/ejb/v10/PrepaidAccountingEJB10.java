@@ -2,7 +2,7 @@ package cl.multicaja.accounting.ejb.v10;
 
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
-import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 
@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public interface PrepaidAccountingEJB10 {
 
-  List<Accounting10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception;
+  List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception;
 
-  List<Accounting10> saveAccountingData (Map<String, Object> header,List<Accounting10> accounting10s) throws Exception;
+  List<AccountingData10> saveAccountingData (Map<String, Object> header, List<AccountingData10> accounting10s) throws Exception;
 
   /**
    * Busca los movimientos conciliados para agregarlos en la tabla de contabilidad.
@@ -38,7 +38,7 @@ public interface PrepaidAccountingEJB10 {
    * @return
    * @throws Exception
    */
-  List<Accounting10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
+  List<AccountingData10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
 
   /**
    * Busca los movimientos en accounting y genera un archivo csv que se envia por correo

@@ -22,6 +22,6 @@ public class AccountingSchedulerRoute10 extends BaseRoute10 {
 
     // Cada 5to dia del mes a las 22H
     //from("quartz2://myGroup/myfirstrigger?cron=0+0+22+5+1/1+?+*")
-    // .process(new AccountingScheduler10(this).generateAccountingFile());
+    // .process(new AccountingScheduler10(this).generateClearingFile());
   }
 }
