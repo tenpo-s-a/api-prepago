@@ -75,14 +75,14 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
       getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, ipmFile);
 
-      List<Accounting10> trxs = getDbTransactions();
-      List<Clearing10> trxcle = getDbClearingTransactions();
+      List<AccountingData10> trxs = getDbTransactions();
+      List<ClearingData10> trxcle = getDbClearingTransactions();
 
       Assert.assertEquals("Debe tener 50 transacciones", Integer.valueOf(50), Integer.valueOf(trxs.size()));
       Assert.assertEquals("Debe tener 50 tx", Integer.valueOf(50),Integer.valueOf(trxcle.size()));
       Assert.assertEquals("Tamaños Iguales",trxs.size(),trxcle.size());
 
-      for(Accounting10 trx : trxs) {
+      for(AccountingData10 trx : trxs) {
         Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
         Assert.assertEquals("Debe tener type [COMPRA_MONEDA]", AccountingTxType.COMPRA_MONEDA, trx.getType());
         Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
@@ -110,30 +110,30 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
 
   }
-  private List<Clearing10> getDbClearingTransactions() {
-    List<Clearing10> trxs = new ArrayList<>();
+  private List<ClearingData10> getDbClearingTransactions() {
+    List<ClearingData10> trxs = new ArrayList<>();
 
     List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", SCHEMA));
 
     for (Map row : rows) {
-      Clearing10 cle = new Clearing10();
+      ClearingData10 cle = new ClearingData10();
 
-      cle.setClearingId((Long)(row.get("id")));
+      cle.setId((Long)(row.get("id")));
       cle.setId((Long)(row.get("accounting_id")));
-      cle.setClearingStatus(AccountingStatusType.fromValue((String)row.get("status")));
+      cle.setStatus(AccountingStatusType.fromValue((String)row.get("status")));
       trxs.add(cle);
     }
 
     return trxs;
   }
-  private List<Accounting10> getDbTransactions() {
-    List<Accounting10> trxs = new ArrayList<>();
+  private List<AccountingData10> getDbTransactions() {
+    List<AccountingData10> trxs = new ArrayList<>();
 
 
     List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.accounting", SCHEMA));
 
     for (Map row : rows) {
-      Accounting10 acc = new Accounting10();
+      AccountingData10 acc = new AccountingData10();
       acc.setId((Long)(row.get("id")));
       acc.setType(AccountingTxType.fromValue((String)row.get("type")));
       acc.setOrigin(AccountingOriginType.fromValue((String)row.get("origin")));

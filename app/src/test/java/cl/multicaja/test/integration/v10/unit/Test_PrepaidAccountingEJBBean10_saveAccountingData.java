@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.Accounting10;
+import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
 
     // Falla en parametro 1
     {
-      List<Accounting10> lstAccounts =  generateRandomAccountingList(1,2);
+      List<AccountingData10> lstAccounts =  generateRandomAccountingList(1,2);
       try {
         getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
       }catch (BadRequestException e) {
@@ -33,7 +33,7 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
     }
     // Falla en parametro 2
     {
-      List<Accounting10> lstAccounts =  generateRandomAccountingList(2,2);
+      List<AccountingData10> lstAccounts =  generateRandomAccountingList(2,2);
       try {
         getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
       }catch (BadRequestException e) {
@@ -42,7 +42,7 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
     }
     // Falla en parametro 3
     {
-      List<Accounting10> lstAccounts =  generateRandomAccountingList(3,2);
+      List<AccountingData10> lstAccounts =  generateRandomAccountingList(3,2);
       try {
         getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
       }catch (BadRequestException e) {
@@ -51,7 +51,7 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
     }
     // Falla en parametro 4
     {
-      List<Accounting10> lstAccounts =  generateRandomAccountingList(4,2);
+      List<AccountingData10> lstAccounts =  generateRandomAccountingList(4,2);
       try {
         getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
       }catch (BadRequestException e) {
@@ -64,10 +64,10 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
   @Test
   public void saveAccountingData() throws Exception {
     {
-      List<Accounting10> lstAccounts =  generateRandomAccountingList(null,2);
+      List<AccountingData10> lstAccounts =  generateRandomAccountingList(null,2);
       try {
-        List<Accounting10> lstAccountsResult = getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
-        for(Accounting10 acount : lstAccountsResult){
+        List<AccountingData10> lstAccountsResult = getPrepaidAccountingEJBBean10().saveAccountingData(null,lstAccounts);
+        for(AccountingData10 acount : lstAccountsResult){
           Assert.assertNotEquals("Id no debe ser 0",new Long(0),acount.getId());
         }
         Assert.assertEquals("Las Listas deben ser iguales",lstAccounts,lstAccountsResult);

@@ -1,6 +1,7 @@
 package cl.multicaja.accounting.model.v10;
 
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -9,7 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class Accounting10 implements Serializable {
+public class AccountingData10 implements Serializable {
 
  private Long id;
  private Long idTransaction;
@@ -29,11 +30,12 @@ public class Accounting10 implements Serializable {
  private Timestamp transactionDate;
  private Timestamp conciliationDate;
  private AccountingStatusType status;
+ private Timestamps timestamps;
 
-  public Accounting10() {
+  public AccountingData10() {
   }
 
-  public Accounting10(Long id,Long idTransaction, AccountingTxType type, AccountingOriginType origin, NewAmountAndCurrency10 amount, NewAmountAndCurrency10 amountUsd, BigDecimal exchangeRateDif, BigDecimal fee, BigDecimal feeIva, Timestamp transactionDate) {
+  public AccountingData10(Long id, Long idTransaction, AccountingTxType type, AccountingOriginType origin, NewAmountAndCurrency10 amount, NewAmountAndCurrency10 amountUsd, BigDecimal exchangeRateDif, BigDecimal fee, BigDecimal feeIva, Timestamp transactionDate) {
     this.id = id;
     this.idTransaction = idTransaction;
     this.type = type;
@@ -194,6 +196,14 @@ public class Accounting10 implements Serializable {
 
   public void setStatus(AccountingStatusType status) {
     this.status = status;
+  }
+
+  public Timestamps getTimestamps() {
+    return timestamps;
+  }
+
+  public void setTimestamps(Timestamps timestamps) {
+    this.timestamps = timestamps;
   }
 
   @Override

@@ -9,14 +9,14 @@ import java.util.stream.Stream;
 
 public enum AccountingTxType {
 
-  COMPRA_SUSCRIPCION("CompraSuscripcion"),
-  COMPRA_PESOS("CompraPesos"),
-  COMPRA_MONEDA("CompraOtraMoneda"),
-  CARGA_WEB("CargaWeb"),
-  CARGA_POS("CargaPos"),
-  RETIRO_WEB("RetiroWEB"),
-  RETIRO_POS("RetiroPOS");
-
+  COMPRA_SUSCRIPCION("SUSCRPCION"),
+  COMPRA_PESOS("COMPRA_PESOS"),
+  COMPRA_MONEDA("COMPRA_OTRA_MONEDA"),
+  CARGA_WEB("CARGA_WEB"),
+  CARGA_POS("CARGA_POS"),
+  RETIRO_WEB("RETIRO_WEB"),
+  RETIRO_POS("RETIRO_POS"),
+  DEVOLUCION("DEVOLUCION");
 
   AccountingTxType(String value) {
     this.value = value;
