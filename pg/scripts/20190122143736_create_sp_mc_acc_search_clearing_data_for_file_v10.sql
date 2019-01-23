@@ -81,7 +81,7 @@ RETURN QUERY
     c.created >= TO_TIMESTAMP(_in_from, 'YYYY-MM-DD HH24:MI:SS') AND
     c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS')
   ORDER BY
-    c.created DESC;
+    c.created ASC;
 RETURN;
 END;
 $function$
