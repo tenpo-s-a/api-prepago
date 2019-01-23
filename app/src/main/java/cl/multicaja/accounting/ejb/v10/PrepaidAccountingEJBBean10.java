@@ -341,40 +341,57 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
         //Se calcula la comision del movimiento
         BigDecimal fee = BigDecimal.ZERO;
+        BigDecimal feeIva = BigDecimal.ZERO;
         switch (m.getTipoMovimiento()) {
           case TOPUP:
             // Calcula las comisiones segun el tipo de carga (WEB o POS)
             if (TransactionOriginType.WEB.equals(m.getOriginType())) {
               fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-            } else {
-              // MAX(100; 0,5% * prepaid_topup_new_amount_value) + IVA
-              fee = getCalculationsHelper().calculateFee(m.getImpfac(), getPercentage().getTOPUP_POS_FEE_PERCENTAGE());
+              feeIva =getCalculationsHelper().calculateFeeIva(fee);
+
+              accounting.setFee(fee);
+              accounting.setFeeIva(feeIva);
+              accounting.setCollectorFee(BigDecimal.ZERO);
+              accounting.setCollectorFeeIva(BigDecimal.ZERO);
+            }
+            else {
+              // Comision es Fija $200
+              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+              feeIva =getCalculationsHelper().calculateFeeIva(fee);
+              accounting.setFee(BigDecimal.ZERO);
+              accounting.setFeeIva(BigDecimal.ZERO);
+              accounting.setCollectorFee(fee);
+              accounting.setCollectorFeeIva(feeIva);
             }
             break;
           case WITHDRAW:
             // Calcula las comisiones segun el tipo de carga (WEB o POS)
             if (TransactionOriginType.WEB.equals(m.getOriginType())) {
               fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-            } else {
-              // MAX ( 100; 0,5%*prepaid_topup_new_amount_value ) + IVA
-              fee = getCalculationsHelper().calculateFee(m.getImpfac(), getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE());
+              feeIva =getCalculationsHelper().calculateFeeIva(fee);
+              accounting.setFee(fee);
+              accounting.setFeeIva(feeIva);
+              accounting.setCollectorFee(BigDecimal.ZERO);
+              accounting.setCollectorFeeIva(BigDecimal.ZERO);
+            }
+            else {
+              // Comision es Fija $200
+              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+              feeIva =getCalculationsHelper().calculateFeeIva(fee);
+              accounting.setFee(BigDecimal.ZERO);
+              accounting.setFeeIva(BigDecimal.ZERO);
+              accounting.setCollectorFee(fee);
+              accounting.setCollectorFeeIva(feeIva);
             }
             break;
         }
-        accounting.setFee(fee);
-
-        // Se calcula el Iva correspondiente a la comision
-        BigDecimal iva = getCalculationsHelper().calculateIvaFromTotal(fee);
-        accounting.setFeeIva(iva);
         accounting.setTransactionDate(m.getFechaCreacion());
-
         accounting.setStatus(AccountingStatusType.OK);
-        //TODO: Llenar con los valores que corresponda.
         accounting.setFileId(0L);
-        accounting.setAmountBalance(new NewAmountAndCurrency10(new BigDecimal(0)));
-        accounting.setAmountMastercard(new NewAmountAndCurrency10(new BigDecimal(0)));
-        accounting.setCollectorFee(new BigDecimal(0));
-        accounting.setCollectorFeeIva(new BigDecimal(0));
+        accounting.setAmountBalance(new NewAmountAndCurrency10(m.getImpfac().subtract(fee).subtract(feeIva)));
+        accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
+        //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
+        //de conciliacion
         accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
 
         accountingMovements.add(accounting);
@@ -724,12 +741,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setFee(fee);
       acc.setFeeIva(iva);
       acc.setExchangeRateDif(exchangeRateDiff);
-      //TODO: Llenar con los valores que corresponda.
       acc.setFileId(0L);
-      acc.setAmountBalance(new NewAmountAndCurrency10(new BigDecimal(0)));
-      acc.setAmountMastercard(new NewAmountAndCurrency10(new BigDecimal(0)));
-      acc.setCollectorFee(new BigDecimal(0));
-      acc.setCollectorFeeIva(new BigDecimal(0));
+      acc.setAmountBalance(new NewAmountAndCurrency10(BigDecimal.ZERO));
+      BigDecimal amountMastercard = acc.getAmount().getValue().subtract(fee).subtract(iva).subtract(exchangeRateDiff);
+      acc.setAmountMastercard(new NewAmountAndCurrency10(amountMastercard));
+      acc.setCollectorFee(BigDecimal.ZERO);
+      acc.setCollectorFeeIva(BigDecimal.ZERO);
+
+      //TODO: Revisar Fecha
       acc.setConciliationDate(new Timestamp(System.currentTimeMillis()));
       acc.setStatus(AccountingStatusType.OK);
 

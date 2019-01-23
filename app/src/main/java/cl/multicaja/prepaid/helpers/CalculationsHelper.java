@@ -87,6 +87,11 @@ public class CalculationsHelper {
     return rounded;
   }
 
+  public BigDecimal calculateFeeIva(BigDecimal amount){
+    BigDecimal result = amount.multiply(BigDecimal.valueOf(1.19)).subtract(amount);
+    BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
+    return rounded;
+  }
   /**
    * Calcula el IVA dado el monto total
    *
