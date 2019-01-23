@@ -13,6 +13,7 @@ import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -246,11 +247,9 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn404_UserNull() throws Exception {
     // POS
     {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1234", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.setRut(Integer.MAX_VALUE);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidWithdraw.setPassword("1234");
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -262,7 +261,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.setRut(Integer.MAX_VALUE);
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
@@ -283,8 +282,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser(UserIdentityStatus.TERRORIST);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1356", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
@@ -297,11 +295,14 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser(UserIdentityStatus.TERRORIST);
+      User user = registerUser();
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      user.setIdentityStatus(UserIdentityStatus.TERRORIST);
+      updateUser(user);
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -322,8 +323,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
@@ -336,15 +336,17 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser(UserStatus.DISABLED);
+      User user = registerUser();
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
 
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      user.setGlobalStatus(UserStatus.DISABLED);
+      updateUser(user);
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -361,8 +363,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser(UserStatus.LOCKED);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
@@ -375,11 +376,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser(UserStatus.LOCKED);
+      User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      user.setGlobalStatus(UserStatus.LOCKED);
+      updateUser(user);
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -396,8 +399,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser(UserStatus.DELETED);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1239", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
@@ -410,11 +412,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser(UserStatus.DELETED);
+      User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1298", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      user.setGlobalStatus(UserStatus.DELETED);
+      user = updateUser(user);
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -431,8 +435,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser(UserStatus.PREREGISTERED);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
@@ -445,11 +448,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser(UserStatus.PREREGISTERED);
+      User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+
+      user.setGlobalStatus(UserStatus.PREREGISTERED);
+      updateUser(user);
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -466,8 +471,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
@@ -482,8 +486,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user);
-      prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
@@ -507,8 +510,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "2356", RandomStringUtils.randomAlphanumeric(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
@@ -529,8 +531,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user);
-      prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
@@ -554,8 +555,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -583,8 +583,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -617,8 +616,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -645,8 +643,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -674,8 +671,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -709,8 +705,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -747,8 +742,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", RandomStringUtils.randomAlphanumeric(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 
@@ -781,8 +775,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
 
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 

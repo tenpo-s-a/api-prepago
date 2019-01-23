@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;

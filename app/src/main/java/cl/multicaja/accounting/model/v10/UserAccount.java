@@ -1,14 +1,22 @@
 package cl.multicaja.accounting.model.v10;
 
+import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.prepaid.helpers.users.model.UserBankAccountStatus;
 
-public class UserAccount {
+public class UserAccount extends BaseModel {
 
   private Long id;
+  private String accountAlias;
   private Long bankId;
   private String bankName;
   private String accountType;
   private String accountNumber;
+  private UserBankAccountStatus status;
+  private Timestamps timestamps;
+  private Rut rut;
+
 
   public Long getId() {
     return id;
@@ -16,6 +24,14 @@ public class UserAccount {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getAccountAlias() {
+    return accountAlias;
+  }
+
+  public void setAccountAlias(String accountAlias) {
+    this.accountAlias = accountAlias;
   }
 
   public Long getBankId() {
@@ -48,5 +64,29 @@ public class UserAccount {
 
   public void setAccountNumber(String accountNumber) {
     this.accountNumber = accountNumber;
+  }
+
+  public UserBankAccountStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(UserBankAccountStatus status) {
+    this.status = status;
+  }
+
+  public Timestamps getTimestamps() {
+    return timestamps;
+  }
+
+  public void setTimestamps(Timestamps timestamps) {
+    this.timestamps = timestamps;
+  }
+
+  public Rut getRut() {
+    return rut;
+  }
+
+  public void setRut(Rut rut) {
+    this.rut = rut;
   }
 }

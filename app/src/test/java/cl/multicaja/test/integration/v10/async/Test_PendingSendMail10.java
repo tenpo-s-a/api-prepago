@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
