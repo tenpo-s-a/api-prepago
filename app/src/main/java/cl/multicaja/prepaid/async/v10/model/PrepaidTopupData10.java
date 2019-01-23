@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.model;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 /**
  * @autor vutreras
  */
+//TODO: Revisar implementacion (esta clase hace muchas cosas)
 public class PrepaidTopupData10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
@@ -24,6 +26,7 @@ public class PrepaidTopupData10 implements Serializable {
   private CdtTransaction10 cdtTransactionConfirm10;
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
+  private UserAccount userAccount;
 
   private Errors numError;
   private String msjError;
@@ -101,6 +104,14 @@ public class PrepaidTopupData10 implements Serializable {
 
   public void setIssuanceFeeMovement10(PrepaidMovement10 issuanceFeeMovement10) {
     this.issuanceFeeMovement10 = issuanceFeeMovement10;
+  }
+
+  public UserAccount getUserAccount() {
+    return userAccount;
+  }
+
+  public void setUserAccount(UserAccount userAccount) {
+    this.userAccount = userAccount;
   }
 
   public CdtTransaction10 getCdtTransactionConfirm10() {

@@ -48,6 +48,6 @@
 -- SQL to undo the change goes here.
   DROP TABLE IF EXISTS ${schema.acc}.accounting;
 
-  DROP SCHEMA IF EXISTS ${schema.acc};
+  DROP SCHEMA IF EXISTS ${schema.acc} CASCADE;
 
 

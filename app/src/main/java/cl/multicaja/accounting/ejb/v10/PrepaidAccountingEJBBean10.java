@@ -35,6 +35,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -88,30 +89,43 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
+  //TODO: este metodo no tiene tests?
   public List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
 
     if(dateToSearch == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
     }
 
+    Date date = Date.from(dateToSearch.atZone(ZoneId.of("UTC")).toInstant());
+    return searchAccountingData(null, date);
+  }
+
+  //TODO: este metodo no tiene tests?
+  @Override
+  public List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
+    if(dateToSearch == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
+    }
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    String dateString = dateFormatter.format(new Date());
+
     Object[] params = {
-      dateToSearch
+      new InParam(dateString, Types.VARCHAR)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
       AccountingData10 account = new AccountingData10();
+      account.setId(getNumberUtils().toLong(row.get("_id")));
 
       account.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
       amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount")));
       amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-
       account.setAmount(amount);
 
       NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
-      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
-      amount.setCurrencyCode(CodigoMoneda.USA_USD);
-
+      amountUsd.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
+      amountUsd.setCurrencyCode(CodigoMoneda.USA_USD);
       account.setAmountUsd(amountUsd);
 
       account.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
@@ -131,14 +145,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       return account;
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_search_accounting_data_v10", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_prp_search_accounting_data_v10", rm, params);
     log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
-  }
-
-  @Override
-  public List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
-    return null;
   }
 
   public List<AccountingData10> saveAccountingData (Map<String, Object> header, List<AccountingData10> accounting10s) throws Exception {
@@ -147,58 +156,63 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
     List<AccountingData10> accounting10sFinal = new ArrayList<>();
     for(AccountingData10 account : accounting10s) {
-
-      if(account.getIdTransaction() == null){
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getIdTransaction"));
-      }
-      if(account.getType() == null){
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getType"));
-      }
-      if(account.getOrigin() == null){
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getOrigin"));
-      }
-      if(account.getTransactionDate() == null){
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getTransactionDate"));
-      }
-      if(account.getStatus() == null){
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getStatus"));
-      }
-
-      Object[] params = {
-        new InParam(account.getIdTransaction(), Types.BIGINT),
-        new InParam(account.getType().getValue(), Types.VARCHAR),
-        new InParam(account.getAccountingMovementType().getValue(), Types.VARCHAR),
-        new InParam(account.getOrigin().getValue(), Types.VARCHAR),
-        account.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getValue(), Types.NUMERIC),
-        account.getAmount().getCurrencyCode() == null ?  new NullParam(Types.NUMERIC) : new InParam(account.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
-        account.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountUsd().getValue(), Types.NUMERIC),
-        account.getAmountMastercard().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountMastercard().getValue(), Types.NUMERIC),
-        account.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getExchangeRateDif(), Types.NUMERIC),
-        account.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFee(), Types.NUMERIC),
-        account.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getFeeIva(),Types.NUMERIC),
-        account.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getCollectorFee(), Types.NUMERIC),
-        account.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(account.getCollectorFeeIva(),Types.NUMERIC),
-        account.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( account.getAmountBalance().getValue(),Types.NUMERIC),
-        new InParam(account.getTransactionDateInFormat(),Types.VARCHAR),
-        new InParam(account.getConciliationDateInFormat(),Types.VARCHAR),
-        new InParam(account.getStatus().getValue(), Types.VARCHAR),
-        new InParam(account.getFileId(), Types.BIGINT),
-        new OutParam("_id", Types.BIGINT),
-        new OutParam("_error_code", Types.VARCHAR),
-        new OutParam("_error_msg", Types.VARCHAR)
-      };
-
-      Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_prp_insert_accounting_data_v10",params);
-
-      if (!"0".equals(resp.get("_error_code"))) {
-        log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
-        throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-      }
-      account.setId(getNumberUtils().toLong(resp.get("_id")));
-      log.info("Accounting Insertado Id: "+getNumberUtils().toLong(resp.get("_id")));
+      account = saveAccountingData(null, account);
       accounting10sFinal.add(account);
     }
     return accounting10sFinal;
+  }
+
+  public AccountingData10 saveAccountingData(Map<String, Object> header, AccountingData10 accounting10) throws Exception {
+    if(accounting10.getIdTransaction() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getIdTransaction"));
+    }
+    if(accounting10.getType() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getType"));
+    }
+    if(accounting10.getOrigin() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getOrigin"));
+    }
+    if(accounting10.getTransactionDate() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getTransactionDate"));
+    }
+    if(accounting10.getStatus() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getStatus"));
+    }
+
+    Object[] params = {
+      new InParam(accounting10.getIdTransaction(), Types.BIGINT),
+      new InParam(accounting10.getType().getValue(), Types.VARCHAR),
+      new InParam(accounting10.getAccountingMovementType().getValue(), Types.VARCHAR),
+      new InParam(accounting10.getOrigin().getValue(), Types.VARCHAR),
+      accounting10.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getAmount().getValue(), Types.NUMERIC),
+      accounting10.getAmount().getCurrencyCode() == null ?  new NullParam(Types.NUMERIC) : new InParam(accounting10.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
+      accounting10.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountUsd().getValue(), Types.NUMERIC),
+      accounting10.getAmountMastercard().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountMastercard().getValue(), Types.NUMERIC),
+      accounting10.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getExchangeRateDif(), Types.NUMERIC),
+      accounting10.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getFee(), Types.NUMERIC),
+      accounting10.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getFeeIva(),Types.NUMERIC),
+      accounting10.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFee(), Types.NUMERIC),
+      accounting10.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFeeIva(),Types.NUMERIC),
+      accounting10.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountBalance().getValue(),Types.NUMERIC),
+      new InParam(accounting10.getTransactionDateInFormat(),Types.VARCHAR),
+      new InParam(accounting10.getConciliationDateInFormat(),Types.VARCHAR),
+      new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
+      new InParam(accounting10.getFileId(), Types.BIGINT),
+      new OutParam("_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_prp_insert_accounting_data_v10",params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_insert_accounting_data_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+    accounting10.setId(getNumberUtils().toLong(resp.get("_id")));
+    log.info("Accounting Insertado Id: "+getNumberUtils().toLong(resp.get("_id")));
+
+    return accounting10;
   }
 
   /**
@@ -313,87 +327,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       List<AccountingData10> accountingMovements = new ArrayList<>();
 
       for (PrepaidMovement10 m : movements) {
-
-        AccountingTxType type = AccountingTxType.RETIRO_WEB;;
-        AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
-
-        if(TipoFactura.CARGA_TRANSFERENCIA.equals(m.getTipofac())) {
-          type = AccountingTxType.CARGA_WEB;
-          movementType = AccountingMovementType.CARGA_WEB;
-        } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(m.getTipofac())) {
-          type = AccountingTxType.CARGA_POS;
-          movementType =AccountingMovementType.CARGA_POS;
-        } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(m.getTipofac())) {
-          type = AccountingTxType.RETIRO_POS;
-          movementType =AccountingMovementType.RETIRO_POS;
-        }
-
-        AccountingData10 accounting = new AccountingData10();
-        accounting.setIdTransaction(m.getId());
-        accounting.setOrigin(AccountingOriginType.MOVEMENT);
-        accounting.setType(type);
-        accounting.setAccountingMovementType(movementType);
-        accounting.setAmount(new NewAmountAndCurrency10(m.getImpfac()));
-
-        //Se colocan en 0 ya que solo se procesan cargas y retiros
-        accounting.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
-        accounting.setExchangeRateDif(BigDecimal.ZERO);
-
-        //Se calcula la comision del movimiento
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal feeIva = BigDecimal.ZERO;
-        switch (m.getTipoMovimiento()) {
-          case TOPUP:
-            // Calcula las comisiones segun el tipo de carga (WEB o POS)
-            if (TransactionOriginType.WEB.equals(m.getOriginType())) {
-              fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-
-              accounting.setFee(fee);
-              accounting.setFeeIva(feeIva);
-              accounting.setCollectorFee(BigDecimal.ZERO);
-              accounting.setCollectorFeeIva(BigDecimal.ZERO);
-            }
-            else {
-              // Comision es Fija $200
-              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(BigDecimal.ZERO);
-              accounting.setFeeIva(BigDecimal.ZERO);
-              accounting.setCollectorFee(fee);
-              accounting.setCollectorFeeIva(feeIva);
-            }
-            break;
-          case WITHDRAW:
-            // Calcula las comisiones segun el tipo de carga (WEB o POS)
-            if (TransactionOriginType.WEB.equals(m.getOriginType())) {
-              fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(fee);
-              accounting.setFeeIva(feeIva);
-              accounting.setCollectorFee(BigDecimal.ZERO);
-              accounting.setCollectorFeeIva(BigDecimal.ZERO);
-            }
-            else {
-              // Comision es Fija $200
-              fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-              feeIva =getCalculationsHelper().calculateFeeIva(fee);
-              accounting.setFee(BigDecimal.ZERO);
-              accounting.setFeeIva(BigDecimal.ZERO);
-              accounting.setCollectorFee(fee);
-              accounting.setCollectorFeeIva(feeIva);
-            }
-            break;
-        }
-        accounting.setTransactionDate(m.getFechaCreacion());
-        accounting.setStatus(AccountingStatusType.OK);
-        accounting.setFileId(0L);
-        accounting.setAmountBalance(new NewAmountAndCurrency10(m.getImpfac().subtract(fee).subtract(feeIva)));
-        accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
-        //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
-        //de conciliacion
-        accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
-
+        AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK);
         accountingMovements.add(accounting);
       }
 
@@ -414,7 +348,90 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       log.info("No hay movimientos a insertar en la tabla de contabilidad. -> [fecha]: " + date.toString());
       return Collections.emptyList();
     }
+  }
 
+  public AccountingData10 buildAccounting10(PrepaidMovement10 movement, AccountingStatusType accountingStatus) {
+    AccountingTxType type = AccountingTxType.RETIRO_WEB;;
+    AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
+
+    if(TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
+      type = AccountingTxType.CARGA_WEB;
+      movementType = AccountingMovementType.CARGA_WEB;
+    } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
+      type = AccountingTxType.CARGA_POS;
+      movementType =AccountingMovementType.CARGA_POS;
+    } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac())) {
+      type = AccountingTxType.RETIRO_POS;
+      movementType =AccountingMovementType.RETIRO_POS;
+    }
+
+    AccountingData10 accounting = new AccountingData10();
+    accounting.setIdTransaction(movement.getId());
+    accounting.setOrigin(AccountingOriginType.MOVEMENT);
+    accounting.setType(type);
+    accounting.setAccountingMovementType(movementType);
+    accounting.setAmount(new NewAmountAndCurrency10(movement.getImpfac()));
+
+    //Se colocan en 0 ya que solo se procesan cargas y retiros
+    accounting.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    accounting.setExchangeRateDif(BigDecimal.ZERO);
+
+    //Se calcula la comision del movimiento
+    BigDecimal fee = BigDecimal.ZERO;
+    BigDecimal feeIva = BigDecimal.ZERO;
+    switch (movement.getTipoMovimiento()) {
+      case TOPUP:
+        // Calcula las comisiones segun el tipo de carga (WEB o POS)
+        if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
+          fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+
+          accounting.setFee(fee);
+          accounting.setFeeIva(feeIva);
+          accounting.setCollectorFee(BigDecimal.ZERO);
+          accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        }
+        else {
+          // Comision es Fija $200
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(BigDecimal.ZERO);
+          accounting.setFeeIva(BigDecimal.ZERO);
+          accounting.setCollectorFee(fee);
+          accounting.setCollectorFeeIva(feeIva);
+        }
+        break;
+      case WITHDRAW:
+        // Calcula las comisiones segun el tipo de carga (WEB o POS)
+        if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
+          fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(fee);
+          accounting.setFeeIva(feeIva);
+          accounting.setCollectorFee(BigDecimal.ZERO);
+          accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        }
+        else {
+          // Comision es Fija $200
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
+          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          accounting.setFee(BigDecimal.ZERO);
+          accounting.setFeeIva(BigDecimal.ZERO);
+          accounting.setCollectorFee(fee);
+          accounting.setCollectorFeeIva(feeIva);
+        }
+        break;
+    }
+    accounting.setTransactionDate(movement.getFechaCreacion());
+    accounting.setStatus(accountingStatus);
+    accounting.setFileId(0L);
+    accounting.setAmountBalance(new NewAmountAndCurrency10(movement.getImpfac().subtract(fee).subtract(feeIva)));
+    accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
+    //de conciliacion
+    accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+
+    return accounting;
   }
 
   /**

@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.helpers.users;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
@@ -12,6 +13,7 @@ import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.*;
+import cl.multicaja.users.model.v10.UserAccountNew;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,22 +34,22 @@ public class UserClient {
     new HttpHeader("Content-Type", "application/json"),
   };
 
-  private JsonMapper getJsonMapper(){
+  private JsonMapper getJsonMapper() {
     if(jsonMapper == null) {
-      jsonMapper = new JsonMapper() ;
+      jsonMapper = new JsonMapper();
     }
     return jsonMapper;
   }
 
   public static UserClient getInstance() {
-    if(instance == null){
+    if(instance == null) {
       instance = new UserClient();
     }
     return instance;
   }
 
-  private ConfigUtils getConfigUtils(){
-    if (configUtils == null) {
+  private ConfigUtils getConfigUtils() {
+    if(configUtils == null) {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
@@ -64,43 +66,43 @@ public class UserClient {
   private HttpResponse apiPOST(String api_route, Object request) {
     log.info("request route: " + api_route);
     log.info("request: " + getJsonMapper().toJson(request));
-    return httpUtils.execute(HttpUtils.ACTIONS.POST,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
+    return httpUtils.execute(HttpUtils.ACTIONS.POST, null, TIMEOUT, TIMEOUT, api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiGET(String api_route) {
     log.info("request route: " + api_route);
-    return httpUtils.execute(HttpUtils.ACTIONS.GET,null,TIMEOUT,TIMEOUT,api_route, null, DEFAULT_HTTP_HEADERS);
+    return httpUtils.execute(HttpUtils.ACTIONS.GET, null, TIMEOUT, TIMEOUT, api_route, null, DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiDELETE(String api_route, Object request) {
     log.info("request route: " + api_route);
     log.info("request: " + getJsonMapper().toJson(request));
-    return httpUtils.execute(HttpUtils.ACTIONS.DELETE,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
+    return httpUtils.execute(HttpUtils.ACTIONS.DELETE, null, TIMEOUT, TIMEOUT, api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiPUT(String api_route, Object request) {
     log.info("request route: " + api_route);
     log.info("request: " + getJsonMapper().toJson(request));
-    return httpUtils.execute(HttpUtils.ACTIONS.PUT,null,TIMEOUT,TIMEOUT,api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
+    return httpUtils.execute(HttpUtils.ACTIONS.PUT, null, TIMEOUT, TIMEOUT, api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   private HttpResponse apiPATCH(String api_route, Object request) {
     log.info("request route: " + api_route);
     log.info("request: " + getJsonMapper().toJson(request));
-    return httpUtils.execute(HttpUtils.ACTIONS.PATCH,null,TIMEOUT,TIMEOUT,api_url+api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
+    return httpUtils.execute(HttpUtils.ACTIONS.PATCH, null, TIMEOUT, TIMEOUT, api_url + api_route, jsonMapper.toJson(request).getBytes(), DEFAULT_HTTP_HEADERS);
   }
 
   /**
-   *  USERS
+   * USERS
    */
 
   public User getUserByRut(Map<String, Object> headers, Integer rut) throws Exception {
     log.info("******** getUserByRut IN ********");
-    HttpResponse httpResponse =  apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
+    HttpResponse httpResponse = apiGET(String.format("%s?rut=%d", getApiUrl(), rut));
     log.info("response: " + httpResponse.getResp());
     httpResponse.setJsonParser(getJsonMapper());
     User[] response;
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -115,7 +117,7 @@ public class UserClient {
         BadRequestException brex = httpResponse.toObject(BadRequestException.class);
         brex.setStatus(status);
         log.error(brex);
-        throw  brex;
+        throw brex;
       case 404:
         NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
         nfe.setStatus(status);
@@ -125,7 +127,7 @@ public class UserClient {
         ValidationException vex = httpResponse.toObject(ValidationException.class);
         vex.setStatus(status);
         log.error(vex);
-        throw  vex;
+        throw vex;
       case 500:
         BaseException bex = httpResponse.toObject(BaseException.class);
         bex.setStatus(status);
@@ -138,11 +140,11 @@ public class UserClient {
 
   public User getUserByEmail(Map<String, Object> headers, String email) throws Exception {
     log.info("******** getUserByEmail IN ********");
-    HttpResponse httpResponse =  apiGET(String.format("%s?email=%s", getApiUrl(), email));
+    HttpResponse httpResponse = apiGET(String.format("%s?email=%s", getApiUrl(), email));
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     User[] response;
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -157,7 +159,7 @@ public class UserClient {
         BadRequestException brex = httpResponse.toObject(BadRequestException.class);
         brex.setStatus(status);
         log.error(brex);
-        throw  brex;
+        throw brex;
       case 404:
         NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
         nfe.setStatus(status);
@@ -167,7 +169,7 @@ public class UserClient {
         ValidationException vex = httpResponse.toObject(ValidationException.class);
         vex.setStatus(status);
         log.error(vex);
-        throw  vex;
+        throw vex;
       case 500:
         BaseException bex = httpResponse.toObject(BaseException.class);
         bex.setStatus(status);
@@ -180,11 +182,11 @@ public class UserClient {
 
   public User getUserById(Map<String, Object> headers, Long userIdMc) throws Exception {
     log.info("******** getUserById IN ********");
-    HttpResponse httpResponse =  apiGET(String.format("%s/%d", getApiUrl(), userIdMc));
+    HttpResponse httpResponse = apiGET(String.format("%s/%d", getApiUrl(), userIdMc));
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     System.out.println(httpResponse.getResp());
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("getUserById", httpResponse, User.class);
@@ -192,10 +194,10 @@ public class UserClient {
 
   public SignUp signUp(Map<String, Object> headers, SignUPNew signUPNew) throws Exception {
     log.info("******** signUp IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/soft_signup", getApiUrl()),signUPNew);
+    HttpResponse httpResponse = apiPOST(String.format("%s/soft_signup", getApiUrl()), signUPNew);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("signUp", httpResponse, SignUp.class);
@@ -203,11 +205,11 @@ public class UserClient {
 
   public User finishSignup(Map<String, Object> headers, Long userIdMc, String product) throws Exception {
     log.info("******** finishSignup IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc), product);
+    HttpResponse httpResponse = apiPOST(String.format("%s/%s/finish_signup", getApiUrl(), userIdMc), product);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     User response;
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if (HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       response = new User();
       return response;
     }
@@ -215,40 +217,40 @@ public class UserClient {
     return this.processResponse("finishSignup", httpResponse, User.class);
   }
 
-  public void sendMail(Map<String,Object> headers, Long userId, EmailBody content) throws Exception {
+  public void sendMail(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
     log.info("******** sendMail IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/mail", getApiUrl(), userId), content);
+    HttpResponse httpResponse = apiPOST(String.format("%s/%s/mail", getApiUrl(), userId), content);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
 
     this.processResponse("sendMail", httpResponse, Map.class);
   }
 
-  public void sendInternalMail(Map<String,Object> headers, EmailBody content) throws Exception {
+  public void sendInternalMail(Map<String, Object> headers, EmailBody content) throws Exception {
     log.info("******** sendInternalMail IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/mail", getApiUrl()), content);
+    HttpResponse httpResponse = apiPOST(String.format("%s/mail", getApiUrl()), content);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
 
     this.processResponse("sendInternalMail", httpResponse, Map.class);
   }
 
-  public void checkPassword(Map<String, Object> headers,Long userId, UserPasswordNew userPasswordNew) throws Exception {
+  public void checkPassword(Map<String, Object> headers, Long userId, UserPasswordNew userPasswordNew) throws Exception {
     log.info("******** checkPassword IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/check_password", getApiUrl(), userId), userPasswordNew);
+    HttpResponse httpResponse = apiPOST(String.format("%s/%s/check_password", getApiUrl(), userId), userPasswordNew);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     this.processResponse("checkPassword", httpResponse, Boolean.class);
@@ -256,12 +258,12 @@ public class UserClient {
 
   public User initIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
     log.info("******** initIdentityValidation IN ********");
-    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/init_identity_validation", getApiUrl(), userId), "{}");
+    HttpResponse httpResponse = apiPUT(String.format("%s/%s/init_identity_validation", getApiUrl(), userId), "{}");
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -271,19 +273,19 @@ public class UserClient {
     log.info("******** initIdentityValidation IN ********");
 
     StringBuilder url = new StringBuilder(String.format("%s/%s/finish_identity_validation?", getApiUrl(), userId));
-    if(success){
+    if(success) {
       url.append("success=true&");
     }
     if(isBlacklisted) {
       url.append("blacklisted=true&");
     }
 
-    HttpResponse httpResponse =  apiPUT(url.toString(), "{}");
+    HttpResponse httpResponse = apiPUT(url.toString(), "{}");
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -291,12 +293,12 @@ public class UserClient {
 
   public User resetIdentityValidation(Map<String, Object> headers, Long userId) throws Exception {
     log.info("******** initIdentityValidation IN ********");
-    HttpResponse httpResponse =  apiPUT(String.format("%s/%s/reset_identity_validation", getApiUrl(), userId), "{}");
+    HttpResponse httpResponse = apiPUT(String.format("%s/%s/reset_identity_validation", getApiUrl(), userId), "{}");
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
@@ -309,45 +311,45 @@ public class UserClient {
     data.put("name", name);
     data.put("lastname_1", lastname);
 
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%s/update_personal_data", getApiUrl(), userId), data);
+    HttpResponse httpResponse = apiPOST(String.format("%s/%s/update_personal_data", getApiUrl(), userId), data);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       throw new Exception("Error timeout");
     }
     return this.processResponse("updatePersonalData", httpResponse, User.class);
   }
 
   /**
-   *  FILES
+   * FILES
    */
 
-  public UserFile createUserFile(Map<String,Object> headers, Long userIdMc, UserFile newFile) throws Exception {
+  public UserFile createUserFile(Map<String, Object> headers, Long userIdMc, UserFile newFile) throws Exception {
     log.info("******** createUserFile IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%d/files", getApiUrl(), userIdMc), newFile);
+    HttpResponse httpResponse = apiPOST(String.format("%s/%d/files", getApiUrl(), userIdMc), newFile);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("createUserFile", httpResponse, UserFile.class);
   }
 
-  public UserFile getUserFileById(Map<String,Object> headers,Long userIdMc, Long fileId) throws Exception {
+  public UserFile getUserFileById(Map<String, Object> headers, Long userIdMc, Long fileId) throws Exception {
     log.info("******** getUserFileById IN ********");
-    HttpResponse httpResponse =  apiGET(String.format("%s/%d/files/%d", getApiUrl(), userIdMc, fileId));
+    HttpResponse httpResponse = apiGET(String.format("%s/%d/files/%d", getApiUrl(), userIdMc, fileId));
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
     return this.processResponse("getUserFileById", httpResponse, UserFile.class);
   }
 
-  public List<UserFile> getUserFiles(Map<String,Object> headers, Long userId, String app, String name, String version, UserFileStatus fileStatus) throws Exception {
+  public List<UserFile> getUserFiles(Map<String, Object> headers, Long userId, String app, String name, String version, UserFileStatus fileStatus) throws Exception {
     log.info("******** getUserFiles IN ********");
     StringBuilder filter = new StringBuilder("");
     if(!StringUtils.isAllBlank(app)) {
@@ -363,11 +365,11 @@ public class UserClient {
       filter.append(String.format("status=%s&", fileStatus.toString()));
     }
 
-    HttpResponse httpResponse =  apiGET(String.format("%s/%d/files?%s", getApiUrl(), userId, filter.toString()));
+    HttpResponse httpResponse = apiGET(String.format("%s/%d/files?%s", getApiUrl(), userId, filter.toString()));
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
     UserFile[] response;
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
 
@@ -376,7 +378,92 @@ public class UserClient {
       case 200:
       case 201:
         response = httpResponse.toObject(UserFile[].class);
-        log.info("******** getUserByRuts OUT ********");
+        log.info("******** getUserFiles OUT ********");
+        return response != null ? Arrays.asList(response) : Collections.EMPTY_LIST;
+      case 400:
+        BadRequestException brex = httpResponse.toObject(BadRequestException.class);
+        brex.setStatus(status);
+        log.error(brex);
+        throw brex;
+      case 404:
+        NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
+        nfe.setStatus(status);
+        log.error(nfe);
+        return null;
+      case 422:
+        ValidationException vex = httpResponse.toObject(ValidationException.class);
+        vex.setStatus(status);
+        log.error(vex);
+        throw vex;
+      case 500:
+        BaseException bex = httpResponse.toObject(BaseException.class);
+        bex.setStatus(status);
+        log.error(bex);
+        throw bex;
+      default:
+        throw new IllegalStateException();
+    }
+  }
+
+  /**
+   * BACKOFFICE
+   */
+  public Ticket createFreshdeskTicket(Map<String, Object> headers, Long userIdMc, NewTicket newTicket) throws Exception {
+    log.info("******** createFreshdeskTicket IN ********");
+    HttpResponse httpResponse = apiPOST(String.format("%s/%d/backoffice/ticket", getApiUrl(), userIdMc), newTicket);
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      return null;
+    }
+    return this.processResponse("createFreshdeskTicket", httpResponse, Ticket.class);
+  }
+
+  /**
+   * BANK ACCOUNTS
+   */
+  public UserAccount getUserBankAccountById(Map<String, Object> headers, Long userIdMc, Long accountId) throws Exception {
+    log.info("******** getUserAccountById IN ********");
+    HttpResponse httpResponse = apiGET(String.format("%s/%d/bank_accounts/%d", getApiUrl(), userIdMc, accountId));
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      return null;
+    }
+    return this.processResponse("getUserAccountById", httpResponse, UserAccount.class);
+  }
+
+  public UserAccount createUserBankAccount(Map<String, Object> headers, Long userIdMc, UserAccountNew newAccount) throws Exception {
+    log.info("******** createUserAccount IN ********");
+    HttpResponse httpResponse = apiPOST(String.format("%s/%d/bank_accounts", getApiUrl(), userIdMc), newAccount);
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      return null;
+    }
+    return this.processResponse("createUserBankAccount", httpResponse, UserAccount.class);
+  }
+
+  public List<UserAccount> getUserBankAccounts(Map<String, Object> headers, Long userId) throws Exception {
+
+    log.info("******** getUserBankAccounts IN ********");
+    HttpResponse httpResponse = apiGET(String.format("%s/%d/bank_accounts", getApiUrl(), userId));
+    httpResponse.setJsonParser(getJsonMapper());
+    log.info("response: " + httpResponse.getResp());
+    UserAccount[] response;
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      return null;
+    }
+
+    int status = httpResponse.getStatus();
+    switch (status) {
+      case 200:
+      case 201:
+        response = httpResponse.toObject(UserAccount[].class);
+        log.info("******** getUserBankAccounts OUT ********");
         return response != null ? Arrays.asList(response) : Collections.EMPTY_LIST;
       case 400:
         BadRequestException brex = httpResponse.toObject(BadRequestException.class);
@@ -403,27 +490,23 @@ public class UserClient {
     }
   }
 
-  /**
-   *  BACKOFFICE
-   */
-  public Ticket createFreshdeskTicket(Map<String, Object> headers, Long userIdMc, NewTicket newTicket) throws Exception {
-    log.info("******** createFreshdeskTicket IN ********");
-    HttpResponse httpResponse =  apiPOST(String.format("%s/%d/backoffice/ticket", getApiUrl(), userIdMc), newTicket);
+  public UserAccount deleteUserBankAccount(Map<String, Object> headers, Long userIdMc, UserAccount oldAccount) throws Exception {
+    log.info("******** deleteUserAccount IN ********");
+    HttpResponse httpResponse = apiDELETE(String.format("%s/%d/files/%sd", getApiUrl(), userIdMc, oldAccount.getBankId()), null);
     httpResponse.setJsonParser(getJsonMapper());
     log.info("response: " + httpResponse.getResp());
 
-    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
       return null;
     }
-    return this.processResponse("createFreshdeskTicket", httpResponse, Ticket.class);
+    return this.processResponse("deleteUserAccount", httpResponse, UserAccount.class);
   }
-
 
   /**
    *  TEST HELPERS
    */
   private void validate() {
-    if (ConfigUtils.isEnvProduction()) {
+    if(ConfigUtils.isEnvProduction()) {
       throw new SecurityException("Este método no puede ser ejecutado en un ambiente de producción");
     }
   }

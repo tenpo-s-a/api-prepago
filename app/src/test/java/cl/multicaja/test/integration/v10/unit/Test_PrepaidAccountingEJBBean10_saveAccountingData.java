@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBaseUnit {
@@ -12,7 +13,8 @@ public class Test_PrepaidAccountingEJBBean10_saveAccountingData extends TestBase
   @Test(expected = BadRequestException.class)
   public void saveAccountingDataNullList() throws Exception {
     try {
-      getPrepaidAccountingEJBBean10().saveAccountingData(null,null);
+      ArrayList<AccountingData10> accounting10s = null;
+      getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10s);
     }catch (BadRequestException e) {
       Assert.assertEquals("","accounting10s",e.getData()[0].getValue());
       throw new BadRequestException();
