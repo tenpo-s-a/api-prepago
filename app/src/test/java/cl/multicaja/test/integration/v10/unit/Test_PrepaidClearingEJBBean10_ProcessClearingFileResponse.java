@@ -48,7 +48,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
   public void insertClearingOK() throws Exception {
 
     List<AccountingData10> accounting10s = new ArrayList<>();
-    for (int i = 0; i == 9; i++) {
+    for (int i = 0; i< 10 ; i++) {
       AccountingData10 accounting10 = buildRandomAccouting();
       accounting10s.add(accounting10);
       accounting10s = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10s);
@@ -83,6 +83,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
     InputStream is = createAccountingCSV(fileName, movements); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null",is);
+    getPrepaidClearingEJBBean10().processClearingResponse(is,"test");
 
   }
 
