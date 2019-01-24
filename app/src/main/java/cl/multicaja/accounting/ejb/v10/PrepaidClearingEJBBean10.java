@@ -4,13 +4,17 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
@@ -25,6 +29,7 @@ import java.io.*;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +45,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private static Log log = LogFactory.getLog(PrepaidClearingEJBBean10.class);
 
   @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @EJB
   private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   public PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10() {
     return prepaidAccountingFileEJBBean10;
@@ -48,6 +59,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void setPrepaidAccountingFileEJBBean10(PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10) {
     this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
+    return prepaidMovementEJBBean10;
+  }
+
+  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
+    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
   }
 
   @Override
@@ -109,6 +136,20 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchClearingDataById(header,getNumberUtils().toLong(id));
   }
 
+
+  public List<ClearingData10> updateClearingData (Map<String, Object> header, List<ClearingData10> data, Long fileId) throws Exception {
+    if(data == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data"));
+    }
+
+    for (ClearingData10 m : data) {
+      m.setStatus(AccountingStatusType.SENT);
+      m.setFileId(fileId);
+      m = this.updateClearingData(header, m.getId(), m.getFileId(), m.getStatus());
+    }
+    return data;
+  }
+
   //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
@@ -130,6 +171,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_created"));
       timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
@@ -257,15 +299,30 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     List<ClearingData10> movements = this.searchClearingDataToFile(null, to);
 
-    //Busca la cuenta bancaria del movimiento
-    /*
-    movements.forEach(m -> {
-      if(m.getUserBankAccount().getId() > 0) {
-        // TODO: buscar id del usuario
-        // TODO: buscar info de la cuenta
+    for (ClearingData10 mov : movements) {
+      //Busca la cuenta bancaria del movimiento
+      if(mov.getUserBankAccount().getId() > 0) {
+        //Obtener el Id del usuario
+        Long prepaidUserId = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getIdTransaction()).getIdPrepaidUser();
+        Long userIdMc = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUserId).getUserIdMc();
+        UserAccount userAccount = getUserClient().getUserBankAccountById(null, userIdMc, mov.getUserBankAccount().getId());
+        if(userAccount == null) {
+          throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
+        }
+        mov.getUserBankAccount().setAccountNumber(userAccount.getAccountNumber());
+        mov.getUserBankAccount().setAccountType(userAccount.getAccountType());
+        mov.getUserBankAccount().setBankName(userAccount.getBankName());
+        Rut r = new Rut();
+        r.setValue(userAccount.getRut().getValue());
+        r.setDv(userAccount.getRut().getDv());
+        mov.getUserBankAccount().setRut(r);
       }
-    });
-    */
+    }
+
+    if(movements.isEmpty()){
+      return null;
+    }
+
     String directoryName = "clearing_files";
     File directory = new File(directoryName);
     if (! directory.exists()){
@@ -274,7 +331,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
-
 
     createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
 
@@ -288,6 +344,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
 
+
+    movements = this.updateClearingData(headers, movements, file.getId());
+
     return file;
   }
 
@@ -297,7 +356,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    String[] header = new String[]{"ID","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
+    String[] header = new String[]{"ID_PREPAGO","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
       "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO", "RUT", "BANCO",
@@ -306,15 +365,21 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     for (ClearingData10 mov : lstClearingMovement10s) {
 
+      Long accountId = mov.getUserBankAccount().getId();
+
+      //TODO: revisar estas fechas
+      String transactionDate = mov.getTransactionDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh24:mm:ss"));
+      String reconciliationDate = mov.getConciliationDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh24:mm:ss"));
+
       String[] data = new String[]{
         mov.getId().toString(), //ID,
         fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
         "0", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
         mov.getType().getValue(), //TIPO_TRX
-        "", //MOV_CONTABLE TODO: definir los tipos de movimientos contables.
-        mov.getTransactionDateInFormat(), //FECHA_TRX
-        mov.getConciliationDateInFormat(), //FECHA_CONCILIACION
+        mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
+        transactionDate, //FECHA_TRX
+        reconciliationDate, //FECHA_CONCILIACION
         mov.getAmountBalance().getValue().toString(), //MONTO_TRX_PESOS
         mov.getAmountMastercard().getValue().toString(), //MONTO_TRX_MCARD_PESOS
         mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
@@ -326,10 +391,10 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getCollectorFeeIva().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmount().getValue().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
-        "", //RUT
-        "", //BANCO
-        "", //NRO_CUENTA
-        "", //TIPO_CUENTA
+        accountId > 0 ? String.format("%s-%s", mov.getUserBankAccount().getRut().getValue(), mov.getUserBankAccount().getRut().getDv()) : "", //RUT
+        accountId > 0 ? mov.getUserBankAccount().getBankName() : "", //BANCO
+        accountId > 0 ? getNumberUtils().toLong(mov.getUserBankAccount().getAccountNumber()).toString() : "", //NRO_CUENTA
+        accountId > 0 ? mov.getUserBankAccount().getAccountType() : "", //TIPO_CUENTA
         mov.getStatus().getValue() //ESTADO_LIQUIDACION
       };
       writer.writeNext(data);

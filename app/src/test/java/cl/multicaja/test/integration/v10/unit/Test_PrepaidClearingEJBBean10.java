@@ -39,57 +39,6 @@ public class Test_PrepaidClearingEJBBean10 extends TestBaseUnit {
     return clearing10;
   }
 
-  //generateClearingFile
-
-  @Test
-  public void insertClearingOK3() throws Exception{
-    ZonedDateTime zd = ZonedDateTime.now();
-    ZonedDateTime midnight = zd.withHour(0).withMinute(0).withSecond(0).withNano(0);
-    ZonedDateTime endDay = zd.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
-
-    ZonedDateTime utdZd = ZonedDateTime.ofInstant(zd.toInstant(), ZoneOffset.UTC);
-    ZonedDateTime midnightUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
-    ZonedDateTime endDaytUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
-
-    LocalDateTime localNow = utdZd.toLocalDateTime();
-    LocalDateTime localMidnight = midnightUtc.toLocalDateTime();
-    LocalDateTime endDayMidnight = endDaytUtc.toLocalDateTime();
-
-    System.out.println(midnight);
-    System.out.println(zd);
-    System.out.println(endDay);
-
-    System.out.println("================");
-
-    System.out.println(midnightUtc);
-    System.out.println(utdZd);
-    System.out.println(endDaytUtc);
-
-    System.out.println("================");
-
-    System.out.println(localMidnight);
-    System.out.println(localNow);
-    System.out.println(endDayMidnight);
-
-  }
-
-  @Test
-  public void insertClearingOK2() throws Exception{
-    AccountingData10 accounting10 = buildRandomAccouting();
-    List<AccountingData10> accounting10s = new ArrayList<>();
-    accounting10s.add(accounting10);
-    accounting10s = getPrepaidAccountingEJBBean10().saveAccountingData(null,accounting10s);
-
-    ClearingData10 clearing10 = buildClearing();
-    clearing10.setAccountingId(accounting10s.get(0).getId());
-
-    clearing10 = getPrepaidClearingEJBBean10().insertClearingData(null,clearing10);
-    Assert.assertNotNull("El objeto no puede ser Null",clearing10);
-    Assert.assertNotEquals("El id no puede ser 0",0,clearing10.getId().longValue());
-
-    getPrepaidClearingEJBBean10().generateClearingFile(null, ZonedDateTime.now(ZoneId.of("America/Santiago")));
-  }
-
   @Test
   public void insertClearingOK() throws Exception{
     AccountingData10 accounting10 = buildRandomAccouting();

@@ -13,7 +13,8 @@ public enum AccountingStatusType {
   OK("OK"),
   REVERSED("REVERSED"),
   REJECTED("RECHAZADO"),
-  REJECTED_FORMAT("RECHAZADO_FORMATO");
+  REJECTED_FORMAT("RECHAZADO_FORMATO"),
+  SENT("SENT");
 
   String value;
 

@@ -37,6 +37,8 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
@@ -222,6 +224,8 @@ public class TestBaseUnit extends TestApiBase {
     if(prepaidClearingEJBBean10 == null){
       prepaidClearingEJBBean10 = new PrepaidClearingEJBBean10();
       prepaidClearingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
+      prepaidClearingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      prepaidClearingEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
     }
     return prepaidClearingEJBBean10;
   }
