@@ -1,18 +1,21 @@
 package cl.multicaja.test.integration.v10.async;
 
-import cl.multicaja.accounting.model.v10.AccountingData10;
-import cl.multicaja.accounting.model.v10.AccountingFiles10;
-import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
+import com.opencsv.CSVReader;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.*;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBaseUnitAsync {
@@ -77,6 +81,11 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
 
     Path file = Paths.get("clearing_files/" + clearingFile.getName());
     Assert.assertTrue("Debe existir el archivo", Files.exists(file));
+
+
+    validateFile("clearing_files/" + clearingFile.getName(), 2);
+
+
     Files.delete(file);
 
   }
@@ -116,8 +125,9 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
 
     Path file = Paths.get("clearing_files/" + clearingFile.getName());
     Assert.assertTrue("Debe existir el archivo", Files.exists(file));
-    //Files.delete(file);
+    validateFile("clearing_files/" + clearingFile.getName(), 1);
 
+    Files.delete(file);
   }
 
   @Test
@@ -128,5 +138,35 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
     } catch (BadRequestException brex) {
       Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
     }
+  }
+
+  private void validateFile(String fileName, int size) throws Exception {
+    List<ClearingData10> data = getCsvData(fileName);
+
+    Assert.assertEquals(String.format("Debe tener %s registros", size), size, data.size());
+  }
+
+  public List<ClearingData10> getCsvData(String fileName) throws Exception {
+    FileInputStream is = new FileInputStream(fileName);
+    List<ClearingData10> listClearing;
+    try {
+      Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+      CSVReader csvReader = new CSVReader(reader,',');
+      csvReader.readNext();
+      String[] record;
+      listClearing = new ArrayList<>();
+
+      while ((record = csvReader.readNext()) != null) {
+        ClearingData10 clearing = new ClearingData10();
+        clearing.setId(numberUtils.toLong(record[0]));
+        clearing.setIdTransaction(numberUtils.toLong(record[2]));
+        listClearing.add(clearing);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println("Exception: "+e);
+      throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
+    }
+    return listClearing;
   }
 }
