@@ -152,20 +152,27 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
-  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime to) throws Exception {
-    if(to == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
+  private List<ClearingData10> searchClearignDataByFileId(Map<String, Object> headers, String fileId) throws Exception{
+    if(fileId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
     }
+    return searchFullClearingData(headers,null,fileId,null);
+  }
+
+  private List<ClearingData10> searchFullClearingData(Map<String, Object> headers, LocalDateTime to,String fileId, AccountingStatusType status) throws Exception{
 
     String format = "yyyy-MM-dd HH:mm:ss";
-
-    String t = to.format(DateTimeFormatter.ofPattern(format));
+    String t = null;
+    if(to != null){
+      t = to.format(DateTimeFormatter.ofPattern(format));
+    }
 
     Object[] params = {
-      t,
-      AccountingStatusType.PENDING.getValue()
+      t == null ? new NullParam(Types.VARCHAR) : t,
+      status.getValue() == null ? new NullParam(Types.VARCHAR) : status.getValue(),
+      fileId == null ? new NullParam(Types.VARCHAR) : fileId
     };
-
+    log.info(params);
     RowMapper rm = (Map<String, Object> row) -> {
       ClearingData10 data = new ClearingData10();
 
@@ -221,6 +228,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     List<ClearingData10> result = (List<ClearingData10>)resp.get("result");
     return result != null ? result : Collections.EMPTY_LIST;
+  }
+
+  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime to) throws Exception {
+    if(to == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
+    }
+    return searchFullClearingData(headers,to,null,AccountingStatusType.PENDING);
   }
 
   /**
