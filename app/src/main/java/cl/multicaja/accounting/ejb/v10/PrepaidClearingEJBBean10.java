@@ -336,7 +336,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.info("IN");
       try {
         Reader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-        CSVReader csvReader = new CSVReader(reader,';');
+        CSVReader csvReader = new CSVReader(reader,',');
         csvReader.readNext();
         String[] record;
         clearingData10s = new ArrayList<>();
@@ -344,9 +344,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         while ((record = csvReader.readNext()) != null) {
           log.debug(Arrays.toString(record));
           ClearingData10 clearingData = new ClearingData10();
-          clearingData.setAccountingId(numberUtil.toLong(record[0]));
-          clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[0])));
-          clearingData.setUserAccountId(getNumberUtils().toLong(record[0]));
+          clearingData.setId(numberUtil.toLong(record[0]));
+          clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
           clearingData10s.add(clearingData);
         }
         inputStream.close();

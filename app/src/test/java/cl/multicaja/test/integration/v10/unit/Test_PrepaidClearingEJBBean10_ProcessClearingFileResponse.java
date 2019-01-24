@@ -45,7 +45,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
 
   @Test
-  public void insertClearingOK() throws Exception {
+  public void testProcessFileAllOK() throws Exception {
 
     List<AccountingData10> accounting10s = new ArrayList<>();
     for (int i = 0; i< 10 ; i++) {
@@ -63,31 +63,27 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
 
     ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
-    ZonedDateTime midnight = date.withHour(0).withMinute(0).withSecond(0).withNano(0);
-    ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+    ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
 
-    ZonedDateTime fromUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
     ZonedDateTime toUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
 
-    LocalDateTime from = fromUtc.toLocalDateTime();
     LocalDateTime to = toUtc.toLocalDateTime();
 
-    List<ClearingData10> movements = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, from, to);
+    List<ClearingData10> movements = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, to);
     Assert.assertEquals("Debe ser 10",10,movements.size());
 
-    int i = 0;
     for(ClearingData10 data: movements) {
       data.setStatus(AccountingStatusType.OK);
     }
-
+    String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-    InputStream is = createAccountingCSV(fileName, movements); // Crear archivo csv temporal
+    InputStream is = createAccountingCSV(fileId,fileName, movements); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null",is);
     getPrepaidClearingEJBBean10().processClearingResponse(is,"test");
 
   }
 
-  public InputStream createAccountingCSV(String filename, List<ClearingData10> lstClearingMovement10s) throws IOException {
+  public InputStream createAccountingCSV(String fileId, String filename, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -108,7 +104,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       }
 
       String[] data = new String[]{
-        mov.getId().toString(), //ID_LIQUIDACION,
+        mov.getId().toString(), //ID,
+        fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
         "0", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
         mov.getType().getValue(), //TIPO_TRX
