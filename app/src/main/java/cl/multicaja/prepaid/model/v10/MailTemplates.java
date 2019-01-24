@@ -9,7 +9,7 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_CARD_ERROR = "Prepago/ErrorEnvioTarjeta";
   public static final String TEMPLATE_MAIL_EMISSION_ERROR = "Prepago/ErrorAltaRapida";
   public static final String TEMPLATE_MAIL_ERROR_TOPUP = "Prepago/ErrorCarga";
-  public static final String TEMPLATE_MAIL_ERROR_TOPUP_TO_USER = "Prepago/ErrorCargaToUser";
+  public static final String TEMPLATE_MAIL_ERROR_TOPUP_TO_USER = "Prepago/ErrorCargaParaUsuario";
   public static final String TEMPLATE_MAIL_ERROR_TOPUP_REVERSE = "Prepago/ErrorReversaCarga";
   public static final String TEMPLATE_MAIL_ERROR_ISSUANCE_FEE = "Prepago/ErrorCobroEmision";
   public static final String TEMPLATE_MAIL_ERROR_CREATE_CARD = "Prepago/ErrorDatosTarjeta";
