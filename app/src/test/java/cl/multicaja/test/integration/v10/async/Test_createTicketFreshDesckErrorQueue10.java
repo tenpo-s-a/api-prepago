@@ -138,7 +138,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  // @Ignore
   @Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -174,7 +174,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  // @Ignore
   @Test
   public void testReinjectTopupReverse() throws Exception{
 
@@ -214,7 +214,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  // @Ignore
   @Test
   public void testReinjectWithdrawReversal() throws Exception{
     tc.getTecnocomService().setAutomaticError(false);
@@ -250,7 +250,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  // @Ignore
   @Test
   public void testReinjectIssuanFee() throws Exception {
 
