@@ -221,6 +221,7 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10(){
     if(prepaidClearingEJBBean10 == null){
       prepaidClearingEJBBean10 = new PrepaidClearingEJBBean10();
+      prepaidClearingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
     }
     return prepaidClearingEJBBean10;
   }

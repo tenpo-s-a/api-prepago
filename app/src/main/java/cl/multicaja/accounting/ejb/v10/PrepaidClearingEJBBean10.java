@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
+import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
@@ -37,6 +38,17 @@ import static cl.multicaja.core.model.Errors.*;
 public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidClearingEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidClearingEJBBean10.class);
+
+  @EJB
+  private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
+
+  public PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10() {
+    return prepaidAccountingFileEJBBean10;
+  }
+
+  public void setPrepaidAccountingFileEJBBean10(PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10) {
+    this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
+  }
 
   @Override
   public ClearingData10 insertClearingData(Map<String, Object> header, ClearingData10 clearing10) throws Exception {
@@ -140,24 +152,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
-  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to) throws Exception {
-    if(from == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "from"));
-    }
+  public List<ClearingData10> searchClearingDataToFile(Map<String, Object> headers, LocalDateTime to) throws Exception {
     if(to == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
     }
 
     String format = "yyyy-MM-dd HH:mm:ss";
 
-    String f = from.format(DateTimeFormatter.ofPattern(format));
     String t = to.format(DateTimeFormatter.ofPattern(format));
 
-    log.info(String.format("From: %s", f));
-    log.info(String.format("To: %s", t));
-
     Object[] params = {
-      f,
       t,
       AccountingStatusType.PENDING.getValue()
     };
@@ -226,35 +230,60 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
    * @return
    * @throws Exception
    */
-  public void generateClearingFile(Map<String, Object> headers, ZonedDateTime date) throws Exception {
+  public AccountingFiles10 generateClearingFile(Map<String, Object> headers, ZonedDateTime date) throws Exception {
     if(date == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
 
-    ZonedDateTime midnight = date.withHour(0).withMinute(0).withSecond(0).withNano(0);
     ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
 
-    ZonedDateTime fromUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
     ZonedDateTime toUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
 
-    LocalDateTime from = fromUtc.toLocalDateTime();
     LocalDateTime to = toUtc.toLocalDateTime();
 
-    List<ClearingData10> movements = this.searchClearingDataToFile(null, from, to);
+    List<ClearingData10> movements = this.searchClearingDataToFile(null, to);
 
-    String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-    createAccountingCSV(fileName, movements); // Crear archivo csv temporal
-    //sendFile(fileName, getConfigUtils().getProperty("accounting.email.dailyreport")); // envia archivo al email de reportes
-    //new File(fileName).delete(); // borra el archivo creado
+    //Busca la cuenta bancaria del movimiento
+    /*
+    movements.forEach(m -> {
+      if(m.getUserBankAccount().getId() > 0) {
+        // TODO: buscar id del usuario
+        // TODO: buscar info de la cuenta
+      }
+    });
+    */
+    String directoryName = "clearing_files";
+    File directory = new File(directoryName);
+    if (! directory.exists()){
+      directory.mkdir();
+    }
+
+    String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
+
+
+    createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+
+    AccountingFiles10 file = new AccountingFiles10();
+    file.setStatus(AccountingStatusType.PENDING);
+    file.setName(fileName);
+    file.setFileId(fileId);
+    file.setFileFormatType(AccountingFileFormatType.CSV);
+    file.setFileType(AccountingFileType.CLEARING);
+    file.setUrl("");
+
+    file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
+
+    return file;
   }
 
 
-  public void createAccountingCSV(String filename, List<ClearingData10> lstClearingMovement10s) throws IOException {
+  public void createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    String[] header = new String[]{"ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
+    String[] header = new String[]{"ID","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
       "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO", "RUT", "BANCO",
@@ -263,14 +292,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     for (ClearingData10 mov : lstClearingMovement10s) {
 
-      Long bankAccountId = mov.getUserBankAccount().getId();
-
-      if(bankAccountId > 0) {
-        //TODO: buscar la informacion de la cuenta bancaria en api-users
-      }
-
       String[] data = new String[]{
-        mov.getId().toString(), //ID_LIQUIDACION,
+        mov.getId().toString(), //ID,
+        fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
         "0", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
         mov.getType().getValue(), //TIPO_TRX

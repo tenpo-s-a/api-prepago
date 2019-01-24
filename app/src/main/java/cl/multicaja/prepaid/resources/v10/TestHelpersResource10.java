@@ -1,5 +1,8 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.accounting.async.v10.ClearingFileDelegate10;
+import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
+import cl.multicaja.accounting.model.v10.AccountingFiles10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
@@ -38,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -46,7 +50,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -67,6 +74,8 @@ public final class TestHelpersResource10 extends BaseResource {
 
   private NumberUtils numberUtils = NumberUtils.getInstance();
 
+  @EJB
+  private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -82,6 +91,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @Inject
+  private ClearingFileDelegate10 clearingFileDelegate;
 
   private UserClient userClient;
 
@@ -398,6 +410,29 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok("OK").status(201).build();
   }
 
+
+  @POST
+  @Path("/generate_clearing_file")
+  public Response generateClearingFile(@Context HttpHeaders headers) throws Exception {
+    Map<String, Object> response = new HashMap<>();
+	  try{
+      validate();
+
+      AccountingFiles10 file = prepaidClearingEJBBean10.generateClearingFile(headersToMap(headers), ZonedDateTime.now());
+
+      clearingFileDelegate.uploadFile(file.getName());
+
+
+      response.put("file_name", file.getName());
+      response.put("file_exists", Files.exists(Paths.get("clearing_files/" + file.getName())));
+    } catch (Exception e) {
+	    e.printStackTrace();
+	    response.put("error", e.getMessage());
+    }
+
+
+    return Response.ok(response).status(202).build();
+  }
 
   public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
     Integer rut = getUniqueRutNumber();
