@@ -21,6 +21,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_search_clearing_data_for_file_v1
 (
   IN _in_to VARCHAR,
   IN _in_status VARCHAR,
+  IN _in_file_id VARCHAR,
   OUT _id BIGINT,
   OUT _id_tx BIGINT,
   OUT _type VARCHAR,
@@ -78,8 +79,9 @@ RETURN QUERY
     INNER JOIN ${schema.acc}.accounting a
       ON a.id = c.accounting_id
   WHERE
-    c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS') AND
-    c.status = _in_status
+    (COALESCE(_in_to,'') == '' OR c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS')) AND
+    (COALESCE(_in_status,'') == '' or c.status = _in_status) AND
+    (COALESCE(_in_status,'') == '' or c.status = _in_status)
   ORDER BY
     c.created ASC;
 RETURN;
