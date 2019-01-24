@@ -31,7 +31,7 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
   @Before
-  @After
+  //@After
   public void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
@@ -78,16 +78,20 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
 
     Assert.assertNotNull("No deberia ser null", clearingFile);
     Assert.assertTrue("Debe tener id", clearingFile.getId() > 0);
+    Assert.assertEquals("Debe estar en status PENDING", AccountingStatusType.PENDING, clearingFile.getStatus());
+
+    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT);
+    Assert.assertNotNull("No deberia ser null", data);
+    Assert.assertEquals("Debe tener 2 registros", 2,data.size());
+    data.forEach(d-> {
+      Assert.assertEquals("Debe tener el fileId", clearingFile.getId(), d.getFileId());
+    });
 
     Path file = Paths.get("clearing_files/" + clearingFile.getName());
     Assert.assertTrue("Debe existir el archivo", Files.exists(file));
 
-
-    validateFile("clearing_files/" + clearingFile.getName(), 2);
-
-
+    validateCsvFile("clearing_files/" + clearingFile.getName(), 2);
     Files.delete(file);
-
   }
 
   @Test
@@ -122,11 +126,18 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
 
     Assert.assertNotNull("No deberia ser null", clearingFile);
     Assert.assertTrue("Debe tener id", clearingFile.getId() > 0);
+    Assert.assertEquals("Debe estar en status PENDING", AccountingStatusType.PENDING, clearingFile.getStatus());
+
+    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT);
+    Assert.assertNotNull("No deberia ser null", data);
+    Assert.assertEquals("Debe tener 1 registros", 1,data.size());
+    data.forEach(d-> {
+      Assert.assertEquals("Debe tener el fileId", clearingFile.getId(), d.getFileId());
+    });
 
     Path file = Paths.get("clearing_files/" + clearingFile.getName());
     Assert.assertTrue("Debe existir el archivo", Files.exists(file));
-    validateFile("clearing_files/" + clearingFile.getName(), 1);
-
+    validateCsvFile("clearing_files/" + clearingFile.getName(), 1);
     Files.delete(file);
   }
 
@@ -140,7 +151,7 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
     }
   }
 
-  private void validateFile(String fileName, int size) throws Exception {
+  private void validateCsvFile(String fileName, int size) throws Exception {
     List<ClearingData10> data = getCsvData(fileName);
 
     Assert.assertEquals(String.format("Debe tener %s registros", size), size, data.size());

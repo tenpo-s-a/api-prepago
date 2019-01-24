@@ -33,10 +33,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -139,6 +136,20 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchClearingDataById(header,getNumberUtils().toLong(id));
   }
 
+
+  public List<ClearingData10> updateClearingData (Map<String, Object> header, List<ClearingData10> data, Long fileId) throws Exception {
+    if(data == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data"));
+    }
+
+    for (ClearingData10 m : data) {
+      m.setStatus(AccountingStatusType.SENT);
+      m.setFileId(fileId);
+      m = this.updateClearingData(header, m.getId(), m.getFileId(), m.getStatus());
+    }
+    return data;
+  }
+
   //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
@@ -160,6 +171,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt((Timestamp)row.get("_created"));
       timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
@@ -306,7 +318,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
 
-
     createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
 
     AccountingFiles10 file = new AccountingFiles10();
@@ -318,6 +329,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     file.setUrl("");
 
     file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
+
+
+    movements = this.updateClearingData(headers, movements, file.getId());
 
     return file;
   }
