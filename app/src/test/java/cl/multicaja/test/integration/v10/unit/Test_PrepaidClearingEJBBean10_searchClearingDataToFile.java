@@ -122,7 +122,6 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
     Assert.assertTrue("La lista debe estar vacia", data.isEmpty());
   }
 
-
   @Test
   public void shouldFail_missingTo() throws Exception{
     try{
