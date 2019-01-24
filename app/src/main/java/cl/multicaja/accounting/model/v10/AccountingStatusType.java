@@ -11,7 +11,9 @@ public enum AccountingStatusType {
 
   PENDING("PENDING"),
   OK("OK"),
-  REVERSED("REVERSED");
+  REVERSED("REVERSED"),
+  SENT("SENT");
+
   String value;
 
   AccountingStatusType(String value) {
