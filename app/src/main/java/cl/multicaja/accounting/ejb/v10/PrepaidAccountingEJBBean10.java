@@ -36,8 +36,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -384,7 +383,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
           fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee);
 
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
@@ -394,7 +393,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         else {
           // Comision es Fija $200
           fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -405,7 +404,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(movement.getOriginType())) {
           fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee);
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
           accounting.setCollectorFee(BigDecimal.ZERO);
@@ -414,7 +413,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         else {
           // Comision es Fija $200
           fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-          feeIva =getCalculationsHelper().calculateFeeIva(fee);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -425,11 +424,22 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     accounting.setTransactionDate(movement.getFechaCreacion());
     accounting.setStatus(accountingStatus);
     accounting.setFileId(0L);
-    accounting.setAmountBalance(new NewAmountAndCurrency10(movement.getImpfac().subtract(fee).subtract(feeIva)));
+
+    // Monto que afecta al saldo del usuario
+    NewAmountAndCurrency10 amountToBalance = new NewAmountAndCurrency10();
+    amountToBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+
+    if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac()) || TipoFactura.RETIRO_TRANSFERENCIA.equals(movement.getTipofac())) {
+      amountToBalance.setValue(movement.getImpfac().add(fee).add(feeIva));
+    } else {
+      amountToBalance.setValue(movement.getImpfac().subtract(fee).subtract(feeIva));
+    }
+
+    accounting.setAmountBalance(amountToBalance);
     accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
-    //de conciliacion
-    accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+
+    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha de conciliacion
+    accounting.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
 
     return accounting;
   }
@@ -759,14 +769,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setFeeIva(iva);
       acc.setExchangeRateDif(exchangeRateDiff);
       acc.setFileId(0L);
-      acc.setAmountBalance(new NewAmountAndCurrency10(BigDecimal.ZERO));
+      // Monto que afecta al saldo del cliente
+      acc.setAmountBalance(new NewAmountAndCurrency10(acc.getAmount().getValue().add(acc.getFee()).add(acc.getFeeIva())));
       BigDecimal amountMastercard = acc.getAmount().getValue().subtract(fee).subtract(iva).subtract(exchangeRateDiff);
       acc.setAmountMastercard(new NewAmountAndCurrency10(amountMastercard));
       acc.setCollectorFee(BigDecimal.ZERO);
       acc.setCollectorFeeIva(BigDecimal.ZERO);
 
       //TODO: Revisar Fecha
-      acc.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+      acc.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
       acc.setStatus(AccountingStatusType.OK);
 
       transactions.add(acc);

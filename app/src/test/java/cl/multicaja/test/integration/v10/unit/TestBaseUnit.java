@@ -713,10 +713,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidWithdraw;
   }
 
-  public void buildAccountForPrepaid(User user, NewPrepaidWithdraw10 prepaidWithdraw10) {
-
-  }
-
   /**
    *
    * @param user
