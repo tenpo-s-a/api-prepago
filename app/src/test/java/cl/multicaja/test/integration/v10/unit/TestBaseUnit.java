@@ -29,7 +29,7 @@ import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import cl.multicaja.users.model.v10.UserAccountNew;
+import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.security.common.FileRealmHelper;
@@ -712,10 +712,6 @@ public class TestBaseUnit extends TestApiBase {
     }
 
     return prepaidWithdraw;
-  }
-
-  public void buildAccountForPrepaid(User user, NewPrepaidWithdraw10 prepaidWithdraw10) {
-
   }
 
   /**

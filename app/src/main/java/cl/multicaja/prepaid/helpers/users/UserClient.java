@@ -13,7 +13,7 @@ import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.*;
-import cl.multicaja.users.model.v10.UserAccountNew;
+import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
