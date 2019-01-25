@@ -77,7 +77,7 @@ RETURN QUERY
   FROM
     ${schema.acc}.clearing c
     INNER JOIN ${schema.acc}.accounting a ON a.id = c.accounting_id
-    INNER join ${schema.acc}.accounting_files f ON c.file_id = f.id
+    LEFT join ${schema.acc}.accounting_files f ON c.file_id = f.id
   WHERE
     (COALESCE(_in_to,'') = '' OR c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS')) AND
     (COALESCE(_in_status,'') = '' OR c.status = _in_status) AND

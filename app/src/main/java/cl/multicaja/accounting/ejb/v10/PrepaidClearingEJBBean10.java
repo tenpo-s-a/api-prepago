@@ -194,7 +194,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
-  private List<ClearingData10> searchClearignDataByFileId(Map<String, Object> headers, String fileId) throws Exception{
+
+  public List<ClearingData10> searchClearignDataByFileId(Map<String, Object> headers, String fileId) throws Exception{
     if(fileId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
     }
@@ -211,7 +212,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Object[] params = {
       t == null ? new NullParam(Types.VARCHAR) : t,
-      status.getValue() == null ? new NullParam(Types.VARCHAR) : status.getValue(),
+      status == null ? new NullParam(Types.VARCHAR) : status.getValue(),
       fileId == null ? new NullParam(Types.VARCHAR) : fileId
     };
     log.info(params);
