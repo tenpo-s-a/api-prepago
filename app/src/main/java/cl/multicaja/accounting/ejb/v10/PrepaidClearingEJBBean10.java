@@ -420,6 +420,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
     writer.close();
   }
+
   public void processClearingResponse(InputStream inputStream, String fileName) throws Exception {
     log.info("processClearingResponse IN");
     String fileId = fileName.replace("TRX_PREPAGO_","").replace(".CSV","");
@@ -468,15 +469,14 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //Verifica lo que debe venir en el archivo.
     for (ClearingData10 data : clearingDataInTable) {
       if (AccountingTxType.RETIRO_WEB.equals(data.getType())) {
-
         // Busca todos los retiros web que tienen que venir en el archivo
         ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
         //Existe
         if(result != null) {
           //Coinciden
-          if(data.getAmount().equals(result.getAmount()) &&
-            data.getAmountBalance().equals(result.getAmount()) &&
-            data.getAmountMastercard().equals(result.getAmount())
+          if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
+            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0&&
+            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0
           ){
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
             ClearingData10 dataUpdated = updateClearingData(null,data.getId(),null,result.getStatus());

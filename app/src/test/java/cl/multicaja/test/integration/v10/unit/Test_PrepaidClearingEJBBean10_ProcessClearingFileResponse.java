@@ -1,8 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.AccountingData10;
-import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.ConfigUtils;
@@ -33,6 +31,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
   public static void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", SCHEMA));
   }
 
   public ClearingData10 buildClearing() {
@@ -47,14 +46,32 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
   @Test
   public void testProcessFileAllOK() throws Exception {
 
+    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
+    String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+
+    AccountingFiles10 files10 = new AccountingFiles10();
+    files10.setFileId(fileId);
+    files10.setFileFormatType(AccountingFileFormatType.CSV);
+    files10.setFileType(AccountingFileType.CLEARING);
+    files10.setName(fileName);
+    files10.setStatus(AccountingStatusType.OK);
+
+    files10 = getPrepaidAccountingFileEJBBean10().insertAccountingFile(null,files10);
+
+    Assert.assertNotNull("No debe ser null",files10);
+    Assert.assertNotEquals("No debe ser 0",0,files10.getId().longValue());
+
     List<AccountingData10> accounting10s = new ArrayList<>();
     for (int i = 0; i< 10 ; i++) {
-      AccountingData10 accounting10 = buildRandomAccouting();
+
+      AccountingData10 accounting10 = buildRandomAccouting(AccountingTxType.RETIRO_WEB);
       accounting10s.add(accounting10);
       accounting10s = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10s);
 
       ClearingData10 clearing10 = buildClearing();
       clearing10.setAccountingId(accounting10s.get(0).getId());
+      clearing10.setFileId(files10.getId());
 
       clearing10 = getPrepaidClearingEJBBean10().insertClearingData(null, clearing10);
       Assert.assertNotNull("El objeto no puede ser Null", clearing10);
@@ -62,11 +79,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     }
 
 
-    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
     ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
-
     ZonedDateTime toUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
-
     LocalDateTime to = toUtc.toLocalDateTime();
 
     List<ClearingData10> movements = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, to);
@@ -75,11 +89,14 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     for(ClearingData10 data: movements) {
       data.setStatus(AccountingStatusType.OK);
     }
-    String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-    String fileName = String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+
     InputStream is = createAccountingCSV(fileId,fileName, movements); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null",is);
-    getPrepaidClearingEJBBean10().processClearingResponse(is,"test");
+    getPrepaidClearingEJBBean10().processClearingResponse(is,fileName);
+    List<ClearingData10> processedClearingmovements = getPrepaidClearingEJBBean10().searchClearignDataByFileId(null,fileId);
+    for(ClearingData10 data : processedClearingmovements){
+      Assert.assertEquals("El Status debe ser OK",AccountingStatusType.OK, data.getStatus());
+    }
 
   }
 

@@ -1,5 +1,6 @@
 package cl.multicaja.accounting.async.v10.routes;
 
+import cl.multicaja.accounting.async.v10.processors.PendingClearingFile10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
@@ -36,6 +37,8 @@ public class ClearingFileRoute10 extends BaseRoute10 {
       .to(getFtpUri()) // upload the CSV file
       .log("${date:now:yyyy-MM-dd'T'HH:mm:ssZ} - FTP upload complete. File: ${header.CamelFileName}");
 
+    //Se agrega ruta para procesar respuesta de Banco
+    //from(getFtpUriResponse()).process(new PendingClearingFile10(this).processClearingBatch());
   }
   /**
    * Creates a Camel FTP URI
@@ -49,4 +52,21 @@ public class ClearingFileRoute10 extends BaseRoute10 {
     sb.append("&fileName=${header.CamelFileName}");
     return sb.toString();
   }
+
+  private String getFtpUriResponse() {
+    final String fileErrorConfig = "/${file:name.noext}-${date:now:yyyyMMddHHmmssSSS}.${file:ext}";
+    StringBuilder sb = new StringBuilder();
+    sb.append("sftp://")
+      .append(getConfigUtils().getProperty("sftp.multicajared.host"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.clearing.received.folder"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.auth.username"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.auth.password"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.clearing.move.done.folder"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.clearing.move.error.folder").concat(fileErrorConfig))
+      .append(getConfigUtils().getProperty("sftp.multicajared.reconnectDelay"))
+      .append(getConfigUtils().getProperty("sftp.multicajared.throwExceptionOnConnectFailed"));
+    log.info(String.format("sftp endpoint -> [%s]", sb.toString()));
+    return sb.toString();
+  }
+
 }
