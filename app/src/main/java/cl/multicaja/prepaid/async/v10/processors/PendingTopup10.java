@@ -156,7 +156,9 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             log.info(String.format("Respuesta inclusion: Codigo -> %s, Descripcion -> %s", inclusionMovimientosDTO.getRetorno(), inclusionMovimientosDTO.getDescRetorno()));
 
-            if (inclusionMovimientosDTO.isRetornoExitoso()) {
+            // Responde OK || Responde que ya el movimiento existia (cod. 200 + MPE5501)
+            if (inclusionMovimientosDTO.isRetornoExitoso() ||
+               (CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno()) && inclusionMovimientosDTO.getDescRetorno().contains("MPE5501"))) {
 
               String centalta = inclusionMovimientosDTO.getCenalta();
               String cuenta = inclusionMovimientosDTO.getCuenta();
@@ -232,20 +234,22 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
               req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
               return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
-            }else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
+            } else if (CodigoRetorno._1010.equals(inclusionMovimientosDTO.getRetorno())) {
               req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
               req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
               return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
             } else if (CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
-              if(inclusionMovimientosDTO.getDescRetorno().contains("")){
-                //TODO: se debe manejar la posibilidad que el movimiento devuelva error por "Operacion realizada previamente" si el intento anterior tuvo error TECNOCOM_TIME_OUT_RESPONSE
-                return req;
-              }
               req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
               req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
               return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
-            }
-            else {
+            } else if (CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
+              // La inclusion devuelve error y el error es distinto a "ya existia"
+              log.debug("********** Movimiento rechazado **********");
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), PrepaidMovementStatus.REJECTED);
+
+              Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
+              return redirectRequest(endpoint, exchange, req, false);
+            } else {
               PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
               data.getPrepaidMovement10().setEstado(status);
@@ -253,7 +257,6 @@ public class PendingTopup10 extends BaseProcessor10 {
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             }
-
           } else {
 
             //https://www.pivotaltracker.com/story/show/157816408
@@ -308,6 +311,8 @@ public class PendingTopup10 extends BaseProcessor10 {
           if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
           }
+        } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
+          // TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
         } else {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", data.getUser().getId().toString());
