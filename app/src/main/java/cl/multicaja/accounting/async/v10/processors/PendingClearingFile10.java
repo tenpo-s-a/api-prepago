@@ -4,8 +4,11 @@ import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.file.GenericFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.InputStream;
 
 public class PendingClearingFile10 extends BaseProcessor10 {
 
@@ -18,7 +21,9 @@ public class PendingClearingFile10 extends BaseProcessor10 {
       @Override
       public void process(Exchange exchange) throws Exception {
         log.info("Process Clearing Batch");
-        getRoute().getPrepaidClearingEJBBean10().processClearingResponse(null,null);
+        final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
+        String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
+        getRoute().getPrepaidClearingEJBBean10().processClearingResponse(inputStream,fileName);
       }
     };
   }

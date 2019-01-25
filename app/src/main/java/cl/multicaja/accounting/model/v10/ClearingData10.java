@@ -32,4 +32,5 @@ public class ClearingData10 extends AccountingData10 {
     }
     userBankAccount.setId(userAccountId);
   }
+
 }

@@ -206,7 +206,7 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
 
     Map<String, Object> paramIn = null;
     String fileIdString = getRandomString(10);
-    
+
     Map<String, Object> clearinFile = Test_20190114145205_create_sp_mc_acc_create_accounting_file_v10.createAccountingFile(getRandomString(10),fileIdString,getRandomString(10),getRandomString(10),getRandomNumericString(10),"OK");
     Long fileId = numberUtils.toLong(clearinFile.get("_r_id"));
     System.out.println("FileId: "+fileId);

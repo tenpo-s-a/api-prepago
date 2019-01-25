@@ -14,7 +14,8 @@ public enum AccountingStatusType {
   REVERSED("REVERSED"),
   REJECTED("RECHAZADO"),
   REJECTED_FORMAT("RECHAZADO_FORMATO"),
-  SENT("SENT");
+  SENT("SENT"),
+  RESEARCH("INVESTIGAR");
 
   String value;
 
