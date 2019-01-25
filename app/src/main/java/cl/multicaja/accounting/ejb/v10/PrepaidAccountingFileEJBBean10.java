@@ -107,7 +107,6 @@ public class PrepaidAccountingFileEJBBean10 extends PrepaidBaseEJBBean10 impleme
 
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_accounting_file_v10",  rm, params);
     List<AccountingFiles10> res = (List<AccountingFiles10>)resp.get("result");
-    log.info(res);
     return res != null ? res : Collections.EMPTY_LIST;
   }
 

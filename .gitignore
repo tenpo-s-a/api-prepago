@@ -12,6 +12,7 @@ app/datos-mock.cache
 
 target/
 
+app/clearing_files
 app/activemq-data-prepaid
 app/activemq-data
 app/.idea
@@ -52,4 +53,4 @@ app/src/test/resources/mastercard/T058/done/
 app/src/test/resources/mastercard/T058/error/
 
 app/src/test/resources/multicajared/done/*.csv
-app/src/test/resources/multicajared/error/*.csv 
+app/src/test/resources/multicajared/error/*.csv

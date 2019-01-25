@@ -66,17 +66,14 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
     Assert.assertNotEquals("El id no puede ser 0",0, clearing2.getId().longValue());
 
     ZonedDateTime zd = ZonedDateTime.now();
-    ZonedDateTime midnight = zd.withHour(0).withMinute(0).withSecond(0).withNano(0);
     ZonedDateTime endDay = zd.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
 
-    ZonedDateTime midnightUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
     ZonedDateTime endDayUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
 
-    LocalDateTime localMidnight = midnightUtc.toLocalDateTime();
     LocalDateTime endDayMidnight = endDayUtc.toLocalDateTime();
 
 
-    List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, localMidnight, endDayMidnight);
+    List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, endDayMidnight);
 
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertFalse("La lista no debe estar vacia", data.isEmpty());
@@ -113,36 +110,22 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
   @Test
   public void emptyData() throws Exception {
     ZonedDateTime zd = ZonedDateTime.now().minusDays(30);
-    ZonedDateTime midnight = zd.withHour(0).withMinute(0).withSecond(0).withNano(0);
     ZonedDateTime endDay = zd.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
 
-    ZonedDateTime midnightUtc = ZonedDateTime.ofInstant(midnight.toInstant(), ZoneOffset.UTC);
     ZonedDateTime endDayUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
 
-    LocalDateTime localMidnight = midnightUtc.toLocalDateTime();
     LocalDateTime endDayMidnight = endDayUtc.toLocalDateTime();
 
-
-    List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, localMidnight, endDayMidnight);
+    List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearingDataToFile(null,  endDayMidnight);
 
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertTrue("La lista debe estar vacia", data.isEmpty());
   }
 
   @Test
-  public void shouldFail_missingFrom() throws Exception{
-    try{
-      getPrepaidClearingEJBBean10().searchClearingDataToFile(null, null, null);
-      Assert.fail("Should not be here");
-    } catch (BadRequestException brex) {
-      Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
-    }
-  }
-
-  @Test
   public void shouldFail_missingTo() throws Exception{
     try{
-      getPrepaidClearingEJBBean10().searchClearingDataToFile(null, LocalDateTime.now(), null);
+      getPrepaidClearingEJBBean10().searchClearingDataToFile(null, null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
