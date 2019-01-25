@@ -3,7 +3,9 @@ package cl.multicaja.test.db;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.swing.text.DateFormatter;
@@ -22,6 +24,14 @@ import static cl.multicaja.test.db.Test_20190114151738_mc_acc_create_clearing_da
 public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA_ACCOUNTING + ".mc_acc_search_clearing_data_for_file_v10";
+
+  @BeforeClass
+  @AfterClass
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.clearing cascade",SCHEMA_ACCOUNTING));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.accounting cascade", SCHEMA_ACCOUNTING));
+  }
+
 
   public static List<Map<String, Object>> getTestSuiteOk(){
 
@@ -137,6 +147,7 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
 
     return map;
   }
+
   @Test
   public void getAccountsByDateOk() throws SQLException {
 
@@ -193,12 +204,13 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
 
     List<Map<String, Object>> testSuite = getTestSuiteOk();
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     Map<String, Object> paramIn = null;
-    Map<String, Object> clearinFile = Test_20190114145205_create_sp_mc_acc_create_accounting_file_v10.createAccountingFile(getRandomString(10),getRandomString(10),getRandomString(10),getRandomString(10),getRandomString(10),"OK");
+    String fileIdString = getRandomString(10);
+    
+    Map<String, Object> clearinFile = Test_20190114145205_create_sp_mc_acc_create_accounting_file_v10.createAccountingFile(getRandomString(10),fileIdString,getRandomString(10),getRandomString(10),getRandomNumericString(10),"OK");
     Long fileId = numberUtils.toLong(clearinFile.get("_r_id"));
+    System.out.println("FileId: "+fileId);
+    Assert.assertNotNull("File id no puede ser null",fileId);
     for (Map<String, Object> testCase : testSuite) {
 
       List<Map<String, Object>> acc_created = Test_20181126083955_create_sp_mc_prp_insert_accounting_data.insertAccountOkByTestCase();
@@ -206,15 +218,14 @@ public class Test_20190122143736_create_sp_mc_acc_search_clearing_data_for_file_
       for (Map<String, Object> acc : acc_created) {
         Map<String, Object> data = createClearingData(numberUtils.toLong(acc.get("id")),numberUtils.random(1L,9999L),fileId,"OK");
         Assert.assertNotNull("La respuesta no debe ser null",data);
-        paramIn = new HashMap<>();
-        paramIn.put("_in_to", "");
-        paramIn.put("_in_status", "OK");
-        paramIn.put("_in_file_id",fileId);
-        Map<String, Object> resp = queryByFileId(paramIn);
-        Assert.assertNotNull("Debe retornar respuesta", resp);
-        Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("id")) > 0);
       }
     }
-
+    paramIn = new HashMap<>();
+    paramIn.put("_in_to", "");
+    paramIn.put("_in_status", "");
+    paramIn.put("_in_file_id",fileIdString);
+    Map<String, Object> resp = queryByFileId(paramIn);
+    Assert.assertNotNull("Debe retornar respuesta", resp);
+    Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("id")) > 0);
   }
 }
