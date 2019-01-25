@@ -420,7 +420,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
       AccountingFiles10 file = prepaidClearingEJBBean10.generateClearingFile(headersToMap(headers), ZonedDateTime.now());
 
-      clearingFileDelegate.uploadFile(file.getName());
+      //clearingFileDelegate.uploadFile(file.getName());
 
 
       response.put("file_name", file.getName());
