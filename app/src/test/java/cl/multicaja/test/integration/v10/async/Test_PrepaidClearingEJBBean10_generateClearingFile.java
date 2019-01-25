@@ -31,7 +31,7 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
   @Before
-  //@After
+  @After
   public void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));

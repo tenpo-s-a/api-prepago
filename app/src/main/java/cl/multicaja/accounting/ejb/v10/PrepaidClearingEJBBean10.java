@@ -19,6 +19,7 @@ import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import com.opencsv.CSVWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,10 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -336,6 +334,25 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return file;
   }
 
+  private final String TIME_ZONE = "America/Santiago";
+  private final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+  private String getTimestampAtTimezone(Timestamp ts, String timeZone, String pattern) {
+    if(ts == null) {
+      ts = Timestamp.from(Instant.now());
+    }
+    if(StringUtils.isAllBlank(timeZone)) {
+      timeZone = TIME_ZONE;
+    }
+    if(StringUtils.isAllBlank(pattern)) {
+      pattern = DATE_PATTERN;
+    }
+    LocalDateTime localDateTime = ts.toLocalDateTime();
+    ZonedDateTime utc = localDateTime.atZone(ZoneOffset.UTC);
+    ZonedDateTime atTimezone = utc.withZoneSameInstant(ZoneId.of(timeZone));
+    return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
+  }
+
 
   public void createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
@@ -353,9 +370,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       Long accountId = mov.getUserBankAccount().getId();
 
-      //TODO: revisar estas fechas
-      String transactionDate = mov.getTransactionDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh24:mm:ss"));
-      String reconciliationDate = mov.getConciliationDate().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh24:mm:ss"));
+      String transactionDate = getTimestampAtTimezone(mov.getTransactionDate(), null, null);
+      String reconciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null, null);
 
       String[] data = new String[]{
         mov.getId().toString(), //ID,

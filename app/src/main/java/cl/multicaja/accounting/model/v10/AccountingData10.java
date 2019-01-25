@@ -1,6 +1,5 @@
 package cl.multicaja.accounting.model.v10;
 
-import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -8,7 +7,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class AccountingData10 implements Serializable {
 
@@ -101,10 +101,10 @@ public class AccountingData10 implements Serializable {
   }
 
   public String getTransactionDateInFormat() {
-    return DateUtils.getInstance().dateToStringFormat(new Date(transactionDate.getTime()),"yyyy-MM-dd hh24:mm:ss");
+    return transactionDate.toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
   public String getConciliationDateInFormat() {
-    return DateUtils.getInstance().dateToStringFormat(new Date(conciliationDate.getTime()),"yyyy-MM-dd hh24:mm:ss");
+    return conciliationDate.toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
   public void setTransactionDate(Timestamp transactionDate) {
     this.transactionDate = transactionDate;
