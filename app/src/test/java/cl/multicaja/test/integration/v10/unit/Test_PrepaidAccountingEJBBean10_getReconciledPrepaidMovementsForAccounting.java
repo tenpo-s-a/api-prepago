@@ -31,7 +31,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
 
   @Test(expected = BadRequestException.class)
   public void dateNull()throws Exception {
-      List<PrepaidMovement10> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), null);
+      List<PrepaidAccountingMovement> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), null);
       Assert.fail("Should not be here");
   }
 
@@ -96,9 +96,11 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
       Thread.sleep(1000);
-      List<PrepaidMovement10> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+      List<PrepaidAccountingMovement> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
       Assert.assertEquals("Debe ser 3 ", 3,lstMovement10s.size());
-
+      for (PrepaidAccountingMovement m : lstMovement10s) {
+        Assert.assertNotNull("Debe tener fecha de conciliacion", m.getReconciliationDate());
+      }
     }
   }
 

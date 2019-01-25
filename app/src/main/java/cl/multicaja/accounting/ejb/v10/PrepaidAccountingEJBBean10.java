@@ -222,7 +222,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
    * @return
    * @throws Exception
    */
-  public List<PrepaidMovement10> getReconciledPrepaidMovementsForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
+  public List<PrepaidAccountingMovement> getReconciledPrepaidMovementsForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception {
     if(date == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
     }
@@ -238,6 +238,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     RowMapper rm = (Map<String, Object> row) -> {
       try{
+        PrepaidAccountingMovement pA = new PrepaidAccountingMovement();
+
         PrepaidMovement10 p = new PrepaidMovement10();
         p.setId(getNumberUtils().toLong(row.get("_id")));
         p.setIdMovimientoRef(getNumberUtils().toLong(row.get("_id_movimiento_ref")));
@@ -280,10 +282,13 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         p.setLinref(getNumberUtils().toInteger(row.get("_linref")));
         p.setNumbencta(getNumberUtils().toInteger(row.get("_numbencta")));
         p.setNumplastico(getNumberUtils().toLong(row.get("_numplastico")));
+
+        pA.setPrepaidMovement10(p);
+        pA.setReconciliationDate((Timestamp) row.get("_fecha_conciliacion"));
         log.info("RowMapper getPrepaidMovements");
         log.info(p);
 
-        return p;
+        return pA;
       }catch (Exception e){
         e.printStackTrace();
         log.info("RowMapper Error: "+e);
@@ -310,22 +315,21 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     log.info("Buscando movimientos a insertar en tabla de contabilidad. -> [fecha]: " + date.toString());
 
     //Obtiene los movimientos
-    List<PrepaidMovement10> movements = this.getReconciledPrepaidMovementsForAccounting(headers, date);
+    List<PrepaidAccountingMovement> movements = this.getReconciledPrepaidMovementsForAccounting(headers, date);
 
     if(movements != null) {
 
       log.info("Se filtran los movimientos por tipo de factura -> Cargas y Retiros");
-      movements = movements.stream().filter(movement -> (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac()) ||
-        TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac()) ||
-        TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac()) ||
-        TipoFactura.RETIRO_TRANSFERENCIA.equals(movement.getTipofac())
+      movements = movements.stream().filter(movement -> (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getPrepaidMovement10().getTipofac()) ||
+        TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getPrepaidMovement10().getTipofac()) ||
+        TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getPrepaidMovement10().getTipofac())
       ))
         .collect(Collectors.toList());
 
 
       List<AccountingData10> accountingMovements = new ArrayList<>();
 
-      for (PrepaidMovement10 m : movements) {
+      for (PrepaidAccountingMovement m : movements) {
         AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK);
         accountingMovements.add(accounting);
       }
@@ -349,9 +353,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
-  public AccountingData10 buildAccounting10(PrepaidMovement10 movement, AccountingStatusType accountingStatus) {
+  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType accountingStatus) {
     AccountingTxType type = AccountingTxType.RETIRO_WEB;;
     AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
+
+    PrepaidMovement10 movement = accountingMovement.getPrepaidMovement10();
 
     if(TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
       type = AccountingTxType.CARGA_WEB;
@@ -438,8 +444,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     accounting.setAmountBalance(amountToBalance);
     accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
-    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha de conciliacion
-    accounting.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
+    accounting.setConciliationDate(accountingMovement.getReconciliationDate());
 
     return accounting;
   }

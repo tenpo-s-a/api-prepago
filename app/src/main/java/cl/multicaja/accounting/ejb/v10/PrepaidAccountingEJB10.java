@@ -4,7 +4,7 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
 import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidAccountingMovement;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ public interface PrepaidAccountingEJB10 {
    * @return
    * @throws Exception
    */
-  List<PrepaidMovement10> getReconciledPrepaidMovementsForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
+  List<PrepaidAccountingMovement> getReconciledPrepaidMovementsForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
 
   /**
    * Procesa los movimientos conciliados para agregarlos en la tabla de contabilidad

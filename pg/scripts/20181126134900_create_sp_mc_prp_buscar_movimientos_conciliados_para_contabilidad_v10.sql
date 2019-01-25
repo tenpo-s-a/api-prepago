@@ -61,7 +61,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_conciliados_para_
   OUT _tipolin            VARCHAR,
   OUT _linref             NUMERIC,
   OUT _numbencta          NUMERIC,
-  OUT _numplastico        NUMERIC
+  OUT _numplastico        NUMERIC,
+  OUT _fecha_conciliacion TIMESTAMP
 )
 RETURNS SETOF RECORD AS $$
 BEGIN
@@ -107,7 +108,8 @@ BEGIN
     m.tipolin,
     m.linref,
     m.numbencta,
-    m.numplastico
+    m.numplastico,
+    mc.fecha_registro
   FROM
     ${schema}.prp_movimiento m
     INNER JOIN ${schema}.prp_movimiento_conciliado mc
