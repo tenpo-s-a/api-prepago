@@ -286,29 +286,37 @@ public class PendingTopup10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-      log.info("processPendingTopupReturns - REQ: " + req);
-      req.retryCountNext();
-      PrepaidTopupData10 data = req.getData();
-        if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
+        log.info("processPendingTopupReturns - REQ: " + req);
+        req.retryCountNext();
+        PrepaidTopupData10 data = req.getData();
+        if (Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
           Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
-          String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_1","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas1(template,"Error al realizar carga",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId(),data.getPrepaidMovement10().getNumaut(),data.getPrepaidTopup10().getAmount().getValue().longValue());
+          String template = getRoute().getParametersUtil().getString("api-prepaid", "template_ticket_cola_1", "v1.0");
+          template = TemplateUtils.freshDeskTemplateColas1(template, "Error al realizar carga", String.format("%s %s", data.getUser().getName(), data.getUser().getLastname_1()), String.format("%s-%s", data.getUser().getRut().getValue(), data
+            .getUser().getRut().getDv()), data.getUser().getId(), data.getPrepaidMovement10().getNumaut(), data.getPrepaidTopup10().getAmount().getValue().longValue());
 
-          NewTicket newTicket = createTicket(String.format("Error al realizar carga %s",data.getPrepaidTopup10().getTransactionOriginType().name()),
+          NewTicket newTicket = createTicket(String.format("Error al realizar carga %s", data.getPrepaidTopup10().getTransactionOriginType().name()),
             template,
             String.valueOf(data.getUser().getRut().getValue()),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.TOPUP,
             req.getReprocesQueue());
 
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
-          if(ticket.getId() != null){
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null, data.getUser().getId(), newTicket);
+          if (ticket.getId() != null) {
             log.info("Ticket Creado Exitosamente");
           }
-        } else {
+        } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
+          //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
+          // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
+          // tan rapido. Investigar?
+        } else if (PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP.equals(data.getPrepaidMovement10().getEstado())) {
+          //TODO: que hacer con los otros errores (codigo != 200) de tecnocom. Devolverse? Invertigarse?
+          // Hay otros errores no reintentables (ver CodigoRetorno.java) que podria devolver Tecnocom.
+          // Se debe decidir que hacer con esos errores, entran dentro de la devolucion?
+        } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", data.getUser().getId().toString());
           templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
