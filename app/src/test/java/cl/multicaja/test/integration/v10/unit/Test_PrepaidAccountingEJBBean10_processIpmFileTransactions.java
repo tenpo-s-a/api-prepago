@@ -110,6 +110,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
 
   }
+
   private List<ClearingData10> getDbClearingTransactions() {
     List<ClearingData10> trxs = new ArrayList<>();
 
