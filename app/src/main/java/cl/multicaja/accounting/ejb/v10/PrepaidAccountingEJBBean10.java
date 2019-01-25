@@ -36,8 +36,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -427,9 +426,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     accounting.setFileId(0L);
     accounting.setAmountBalance(new NewAmountAndCurrency10(movement.getImpfac().subtract(fee).subtract(feeIva)));
     accounting.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha
-    //de conciliacion
-    accounting.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+    //TODO: Modificar procedimiento que busca estos movimientos para que cruze con la tabla de Movimientos conciliados y obtenga la fecha de conciliacion
+
+    accounting.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
 
     return accounting;
   }
@@ -766,7 +765,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setCollectorFeeIva(BigDecimal.ZERO);
 
       //TODO: Revisar Fecha
-      acc.setConciliationDate(new Timestamp(System.currentTimeMillis()));
+      acc.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
       acc.setStatus(AccountingStatusType.OK);
 
       transactions.add(acc);
