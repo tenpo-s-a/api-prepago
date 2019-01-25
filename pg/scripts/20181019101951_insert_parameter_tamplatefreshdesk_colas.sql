@@ -58,4 +58,5 @@ VALUES
 -- //@UNDO
 -- SQL to undo the change goes here.
 DELETE FROM ${schema}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'template_ticket_cola_1' AND version = 'v1.0';
+
 DELETE FROM ${schema}.mc_parametro WHERE aplicacion = 'api-prepaid' AND nombre = 'template_ticket_cola_2' AND version = 'v1.0';
