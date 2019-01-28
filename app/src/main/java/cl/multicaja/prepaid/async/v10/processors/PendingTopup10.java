@@ -312,7 +312,6 @@ public class PendingTopup10 extends BaseProcessor10 {
             log.info("Ticket Creado Exitosamente");
           }
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
-<<<<<<< HEAD
           //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
           // tan rapido. Investigar?
@@ -321,10 +320,6 @@ public class PendingTopup10 extends BaseProcessor10 {
           // Hay otros errores no reintentables (ver CodigoRetorno.java) que podria devolver Tecnocom.
           // Se debe decidir que hacer con esos errores, entran dentro de la devolucion?
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
-=======
-          // TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
-        } else {
->>>>>>> master
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", data.getUser().getId().toString());
           templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
