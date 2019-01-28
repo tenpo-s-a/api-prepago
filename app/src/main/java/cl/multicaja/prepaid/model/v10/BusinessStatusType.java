@@ -10,6 +10,11 @@ import java.util.stream.Stream;
 public enum BusinessStatusType {
 
   OK("OK"),
+  IN_PROCESS("IN_PROCESS"),
+  REJECTED("REJECTED"),
+  TO_REFUND("TO_REFUND"),
+  REFUNDED("REFUNDED"),
+  CONFIRMED("CONFIRMED"),
   REVERSED("REVERSED");
 
   public String getValue() {
