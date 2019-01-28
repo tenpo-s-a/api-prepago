@@ -902,7 +902,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     }
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  (
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) && (
       PrepaidMovementStatus.REJECTED.equals(mov.getEstado())
     ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
       log.debug("XLS ID 9");
