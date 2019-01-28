@@ -1,18 +1,14 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.AccountingData10;
-import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -28,9 +24,9 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
 
-  @BeforeClass
-  @AfterClass
-  public static void beforeClass() {
+  @Before
+  @After
+  public void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", getSchema()));
@@ -44,13 +40,13 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   }
 
   @Test
-  public void processMovementForAccounting()throws Exception {
+  public void processMovementForAccounting_PosTopup()throws Exception {
     {
       User user = registerUser();
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
-
+      prepaidTopup.setMerchantCode(getRandomString(15));
       List<Long> originalMovementsIds = new ArrayList<>();
 
       // CREA MOVIMIENTOS
@@ -99,6 +95,19 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       for (AccountingData10 m : accountinMovements) {
         Assert.assertNotNull("Debe tener id", m.getId());
+        Assert.assertEquals("Debe ser Carga_POS", AccountingTxType.CARGA_POS, m.getType());
+        Assert.assertEquals("Debe ser Amount Mastercard -> 0", BigDecimal.ZERO, m.getAmountMastercard().getValue());
+        Assert.assertEquals("Debe ser Amount usd -> 0", BigDecimal.ZERO, m.getAmountUsd().getValue());
+        Assert.assertEquals("Debe ser Fee -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Fee Iva -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Fee Iva -> 0", BigDecimal.ZERO, m.getFeeIva());
+        Assert.assertEquals("Debe ser ExchangeRateDiff -> 0", BigDecimal.ZERO, m.getExchangeRateDif());
+        BigDecimal amountBalance = BigDecimal.ZERO
+          .add(m.getAmount().getValue())
+          .subtract(m.getCollectorFee())
+          .subtract(m.getCollectorFeeIva());
+
+        Assert.assertEquals("AmountBalance = amount - fee - feeIva", amountBalance, m.getAmountBalance().getValue());
 
         Long originalMovement = originalMovementsIds.stream()
           .filter(mov -> mov.equals(m.getIdTransaction()))
@@ -108,6 +117,232 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
         Assert.assertNotNull("Debe estar entre los movimientos insertados", originalMovement);
 
       }
+      List<ClearingData10> clearing10s = getDbClearingTransactions();
+      Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
+    }
+  }
+
+  @Test
+  public void processMovementForAccounting_TefTopup()throws Exception {
+    {
+      User user = registerUser();
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      List<Long> originalMovementsIds = new ArrayList<>();
+
+      // CREA MOVIMIENTOS
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
+
+      Thread.sleep(1000);
+
+      List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+
+      Assert.assertEquals("Debe ser 3 ", 3,accountinMovements.size());
+
+      for (AccountingData10 m : accountinMovements) {
+        Assert.assertNotNull("Debe tener id", m.getId());
+        Assert.assertEquals("Debe ser CARGA_WEB", AccountingTxType.CARGA_WEB, m.getType());
+        Assert.assertEquals("Debe ser Amount Mastercard -> 0", BigDecimal.ZERO, m.getAmountMastercard().getValue());
+        Assert.assertEquals("Debe ser Amount usd -> 0", BigDecimal.ZERO, m.getAmountUsd().getValue());
+        Assert.assertEquals("Debe ser Fee -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Fee Iva -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Collector Fee -> 0", BigDecimal.ZERO, m.getCollectorFee());
+        Assert.assertEquals("Debe ser Collector Fee Iva -> 0", BigDecimal.ZERO, m.getCollectorFeeIva());
+        Assert.assertEquals("Debe ser ExchangeRateDiff -> 0", BigDecimal.ZERO, m.getExchangeRateDif());
+        BigDecimal amountBalance = BigDecimal.ZERO
+          .add(m.getAmount().getValue())
+          .subtract(m.getCollectorFee())
+          .subtract(m.getCollectorFeeIva());
+
+        Assert.assertEquals("AmountBalance = amount - fee - feeIva", amountBalance, m.getAmountBalance().getValue());
+
+        Long originalMovement = originalMovementsIds.stream()
+          .filter(mov -> mov.equals(m.getIdTransaction()))
+          .findAny()
+          .orElse(null);
+
+        Assert.assertNotNull("Debe estar entre los movimientos insertados", originalMovement);
+
+      }
+      List<ClearingData10> clearing10s = getDbClearingTransactions();
+      Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
+    }
+  }
+
+  @Test
+  public void processMovementForAccounting_PosWithdraw()throws Exception {
+    {
+      User user = registerUser();
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(getRandomString(15));
+      List<Long> originalMovementsIds = new ArrayList<>();
+
+      // CREA MOVIMIENTOS
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.NEED_VERIFICATION);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
+
+      Thread.sleep(1000);
+
+      List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+
+      Assert.assertEquals("Debe ser 3 ", 3,accountinMovements.size());
+
+      for (AccountingData10 m : accountinMovements) {
+        Assert.assertNotNull("Debe tener id", m.getId());
+        Assert.assertEquals("Debe ser RETIRO_POS", AccountingTxType.RETIRO_POS, m.getType());
+        Assert.assertEquals("Debe ser Amount Mastercard -> 0", BigDecimal.ZERO, m.getAmountMastercard().getValue());
+        Assert.assertEquals("Debe ser Amount usd -> 0", BigDecimal.ZERO, m.getAmountUsd().getValue());
+        Assert.assertEquals("Debe ser Fee -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Fee Iva -> 0", BigDecimal.ZERO, m.getFee());
+        Assert.assertEquals("Debe ser Fee Iva -> 0", BigDecimal.ZERO, m.getFeeIva());
+        Assert.assertEquals("Debe ser ExchangeRateDiff -> 0", BigDecimal.ZERO, m.getExchangeRateDif());
+        BigDecimal amountBalance = BigDecimal.ZERO
+          .add(m.getAmount().getValue())
+          .add(m.getCollectorFee())
+          .add(m.getCollectorFeeIva());
+
+        Assert.assertEquals("AmountBalance = amount + fee + feeIva", amountBalance, m.getAmountBalance().getValue());
+
+        Long originalMovement = originalMovementsIds.stream()
+          .filter(mov -> mov.equals(m.getIdTransaction()))
+          .findAny()
+          .orElse(null);
+
+        Assert.assertNotNull("Debe estar entre los movimientos insertados", originalMovement);
+
+      }
+      List<ClearingData10> clearing10s = getDbClearingTransactions();
+      Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
+    }
+  }
+
+  @Test
+  public void processMovementForAccounting_TefWithdraw()throws Exception {
+    {
+      User user = registerUser();
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      List<Long> originalMovementsIds = new ArrayList<>();
+
+      // CREA MOVIMIENTOS
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.NEED_VERIFICATION);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
+      updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
+      originalMovementsIds.add(prepaidMovement10.getId());
+
+      ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
+
+      Thread.sleep(1000);
+
+      List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+
+      // Retiros web no se procesan por este metodo
+      Assert.assertEquals("Debe ser 0 ", 0,accountinMovements.size());
       List<ClearingData10> clearing10s = getDbClearingTransactions();
       Assert.assertEquals("Deben ser iguales",accountinMovements.size(),clearing10s.size());
     }
