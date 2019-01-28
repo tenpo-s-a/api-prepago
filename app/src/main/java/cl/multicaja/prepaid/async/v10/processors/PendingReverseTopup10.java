@@ -98,6 +98,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
                 log.debug("********** Movimiento original no existia previamente **********");
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.CONFIRMED);
                 // Incluir datos en CDT.
                 CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
                 callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
@@ -106,12 +107,14 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
                   log.debug("********** Movimiento original ya existia **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.CONFIRMED);
                   // Incluir datos en CDT.
                   CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
                   callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
                 } else {
                   log.debug("********** Movimiento original rechazado **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
+                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REJECTED);
                 }
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
@@ -142,7 +145,11 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.CONFIRMED);
+
               req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
+              req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
+
               log.debug("********** Reversa de retiro realizada exitosamente **********");
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
               CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L,
@@ -157,6 +164,10 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.debug("********** Reversa de retiro ya existia **********");
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.CONFIRMED);
+
+                req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
+                req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
                 CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L, CdtTransactionType.REVERSA_CARGA);
                 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,cdtTxReversa.getTransactionReference(),cdtTxReversa.getCdtTransactionTypeConfirm());
                 if(!"0".equals(cdtTxReversa.getNumError())){
@@ -166,6 +177,10 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.debug("********** Reversa de retiro rechazada **********");
                 log.debug(inclusionMovimientosDTO.getDescRetorno());
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.REJECTED);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.REJECTED);
+
+                req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.REJECTED);
+                req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.REJECTED);
               }
             } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
@@ -187,6 +202,9 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             }
           }else {
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
+            getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.CONFIRMED);
+
+            req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
           }
         }catch (Exception e){
           e.printStackTrace();
