@@ -1,8 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.AccountingData10;
-import cl.multicaja.accounting.model.v10.AccountingStatusType;
-import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
@@ -40,7 +38,7 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
   }
 
   @Test
-  public void searchData() throws Exception{
+  public void searchDataByDate() throws Exception{
     AccountingData10 accounting1 = buildRandomAccouting();
     List<AccountingData10> accounting1s = new ArrayList<>();
     accounting1s.add(accounting1);
@@ -74,6 +72,74 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
 
 
     List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearingDataToFile(null, endDayMidnight);
+
+    Assert.assertNotNull("No deberia ser null", data);
+    Assert.assertFalse("La lista no debe estar vacia", data.isEmpty());
+    Assert.assertEquals("Debe tener 2 registros", 2, data.size());
+
+    for (ClearingData10 d : data) {
+      if(d.getId().equals(clearing1.getId())) {
+        this.checkAttributes(accounting1, d);
+      } else {
+        this.checkAttributes(accounting2, d);
+      }
+    }
+  }
+
+  @Test
+  public void searchDataByFileId() throws Exception{
+    clearData();
+
+    AccountingData10 accounting1 = buildRandomAccouting();
+    List<AccountingData10> accounting1s = new ArrayList<>();
+    accounting1s.add(accounting1);
+    accounting1s = getPrepaidAccountingEJBBean10().saveAccountingData(null,accounting1s);
+
+    ClearingData10 clearing1 = buildClearing();
+    clearing1.setAccountingId(accounting1s.get(0).getId());
+
+    //Create File
+    AccountingFiles10 files10 = new AccountingFiles10();
+    files10.setFileId(getRandomNumericString(10));
+    files10.setName("Test");
+    files10.setStatus(AccountingStatusType.PENDING);
+    files10.setFileFormatType(AccountingFileFormatType.CSV);
+    files10.setUrl("");
+    files10.setFileType(AccountingFileType.CLEARING);
+
+    files10 = getPrepaidAccountingFileEJBBean10().insertAccountingFile(null,files10);
+    Assert.assertNotNull("No debe ser null",files10);
+    Assert.assertNotEquals("ID no debe ser 0",0,files10.getId().longValue());
+
+    //Insert Clearing Data
+    clearing1.setFileId(files10.getId());
+    clearing1 = getPrepaidClearingEJBBean10().insertClearingData(null,clearing1);
+    Assert.assertNotNull("El objeto no puede ser Null",clearing1);
+    Assert.assertNotEquals("El id no puede ser 0",0,clearing1.getId().longValue());
+    AccountingData10 accounting2 = buildRandomAccouting();
+
+    List<AccountingData10> accounting2s = new ArrayList<>();
+    accounting2s.add(accounting2);
+    accounting2s = getPrepaidAccountingEJBBean10().saveAccountingData(null,accounting2s);
+
+    ClearingData10 clearing2 = buildClearing();
+    clearing2.setAccountingId(accounting2s.get(0).getId());
+
+    //Insert Clearing adata
+    clearing2.setFileId(files10.getId());
+    clearing2 = getPrepaidClearingEJBBean10().insertClearingData(null,clearing2);
+    Assert.assertNotNull("El objeto no puede ser Null", clearing2);
+    Assert.assertNotEquals("El id no puede ser 0",0, clearing2.getId().longValue());
+
+    ZonedDateTime zd = ZonedDateTime.now();
+    ZonedDateTime endDay = zd.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+    ZonedDateTime endDayUtc = ZonedDateTime.ofInstant(endDay.toInstant(), ZoneOffset.UTC);
+
+    LocalDateTime endDayMidnight = endDayUtc.toLocalDateTime();
+
+
+    List<ClearingData10> data = getPrepaidClearingEJBBean10().searchClearignDataByFileId(null, files10.getFileId());
 
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertFalse("La lista no debe estar vacia", data.isEmpty());

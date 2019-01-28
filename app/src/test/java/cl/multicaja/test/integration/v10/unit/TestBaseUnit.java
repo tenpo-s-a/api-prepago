@@ -32,7 +32,6 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.security.common.FileRealmHelper;
 import org.junit.Assert;
 
 import java.math.BigDecimal;
@@ -1312,6 +1311,44 @@ public class TestBaseUnit extends TestApiBase {
     header.put(cl.multicaja.core.utils.Constants.HEADER_USER_LOCALE, cl.multicaja.core.utils.Constants.DEFAULT_LOCALE.toString());
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
+  }
+  protected AccountingData10 buildRandomAccouting(AccountingTxType accountingTxType){
+    AccountingData10 accounting10 = new AccountingData10();
+    accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));
+    accounting10.setOrigin(AccountingOriginType.IPM);
+    accounting10.setType(accountingTxType);
+    accounting10.setIdTransaction(getUniqueLong());
+    accounting10.setFeeIva(new BigDecimal(getUniqueInteger()));
+    accounting10.setFee(new BigDecimal(getUniqueInteger()));
+    accounting10.setExchangeRateDif(new BigDecimal(getUniqueInteger()));
+
+    accounting10.setConciliationDate(new Timestamp((new Date()).getTime()));
+    accounting10.setAccountingMovementType(AccountingMovementType.COMPRA_MONEDA);
+    accounting10.setCollectorFee(new BigDecimal(getUniqueInteger()));
+    accounting10.setCollectorFeeIva(new BigDecimal(getUniqueInteger()));
+
+    NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+    amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountBalance.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountBalance(amountBalance);
+    accounting10.setStatus(AccountingStatusType.OK);
+    accounting10.setFileId(0L);
+
+    NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
+    amountMcar.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountMcar.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountMastercard(amountMcar);
+
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amount.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmount(amount);
+
+    NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+    amountUsd.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    amountUsd.setValue(new BigDecimal(getUniqueInteger()));
+    accounting10.setAmountUsd(amountUsd);
+    return accounting10;
   }
   protected AccountingData10 buildRandomAccouting(){
     AccountingData10 accounting10 = new AccountingData10();
