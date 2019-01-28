@@ -27,6 +27,7 @@ import javax.ejb.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.*;
@@ -375,7 +376,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       String usdValue = "";
       if(mov.getAmountMastercard().getValue().doubleValue() > 0) {
-        usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue())).toString();
+        usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
       }
 
       String[] data = new String[]{
