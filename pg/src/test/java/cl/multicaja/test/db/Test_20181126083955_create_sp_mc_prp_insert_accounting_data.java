@@ -267,8 +267,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
 
   public static List<Map<String,Object>> insertAccountOkByTestCase() throws SQLException {
 
-    List<Map<String, Object>> respList  = new ArrayList<Map<String, Object>>();
-
+    List<Map<String, Object>> respList  = new ArrayList<>();
     List<Map<String, Object>> testSuite = getTestSuiteOk();
     for (Map<String, Object> testCase : testSuite) {
       Map<String, Object> resp = insertAccount(testCase);

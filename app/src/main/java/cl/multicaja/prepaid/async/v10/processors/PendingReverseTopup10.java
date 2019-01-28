@@ -101,7 +101,6 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 // Incluir datos en CDT.
                 CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
                 callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
-
               } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
                 // La inclusion devuelve error, se evalua el error.
                 if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
@@ -113,7 +112,6 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 } else {
                   log.debug("********** Movimiento original rechazado **********");
                   getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
-
                 }
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
@@ -121,6 +119,8 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
               } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+              } else { // Ningun error tipico
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP);
               }
               // Se envia el mensaje para ser procesado nuevamente
               return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
