@@ -378,10 +378,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     accounting.setOrigin(AccountingOriginType.MOVEMENT);
     accounting.setType(type);
     accounting.setAccountingMovementType(movementType);
-    accounting.setAmount(new NewAmountAndCurrency10(movement.getImpfac()));
+    accounting.setAmount(new NewAmountAndCurrency10(movement.getImpfac().setScale(0, BigDecimal.ROUND_HALF_UP)));
 
     //Se colocan en 0 ya que solo se procesan cargas y retiros
-    NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.ZERO);
+    NewAmountAndCurrency10 zero = new NewAmountAndCurrency10(BigDecimal.ZERO.setScale(0, BigDecimal.ROUND_HALF_UP));
     accounting.setAmountUsd(zero);
     accounting.setExchangeRateDif(BigDecimal.ZERO);
     accounting.setAmountMastercard(zero);
@@ -393,8 +393,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       case TOPUP:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
-          fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT();
-          feeIva = getCalculationsHelper().calculateFeeIva(fee);
+          fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
 
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
@@ -403,8 +403,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         }
         else {
           // Comision es Fija $200
-          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-          feeIva = getCalculationsHelper().calculateFeeIva(fee);
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -414,8 +414,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
-          fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT();
-          feeIva = getCalculationsHelper().calculateFeeIva(fee);
+          fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
           accounting.setCollectorFee(BigDecimal.ZERO);
@@ -423,8 +423,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         }
         else {
           // Comision es Fija $200
-          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT();
-          feeIva = getCalculationsHelper().calculateFeeIva(fee);
+          fee = getPercentage().getTOPUP_POS_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -725,7 +725,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           ipmFile.getCurrencyExponents().get(
             trx.getCardholderBillingCurrencyCode()
           )
-        )
+        ).setScale(0, BigDecimal.ROUND_HALF_UP)
       ));
 
       //Monto en usd
@@ -735,7 +735,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           ipmFile.getCurrencyExponents().get(
             trx.getReconciliationCurrencyCode()
           )
-        )
+        ).setScale(2, BigDecimal.ROUND_UNNECESSARY)
       ));
 
       BigDecimal fee = BigDecimal.ZERO;
@@ -772,16 +772,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           iva = this.getCalculationsHelper().calculatePercentageValue(fee, BigDecimal.valueOf(this.getCalculationsHelper().getCalculatorParameter10().getIVA()));
 
           //  1.5% del monto CLP (DE6)
-          exchangeRateDiff = this.getCalculationsHelper().calculatePercentageValue(acc.getAmount().getValue(), this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE());
+          exchangeRateDiff = this.getCalculationsHelper().calculatePercentageValue(acc.getAmountMastercard().getValue(), this.getCalculationsHelper().getCalculatorParameter10().getOTHER_CURRENCY_PURCHASE_EXCHANGE_RATE_PERCENTAGE());
           break;
       }
 
-      acc.setFee(fee);
-      acc.setFeeIva(iva);
+      acc.setFee(fee.setScale(0, BigDecimal.ROUND_HALF_UP));
+      acc.setFeeIva(iva.setScale(0, BigDecimal.ROUND_HALF_UP));
       acc.setExchangeRateDif(exchangeRateDiff);
       acc.setFileId(0L);
       // Monto que afecta al saldo del cliente
-      acc.setAmountBalance(new NewAmountAndCurrency10(acc.getAmountMastercard().getValue().add(acc.getFee()).add(acc.getFeeIva())));
+      acc.setAmountBalance(new NewAmountAndCurrency10(acc.getAmountMastercard().getValue().add(acc.getFee()).add(acc.getFeeIva()).add(acc.getExchangeRateDif()).setScale(0, BigDecimal.ROUND_UP)));
       acc.setCollectorFee(BigDecimal.ZERO);
       acc.setCollectorFeeIva(BigDecimal.ZERO);
 

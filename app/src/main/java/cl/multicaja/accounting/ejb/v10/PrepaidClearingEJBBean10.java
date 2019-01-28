@@ -382,21 +382,21 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getId().toString(), //ID_PREPAGO,
         fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
-        "0", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
+        "", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
         mov.getType().getValue(), //TIPO_TRX
         mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
         transactionDate, //FECHA_TRX
         reconciliationDate, //FECHA_CONCILIACION
-        mov.getAmount().getValue().toString(), //MONTO_TRX_PESOS
-        mov.getAmountMastercard().getValue().toString(), //MONTO_TRX_MCARD_PESOS
+        mov.getAmount().getValue().toBigInteger().toString(), //MONTO_TRX_PESOS
+        mov.getAmountMastercard().getValue().toBigInteger().toString(), //MONTO_TRX_MCARD_PESOS
         mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
         usdValue, //VALOR_USD
         mov.getExchangeRateDif().toString(), //DIF_TIPO_CAMBIO
-        mov.getFee().toString(), //COMISION_PREPAGO_PESOS
-        mov.getFeeIva().toString(), //IVA_COMISION_PREPAGO_PESOS
-        mov.getCollectorFee().toString(), //COMISION_RECAUDADOR_MC_PESOS
-        mov.getCollectorFeeIva().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
-        mov.getAmountBalance().getValue().toString(), //MONTO_AFECTO_A_SALDO_PESOS
+        mov.getFee().toBigInteger().toString(), //COMISION_PREPAGO_PESOS
+        mov.getFeeIva().toBigInteger().toString(), //IVA_COMISION_PREPAGO_PESOS
+        mov.getCollectorFee().toBigInteger().toString(), //COMISION_RECAUDADOR_MC_PESOS
+        mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
+        mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
         accountId > 0 ? String.format("%s-%s", mov.getUserBankAccount().getRut().getValue(), mov.getUserBankAccount().getRut().getDv()) : "", //RUT
         accountId > 0 ? mov.getUserBankAccount().getBankName() : "", //BANCO
