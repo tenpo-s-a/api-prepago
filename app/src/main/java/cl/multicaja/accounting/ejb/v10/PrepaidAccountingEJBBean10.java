@@ -232,7 +232,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     Object[] params = {
       ts,
       ReconciliationStatusType.RECONCILED.getValue(),
-      BusinessStatusType.OK.getValue(),
+      BusinessStatusType.CONFIRMED.getValue(),
       AccountingOriginType.MOVEMENT.getValue()
     };
 

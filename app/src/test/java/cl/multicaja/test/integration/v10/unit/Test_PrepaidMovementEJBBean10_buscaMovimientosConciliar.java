@@ -79,6 +79,7 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       createPrepaidMovement10(prepaidMovement10);
 
       List<PrepaidMovement10> lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);
@@ -93,16 +94,19 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       createPrepaidMovement10(prepaidMovement10);
 
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       createPrepaidMovement10(prepaidMovement10);
 
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       createPrepaidMovement10(prepaidMovement10);
 
       // se agrega un movimiento de retiro web
@@ -112,6 +116,7 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliar  extends Te
 
       prepaidWithdrawMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidWithdrawMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidWithdrawMovement.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       createPrepaidMovement10(prepaidWithdrawMovement);
 
       lstMovement10s = getPrepaidMovementEJBBean10().getMovementsForConciliate(null);

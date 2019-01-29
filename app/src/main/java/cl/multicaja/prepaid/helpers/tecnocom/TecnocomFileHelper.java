@@ -277,7 +277,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
     prepaidMovement.setMonto(batchTrx.getImpfac());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(batchTrx.getCodent());
     prepaidMovement.setCentalta(batchTrx.getCentalta());
     prepaidMovement.setCuenta(batchTrx.getCuenta());
