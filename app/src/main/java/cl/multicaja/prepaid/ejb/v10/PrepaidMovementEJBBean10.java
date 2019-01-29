@@ -987,8 +987,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           log.info("Ticket Creado Exitosamente");
         }
       } else {
-        //TODO: que se hace en los otros casos? Por ahora solo conciliamos.
-        createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+        //TODO: que se hace en los otros casos?
       }
     }
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
