@@ -166,6 +166,8 @@ public class PendingTopup10 extends BaseProcessor10 {
               Integer nummovext = inclusionMovimientosDTO.getNummovext();
               Integer clamone = inclusionMovimientosDTO.getClamone();
               PrepaidMovementStatus status = PrepaidMovementStatus.PROCESS_OK; //realizado
+              BusinessStatusType businessStatus = BusinessStatusType.CONFIRMED;
+
               log.info("Prepaid Movement Status: "+status.name() );
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
                 prepaidMovement.getId(),
@@ -175,7 +177,7 @@ public class PendingTopup10 extends BaseProcessor10 {
                 numextcta,
                 nummovext,
                 clamone,
-                null,
+                businessStatus,
                 status);
 
               prepaidMovement.setPan(prepaidCard.getPan());
@@ -185,6 +187,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               prepaidMovement.setNummovext(nummovext);
               prepaidMovement.setClamone(clamone);
               prepaidMovement.setEstado(status);
+              prepaidMovement.setEstadoNegocio(businessStatus);
               data.setPrepaidMovement10(prepaidMovement);
               CdtTransaction10 cdtTransaction = data.getCdtTransaction10();
 
@@ -245,7 +248,13 @@ public class PendingTopup10 extends BaseProcessor10 {
             } else if (CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
               // La inclusion devuelve error y el error es distinto a "ya existia"
               log.debug("********** Movimiento rechazado **********");
-              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), PrepaidMovementStatus.REJECTED);
+              PrepaidMovementStatus status = PrepaidMovementStatus.REJECTED;
+              BusinessStatusType businessStatus = BusinessStatusType.REJECTED;
+
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, data.getPrepaidMovement10().getId(), businessStatus);
+              data.getPrepaidMovement10().setEstado(status);
+              data.getPrepaidMovement10().setEstadoNegocio(businessStatus);
 
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);

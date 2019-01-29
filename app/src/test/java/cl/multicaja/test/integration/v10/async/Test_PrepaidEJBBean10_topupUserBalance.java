@@ -243,27 +243,20 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
 
     //primera carga
-    {
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
-      System.out.println("resp:: " + resp);
-
-      Assert.assertNotNull("debe tener un id", resp.getId());
-      Assert.assertTrue("debe ser primera carga", resp.isFirstTopup());
-    }
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    Assert.assertTrue("debe ser primera carga", resp.isFirstTopup());
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
-
-    System.out.println(prepaidCard10);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
     PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
-    System.out.println(prepaidBalance10);
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
         Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision(119) - comision de apertura (990))", 3000L, prepaidBalance10.getBalance().getValue().longValue());
@@ -272,6 +265,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision(0) - comision de apertura (990))", 3119L, prepaidBalance10.getBalance().getValue().longValue());
         break;
     }
+
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    Assert.assertNotNull("debe tener un movimiento", topup);
+    Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
+    Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
   }
 
   @Test
@@ -288,27 +286,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
 
     //primera carga
-    {
-      prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-      PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
 
-      System.out.println("resp:: " + resp);
-
-      Assert.assertNotNull("debe tener un id", resp.getId());
-      Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
-    }
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
-
-    System.out.println(prepaidCard10);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
     PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
-
-    System.out.println(prepaidBalance10);
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -318,6 +308,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
         break;
     }
+
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    Assert.assertNotNull("debe tener un movimiento", topup);
+    Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
+    Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
   }
 
   @Test

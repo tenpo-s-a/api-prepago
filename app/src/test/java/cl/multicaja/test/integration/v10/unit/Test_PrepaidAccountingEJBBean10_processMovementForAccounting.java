@@ -53,6 +53,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -62,6 +63,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -70,6 +72,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -79,6 +82,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -136,6 +140,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -145,6 +150,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -153,6 +159,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -162,6 +169,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -220,6 +228,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
@@ -229,6 +238,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.NEED_VERIFICATION);
@@ -237,6 +247,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
@@ -246,6 +257,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.RECONCILED);
@@ -379,6 +391,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -388,6 +401,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -396,6 +410,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -405,6 +420,7 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
