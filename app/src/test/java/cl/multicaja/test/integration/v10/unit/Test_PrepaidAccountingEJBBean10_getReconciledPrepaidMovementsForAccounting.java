@@ -31,7 +31,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
 
   @Test(expected = BadRequestException.class)
   public void dateNull()throws Exception {
-      List<PrepaidMovement10> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), null);
+      List<PrepaidAccountingMovement> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), null);
       Assert.fail("Should not be here");
   }
 
@@ -47,6 +47,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -55,6 +56,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.NEED_VERIFICATION);
@@ -68,6 +70,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -76,6 +79,7 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConSwitch(ReconciliationStatusType.PENDING);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
       prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       getPrepaidMovementEJBBean10().createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.RECONCILED);
@@ -92,13 +96,14 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
 
-
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
       Thread.sleep(1000);
-      List<PrepaidMovement10> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
+      List<PrepaidAccountingMovement> lstMovement10s = getPrepaidAccountingEJBBean10().getReconciledPrepaidMovementsForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
       Assert.assertEquals("Debe ser 3 ", 3,lstMovement10s.size());
-
+      for (PrepaidAccountingMovement m : lstMovement10s) {
+        Assert.assertNotNull("Debe tener fecha de conciliacion", m.getReconciliationDate());
+      }
     }
   }
 

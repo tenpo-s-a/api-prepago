@@ -90,6 +90,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setTipofac(TipoFactura.COMISION_APERTURA);
           issuanceFeeMovement.setId(null);
           issuanceFeeMovement.setEstado(PrepaidMovementStatus.PENDING);
+          issuanceFeeMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
           issuanceFeeMovement.setImpfac(amount);
           issuanceFeeMovement.setConTecnocom(ReconciliationStatusType.PENDING);
           issuanceFeeMovement.setConSwitch(ReconciliationStatusType.PENDING);
@@ -157,6 +158,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           Integer nummovext = inclusionMovimientosDTO.getNummovext();
           Integer clamone = inclusionMovimientosDTO.getClamone();
           PrepaidMovementStatus  status = PrepaidMovementStatus.PROCESS_OK;
+          BusinessStatusType businessStatus = BusinessStatusType.CONFIRMED;
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
@@ -166,7 +168,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             numextcta,
             nummovext,
             clamone,
-            null,
+            businessStatus,
             status);
 
           issuanceFeeMovement.setPan(prepaidCard.getPan());
@@ -176,6 +178,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setNummovext(nummovext);
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
+          issuanceFeeMovement.setEstadoNegocio(businessStatus);
 
           // Activa la tarjeta luego de realizado el cobro de emision
           prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -213,6 +216,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           Integer nummovext = 0;
           Integer clamone = 0;
           PrepaidMovementStatus  status = PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE;
+          BusinessStatusType businessStatus = BusinessStatusType.REJECTED;
 
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
             issuanceFeeMovement.getId(),
@@ -222,13 +226,14 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             numextcta,
             nummovext,
             clamone,
-            null,
+            businessStatus,
             status);
 
           issuanceFeeMovement.setNumextcta(numextcta);
           issuanceFeeMovement.setNummovext(nummovext);
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
+          issuanceFeeMovement.setEstadoNegocio(businessStatus);
 
           Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
           return redirectRequest(endpoint, exchange, req, false);

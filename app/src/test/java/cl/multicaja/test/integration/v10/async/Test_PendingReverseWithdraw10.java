@@ -41,7 +41,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
-
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, prepaidMovement, 4);
@@ -53,12 +53,13 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_WITHDRAW_REVERSE, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_WITHDRAW_REVERSE, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
     }
 
     {
@@ -79,6 +80,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
       Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_WITHDRAW_REVERSE, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", BusinessStatusType.IN_PROCESS, prepaidMovementInDb.getEstadoNegocio());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());
@@ -111,6 +113,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
     originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    originalWithdraw.setEstadoNegocio(BusinessStatusType.CONFIRMED);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
     originalWithdraw = createPrepaidMovement10(originalWithdraw);
@@ -119,6 +122,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setNumaut(null);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
@@ -130,18 +134,20 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
       Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio PROCESS_OK", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
     }
   }
 
@@ -190,6 +196,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
@@ -201,12 +208,13 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
     }
 
     // segundo intento
@@ -216,18 +224,20 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
       Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio CONFIRMED", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
 
     }
 
@@ -281,6 +291,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
@@ -292,12 +303,13 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
     }
 
     // segundo intento
@@ -307,18 +319,20 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
       Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio CONFIRMED", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
 
     }
   }
@@ -373,6 +387,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
@@ -384,12 +399,13 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
     }
 
     // segundo intento
@@ -399,18 +415,20 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
       Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio CONFIRMED", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
 
     }
   }
@@ -450,6 +468,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     reverse.setIdTxExterno(withdraw10.getTransactionId());
     reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
     String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
@@ -461,12 +480,13 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PENDING, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
     }
 
     // segundo intento
@@ -476,18 +496,19 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 
-      PrepaidMovement10 issuanceMovement = remoteReverse.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
-
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
       PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
       Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio CONFIRMED", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
 
     }
   }

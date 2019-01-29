@@ -42,6 +42,7 @@ BEGIN
     WHERE
       prp_movimiento.estado_con_switch != 'PENDING' and
       prp_movimiento.estado_con_tecnocom != 'PENDING' and
+      prp_movimiento.tipofac != 3003 and -- Se buscan todos menos los retiros web
       prp_movimiento.id not in (select
                                   prp_movimiento_conciliado.id_mov_ref
                                 from

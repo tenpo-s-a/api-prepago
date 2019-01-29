@@ -4,13 +4,16 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +89,13 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
         Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
         Assert.assertEquals("Debe tener type [COMPRA_MONEDA]", AccountingTxType.COMPRA_MONEDA, trx.getType());
         Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
+
+        BigDecimal amountBalance = BigDecimal.ZERO
+          .add(trx.getAmountMastercard().getValue())
+          .add(trx.getFee())
+          .add(trx.getFeeIva())
+          .add(trx.getExchangeRateDif()).setScale(0, BigDecimal.ROUND_UP);
+        Assert.assertEquals("El monto afecto a saldo debe ser la suma", amountBalance, trx.getAmountBalance().getValue().setScale(0, BigDecimal.ROUND_UP));
       }
 
       {
@@ -127,6 +137,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
     return trxs;
   }
+
   private List<AccountingData10> getDbTransactions() {
     List<AccountingData10> trxs = new ArrayList<>();
 
@@ -138,6 +149,16 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       acc.setId((Long)(row.get("id")));
       acc.setType(AccountingTxType.fromValue((String)row.get("type")));
       acc.setOrigin(AccountingOriginType.fromValue((String)row.get("origin")));
+      acc.setAmount(new NewAmountAndCurrency10(BigDecimal.valueOf(numberUtils.toDouble(row.get("amount")))));
+      acc.setAmountMastercard(new NewAmountAndCurrency10(BigDecimal.valueOf(numberUtils.toDouble(row.get("amount_mcar")))));
+      acc.setAmountUsd(new NewAmountAndCurrency10(BigDecimal.valueOf(numberUtils.toDouble(row.get("amount_usd")))));
+      acc.setAmountBalance(new NewAmountAndCurrency10(BigDecimal.valueOf(numberUtils.toDouble(row.get("amount_balance")))));
+
+      acc.setFee(BigDecimal.valueOf(numberUtils.toDouble(row.get("fee"))));
+      acc.setFeeIva(BigDecimal.valueOf(numberUtils.toDouble(row.get("fee_iva"))));
+      acc.setCollectorFee(BigDecimal.valueOf(numberUtils.toDouble(row.get("collector_fee"))));
+      acc.setCollectorFeeIva(BigDecimal.valueOf(numberUtils.toDouble(row.get("collector_fee_iva"))));
+      acc.setExchangeRateDif(BigDecimal.valueOf(numberUtils.toDouble(row.get("exchange_rate_dif"))));
 
       trxs.add(acc);
     }

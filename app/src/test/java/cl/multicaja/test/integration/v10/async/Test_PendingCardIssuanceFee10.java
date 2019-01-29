@@ -31,7 +31,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
 
@@ -61,7 +60,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
@@ -92,7 +90,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
@@ -126,7 +123,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
@@ -159,7 +155,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
 
@@ -174,7 +169,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
@@ -192,8 +186,6 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
       null,
       PrepaidMovementStatus.PROCESS_OK);
 
-    System.out.println("prepaidMovement: " + prepaidMovement);
-
     String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
@@ -207,7 +199,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 issuanceFeeMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia tener un Movimiento de cobro de comision de emision", issuanceFeeMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, issuanceFeeMovement.getEstado());
+    Assert.assertEquals("Debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, issuanceFeeMovement.getEstado());
+    Assert.assertEquals("Debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, issuanceFeeMovement.getEstadoNegocio());
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNumextcta());
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNummovext());
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getClamone());
@@ -221,7 +214,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
     Assert.assertEquals("Debe tener un movimiento de comision", issuanceFeeMovement.getId(), dbMovements.get(0).getId());
-    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con estado de negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
@@ -247,18 +241,15 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard = createPrepaidCard10(prepaidCard);
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
 
@@ -270,7 +261,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debetener status -> ERROR_IN_PROCESS_CARD_ISSUANCE_FEE", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debe tener estado negocio -> REJECTED", BusinessStatusType.REJECTED, issuanceMovement.getEstadoNegocio());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -282,7 +274,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", remoteTopup);
     issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debetener status -> ERROR_IN_PROCESS_CARD_ISSUANCE_FEE", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debe tener estado negocio -> REJECTED", BusinessStatusType.REJECTED, issuanceMovement.getEstadoNegocio());
+
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -292,7 +286,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
     Assert.assertEquals("Debe tener un movimiento de comision", issuanceMovement.getId(), dbMovements.get(0).getId());
-    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con status -> ERROR_IN_PROCESS_CARD_ISSUANCE_FEE", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con estado negocio ->  REJECTED", BusinessStatusType.REJECTED, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
@@ -315,18 +310,15 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-    System.out.println("prepaidUser: " + prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard = createPrepaidCard10(prepaidCard);
-    System.out.println("prepaidCard: " + prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    System.out.println("prepaidMovement: " + prepaidMovement);
 
     String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 3);
 
@@ -350,7 +342,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     issuanceMovement = remoteTopup.getData().getIssuanceFeeMovement10();
     Assert.assertNotNull("Deberia existir un mensaje en la cola de error de cobro de emision", issuanceMovement);
-    Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debetener status -> ERROR_IN_PROCESS_CARD_ISSUANCE_FEE", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, issuanceMovement.getEstado());
+    Assert.assertEquals("Debe tener estado negocio -> IN_PROCESS", BusinessStatusType.IN_PROCESS, issuanceMovement.getEstadoNegocio());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
     Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
@@ -360,7 +353,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     Assert.assertTrue("Debe tener un movimiento de comision", dbMovements.size() > 0);
     Assert.assertEquals("Debe tener un movimiento de comision", issuanceMovement.getId(), dbMovements.get(0).getId());
-    Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con status -> ERROR_IN_PROCESS_CARD_ISSUANCE_FEE", PrepaidMovementStatus.ERROR_IN_PROCESS_CARD_ISSUANCE_FEE, dbMovements.get(0).getEstado());
+    Assert.assertEquals("Debe tener un movimiento de comision con estado negocio ->  IN_PROCESS", BusinessStatusType.IN_PROCESS, dbMovements.get(0).getEstadoNegocio());
 
     // Busca la Tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());

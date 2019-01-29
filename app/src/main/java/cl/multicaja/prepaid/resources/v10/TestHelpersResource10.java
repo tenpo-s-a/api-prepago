@@ -571,7 +571,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
@@ -603,7 +603,6 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
 
     return prepaidMovement;
   }
@@ -780,7 +779,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setCodent(codent);
     prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
     prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues

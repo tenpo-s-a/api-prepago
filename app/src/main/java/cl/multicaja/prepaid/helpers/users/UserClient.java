@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.helpers.users;
 
 import cl.multicaja.accounting.model.v10.UserAccount;
+import cl.multicaja.accounting.model.v10.UserAccountNew;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
@@ -11,7 +12,8 @@ import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.StringUtils;

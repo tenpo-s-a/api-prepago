@@ -12,7 +12,10 @@ public enum AccountingStatusType {
   PENDING("PENDING"),
   OK("OK"),
   REVERSED("REVERSED"),
-  SENT("SENT");
+  REJECTED("RECHAZADO"),
+  REJECTED_FORMAT("RECHAZADO_FORMATO"),
+  SENT("SENT"),
+  RESEARCH("INVESTIGAR");
 
   String value;
 

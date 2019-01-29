@@ -9,20 +9,16 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.model.v10.PrepaidAccountingMovement;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
   private static Log log = LogFactory.getLog(AccountingScheduler10.class);
@@ -51,8 +47,12 @@ public class PendingStoreWithdrawToAccounting10 extends BaseProcessor10 {
           return null;
         }
 
+        PrepaidAccountingMovement mov = new PrepaidAccountingMovement();
+        mov.setPrepaidMovement10(prepaidWithdraw);
+        mov.setReconciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
+
         // Insertar en accounting como PENDING
-        AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(prepaidWithdraw, AccountingStatusType.PENDING);
+        AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(mov, AccountingStatusType.PENDING);
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
         // Insertar en clearing

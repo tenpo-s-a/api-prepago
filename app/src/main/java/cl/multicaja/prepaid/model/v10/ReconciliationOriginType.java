@@ -4,7 +4,8 @@ public enum ReconciliationOriginType {
 
   SWITCH,
   TECNOCOM,
-  MOTOR;
+  MOTOR,
+  CLEARING;
 
   public static ReconciliationOriginType valueOfEnum(String name) {
     try {

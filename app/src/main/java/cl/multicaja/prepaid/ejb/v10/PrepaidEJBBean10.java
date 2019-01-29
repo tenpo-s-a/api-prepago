@@ -386,7 +386,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         } else{
           timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
         }
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
+        if(getDateUtils().inLastHours(24L, originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
           // Agrego la reversa al cdt
           CdtTransaction10 cdtTransaction = new CdtTransaction10();
           cdtTransaction.setTransactionReference(0L);
@@ -577,7 +577,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
-
     log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
 
     InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
@@ -603,7 +602,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         numextcta,
         nummovext,
         clamone,
-        BusinessStatusType.OK,
+        null,
         status);
 
       if(isWebWithdraw) {
@@ -616,6 +615,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+        getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
       }
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
@@ -651,8 +651,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     else {
       log.info("Error no reintentable");
       //Colocar el movimiento en error
-      PrepaidMovementStatus status = TransactionOriginType.WEB.equals(prepaidWithdraw.getTransactionOriginType()) ? PrepaidMovementStatus.ERROR_WEB_WITHDRAW : PrepaidMovementStatus.ERROR_POS_WITHDRAW;
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
+      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
+      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
 
       //Confirmar el retiro en CDT
       cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -669,9 +669,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO_CONF);
       //cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
       cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-      getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
-      getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null,prepaidMovement.getId(), BusinessStatusType.REVERSED);
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
@@ -1158,7 +1155,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setTipoMovimiento(transaction.getMovementType());
     prepaidMovement.setMonto(transaction.getAmount().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.OK);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
@@ -2313,14 +2310,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     String template = getParametersUtil().getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
 
-    log.info(template);
-
     Map<String, String> templateData = new HashMap<>();
     templateData.put("${rut}", String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
     templateData.put("${name}", user.getName());
     templateData.put("${lastname}", user.getLastname_1());
 
-    //TODO: obtener las url de las imagenes
     templateData.put("${ciFront}", ciFront.getLocation());
     templateData.put("${ciBack}", ciBack.getLocation());
     templateData.put("${ciSelfie}", selfie.getLocation());
@@ -2328,6 +2322,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     template = getParametersUtil().replaceDataHTML(template, templateData);
     TicketType type = TicketType.VALIDACION_IDENTIDAD;
 
+    //TODO: externalizar esta configuracion?
     NewTicket ticket = new NewTicket();
     ticket.setGroupId(43000159450L);
     ticket.setUniqueExternalId(user.getRut().getValue().toString());
@@ -2337,6 +2332,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     ticket.setDescription(template);
     ticket.setStatus(StatusType.PENDING);
     ticket.setPriority(PriorityType.HIGH);
+    ticket.setProductId(43000001595L);
 
     Ticket t = getUserClient().createFreshdeskTicket(headers, user.getId(), ticket);
 

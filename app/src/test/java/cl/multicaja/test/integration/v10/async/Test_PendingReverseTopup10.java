@@ -44,6 +44,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,4);
@@ -55,12 +56,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de carga de retiro", remoteTopup);
 
-      PrepaidMovement10 issuanceMovement = remoteTopup.getData().getPrepaidMovementReverse();
-      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de carga", issuanceMovement);
-      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP_REVERSE, issuanceMovement.getEstado());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNumextcta());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getNummovext());
-      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceMovement.getClamone());
+      PrepaidMovement10 reverseMovement = remoteTopup.getData().getPrepaidMovementReverse();
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP_REVERSE, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.IN_PROCESS, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
 
     }
     // Segunda vez
@@ -82,6 +83,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
       Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
       Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP_REVERSE, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", BusinessStatusType.IN_PROCESS, prepaidMovementInDb.getEstadoNegocio());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());
@@ -95,7 +97,6 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
     }
   }
-
 
   @Test
   public void testPendingTopupReverseOk() throws Exception {
@@ -122,6 +123,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     System.out.println(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
@@ -143,6 +145,8 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
     Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
+
 
   }
 
@@ -170,6 +174,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
@@ -192,6 +197,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
       Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PENDING, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.IN_PROCESS, prepaidMovementReverseResp.getEstadoNegocio());
     }
     // Segunda vez
     {
@@ -213,6 +219,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
       Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
     }
   }
 
@@ -241,6 +248,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     inclusionMovimientosTecnocom(prepaidCard,prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
@@ -263,6 +271,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
       Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PENDING, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.IN_PROCESS, prepaidMovementReverseResp.getEstadoNegocio());
     }
     // Segunda vez
     {
@@ -284,6 +293,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
       Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
     }
   }
 
