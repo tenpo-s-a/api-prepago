@@ -10,7 +10,9 @@ import java.util.stream.Stream;
 public enum BusinessStatusType {
 
   OK("OK"),
-  REVERSED("REVERSED");
+  REVERSED("REVERSED"),
+  TO_REFUND("TO_REFUND"),
+  REFUND_OK("REFUND_OK");
 
   public String getValue() {
     return value;

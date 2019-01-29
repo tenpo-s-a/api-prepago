@@ -71,7 +71,7 @@ public class PendingTopup10 extends BaseProcessor10 {
             } else if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(req.getData().getNumError())){
               status = PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE;
             } else {
-              status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
+              status = PrepaidMovementStatus.REJECTED;
             }
             getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
             prepaidMovement.setEstado(status);
@@ -242,15 +242,9 @@ public class PendingTopup10 extends BaseProcessor10 {
               req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
               req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
               return redirectRequest(createJMSEndpoint(PENDING_TOPUP_REQ), exchange, req, true);
-            } else if (CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
-              // La inclusion devuelve error y el error es distinto a "ya existia"
-              log.debug("********** Movimiento rechazado **********");
-              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), PrepaidMovementStatus.REJECTED);
-
-              Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
-              return redirectRequest(endpoint, exchange, req, false);
             } else {
-              PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
+              // Todos los errores restantes de tecnocom se consideran rechazo y se iran a devolucion
+              PrepaidMovementStatus status = PrepaidMovementStatus.REJECTED;
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, data.getPrepaidMovement10().getId(), status);
               data.getPrepaidMovement10().setEstado(status);
 
@@ -315,10 +309,6 @@ public class PendingTopup10 extends BaseProcessor10 {
           //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
           // tan rapido. Investigar?
-        } else if (PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP.equals(data.getPrepaidMovement10().getEstado())) {
-          //TODO: que hacer con los otros errores (codigo != 200) de tecnocom. Devolverse? Invertigarse?
-          // Hay otros errores no reintentables (ver CodigoRetorno.java) que podria devolver Tecnocom.
-          // Se debe decidir que hacer con esos errores, entran dentro de la devolucion?
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", data.getUser().getId().toString());

@@ -6,6 +6,7 @@ public enum ReconciliationActionType {
   RETIRO,
   REVERSA_RETIRO,
   INVESTIGACION,
+  REFUND,
   NONE;
 
   public static ReconciliationActionType valueOfEnum(String name) {

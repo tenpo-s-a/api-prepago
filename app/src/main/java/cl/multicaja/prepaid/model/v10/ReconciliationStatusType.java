@@ -14,7 +14,8 @@ public enum ReconciliationStatusType {
   NOT_RECONCILED("NOT_RECONCILED"),
   NEED_VERIFICATION("NEED_VERIFICATION"),
   NO_CASE("NO_CASE"),
-  COUNTER_MOVEMENT("COUNTER_MOVEMENT");
+  COUNTER_MOVEMENT("COUNTER_MOVEMENT"),
+  TO_REFUND("TO_REFUND");
 
   public String getValue() {
     return value;
