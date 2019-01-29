@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 
 public class CdtTransaction10 implements Serializable {
 
+  private Long id;
   private String accountId;
   private CdtTransactionType transactionType;
   private Long transactionReference;
@@ -20,6 +21,14 @@ public class CdtTransaction10 implements Serializable {
   private Boolean indSimulacion;
   private String numError = "0";
   private String msjError = "";
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public String getAccountId() {
     return accountId;
@@ -119,6 +128,26 @@ public class CdtTransaction10 implements Serializable {
       return CdtTransactionType.REVERSA_RETIRO_CONF;
     } else {
       return CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF;
+    }
+  }
+
+  public CdtTransactionType getCdtTransactionTypeReverse() {
+    if(CdtTransactionType.PRIMERA_CARGA.equals(this.getTransactionType())){
+      return CdtTransactionType.REVERSA_PRIMERA_CARGA;
+    } else if (CdtTransactionType.CARGA_WEB.equals(this.getTransactionType())){
+      return CdtTransactionType.REVERSA_CARGA;
+    } else if (CdtTransactionType.CARGA_POS.equals(this.getTransactionType())) {
+      return CdtTransactionType.REVERSA_CARGA;
+    }else if(CdtTransactionType.RETIRO_WEB.equals(this.getTransactionType())) {
+      return CdtTransactionType.REVERSA_RETIRO;
+    }else if (CdtTransactionType.RETIRO_POS.equals(this.getTransactionType())) {
+      return CdtTransactionType.REVERSA_RETIRO;
+    } else if (CdtTransactionType.REVERSA_CARGA.equals(this.getTransactionType())) {
+      return null;
+    } else if (CdtTransactionType.REVERSA_RETIRO.equals(this.getTransactionType())) {
+      return null;
+    } else {
+      return null;
     }
   }
 

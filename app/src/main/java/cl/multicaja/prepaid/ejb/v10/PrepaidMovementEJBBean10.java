@@ -13,9 +13,11 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 
 @Stateless
 @LocalBean
@@ -826,6 +829,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(movFull != null ) {
         if(PrepaidMovementStatus.PROCESS_OK.equals(movFull.getEstado())) {
           createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+        } else {
+          //TODO: que se hace en los otros casos?
         }
       }
       else { // SE REVERSA EL MOVIMIENTO DE RETIRO
@@ -899,42 +904,91 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
+      } else {
+        //TODO: que se debe hacer en los otros casos?
       }
     }
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  (
+      ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) && (
       PrepaidMovementStatus.REJECTED.equals(mov.getEstado())
     ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
       log.debug("XLS ID 9");
-        PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
+      System.out.println("XLS ID 9");
+      PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
-        if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
-          //Se busca usuario prepago para obtener user
-          PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
-          if(prepaidUser10 == null){
-            log.info("prepaidTopup10 null");
-          }
-          //Se busca user para obterner rut
-          User user = userClient.getUserById(null,prepaidUser10.getUserIdMc());
-          if(user == null){
-            log.info("user null");
-          }
-          // Se crea movimiento de reversa
-          NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
-          newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-          newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
-          newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
-          newPrepaidTopup10.setMerchantName("Conciliacion" );
-          newPrepaidTopup10.setRut(user.getRut().getValue());
-          String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
-          newPrepaidTopup10.setTransactionId(newTxId);
-          // Se envia movimiento a reversar
-          getPrepaidEJBBean10().topupUserBalance(null,newPrepaidTopup10,false);
-          // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
-          createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
-          createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
-          log.info("REINJECT TOPUP");
+      if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+        //Se busca usuario prepago para obtener user
+        PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
+        if(prepaidUser10 == null) {
+          log.info("prepaidTopup10 null");
         }
+        //Se busca user para obterner rut
+        User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+        if(user == null) {
+          log.info("user null");
+          return;
+        }
+
+        //TODO: esta correcto crear una reversa? El movimiento fue rechazado por tecnocom,
+        // enviar reversa seria descontar plata que nunca se cargo.
+        // Y porque se envia a research? Que no esté en tecnocom es normal si fue rechazado.
+        /*
+        // Se crea movimiento de reversa
+        NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
+        newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
+        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
+        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
+        newPrepaidTopup10.setMerchantName("Conciliacion" );
+        newPrepaidTopup10.setRut(user.getRut().getValue());
+        String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
+        newPrepaidTopup10.setTransactionId(newTxId);
+        // Se envia movimiento a reversar
+        getPrepaidEJBBean10().topupUserBalance(null,newPrepaidTopup10,false);
+
+        createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
+        createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
+        */
+
+        // Enviar movimiento a REFUND
+        createMovementConciliate(null, movFull.getId(), ReconciliationActionType.REFUND, ReconciliationStatusType.TO_REFUND);
+        updatePrepaidBusinessStatus(null, movFull.getId(), BusinessStatusType.TO_REFUND);
+
+        // Confirmar el topup en el CDT
+        CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExterno(null, movFull.getIdTxExterno());
+
+        CdtTransactionType reverseTransactionType = cdtTransaction.getCdtTransactionTypeReverse();
+        cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+        cdtTransaction.setIndSimulacion(Boolean.FALSE);
+        cdtTransaction.setTransactionReference(cdtTransaction.getId());
+        cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        // Iniciar reversa en CDT
+        cdtTransaction.setTransactionType(reverseTransactionType);
+        cdtTransaction.setTransactionReference(0L);
+        cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        // Enviar ticket a freshdesk
+        String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
+        template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", user.getName(), user.getLastname_1()), String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()), user.getId(), movFull.getNumaut(), movFull.getMonto().longValue(), user.getEmail().getValue(), user.getCellphone().getValue());
+
+        NewTicket newTicket = new NewTicket();
+        newTicket.setDescription(template);
+        newTicket.setGroupId(GroupId.OPERACIONES);
+        newTicket.setUniqueExternalId(String.valueOf(user.getRut().getValue()));
+        newTicket.setType(TicketType.DEVOLUCION);
+        newTicket.setStatus(StatusType.OPEN);
+        newTicket.setPriority(PriorityType.URGENT);
+        newTicket.setSubject("Devolucion de carga");
+        newTicket.setProductId(43000001595L);
+        newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
+
+        Ticket ticket = getUserClient().createFreshdeskTicket(null, user.getId(), newTicket);
+        if (ticket.getId() != null) {
+          log.info("Ticket Creado Exitosamente");
+        }
+      } else {
+        //TODO: que se hace en los otros casos?
+      }
     }
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){

@@ -151,7 +151,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
   }
 
   @Test
-  public void pendingTopup_with_prepaidMovement_ERROR_IN_PROCESS_PENDING_TOPUP() throws Exception {
+  public void pendingTopup_with_prepaidMovement_REJECTED() throws Exception {
 
     User user = registerUser();
 
@@ -194,7 +194,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
 
       Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
-      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.REJECTED, prepaidMovementInDb.getEstado());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());

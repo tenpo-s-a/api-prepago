@@ -165,27 +165,44 @@ public class CdtEJBBean10 implements CdtEJB10 {
   }
 
   @Override
-  public CdtTransaction10 buscaMovimientoByIdExterno(Map<String, Object> headers, String idRef) throws Exception {
-    if(idRef == null) {
+  public CdtTransaction10 buscaMovimientoByIdExterno(Map<String, Object> headers, String idExterno) throws Exception {
+    List list = buscaListaMovimientoByIdExterno(headers, idExterno);
+    return (CdtTransaction10) list.get(0);
+  }
+
+  @Override
+  public List buscaListaMovimientoByIdExterno(Map<String, Object> headers, String idExterno) throws Exception {
+    if(idExterno == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idRef"));
     }
 
     Object[] params = new Object[] {
-      idRef,
+      idExterno,
     };
     RowMapper rowMapper = row -> {
       CdtTransaction10 cdtTransaction10 = new CdtTransaction10();
+      cdtTransaction10.setId(numberUtils.toLong(row.get("_id")));
       cdtTransaction10.setTransactionType(CdtTransactionType.fromValue(String.valueOf(row.get("_movimiento"))));
       cdtTransaction10.setAccountId(String.valueOf(numberUtils.toLong(row.get("_id_cuenta"))));
-      cdtTransaction10.setTransactionReference(0L);
+      cdtTransaction10.setTransactionReference(numberUtils.toLong(row.get("_id_mov_referencia")));
       cdtTransaction10.setGloss(String.valueOf(row.get("_glosa")));
       cdtTransaction10.setExternalTransactionId(String.valueOf(row.get("_id_tx_externo")));
       cdtTransaction10.setAmount(numberUtils.toBigDecimal(row.get("_monto")));
       return cdtTransaction10;
     };
     Map<String, Object>  map = getDbUtils().execute(getSchema() + ".mc_cdt_busca_movimiento_by_idext_v10", rowMapper,params);
-    return (CdtTransaction10) ((List)map.get("result")).get(0);
+    return (List)map.get("result");
   }
 
+  @Override
+  public CdtTransaction10 buscaMovimientoByIdExternoAndTransactionType(Map<String, Object> headers, String idExterno, CdtTransactionType type) throws Exception {
+    List<CdtTransaction10> cdtTransaction10s = buscaListaMovimientoByIdExterno(headers, idExterno);
+    for(CdtTransaction10 transaction : cdtTransaction10s) {
+      if(type.equals(transaction.getTransactionType())) {
+        return transaction;
+      }
+    }
+    return null;
+  }
 
 }
