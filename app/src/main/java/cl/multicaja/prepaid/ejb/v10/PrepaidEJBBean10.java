@@ -2310,14 +2310,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     String template = getParametersUtil().getString("api-prepaid", "identity_validation_ticket_template", "v1.0");
 
-    log.info(template);
-
     Map<String, String> templateData = new HashMap<>();
     templateData.put("${rut}", String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
     templateData.put("${name}", user.getName());
     templateData.put("${lastname}", user.getLastname_1());
 
-    //TODO: obtener las url de las imagenes
     templateData.put("${ciFront}", ciFront.getLocation());
     templateData.put("${ciBack}", ciBack.getLocation());
     templateData.put("${ciSelfie}", selfie.getLocation());
@@ -2325,6 +2322,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     template = getParametersUtil().replaceDataHTML(template, templateData);
     TicketType type = TicketType.VALIDACION_IDENTIDAD;
 
+    //TODO: externalizar esta configuracion?
     NewTicket ticket = new NewTicket();
     ticket.setGroupId(43000159450L);
     ticket.setUniqueExternalId(user.getRut().getValue().toString());
@@ -2334,6 +2332,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     ticket.setDescription(template);
     ticket.setStatus(StatusType.PENDING);
     ticket.setPriority(PriorityType.HIGH);
+    ticket.setProductId(43000001595L);
 
     Ticket t = getUserClient().createFreshdeskTicket(headers, user.getId(), ticket);
 
