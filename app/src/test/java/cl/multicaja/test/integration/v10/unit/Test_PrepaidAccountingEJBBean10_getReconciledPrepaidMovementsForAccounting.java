@@ -92,7 +92,6 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
       updateDate(prepaidMovement10.getId(), getNewDate(2, prepaidMovement10.getFechaCreacion()));
 
 
-
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
       Thread.sleep(1000);
