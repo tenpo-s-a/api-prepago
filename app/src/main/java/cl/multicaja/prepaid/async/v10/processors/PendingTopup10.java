@@ -292,7 +292,6 @@ public class PendingTopup10 extends BaseProcessor10 {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
         log.info("processPendingTopupReturns - REQ: " + req);
-        System.out.println("en error topup req");
         req.retryCountNext();
         PrepaidTopupData10 data = req.getData();
         if (Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
@@ -314,12 +313,10 @@ public class PendingTopup10 extends BaseProcessor10 {
           if (ticket.getId() != null) {
             log.info("Ticket Creado Exitosamente");
           }
-          System.out.println("saliendo topup req");
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
           //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
           // tan rapido. Investigar?
-          System.out.println("saliendo de indeterminado");
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", data.getUser().getId().toString());
@@ -342,7 +339,6 @@ public class PendingTopup10 extends BaseProcessor10 {
           emailBody.setTemplate(TEMPLATE_MAIL_ERROR_TOPUP_TO_USER);
           emailBody.setAddress(data.getUser().getEmail().getValue());
           getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
-          System.out.println("saliendo de rejected");
         }
         return req;
       }
