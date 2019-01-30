@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.SEDA_PENDING_SEND_MAIL_TOPUP;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
@@ -189,21 +191,10 @@ public class PendingTopup10 extends BaseProcessor10 {
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
-              log.info(prepaidTopup);
-              //Envio de comprobante de carga por mail
-              Map<String, Object> templateData = new HashMap<>();
 
-              templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-              templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-              templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
-              templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
-              templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
-
-              EmailBody emailBody = new EmailBody();
-              emailBody.setTemplateData(templateData);
-              emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
-              emailBody.setAddress(data.getUser().getEmail().getValue());
-              getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+              log.info("Enviando comprobante de carga por mail");
+              Endpoint mailEndpoint = createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REQ);
+              redirectRequest(mailEndpoint, exchange, req, Boolean.FALSE);
 
               //segun la historia: https://www.pivotaltracker.com/story/show/158044562
               if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
