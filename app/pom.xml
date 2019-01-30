@@ -61,7 +61,7 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>c1e41e0462ea2ebcd1de2c9c226ffbc246be84a2</version>
+      <version>6d28cbfd2b99a6569da323aeaf4f7bf79f0335bc</version>
     </dependency>
 
     <dependency>
