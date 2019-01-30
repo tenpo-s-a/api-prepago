@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
@@ -73,6 +74,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Spy
   private CalculatorParameter10 calculatorParameter10;
+
+  @Spy
+  private TecnocomServiceHelper tecnocomServiceHelper;
 
   @Spy
   @InjectMocks
@@ -196,7 +200,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     response.getRunServiceResponse().getReturn().setRetorno("1020");
     response.getRunServiceResponse().getReturn().setDescRetorno("");
     InclusionMovimientosDTO dtoWithdraw = new InclusionMovimientosDTO(response);
-    Mockito.doReturn(dtoWithdraw).when(tecnocomService).inclusionMovimientos(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.doReturn(dtoWithdraw).when(tecnocomServiceHelper).withdraw(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     Mockito.doReturn("123456789")
       .when(delegate).sendPendingWithdrawReversal(Mockito.any(), Mockito.any(), Mockito.any());
