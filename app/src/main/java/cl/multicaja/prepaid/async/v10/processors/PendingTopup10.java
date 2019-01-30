@@ -239,7 +239,8 @@ public class PendingTopup10 extends BaseProcessor10 {
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             }
-          } else {
+          }
+          else {
 
             //https://www.pivotaltracker.com/story/show/157816408
             //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso

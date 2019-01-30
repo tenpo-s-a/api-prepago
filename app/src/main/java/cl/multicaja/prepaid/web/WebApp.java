@@ -50,6 +50,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private ProductChangeRoute10 productChangeRoute10;
 
+  @Inject
+  private MailRoute10 mailRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -79,7 +82,8 @@ public class WebApp implements ServletContextListener  {
         camelFactory.startCamelContextWithRoutes(true,
           prepaidTopupRoute10,
           transactionReversalRoute10,
-          productChangeRoute10);
+          productChangeRoute10,
+          mailRoute10);
         log.info("==== Apache camel iniciado ====");
       }
     } catch (Exception e) {

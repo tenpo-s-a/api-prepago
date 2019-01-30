@@ -9,6 +9,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
+import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
@@ -84,6 +85,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Inject
   private ProductChangeDelegate10 productChangeDelegate;
 
+  @Inject
+  private MailDelegate10 mailDelegate;
+
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJB10;
 
@@ -136,6 +140,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setProductChangeDelegate(ProductChangeDelegate10 productChangeDelegate) {
     this.productChangeDelegate = productChangeDelegate;
+  }
+
+  public MailDelegate10 getMailDelegate() {
+    return mailDelegate;
+  }
+
+  public void setMailDelegate(MailDelegate10 mailDelegate) {
+    this.mailDelegate = mailDelegate;
   }
 
   public PrepaidUserEJBBean10 getPrepaidUserEJB10() {
@@ -343,11 +355,103 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidTopup.setId(prepaidMovement.getId());
 
-    /*
-      Enviar mensaje al proceso asincrono
-     */
-    String messageId = this.getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
-    prepaidTopup.setMessageId(messageId);
+
+    if(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId())) { // Si es primera carga
+      /*
+        Enviar mensaje al proceso asincrono
+      */
+      String messageId = this.getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
+      prepaidTopup.setMessageId(messageId);
+    }
+    else { // Si es N carga se hace de manera sincrona
+      String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
+
+      InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(prepaidCard.getProcessorUserId(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
+
+      // Responde OK || Responde que ya el movimiento existia (cod. 200 + MPE5501)
+      if (inclusionMovimientosDTO.isRetornoExitoso()) {
+
+        getPrepaidMovementEJB10().updatePrepaidMovement(null,
+          prepaidMovement.getId(),
+          prepaidCard.getPan(),
+          inclusionMovimientosDTO.getCenalta(),
+          inclusionMovimientosDTO.getCuenta(),
+          inclusionMovimientosDTO.getNumextcta(),
+          inclusionMovimientosDTO.getNummovext(),
+          inclusionMovimientosDTO.getClamone(),
+          BusinessStatusType.CONFIRMED,
+          PrepaidMovementStatus.PROCESS_OK);
+
+
+        CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
+        cdtTransactionConfirm.setAmount(cdtTransaction.getAmount().subtract(prepaidTopup.getFee().getValue()));
+        cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+        cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
+        cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
+        cdtTransactionConfirm.setIndSimulacion(false);
+        //se debe agregar CONFIRM para evitar el constraint unique de esa columna
+        cdtTransactionConfirm.setExternalTransactionId(cdtTransaction.getExternalTransactionId());
+        cdtTransactionConfirm.setGloss(prepaidTopup.getCdtTransactionTypeConfirm().getName() + " " + cdtTransactionConfirm.getAmount());
+
+        getCdtEJB10().addCdtTransaction(null, cdtTransactionConfirm);
+
+        if (!cdtTransaction.isNumErrorOk()) {
+          log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
+        }
+
+        String messageId = this.getMailDelegate().sendTopupMail(prepaidTopup, user, prepaidMovement);
+        prepaidTopup.setMessageId(messageId);
+      }
+      else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
+        log.info("Error Timeout Response");
+        getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+        //Inicia la reversa del movimiento
+
+        // Agrego la reversa al cdt
+        CdtTransaction10 cdtTransactionReverse = new CdtTransaction10();
+        cdtTransactionReverse.setTransactionReference(0L);
+        cdtTransactionReverse.setExternalTransactionId(topupRequest.getTransactionId());
+
+        PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
+
+        TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+
+        PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
+        prepaidMovementReverse.setConSwitch(ReconciliationStatusType.RECONCILED);
+        prepaidMovementReverse.setPan(prepaidMovement.getPan());
+        prepaidMovementReverse.setCentalta(prepaidMovement.getCentalta());
+        prepaidMovementReverse.setCuenta(prepaidMovement.getCuenta());
+        prepaidMovementReverse.setTipofac(tipoFacReverse);
+        prepaidMovementReverse.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        prepaidMovementReverse = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovementReverse);
+
+        String messageId = this.getDelegate().sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidMovementReverse);
+
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()),
+          new KeyValue("messageId", messageId));
+      } else {
+        log.info("Error no reintentable");
+        //Colocar el movimiento en error
+        getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
+        getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
+
+        //Confirmar el retiro en CDT
+        cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
+        cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        //Iniciar reversa en CDT
+        cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO);
+        cdtTransaction.setTransactionReference(0L);
+        cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        //Confirmar reversa en CDT
+        cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_RETIRO_CONF);
+        cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
+      }
+
+    }
 
     return prepaidTopup;
   }
@@ -615,7 +719,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
-      log.info("Error Reintentable");
+      log.info("Error Timeout Response");
       getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
       //Inicia la reversa del movimiento
 

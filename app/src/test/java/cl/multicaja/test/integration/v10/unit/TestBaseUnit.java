@@ -14,6 +14,7 @@ import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
+import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
 import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
@@ -75,6 +76,7 @@ public class TestBaseUnit extends TestApiBase {
   private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
   private static PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJB10;
   private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
+  private static MailDelegate10 mailDelegate;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     System.out.println("Exist: " + getPrepaidCardEJBBean10());
@@ -131,6 +133,14 @@ public class TestBaseUnit extends TestApiBase {
   public CalculatorParameter10 getPercentage(){
    return getCalculationsHelper().getCalculatorParameter10();
   }
+
+  public static MailDelegate10 getMailDelegate() {
+    if(mailDelegate == null) {
+      mailDelegate = new MailDelegate10();
+    }
+    return mailDelegate;
+  }
+
   /**
    *
    * @return
@@ -245,6 +255,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
       prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());
+      prepaidEJBBean10.setMailDelegate(getMailDelegate());
     }
     return prepaidEJBBean10;
   }
