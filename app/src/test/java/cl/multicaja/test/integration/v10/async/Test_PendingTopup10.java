@@ -150,6 +150,8 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 
+  //TODO: este test debe probarse con la logica de devoluciones
+  @Ignore
   @Test
   public void pendingTopup_with_prepaidMovement_REJECTED() throws Exception {
 
@@ -208,20 +210,15 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       Assert.assertNull("No debe tener un regisro cdt de confirmacion", cdtTransactionConfirm10);
 
       //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_RETURNS_REQ
-      //TODO
-      /*
       ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
       String endpoint = PrepaidTopupRoute10.ERROR_TOPUP_REQ;
 
       Assert.assertEquals("debe ser intento procesado 5", 5, lastProcessorMetadata.getRetry());
       Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
       Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
-      */
     }
 
     //debe existir el mensaje en la cola de devoluciones pendientes
-    // TODO
-    /*
     {
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
       Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
@@ -239,7 +236,8 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       PrepaidMovement10 prepaidMovementInDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementResp.getId());
 
       Assert.assertNotNull("Deberia existir un prepaidMovement en la bd", prepaidMovementInDb);
-      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", PrepaidMovementStatus.REJECTED, prepaidMovementInDb.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado con error", BusinessStatusType.REJECTED, prepaidMovementInDb.getEstadoNegocio());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNumextcta());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getNummovext());
       Assert.assertEquals("El movimiento debe ser procesado con error", Integer.valueOf(0), prepaidMovementInDb.getClamone());
@@ -260,7 +258,6 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       Assert.assertFalse("debe ser redirect", lastProcessorMetadata.isRedirect());
       Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
     }
-    */
   }
 
   @Test

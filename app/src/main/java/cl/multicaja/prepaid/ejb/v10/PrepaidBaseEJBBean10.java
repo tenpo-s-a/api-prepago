@@ -35,6 +35,11 @@ public abstract class PrepaidBaseEJBBean10 {
   public TecnocomService getTecnocomService() {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
+
+  public TecnocomServiceHelper getTecnocomServiceHelper() {
+    return TecnocomServiceHelper.getInstance();
+  }
+
   public UserClient getUserClient(){
     return UserClient.getInstance();
   }

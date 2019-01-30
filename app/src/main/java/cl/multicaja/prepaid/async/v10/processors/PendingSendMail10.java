@@ -14,6 +14,7 @@ import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.model.v10.MimeType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import cl.multicaja.prepaid.model.v10.QueuesNameType;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 import static cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE;
@@ -217,6 +219,48 @@ public class PendingSendMail10 extends BaseProcessor10 {
     };
   }
 
+  /**
+   * Envio recibo carga
+   */
+  public ProcessorRoute processPendingTopupMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingTopupMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        if(req.getRetryCount() > getMaxRetryCount()) {
+          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_TOPUP_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
+        }
+
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+        PrepaidTopup10 topup = data.getPrepaidTopup10();
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
+        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getTotal().getValue())));
+        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidTopup10().getAmount().getValue()));
+        templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
   public String createPdf(String passwordUser, String passwordOwner,String numTarjeta,String fecha, String cvc,String name) throws IOException, DocumentException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Document document = new Document();
@@ -254,12 +298,18 @@ public class PendingSendMail10 extends BaseProcessor10 {
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-      log.info("processErrorPendingWithdrawMail - REQ: " + req);
-      req.retryCountNext();
-      PrepaidTopupData10 data = req.getData();
-      log.debug(data.getPrepaidTopup10());
-
+        log.info("Error sending withdraw mail");
       return req;
+      }
+    };
+  }
+
+  public ProcessorRoute processErrorPendingTopupMail() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+        log.info("Error sending topup mail");
+        return req;
       }
     };
   }

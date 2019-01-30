@@ -712,7 +712,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
   private void doTopup(User user, Integer amount, String merchantCode) throws Exception {
       NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
-      prepaidTopup10.setMerchantCode(merchantCode); //carga WEB
+      prepaidTopup10.setMerchantCode(merchantCode);
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(amount));
 
       PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);

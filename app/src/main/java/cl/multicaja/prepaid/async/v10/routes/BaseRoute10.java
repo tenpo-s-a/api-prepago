@@ -170,6 +170,10 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     return TecnocomServiceHelper.getInstance().getTecnocomService();
   }
 
+  public TecnocomServiceHelper getTecnocomServiceHelper() {
+    return TecnocomServiceHelper.getInstance();
+  }
+
   public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
     return mailPrepaidEJBBean10;
   }

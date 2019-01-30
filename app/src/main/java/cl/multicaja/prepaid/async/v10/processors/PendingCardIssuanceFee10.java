@@ -132,19 +132,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
-        CodigoMoneda clamon = issuanceFeeMovement.getClamon();
-        IndicadorNormalCorrector indnorcor = issuanceFeeMovement.getIndnorcor();
-        TipoFactura tipofac = issuanceFeeMovement.getTipofac();
-        BigDecimal impfac = issuanceFeeMovement.getImpfac();
-        String codcom = issuanceFeeMovement.getCodcom();
-        Integer codact = issuanceFeeMovement.getCodact();
-        CodigoMoneda clamondiv = CodigoMoneda.NONE;
+
+        //TODO: para el cobro de emision se toma el mismo merchant name de la carga? o se debe colocar el de prepago?
         String nomcomred = prepaidTopup.getMerchantName();
-        String numreffac = issuanceFeeMovement.getId().toString(); //Se hace internamente en Tecnocom.
-        String numaut = TecnocomServiceHelper.getNumautFromIdMov( issuanceFeeMovement.getId().toString());
-        log.info(String.format("LLamando cobro emision %s", prepaidCard.getProcessorUserId()));
-        InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato,
-          pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+
+        InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().issuanceFee(contrato, pan, nomcomred, issuanceFeeMovement);
 
         log.info("Respuesta inclusion");
         log.info(inclusionMovimientosDTO.getRetorno());
