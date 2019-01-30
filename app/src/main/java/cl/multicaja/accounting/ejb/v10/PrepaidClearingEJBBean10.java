@@ -124,7 +124,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Object[] params = {
       new InParam(id, Types.BIGINT),
       fileId == null ? new NullParam(Types.BIGINT) : new InParam(fileId, Types.BIGINT),
-      status == null ? new NullParam(Types.VARCHAR) : new InParam(status, Types.VARCHAR),
+      status == null ? new NullParam(Types.VARCHAR) : new InParam(status.getValue(), Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -167,7 +167,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
     RowMapper rm = (Map<String, Object> row) -> {
       ClearingData10 clearing10 = new ClearingData10();
-
       clearing10.setId(getNumberUtils().toLong(row.get("_id")));
       clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
@@ -372,7 +371,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
 
-  private void createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
+  public File createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -416,7 +415,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
-        accountId > 0 ? String.format("%s-%s", mov.getUserBankAccount().getRut().getValue(), mov.getUserBankAccount().getRut().getDv()) : "", //RUT
+        accountId > 0 ? (mov.getUserBankAccount().getRut() != null ? String.format("%s-%s", mov.getUserBankAccount().getRut().getValue(), mov.getUserBankAccount().getRut().getDv()) : "") : "", //RUT
         accountId > 0 ? mov.getUserBankAccount().getBankName() : "", //BANCO
         accountId > 0 ? getNumberUtils().toLong(mov.getUserBankAccount().getAccountNumber()).toString() : "", //NRO_CUENTA
         accountId > 0 ? mov.getUserBankAccount().getAccountType() : "", //TIPO_CUENTA
@@ -425,13 +424,14 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       writer.writeNext(data);
     }
     writer.close();
+    return file;
   }
 
   public void processClearingResponse(InputStream inputStream, String fileName) throws Exception {
     log.info("processClearingResponse IN");
     String fileId = fileName.replace("TRX_PREPAGO_","").replace(".CSV","");
     List<ClearingData10> clearingData10s = processClearingResponseDataFile(inputStream);
-    log.info(String.format("Registro procesados: %d",clearingData10s.size()));
+    log.info(String.format("Registro procesados: %d", clearingData10s.size()));
     processClearingBankResponse(clearingData10s,fileName,fileId);
     log.info("processClearingResponse OUT");
   }
@@ -452,9 +452,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           ClearingData10 clearingData = new ClearingData10();
           clearingData.setId(numberUtil.toLong(record[0]));
           clearingData.setType(AccountingTxType.fromValue(String.valueOf(record[4])));
-          clearingData.setAmountBalance(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[8])));
+          clearingData.setAmount(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[8])));
           clearingData.setAmountMastercard(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[9])));
-          clearingData.setAmount(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[17])));
+          clearingData.setAmountBalance(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
           clearingData10s.add(clearingData);
         }
@@ -483,18 +483,18 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
             data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0&&
             data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0
-          ){
+          ) {
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
-            ClearingData10 dataUpdated = updateClearingData(null,data.getId(),null,result.getStatus());
+            updateClearingData(null, data.getId(),null, result.getStatus());
           }
-          else{//Si  viene en el archivo, pero los montos no concuerdan, investigar.
-            ClearingData10 dataUpdated = updateClearingData(null,data.getId(),null,AccountingStatusType.RESEARCH);
-            this.createClearingResearch(fileName,data.getId());
+          else {//Si  viene en el archivo, pero los montos no concuerdan, investigar.
+            ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
+            this.createClearingResearch(fileName, data.getId());
           }
         }
-        else{ // No viene en el archivo
-          ClearingData10 dataUpdated = updateClearingData(null,data.getId(),null,AccountingStatusType.RESEARCH);
-          this.createClearingResearch(fileName,data.getId());
+        else { // No viene en el archivo
+          ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
+          this.createClearingResearch(fileName, data.getId());
         }
       }
     }

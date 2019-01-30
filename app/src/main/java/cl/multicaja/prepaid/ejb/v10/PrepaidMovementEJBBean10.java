@@ -929,8 +929,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           return;
         }
 
-        //TODO: esta correcto crear una reversa? El movimiento fue rechazado por tecnocom,
-        // enviar reversa seria descontar plata que nunca se cargo.
+        //TODO: esta correcto crear una reversa? El movimiento fue rechazado por tecnocom.
         // Y porque se envia a research? Que no esté en tecnocom es normal si fue rechazado.
         /*
         // Se crea movimiento de reversa
