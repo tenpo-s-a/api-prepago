@@ -781,7 +781,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     /*
       Enviar mensaje al proceso asincrono
      */
-    String messageId = this.getDelegate().sendWithdraw(prepaidWithdraw, user, cdtTransaction, prepaidMovement);
+    String messageId = this.getMailDelegate().sendWithdrawRequestMail(prepaidWithdraw, user, prepaidMovement);
     prepaidWithdraw.setMessageId(messageId);
 
     return prepaidWithdraw;

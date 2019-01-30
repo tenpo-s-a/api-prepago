@@ -41,12 +41,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.errorSendMailCard.req";
   public static final String ERROR_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.errorSendMailCard.resp";
 
-  public static final String PENDING_SEND_MAIL_WITHDRAW_REQ = "PrepaidTopupRoute10.pendingSendMailWithdraw.req";
-  public static final String PENDING_SEND_MAIL_WITHDRAW_RESP = "PrepaidTopupRoute10.pendingSendMailWithdraw.resp";
-
-  public static final String ERROR_SEND_MAIL_WITHDRAW_REQ = "PrepaidTopupRoute10.errorSendMailWithdraw.req";
-  public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "PrepaidTopupRoute10.errorSendMailWithdraw.resp";
-
   public static final String PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ = "PrepaidTopupRoute10.pendingSendMovementToAccounting.req";
   public static final String PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP = "PrepaidTopupRoute10.pendingSendMovementToAccounting.resp";
 
@@ -132,22 +126,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingSendMailCard())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP + confResp)).end();
-
-    /**
-     * Envio recibo de retiro
-     */
-
-    from(String.format("seda:PrepaidTopupRoute10.pendingWithdrawMail?concurrentConsumers=%s&size=%s", concurrentConsumers, sedaSize))
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_REQ));
-
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processPendingWithdrawMail())
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_RESP + confResp)).end();
-
-    //Errores
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP)).end();
 
     /**
      * Envio de movement a accounting

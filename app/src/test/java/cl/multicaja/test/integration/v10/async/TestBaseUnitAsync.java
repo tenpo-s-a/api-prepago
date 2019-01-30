@@ -28,6 +28,8 @@ import org.junit.BeforeClass;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_WITHDRAW_REQ;
+
 /**
  * @autor vutreras
  */
@@ -321,7 +323,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     String messageId = getRandomString(20);
 
     //se crea la cola de requerimiento
-    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_WITHDRAW_REQ);
+    Queue qReq = camelFactory.createJMSQueue(PENDING_SEND_MAIL_WITHDRAW_REQ);
     // Realiza alta en tecnocom para que el usuario exista
 
     //se crea la el objeto con los datos del proceso
