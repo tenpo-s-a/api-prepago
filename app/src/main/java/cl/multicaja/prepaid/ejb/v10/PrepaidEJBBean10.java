@@ -101,6 +101,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private TecnocomService tecnocomService;
 
+  private TecnocomServiceHelper tecnocomServiceHelper;
+
   private UserClient userClient;
 
   private EncryptUtil encryptUtil;
@@ -189,6 +191,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
     }
     return tecnocomService;
+  }
+
+  @Override
+  public TecnocomServiceHelper getTecnocomServiceHelper() {
+    if(tecnocomServiceHelper == null) {
+      tecnocomServiceHelper = TecnocomServiceHelper.getInstance();
+    }
+    return tecnocomServiceHelper;
   }
 
   @Override
@@ -550,9 +560,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
     }
 
-    String contrato = prepaidCard.getProcessorUserId();
-    String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
-
     /*
       Registra el movimiento en estado pendiente
      */
@@ -566,21 +573,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
-    CodigoMoneda clamon = prepaidMovement.getClamon();
-    IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
-    TipoFactura tipofac = prepaidMovement.getTipofac();
-    BigDecimal impfac = prepaidMovement.getImpfac();
-    String codcom = prepaidMovement.getCodcom();
-    Integer codact = prepaidMovement.getCodact();
-    CodigoMoneda clamondiv = CodigoMoneda.NONE;
-    String nomcomred = prepaidWithdraw.getMerchantName();
-    String numreffac = prepaidMovement.getId().toString(); //Esto se realiza en tecnocom se reemplaza por 000000000
-    String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
+    String contrato = prepaidCard.getProcessorUserId();
+    String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-    log.info(String.format("LLamando retiro de saldo %s", prepaidCard.getProcessorUserId()));
-
-    InclusionMovimientosDTO inclusionMovimientosDTO =  getTecnocomService()
-      .inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac, numreffac, impfac, numaut, codcom, nomcomred, codact, clamondiv,impfac);
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().withdraw(contrato, pan, prepaidWithdraw.getMerchantName(), prepaidMovement);
 
     log.info("Respuesta inclusion");
     log.info(inclusionMovimientosDTO.getRetorno());

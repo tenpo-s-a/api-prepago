@@ -130,30 +130,10 @@ public class PendingTopup10 extends BaseProcessor10 {
             data.setPrepaidCard10(prepaidCard);
 
             String contrato = prepaidCard.getProcessorUserId();
-            log.info(String.format("Contrato: %s",contrato));
-
-            String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
-            log.info(String.format("Pan: %s", prepaidCard.getPan()));
-
-            CodigoMoneda clamon = prepaidMovement.getClamon();
-            log.info(String.format("Clamon: %s",clamon));
-
-
-            IndicadorNormalCorrector indnorcor = prepaidMovement.getIndnorcor();
-            TipoFactura tipofac = prepaidMovement.getTipofac();
-            BigDecimal impfac = prepaidMovement.getImpfac();
-            String codcom = prepaidMovement.getCodcom();
-            Integer codact = prepaidMovement.getCodact();
-            CodigoMoneda clamondiv = CodigoMoneda.NONE;
             String nomcomred = prepaidTopup.getMerchantName();
-            String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
-            String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
+            String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-            log.info(String.format("LLamando a inclusion de movimientos para carga de saldo a contrato %s", prepaidCard.getProcessorUserId()));
-
-            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
-                                                                                                        numreffac, impfac, numaut, codcom,
-                                                                                                        nomcomred, codact, clamondiv,impfac);
+            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, nomcomred, prepaidMovement);
 
             log.info(String.format("Respuesta inclusion: Codigo -> %s, Descripcion -> %s", inclusionMovimientosDTO.getRetorno(), inclusionMovimientosDTO.getDescRetorno()));
 

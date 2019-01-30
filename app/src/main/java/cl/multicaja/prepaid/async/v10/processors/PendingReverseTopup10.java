@@ -71,6 +71,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
           //prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
           log.info("[AFTER prepaidMovement] "+prepaidMovementReverse);
 
+          String contrato = prepaidCard.getProcessorUserId();
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
           // Busca el movimiento de carga original
@@ -86,9 +87,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
 
               // Se intenta realizar nuevamente la inclusion del movimiento original .
-            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), pan, originalMovement.getClamon(),
-                originalMovement.getIndnorcor(), originalMovement.getTipofac(), "", originalMovement.getImpfac(), originalMovement.getNumaut(), originalMovement.getCodcom(),
-                originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
+            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, originalMovement.getCodcom(), originalMovement);
 
             log.info("Respuesta reversa mov original");
             log.info(inclusionMovimientosDTO.getRetorno());
@@ -133,9 +132,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
 
             // Se intenta realizar reversa del movimiento.
-            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomService().inclusionMovimientos(prepaidCard.getProcessorUserId(), pan,originalMovement.getClamon(),
-              prepaidMovementReverse.getIndnorcor(), prepaidMovementReverse.getTipofac(), "", originalMovement.getImpfac(), prepaidMovementReverse.getNumaut(), originalMovement.getCodcom(),
-              originalMovement.getCodcom(), originalMovement.getCodact(), CodigoMoneda.fromValue(originalMovement.getClamondiv()), new BigDecimal(originalMovement.getImpliq()));
+            InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().reverse(contrato, pan, originalMovement.getCodcom(), prepaidMovementReverse);
 
             log.info("Respuesta reversa");
             log.info(inclusionMovimientosDTO.getRetorno());
