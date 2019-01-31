@@ -200,10 +200,10 @@ public class PendingTopup10 extends BaseProcessor10 {
               if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
                 Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
                 return redirectRequest(endpoint, exchange, req, false);
-              } else {
-                req.setData(data);
-                return req;
               }
+
+              req.setData(data);
+              return req;
 
             } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
