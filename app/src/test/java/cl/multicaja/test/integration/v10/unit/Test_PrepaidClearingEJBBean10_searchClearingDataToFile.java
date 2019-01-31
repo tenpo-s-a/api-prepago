@@ -29,7 +29,7 @@ public class Test_PrepaidClearingEJBBean10_searchClearingDataToFile extends Test
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
   }
 
-  public ClearingData10 buildClearing() {
+  public static ClearingData10 buildClearing() {
     ClearingData10 clearing10 = new ClearingData10();
     clearing10.setUserAccountId(getUniqueLong());
     clearing10.setFileId(getUniqueLong());
