@@ -417,6 +417,17 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
+  public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndIdMovement(Long idPrepaidUser, Long IdMovement) throws Exception {
+    if(idPrepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if(IdMovement == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "IdMovement"));
+    }
+    return this.getPrepaidMovements(IdMovement, null, idPrepaidUser, null, null, null, null, null, null, null, null, null);
+  }
+
+  @Override
   public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long idPrepaidUser, PrepaidMovementStatus estado) throws Exception {
     if(idPrepaidUser == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
