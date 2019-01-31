@@ -4,6 +4,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.MailRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -341,12 +342,12 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
       Assert.assertEquals("deben ser transactionType de confirmacion", CdtTransactionType.CARGA_WEB_CONF, cdtTransactionConfirm10.getTransactionType());
     }
 
-    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
+    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_TOPUP_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
-    String endpoint = PrepaidTopupRoute10.PENDING_TOPUP_REQ;
+    String endpoint = MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
 
-    Assert.assertEquals("debe ser primer intento", 0, lastProcessorMetadata.getRetry());
-    Assert.assertFalse("no debe ser redirect", lastProcessorMetadata.isRedirect());
+    Assert.assertEquals("debe ser primer intento", 1, lastProcessorMetadata.getRetry());
+    Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 
@@ -437,7 +438,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ;
 
-    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento procesado", 0, lastProcessorMetadata.getRetry());
     Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }

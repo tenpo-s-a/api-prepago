@@ -15,6 +15,9 @@ import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_WITHDRAW_RESP;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_WITHDRAW_RESP;
+
 public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
 
   @Test
@@ -30,7 +33,7 @@ public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingWithdrawMail(user, withdraw,prepaidMovement10,0);
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_WITHDRAW_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PENDING_SEND_MAIL_WITHDRAW_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertEquals("Debe tener mismo id", messageId, remote.getData().getPrepaidWithdraw10().getMessageId());
@@ -51,7 +54,7 @@ public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingWithdrawMail(user, withdraw,prepaidMovement10,3);
 
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_WITHDRAW_RESP);
+    Queue qResp = camelFactory.createJMSQueue(ERROR_SEND_MAIL_WITHDRAW_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertEquals("Debe tener mismo id", messageId, remote.getData().getPrepaidWithdraw10().getMessageId());
