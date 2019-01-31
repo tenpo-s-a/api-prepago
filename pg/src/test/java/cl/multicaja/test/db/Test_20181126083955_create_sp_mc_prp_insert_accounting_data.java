@@ -24,7 +24,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
 
   }
 
-  public static Map<String, Object> createRandomAccounting() {
+  public static Map<String, Object> createRandomAccounting(Long idTx) {
     Map<String, Object> testCase = null;
 
     Calendar c = Calendar.getInstance();
@@ -34,8 +34,8 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     testCase = new HashMap<>();
     testCase.put("id", 0);
-    testCase.put("id_tx", getUniqueInteger());
-    testCase.put("type", "1");
+    testCase.put("id_tx", idTx);
+    testCase.put("type", "RETIRO_WEB");
     testCase.put("accounting_mov","Carga WEb");
     testCase.put("amount_mcar",numberUtils.random(1000,9999));
     testCase.put("conciliation_date", currentDate);
@@ -53,6 +53,10 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("transaction_date", currentDate);
     testCase.put("file_id",0);
     return testCase;
+  }
+
+  public static Map<String, Object> createRandomAccounting() {
+    return createRandomAccounting(getUniqueLong());
   }
 
   public static List<Map<String, Object>> getTestSuiteOk(){
