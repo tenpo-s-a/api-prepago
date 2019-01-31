@@ -1,16 +1,14 @@
 package cl.multicaja.test.db;
 
-import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.*;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
-public class Test_20190131152532_create_sp_mc_prp_busca_retiros_web_conciliar_v10 extends TestDbBasePg {
+public class Test_20190131152532_create_sp_mc_acc_busca_retiros_web_conciliar_v10 extends TestDbBasePg {
 
-  //@AfterClass
+  @AfterClass
   public static void beforeAndAfterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", SCHEMA_ACCOUNTING));
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", SCHEMA_ACCOUNTING));
@@ -28,7 +26,7 @@ public class Test_20190131152532_create_sp_mc_prp_busca_retiros_web_conciliar_v1
 
 
   public static Map<String, Object> searchMovements() throws SQLException {
-    return dbUtils.execute(SCHEMA + ".mc_prp_busca_retiros_web_conciliar_v10");
+    return dbUtils.execute(SCHEMA_ACCOUNTING + ".mc_acc_busca_retiros_web_conciliar_v10");
   }
 
   private Long insertMovement(String tecnocomConStatus, Boolean isReconcilied, String clearingStatus) throws Exception {

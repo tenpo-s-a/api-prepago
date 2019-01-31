@@ -14,10 +14,10 @@
 --    limitations under the License.
 --
 
--- // create_sp_mc_prp_busca_retiros_web_conciliar_v10
+-- // create_sp_mc_acc_busca_retiros_web_conciliar_v10
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_retiros_web_conciliar_v10
+CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_busca_retiros_web_conciliar_v10
 (
   OUT _id BIGINT,
   OUT _id_tx BIGINT,
@@ -91,4 +91,4 @@ $function$
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_retiros_web_conciliar_v10();
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_busca_retiros_web_conciliar_v10();
