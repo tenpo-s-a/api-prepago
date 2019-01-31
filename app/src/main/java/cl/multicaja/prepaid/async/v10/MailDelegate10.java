@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
@@ -17,8 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.SEDA_PENDING_SEND_MAIL_TOPUP;
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.SEDA_PENDING_SEND_MAIL_WITHDRAW;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.*;
 
 /**
  * Clase delegate que permite iniciar los procesos asincronos
@@ -115,4 +115,66 @@ public final class MailDelegate10 {
 
     return messageId;
   }
+
+  /**
+   * Envia la confirmacion de withdraw al proceso asincrono
+   *
+   * @param user
+   * @return
+   */
+  public String sendWithdrawSuccessMail(User user, PrepaidMovement10 prepaidMovement, UserAccount userAccount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+
+    PrepaidTopupData10 data = new PrepaidTopupData10();
+    data.setUser(user);
+    data.setPrepaidMovement10(prepaidMovement);
+    data.setUserAccount(userAccount);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_PENDING_SEND_MAIL_WITHDRAW_SUCCESS));
+
+    this.getProducerTemplate().sendBodyAndHeaders(SEDA_PENDING_SEND_MAIL_WITHDRAW_SUCCESS, req, headers);
+
+    return messageId;
+  }
+
+  /**
+   * Envia la notificacion de error de withdraw al proceso asincrono
+   *
+   * @param user
+   * @return
+   */
+  public String sendWithdrawFailedMail(User user, PrepaidMovement10 prepaidMovement) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+
+    PrepaidTopupData10 data = new PrepaidTopupData10();
+    data.setUser(user);
+    data.setPrepaidMovement10(prepaidMovement);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_PENDING_SEND_MAIL_WITHDRAW_FAILED));
+
+    this.getProducerTemplate().sendBodyAndHeaders(SEDA_PENDING_SEND_MAIL_WITHDRAW_FAILED, req, headers);
+
+    return messageId;
+  }
+
 }

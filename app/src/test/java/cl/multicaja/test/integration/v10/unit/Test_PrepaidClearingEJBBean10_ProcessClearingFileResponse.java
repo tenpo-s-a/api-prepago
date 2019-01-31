@@ -191,7 +191,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     for(ClearingData10 originalMovement : wrongAmountMovements) {
       ClearingData10 result = processedClearingmovements.stream().filter(x ->originalMovement.getId().equals(x.getId())).findAny().orElse(null);
       Assert.assertNotNull("Deberia existir un mov con el mismo id", result);
-      Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.RESEARCH, result.getStatus());
+      Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.INVALID_INFORMATION, result.getStatus());
       List<ReconciliedResearch> researchMovs = getResearchMovement(result.getId());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
@@ -201,7 +201,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     for(ClearingData10 originalMovement : notInFileMovements) {
       ClearingData10 result = processedClearingmovements.stream().filter(x ->originalMovement.getId().equals(x.getId())).findAny().orElse(null);
       Assert.assertNotNull("Deberia existir un mov con el mismo id", result);
-      Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.RESEARCH, result.getStatus());
+      Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.NOT_IN_FILE, result.getStatus());
       List<ReconciliedResearch> researchMovs = getResearchMovement(result.getId());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());

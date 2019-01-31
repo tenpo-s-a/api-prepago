@@ -131,7 +131,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_clearing_data_v10", params);
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_acc_create_accounting_file_v10 resp: " + resp);
+      log.error("mc_acc_update_clearing_data_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
     return searchClearingDataById(header,getNumberUtils().toLong(id));
@@ -488,12 +488,12 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             updateClearingData(null, data.getId(),null, result.getStatus());
           }
           else {//Si  viene en el archivo, pero los montos no concuerdan, investigar.
-            ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
+            ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
             this.createClearingResearch(fileName, data.getId());
           }
         }
         else { // No viene en el archivo
-          ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
+          ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
           this.createClearingResearch(fileName, data.getId());
         }
       }
@@ -512,7 +512,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
   // Agrega movimiento a investigar
-  private void createClearingResearch(String fileName,Long clearingId) throws Exception {
+  public void createClearingResearch(String fileName,Long clearingId) throws Exception {
     String idToResearch = String.format("ClearingId=%d",clearingId);
     getPrepaidMovementEJBBean10().createMovementResearch(null,idToResearch, ReconciliationOriginType.CLEARING,fileName);
   }

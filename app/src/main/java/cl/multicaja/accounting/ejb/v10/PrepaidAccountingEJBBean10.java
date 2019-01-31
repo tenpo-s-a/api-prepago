@@ -873,4 +873,32 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       .anyMatch(m -> merchantName.toLowerCase().contains(m.toLowerCase()));
   }
 
+
+  @Override
+  public void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception {
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+    if(fileId == null && status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
+    }
+
+    Object[] params = {
+      new InParam(id, Types.BIGINT),
+      fileId == null ? new NullParam(Types.BIGINT) : new InParam(fileId, Types.BIGINT),
+      status == null ? new NullParam(Types.VARCHAR) : new InParam(status.getValue(), Types.VARCHAR),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_accounting_data_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_acc_update_accounting_data_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+    return;
+  }
+
 }

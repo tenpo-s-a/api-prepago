@@ -3,6 +3,7 @@ package cl.multicaja.accounting.ejb.v10;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
 import cl.multicaja.accounting.model.v10.AccountingData10;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.prepaid.model.v10.PrepaidAccountingMovement;
 
@@ -106,4 +107,14 @@ public interface PrepaidAccountingEJB10 {
    */
   Boolean isSubscriptionMerchant(final String merchantName) throws Exception;
 
+  /**
+   * Actualiza el estado
+   *
+   * @param header
+   * @param id
+   * @param fileId
+   * @param status
+   * @throws Exception
+   */
+  void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception;
 }
