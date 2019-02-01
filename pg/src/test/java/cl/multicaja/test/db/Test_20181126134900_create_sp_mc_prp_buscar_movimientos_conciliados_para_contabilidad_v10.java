@@ -19,7 +19,6 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
 
   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  @BeforeClass
   @AfterClass
   public static void beforeAndAfterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", SCHEMA_ACCOUNTING));
