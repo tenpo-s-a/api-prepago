@@ -1290,6 +1290,7 @@ public final class TestHelpersResource10 extends BaseResource {
 
     Response returnResponse = null;
 
+    
     try{
 
       User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
