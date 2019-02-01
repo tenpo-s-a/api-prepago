@@ -87,7 +87,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /
+        prefix: /prepaid
     route:
     - destination:
         host: api-prepaid
