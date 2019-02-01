@@ -165,19 +165,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
-    RowMapper rm = (Map<String, Object> row) -> {
-      ClearingData10 clearing10 = new ClearingData10();
-      clearing10.setId(getNumberUtils().toLong(row.get("_id")));
-      clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
-      clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
-      clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
-      clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
-      clearing10.setTimestamps(timestamps);
-      return clearing10;
-    };
+    RowMapper rm = getClearingDataRowMapper();
 
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_clearing_data_v10",  rm, params);
     List<ClearingData10> res = (List<ClearingData10>)resp.get("result");
@@ -470,6 +458,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       return clearingData10s;
 
   }
+
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile,String fileName,String fileId) throws Exception {
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null,fileId);
     //Verifica lo que debe venir en el archivo.
@@ -515,5 +504,33 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private void createClearingResearch(String fileName,Long clearingId) throws Exception {
     String idToResearch = String.format("ClearingId=%d",clearingId);
     getPrepaidMovementEJBBean10().createMovementResearch(null,idToResearch, ReconciliationOriginType.CLEARING,fileName);
+  }
+
+
+  @Override
+  public List<ClearingData10> getWebWithdrawForReconciliation(Map<String, Object> headers) throws Exception {
+
+    RowMapper rm = getClearingDataRowMapper();
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_acc_busca_retiros_web_conciliar_v10",getSchemaAccounting()), rm);
+
+    List list = (List)resp.get("result");
+
+    return list != null ? list : Collections.EMPTY_LIST;
+  }
+
+  private RowMapper getClearingDataRowMapper() {
+    return (Map<String, Object> row) -> {
+      ClearingData10 clearing10 = new ClearingData10();
+      clearing10.setId(getNumberUtils().toLong(row.get("_id")));
+      clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
+      clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
+      clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_created"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      clearing10.setTimestamps(timestamps);
+      return clearing10;
+    };
   }
 }

@@ -30,24 +30,21 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_conciliar_v10
 BEGIN
   RETURN QUERY
     SELECT
-      prp_movimiento.id,
-      prp_movimiento.estado,
-      prp_movimiento.estado_de_negocio,
-      prp_movimiento.estado_con_switch,
-      prp_movimiento.estado_con_tecnocom,
-      prp_movimiento.tipo_movimiento,
-      prp_movimiento.indnorcor
+      pm.id,
+      pm.estado,
+      pm.estado_de_negocio,
+      pm.estado_con_switch,
+      pm.estado_con_tecnocom,
+      pm.tipo_movimiento,
+      pm.indnorcor
     FROM
-     ${schema}.prp_movimiento
+     ${schema}.prp_movimiento pm
+      LEFT JOIN ${schema}.prp_movimiento_conciliado pmc on pm.id = pmc.id_mov_ref
     WHERE
-      prp_movimiento.estado_con_switch != 'PENDING' and
-      prp_movimiento.estado_con_tecnocom != 'PENDING' and
-      prp_movimiento.tipofac != 3003 and -- Se buscan todos menos los retiros web
-      prp_movimiento.id not in (select
-                                  prp_movimiento_conciliado.id_mov_ref
-                                from
-                                  ${schema}.prp_movimiento_conciliado
-                               );
+      pmc.id_mov_ref is null and -- que no este conciliado
+      pm.estado_con_switch != 'PENDING' and
+      pm.estado_con_tecnocom != 'PENDING' and
+      pm.tipofac != 3003;  -- Se buscan todos menos los retiros web
   RETURN;
 END;
 $$ LANGUAGE plpgsql;
