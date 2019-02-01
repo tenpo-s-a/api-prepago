@@ -46,4 +46,15 @@ public interface PrepaidClearingEJB10 {
    */
   ClearingData10 searchClearingDataById(Map<String, Object> header, Long id) throws Exception;
 
+  /**
+   * Busca los retiros web para procesar conciliacion:
+   *  - El movimiento debe tener respuesta del banco sobre el proceso de clearing
+   *  - El movimiento debe haber pasado el procesado de conciliacion con Tecnocom
+   *  - El movimiento no debe no ha sido conciliado
+   * @param headers
+   * @return
+   * @throws Exception
+   */
+  List<ClearingData10> getWebWithdrawForReconciliation(Map<String, Object> headers) throws Exception;
+
 }

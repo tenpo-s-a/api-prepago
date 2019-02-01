@@ -26,19 +26,23 @@ public class Test_20180925145632_create_sp_mc_prp_actualiza_movimiento_estado_te
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
 
+  public static Map<String,Object> updateTecnocomStatus(Long id, String status) throws SQLException {
+    Object[] params = {
+      id == null ? new NullParam(Types.NUMERIC) : id, //id
+      status == null ? new NullParam(Types.VARCHAR) : status,
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    return dbUtils.execute(SP_NAME, params);
+  }
+
   @Test
   public void updateMovementsOk() throws SQLException {
 
     Map<String, Object> mapMovimiento = insertRandomMovement();
 
-    Object[] params = {
-      mapMovimiento.get("_id"), //id
-      "Conciliado",
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp = dbUtils.execute(SP_NAME, params);
+    Map<String,Object> resp = updateTecnocomStatus(numberUtils.toLong(mapMovimiento.get("_id")), "Conciliado");
 
     List lstMov = searchMovement(mapMovimiento.get("_id"));
 
@@ -55,14 +59,7 @@ public class Test_20180925145632_create_sp_mc_prp_actualiza_movimiento_estado_te
   @Test
   public void updateMovementsNotOkByIdNull()throws SQLException {
 
-    Object[] params = {
-      new NullParam(Types.NUMERIC), //id
-      "Conciliado",
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+    Map<String,Object> resp = updateTecnocomStatus(null, "Conciliado");
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
@@ -73,14 +70,7 @@ public class Test_20180925145632_create_sp_mc_prp_actualiza_movimiento_estado_te
 
     Map<String, Object> mapMovimiento = insertRandomMovement();
 
-    Object[] params = {
-      mapMovimiento.get("_id"), //id
-      new NullParam(Types.VARCHAR),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String,Object> resp = dbUtils.execute(SP_NAME,params);
+    Map<String,Object> resp = updateTecnocomStatus(numberUtils.toLong(mapMovimiento.get("_id")), null);
 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertNotEquals("Codigo de error debe ser != 0", "0", resp.get("_error_code"));
