@@ -129,7 +129,7 @@ public final class MailDelegate10 {
       return null;
     }
 
-    String messageId = String.format("%s#%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
+    String messageId = String.format("%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
 
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);
@@ -160,7 +160,7 @@ public final class MailDelegate10 {
       return null;
     }
 
-    String messageId = String.format("%s#%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
+    String messageId = String.format("%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
 
     Map<String, Object> headers = new HashMap<>();
     headers.put("JMSCorrelationID", messageId);

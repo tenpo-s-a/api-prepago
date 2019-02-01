@@ -47,7 +47,7 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
   @EJB
-  private  TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
+  private TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
 
   @EJB
   private McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;

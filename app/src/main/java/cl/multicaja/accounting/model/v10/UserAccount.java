@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.UserBankAccountStatus;
 import cl.multicaja.tecnocom.util.StringUtil;
+import com.itextpdf.text.pdf.security.MakeXmlSignature;
 import org.apache.commons.lang3.StringUtils;
 
 public class UserAccount extends BaseModel {
@@ -94,7 +95,7 @@ public class UserAccount extends BaseModel {
 
   public String getCensoredAccount() {
     int numberOfDigits = accountNumber.length();
-    int numberOfX = numberOfDigits - 4;
+    int numberOfX = Math.max(numberOfDigits - 4, 0);
     String censoredAccount = StringUtils.repeat("X", numberOfX);
     censoredAccount = censoredAccount.concat(accountNumber.substring(numberOfX));
     return censoredAccount;
