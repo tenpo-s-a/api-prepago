@@ -82,9 +82,9 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   }
 
   public void movement_not_belongs_to_prepaid_user_id(Integer prepaidUserId, Integer movementId) throws Exception {
-    List<PrepaidMovement10> prepaidMovement10s = getPrepaidMovementEJBBean10().
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJBBean10().
       getPrepaidMovementByIdPrepaidUserAndIdMovement(prepaidUserId.longValue(),movementId.longValue());
-      Assert.assertNull("No se encuentra movimiento para el el usuario y el movimiento: ", prepaidMovement10s);
+      Assert.assertNull("No se encuentra movimiento para el el usuario y el movimiento: ", prepaidMovement);
   }
 
   @Test
