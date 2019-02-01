@@ -236,6 +236,7 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().status(201).build();
   }
 
+
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response processRefundMovement(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId, @Context HttpHeaders headers){
@@ -244,28 +245,56 @@ public final class PrepaidResource10 extends BaseResource {
 
     try{
 
+      PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+      PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
+      if (prepaidUserTest == null){
+        returnResponse = Response.status(301).build();
+        return returnResponse;
+      }
+
+      PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+      PrepaidMovement10 prepaidMovementTest = prepaidMovementEJBBean10.getPrepaidMovementById(movementId.longValue());
+      if (prepaidMovementTest == null){
+        returnResponse = Response.status(302).build();
+        return returnResponse;
+      }
+
+      List<PrepaidMovement10> prepaidMovement10sTest = prepaidMovementEJBBean10.
+        getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+      if(prepaidMovement10sTest == null) {
+        returnResponse = Response.status(303).build();
+        return returnResponse;
+      }
+
       PrepaidUser10 prepaidUser = prepaidEJBBean10.getPrepaidUser(headersToMap(headers),userPrepagoId);
       List<PrepaidMovement10> prepaidMovement10s = prepaidMovementEJBBean10.getPrepaidMovementByIdPrepaidUserAndIdMovement(prepaidUser.getId(),movementId);
 
       if( prepaidMovement10s.size() == 1 ){
 
         for (ListIterator<PrepaidMovement10> iter = prepaidMovement10s.listIterator(); iter.hasNext();) {
-            PrepaidMovement10 prepaidMovement = iter.next();
+          PrepaidMovement10 prepaidMovement = iter.next();
 
-            Long _movementId = prepaidMovement.getId();
+          Long _movementId = prepaidMovement.getId();
 
-            prepaidMovementEJBBean10.updatePrepaidMovementStatus(headersToMap(headers),_movementId,PrepaidMovementStatus.REJECTED);
-            prepaidMovementEJBBean10.updatePrepaidBusinessStatus(headersToMap(headers), _movementId, BusinessStatusType.TO_REFUND);
+          prepaidMovementEJBBean10.updatePrepaidBusinessStatus(headersToMap(headers), _movementId, BusinessStatusType.REFUND_OK);
 
-            CdtTransaction10 cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(headersToMap(headers),
-              prepaidMovementEJBBean10.getPrepaidMovementById(_movementId).getIdTxExterno());
+          CdtTransaction10 cdtTransaction = null;
 
-            //Confirmar reversa en CDT
-            cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
-            cdtTransaction.setIndSimulacion(Boolean.FALSE);
-            cdtTransaction = cdtEJBBean10.addCdtTransaction(headersToMap(headers), cdtTransaction);
+          cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExternoAndTransactionType(headersToMap(headers),
+            prepaidMovement.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA);
 
-            returnResponse = Response.ok(cdtTransaction).status(200).build();
+          if(cdtTransaction == null){
+            cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExternoAndTransactionType(headersToMap(headers),
+              prepaidMovement.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA);
+          }
+
+          //Confirmar reversa en CDT
+          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+          cdtTransaction.setIndSimulacion(Boolean.FALSE);
+          cdtTransaction.setTransactionReference(cdtTransaction.getId());
+          cdtTransaction = cdtEJBBean10.addCdtTransaction(headersToMap(headers), cdtTransaction);
+
+          returnResponse = Response.ok(cdtTransaction).status(201).build();
 
         }
 
@@ -274,7 +303,7 @@ public final class PrepaidResource10 extends BaseResource {
     }catch (Exception ex) {
       log.error("Error processing refund for movement: "+movementId+" with status rejected");
       ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(201).build();
+      returnResponse = Response.ok(ex).status(202).build();
     }
     return returnResponse;
   }

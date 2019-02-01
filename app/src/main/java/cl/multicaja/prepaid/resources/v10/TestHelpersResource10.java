@@ -1212,6 +1212,7 @@ public final class TestHelpersResource10 extends BaseResource {
     log.info("TICKET CREADO");
   }
 
+
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response testRefundMovementWithMovementId(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId,
@@ -1220,6 +1221,27 @@ public final class TestHelpersResource10 extends BaseResource {
     Response returnResponse = null;
 
     try{
+
+      PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+      PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
+      if (prepaidUserTest == null){
+        returnResponse = Response.status(301).build();
+        return returnResponse;
+      }
+
+      PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+      PrepaidMovement10 prepaidMovementTest = prepaidMovementEJBBean10.getPrepaidMovementById(movementId.longValue());
+      if (prepaidMovementTest == null){
+        returnResponse = Response.status(302).build();
+        return returnResponse;
+      }
+
+      List<PrepaidMovement10> prepaidMovement10sTest = prepaidMovementEJBBean10.
+        getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+      if(prepaidMovement10sTest == null) {
+        returnResponse = Response.status(303).build();
+        return returnResponse;
+      }
 
       List<PrepaidMovement10> prepaidMovement10s = prepaidMovementEJBBean10.getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
 
@@ -1230,18 +1252,25 @@ public final class TestHelpersResource10 extends BaseResource {
 
           Long _movementId = prepaidMovement.getId();
 
-          prepaidMovementEJBBean10.updatePrepaidMovementStatus(headersToMap(headers),_movementId,PrepaidMovementStatus.REJECTED);
-          prepaidMovementEJBBean10.updatePrepaidBusinessStatus(headersToMap(headers), _movementId, BusinessStatusType.TO_REFUND);
+          prepaidMovementEJBBean10.updatePrepaidBusinessStatus(headersToMap(headers), _movementId, BusinessStatusType.REFUND_OK);
 
-          CdtTransaction10 cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(headersToMap(headers),
-            prepaidMovementEJBBean10.getPrepaidMovementById(_movementId).getIdTxExterno());
+          CdtTransaction10 cdtTransaction = null;
+
+          cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExternoAndTransactionType(headersToMap(headers),
+            prepaidMovement.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA);
+
+          if(cdtTransaction == null){
+            cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExternoAndTransactionType(headersToMap(headers),
+              prepaidMovement.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA);
+          }
 
           //Confirmar reversa en CDT
-          cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA_CONF);
+          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
           cdtTransaction.setIndSimulacion(Boolean.FALSE);
+          cdtTransaction.setTransactionReference(cdtTransaction.getId());
           cdtTransaction = cdtEJBBean10.addCdtTransaction(headersToMap(headers), cdtTransaction);
 
-          returnResponse = Response.ok(cdtTransaction).status(200).build();
+          returnResponse = Response.ok(cdtTransaction).status(201).build();
 
         }
 
@@ -1250,7 +1279,7 @@ public final class TestHelpersResource10 extends BaseResource {
     }catch (Exception ex) {
       log.error("Error processing refund for movement: "+movementId+" with status rejected");
       ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(201).build();
+      returnResponse = Response.ok(ex).status(202).build();
     }
     return returnResponse;
   }
@@ -1287,28 +1316,53 @@ public final class TestHelpersResource10 extends BaseResource {
       prepaidMovement.setTipoMovimiento(TOPUP);
       prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
 
+
+      // Enviar movimiento a REFUND
+      prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.TO_REFUND);
+
+      CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
+
+      // Confirmar el topup en el CDT
+      cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(null, prepaidMovement.getIdTxExterno());
+
+      CdtTransactionType reverseTransactionType = cdtTransaction.getCdtTransactionTypeReverse();
+      cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+      cdtTransaction.setIndSimulacion(Boolean.FALSE);
+      cdtTransaction.setTransactionReference(cdtTransaction.getId());
+      cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+      // Iniciar reversa en CDT
+      cdtTransaction.setTransactionType(reverseTransactionType);
+      cdtTransaction.setTransactionReference(0L);
+      cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
       String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
       template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", user.getName(), user.getLastname_1()), String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()), user.getId(), "8888", 200000L, user.getEmail().getValue(), user.getCellphone().getValue());
 
+
+      user = getUserClient().finishSignup(headersToMap(headers),user.getId(),"Prepago");
+
       NewTicket newTicket = new NewTicket();
-      newTicket.setDescription(template);
+      //newTicket.setRequesterId(prepaidUser.getId().longValue());
       newTicket.setGroupId(GroupId.OPERACIONES);
       newTicket.setUniqueExternalId(user.getRut().getValue().toString());
       newTicket.setType(TicketType.DEVOLUCION);
+      newTicket.setSubject(String.format("%s - %s %s",
+        TicketType.DEVOLUCION.getValue(), user.getName(), user.getLastname_1()));
+      newTicket.setDescription(template);
       newTicket.setStatus(StatusType.OPEN);
       newTicket.setPriority(PriorityType.URGENT);
-      newTicket.setSubject("Devolucion de carga");
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
       Ticket ticket = getUserClient().createFreshdeskTicket(headersToMap(headers), user.getId(), newTicket);
 
-      returnResponse = Response.ok(newTicket).status(200).build();
+      returnResponse = Response.ok(newTicket).status(201).build();
 
     }catch (Exception ex) {
       log.error("Error processing prepare_to_refund");
       ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(201).build();
+      returnResponse = Response.ok(ex).status(202).build();
     }
 
     return returnResponse;

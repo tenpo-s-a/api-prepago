@@ -194,6 +194,7 @@ public class CdtEJBBean10 implements CdtEJB10 {
     return (List)map.get("result");
   }
 
+  //TODO: generar test de esta deficion
   @Override
   public CdtTransaction10 buscaMovimientoByIdExternoAndTransactionType(Map<String, Object> headers, String idExterno, CdtTransactionType type) throws Exception {
     List<CdtTransaction10> cdtTransaction10s = buscaListaMovimientoByIdExterno(headers, idExterno);

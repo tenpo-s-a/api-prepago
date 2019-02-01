@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.weld.context.http.Http;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ejb.EJB;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
+import static cl.multicaja.prepaid.model.v10.BusinessStatusType.REFUND_OK;
 import static cl.multicaja.prepaid.model.v10.BusinessStatusType.TO_REFUND;
 import static cl.multicaja.prepaid.model.v10.CdtTransactionType.*;
 import static cl.multicaja.prepaid.model.v10.PrepaidMovementStatus.REJECTED;
@@ -63,28 +65,26 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
+  private HttpResponse callPrepareToRefundOnMovement() {
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid_testhelpers/transactions/prepare_to_refund"), null);
+    System.out.println("RESP HTTP: " + respHttp);
+    return respHttp;
+  }
 
-  @Test
-  public void user_not_exist() throws  Exception {
-    Integer userId = 123456789;
+  public void user_not_exist(Integer userId) throws  Exception {
     PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().getPrepaidUserById(null,userId.longValue());
-    Assert.assertNull("Usario prepago no se encuentra ", prepaidUser);
+      Assert.assertNull("Usario prepago no se encuentra ", prepaidUser);
   }
 
-  @Test
-  public void movement_not_exist() throws Exception {
-    Integer movementId = 123456789;
+  public void movement_not_exist(Integer movementId) throws Exception {
     PrepaidMovement10 prepaidMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(movementId.longValue());
-    Assert.assertNull("Movimiento no se encuentra ", prepaidMovement);
+      Assert.assertNull("Movimiento no se encuentra ", prepaidMovement);
   }
 
-  @Test
-  public void movement_not_belongs_to_prepaid_user_id() throws Exception {
-    Integer movementId = 123456789;
-    Integer prepaidUserId = 123456789;
+  public void movement_not_belongs_to_prepaid_user_id(Integer prepaidUserId, Integer movementId) throws Exception {
     List<PrepaidMovement10> prepaidMovement10s = getPrepaidMovementEJBBean10().
       getPrepaidMovementByIdPrepaidUserAndIdMovement(prepaidUserId.longValue(),movementId.longValue());
-    Assert.assertNull("No se encuentra movimiento para el el usuario y el movimiento: ",prepaidMovement10s);
+      Assert.assertNull("No se encuentra movimiento para el el usuario y el movimiento: ", prepaidMovement10s);
   }
 
   @Test
@@ -142,9 +142,8 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
 
   }
 
-
   @Test
-  public void refund_status_on_movement_by_id() throws  Exception {
+  public void refund_status_on_movement_primera_carga() throws  Exception {
 
     User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -162,6 +161,7 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     //cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(REJECTED);
@@ -169,14 +169,68 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
 
-    HttpResponse httpResponse = setRefundStatusOnMovement(prepaidUser.getId(), prepaidMovement10.getId());
-    Assert.assertEquals("Refund exitoso",200, httpResponse.getStatus());
+    // Enviar movimiento a REFUND
+    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+    prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.TO_REFUND);
 
-    Assert.assertEquals("Se encuentra con estado 1", REJECTED,
+    CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
+
+    // Confirmar el topup en el CDT
+    cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(null, prepaidMovement10.getIdTxExterno());
+
+    CdtTransactionType reverseTransactionType = cdtTransaction.getCdtTransactionTypeReverse();
+    cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction.setTransactionReference(cdtTransaction.getId());
+    cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+    // Iniciar reversa en CDT
+    cdtTransaction.setTransactionType(reverseTransactionType);
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+    HttpResponse httpResponse = setRefundStatusOnMovement(prepaidUser.getId(), prepaidMovement10.getId());
+    Assert.assertEquals("Refund exitoso",201, httpResponse.getStatus());
+
+    Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
       getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstado());
-    Assert.assertEquals("Se encuentra con estado 2",TO_REFUND,
+    Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
       getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstadoNegocio());
 
+    Assert.assertEquals(" Se encuentra con estado "+REVERSA_PRIMERA_CARGA.getName(),
+      REVERSA_PRIMERA_CARGA,cdtTransaction.getTransactionType());
+
+    Assert.assertEquals(" Se encuentra con estado "+REVERSA_PRIMERA_CARGA_CONF.getName(),
+      REVERSA_PRIMERA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+
+    Assert.assertEquals(" Se encuentra con estado "+REVERSA_CARGA.getName()+" NULL ",null,
+      cdtTransaction.getCdtTransactionTypeReverse());
+
   }
+
+  @Test
+  public void refund_status_on_movement_with_user_not_found() throws  Exception {
+    user_not_exist(123456789);
+  }
+
+  @Test
+  public void refund_status_on_movement_with_movement_not_found() throws Exception {
+    movement_not_exist(123456789);
+  }
+
+  @Test
+  public void refund_status_on_movement_with_movement_not_belongs_to_prepare_user_id() throws Exception {
+    Integer prepareUserId = 123;
+    Integer movemementId = 456;
+    movement_not_belongs_to_prepaid_user_id(prepareUserId,movemementId);
+  }
+
+  @Ignore
+  @Test
+  public void call_prepare_to_refund_on_movement() throws  Exception {
+    HttpResponse httpResponse = callPrepareToRefundOnMovement();
+    System.out.println("callPrepareToRefundOnMovement: "+httpResponse.getResp());
+  }
+
 
 }
