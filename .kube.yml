@@ -58,12 +58,6 @@ spec:
     istio: ingressgateway # use istio default controller
   servers:
   - port:
-      number: 80
-      name: http-api-prepaid
-      protocol: HTTP
-    hosts:
-    - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
-  - port:
       number: 443
       name: https-api-prepaid
       protocol: HTTPS
@@ -89,7 +83,7 @@ spec:
     - uri:
         prefix: /prepaid/1.0
     rewrite:
-      uri: /api-prepaid-1.0/1.0/prepaid
+      uri: /api-prepaid-1.0/1.0
     route:
     - destination:
         host: api-prepaid
