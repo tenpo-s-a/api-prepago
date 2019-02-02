@@ -221,7 +221,7 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     Integer _idUser = 1234567890;
     CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(_idUser.longValue(),prepaidMovement10.getId());
-    Assert.assertNull("Transaccion exitosa",cdtTransactionTest);
+    Assert.assertNull("Transaccion fallida, el idUser:"+_idUser+" no contiene movimientos o transacciones asociadas",cdtTransactionTest);
 
   }
 
@@ -254,7 +254,7 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     Integer _idMovimiento = 123456789;
     CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),_idMovimiento.longValue());
-    Assert.assertNull("Transaccion exitosa",cdtTransactionTest);
+    Assert.assertNull("Transaccion fallida, el idMovimiento:"+_idMovimiento+" no contiene movimientos o transacciones asociadass",cdtTransactionTest);
   }
 
 }
