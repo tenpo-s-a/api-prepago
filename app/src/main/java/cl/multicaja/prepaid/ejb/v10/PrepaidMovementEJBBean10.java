@@ -601,7 +601,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
-  public CdtTransaction10 preocessRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
+  public CdtTransaction10 processRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
 
     CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
     CdtTransaction10 cdtTransaction = null;

@@ -243,7 +243,7 @@ public final class PrepaidResource10 extends BaseResource {
 
     Response returnResponse = null;
     try{
-      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.preocessRefundMovement(userPrepagoId,movementId);
+      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
       if(cdtTransaction == null){
         System.out.println("CDT_TRANSACTION_IS_NULL");
       }
