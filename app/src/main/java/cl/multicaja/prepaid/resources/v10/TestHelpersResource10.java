@@ -1217,62 +1217,13 @@ public final class TestHelpersResource10 extends BaseResource {
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response testRefundMovementWithMovementId(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId,
                                                    @Context HttpHeaders headers) throws Exception {
-
     Response returnResponse = null;
-
     try{
-
-      PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
-      PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
-      if (prepaidUserTest == null){
-        returnResponse = Response.status(410).build();
-        return returnResponse;
+      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.preocessRefundMovement(userPrepagoId,movementId);
+      if(cdtTransaction == null){
+        System.out.println("CDT_TRANSACTION_IS_NULL");
       }
-
-      PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
-      PrepaidMovement10 prepaidMovementTest = prepaidMovementEJBBean10.getPrepaidMovementById(movementId.longValue());
-      if (prepaidMovementTest == null){
-        returnResponse = Response.status(410).build();
-        return returnResponse;
-      }
-
-      PrepaidMovement10 prepaidMovement10Test = prepaidMovementEJBBean10.
-        getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
-      if(prepaidMovement10Test == null) {
-        returnResponse = Response.status(410).build();
-        return returnResponse;
-      }
-
-      PrepaidMovement10 prepaidMovement = prepaidMovementEJBBean10.getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
-
-      Long _movementId = prepaidMovement.getId();
-
-      prepaidMovementEJBBean10.updatePrepaidBusinessStatus(headersToMap(headers), _movementId, BusinessStatusType.REFUND_OK);
-
-      CdtTransaction10 cdtTransaction = null;
-
-      List<CdtTransaction10> transaction10s = cdtEJBBean10.buscaListaMovimientoByIdExterno(headersToMap(headers),prepaidMovement.getIdTxExterno());
-
-      if(transaction10s.size() > 0){
-
-        for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
-          cdtTransaction = iter.next();
-
-          if(cdtTransaction.getCdtTransactionTypeConfirm() != null){
-
-            cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
-            cdtTransaction.setIndSimulacion(Boolean.FALSE);
-            cdtTransaction.setTransactionReference(cdtTransaction.getId());
-            cdtTransaction = cdtEJBBean10.addCdtTransaction(headersToMap(headers), cdtTransaction);
-
-          }
-
-        }
-
-      }
-
       returnResponse = Response.ok(cdtTransaction).status(201).build();
-
     }catch (Exception ex) {
       log.error("Error processing refund for movement: "+movementId+" with status rejected");
       ex.printStackTrace();

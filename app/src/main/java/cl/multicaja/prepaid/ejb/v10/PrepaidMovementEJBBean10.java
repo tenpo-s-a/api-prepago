@@ -29,6 +29,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -600,6 +601,58 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
+  public CdtTransaction10 preocessRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
+
+    CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
+    CdtTransaction10 cdtTransaction = null;
+
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
+    if (prepaidUserTest == null){
+      return cdtTransaction;
+    }
+
+    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+    PrepaidMovement10 prepaidMovementTest = prepaidMovementEJBBean10.getPrepaidMovementById(movementId.longValue());
+    if (prepaidMovementTest == null){
+      return cdtTransaction;
+    }
+
+    PrepaidMovement10 prepaidMovement10sTest = prepaidMovementEJBBean10.
+      getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    if(prepaidMovement10sTest == null) {
+      return cdtTransaction;
+    }
+
+    PrepaidMovement10 prepaidMovement = prepaidMovementEJBBean10.getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+
+    Long _movementId = prepaidMovement.getId();
+
+    prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
+
+    List<CdtTransaction10> transaction10s = cdtEJBBean10.buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
+
+    if(transaction10s.size() > 0){
+
+      for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
+        cdtTransaction = iter.next();
+
+        if(cdtTransaction.getCdtTransactionTypeConfirm() != null){
+
+          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+          cdtTransaction.setIndSimulacion(Boolean.FALSE);
+          cdtTransaction.setTransactionReference(cdtTransaction.getId());
+          cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+        }
+
+      }
+
+    }
+
+    return cdtTransaction;
+  }
+
   @Override
   public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception {
     if(idMovRef == null){
@@ -1013,5 +1066,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
   }
+
+
+
 
 }
