@@ -257,5 +257,4 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     Assert.assertNull("Transaccion exitosa",cdtTransactionTest);
   }
 
-
 }
