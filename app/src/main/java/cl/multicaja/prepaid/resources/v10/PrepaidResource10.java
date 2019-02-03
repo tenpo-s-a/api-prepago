@@ -40,16 +40,10 @@ public final class PrepaidResource10 extends BaseResource {
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
-
-  @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
-
-  @EJB
-  private CdtEJBBean10 cdtEJBBean10;
 
   /*
     Prepaid topup

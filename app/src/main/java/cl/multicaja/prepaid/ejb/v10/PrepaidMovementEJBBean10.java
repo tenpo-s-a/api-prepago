@@ -603,7 +603,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public CdtTransaction10 processRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
 
-    CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
     CdtTransaction10 cdtTransaction = null;
 
     PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
@@ -630,7 +629,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
 
-    List<CdtTransaction10> transaction10s = cdtEJBBean10.buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
+    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
 
     if(transaction10s.size() > 0){
 
@@ -642,7 +641,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
           cdtTransaction.setIndSimulacion(Boolean.FALSE);
           cdtTransaction.setTransactionReference(cdtTransaction.getId());
-          cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+          cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
         }
 

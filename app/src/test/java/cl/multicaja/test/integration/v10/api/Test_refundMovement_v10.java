@@ -61,12 +61,16 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     prepaidMovement10.setEstado(REJECTED);
     prepaidMovement10.setTipoMovimiento(TOPUP);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+    //init Asserts
     Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
 
-    prepaidMovement10.setEstado(PrepaidMovementStatus.REJECTED);
-    Assert.assertEquals("Estado técnico Rejected", REJECTED, prepaidMovement10.getEstado());
-    prepaidMovement10.setEstadoNegocio(BusinessStatusType.TO_REFUND);
-    Assert.assertEquals("Estado de negocio Refund", TO_REFUND, prepaidMovement10.getEstadoNegocio());
+    getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null,prepaidMovement10.getId(),PrepaidMovementStatus.REJECTED);
+    getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.TO_REFUND);
+
+    PrepaidMovement10 prepaidMovementTest = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+    Assert.assertEquals("Estado técnico Rejected", REJECTED, prepaidMovementTest.getEstado());
+    Assert.assertEquals("Estado de negocio Refund", TO_REFUND, prepaidMovementTest.getEstadoNegocio());
 
     //Confirmar el retiro en CDT
     cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -79,16 +83,16 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
     Assert.assertEquals("Movimiento es Reversa de Carga",REVERSA_CARGA,cdtTransaction.getTransactionType());
 
-    HttpResponse httpResponse = setRefundStatusOnMovement(prepaidUser.getId(), prepaidMovement10.getId());
+    HttpResponse httpResponse = setRefundStatusOnMovement(prepaidUser.getId(), prepaidMovementTest.getId());
     Assert.assertEquals("Refund exitoso",201, httpResponse.getStatus());
 
     Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstado());
+      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstado());
     
     Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstadoNegocio());
+      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstadoNegocio());
 
-    List<CdtTransaction10> transaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null,prepaidMovement10.getIdTxExterno());
+    List<CdtTransaction10> transaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null,prepaidMovementTest.getIdTxExterno());
 
     if(transaction10s.size() > 0){
 
@@ -148,10 +152,10 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
 
     // Enviar movimiento a REFUND
-    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
+    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = getPrepaidMovementEJBBean10();
     prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.TO_REFUND);
 
-    CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
+    CdtEJBBean10 cdtEJBBean10 = getCdtEJBBean10();
 
     // Confirmar el topup en el CDT
     cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(null, prepaidMovement10.getIdTxExterno());
