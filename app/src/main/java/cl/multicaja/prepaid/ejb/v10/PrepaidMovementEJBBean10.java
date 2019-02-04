@@ -634,7 +634,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
         cdtTransaction = iter.next();
 
-        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType())){
+        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(cdtTransaction.getTransactionType())){
 
           cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
           cdtTransaction.setIndSimulacion(Boolean.FALSE);

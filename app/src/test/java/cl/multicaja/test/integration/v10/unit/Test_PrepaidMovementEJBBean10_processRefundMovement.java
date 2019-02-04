@@ -174,7 +174,7 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     if(transaction10s.size() > 0){
 
-      Assert.assertEquals("3 Transacciones: ",3,transaction10s.size());
+      Assert.assertEquals("4 Transacciones: ",4,transaction10s.size());
 
       for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
         cdtTransaction = iter.next();
