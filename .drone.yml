@@ -159,27 +159,6 @@ pipeline:
     when:
       event: [ tag ]
 
-  kong_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    vars:
-      cluster-environment: staging
-      cluster-domain: multicajadigital.cloud
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/staging/terraform-state"
-    actions:
-      - plan-destroy
-      - destroy
-    secrets:
-      - source: consul_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ push ]
-      branch: master
-
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
     channel: drone_deployments
