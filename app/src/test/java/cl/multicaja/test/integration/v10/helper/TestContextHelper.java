@@ -77,7 +77,7 @@ public class TestContextHelper extends TestBaseUnit {
         tecnocomReconciliationRoute10);
         */
       camelFactory.startCamelContextWithRoutes(true,
-        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10);
+        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }
