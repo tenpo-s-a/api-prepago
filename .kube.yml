@@ -89,3 +89,17 @@ spec:
         host: api-prepaid
         port:
           number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: db
+  namespace: api-users
+spec:
+  hosts:
+  - "prepaid-postgresql-staging.postgres.database.azure.com"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 5432
+    name: tcp-api-users-db
+    protocol: TCP
