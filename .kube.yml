@@ -83,7 +83,7 @@ spec:
     - uri:
         prefix: /prepaid/1.0
     rewrite:
-      uri: /api-prepaid-1.0/1.0/prepaid
+      uri: /api-prepaid-1.0/1.0
     route:
     - destination:
         host: api-prepaid
