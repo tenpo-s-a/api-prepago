@@ -605,29 +605,27 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     CdtTransaction10 cdtTransaction = null;
 
-    PrepaidUserEJBBean10 prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
     PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
     if (prepaidUserTest == null){
       return cdtTransaction;
     }
 
-    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = new PrepaidMovementEJBBean10();
-    PrepaidMovement10 prepaidMovementTest = prepaidMovementEJBBean10.getPrepaidMovementById(movementId.longValue());
+    PrepaidMovement10 prepaidMovementTest = getPrepaidMovementById(movementId.longValue());
     if (prepaidMovementTest == null){
       return cdtTransaction;
     }
 
-    PrepaidMovement10 prepaidMovement10sTest = prepaidMovementEJBBean10.
-      getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    PrepaidMovement10 prepaidMovement10sTest = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
     if(prepaidMovement10sTest == null) {
       return cdtTransaction;
     }
 
-    PrepaidMovement10 prepaidMovement = prepaidMovementEJBBean10.getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
 
     Long _movementId = prepaidMovement.getId();
 
-    prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
+    updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
 
     List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
 
@@ -636,7 +634,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
         cdtTransaction = iter.next();
 
-        if(cdtTransaction.getCdtTransactionTypeConfirm() != null){
+        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType())){
 
           cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
           cdtTransaction.setIndSimulacion(Boolean.FALSE);
