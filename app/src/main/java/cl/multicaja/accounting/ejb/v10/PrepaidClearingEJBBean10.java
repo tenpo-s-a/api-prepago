@@ -470,6 +470,12 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
         //Existe
         if(result != null) {
+          System.out.print(data.getUserBankAccount());
+          System.out.print(data.getUserBankAccount().getRut());
+          System.out.print( data.getUserBankAccount().getRut().getValue());
+          System.out.print(result.getUserBankAccount());
+          System.out.print(result.getUserBankAccount().getRut());
+          System.out.print(result.getUserBankAccount().getRut().getValue());
           //Coinciden
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
             data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&

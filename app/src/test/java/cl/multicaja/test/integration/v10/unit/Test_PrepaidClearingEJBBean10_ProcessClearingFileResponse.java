@@ -4,6 +4,7 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
@@ -155,6 +156,10 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       data.setStatus(AccountingStatusType.OK);
       UserAccount bankAccount = new UserAccount();
       bankAccount.setId(55L);
+      bankAccount.setAccountNumber(getRandomNumericString(12));
+      Rut rut = new Rut();
+      rut.setValue(Integer.valueOf(getRandomNumericString(8)));
+      bankAccount.setRut(rut);
       data.setUserBankAccount(bankAccount);
       movements.add(data);
       notInBDMovements.add(data);
