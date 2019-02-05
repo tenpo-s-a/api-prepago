@@ -24,6 +24,7 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
   @Test
   public void refund_status_on_movement_carga() throws  Exception {
 
+    
     User user = registerUser();
 
     System.out.println("userRut: "+user.getRut());
