@@ -165,7 +165,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             callCDT(prepaidWithdraw, prepaidUser10, originalMovement.getIdMovimientoRef(), movRef.getCdtTransactionTypeConfirm());
             CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, 0L, CdtTransactionType.REVERSA_RETIRO);
             cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, cdtTxReversa.getTransactionReference(), cdtTxReversa.getCdtTransactionTypeConfirm());
-            if (!"0".equals(cdtTxReversa.getNumError())) {
+            if(!"0".equals(cdtTxReversa.getNumError())) {
               log.error("Error al confirmar reversa en CDT");
             }
             return req;
