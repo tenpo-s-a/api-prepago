@@ -29,6 +29,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -417,6 +418,18 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
+  public PrepaidMovement10 getPrepaidMovementByIdPrepaidUserAndIdMovement(Long idPrepaidUser, Long IdMovement) throws Exception {
+    if(idPrepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if(IdMovement == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "IdMovement"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(IdMovement, null, idPrepaidUser, null, null, null, null, null, null, null, null, null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  @Override
   public List<PrepaidMovement10> getPrepaidMovementByIdPrepaidUserAndEstado(Long idPrepaidUser, PrepaidMovementStatus estado) throws Exception {
     if(idPrepaidUser == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
@@ -586,6 +599,57 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, fecfac, numaut);
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
+  public CdtTransaction10 processRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
+
+    CdtTransaction10 cdtTransaction = null;
+
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
+    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
+    if (prepaidUserTest == null){
+      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: "+userPrepagoId);
+      return cdtTransaction;
+    }
+
+    PrepaidMovement10 prepaidMovementTest = getPrepaidMovementById(movementId.longValue());
+    if (prepaidMovementTest == null){
+      log.error("Error on processRefundMovement: prepaid movement not found by using movementId: "+movementId);
+      return cdtTransaction;
+    }
+
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    if(prepaidMovement == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
+      return cdtTransaction;
+    }
+
+    Long _movementId = prepaidMovement.getId();
+
+    updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
+
+    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
+
+    if(transaction10s.size() > 0){
+
+      for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
+        cdtTransaction = iter.next();
+
+        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(cdtTransaction.getTransactionType())){
+
+          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+          cdtTransaction.setIndSimulacion(Boolean.FALSE);
+          cdtTransaction.setTransactionReference(cdtTransaction.getId());
+          cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        }
+
+      }
+
+    }
+
+    return cdtTransaction;
   }
 
   @Override
@@ -1001,5 +1065,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
   }
+
+
+
 
 }

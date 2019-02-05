@@ -7,6 +7,7 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.cdt.ejb.v10.CdtEJB10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
@@ -19,15 +20,14 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
+import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
+import javax.ejb.PostActivate;
 import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.ws.rs.*;
@@ -60,7 +61,12 @@ import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
+import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
+import static cl.multicaja.prepaid.model.v10.BusinessStatusType.TO_REFUND;
+import static cl.multicaja.prepaid.model.v10.CdtTransactionType.REVERSA_CARGA_CONF;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
+import static cl.multicaja.prepaid.model.v10.PrepaidMovementStatus.REJECTED;
+import static cl.multicaja.prepaid.model.v10.PrepaidMovementType.TOPUP;
 
 /**
  * @author vutreras
@@ -1205,4 +1211,114 @@ public final class TestHelpersResource10 extends BaseResource {
     String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
     log.info("TICKET CREADO");
   }
+
+
+  @POST
+  @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
+  public Response testRefundMovementWithMovementId(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId,
+                                                   @Context HttpHeaders headers) throws Exception {
+    Response returnResponse = null;
+    try{
+      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
+      if(cdtTransaction == null){
+        System.out.println("CDT_TRANSACTION_IS_NULL");
+        log.error("testRefundMovementWithMovementId:CDT_TRANSACTION_IS_NULL by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
+      }
+      returnResponse = Response.ok(cdtTransaction).status(201).build();
+    }catch (Exception ex) {
+      log.error("Error processing refund for movement: "+movementId+" with status rejected");
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).status(410).build();
+    }
+    return returnResponse;
+  }
+
+  @POST
+  @Path("/transactions/prepare_to_refund")
+  public Response prepareToRefund(@Context HttpHeaders headers) throws Exception {
+
+    Response returnResponse = null;
+
+
+    try{
+
+      User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
+
+      PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+      prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
+      prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
+
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+      cdtTransaction = createCdtTransaction10(cdtTransaction);
+      cdtTransaction.setIndSimulacion(Boolean.FALSE);
+
+
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+      prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
+      prepaidMovement.setEstado(REJECTED);
+      prepaidMovement.setTipoMovimiento(TOPUP);
+      prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
+
+
+      // Enviar movimiento a REFUND
+      prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.TO_REFUND);
+
+      CdtEJBBean10 cdtEJBBean10 = new CdtEJBBean10();
+
+      // Confirmar el topup en el CDT
+      cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(null, prepaidMovement.getIdTxExterno());
+
+      CdtTransactionType reverseTransactionType = cdtTransaction.getCdtTransactionTypeReverse();
+      cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+      cdtTransaction.setIndSimulacion(Boolean.FALSE);
+      cdtTransaction.setTransactionReference(cdtTransaction.getId());
+      cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+      // Iniciar reversa en CDT
+      cdtTransaction.setTransactionType(reverseTransactionType);
+      cdtTransaction.setTransactionReference(0L);
+      cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+      String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
+      template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", user.getName(), user.getLastname_1()), String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()), user.getId(), "8888", 200000L, user.getEmail().getValue(), user.getCellphone().getValue());
+
+
+      user = getUserClient().finishSignup(headersToMap(headers),user.getId(),"Prepago");
+
+      NewTicket newTicket = new NewTicket();
+      //newTicket.setRequesterId(prepaidUser.getId().longValue());
+      newTicket.setGroupId(GroupId.OPERACIONES);
+      newTicket.setUniqueExternalId(user.getRut().getValue().toString());
+      newTicket.setType(TicketType.DEVOLUCION);
+      newTicket.setSubject(String.format("%s - %s %s",
+        TicketType.DEVOLUCION.getValue(), user.getName(), user.getLastname_1()));
+      newTicket.setDescription(template);
+      newTicket.setStatus(StatusType.OPEN);
+      newTicket.setPriority(PriorityType.URGENT);
+      newTicket.setProductId(43000001595L);
+      newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
+
+      Ticket ticket = getUserClient().createFreshdeskTicket(headersToMap(headers), user.getId(), newTicket);
+
+      returnResponse = Response.ok(newTicket).status(201).build();
+
+    }catch (Exception ex) {
+      log.error("Error processing prepare_to_refund");
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).status(410).build();
+    }
+
+    return returnResponse;
+
+  }
+
+
+
 }

@@ -1,10 +1,9 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
@@ -13,12 +12,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import javax.persistence.PostUpdate;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -38,10 +40,10 @@ public final class PrepaidResource10 extends BaseResource {
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   @EJB
-  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   /*
     Prepaid topup
@@ -226,6 +228,27 @@ public final class PrepaidResource10 extends BaseResource {
       //TODO: informar error?
     }
     return Response.ok().status(201).build();
+  }
+
+
+  @POST
+  @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
+  public Response processRefundMovement(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId, @Context HttpHeaders headers) {
+
+    Response returnResponse = null;
+    try{
+      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
+      if(cdtTransaction == null){
+        System.out.println("CDT_TRANSACTION_IS_NULL");
+        log.error("processRefundMovement:CDT_TRANSACTION_IS_NULL");
+      }
+      returnResponse = Response.ok(cdtTransaction).status(201).build();
+    }catch (Exception ex) {
+      log.error("Error processing refund for movement: "+movementId+" with status rejected");
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).status(410).build();
+    }
+    return returnResponse;
   }
 
 }
