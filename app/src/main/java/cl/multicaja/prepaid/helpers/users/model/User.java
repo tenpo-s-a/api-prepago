@@ -34,7 +34,6 @@ public class User extends BaseModel {
   private UserIdentityStatus identityStatus;
   private String FreshDeskId;
 
-  @JsonProperty("ocupation")
   private String occupation;
 
   private Boolean isBlacklisted;
