@@ -460,6 +460,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile,String fileName,String fileId) throws Exception {
+    //TODO (prioridad minima, para algun dia futuro): si un movimiento viene en el banco, Y esta en nuestra BD pero en un archivo anterior, debe marcarse como OK
+
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null,fileId);
     //Verifica lo que debe venir en el archivo.
     for (ClearingData10 data : clearingDataInTable) {
@@ -470,20 +472,20 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(result != null) {
           //Coinciden
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
-            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0&&
-            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0
+            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
+            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
+            data.getUserBankAccount().getRut().getValue().equals(result.getUserBankAccount().getRut().getValue()) &&
+            data.getUserBankAccount().getAccountNumber().equals(result.getUserBankAccount().getAccountNumber())
           ) {
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
             updateClearingData(null, data.getId(),null, result.getStatus());
           }
-          else {//Si  viene en el archivo, pero los montos no concuerdan, investigar.
-            ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
-            this.createClearingResearch(fileName, data.getId());
+          else {//Si  viene en el archivo, pero los montos no concuerdan, marcar.
+            updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
           }
         }
-        else { // No viene en el archivo
-          ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
-          this.createClearingResearch(fileName, data.getId());
+        else { // No viene en el archivo, marcar
+          updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
         }
       }
     }
@@ -500,6 +502,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     }
   }
+
   // Agrega movimiento a investigar
   public void createClearingResearch(String fileName,Long clearingId) throws Exception {
     String idToResearch = String.format("ClearingId=%d",clearingId);

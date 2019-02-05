@@ -63,33 +63,28 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement.getActionType());
 
-    Boolean reverseFound = false;
-    Boolean movementFound = false;
+    PrepaidMovement10 foundMovement = null;
     for(int i = 0; i < 20; i++) {
-      Thread.sleep(500); // Esperar que el async envie la reversa
+      Thread.sleep(500); // Esperar que el async ejecute la reversa
       System.out.println("Buscando...");
-      if(!reverseFound) {
-        PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
-        if(foundReverse != null) {
-          System.out.println("Encontre reversa...");
-          reverseFound = true;
-        }
-      }
 
-      if(!movementFound) {
-        PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-        if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
-          System.out.println("Encontre movimiento con estado cambiado...");
-          movementFound = true;
-        }
+      /*
+      if(foundReverse == null) {
+        foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
       }
+      */
 
-      if(movementFound && reverseFound) {
+      foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
         break;
       }
     }
-    Assert.assertTrue("Debe encontrarse la reversa", reverseFound);
-    Assert.assertTrue("Debe encontrarse el movimiento con el estado cambiado", movementFound);
+
+    Assert.assertNotNull("Debe encontrarse el movimiento");
+    Assert.assertEquals("Debe tener estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
+
+    PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
+    Assert.assertNotNull("Debe existir una reversa", foundReverse);
   }
 
   @Test

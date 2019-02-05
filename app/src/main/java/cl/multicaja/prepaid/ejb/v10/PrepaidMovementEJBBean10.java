@@ -968,25 +968,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           return;
         }
 
-        //TODO: esta correcto crear una reversa? El movimiento fue rechazado por tecnocom.
-        // Y porque se envia a research? Que no esté en tecnocom es normal si fue rechazado.
-        /*
-        // Se crea movimiento de reversa
-        NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
-        newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
-        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
-        newPrepaidTopup10.setMerchantName("Conciliacion" );
-        newPrepaidTopup10.setRut(user.getRut().getValue());
-        String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
-        newPrepaidTopup10.setTransactionId(newTxId);
-        // Se envia movimiento a reversar
-        getPrepaidEJBBean10().topupUserBalance(null,newPrepaidTopup10,false);
-
-        createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
-        createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
-        */
-
         // Enviar movimiento a REFUND
         createMovementConciliate(null, movFull.getId(), ReconciliationActionType.REFUND, ReconciliationStatusType.TO_REFUND);
         updatePrepaidBusinessStatus(null, movFull.getId(), BusinessStatusType.TO_REFUND);
@@ -1041,6 +1022,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   }
 
+  public void clearingResolution() throws Exception {
+    List<ClearingData10> clearingData10s = getPrepaidClearingEJB10().getWebWithdrawForReconciliation(null);
+
+    for(ClearingData10 clearingData10 : clearingData10s) {
+      PrepaidMovement10 prepaidMovement10 = this.getPrepaidMovementById(clearingData10.getIdTransaction());
+      this.processClearingResolution(prepaidMovement10, clearingData10);
+    }
+  }
+
   public void processClearingResolution(PrepaidMovement10 prepaidMovement10, ClearingData10 clearingData10) throws Exception {
     if(prepaidMovement10 == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovement10"));
@@ -1054,6 +1044,26 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(!PrepaidMovementType.WITHDRAW.equals(prepaidMovement10.getTipoMovimiento()) ||
        !NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidMovement10.getCodcom())) {
       throw new ValidationException(PARAMETRO_NO_PERMITIDO_$VALUE).setData(new KeyValue("value", "Movimiento no es retiro web"));
+    }
+
+    // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
+    if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
+      String idToResearch = String.format("idClearing=%d", clearingData10.getId());
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+
+      // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
+      createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      return;
+    }
+
+    // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
+    if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
+      String idToResearch = String.format("idClearing=%d", clearingData10.getId());
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+
+      // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
+      createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      return;
     }
 
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
@@ -1124,7 +1134,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               mailDelegate.sendWithdrawFailedMail(mcUser, prepaidMovement10);
             }
             break;
-          default: // Linea 4: OK tecnocom, error con banco (no vino en archivo o no concordaba el monto)
+          default: // Linea 4: OK tecnocom, error con banco (no concordaba el monto)
             {
               String idToResearch = String.format("idClearing=%d", clearingData10.getId());
               createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
