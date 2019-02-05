@@ -608,20 +608,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
     PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
     if (prepaidUserTest == null){
+      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: "+userPrepagoId);
       return cdtTransaction;
     }
 
     PrepaidMovement10 prepaidMovementTest = getPrepaidMovementById(movementId.longValue());
     if (prepaidMovementTest == null){
-      return cdtTransaction;
-    }
-
-    PrepaidMovement10 prepaidMovement10sTest = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
-    if(prepaidMovement10sTest == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using movementId: "+movementId);
       return cdtTransaction;
     }
 
     PrepaidMovement10 prepaidMovement = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    if(prepaidMovement == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
+      return cdtTransaction;
+    }
 
     Long _movementId = prepaidMovement.getId();
 

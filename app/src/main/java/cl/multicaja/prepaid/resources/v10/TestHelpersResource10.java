@@ -1222,6 +1222,7 @@ public final class TestHelpersResource10 extends BaseResource {
       CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
       if(cdtTransaction == null){
         System.out.println("CDT_TRANSACTION_IS_NULL");
+        log.error("testRefundMovementWithMovementId:CDT_TRANSACTION_IS_NULL by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
       }
       returnResponse = Response.ok(cdtTransaction).status(201).build();
     }catch (Exception ex) {
