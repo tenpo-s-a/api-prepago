@@ -54,7 +54,7 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     clearingData10.setStatus(AccountingStatusType.REJECTED); // Banco rechaza deposito
     clearingData10.setUserBankAccount(userAccount);
 
-    // No vino en el archivo del banco
+    // Banco rechaza retiro
     getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
 
     // Debe existir el movimiento conciliado
@@ -68,23 +68,31 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
       Thread.sleep(500); // Esperar que el async ejecute la reversa
       System.out.println("Buscando...");
 
-      /*
-      if(foundReverse == null) {
-        foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
-      }
-      */
-
       foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
       if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
         break;
       }
     }
 
-    Assert.assertNotNull("Debe encontrarse el movimiento");
+    Assert.assertNotNull("Debe encontrarse el movimiento", foundMovement);
     Assert.assertEquals("Debe tener estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
 
     PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
     Assert.assertNotNull("Debe existir una reversa", foundReverse);
+
+    // Chequear que exista el cdt confirmado
+    CdtTransaction10 originalCdtTransaction = getCdtEJBBean10().buscaMovimientoReferencia(null, prepaidMovement10.getIdMovimientoRef());
+    CdtTransaction10 foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), cdtTransaction.getCdtTransactionTypeConfirm());
+    Assert.assertNotNull("Debe existir la confirmacion del movimiento cdt", foundCdtTransaction);
+    Assert.assertEquals("Debe referenciar al movimiento original", originalCdtTransaction.getId(), foundCdtTransaction.getTransactionReference());
+
+    // Chequear que exista la reversa del cdt
+    CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoReferencia(null, foundReverse.getIdMovimientoRef());
+    Assert.assertNotNull("Debe existir la reversa en el cdt", reverseCdtTransaction);
+
+    // Debe existir la confirmacion de la reversa
+    CdtTransaction10 reverseConfirm = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), reverseCdtTransaction.getCdtTransactionTypeConfirm());
+    Assert.assertNotNull("Debe exitir la confirmacion de la reversa", reverseConfirm);
   }
 
   @Test
@@ -126,7 +134,7 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     clearingData10.setStatus(AccountingStatusType.REJECTED_FORMAT); // MC rechaza archivo
     clearingData10.setUserBankAccount(userAccount);
 
-    // No vino en el archivo del banco
+    // Rechazo formato
     getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
 
     // Debe existir el movimiento conciliado
