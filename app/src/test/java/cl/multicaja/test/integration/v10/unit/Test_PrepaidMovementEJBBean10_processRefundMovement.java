@@ -66,10 +66,10 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     Assert.assertEquals("Movimiento es Primera Carga Confirmada",PRIMERA_CARGA_CONF,cdtTransaction.getTransactionType());
 
     //Iniciar reversa en CDT
-    cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_CARGA);
+    cdtTransaction.setTransactionType(CdtTransactionType.REVERSA_PRIMERA_CARGA);
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
-    Assert.assertEquals("Movimiento es Reversa de Carga",REVERSA_CARGA,cdtTransaction.getTransactionType());
+    Assert.assertEquals("Movimiento es Reversa de Carga",CdtTransactionType.REVERSA_PRIMERA_CARGA,cdtTransaction.getTransactionType());
 
     CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovementTest.getId());
     Assert.assertNotNull("Transaccion exitosa",cdtTransactionTest);
@@ -80,6 +80,8 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
       getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstadoNegocio());
 
+    Integer numTestPassed = 0;
+    Integer numConditionsTrue = 4;
     List<CdtTransaction10> transaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null,prepaidMovementTest.getIdTxExterno());
 
     if(transaction10s.size() > 0){
@@ -94,20 +96,25 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
           if(cdtTransaction.getCdtTransactionTypeConfirm() == PRIMERA_CARGA_CONF){
             Assert.assertEquals(" Se encuentra con estado "+PRIMERA_CARGA_CONF.getName(),
               PRIMERA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+            numTestPassed ++;
           }
 
           if(cdtTransaction.getCdtTransactionTypeConfirm() == REVERSA_PRIMERA_CARGA_CONF){
             Assert.assertEquals(" Se encuentra con estado "+REVERSA_PRIMERA_CARGA_CONF.getName(),
               REVERSA_PRIMERA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+            numTestPassed ++;
           }
 
           if(cdtTransaction.getCdtTransactionTypeConfirm() == REVERSA_CARGA_CONF){
             Assert.assertEquals(" Se encuentra con estado "+REVERSA_CARGA_CONF.getName(),
               REVERSA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+            numTestPassed ++;
           }
         }
 
       }
+      Assert.assertEquals("Se cumplen las : "+transaction10s.size()+" condiciones ",
+        numConditionsTrue.longValue(),numTestPassed.longValue());
     }
 
   }
@@ -162,14 +169,13 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId());
     Assert.assertNotNull("Transaccion exitosa",cdtTransactionTest);
 
-    //HttpResponse httpResponse = setRefundStatusOnMovement(prepaidUser.getId(), prepaidMovement10.getId());
-    //Assert.assertEquals("Refund exitoso",201, httpResponse.getStatus());
-
     Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
       getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstado());
     Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
       getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstadoNegocio());
 
+    Integer numTestPassed = 0;
+    Integer numConditionsTrue = 4;
     List<CdtTransaction10> transaction10s = getCdtEJBBean10().buscaListaMovimientoByIdExterno(null,prepaidMovement10.getIdTxExterno());
 
     if(transaction10s.size() > 0){
@@ -184,15 +190,20 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
           if(cdtTransaction.getCdtTransactionTypeConfirm() == PRIMERA_CARGA_CONF){
             Assert.assertEquals(" Se encuentra con estado "+PRIMERA_CARGA_CONF.getName(),
               PRIMERA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+            numTestPassed ++;
           }
 
           if(cdtTransaction.getCdtTransactionTypeConfirm() == REVERSA_PRIMERA_CARGA_CONF){
             Assert.assertEquals(" Se encuentra con estado "+REVERSA_PRIMERA_CARGA_CONF.getName(),
               REVERSA_PRIMERA_CARGA_CONF,cdtTransaction.getCdtTransactionTypeConfirm());
+            numTestPassed ++;
           }
 
         }
       }
+
+      Assert.assertEquals("Se cumplen las : "+transaction10s.size()+" condiciones ",
+        numConditionsTrue.longValue(),numTestPassed.longValue());
     }
   }
 
