@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.helpers.users.model;
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
@@ -32,6 +33,8 @@ public class User extends BaseModel {
   private Boolean hasPassword;
   private UserIdentityStatus identityStatus;
   private String FreshDeskId;
+
+  private String occupation;
 
   private Boolean isBlacklisted;
 
@@ -179,5 +182,13 @@ public class User extends BaseModel {
 
   public void setFreshDeskId(String freshDeskId) {
     FreshDeskId = freshDeskId;
+  }
+
+  public String getOccupation() {
+    return occupation;
+  }
+
+  public void setOccupation(String occupation) {
+    this.occupation = occupation;
   }
 }
