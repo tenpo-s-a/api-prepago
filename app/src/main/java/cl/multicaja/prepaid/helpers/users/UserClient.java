@@ -312,7 +312,7 @@ public class UserClient {
     Map<String, String> data = new HashMap<>();
     data.put("name", name);
     data.put("lastname_1", lastname);
-    data.put("ocupation", occupation);
+    data.put("occupation", occupation);
 
     HttpResponse httpResponse = apiPOST(String.format("%s/%s/update_personal_data", getApiUrl(), userId), data);
     httpResponse.setJsonParser(getJsonMapper());
