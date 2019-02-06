@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -16,9 +17,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
-import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -383,6 +382,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
       }
 
+      System.out.println("Guardando en el archivo: " + mov.getAmount().getValue() + "::" + mov.getAmount().getValue().toBigInteger() + "::" + mov.getAmount().getValue().toBigInteger().toString());
+
       String[] data = new String[]{
         mov.getId().toString(), //ID_PREPAGO,
         fileId, //ID_LIQUIDACION,
@@ -444,6 +445,21 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           clearingData.setAmountMastercard(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[9])));
           clearingData.setAmountBalance(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
+
+          Rut accountRut = new Rut();
+          String stringRut = String.valueOf(record[19]);
+          System.out.println("Rut: " + stringRut);
+          String[] rutParts = stringRut.split("-");
+          accountRut.setValue(Integer.valueOf(rutParts[0]));
+          accountRut.setDv(rutParts[1]);
+
+          UserAccount userAccount = new UserAccount();
+          userAccount.setRut(accountRut);
+          userAccount.setBankName(String.valueOf(record[20]));
+          userAccount.setAccountNumber(String.valueOf(record[21]));
+          userAccount.setAccountType(String.valueOf(record[22]));
+
+          clearingData.setUserBankAccount(userAccount);
           clearingData10s.add(clearingData);
         }
         inputStream.close();
@@ -470,18 +486,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
         //Existe
         if(result != null) {
-          System.out.print(data.getUserBankAccount());
-          System.out.print(data.getUserBankAccount().getRut());
-          System.out.print( data.getUserBankAccount().getRut().getValue());
-          System.out.print(result.getUserBankAccount());
-          System.out.print(result.getUserBankAccount().getRut());
-          System.out.print(result.getUserBankAccount().getRut().getValue());
+          PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(data.getIdTransaction());
+          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
+          UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
+
+          System.out.println(data.getAmount().getValue() + " = " + result.getAmount().getValue() + " ?");
+          System.out.println(data.getAmountBalance().getValue() + " = " + result.getAmountBalance().getValue() + " ?");
+          System.out.println(data.getAmountMastercard().getValue() + " = " + result.getAmountMastercard().getValue() + " ?");
+          System.out.println(getNumberUtils().toLong(userAccount.getAccountNumber()).toString() + " = " + result.getUserBankAccount().getAccountNumber() + " ?");
+          System.out.println(userAccount.getRut().getValue() + " = " + result.getUserBankAccount().getRut().getValue() + " ?");
+
           //Coinciden
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
             data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
             data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
-            data.getUserBankAccount().getRut().getValue().equals(result.getUserBankAccount().getRut().getValue()) &&
-            data.getUserBankAccount().getAccountNumber().equals(result.getUserBankAccount().getAccountNumber())
+            getNumberUtils().toLong(userAccount.getAccountNumber()).toString().equals(result.getUserBankAccount().getAccountNumber()) &&
+            userAccount.getRut().getValue().equals(result.getUserBankAccount().getRut().getValue())
           ) {
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
             updateClearingData(null, data.getId(),null, result.getStatus());

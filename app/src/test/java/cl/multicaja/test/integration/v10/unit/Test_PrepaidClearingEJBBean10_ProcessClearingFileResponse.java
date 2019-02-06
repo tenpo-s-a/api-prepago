@@ -1,13 +1,15 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.model.v10.*;
+import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.model.v10.*;
 import com.opencsv.CSVWriter;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -67,30 +69,89 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     Assert.assertNotNull("No debe ser null",files10);
     Assert.assertNotEquals("No debe ser 0",0,files10.getId().longValue());
 
-    int numberOfOKMovements = 3;
-    int numberOfRejectedMovements = 3;
-    int numberOfRejectedFormatMovements = 3;
-    int numberOfWrongAmountMovements = 3;
-    int numberOfNotReturnedMovements = 3;
-    int numberOfNotInDatabaseMovements = 3;
+    int numberOfOKMovements = 1;
+    int numberOfRejectedMovements = 1;
+    int numberOfRejectedFormatMovements = 1;
+    int numberOfWrongAmountMovements = 1;
+    int numberOfNotReturnedMovements = 1;
+    int numberOfNotInDatabaseMovements = 1;
 
     int totalMovements = numberOfOKMovements + numberOfRejectedMovements + numberOfRejectedFormatMovements + numberOfWrongAmountMovements + numberOfNotReturnedMovements + numberOfNotInDatabaseMovements;
 
     // Crear todos los movimientos que SI estan en la BD
-    List<AccountingData10> accounting10s = new ArrayList<>();
+    List<ClearingData10> allClearingData = new ArrayList<>();
     for (int i = 0; i < totalMovements - numberOfNotInDatabaseMovements ; i++) {
+      User user = registerUser();
+      UserAccount userAccount = createBankAccount(user);
 
-      AccountingData10 accounting10 = buildRandomAccouting(AccountingTxType.RETIRO_WEB);
-      accounting10s.add(accounting10);
-      getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+      prepaidCard = createPrepaidCard10(prepaidCard);
 
-      ClearingData10 clearing10 = buildClearing();
-      clearing10.setAccountingId(accounting10s.get(0).getId());
-      clearing10.setFileId(files10.getId());
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      prepaidWithdraw.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
+      prepaidWithdraw.setBankAccountId(userAccount.getId());
+      NewAmountAndCurrency10 amountAndCurrency10 = new NewAmountAndCurrency10(new BigDecimal(12000L));
+      prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
+      prepaidWithdraw.setTotal(amountAndCurrency10);
 
-      clearing10 = getPrepaidClearingEJBBean10().insertClearingData(null, clearing10);
-      Assert.assertNotNull("El objeto no puede ser Null", clearing10);
-      Assert.assertNotEquals("El id no puede ser 0", 0, clearing10.getId().longValue());
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+      cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+      prepaidMovement10.setMonto(prepaidWithdraw.getAmount().getValue());
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+      prepaidMovement10.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+      AccountingData10 accountingData10 = buildRandomAccouting();
+      accountingData10.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+      accountingData10.setIdTransaction(prepaidMovement10.getId());
+      accountingData10.setType(AccountingTxType.RETIRO_WEB);
+      accountingData10.setStatus(AccountingStatusType.PENDING);
+      accountingData10.setAmount(amountAndCurrency10);
+      accountingData10.setAmountBalance(amountAndCurrency10);
+      accountingData10.setAmountUsd(amountAndCurrency10);
+      accountingData10.setAmountMastercard(amountAndCurrency10);
+      accountingData10 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
+
+      ClearingData10 clearingData10 = buildClearing();
+      clearingData10.setId(getUniqueLong());
+      clearingData10.setAccountingId(accountingData10.getId());
+      clearingData10.setStatus(AccountingStatusType.PENDING);
+      clearingData10.setUserBankAccount(userAccount);
+      clearingData10.setFileId(files10.getId());
+      clearingData10.setAmount(amountAndCurrency10);
+      clearingData10.setAmountBalance(amountAndCurrency10);
+      clearingData10.setAmountUsd(amountAndCurrency10);
+      clearingData10.setAmountMastercard(amountAndCurrency10);
+
+      clearingData10 = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
+      Assert.assertNotNull("El objeto no puede ser Null", clearingData10);
+      Assert.assertNotEquals("El id no puede ser 0", 0, clearingData10.getId().longValue());
+
+      // Como las clearing data no cargan todos sus datos, se los seteamos para mandarlo al archivo
+      clearingData10.setIdTransaction(accountingData10.getIdTransaction());
+      clearingData10.setAmount(amountAndCurrency10);
+      clearingData10.setAmountBalance(amountAndCurrency10);
+      clearingData10.setAmountUsd(amountAndCurrency10);
+      clearingData10.setAmountMastercard(amountAndCurrency10);
+
+      clearingData10.setType(AccountingTxType.RETIRO_WEB);
+      clearingData10.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+      clearingData10.setExchangeRateDif(new BigDecimal(100));
+      clearingData10.setFee(new BigDecimal(10));
+      clearingData10.setFeeIva(new BigDecimal(19));
+      clearingData10.setCollectorFee(new BigDecimal(90));
+      clearingData10.setCollectorFeeIva(new BigDecimal(9));
+
+      clearingData10.setUserBankAccount(userAccount);
+
+      // Se almacenan todas para prepararlas para meterlas al archivo
+      allClearingData.add(clearingData10);
     }
 
     ZonedDateTime endDay = date.withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
@@ -108,8 +169,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     List<ClearingData10> notInBDMovements = new ArrayList<>();
 
     // Preparar los datos que vienen en el archivo y tambien estan en la BD
-    for(int i = 0; i < movements.size(); i++) {
-      ClearingData10 data = movements.get(i);
+    for(int i = 0; i < allClearingData.size(); i++) {
+      ClearingData10 data = allClearingData.get(i);
       if(i < numberOfOKMovements) {
         data.setStatus(AccountingStatusType.OK);
         okMovements.add(data);
@@ -131,7 +192,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
     // Sacar de la lista las que no tienen que venir en el archivo, pero SI estan en la BD
     for(int i = 0; i < numberOfNotReturnedMovements; i++) {
-      movements.remove(movements.size() - 1);
+      allClearingData.remove(allClearingData.size() - 1);
     }
 
     // Agregar a la lista las que no estaran en la base de datos
@@ -161,11 +222,11 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       rut.setValue(Integer.valueOf(getRandomNumericString(8)));
       bankAccount.setRut(rut);
       data.setUserBankAccount(bankAccount);
-      movements.add(data);
+      allClearingData.add(data);
       notInBDMovements.add(data);
     }
 
-    InputStream is = createAccountingCSV(fileName, fileId, movements); // Crear archivo csv temporal
+    InputStream is = createAccountingCSV(fileName, fileId, allClearingData); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null", is);
     getPrepaidClearingEJBBean10().processClearingResponse(is, fileName);
 
@@ -197,9 +258,6 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       ClearingData10 result = processedClearingmovements.stream().filter(x ->originalMovement.getId().equals(x.getId())).findAny().orElse(null);
       Assert.assertNotNull("Deberia existir un mov con el mismo id", result);
       Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.INVALID_INFORMATION, result.getStatus());
-      List<ReconciliedResearch> researchMovs = getResearchMovement(result.getId());
-      Assert.assertNotNull("Debe haber una respuesta", researchMovs);
-      Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
 
     // Revisar los que no vienen en el archivo
@@ -207,9 +265,6 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       ClearingData10 result = processedClearingmovements.stream().filter(x ->originalMovement.getId().equals(x.getId())).findAny().orElse(null);
       Assert.assertNotNull("Deberia existir un mov con el mismo id", result);
       Assert.assertEquals("El status debe ser RESEARCH", AccountingStatusType.NOT_IN_FILE, result.getStatus());
-      List<ReconciliedResearch> researchMovs = getResearchMovement(result.getId());
-      Assert.assertNotNull("Debe haber una respuesta", researchMovs);
-      Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
 
     // Revisar los que venian en el archivo pero no estan en nuestra BD
