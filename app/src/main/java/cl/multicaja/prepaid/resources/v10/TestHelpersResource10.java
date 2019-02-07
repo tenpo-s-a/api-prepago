@@ -1319,6 +1319,30 @@ public final class TestHelpersResource10 extends BaseResource {
 
   }
 
+  @POST
+  @Path("/processor/notification")
+  public Response callNotification(Map<String, Object> body,@Context HttpHeaders headers) throws Exception {
+
+    Response returnResponse = null;
+
+    try{
+
+      ObjectMapper mapper = new ObjectMapper();
+      String json = new ObjectMapper().writeValueAsString(body);
+      NotificationCallback notificationCallback = mapper.readValue(json, NotificationCallback.class);
+      this.prepaidEJBBean10.setNotificationCallback(headersToMap(headers),notificationCallback);
+
+      returnResponse = Response.ok().status(202).build();
+    }catch(Exception ex){
+      log.error("Error on callNotification: "+ex.toString());
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).status(410).build();
+    }
+
+    return returnResponse;
+
+  }
+
 
 
 }

@@ -117,6 +117,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static CalculatorParameter10 calculatorParameter10;
 
+  private NotificationCallback notificationCallback;
+
 
   public PrepaidTopupDelegate10 getDelegate() {
     return delegate;
@@ -2673,6 +2675,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
+  }
+
+  public NotificationCallback setNotificationCallback(Map<String, Object>headers, NotificationCallback notificationCallback) throws Exception {
+
+
+    return notificationCallback;
   }
 
 }
