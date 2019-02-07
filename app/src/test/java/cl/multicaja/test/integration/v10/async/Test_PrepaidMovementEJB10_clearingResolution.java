@@ -99,7 +99,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
       Assert.assertEquals("Debe referenciar al movimiento original", originalCdtTransaction.getId(), foundCdtTransaction.getTransactionReference());
 
       // Chequear que exista la reversa del cdt
-      CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, foundReverse.getIdTxExterno(), originalCdtTransaction.getCdtTransactionTypeReverse());
+      CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, rejectedFormatClearing.prepaidMovement10.getIdTxExterno(), originalCdtTransaction.getCdtTransactionTypeReverse());
       Assert.assertNotNull("Debe existir la reversa en el cdt", reverseCdtTransaction);
 
       // Debe existir la confirmacion de la reversa
