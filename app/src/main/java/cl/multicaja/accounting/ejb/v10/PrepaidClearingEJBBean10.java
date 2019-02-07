@@ -93,7 +93,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Object[] params = {
       clearing10.getAccountingId() == null ? new NullParam(Types.BIGINT):new InParam(clearing10.getAccountingId(), Types.BIGINT),
-      clearing10.getUserBankAccount().getId() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getUserBankAccount().getId(), Types.BIGINT),
+      clearing10.getUserBankAccount() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getUserBankAccount().getId(), Types.BIGINT),
       clearing10.getFileId() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getFileId(), Types.BIGINT),
       clearing10.getStatus() == null ? new NullParam(Types.VARCHAR) : new InParam(clearing10.getStatus().getValue(), Types.VARCHAR),
       new OutParam("_id", Types.BIGINT),

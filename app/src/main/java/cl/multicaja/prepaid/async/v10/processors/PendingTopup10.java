@@ -188,6 +188,8 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
+              //TODO: Se debe guardar el movimiento en accounting -> PENDING y clearing -> INITIAL
+
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }

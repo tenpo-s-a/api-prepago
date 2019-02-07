@@ -3,10 +3,8 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.MovementOriginType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
@@ -16,9 +14,6 @@ import org.junit.*;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +47,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     String messageId = sendWithdrawToAccounting(prepaidMovement, userAccount);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP);
     ExchangeData<PrepaidTopupData10> remoteData = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteData);
@@ -87,7 +82,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     String messageId = sendWithdrawToAccounting(null, userAccount);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP);
     ExchangeData<PrepaidTopupData10> remoteData = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
@@ -116,7 +111,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     String messageId = sendWithdrawToAccounting(prepaidMovement, null);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP);
     ExchangeData<PrepaidTopupData10> remoteData = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
@@ -146,7 +141,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     String messageId = sendWithdrawToAccounting(prepaidMovement, userAccount);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP);
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP);
     ExchangeData<PrepaidTopupData10> remoteData = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);

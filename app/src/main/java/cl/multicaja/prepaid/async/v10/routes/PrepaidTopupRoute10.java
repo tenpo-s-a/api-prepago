@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
-import cl.multicaja.accounting.async.v10.processors.PendingStoreWithdrawToAccounting10;
+import cl.multicaja.accounting.async.v10.processors.PendingStoreInAccountingProcessor10;
 import cl.multicaja.prepaid.async.v10.processors.*;
 
 /**
@@ -41,8 +41,9 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.errorSendMailCard.req";
   public static final String ERROR_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.errorSendMailCard.resp";
 
-  public static final String PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ = "PrepaidTopupRoute10.pendingSendMovementToAccounting.req";
-  public static final String PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP = "PrepaidTopupRoute10.pendingSendMovementToAccounting.resp";
+  public static final String SEDA_SEND_MOVEMENT_TO_ACCOUNTING_REQ = "seda:PrepaidTopupRoute10.pendingSendMovementToAccounting";
+  public static final String PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ = "PrepaidTopupRoute10.pendingSendMovementToAccounting.req";
+  public static final String PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP = "PrepaidTopupRoute10.pendingSendMovementToAccounting.resp";
 
   @Override
   public void configure() throws Exception {
@@ -130,9 +131,10 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     /**
      * Envio de movement a accounting
      */
-
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ, concurrentConsumers)))
-      .process(new PendingStoreWithdrawToAccounting10(this).storeWithdrawToAccounting())
-      .to(createJMSEndpoint(PENDING_SEND_WITHDRAW_TO_ACCOUNTING_RESP + confResp)).end();
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_SEND_MOVEMENT_TO_ACCOUNTING_REQ, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ));
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ, concurrentConsumers)))
+      .process(new PendingStoreInAccountingProcessor10(this).storeInAccounting())
+      .to(createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP + confResp)).end();
   }
 }
