@@ -2679,6 +2679,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public NotificationCallback setNotificationCallback(Map<String, Object>headers, NotificationCallback notificationCallback) throws Exception {
 
+    String responseCode = "000";
+
+    if(notificationCallback.getBase64_data()==null){
+
+      responseCode = "101007";
+      notificationCallback.setResponse_code(responseCode);
+      notificationCallback.setResponse_message("Base64 is empty");
+
+
+    }
+
+
 
     return notificationCallback;
   }

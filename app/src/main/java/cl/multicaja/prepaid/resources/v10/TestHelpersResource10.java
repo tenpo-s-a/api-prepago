@@ -7,7 +7,6 @@ import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
-import cl.multicaja.cdt.ejb.v10.CdtEJB10;
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BaseException;
@@ -31,7 +30,6 @@ import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
-import cl.multicaja.tecnocom.model.response.Contratos;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -41,9 +39,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.ejb.EJB;
-import javax.ejb.PostActivate;
 import javax.inject.Inject;
 import javax.jms.Queue;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -62,9 +61,6 @@ import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
-import static cl.multicaja.prepaid.model.v10.BusinessStatusType.TO_REFUND;
-import static cl.multicaja.prepaid.model.v10.CdtTransactionType.REVERSA_CARGA_CONF;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_TOPUP;
 import static cl.multicaja.prepaid.model.v10.PrepaidMovementStatus.REJECTED;
 import static cl.multicaja.prepaid.model.v10.PrepaidMovementType.TOPUP;
 
@@ -1329,10 +1325,26 @@ public final class TestHelpersResource10 extends BaseResource {
 
       ObjectMapper mapper = new ObjectMapper();
       String json = new ObjectMapper().writeValueAsString(body);
-      NotificationCallback notificationCallback = mapper.readValue(json, NotificationCallback.class);
-      this.prepaidEJBBean10.setNotificationCallback(headersToMap(headers),notificationCallback);
 
-      returnResponse = Response.ok().status(202).build();
+      NotificationCallback notificationCallback = this.prepaidEJBBean10.setNotificationCallback(
+        headersToMap(headers),mapper.readValue(json, NotificationCallback.class));
+
+      JsonObject notifResponse = Json.createObjectBuilder().
+        add("code", notificationCallback.getResponse_code()).
+        add("message",notificationCallback.getResponse_message()).build();
+
+      if(notificationCallback.getResponse_code()!="101007"){
+        returnResponse = Response.ok(notifResponse).status(422).build();
+      }
+
+      if(notificationCallback){
+
+      }
+
+      if(notificationCallback.getResponse_code()=="000"){
+        returnResponse = Response.ok(notificationCallback).status(202).build();
+      }
+
     }catch(Exception ex){
       log.error("Error on callNotification: "+ex.toString());
       ex.printStackTrace();

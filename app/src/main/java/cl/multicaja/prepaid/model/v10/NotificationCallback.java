@@ -28,6 +28,7 @@ import java.util.Base64;
   "resolucion_tx",
   "base64_data"
 })
+
 public class NotificationCallback extends BaseModel {
 
   @JsonProperty("id")
@@ -62,7 +63,10 @@ public class NotificationCallback extends BaseModel {
   private Long resolucion_tx;
   @JsonProperty("base64_data")
   private Base64 base64_data;
-
+  @JsonProperty("response_message")
+  private String response_message;
+  @JsonProperty("response_code")
+  private String response_code;
 
   //@JsonProperty("base64_data")
   public Long getId() {
@@ -191,5 +195,21 @@ public class NotificationCallback extends BaseModel {
 
   public void setBase64_data(Base64 base64_data) {
     this.base64_data = base64_data;
+  }
+
+  public String getResponse_message() {
+    return response_message;
+  }
+
+  public void setResponse_message(String response_message) {
+    this.response_message = response_message;
+  }
+
+  public String getResponse_code() {
+    return response_code;
+  }
+
+  public void setResponse_code(String response_code) {
+    this.response_code = response_code;
   }
 }
