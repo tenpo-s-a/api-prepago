@@ -87,7 +87,7 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     Assert.assertEquals("Debe referenciar al movimiento original", originalCdtTransaction.getId(), foundCdtTransaction.getTransactionReference());
 
     // Chequear que exista la reversa del cdt
-    CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoReferencia(null, foundReverse.getIdMovimientoRef());
+    CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, foundReverse.getIdTxExterno(), originalCdtTransaction.getCdtTransactionTypeReverse());
     Assert.assertNotNull("Debe existir la reversa en el cdt", reverseCdtTransaction);
 
     // Debe existir la confirmacion de la reversa
@@ -143,35 +143,37 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement.getActionType());
 
-    Boolean reverseFound = false;
-    Boolean movementFound = false;
+    PrepaidMovement10 foundMovement = null;
     for(int i = 0; i < 20; i++) {
-      Thread.sleep(500); // Esperar que el async envie la reversa
+      Thread.sleep(500); // Esperar que el async ejecute la reversa
       System.out.println("Buscando...");
-      if(!reverseFound) {
-        PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
-        if(foundReverse != null) {
-          System.out.println("Encontre reversa...");
-          reverseFound = true;
-        }
-      }
 
-      if(!movementFound) {
-        PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
-        if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
-          System.out.println("Encontre movimiento con estado cambiado...");
-          movementFound = true;
-        }
-      }
-
-      if(movementFound && reverseFound) {
+      foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
         break;
       }
     }
-    Assert.assertTrue("Debe encontrarse la reversa", reverseFound);
-    Assert.assertTrue("Debe encontrarse el movimiento con el estado cambiado", movementFound);
-  }
 
+    Assert.assertNotNull("Debe encontrarse el movimiento", foundMovement);
+    Assert.assertEquals("Debe tener estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
+
+    PrepaidMovement10 foundReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(prepaidMovement10.getIdTxExterno(), prepaidMovement10.getTipoMovimiento(), IndicadorNormalCorrector.CORRECTORA);
+    Assert.assertNotNull("Debe existir una reversa", foundReverse);
+
+    // Chequear que exista el cdt confirmado
+    CdtTransaction10 originalCdtTransaction = getCdtEJBBean10().buscaMovimientoReferencia(null, prepaidMovement10.getIdMovimientoRef());
+    CdtTransaction10 foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), cdtTransaction.getCdtTransactionTypeConfirm());
+    Assert.assertNotNull("Debe existir la confirmacion del movimiento cdt", foundCdtTransaction);
+    Assert.assertEquals("Debe referenciar al movimiento original", originalCdtTransaction.getId(), foundCdtTransaction.getTransactionReference());
+
+    // Chequear que exista la reversa del cdt
+    CdtTransaction10 reverseCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, foundReverse.getIdTxExterno(), originalCdtTransaction.getCdtTransactionTypeReverse());
+    Assert.assertNotNull("Debe existir la reversa en el cdt", reverseCdtTransaction);
+
+    // Debe existir la confirmacion de la reversa
+    CdtTransaction10 reverseConfirm = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), reverseCdtTransaction.getCdtTransactionTypeConfirm());
+    Assert.assertNotNull("Debe exitir la confirmacion de la reversa", reverseConfirm);
+  }
 
   private ReconciliedMovement getReconciliedMovement(Long idMov) {
     RowMapper rowMapper = (rs, rowNum) -> {

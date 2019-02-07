@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
 
     // El movimiento debe quedar conciliado para que no vuelva a ser procesado
     ReconciliedMovement reconciliedMovement = getReconciliedMovement(prepaidMovement10.getId());
-    Assert.assertEquals("Debe tener estado recnciled", ReconciliationStatusType.RECONCILED, reconciliedMovement.getReconciliationStatusType());
+    Assert.assertEquals("Debe tener estado reconciled", ReconciliationStatusType.RECONCILED, reconciliedMovement.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion none", ReconciliationActionType.NONE, reconciliedMovement.getActionType());
   }
 

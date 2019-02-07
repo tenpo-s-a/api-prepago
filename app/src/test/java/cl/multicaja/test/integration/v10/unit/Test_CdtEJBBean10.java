@@ -67,7 +67,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
 
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
-      oCdtTx10.setAccountId(accountId);
+      oCdtTx10.setAccountId("");
       oCdtTx10.setTransactionReference(0L);
       oCdtTx10.setExternalTransactionId("POS" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
@@ -86,7 +86,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
 
     try {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
-      oCdtTx10.setAccountId("");
+      oCdtTx10.setAccountId(accountId);
       oCdtTx10.setTransactionReference(null);
       oCdtTx10.setExternalTransactionId("POS" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");

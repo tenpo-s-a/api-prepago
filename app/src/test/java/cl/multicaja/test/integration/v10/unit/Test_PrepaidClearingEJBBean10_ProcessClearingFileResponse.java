@@ -72,7 +72,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     int numberOfOKMovements = 1;
     int numberOfRejectedMovements = 1;
     int numberOfRejectedFormatMovements = 1;
-    int numberOfWrongAmountMovements = 1;
+    int numberOfWrongAmountMovements = 5; // Los 5 tipos de casos de informacion invalida
     int numberOfNotReturnedMovements = 1;
     int numberOfNotInDatabaseMovements = 1;
 
@@ -168,6 +168,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     List<ClearingData10> notInFileMovements = new ArrayList<>();
     List<ClearingData10> notInBDMovements = new ArrayList<>();
 
+    int wrongAmountCounter = 0;
     // Preparar los datos que vienen en el archivo y tambien estan en la BD
     for(int i = 0; i < allClearingData.size(); i++) {
       ClearingData10 data = allClearingData.get(i);
@@ -181,14 +182,33 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
         data.setStatus(AccountingStatusType.REJECTED_FORMAT);
         rejectedFormatMovements.add(data);
       } else if (i < numberOfOKMovements + numberOfRejectedMovements + numberOfRejectedFormatMovements + numberOfWrongAmountMovements) {
-        data.getAmount().setValue(data.getAmount().getValue().add(new BigDecimal(1L)));
+        // Creamos los 5 tipos de errores de informacion invalida
+        switch(wrongAmountCounter) {
+          case 0:
+            data.getAmount().setValue(data.getAmount().getValue().add(new BigDecimal(1L)));
+            break;
+          case 1:
+            data.getAmountBalance().setValue(data.getAmountBalance().getValue().add(new BigDecimal(1L)));
+            break;
+          case 2:
+            data.getAmountMastercard().setValue(data.getAmountMastercard().getValue().add(new BigDecimal(1L)));
+            break;
+          case 3:
+            data.getUserBankAccount().setAccountNumber("1234");
+            break;
+          case 4:
+            data.getUserBankAccount().getRut().setValue(1234);
+            break;
+        }
         data.setStatus(AccountingStatusType.OK);
         wrongAmountMovements.add(data);
+        wrongAmountCounter++;
       } else {
         data.setStatus(AccountingStatusType.OK);
         notInFileMovements.add(data);
       }
     }
+
 
     // Sacar de la lista las que no tienen que venir en el archivo, pero SI estan en la BD
     for(int i = 0; i < numberOfNotReturnedMovements; i++) {

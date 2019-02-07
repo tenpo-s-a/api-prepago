@@ -1027,7 +1027,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     for(ClearingData10 clearingData10 : clearingData10s) {
       PrepaidMovement10 prepaidMovement10 = this.getPrepaidMovementById(clearingData10.getIdTransaction());
-      this.processClearingResolution(prepaidMovement10, clearingData10);
+      System.out.println("Procesando: " + prepaidMovement10);
+      try {
+        this.processClearingResolution(prepaidMovement10, clearingData10);
+      } catch (Exception e) {
+        log.error("Error al procesar la resolucion del movimiento [" + (prepaidMovement10 != null ? prepaidMovement10.getId() : null) + "]");
+      }
     }
   }
 
@@ -1082,6 +1087,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         switch(clearingData10.getStatus()) {
           case OK: // Linea 1: OK tecnocom, Banco OK
             {
+              System.out.println("Camino felix");
+
               // Confirmar movimiento en cdt
               CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB);
               cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
@@ -1094,6 +1101,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
               // Actualiza estado accounting
+              System.out.println("Actualizando el accounting id: " + clearingData10.getAccountingId());
               getPrepaidAccountingEJB10().updateAccountingData(null, clearingData10.getAccountingId(), null, AccountingStatusType.OK);
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -1134,7 +1142,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               mailDelegate.sendWithdrawFailedMail(mcUser, prepaidMovement10);
             }
             break;
-          default: // Linea 4: OK tecnocom, error con banco (no concordaba el monto)
+          default: // Nunca deberia llegar aqui
             {
               String idToResearch = String.format("idClearing=%d", clearingData10.getId());
               createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");

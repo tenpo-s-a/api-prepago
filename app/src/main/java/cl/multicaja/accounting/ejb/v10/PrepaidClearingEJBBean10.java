@@ -490,12 +490,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
           UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
 
-          System.out.println(data.getAmount().getValue() + " = " + result.getAmount().getValue() + " ?");
-          System.out.println(data.getAmountBalance().getValue() + " = " + result.getAmountBalance().getValue() + " ?");
-          System.out.println(data.getAmountMastercard().getValue() + " = " + result.getAmountMastercard().getValue() + " ?");
-          System.out.println(getNumberUtils().toLong(userAccount.getAccountNumber()).toString() + " = " + result.getUserBankAccount().getAccountNumber() + " ?");
-          System.out.println(userAccount.getRut().getValue() + " = " + result.getUserBankAccount().getRut().getValue() + " ?");
-
           //Coinciden
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
             data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
@@ -551,6 +545,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (Map<String, Object> row) -> {
       ClearingData10 clearing10 = new ClearingData10();
       clearing10.setId(getNumberUtils().toLong(row.get("_id")));
+      clearing10.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
