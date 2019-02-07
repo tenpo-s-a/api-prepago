@@ -57,7 +57,7 @@ spec:
   hosts:
   - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
   gateways:
-  - api-prepaid-gateway
+  - global-gateway.default.svc.cluster.local
   http:
   - match:
     - uri:
