@@ -1508,6 +1508,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
+    System.out.println("Testando ------- %%%%%%%%%%%%%%%");
     if(!cdtTransaction.isNumErrorOk()){
       /* Posibles errores:
       El retiro supera el monto máximo de un retiro web

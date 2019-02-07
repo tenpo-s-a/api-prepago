@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
-public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUnitAsync {
+public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAsync {
 
   @BeforeClass
   @AfterClass

@@ -1,7 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJB10;
+import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
 import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJB10;
+import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
@@ -68,10 +70,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private PrepaidEJBBean10 prepaidEJBBean10;
 
   @EJB
-  private PrepaidClearingEJB10 prepaidClearingEJB10;
+  private PrepaidClearingEJBBean10 prepaidClearingEJB10;
 
   @EJB
-  private PrepaidAccountingEJB10 prepaidAccountingEJB10;
+  private PrepaidAccountingEJBBean10 prepaidAccountingEJB10;
 
   @Override
   public UserClient getUserClient() {
@@ -125,19 +127,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     this.cdtEJB10 = cdtEJB10;
   }
 
-  public PrepaidClearingEJB10 getPrepaidClearingEJB10() {
+  public PrepaidClearingEJBBean10 getPrepaidClearingEJB10() {
     return prepaidClearingEJB10;
   }
 
-  public void setPrepaidClearingEJB10(PrepaidClearingEJB10 prepaidClearingEJB10) {
+  public void setPrepaidClearingEJB10(PrepaidClearingEJBBean10 prepaidClearingEJB10) {
     this.prepaidClearingEJB10 = prepaidClearingEJB10;
   }
 
-  public PrepaidAccountingEJB10 getPrepaidAccountingEJB10() {
+  public PrepaidAccountingEJBBean10 getPrepaidAccountingEJB10() {
     return prepaidAccountingEJB10;
   }
 
-  public void setPrepaidAccountingEJB10(PrepaidAccountingEJB10 prepaidAccountingEJB10) {
+  public void setPrepaidAccountingEJB10(PrepaidAccountingEJBBean10 prepaidAccountingEJB10) {
     this.prepaidAccountingEJB10 = prepaidAccountingEJB10;
   }
 
