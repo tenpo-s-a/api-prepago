@@ -143,6 +143,15 @@ public interface PrepaidMovementEJB10 {
   /**
    *
    * @param idPrepaidUser
+   * @param IdMovement
+   * @return
+   * @throws Exception
+   */
+  PrepaidMovement10 getPrepaidMovementByIdPrepaidUserAndIdMovement(Long idPrepaidUser, Long IdMovement) throws Exception;
+
+  /**
+   *
+   * @param idPrepaidUser
    * @param estado
    * @return
    * @throws Exception

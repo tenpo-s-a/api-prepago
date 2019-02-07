@@ -38,8 +38,6 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
@@ -423,6 +421,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
+    user.setOccupation(null);
     user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.VERIFIED);
@@ -470,6 +469,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
+    user.setOccupation(null);
     user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.UNVERIFIED);
@@ -488,6 +488,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setName(null);
     user.setLastname_1(null);
     user.setLastname_2(null);
+    user.setOccupation(null);
     user = getUserClient().fillUser(null,user);
     user.setGlobalStatus(status);
     user.getRut().setStatus(RutStatus.UNVERIFIED);

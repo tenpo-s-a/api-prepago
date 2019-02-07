@@ -40,7 +40,6 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -2609,7 +2608,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // Si necesita actualizar la ifnormacion
       if(needPersonalDataUpdate) {
-        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
+        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1(), user.getOccupation());
       }
 
       user = this.processSuccessfulIdentityVerification(headers, prepaidUser);

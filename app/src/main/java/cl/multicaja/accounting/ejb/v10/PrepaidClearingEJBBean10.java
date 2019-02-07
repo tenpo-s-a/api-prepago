@@ -363,6 +363,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
+    // TODO: Agregar tasa de intercambio
     String[] header = new String[]{"ID_PREPAGO","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -388,7 +389,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getId().toString(), //ID_PREPAGO,
         fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
-        "", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
+        "", //ID_CUENTA_ORIGEN - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
         mov.getType().getValue(), //TIPO_TRX
         mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
         transactionDate, //FECHA_TRX
@@ -476,8 +477,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile,String fileName,String fileId) throws Exception {
-    //TODO (prioridad minima, para algun dia futuro): si un movimiento viene en el banco, Y esta en nuestra BD pero en un archivo anterior, debe marcarse como OK
-
+    //TODO (poca prioridad):  Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null,fileId);
     //Verifica lo que debe venir en el archivo.
     for (ClearingData10 data : clearingDataInTable) {

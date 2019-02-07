@@ -49,26 +49,6 @@ spec:
     app: api-prepaid
 ---
 apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: api-prepaid-gateway
-  namespace: api-prepaid
-spec:
-  selector:
-    istio: ingressgateway # use istio default controller
-  servers:
-  - port:
-      number: 443
-      name: https-api-prepaid
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
-    hosts:
-    - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
----
-apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: api-prepaid-vts
@@ -77,7 +57,7 @@ spec:
   hosts:
   - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
   gateways:
-  - api-prepaid-gateway
+  - global-gateway.default.svc.cluster.local
   http:
   - match:
     - uri:
