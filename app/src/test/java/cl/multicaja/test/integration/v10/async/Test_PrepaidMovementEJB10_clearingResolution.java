@@ -37,7 +37,6 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
 
     getPrepaidMovementEJBBean10().clearingResolution();
 
-
     {
       // Check banco rechaza
       PrepaidMovement10 foundMovement = null;

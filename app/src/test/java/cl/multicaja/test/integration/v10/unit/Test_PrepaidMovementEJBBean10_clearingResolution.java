@@ -160,7 +160,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     // Chequea test: Es RETIRO + Es WEB + No Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notTecnocom.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notTecnocom.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -184,7 +184,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     // Chequea test: Es RETIRO + Es WEB + PENDING Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, pendingTecnocom.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, pendingTecnocom.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -209,7 +209,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     // Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: rejected + Clearing OK
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, movementRejected.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, movementRejected.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -233,7 +233,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     // Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + Clearing notInFile
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notInFile.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notInFile.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -250,14 +250,14 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement.getActionType());
 
       // Debe estar en research
-      List<ReconciliedResearch> reconciliedResearch = getResearchMovement(String.format("idClearing=%d", notInFile.prepaidMovement10.getId()));
+      List<ReconciliedResearch> reconciliedResearch = getResearchMovement(String.format("idClearing=%d", notInFile.clearingData10.getId()));
       Assert.assertEquals("Debe estar en research", 1, reconciliedResearch.size());
     }
 
     // Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + Clearing invalidInformation
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, invalidInformation.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, invalidInformation.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -274,14 +274,14 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement.getActionType());
 
       // Debe estar en research
-      List<ReconciliedResearch> reconciliedResearch = getResearchMovement(String.format("idClearing=%d", invalidInformation.prepaidMovement10.getId()));
+      List<ReconciliedResearch> reconciliedResearch = getResearchMovement(String.format("idClearing=%d", invalidInformation.clearingData10.getId()));
       Assert.assertEquals("Debe estar en research", 1, reconciliedResearch.size());
     }
 
     // Chequea test: No es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     {
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notWithdraw.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, notWithdraw.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -307,7 +307,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     {
       // Debido a que no fue tomado, ninguno de sus estados debe haber cambiado
       // Revisar que no haya confirmado en el cdt
-      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, reconciledMovement.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_POS_CONF);
+      CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, reconciledMovement.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
       // Revisar que no se confirme el estado del negocio
@@ -370,15 +370,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     return accountingData10;
   }
 
-  private void buidFullUser() throws Exception {
-    User user = registerUser();
-    UserAccount userAccount = createBankAccount(user);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-  }
-
   private ResolutionPreparedVariables prepareTest(String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
     User user = registerUser();
     UserAccount userAccount = createBankAccount(user);
@@ -415,7 +406,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     clearingData.setAccountingId(accountingData.getId());
     clearingData.setStatus(clearingStatus);
     clearingData.setUserBankAccount(userAccount);
-    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
+    clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
 
     ResolutionPreparedVariables resolutionPreparedVariables = new ResolutionPreparedVariables();
     resolutionPreparedVariables.accountingData10 = accountingData;
