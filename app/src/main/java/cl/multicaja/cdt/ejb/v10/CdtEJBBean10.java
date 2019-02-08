@@ -92,6 +92,12 @@ public class CdtEJBBean10 implements CdtEJB10 {
     if(cdtTransaction10.getIndSimulacion() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "indSimulacion"));
     }
+    if(cdtTransaction10.getTransactionReference() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transactionReference"));
+    }
+    if(cdtTransaction10.getGloss() == null || StringUtils.isAllBlank(cdtTransaction10.getGloss().trim())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "gloss"));
+    }
 
     Object[] params = {
       cdtTransaction10.getTransactionType().getName(),
@@ -132,6 +138,7 @@ public class CdtEJBBean10 implements CdtEJB10 {
 
     if("0".equals(numError)){
       cdtTransaction10.setTransactionReference(numberUtils.toLong(outputData.get("IdMovimiento")));
+      cdtTransaction10.setId(numberUtils.toLong(outputData.get("Id")));
     } else {
       log.error("addCdtTransaction resp: " + outputData + " - " + cdtTransaction10);
       cdtTransaction10.setNumError(numError);
@@ -158,6 +165,7 @@ public class CdtEJBBean10 implements CdtEJB10 {
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_cdt_busca_movimiento_referencia_v10", params);
 
     CdtTransaction10 tx = new CdtTransaction10();
+    tx.setId(numberUtils.toLong(resp.get("_id"), null));
     tx.setTransactionReference(numberUtils.toLong(resp.get("_id"), null));
     tx.setTransactionType(CdtTransactionType.fromValue(String.valueOf(resp.get("_nombre_fase"))));
 

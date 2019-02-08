@@ -38,7 +38,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
   public void shouldFail_CdtTransactionNull() throws Exception {
     try {
       getCdtEJBBean10().addCdtTransaction(null,null);
-    } catch (BadRequestException ex ) {
+    } catch (BadRequestException ex) {
       Assert.assertEquals("cdtTransaction null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
@@ -50,12 +50,13 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       CdtTransaction10 oCdtTx10 = new CdtTransaction10();
       oCdtTx10.setAccountId(null);
       oCdtTx10.setTransactionReference(0L);
-      oCdtTx10.setExternalTransactionId("POS"+getUniqueInteger());
+      oCdtTx10.setExternalTransactionId("POS" + getUniqueInteger());
       oCdtTx10.setGloss("RECARGA DE PREPAGO");
       oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
       oCdtTx10.setAmount(new BigDecimal(20000));
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
-      getCdtEJBBean10().addCdtTransaction(null,oCdtTx10);
+      getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex ) {
       Assert.assertEquals("accountId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
@@ -74,8 +75,28 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(new BigDecimal(20000));
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("accountId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+    }
+  }
+
+  @Test
+  public void shouldFail_TransactionReferenceNull() throws Exception {
+
+    try {
+      CdtTransaction10 oCdtTx10 = new CdtTransaction10();
+      oCdtTx10.setAccountId(accountId);
+      oCdtTx10.setTransactionReference(null);
+      oCdtTx10.setExternalTransactionId("POS" + getUniqueInteger());
+      oCdtTx10.setGloss("RECARGA DE PREPAGO");
+      oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
+      oCdtTx10.setAmount(new BigDecimal(20000));
+      oCdtTx10.setIndSimulacion(Boolean.FALSE);
+      getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
+    } catch (BadRequestException ex) {
+      Assert.assertEquals("transaction reference null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -92,6 +113,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(new BigDecimal(20000));
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("transactionType null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
@@ -110,8 +132,47 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(new BigDecimal(20000));
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("externalTransactionId null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+    }
+  }
+
+  @Test
+  public void shouldFail_GlossNull() throws Exception {
+
+    try {
+      CdtTransaction10 oCdtTx10 = new CdtTransaction10();
+      oCdtTx10.setAccountId(accountId);
+      oCdtTx10.setTransactionReference(0L);
+      oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
+      oCdtTx10.setGloss(null);
+      oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
+      oCdtTx10.setAmount(new BigDecimal(20000));
+      oCdtTx10.setIndSimulacion(Boolean.FALSE);
+      getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
+    } catch (BadRequestException ex) {
+      Assert.assertEquals("gloss null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
+    }
+  }
+
+  @Test
+  public void shouldFail_GlossEmpty() throws Exception {
+
+    try {
+      CdtTransaction10 oCdtTx10 = new CdtTransaction10();
+      oCdtTx10.setAccountId(accountId);
+      oCdtTx10.setTransactionReference(0L);
+      oCdtTx10.setExternalTransactionId("POS_" + getUniqueInteger());
+      oCdtTx10.setGloss("");
+      oCdtTx10.setTransactionType(CdtTransactionType.CARGA_POS);
+      oCdtTx10.setAmount(new BigDecimal(20000));
+      oCdtTx10.setIndSimulacion(Boolean.FALSE);
+      getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
+    } catch (BadRequestException ex) {
+      Assert.assertEquals("gloss null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
 
@@ -128,6 +189,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(null);
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("amount null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
@@ -146,6 +208,7 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(BigDecimal.valueOf(0));
       oCdtTx10.setIndSimulacion(Boolean.FALSE);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("amount 0", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
@@ -164,10 +227,14 @@ public class Test_CdtEJBBean10 extends TestBaseUnit {
       oCdtTx10.setAmount(BigDecimal.valueOf(0));
       oCdtTx10.setIndSimulacion(null);
       getCdtEJBBean10().addCdtTransaction(null, oCdtTx10);
+      Assert.fail("No debe caer aqui");
     } catch (BadRequestException ex) {
       Assert.assertEquals("indSimulacion null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
     }
   }
+
+
+
   @Test
   public void searchMovimientoReferencia() throws Exception {
 

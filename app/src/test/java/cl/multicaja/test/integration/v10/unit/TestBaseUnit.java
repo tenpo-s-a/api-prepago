@@ -185,6 +185,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidMovementEJBBean10.setUserClient(getUserClient());
       prepaidMovementEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      prepaidMovementEJBBean10.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
+      prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
+      prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }
@@ -776,6 +779,25 @@ public class TestBaseUnit extends TestApiBase {
     cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
+    cdtTransaction.setIndSimulacion(false);
+    return cdtTransaction;
+  }
+
+  /**
+   *
+   * @param user
+   * @param prepaidWithdraw
+   * @return
+   * @throws BaseException
+   */
+  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidWithdraw10 prepaidWithdraw) throws BaseException {
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(prepaidWithdraw.getAmount().getValue());
+    cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setGloss(prepaidWithdraw.getCdtTransactionType().getName()+" "+prepaidWithdraw.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(prepaidWithdraw.getTransactionId());
     cdtTransaction.setIndSimulacion(false);
     return cdtTransaction;
   }

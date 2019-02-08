@@ -1,5 +1,14 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+
+import java.sql.Timestamp;
+import java.util.Map;
+
 public class ReconciliedMovement {
 
   private Long id;

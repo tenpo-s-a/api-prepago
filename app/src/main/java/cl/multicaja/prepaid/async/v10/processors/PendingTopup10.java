@@ -295,11 +295,6 @@ public class PendingTopup10 extends BaseProcessor10 {
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
           // tan rapido. Investigar?
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
-          Map<String, Object> templateData = new HashMap<String, Object>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
-
           // Comienza el proceso de devolucion
 
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga
