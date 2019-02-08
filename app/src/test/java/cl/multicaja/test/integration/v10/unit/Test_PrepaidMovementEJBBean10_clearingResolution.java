@@ -29,8 +29,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
   @Test
   public void clearingResolution_All() throws Exception {
 
-    // RETIRO + WEB + OK Tecnocom + NO Conciliado + process OK + Clearing (OK, Invalid information, not in file, rejected, rejected_format)
-
     // Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     ResolutionPreparedVariables allOk;
     allOk = prepareTest(NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.OK);

@@ -189,7 +189,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return searchFullClearingData(headers,null,fileId,null);
   }
 
-  private List<ClearingData10> searchFullClearingData(Map<String, Object> headers, LocalDateTime to,String fileId, AccountingStatusType status) throws Exception{
+  private List<ClearingData10> searchFullClearingData(Map<String, Object> headers, LocalDateTime to, String fileId, AccountingStatusType status) throws Exception{
 
     String format = "yyyy-MM-dd HH:mm:ss";
     String t = null;
@@ -382,8 +382,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(mov.getAmountMastercard().getValue().doubleValue() > 0) {
         usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
       }
-
-      System.out.println("Guardando en el archivo: " + mov.getAmount().getValue() + "::" + mov.getAmount().getValue().toBigInteger() + "::" + mov.getAmount().getValue().toBigInteger().toString());
 
       String[] data = new String[]{
         mov.getId().toString(), //ID_PREPAGO,

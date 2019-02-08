@@ -108,6 +108,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
       AccountingData10 accountingData10 = buildRandomAccouting();
+      accountingData10.setFileId(files10.getId());
       accountingData10.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
       accountingData10.setIdTransaction(prepaidMovement10.getId());
       accountingData10.setType(AccountingTxType.RETIRO_WEB);
@@ -124,10 +125,6 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       clearingData10.setStatus(AccountingStatusType.PENDING);
       clearingData10.setUserBankAccount(userAccount);
       clearingData10.setFileId(files10.getId());
-      clearingData10.setAmount(amountAndCurrency10);
-      clearingData10.setAmountBalance(amountAndCurrency10);
-      clearingData10.setAmountUsd(amountAndCurrency10);
-      clearingData10.setAmountMastercard(amountAndCurrency10);
 
       clearingData10 = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
       Assert.assertNotNull("El objeto no puede ser Null", clearingData10);
@@ -185,13 +182,13 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
         // Creamos los 5 tipos de errores de informacion invalida
         switch(wrongAmountCounter) {
           case 0:
-            data.getAmount().setValue(data.getAmount().getValue().add(new BigDecimal(1L)));
+            data.setAmount(new NewAmountAndCurrency10(data.getAmount().getValue().add(new BigDecimal(1L))));
             break;
           case 1:
-            data.getAmountBalance().setValue(data.getAmountBalance().getValue().add(new BigDecimal(1L)));
+            data.setAmountBalance(new NewAmountAndCurrency10(data.getAmountBalance().getValue().add(new BigDecimal(1L))));
             break;
           case 2:
-            data.getAmountMastercard().setValue(data.getAmountMastercard().getValue().add(new BigDecimal(1L)));
+            data.setAmountMastercard(new NewAmountAndCurrency10(data.getAmountMastercard().getValue().add(new BigDecimal(1L))));
             break;
           case 3:
             data.getUserBankAccount().setAccountNumber("1234");

@@ -897,8 +897,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       log.error("mc_acc_update_accounting_data_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
-
-    return;
   }
 
 }
