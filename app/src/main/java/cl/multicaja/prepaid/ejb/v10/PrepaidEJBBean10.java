@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -2677,21 +2678,90 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
-  public NotificationCallback setNotificationCallback(Map<String, Object>headers, NotificationCallback notificationCallback) throws Exception {
+  private Boolean validateBase64(String base64String){
 
-    String responseCode = "000";
+    Boolean boolResponse = false;
 
-    if(notificationCallback.getBase64_data()==null){
-
-      responseCode = "101007";
-      notificationCallback.setResponse_code(responseCode);
-      notificationCallback.setResponse_message("Base64 is empty");
-
-
+    Base64.Decoder decoder = Base64.getDecoder();
+    try {
+      decoder.decode(base64String);
+      boolResponse = true;
+    } catch(IllegalArgumentException iae) {
+      boolResponse = false;
     }
 
+    return boolResponse;
+  }
 
+  public NotificationCallback setNotificationCallback(Map<String, Object>headers, NotificationCallback notificationCallback) throws Exception {
 
+    //Initial states
+    String responseCode = "000";
+    String responseMessage = "";
+
+    //Logic
+    String[] notNullFields = {"sd_currency_code",
+      "sd_value",
+      "il_currency_code",
+      "il_value",
+      "id_currency_code",
+      "id_value",
+      "tipo_tx",
+      "id_mensaje",
+      "merchant_code",
+      "merchant_name",
+      "country_iso_3266_code",
+      "country_description",
+      "place_name",
+      "resolucion_tx",
+      "base64_data"};
+
+    HashMap<String,Object> fieldsOnNull = notificationCallback.checkNull(notNullFields);
+
+    Boolean isBase64 = false;
+    if(notificationCallback.getBase64_data() != null){
+      isBase64 = validateBase64(notificationCallback.getBase64_data());
+    }
+
+    //Error conditions
+    if(fieldsOnNull.size() >= 1){
+
+      if(notificationCallback.getBase64_data()==null && fieldsOnNull.size() == 1){
+        responseCode = "101007";
+        responseMessage = "Base64 is empty";
+        notificationCallback.setResponse_code(responseCode);
+        notificationCallback.setResponse_message(responseMessage);
+      }
+
+      if(notificationCallback.getBase64_data()!=null && isBase64 == false && fieldsOnNull.size() >= 1){
+        responseCode = "101007";
+        responseMessage = "Base64 is not valid";
+        notificationCallback.setResponse_code(responseCode);
+        notificationCallback.setResponse_message(responseMessage);
+      }
+
+      if(fieldsOnNull.size() > 1){
+        responseCode = "101004";
+        responseMessage = responseMessage+" These fields are null or empty: "+fieldsOnNull.keySet();
+        notificationCallback.setResponse_code(responseCode);
+        notificationCallback.setResponse_message(responseMessage);
+      }
+    }else {
+      if(notificationCallback.getBase64_data()!=null && isBase64 == false && fieldsOnNull.size() == 0){
+        responseCode = "101007";
+        responseMessage = "Base64 is not valid";
+        notificationCallback.setResponse_code(responseCode);
+        notificationCallback.setResponse_message(responseMessage);
+      }
+
+      if(notificationCallback.getBase64_data()!=null && isBase64 == true && fieldsOnNull.size() == 0){
+        responseCode = "002";
+        responseMessage = "Accepted";
+        notificationCallback.setResponse_code(responseCode);
+        notificationCallback.setResponse_message(responseMessage);
+      }
+    }
+    
     return notificationCallback;
   }
 

@@ -1,12 +1,18 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.BaseModel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.annotation.Generated;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
@@ -30,6 +36,8 @@ import java.util.Base64;
 })
 
 public class NotificationCallback extends BaseModel {
+
+  private static Log log = LogFactory.getLog(NotificationCallback.class);
 
   @JsonProperty("id")
   private Long id;
@@ -62,7 +70,7 @@ public class NotificationCallback extends BaseModel {
   @JsonProperty("resolucion_tx")
   private Long resolucion_tx;
   @JsonProperty("base64_data")
-  private Base64 base64_data;
+  private String base64_data;
   @JsonProperty("response_message")
   private String response_message;
   @JsonProperty("response_code")
@@ -189,11 +197,11 @@ public class NotificationCallback extends BaseModel {
     this.resolucion_tx = resolucion_tx;
   }
 
-  public Base64 getBase64_data() {
+  public String getBase64_data() {
     return base64_data;
   }
 
-  public void setBase64_data(Base64 base64_data) {
+  public void setBase64_data(String base64_data) {
     this.base64_data = base64_data;
   }
 
@@ -211,5 +219,19 @@ public class NotificationCallback extends BaseModel {
 
   public void setResponse_code(String response_code) {
     this.response_code = response_code;
+  }
+
+  public HashMap<String,Object> checkNull(String [] notNullFields) throws IllegalAccessException {
+
+    HashMap <String,Object> nullFields = new HashMap<String,Object>();
+
+    for (Field f : getClass().getDeclaredFields()){
+      if(Arrays.asList(notNullFields).contains(f.getName())) {
+        if(f.get(this) == null){
+          nullFields.put(f.getName(), f.get(this));
+        }
+      }
+    }
+    return nullFields;
   }
 }

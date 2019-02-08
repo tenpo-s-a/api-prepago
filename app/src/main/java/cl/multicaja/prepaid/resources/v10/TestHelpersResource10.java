@@ -1329,24 +1329,38 @@ public final class TestHelpersResource10 extends BaseResource {
       NotificationCallback notificationCallback = this.prepaidEJBBean10.setNotificationCallback(
         headersToMap(headers),mapper.readValue(json, NotificationCallback.class));
 
-      JsonObject notifResponse = Json.createObjectBuilder().
-        add("code", notificationCallback.getResponse_code()).
-        add("message",notificationCallback.getResponse_message()).build();
+      System.out.println("notificationCallback.getResponse_code(): "+notificationCallback.getResponse_code());
 
-      if(notificationCallback.getResponse_code()!="101007"){
+      String errorCode = notificationCallback.getResponse_code() == null ?
+        "001": notificationCallback.getResponse_code();
+      String errorMessage = notificationCallback.getResponse_message() == null ?
+        "Not Error, but not Accepted":notificationCallback.getResponse_message();
+
+      JsonObject notifResponse = Json.createObjectBuilder().
+        add("code", errorCode).
+        add("message",errorMessage).build();
+
+      System.out.println("ErrorCODE: "+errorCode);
+
+      if(errorCode == "101004"){
+        returnResponse = Response.ok(notifResponse).status(400).build();
+      }
+
+      if(errorCode == "101007"){
         returnResponse = Response.ok(notifResponse).status(422).build();
       }
 
-      if(notificationCallback){
-
+      if(errorCode == "001"){
+        returnResponse = Response.ok(notifResponse).status(201).build();
       }
 
-      if(notificationCallback.getResponse_code()=="000"){
-        returnResponse = Response.ok(notificationCallback).status(202).build();
+      if(errorCode == "002"){
+        //notificationCallback
+        returnResponse = Response.ok(notifResponse).status(202).build();
       }
 
     }catch(Exception ex){
-      log.error("Error on callNotification: "+ex.toString());
+      log.error("Error on TestHelperResource:callNotification: "+ex.toString());
       ex.printStackTrace();
       returnResponse = Response.ok(ex).status(410).build();
     }
