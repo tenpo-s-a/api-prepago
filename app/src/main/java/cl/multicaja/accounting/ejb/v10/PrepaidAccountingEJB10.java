@@ -108,7 +108,7 @@ public interface PrepaidAccountingEJB10 {
   Boolean isSubscriptionMerchant(final String merchantName) throws Exception;
 
   /**
-   * Actualiza el estado
+   * Actualiza el fileId y estado
    *
    * @param header
    * @param id
@@ -117,4 +117,31 @@ public interface PrepaidAccountingEJB10 {
    * @throws Exception
    */
   void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception;
+
+  /**
+   * Actualiza la fecha de conciliacion
+   * @param header
+   * @param id
+   * @param conciliationDate
+   * @throws Exception
+   */
+  void updateReconciliationDate(Map<String, Object> header, Long id, String conciliationDate) throws Exception;
+
+  /**
+   * Actualiza el AccountingStatus
+   * @param header
+   * @param id
+   * @param accountingStatus
+   * @throws Exception
+   */
+  void updateAccountingStatus(Map<String, Object> header, Long id, AccountingStatusType accountingStatus) throws Exception;
+
+  /**
+   * Actualiza es estado
+   * @param header
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updateStatus(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception;
 }

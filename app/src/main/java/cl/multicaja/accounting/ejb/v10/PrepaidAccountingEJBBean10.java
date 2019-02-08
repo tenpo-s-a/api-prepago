@@ -881,24 +881,54 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       .anyMatch(m -> merchantName.toLowerCase().contains(m.toLowerCase()));
   }
 
-
   @Override
   public void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception {
+    if(fileId == null && status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
+    }
+
+    this.updateAccountingData(header, id, fileId, status, null, null);
+  }
+
+  @Override
+  public void updateReconciliationDate(Map<String, Object> header, Long id, String conciliationDate) throws Exception {
+    if(conciliationDate == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "conciliationDate"));
+    }
+
+    this.updateAccountingData(header, id, null, null, null, conciliationDate);
+  }
+
+  @Override
+  public void updateAccountingStatus(Map<String, Object> header, Long id, AccountingStatusType accountingStatus) throws Exception {
+    if(accountingStatus == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingStatus"));
+    }
+
+    this.updateAccountingData(header, id, null, null, accountingStatus, null);
+  }
+
+  @Override
+  public void updateStatus(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    this.updateAccountingData(header, id, null, status, null, null);
+  }
+
+  private void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {
 
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-    if(fileId == null && status == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
     }
 
     Object[] params = {
       new InParam(id, Types.BIGINT),
       fileId == null ? new NullParam(Types.BIGINT) : new InParam(fileId, Types.BIGINT),
       status == null ? new NullParam(Types.VARCHAR) : new InParam(status.getValue(), Types.VARCHAR),
-      //TODO: implementar
-      new NullParam(Types.VARCHAR),
-      new NullParam(Types.VARCHAR),
+      conciliationDate == null ? new NullParam(Types.VARCHAR) : new InParam(conciliationDate, Types.VARCHAR),
+      accountingStatus == null ? new NullParam(Types.VARCHAR) : new InParam(accountingStatus.getValue(), Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
