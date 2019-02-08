@@ -1,10 +1,12 @@
 package cl.multicaja.test.integration.v10.async;
 
+import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.Email;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.TipoAlta;
@@ -17,6 +19,7 @@ import org.junit.Test;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class Test_PendingSendMail10 extends TestBaseUnitAsync {
 
@@ -70,5 +73,45 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNotNull("Debe retornar una respuesta", remote);
+  }
+
+  @Ignore
+  @Test
+  public void sendMail_FailedWithdraw() throws Exception {
+    User user = registerUser();
+    user.setName("Juan");
+    user.setLastname_1("Perez");
+
+    Rut rut = new Rut();
+    rut.setValue(1234567);
+    rut.setDv("8");
+    user.setRut(rut);
+
+    Email email = new Email();
+    email.setValue("hola@p.com");
+    user.setEmail(email);
+
+    UserAccount userAccount = new UserAccount();
+    userAccount.setAccountNumber("0123456789");
+    userAccount.setBankName("El banco de los pobres");
+
+    PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+    amount.setValue(new BigDecimal(10000));
+    prepaidTopup10.setAmount(amount);
+    prepaidTopup10.setTotal(amount);
+
+    PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
+    prepaidMovement10.setMonto(new BigDecimal(5000));
+    prepaidMovement10.setFecfac(new Date());
+    prepaidMovement10.setCodcom("CodigoComercio");
+    prepaidMovement10.setId(38L);
+
+    // Testeando que los mails lleguen correctamente
+    getMailDelegate().sendWithdrawSuccessMail(user, prepaidMovement10, userAccount);
+    //getMailDelegate().sendWithdrawFailedMail(user, prepaidMovement10);
+    //getMailDelegate().sendTopupMail(prepaidTopup10, user, prepaidMovement10);
+
+    Thread.sleep(2000);
   }
 }

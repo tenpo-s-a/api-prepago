@@ -40,7 +40,8 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_busca_retiros_web_conciliar_v10
   OUT _conciliation_date TIMESTAMP without time zone,
   OUT _created TIMESTAMP without time zone,
   OUT _updated TIMESTAMP without time zone,
-  OUT _user_account_id BIGINT
+  OUT _user_account_id BIGINT,
+  OUT _accounting_id BIGINT
 )
 RETURNS SETOF record
 LANGUAGE plpgsql
@@ -70,7 +71,8 @@ RETURN QUERY
     acc.conciliation_date,
     cle.created,
     cle.updated,
-    cle.user_account_id
+    cle.user_account_id,
+    cle.accounting_id
   FROM
     ${schema.acc}.clearing cle
     INNER JOIN ${schema.acc}.accounting acc ON acc.id = cle.accounting_id

@@ -71,7 +71,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-        // Busca el movimiento de carga original
+        // Busca el movimiento de retiro original
         PrepaidMovement10 originalMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementForReverse(prepaidUser10.getId(),
           prepaidWithdraw.getTransactionId(),
           PrepaidMovementType.WITHDRAW,
@@ -151,10 +151,20 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
             req.getData().getPrepaidMovementReverse().setEstadoNegocio(businessStatus);
             req.getData().getPrepaidMovementReverse().setEstado(status);
+
             log.debug("********** Reversa de retiro realizada exitosamente **********");
+
+            // Si estaba abierta, cerrar la transaccion en el CDT
+            CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
+            CdtTransaction10 movRefConf = getRoute().getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, originalMovement.getIdTxExterno(), movRef.getCdtTransactionTypeConfirm());
+            if(movRefConf == null) {
+              callCDT(prepaidWithdraw, prepaidUser10, movRef.getId(), movRef.getCdtTransactionTypeConfirm());
+            }
+
+            // Agregar y confirmar reversa cdt
             CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, 0L, CdtTransactionType.REVERSA_RETIRO);
             cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, cdtTxReversa.getTransactionReference(), cdtTxReversa.getCdtTransactionTypeConfirm());
-            if (!"0".equals(cdtTxReversa.getNumError())) {
+            if(!"0".equals(cdtTxReversa.getNumError())) {
               log.error("Error al confirmar reversa en CDT");
             }
             return req;
@@ -170,9 +180,18 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
               req.getData().getPrepaidMovementReverse().setEstadoNegocio(businessStatus);
               req.getData().getPrepaidMovementReverse().setEstado(status);
+
+              // Si estaba abierta, cerrar la transaccion en el CDT
+              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
+              CdtTransaction10 movRefConf = getRoute().getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, originalMovement.getIdTxExterno(), movRef.getCdtTransactionTypeConfirm());
+              if(movRefConf == null) {
+                callCDT(prepaidWithdraw, prepaidUser10, movRef.getId(), movRef.getCdtTransactionTypeConfirm());
+              }
+
+              // Agregar y confirmar reversa cdt
               CdtTransaction10 cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, 0L, CdtTransactionType.REVERSA_RETIRO);
               cdtTxReversa = callCDT(prepaidWithdraw, prepaidUser10, cdtTxReversa.getTransactionReference(), cdtTxReversa.getCdtTransactionTypeConfirm());
-              if (!"0".equals(cdtTxReversa.getNumError())) {
+              if(!"0".equals(cdtTxReversa.getNumError())) {
                 log.error("Error al confirmar reversa en CDT");
               }
             } else {

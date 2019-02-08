@@ -22,6 +22,24 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_REQ = "MailRoute10.errorSendMailWithdraw.req";
   public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "MailRoute10.errorSendMailWithdraw.resp";
 
+  /*
+    Comprobante de retiro exitoso
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_WITHDRAW_SUCCESS = "seda:MailRoute10.pendingSendMailWithdrawSuccess";
+  public static final String PENDING_SEND_MAIL_WITHDRAW_SUCCESS_REQ = "MailRoute10.pendingSendMailWithdrawSuccess.req";
+  public static final String PENDING_SEND_MAIL_WITHDRAW_SUCCESS_RESP = "MailRoute10.pendingSendMailWithdrawSuccess.resp";
+  public static final String ERROR_SEND_MAIL_WITHDRAW_SUCCESS_REQ = "MailRoute10.errorSendMailWithdrawSuccess.req";
+  public static final String ERROR_SEND_MAIL_WITHDRAW_SUCCESS_RESP = "MailRoute10.errorSendMailWithdrawSuccess.resp";
+
+  /*
+    Comprobante de retiro fallado
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_WITHDRAW_FAILED = "seda:MailRoute10.pendingSendMailWithdrawFailed";
+  public static final String PENDING_SEND_MAIL_WITHDRAW_FAILED_REQ = "MailRoute10.pendingSendMailWithdrawFailed.req";
+  public static final String PENDING_SEND_MAIL_WITHDRAW_FAILED_RESP = "MailRoute10.pendingSendMailWithdrawFailed.resp";
+  public static final String ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ = "MailRoute10.errorSendMailWithdrawFailed.req";
+  public static final String ERROR_SEND_MAIL_WITHDRAW_FAILED_RESP = "MailRoute10.errorSendMailWithdrawFailed.resp";
+
 
   @Override
   public void configure() throws Exception {
@@ -65,5 +83,37 @@ public class MailRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingWithdrawMail())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_RESP)).end();
+
+    /**
+     * Envio de confirmacion retiro exitoso
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_WITHDRAW_SUCCESS, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_SUCCESS_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_SUCCESS_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingWithdrawSuccessMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_SUCCESS_RESP + confResp)).end();
+
+    //Errores
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_SUCCESS_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processErrorPendingWithdrawSuccessMail())
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_SUCCESS_RESP)).end();
+
+    /**
+     * Envio de confirmacion retiro fallado
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_WITHDRAW_FAILED, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_FAILED_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_FAILED_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingWithdrawFailedMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_FAILED_RESP + confResp)).end();
+
+    //Errores
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processErrorPendingWithdrawFailedMail())
+      .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_FAILED_RESP)).end();
   }
 }
