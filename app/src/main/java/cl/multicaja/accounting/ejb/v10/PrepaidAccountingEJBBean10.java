@@ -140,6 +140,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       account.setAmountMastercard(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_mcar"))));
       account.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_balance"))));
       account.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      account.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_accounting_status"))));
       account.setFileId(getNumberUtils().toLong(row.get("file_id")));
       return account;
     };
@@ -201,6 +202,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       new InParam(accounting10.getConciliationDateInFormat(),Types.VARCHAR),
       new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
       new InParam(accounting10.getFileId(), Types.BIGINT),
+      new InParam(accounting10.getAccountingStatus().getValue(), Types.VARCHAR),
       new OutParam("_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -334,7 +336,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       List<AccountingData10> accountingMovements = new ArrayList<>();
 
       for (PrepaidAccountingMovement m : movements) {
-        AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK);
+        AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK, AccountingStatusType.OK);
         accountingMovements.add(accounting);
       }
 
@@ -357,7 +359,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
-  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType accountingStatus) {
+  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType status, AccountingStatusType accountingStatus) {
     AccountingTxType type = AccountingTxType.RETIRO_WEB;
     AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
     TransactionOriginType trxOriginType = TransactionOriginType.WEB;
@@ -437,7 +439,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         break;
     }
     accounting.setTransactionDate(movement.getFechaCreacion());
-    accounting.setStatus(accountingStatus);
+    accounting.setStatus(status);
+    accounting.setAccountingStatus(accountingStatus);
     accounting.setFileId(0L);
 
     // Monto que afecta al saldo del usuario
@@ -792,6 +795,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       //TODO: Revisar Fecha. Usar fecha del archivo IPM?
       acc.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
       acc.setStatus(AccountingStatusType.PENDING);
+      acc.setAccountingStatus(AccountingStatusType.PENDING);
 
       transactions.add(acc);
     }
@@ -892,6 +896,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       new InParam(id, Types.BIGINT),
       fileId == null ? new NullParam(Types.BIGINT) : new InParam(fileId, Types.BIGINT),
       status == null ? new NullParam(Types.VARCHAR) : new InParam(status.getValue(), Types.VARCHAR),
+      //TODO: implementar
+      new NullParam(Types.VARCHAR),
+      new NullParam(Types.VARCHAR),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };

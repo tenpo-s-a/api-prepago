@@ -1,8 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJB10;
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
-import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJB10;
 import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
@@ -12,7 +10,6 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
@@ -49,6 +46,7 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidMovementEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
+
   @Inject
   private PrepaidTopupDelegate10 delegate;
 
