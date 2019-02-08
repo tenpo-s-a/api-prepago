@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import java.util.Map;
  * @author abarazarte
  */
 public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
+
+  private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   /**
    *
@@ -129,6 +132,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_POS, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
       Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", dbPrepaidMovement.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
       Assert.assertNotNull("No debe ser null", clearing10s);
@@ -229,6 +233,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_WEB, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
       Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", dbPrepaidMovement.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
       Assert.assertNotNull("No debe ser null", clearing10s);

@@ -23,6 +23,7 @@ import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
  */
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
+  private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
 
   @BeforeClass
@@ -44,7 +46,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Before
-  //@After
+  @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
@@ -325,6 +327,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
       Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
       Assert.assertNotNull("No debe ser null", clearing10s);
@@ -409,6 +412,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
       Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
       Assert.assertNotNull("No debe ser null", clearing10s);
@@ -673,6 +677,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         PrepaidMovement10 mov = movements.get(acc.getIdTransaction());
         Assert.assertNotNull("Debe tener el mismo id", mov);
         Assert.assertEquals("Debe tener el mismo imp fac", mov.getImpfac().stripTrailingZeros(), acc.getAmount().getValue().stripTrailingZeros());
+        Assert.assertEquals("debe tener la misma fecha de transaccion", mov.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), acc.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
       });
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
