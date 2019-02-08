@@ -121,9 +121,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
       Assert.assertNotNull("No debe ser null", accounting10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+      Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 
-      AccountingData10 accounting10 = accounting10s.get(0);
+      AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(withdraw.getId())).findFirst().orElse(null);
+      Assert.assertNotNull("deberia tener un retiro", accounting10);
       Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_POS, accounting10.getType());
       Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_POS, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
@@ -131,9 +132,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
       Assert.assertNotNull("No debe ser null", clearing10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+      Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
 
-      ClearingData10 clearing10 = clearing10s.get(0);
+      ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+      Assert.assertNotNull("deberia tener un retiro", clearing10);
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
@@ -219,9 +221,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
       Assert.assertNotNull("No debe ser null", accounting10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+      Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 
-      AccountingData10 accounting10 = accounting10s.get(0);
+      AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(withdraw.getId())).findFirst().orElse(null);
+      Assert.assertNotNull("deberia tener un retiro", accounting10);
       Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_WEB, accounting10.getType());
       Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_WEB, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
@@ -229,9 +232,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
       Assert.assertNotNull("No debe ser null", clearing10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+      Assert.assertEquals("Debe haber 1 movimientos de clearing", 1, clearing10s.size());
 
       ClearingData10 clearing10 = clearing10s.get(0);
+      Assert.assertNotNull("deberia tener un retiro", clearing10);
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", prepaidWithdraw.getBankAccountId(), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado PENDING", AccountingStatusType.PENDING, clearing10.getStatus());

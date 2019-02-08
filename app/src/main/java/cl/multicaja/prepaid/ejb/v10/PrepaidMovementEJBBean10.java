@@ -161,7 +161,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     if ("0".equals(resp.get("_error_code"))) {
       data.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      return data;
+      return this.getPrepaidMovementById(data.getId());
     } else {
       log.error("addPrepaidMovement resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
