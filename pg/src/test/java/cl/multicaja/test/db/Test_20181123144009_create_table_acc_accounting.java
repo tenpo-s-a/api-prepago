@@ -33,6 +33,7 @@ public class Test_20181123144009_create_table_acc_accounting extends TestDbBaseP
       new ColumnInfo("conciliation_date", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("status", SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("file_id",SqlType.BIGINT.getGetJavaType()),
+      new ColumnInfo("accounting_status",SqlType.VARCHAR.getGetJavaType(), 20),
       new ColumnInfo("create_date",SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("update_date", SqlType.TIMESTAMP.getGetJavaType())
     );

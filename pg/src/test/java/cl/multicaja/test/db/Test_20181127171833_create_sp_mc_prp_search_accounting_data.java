@@ -64,6 +64,7 @@ public class Test_20181127171833_create_sp_mc_prp_search_accounting_data extends
       new OutParam("amount_balance",Types.NUMERIC),
       new OutParam("status",Types.VARCHAR),
       new OutParam("file_id",Types.BIGINT),
+      new OutParam("accounting_status",Types.VARCHAR),
       new OutParam("transaction_date", Types.TIMESTAMP),
       new OutParam("conciliation_date",Types.TIMESTAMP),
       new OutParam("create_date", Types.TIMESTAMP),

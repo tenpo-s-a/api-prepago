@@ -19,11 +19,13 @@
 
 CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_update_accounting_data_v10
 (
-  IN _id                BIGINT,
-  IN _file_id           BIGINT,
-  IN _status            VARCHAR,
-  OUT _error_code       VARCHAR,
-  OUT _error_msg        VARCHAR
+  IN _id                    BIGINT,
+  IN _file_id               BIGINT,
+  IN _status                VARCHAR,
+  IN _conciliation_date     VARCHAR,
+  IN _accounting_status     VARCHAR,
+  OUT _error_code           VARCHAR,
+  OUT _error_msg            VARCHAR
 )AS $$
  DECLARE
 
@@ -51,6 +53,18 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_update_accounting_data_v10
                   ELSE
                     status
                   END
+                ),
+      accounting_status = ( CASE WHEN _accounting_status IS NOT NULL THEN
+                    _accounting_status
+                  ELSE
+                    accounting_status
+                  END
+                ),
+      conciliation_date = ( CASE WHEN _conciliation_date IS NOT NULL THEN
+                    to_timestamp(_conciliation_date,'yyyy-mm-dd hh24:mi:ss')
+                  ELSE
+                    conciliation_date
+                  END
                 )
     WHERE
       id = _id;
@@ -72,4 +86,4 @@ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_update_accounting_data_v10(BIGINT, BIGINT, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_update_accounting_data_v10(BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR);
