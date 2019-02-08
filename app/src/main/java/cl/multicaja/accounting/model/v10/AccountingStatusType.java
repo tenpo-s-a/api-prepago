@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 public enum AccountingStatusType {
 
+  INITIAL("INITIAL"),
   PENDING("PENDING"),
   OK("OK"),
   REVERSED("REVERSED"),
