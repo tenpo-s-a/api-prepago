@@ -777,6 +777,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())) {
       log.debug("XLS ID 1");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+
+      // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
+      if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
+        TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(mov.getTipofac()) ||
+        TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(mov.getTipofac())) {
+        //TODO: actualizar fecha de conciliacion en accounting
+        //TODO: actualizar status en clearing
+      }
     }
     /**
      * ID 2 - Movimiento (Carga, Retiro o Reversa)
@@ -872,7 +880,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           getPrepaidEJBBean10().reverseWithdrawUserBalance(null,newPrepaidWithdraw10,false);
           // Se agrega a la tabla para que no vuelva a ser enviado
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
-
         }
         /**
          * Si es una reversa de retiro - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
@@ -897,6 +904,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 3");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
+      //TODO: actualizar status -> RESEARCH en clearing
     }
     /**
      * ID 4 - Movimiento (Carga, Retiro o Reversa)
@@ -912,6 +921,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 4");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
+      //TODO: actualizar status -> RESEARCH en clearing
     }
     /**
      * ID 5 - Movimiento (Carga o Reversa)
@@ -934,7 +945,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
       updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.CONFIRMED);
-      //TODO: si el movimiento es una reversa, no deberia actualizar el status de negocio del movimiento original a REVERSED?
+      if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+        //TODO: actualizar fecha de conciliacion en accounting
+        //TODO: actualizar status en clearing
+      } else {
+        //TODO: si el movimiento es una reversa, no deberia actualizar el status de negocio del movimiento original a REVERSED?
+      }
     }
     /**
      * ID 6 - Movimiento (Carga o Reversa)
@@ -981,7 +997,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
         // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
-
       }
       /**
        * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
@@ -1037,7 +1052,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
         // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
-
       }
     }
     /**
@@ -1057,6 +1071,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 8");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
+      //TODO: actualizar status -> RESEARCH en clearing
     }
     /**
      * ID 9 - Movimiento (Carga o Reversa)
@@ -1198,6 +1214,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("Movimiento Pendiente o En proceso");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+      // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
+      if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
+        TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(mov.getTipofac()) ||
+        TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(mov.getTipofac())) {
+        //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
+        //TODO: actualizar status -> RESEARCH en clearing
+      }
     }
     /**
      * ID ? - Movimiento (Carga, Retiro o Reversa)
@@ -1208,8 +1231,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.error("No cae en ningun caso: "+mov);
         createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NO_CASE);
+      // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
+      if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
+        TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(mov.getTipofac()) ||
+        TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(mov.getTipofac())) {
+        //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
+        //TODO: actualizar status -> RESEARCH en clearing
+      }
     }
-
   }
 
   public void clearingResolution() throws Exception {
