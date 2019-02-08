@@ -762,21 +762,42 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void processReconciliation(PrepaidMovement10 mov) throws Exception {
     String messageID = "";
-    // Excel fila 1
     log.info("Mov to Reconciliation: "+mov);
+
+    /**
+     * ID 1 - Movimiento (Carga, Retiro o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> PROCESS_OK
+     *  - Existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     *
+     * Se guarda en tabla de movimientos conciliados con status RECONCILIED
+     */
     if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())) {
       log.debug("XLS ID 1");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
     }
-    // Excel fila 2
+    /**
+     * ID 2 - Movimiento (Carga, Retiro o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> PROCESS_OK
+     *  - Existe en archivo Tecnocom
+     *  - NO existe en archivo Switch
+     */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())) {
       log.info("XLS ID 2");
       log.info("Get Prepaid by ID: "+mov.getId());
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
       log.info(movFull);
+      /**
+       * Carga
+       */
       if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())){
+        /**
+         * Si es una carga - Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
+         */
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
 
           //Se busca usuario prepago para obtener user
@@ -806,12 +827,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
         }
+        /**
+         * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+         */
         else {
           createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
         }
       }
-      else{
+      /**
+       * Retiro
+       */
+      else {
+        /**
+         * Si es un retiro - Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
+         */
         if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())){
 
           //Se busca usuario prepago para obtener user
@@ -843,27 +873,55 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Se agrega a la tabla para que no vuelva a ser enviado
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
 
-        }else {
+        }
+        /**
+         * Si es una reversa de retiro - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+         */
+        else {
           createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
         }
       }
     }
-    // Excel fila 3
+    /**
+     * ID 3 - Movimiento (Carga, Retiro o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> PROCESS_OK
+     *  - NO existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     *
+     * Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+     */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
-    // Excel fila 4
+    /**
+     * ID 4 - Movimiento (Carga, Retiro o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> PROCESS_OK
+     *  - NO existe en archivo Tecnocom
+     *  - NO existe en archivo Switch
+     *
+     * Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+     */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
-    // Excel fila 5
+    /**
+     * ID 5 - Movimiento (Carga o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> ERROR_TECNOCOM_REINTENTABLE, ERROR_TIMEOUT_CONEXION, ERROR_TIMEOUT_RESPONSE
+     *  - Existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     *
+     * Se guarda en tabla de movimientos conciliados con status RECONCILED, se actualiza el status del movimiento a PROCESS_OK, se actualzia en status de negocio a CONFIRMED
+     */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&
       ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
@@ -875,8 +933,16 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.CONFIRMED);
+      //TODO: si el movimiento es una reversa, no deberia actualizar el status de negocio del movimiento original a REVERSED?
     }
-    // Excel fila 6
+    /**
+     * ID 6 - Movimiento (Carga o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> ERROR_TECNOCOM_REINTENTABLE, ERROR_TIMEOUT_CONEXION, ERROR_TIMEOUT_RESPONSE
+     *  - Existe en archivo Tecnocom
+     *  - No existe en archivo Switch
+     */
     else if( ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&
       ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
@@ -888,6 +954,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       // Se obtiene el movimiento completo.--
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
+      /**
+       * Si es una carga -  Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
+       */
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
 
         //Se busca usuario prepago para obtener user
@@ -914,13 +983,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
 
       }
+      /**
+       * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+       */
       else {
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       }
-
     }
-    // Excel fila 7
+    /**
+     * ID 7 - Movimiento (Retiro)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> ERROR_TIMEOUT_RESPONSE
+     *  - Existe en archivo Tecnocom
+     *  - No existe en archivo Switch
+     */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&&
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado()) &&
@@ -963,7 +1040,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       }
     }
-    // Excel fila 8
+    /**
+     * ID 8 - Movimiento (Retiro)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> ERROR_TECNOCOM_REINTENTABLE, ERROR_TIMEOUT_CONEXION, ERROR_TIMEOUT_RESPONSE
+     *  - Existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     *
+     *  Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+     */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
@@ -973,7 +1058,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     }
-    // Excel fila 9
+    /**
+     * ID 9 - Movimiento (Carga o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> ERROR_TECNOCOM_REINTENTABLE, ERROR_TIMEOUT_CONEXION, ERROR_TIMEOUT_RESPONSE
+     *  - NO existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&&  ( PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(mov.getEstado()) ||
       PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION.equals(mov.getEstado()) ||
@@ -981,7 +1072,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ) && PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
       log.debug("XLS ID 9");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-
+      /**
+       * Si es una carga - Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
+       */
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
         //Se busca usuario prepago para obtener user
         PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
@@ -1007,10 +1100,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
-      } else {
+      }
+      /**
+       * Si es una reversa -
+       */
+      else {
         //TODO: que se debe hacer en los otros casos?
       }
     }
+    /**
+     * ID ? - Movimiento (Carga o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> REJECTED
+     *  - NO existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) && (
       PrepaidMovementStatus.REJECTED.equals(mov.getEstado())
@@ -1019,6 +1123,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       System.out.println("XLS ID 9");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
+      /**
+       * Si es una carga - Se inicia proceso de devolucion
+       */
       if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
         //Se busca usuario prepago para obtener user
         PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
@@ -1069,16 +1176,35 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if (ticket.getId() != null) {
           log.info("Ticket Creado Exitosamente");
         }
-      } else {
+      }
+      /**
+       * Si es una reversa de carga -
+       */
+      else {
         //TODO: que se hace en los otros casos?
       }
     }
+    /**
+     * ID 19 a 24 - Movimiento (Carga, Retiro o Reversa)
+     *  - Existe en la tabla de movimientos
+     *  - Status -> PENDING o IN_PROCESS
+     *  - NO existe en archivo Tecnocom
+     *  - Existe en archivo Switch
+     *
+     *  Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
+     */
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    } else {
+    }
+    /**
+     * ID ? - Movimiento (Carga, Retiro o Reversa)
+     *  No cae en ninguno de los casos anteriores
+     *  Se guarda en tabla de movimientos conciliados con status NO_CASE y se agrega en la tabla de movimientos a investigar
+     */
+    else {
         log.error("No cae en ningun caso: "+mov);
         createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NO_CASE);
