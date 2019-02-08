@@ -37,7 +37,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Before
-  //@After
+  @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
