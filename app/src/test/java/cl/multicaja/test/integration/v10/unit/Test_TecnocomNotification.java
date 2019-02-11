@@ -1,130 +1,231 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.NotificationCallback;
+import cl.multicaja.prepaid.model.v10.NotificationTecnocom;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 
 public class Test_TecnocomNotification extends TestBaseUnit {
 
-  private NotificationCallback notificationCallback;
+  private NotificationTecnocom notificationTecnocom;
 
-  //@Test
-  //public void testCallNotification() throws Exception{
-  //}
 
   @Test
-  public void testCallNotificationSucessParams() throws Exception{
+  public void testCallNotificationAllParamsWithSuccessProcess() throws Exception{
 
+    String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
-    notificationCallback = new NotificationCallback();
-    notificationCallback.setSd_currency_code(new Long(152));
-    notificationCallback.setSd_value("1000.00");
-    notificationCallback.setIl_currency_code(new Long(152));
-    notificationCallback.setIl_value("1000.00");
-    notificationCallback.setId_currency_code(new Long(152));
-    notificationCallback.setId_value("1000.00");
-    notificationCallback.setTipo_tx(new Long(100));
-    notificationCallback.setId_mensaje(new Long(1200));
-    notificationCallback.setMerchant_code("0008902131");
-    notificationCallback.setMerchant_name("AMAZON UK");
-    notificationCallback.setCountry_iso_3266_code(new Long(152));
-    notificationCallback.setCountry_description("Republica de Chile");
-    notificationCallback.setPlace_name("Santiago");
-    notificationCallback.setResolucion_tx(new Long(100));
-    notificationCallback.setBase64_data(base64String);
+    HashMap<String,Object>headers = new HashMap<>();
+    headers.put("Content-Type","application/json");
+    headers.put("entidad","9603");
+    headers.put("centro_alta","0001");
+    headers.put("cuenta","000000012345");
+    headers.put("pan","411111******1111");
 
-    NotificationCallback notifResult = getPrepaidEJBBean10().setNotificationCallback(null,notificationCallback);
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSd_currency_code(new Long(152));
+    notificationTecnocom.setSd_value("1000.00");
+    notificationTecnocom.setIl_currency_code(new Long(152));
+    notificationTecnocom.setIl_value("1000.00");
+    notificationTecnocom.setId_currency_code(new Long(152));
+    notificationTecnocom.setId_value("1000.00");
+    notificationTecnocom.setTipo_tx(new Long(100));
+    notificationTecnocom.setId_mensaje(new Long(1200));
+    notificationTecnocom.setMerchant_code("0008902131");
+    notificationTecnocom.setMerchant_name("AMAZON UK");
+    notificationTecnocom.setCountry_iso_3266_code(new Long(152));
+    notificationTecnocom.setCountry_description("Republica de Chile");
+    notificationTecnocom.setPlace_name("Santiago");
+    notificationTecnocom.setResolucion_tx(new Long(100));
+    notificationTecnocom.setBase64_data(base64String);
 
-    System.out.println(notifResult);
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"002",notifResult.getResponse_code());
 
   }
 
   @Test
-  public void testCallNotificationWithoutBase64() throws Exception{
+  public void testCallNotificationWithoutBase64ParamOrNullValue() throws Exception{
 
-    notificationCallback = new NotificationCallback();
-    notificationCallback.setSd_currency_code(new Long(152));
-    notificationCallback.setSd_value("1000.00");
-    notificationCallback.setIl_currency_code(new Long(152));
-    notificationCallback.setIl_value("1000.00");
-    notificationCallback.setId_currency_code(new Long(152));
-    notificationCallback.setId_value("1000.00");
-    notificationCallback.setTipo_tx(new Long(100));
-    notificationCallback.setId_mensaje(new Long(1200));
-    notificationCallback.setMerchant_code("0008902131");
-    notificationCallback.setMerchant_name("AMAZON UK");
-    notificationCallback.setCountry_iso_3266_code(new Long(152));
-    notificationCallback.setCountry_description("Republica de Chile");
-    notificationCallback.setPlace_name("Santiago");
-    notificationCallback.setResolucion_tx(new Long(100));
+    HashMap<String,Object>headers = new HashMap<>();
+    headers.put("Content-Type","application/json");
+    headers.put("entidad","9603");
+    headers.put("centro_alta","0001");
+    headers.put("cuenta","000000012345");
+    headers.put("pan","411111******1111");
 
-    NotificationCallback notifResult = getPrepaidEJBBean10().setNotificationCallback(null,notificationCallback);
-    String assertMessage = "Base 64 is Empty";
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSd_currency_code(new Long(152));
+    notificationTecnocom.setSd_value("1000.00");
+    notificationTecnocom.setIl_currency_code(new Long(152));
+    notificationTecnocom.setIl_value("1000.00");
+    notificationTecnocom.setId_currency_code(new Long(152));
+    notificationTecnocom.setId_value("1000.00");
+    notificationTecnocom.setTipo_tx(new Long(100));
+    notificationTecnocom.setId_mensaje(new Long(1200));
+    notificationTecnocom.setMerchant_code("0008902131");
+    notificationTecnocom.setMerchant_name("AMAZON UK");
+    notificationTecnocom.setCountry_iso_3266_code(new Long(152));
+    notificationTecnocom.setCountry_description("Republica de Chile");
+    notificationTecnocom.setPlace_name("Santiago");
+    notificationTecnocom.setResolucion_tx(new Long(100));
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    //String assertMessage = "Base 64 is Empty";
+    String assertMessage = notifResult.getResponse_message();
     System.out.println(assertMessage);
-    Assert.assertEquals(assertMessage,"101007",notifResult.getResponse_code());
-
-
-  }
-
-  @Test
-  public void testCallNotificationBase64NotValid() throws Exception{
-
-    String base64String = "This is a String Text";
-
-    notificationCallback = new NotificationCallback();
-    notificationCallback.setSd_currency_code(new Long(152));
-    notificationCallback.setSd_value("1000.00");
-    notificationCallback.setIl_currency_code(new Long(152));
-    notificationCallback.setIl_value("1000.00");
-    notificationCallback.setId_currency_code(new Long(152));
-    notificationCallback.setId_value("1000.00");
-    notificationCallback.setTipo_tx(new Long(100));
-    notificationCallback.setId_mensaje(new Long(1200));
-    notificationCallback.setMerchant_code("0008902131");
-    notificationCallback.setMerchant_name("AMAZON UK");
-    notificationCallback.setCountry_iso_3266_code(new Long(152));
-    notificationCallback.setCountry_description("Republica de Chile");
-    notificationCallback.setPlace_name("Santiago");
-    notificationCallback.setResolucion_tx(new Long(100));
-    notificationCallback.setBase64_data(base64String);
-
-    NotificationCallback notifResult = getPrepaidEJBBean10().setNotificationCallback(null,notificationCallback);
-    String assertMessage = "Base64 is invalid";
-    System.out.println(assertMessage);
-    Assert.assertEquals(assertMessage,"101007",notifResult.getResponse_code());
-
-  }
-
-  @Test
-  public void testCallNotificationTwoParamsOnNull() throws Exception{
-
-    String base64String = "This is a String Text";
-
-    notificationCallback = new NotificationCallback();
-    notificationCallback.setSd_currency_code(new Long(152));
-    notificationCallback.setSd_value("1000.00");
-    notificationCallback.setIl_currency_code(new Long(152));
-    notificationCallback.setIl_value("1000.00");
-    notificationCallback.setId_currency_code(new Long(152));
-    notificationCallback.setId_value("1000.00");
-    notificationCallback.setTipo_tx(new Long(100));
-    notificationCallback.setId_mensaje(new Long(1200));
-    notificationCallback.setMerchant_code("0008902131");
-    notificationCallback.setMerchant_name("AMAZON UK");
-    notificationCallback.setCountry_iso_3266_code(new Long(152));
-    notificationCallback.setCountry_description("Republica de Chile");
-    notificationCallback.setPlace_name("Santiago");
-    //notificationCallback.setResolucion_tx(new Long(100));
-    //notificationCallback.setBase64_data(base64String);
-
-    NotificationCallback notifResult = getPrepaidEJBBean10().setNotificationCallback(null,notificationCallback);
-    String assertMessage = "Exist more than one parameter on null ";
-    System.out.println(assertMessage+"these are: "+notifResult.getResponse_message());
     Assert.assertEquals(assertMessage,"101004",notifResult.getResponse_code());
+
+
+  }
+
+  @Test
+  public void testCallNotificationWithBase64NotValidParamValue() throws Exception{
+
+    String messageResponse;
+    String base64String = "This is a String Text";
+
+    HashMap<String,Object>headers = new HashMap<>();
+    headers.put("Content-Type","application/json");
+    headers.put("entidad","9603");
+    headers.put("centro_alta","0001");
+    headers.put("cuenta","000000012345");
+    headers.put("pan","411111******1111");
+
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSd_currency_code(new Long(152));
+    notificationTecnocom.setSd_value("1000.00");
+    notificationTecnocom.setIl_currency_code(new Long(152));
+    notificationTecnocom.setIl_value("1000.00");
+    notificationTecnocom.setId_currency_code(new Long(152));
+    notificationTecnocom.setId_value("1000.00");
+    notificationTecnocom.setTipo_tx(new Long(100));
+    notificationTecnocom.setId_mensaje(new Long(1200));
+    notificationTecnocom.setMerchant_code("0008902131");
+    notificationTecnocom.setMerchant_name("AMAZON UK");
+    notificationTecnocom.setCountry_iso_3266_code(new Long(152));
+    notificationTecnocom.setCountry_description("Republica de Chile");
+    notificationTecnocom.setPlace_name("Santiago");
+    notificationTecnocom.setResolucion_tx(new Long(100));
+    notificationTecnocom.setBase64_data(base64String);
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"101007",notifResult.getResponse_code());
+
+  }
+
+  @Test
+  public void testCallNotificationMoreThanOneParamsOnNull() throws Exception{
+
+    String messageResponse;
+    String base64String = "This is a String Text";
+
+    HashMap<String,Object>headers = new HashMap<>();
+    headers.put("Content-Type","application/json");
+    headers.put("entidad","9603");
+    headers.put("centro_alta","0001");
+    headers.put("cuenta","000000012345");
+    headers.put("pan","411111******1111");
+
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSd_currency_code(new Long(152));
+    notificationTecnocom.setSd_value("1000.00");
+    notificationTecnocom.setIl_currency_code(new Long(152));
+    notificationTecnocom.setIl_value("1000.00");
+    notificationTecnocom.setId_currency_code(new Long(152));
+    notificationTecnocom.setId_value("1000.00");
+    notificationTecnocom.setTipo_tx(new Long(100));
+    notificationTecnocom.setId_mensaje(new Long(1200));
+    notificationTecnocom.setMerchant_code("0008902131");
+    notificationTecnocom.setMerchant_name("AMAZON UK");
+    notificationTecnocom.setCountry_iso_3266_code(new Long(152));
+    notificationTecnocom.setCountry_description("Republica de Chile");
+    notificationTecnocom.setPlace_name("Santiago");
+    //notificationTecnocom.setResolucion_tx(new Long(100));
+    //notificationTecnocom.setBase64_data(base64String);
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"101004",notifResult.getResponse_code());
+
+  }
+
+  @Test
+  public void testCallNotificationEmptyHeaderDataAndEmptyBodyData() throws Exception{
+
+    String messageResponse;
+    String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
+
+    HashMap<String,Object>headers = new HashMap<>();
+    notificationTecnocom = new NotificationTecnocom();
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"101004",notifResult.getResponse_code());
+
+  }
+
+  @Test
+  public void testCallNotificationEmptyHeaderDataAndCompleteBodyData() throws Exception{
+
+    String messageResponse;
+    String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
+
+    HashMap<String,Object>headers = new HashMap<>();
+
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSd_currency_code(new Long(152));
+    notificationTecnocom.setSd_value("1000.00");
+    notificationTecnocom.setIl_currency_code(new Long(152));
+    notificationTecnocom.setIl_value("1000.00");
+    notificationTecnocom.setId_currency_code(new Long(152));
+    notificationTecnocom.setId_value("1000.00");
+    notificationTecnocom.setTipo_tx(new Long(100));
+    notificationTecnocom.setId_mensaje(new Long(1200));
+    notificationTecnocom.setMerchant_code("0008902131");
+    notificationTecnocom.setMerchant_name("AMAZON UK");
+    notificationTecnocom.setCountry_iso_3266_code(new Long(152));
+    notificationTecnocom.setCountry_description("Republica de Chile");
+    notificationTecnocom.setPlace_name("Santiago");
+    notificationTecnocom.setResolucion_tx(new Long(100));
+    notificationTecnocom.setBase64_data(base64String);
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"101004",notifResult.getResponse_code());
+
+  }
+
+  @Test
+  public void testCallNotificationCompleteHeaderDataAndEmptyBodyData() throws Exception{
+
+    String messageResponse;
+    String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
+
+    HashMap<String,Object>headers = new HashMap<>();
+    headers.put("Content-Type","application/json");
+    headers.put("entidad","9603");
+    headers.put("centro_alta","0001");
+    headers.put("cuenta","000000012345");
+    headers.put("pan","411111******1111");
+
+    notificationTecnocom = new NotificationTecnocom();
+
+    NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
+    messageResponse = notifResult.getResponse_message();
+    System.out.println(messageResponse);
+    Assert.assertEquals(messageResponse,"101004",notifResult.getResponse_code());
 
   }
 

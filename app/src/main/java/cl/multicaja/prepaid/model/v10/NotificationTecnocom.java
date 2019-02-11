@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.model.v10;
 
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.BaseModel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import javax.annotation.Generated;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,9 +33,9 @@ import java.util.HashMap;
   "base64_data"
 })
 
-public class NotificationCallback extends BaseModel {
+public class NotificationTecnocom extends BaseModel {
 
-  private static Log log = LogFactory.getLog(NotificationCallback.class);
+  private static Log log = LogFactory.getLog(NotificationTecnocom.class);
 
   @JsonProperty("id")
   private Long id;
