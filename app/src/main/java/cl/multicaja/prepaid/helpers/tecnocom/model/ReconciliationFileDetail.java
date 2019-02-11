@@ -50,6 +50,10 @@ public class ReconciliationFileDetail {
   private final ReconciliationFileLayout NUMEXTCTA = new ReconciliationFileLayout(776, 3, null);
   private final ReconciliationFileLayout TIPOLIN = new ReconciliationFileLayout(942, 4, null);
   private final ReconciliationFileLayout LINREF = new ReconciliationFileLayout(988, 8, null);
+  private final ReconciliationFileLayout FECTRN = new ReconciliationFileLayout(1977,10,null);
+  private final ReconciliationFileLayout HORTRN = new ReconciliationFileLayout(1987,8,null);
+  private final ReconciliationFileLayout IMPAUTCON = new ReconciliationFileLayout(2047,17,2);
+  private final ReconciliationFileLayout NOMCOMRED = new ReconciliationFileLayout(2094,27,null);
 
 
   public ReconciliationFileDetail() {
@@ -146,6 +150,17 @@ public class ReconciliationFileDetail {
     return this.detail.substring(this.LINREF.getStart(), this.LINREF.getEnd());
   }
 
+  public String getFecTrn(){return this.detail.substring(this.FECTRN.getStart(),this.FECTRN.getEnd()); }
+
+  public String getHorTrn(){return  this.detail.substring(this.HORTRN.getStart(),this.HORTRN.getEnd());}
+
+  public BigDecimal getImpAutCon() {
+    return this.getScaledValue(this.detail.substring(this.IMPAUTCON.getStart(), this.IMPAUTCON.getEnd()), this.IMPAUTCON.getDecimal());
+  }
+
+  public String getNomComRed(){
+    return this.detail.substring(this.NOMCOMRED.getStart(),this.NOMCOMRED.getEnd());
+  }
 
   public Boolean isFromSat() {
     return SAT_ORIGIN.equals(this.getOrigenope());

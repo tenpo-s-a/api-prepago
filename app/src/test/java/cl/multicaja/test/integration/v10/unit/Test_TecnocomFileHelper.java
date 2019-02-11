@@ -26,6 +26,21 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
     Assert.assertEquals("Deberia tener 26 registros", 16, file.getDetails().size());
   }
+  @Test
+  public void shouldProcessFile_Full() throws Exception {
+    InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0004");
+    ReconciliationFile file = TecnocomFileHelper.getInstance().validateFile(inputStream);
+    inputStream.close();
+
+    Assert.assertNotNull("Deberia procesar el archivo", file);
+    Assert.assertNotNull("Deberia tener header", file.getHeader());
+    Assert.assertNotNull("Deberia tener footer", file.getFooter());
+    Assert.assertNotNull("Deberia detalles", file.getDetails());
+    Assert.assertFalse("Deberia detalles", file.getDetails().isEmpty());
+    Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
+    Assert.assertEquals("Deberia tener 26 registros", 191, file.getDetails().size());
+
+  }
 
   @Test
   public void shouldBeSuspicious_noHeader() throws Exception {
