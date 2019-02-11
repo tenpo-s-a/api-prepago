@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.helpers.tecnocom.model;
 
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
+import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.math.BigDecimal;
@@ -15,8 +16,7 @@ import java.util.Set;
 public class ReconciliationFileDetail {
 
   public static final String FECFACT_DATE_FORMAT = "yyyy-MM-dd";
-  public static final String OPERATION_TYPE = "OP";
-  public static final String SAT_ORIGIN = "ONLI";
+ public static final String SAT_ORIGIN = "ONLI";
 
   private String detail;
   private Boolean hasError;
@@ -97,6 +97,9 @@ public class ReconciliationFileDetail {
 
   public TipoFactura getTipoFac() {
     return TipoFactura.valueOfEnumByCodeAndCorrector(NumberUtils.getInstance().toInt(this.getTipoFactura()), NumberUtils.getInstance().toInt(this.getIndnorcor()));
+  }
+  public TecnocomOperationType getOperationType(){
+    return TecnocomOperationType.fromValue(this.getTiporeg());
   }
 
   public String getFecfac() {

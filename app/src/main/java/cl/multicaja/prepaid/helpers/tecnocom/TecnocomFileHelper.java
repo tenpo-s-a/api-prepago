@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.model.*;
 import cl.multicaja.prepaid.model.v10.BusinessStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
+import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -246,7 +247,10 @@ public class TecnocomFileHelper {
           footerLine = line;
         } else {
           ReconciliationFileDetail detail = new ReconciliationFileDetail(line);
-          if(ReconciliationFileDetail.OPERATION_TYPE.equals(detail.getTiporeg())) {
+          if(TecnocomOperationType.OP.equals(detail.getOperationType())) {
+            file.getDetails().add(new ReconciliationFileDetail(line));
+          }
+          else if (TecnocomOperationType.AU.equals(detail.getOperationType())){
             file.getDetails().add(new ReconciliationFileDetail(line));
           }
           if(!line.startsWith(String.format("%sD", pattern))) {
