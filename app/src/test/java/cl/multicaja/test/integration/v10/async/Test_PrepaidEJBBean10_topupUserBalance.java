@@ -23,6 +23,7 @@ import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
@@ -318,7 +319,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
@@ -403,7 +404,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
@@ -669,7 +670,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 2 movimientos de accounting", 2, accounting10s.size());
 

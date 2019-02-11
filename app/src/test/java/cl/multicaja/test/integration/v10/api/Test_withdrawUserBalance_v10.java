@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -122,7 +123,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 
@@ -223,7 +224,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 

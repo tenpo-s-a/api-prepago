@@ -88,7 +88,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
-  //TODO: este metodo no tiene tests?
+  public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
+
+    if(idTrx == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTrx"));
+    }
+    List<AccountingData10> data = this.searchAccountingData(null, null, idTrx);
+    return data.isEmpty() ? null : data.get(0);
+  }
+
   public List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
 
     if(dateToSearch == null){
@@ -96,20 +104,22 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     Date date = Date.from(dateToSearch.atZone(ZoneId.of("UTC")).toInstant());
-    return searchAccountingData(null, date);
+    return this.searchAccountingData(null, date, null);
   }
 
-  //TODO: este metodo no tiene tests?
-  @Override
-  public List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
-    if(dateToSearch == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
-    }
+  private List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch, Long idTrx) throws Exception {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    String dateString = dateFormatter.format(new Date());
+
+    String dateString = null;
+
+    if(dateToSearch != null){
+      dateString = dateFormatter.format(dateToSearch);
+    }
+
 
     Object[] params = {
-      new InParam(dateString, Types.VARCHAR)
+      dateString == null ? new NullParam(Types.VARCHAR): new InParam(dateString, Types.VARCHAR),
+      idTrx == null ? new NullParam(Types.BIGINT) : new InParam(idTrx, Types.BIGINT)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -891,15 +901,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   }
 
   @Override
-  public void updateReconciliationDate(Map<String, Object> header, Long id, String conciliationDate) throws Exception {
-    if(conciliationDate == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "conciliationDate"));
-    }
-
-    this.updateAccountingData(header, id, null, null, null, conciliationDate);
-  }
-
-  @Override
   public void updateAccountingStatus(Map<String, Object> header, Long id, AccountingStatusType accountingStatus) throws Exception {
     if(accountingStatus == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingStatus"));
@@ -915,6 +916,21 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     this.updateAccountingData(header, id, null, status, null, null);
+  }
+
+  public void update(Map<String, Object> header, AccountingData10 data) throws Exception {
+    if(data == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data"));
+    }
+    if(data.getId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data.id"));
+    }
+    LocalDateTime localDateTime = data.getConciliationDate().toLocalDateTime();
+    ZonedDateTime utc = localDateTime.atZone(ZoneOffset.UTC);
+
+    String conciliationDate = utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    this.updateAccountingData(header, data.getId(), data.getFileId(), data.getStatus(), data.getAccountingStatus(), conciliationDate);
   }
 
   private void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {

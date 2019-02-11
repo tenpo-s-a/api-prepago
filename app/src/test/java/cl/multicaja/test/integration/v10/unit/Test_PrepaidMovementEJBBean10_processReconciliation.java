@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,7 +60,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -114,7 +115,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -169,7 +170,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -224,7 +225,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
