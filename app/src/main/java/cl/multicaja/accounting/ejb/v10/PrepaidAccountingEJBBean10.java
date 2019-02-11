@@ -94,7 +94,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTrx"));
     }
     List<AccountingData10> data = this.searchAccountingData(null, null, idTrx);
-    return data.isEmpty() ? null : data.get(0);
+    return (data == null || data.isEmpty()) ? null : data.get(0);
   }
 
   public List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
