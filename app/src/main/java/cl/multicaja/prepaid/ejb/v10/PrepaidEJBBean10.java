@@ -400,6 +400,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         String messageId = this.getMailDelegate().sendTopupMail(prepaidTopup, user, prepaidMovement);
         prepaidTopup.setMessageId(messageId);
+
+        // Se envia informacion a accounting/clearing
+        this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");
@@ -718,7 +721,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
       }
       // Se envia informacion a accounting/clearing
-      this.getDelegate().sendWithdrawToAccounting(prepaidMovement, userAccount);
+      this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");

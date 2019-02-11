@@ -178,6 +178,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getStatus"));
     }
 
+    // La fecha ya esta en UTC
+    LocalDateTime date = accounting10.getTransactionDate().toLocalDateTime();
+    String d = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
     Object[] params = {
       new InParam(accounting10.getIdTransaction(), Types.BIGINT),
       new InParam(accounting10.getType().getValue(), Types.VARCHAR),
@@ -193,7 +197,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       accounting10.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFee(), Types.NUMERIC),
       accounting10.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFeeIva(),Types.NUMERIC),
       accounting10.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountBalance().getValue(),Types.NUMERIC),
-      new InParam(accounting10.getTransactionDateInFormat(),Types.VARCHAR),
+      new InParam(d,Types.VARCHAR),
       new InParam(accounting10.getConciliationDateInFormat(),Types.VARCHAR),
       new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
       new InParam(accounting10.getFileId(), Types.BIGINT),
