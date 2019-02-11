@@ -19,6 +19,9 @@ import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBaseUnit {
 
+  private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private DateTimeFormatter conciliationDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:00");
+
   @Before
   @After
   public void clearData() {
@@ -53,6 +56,35 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
+
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement10.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement10.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus OK", AccountingStatusType.OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertEquals("debe tener la misma fecha de transaccion", prepaidMovement10.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+    Assert.assertEquals("debe tener la misma fecha de conciliacion", movConciliado.getFechaRegistro().toLocalDateTime().format(conciliationDateTimeFormatter), accounting10.getConciliationDate().toLocalDateTime().format(conciliationDateTimeFormatter));
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.PENDING, clearing10.getStatus());
   }
 
   @Test
@@ -79,6 +111,35 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
+
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement10.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.CARGA_WEB, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement10.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus OK", AccountingStatusType.OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertEquals("debe tener la misma fecha de transaccion", prepaidMovement10.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+    Assert.assertEquals("debe tener la misma fecha de conciliacion", movConciliado.getFechaRegistro().toLocalDateTime().format(conciliationDateTimeFormatter), accounting10.getConciliationDate().toLocalDateTime().format(conciliationDateTimeFormatter));
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.PENDING, clearing10.getStatus());
   }
 
   @Test
@@ -105,6 +166,35 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
+
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement10.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.RETIRO_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.RETIRO_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement10.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus OK", AccountingStatusType.OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertEquals("debe tener la misma fecha de transaccion", prepaidMovement10.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+    Assert.assertEquals("debe tener la misma fecha de conciliacion", movConciliado.getFechaRegistro().toLocalDateTime().format(conciliationDateTimeFormatter), accounting10.getConciliationDate().toLocalDateTime().format(conciliationDateTimeFormatter));
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.PENDING, clearing10.getStatus());
   }
 
   @Test
@@ -131,6 +221,35 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
+
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement10.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", accounting10);
+    Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_WEB, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_WEB, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement10.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus OK", AccountingStatusType.PENDING, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertEquals("debe tener la misma fecha de transaccion", prepaidMovement10.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+    Assert.assertNotEquals("No debe tener fecha de conciliacion", movConciliado.getFechaRegistro().toLocalDateTime().format(conciliationDateTimeFormatter), accounting10.getConciliationDate().toLocalDateTime().format(conciliationDateTimeFormatter));
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimientos de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.PENDING, clearing10.getStatus());
   }
 
   //Movimiento No Conciliado tecnocom, conciliado Switch status ok
