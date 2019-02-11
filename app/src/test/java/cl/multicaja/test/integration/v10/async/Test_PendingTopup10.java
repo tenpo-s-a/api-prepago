@@ -346,7 +346,7 @@ public class Test_PendingTopup10 extends TestBaseUnitAsync {
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
 
-    Assert.assertEquals("debe ser primer intento", 1, lastProcessorMetadata.getRetry());
+    Assert.assertEquals("debe ser primer intento", 0, lastProcessorMetadata.getRetry());
     Assert.assertTrue("no debe ser redirect", lastProcessorMetadata.isRedirect());
     Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }

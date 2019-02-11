@@ -189,6 +189,9 @@ public class PendingTopup10 extends BaseProcessor10 {
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
               //TODO: Se debe guardar el movimiento en accounting -> PENDING y clearing -> INITIAL
+              log.info("Enviando comprobante de carga por mail");
+              Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
+              redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
 
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));

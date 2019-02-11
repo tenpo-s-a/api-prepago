@@ -65,6 +65,7 @@ public class PendingStoreInAccountingProcessor10 extends BaseProcessor10 {
 
         // Insertar en accounting como PENDING
         AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(mov, AccountingStatusType.PENDING);
+
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
         // Insertar en clearing
