@@ -193,6 +193,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new InParam(data.getLinref(), Types.NUMERIC),//_linref NUMERIC
       new InParam(data.getNumbencta(),Types.NUMERIC),//_numbencta NUMERIC
       new InParam(data.getNumplastico(),Types.NUMERIC),//_numplastico NUMERIC
+      new InParam(data.getFechaCreacion(),Types.TIMESTAMP),// Nuevo dato entrada Fecha para movimiento compra
       new OutParam("_r_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
