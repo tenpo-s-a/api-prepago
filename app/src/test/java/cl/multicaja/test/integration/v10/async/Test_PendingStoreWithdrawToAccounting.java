@@ -64,7 +64,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
     Assert.assertEquals("Debe tener el mismo id", prepaidMovement.getId(), accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
 
@@ -90,7 +90,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
@@ -117,7 +117,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
@@ -145,7 +145,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 }

@@ -136,4 +136,14 @@ public interface PrepaidAccountingEJB10 {
    * @throws Exception
    */
   void updateStatus(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception;
+
+  /**
+   * Actualiza accounting status y fecha de conciliacion
+   * @param header
+   * @param id
+   * @param accountingStatus
+   * @param conciliationDate
+   * @throws Exception
+   */
+  void updateAccountingStatusAndConciliationDate(Map<String, Object> header, Long id, AccountingStatusType accountingStatus, String conciliationDate) throws Exception;
 }

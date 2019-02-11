@@ -304,7 +304,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
         break;
@@ -330,7 +330,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
       Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
 
@@ -389,7 +389,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
         break;
@@ -415,7 +415,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
       Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
 
@@ -662,7 +662,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
         break;
@@ -681,7 +681,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("debe tener la misma fecha de transaccion", mov.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), acc.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
       });
 
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
       Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
 

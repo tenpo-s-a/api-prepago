@@ -918,19 +918,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.updateAccountingData(header, id, null, status, null, null);
   }
 
-  public void update(Map<String, Object> header, AccountingData10 data) throws Exception {
-    if(data == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data"));
+  @Override
+  public void updateAccountingStatusAndConciliationDate(Map<String, Object> header, Long id, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {
+    if(accountingStatus == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingStatus"));
     }
-    if(data.getId() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data.id"));
+    if(StringUtils.isAllBlank(conciliationDate)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "conciliationDate"));
     }
-    LocalDateTime localDateTime = data.getConciliationDate().toLocalDateTime();
-    ZonedDateTime utc = localDateTime.atZone(ZoneOffset.UTC);
 
-    String conciliationDate = utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-    this.updateAccountingData(header, data.getId(), data.getFileId(), data.getStatus(), data.getAccountingStatus(), conciliationDate);
+    this.updateAccountingData(header, id, null, null, accountingStatus, conciliationDate);
   }
 
   private void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {

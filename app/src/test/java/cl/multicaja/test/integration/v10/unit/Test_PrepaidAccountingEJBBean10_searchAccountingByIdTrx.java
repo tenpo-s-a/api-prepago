@@ -16,8 +16,6 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingByIdTrx extends Tes
     accounting10.setFileId(36L);
     accounting10 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
-    getPrepaidAccountingEJBBean10().update(null, accounting10);
-
     AccountingData10 db = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, accounting10.getIdTransaction());
 
     Assert.assertEquals("Debe ser el mismo", db.getId(), accounting10.getId());

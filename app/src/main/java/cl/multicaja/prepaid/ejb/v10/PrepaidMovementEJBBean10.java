@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
 import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
+import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
@@ -31,8 +32,14 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -782,8 +789,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
         TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(mov.getTipofac()) ||
         TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(mov.getTipofac())) {
-        //TODO: actualizar fecha de conciliacion en accounting
-        //TODO: actualizar status en clearing
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingAndClearing(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
       }
     }
     /**
@@ -946,8 +954,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
       updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.CONFIRMED);
       if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
-        //TODO: actualizar fecha de conciliacion en accounting
-        //TODO: actualizar status en clearing
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingAndClearing(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
+
       } else {
         //TODO: si el movimiento es una reversa, no deberia actualizar el status de negocio del movimiento original a REVERSED?
       }
@@ -1239,6 +1249,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //TODO: actualizar status -> RESEARCH en clearing
       }
     }
+  }
+
+  public void updateAccountingAndClearing(Long idTrx, AccountingStatusType accountingStatus, AccountingStatusType clearingStatus) throws Exception{
+    // Obtengo el movimiento correspondiente en Accounting
+    AccountingData10 accounting = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null, idTrx);
+
+    Instant instant = Instant.now();
+    ZoneId z = ZoneId.of( "UTC" );
+    ZonedDateTime zdt = instant.atZone(z);
+    getPrepaidAccountingEJB10().updateAccountingStatusAndConciliationDate(null, accounting.getId(), accountingStatus, zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+    // Obtengo el movimiento correspondiente en Clearing
+    ClearingData10 clearing = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accounting.getId());
+
+    getPrepaidClearingEJB10().updateClearingData(null, clearing.getId(), clearingStatus);
   }
 
   public void clearingResolution() throws Exception {
