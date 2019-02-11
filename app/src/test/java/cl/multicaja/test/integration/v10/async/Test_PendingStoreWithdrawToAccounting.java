@@ -14,6 +14,8 @@ import org.junit.*;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -30,16 +32,16 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
   @Test
   public void pendingWithdrawToAccount_ok() throws Exception {
-    Date dateToday = new Date();
+    LocalDateTime dateToday = LocalDateTime.now();
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setId(100L);
     prepaidMovement.setTipofac(TipoFactura.RETIRO_TRANSFERENCIA);
-    prepaidMovement.setFecfac(dateToday);
+    prepaidMovement.setFecfac(new Date());
     prepaidMovement.setImpfac(new BigDecimal(10000));
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setFechaCreacion(new Timestamp(dateToday.getTime()));
+    prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
 
     UserAccount userAccount = new UserAccount();
     userAccount.setId(10L);
@@ -62,7 +64,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
     Assert.assertEquals("Debe tener el mismo id", prepaidMovement.getId(), accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
 
@@ -74,8 +76,6 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
   @Test
   public void pendingWithdrawToAccount_notOK_movementNull() throws Exception {
-    Date dateToday = new Date();
-
     UserAccount userAccount = new UserAccount();
     userAccount.setId(10L);
 
@@ -87,25 +87,23 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
   @Test
   public void pendingWithdrawToAccount_notOK_accountNull() throws Exception {
-    Date dateToday = new Date();
-
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setId(100L);
     prepaidMovement.setTipofac(TipoFactura.RETIRO_TRANSFERENCIA);
-    prepaidMovement.setFecfac(dateToday);
+    prepaidMovement.setFecfac(new Date());
     prepaidMovement.setImpfac(new BigDecimal(10000));
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setFechaCreacion(new Timestamp(dateToday.getTime()));
+    prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
 
 
     String messageId = sendWithdrawToAccounting(prepaidMovement, null);
@@ -116,25 +114,23 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 
   @Test
   public void pendingWithdrawToAccount_notOK_accountIdNull() throws Exception {
-    Date dateToday = new Date();
-
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setId(100L);
     prepaidMovement.setTipofac(TipoFactura.RETIRO_TRANSFERENCIA);
-    prepaidMovement.setFecfac(dateToday);
+    prepaidMovement.setFecfac(new Date());
     prepaidMovement.setImpfac(new BigDecimal(10000));
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setFechaCreacion(new Timestamp(dateToday.getTime()));
+    prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
 
     UserAccount userAccount = new UserAccount();
 
@@ -146,10 +142,10 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
     Assert.assertNull("No deberia existir un withdraw", remoteData);
 
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, dateToday);
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
     Assert.assertNull("Debe ser null", accounting10s);
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     Assert.assertEquals("Debe ser de tamaño zero", 0, clearing10s.size());
   }
 }

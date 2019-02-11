@@ -80,7 +80,7 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
     Assert.assertTrue("Debe tener id", clearingFile.getId() > 0);
     Assert.assertEquals("Debe estar en status PENDING", AccountingStatusType.PENDING, clearingFile.getStatus());
 
-    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT);
+    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT, null);
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertEquals("Debe tener 2 registros", 2,data.size());
     data.forEach(d-> {
@@ -128,7 +128,7 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
     Assert.assertTrue("Debe tener id", clearingFile.getId() > 0);
     Assert.assertEquals("Debe estar en status PENDING", AccountingStatusType.PENDING, clearingFile.getStatus());
 
-    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT);
+    List<ClearingData10> data =  getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.SENT, null);
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertEquals("Debe tener 1 registros", 1,data.size());
     data.forEach(d-> {
