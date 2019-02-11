@@ -1397,21 +1397,18 @@ public final class TestHelpersResource10 extends BaseResource {
 
       if(errorCode == "002"){
 
-        returnResponse = Response.ok(notifResponse).status(202).build();
+        //Ok Service Response
+        returnResponse = Response.ok(notificationTecnocom).status(202).build();
         log.info(textLogBase+notifResponse.toString());
 
+        //Send Async Mail
         Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data", "Es una prueba");
-
+        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
         EmailBody emailBody = new EmailBody();
-        //emailBody.setTemplateData(templateData);
+        emailBody.setTemplateData(templateData);
         emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("soporte-prepago@multicaja.cl");
-        //emailBody.setAddress("mauricio.valencia@multicaja.cl");
-        //emailBody.setAddress("wmvg2@yahoo.com");
-        //mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
-        getUserClient().sendInternalMail(null,emailBody);
-
+        emailBody.setAddress("notification_tecnocom@multicaja.cl");
+        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
 
       }
 

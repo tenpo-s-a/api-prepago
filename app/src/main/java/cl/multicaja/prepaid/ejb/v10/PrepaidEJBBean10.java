@@ -2680,10 +2680,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Boolean boolResponse = false;
 
     Base64.Decoder decoder = Base64.getDecoder();
-    try {
-      decoder.decode(base64String);
-      boolResponse = true;
-    } catch(IllegalArgumentException iae) {
+    if(base64String != null && base64String.length()!=0 && base64String.isEmpty() == false) {
+      try {
+        decoder.decode(base64String);
+        boolResponse = true;
+      } catch (IllegalArgumentException iae) {
+        boolResponse = false;
+      }
+    }else{
       boolResponse = false;
     }
 
@@ -2746,9 +2750,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     HashMap<String,Object> fieldsOnNullFromHttpBody = notificationTecnocom.checkNull(mandatoryFieldsFromHttpBody);
 
     Boolean isBase64 = false;
-    if(notificationTecnocom.getBase64_data() != null){
-      isBase64 = validateBase64(notificationTecnocom.getBase64_data());
-    }
+    isBase64 = this.validateBase64(notificationTecnocom.getBase64_data());
 
     //Error conditions
     if(fieldsOnNullFromHttpBody.size() >= 1){
