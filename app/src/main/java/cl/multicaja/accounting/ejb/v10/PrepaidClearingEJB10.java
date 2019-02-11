@@ -20,6 +20,16 @@ public interface PrepaidClearingEJB10 {
   /**
    *
    * @param header
+   * @param id
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  ClearingData10 updateClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception;
+
+  /**
+   *
+   * @param header
    * @param fileId
    * @param status
    * @return
@@ -35,7 +45,7 @@ public interface PrepaidClearingEJB10 {
    * @return
    * @throws Exception
    */
-  List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status)throws Exception;
+  List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId)throws Exception;
 
   /**
    *
@@ -45,6 +55,15 @@ public interface PrepaidClearingEJB10 {
    * @throws Exception
    */
   ClearingData10 searchClearingDataById(Map<String, Object> header, Long id) throws Exception;
+
+  /**
+   *
+   * @param header
+   * @param accountingId
+   * @return
+   * @throws Exception
+   */
+  ClearingData10 searchClearingDataByAccountingId(Map<String, Object> header, Long accountingId) throws Exception;
 
   /**
    * Busca los retiros web para procesar conciliacion:

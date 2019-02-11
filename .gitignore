@@ -19,6 +19,7 @@ app/.idea
 app/.settings
 app/.classpath
 app/.project
+app/TRX_PREPAGO_*
 
 pg/.idea
 pg/.settings

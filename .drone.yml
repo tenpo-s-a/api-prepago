@@ -11,7 +11,7 @@ pipeline:
       event: [ push ]
 
   dbusers_migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-8dd064d33bf633e74cfc817d29f6c918a1cfb5f9
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-f7a121a29eccdac41d86f9d07756a0b59dd58d2c
     commands:
       - sleep 15
       - cd /app/pg && ./db-create.sh -Denv=ci
@@ -58,16 +58,16 @@ pipeline:
       branch:
         exclude: master
 
-#  upload_to_sonar:
-#    image: maven:3.6.0-jdk-8-alpine
-#    commands:
-#      - ./drone-mvn-cache.sh
-#      - cd app
-#      - mvn sonar:sonar
-#    when:
-#      event: [ push ]
-#      branch:
-#        exclude: master
+  #upload_to_sonar:
+  #  image: maven:3.6.0-jdk-8-alpine
+  #  commands:
+  #    - ./drone-mvn-cache.sh
+  #    - cd app
+  #    - mvn sonar:sonar
+  #  when:
+  #    event: [ push ]
+  #    branch:
+  #      exclude: master
 
   print_log:
     image: maven:3.6.0-jdk-8-alpine
@@ -175,7 +175,7 @@ services:
         exclude: master
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-8dd064d33bf633e74cfc817d29f6c918a1cfb5f9
+    image: mccontainerregistry.azurecr.io/api-users:ci-f7a121a29eccdac41d86f9d07756a0b59dd58d2c
     log-driver: none
     when:
       event: [ push ]

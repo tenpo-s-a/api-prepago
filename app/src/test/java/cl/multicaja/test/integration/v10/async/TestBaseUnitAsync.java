@@ -458,7 +458,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     // Se crea un messageId unico
     String messageId = String.format("%s#%s", id, Utils.uniqueCurrentTimeNano());
 
-    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ);
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setPrepaidMovement10(prepaidMovement10);
     data.setUserAccount(userAccount);

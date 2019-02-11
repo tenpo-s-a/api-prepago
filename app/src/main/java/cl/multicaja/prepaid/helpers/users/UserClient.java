@@ -306,12 +306,13 @@ public class UserClient {
     return this.processResponse("initIdentityValidation", httpResponse, User.class);
   }
 
-  public User updatePersonalData(Map<String, Object> headers, Long userId, String name, String lastname) throws Exception {
+  public User updatePersonalData(Map<String, Object> headers, Long userId, String name, String lastname, String occupation) throws Exception {
     log.info("******** updatePersonalData IN ********");
 
     Map<String, String> data = new HashMap<>();
     data.put("name", name);
     data.put("lastname_1", lastname);
+    data.put("occupation", occupation);
 
     HttpResponse httpResponse = apiPOST(String.format("%s/%s/update_personal_data", getApiUrl(), userId), data);
     httpResponse.setJsonParser(getJsonMapper());

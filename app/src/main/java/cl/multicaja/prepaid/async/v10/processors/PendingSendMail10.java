@@ -9,6 +9,7 @@ import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.async.v10.routes.MailRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
@@ -34,8 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_TOPUP_REQ;
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_WITHDRAW_REQ;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.*;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 import static cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE;
@@ -194,7 +194,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         PrepaidTopupData10 data = req.getData();
 
         if(req.getRetryCount() > getMaxRetryCount()) {
-          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_REQ);
+          Endpoint endpoint = createJMSEndpoint(MailRoute10.ERROR_SEND_MAIL_WITHDRAW_REQ);
           return redirectRequest(endpoint, exchange, req, false);
         }
 
@@ -262,6 +262,80 @@ public class PendingSendMail10 extends BaseProcessor10 {
     };
   }
 
+  /**
+   * Envio confirmacion de retiro exitoso
+   */
+  public ProcessorRoute processPendingWithdrawSuccessMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingWithdrawConfirmedMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        if(req.getRetryCount() > getMaxRetryCount()) {
+          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_SUCCESS_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
+        }
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("withdraw_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+        templateData.put("bank_account", data.getUserAccount().getCensoredAccount());
+        templateData.put("bank_name", data.getUserAccount().getBankName());
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW_SUCCESS);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
+  /**
+   * Envio confirmacion de retiro exitoso
+   */
+  public ProcessorRoute processPendingWithdrawFailedMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingWithdrawConfirmedMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        if(req.getRetryCount() > getMaxRetryCount()) {
+          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
+        }
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("withdraw_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW_FAILED);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
   public String createPdf(String passwordUser, String passwordOwner,String numTarjeta,String fecha, String cvc,String name) throws IOException, DocumentException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Document document = new Document();
@@ -301,6 +375,26 @@ public class PendingSendMail10 extends BaseProcessor10 {
       public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
         log.info("Error sending withdraw mail");
       return req;
+      }
+    };
+  }
+
+  public ProcessorRoute processErrorPendingWithdrawSuccessMail() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+        log.info("Error sending withdraw success mail");
+        return req;
+      }
+    };
+  }
+
+  public ProcessorRoute processErrorPendingWithdrawFailedMail() {
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+        log.info("Error sending withdraw failed mail");
+        return req;
       }
     };
   }

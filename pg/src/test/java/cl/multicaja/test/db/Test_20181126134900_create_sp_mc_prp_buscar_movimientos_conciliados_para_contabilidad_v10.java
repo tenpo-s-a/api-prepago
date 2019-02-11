@@ -69,6 +69,7 @@ public class Test_20181126134900_create_sp_mc_prp_buscar_movimientos_conciliados
       new InParam(trxDate, Types.TIMESTAMP), //conciliation date
       new InParam("OK",Types.VARCHAR),
       new InParam(0, Types.BIGINT),// File ID
+      new InParam("OK",Types.VARCHAR), // accounting_status
       new OutParam("_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

@@ -127,9 +127,9 @@ public class Test_PrepaidAccountingEJBBean10_getReconciledPrepaidMovementsForAcc
     DBUtils.getInstance().getJdbcTemplate().execute(
       String.format("INSERT INTO %s.accounting (id_tx, \"type\",accounting_mov, origin, amount, " +
         "currency, amount_usd,amount_mcar, exchange_rate_dif, fee, fee_iva,collector_fee,collector_fee_iva,amount_balance, " +
-        "transaction_date,conciliation_date,status,file_id, create_date, update_date) " +
+        "transaction_date,conciliation_date,status,file_id, accounting_status, create_date, update_date) " +
         "VALUES(%s, 'CARGA_POS','CARGA_POS', 'IPM', 3119.00, 152, 0.00, 0.00, 0.00, 119.00, 19.00,119.00, 19.00, 0 , " +
-        "'2019-01-30 08:01:01.000','2019-01-30 08:01:01.000','OK',0,'2018-12-27 20:01:02.048', " +
+        "'2019-01-30 08:01:01.000','2019-01-30 08:01:01.000','OK',0,'OK','2018-12-27 20:01:02.048', " +
         " '2018-12-27 20:01:02.048');", SCHEMA, idMovimiento));
   }
 }

@@ -156,7 +156,7 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendWithdrawToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
+  public String sendMovementToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
@@ -165,14 +165,19 @@ public final class PrepaidTopupDelegate10 {
     // Se crea un messageId unico
     String messageId = String.format("%s#%s", prepaidWithdraw.getId(), Utils.uniqueCurrentTimeNano());
 
-    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_WITHDRAW_TO_ACCOUNTING_REQ);
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+
+    String endpoint = PrepaidTopupRoute10.SEDA_SEND_MOVEMENT_TO_ACCOUNTING_REQ;
+
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setPrepaidMovement10(prepaidWithdraw);
     data.setUserAccount(userAccount);
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.setRetryCount(0);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
+
+    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
 
     return messageId;
   }

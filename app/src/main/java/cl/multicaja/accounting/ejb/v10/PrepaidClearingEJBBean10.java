@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
@@ -16,9 +17,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.mastercard.model.AccountingFile;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
-import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -93,7 +92,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Object[] params = {
       clearing10.getAccountingId() == null ? new NullParam(Types.BIGINT):new InParam(clearing10.getAccountingId(), Types.BIGINT),
-      clearing10.getUserBankAccount().getId() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getUserBankAccount().getId(), Types.BIGINT),
+      clearing10.getUserBankAccount() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getUserBankAccount().getId(), Types.BIGINT),
       clearing10.getFileId() == null ? new NullParam(Types.BIGINT) : new InParam(clearing10.getFileId(), Types.BIGINT),
       clearing10.getStatus() == null ? new NullParam(Types.VARCHAR) : new InParam(clearing10.getStatus().getValue(), Types.VARCHAR),
       new OutParam("_id", Types.BIGINT),
@@ -112,12 +111,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
+  public ClearingData10 updateClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    return updateClearingData(header, id, null, status);
+  }
+
+  @Override
   public ClearingData10 updateClearingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception {
 
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    if(fileId == null && status == null){
+    if(status == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
     }
 
@@ -131,7 +140,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_clearing_data_v10", params);
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_acc_create_accounting_file_v10 resp: " + resp);
+      log.error("mc_acc_update_clearing_data_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
     return searchClearingDataById(header,getNumberUtils().toLong(id));
@@ -153,15 +162,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   //TODO: este metodo no tiene test usando el parametro "status"
   @Override
-  public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+  public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId) throws Exception {
 
-    if(id == null && status == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value","allNull"));
-    }
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       status != null ? status.getValue() : new NullParam(Types.VARCHAR),
+      accountingId != null ? accountingId : new NullParam(Types.BIGINT),
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
@@ -178,7 +185,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    List<ClearingData10> clearing10s = searchClearingData(null,id,null);
+    List<ClearingData10> clearing10s = this.searchClearingData(null,id,null, null);
+    return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
+  }
+
+  @Override
+  public ClearingData10 searchClearingDataByAccountingId(Map<String, Object> header, Long accountingId) throws Exception {
+    if(accountingId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingId"));
+    }
+    List<ClearingData10> clearing10s = searchClearingData(null,null,null, accountingId);
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
@@ -364,6 +380,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
+    // TODO: Agregar tasa de intercambio
     String[] header = new String[]{"ID_PREPAGO","ID_LIQUIDACION", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -383,11 +400,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
       }
 
+      System.out.println("Guardando en el archivo: " + mov.getAmount().getValue() + "::" + mov.getAmount().getValue().toBigInteger() + "::" + mov.getAmount().getValue().toBigInteger().toString());
+
       String[] data = new String[]{
         mov.getId().toString(), //ID_PREPAGO,
         fileId, //ID_LIQUIDACION,
         mov.getIdTransaction().toString(), //ID_TRX
-        "", //ID_CUENTA_ORIGEN TODO: este código es dado por Multicaja red.
+        "", //ID_CUENTA_ORIGEN - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
         mov.getType().getValue(), //TIPO_TRX
         mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
         transactionDate, //FECHA_TRX
@@ -444,6 +463,21 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           clearingData.setAmountMastercard(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[9])));
           clearingData.setAmountBalance(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
+
+          Rut accountRut = new Rut();
+          String stringRut = String.valueOf(record[19]);
+          System.out.println("Rut: " + stringRut);
+          String[] rutParts = stringRut.split("-");
+          accountRut.setValue(Integer.valueOf(rutParts[0]));
+          accountRut.setDv(rutParts[1]);
+
+          UserAccount userAccount = new UserAccount();
+          userAccount.setRut(accountRut);
+          userAccount.setBankName(String.valueOf(record[20]));
+          userAccount.setAccountNumber(String.valueOf(record[21]));
+          userAccount.setAccountType(String.valueOf(record[22]));
+
+          clearingData.setUserBankAccount(userAccount);
           clearingData10s.add(clearingData);
         }
         inputStream.close();
@@ -460,6 +494,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile,String fileName,String fileId) throws Exception {
+    //TODO (poca prioridad):  Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null,fileId);
     //Verifica lo que debe venir en el archivo.
     for (ClearingData10 data : clearingDataInTable) {
@@ -468,22 +503,26 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
         //Existe
         if(result != null) {
+          PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementById(data.getIdTransaction());
+          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
+          UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
+
           //Coinciden
           if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
-            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0&&
-            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0
+            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
+            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
+            getNumberUtils().toLong(userAccount.getAccountNumber()).toString().equals(result.getUserBankAccount().getAccountNumber()) &&
+            userAccount.getRut().getValue().equals(result.getUserBankAccount().getRut().getValue())
           ) {
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
             updateClearingData(null, data.getId(),null, result.getStatus());
           }
-          else {//Si  viene en el archivo, pero los montos no concuerdan, investigar.
-            ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
-            this.createClearingResearch(fileName, data.getId());
+          else {//Si  viene en el archivo, pero los montos no concuerdan, marcar.
+            updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
           }
         }
-        else { // No viene en el archivo
-          ClearingData10 dataUpdated = updateClearingData(null, data.getId(),null, AccountingStatusType.RESEARCH);
-          this.createClearingResearch(fileName, data.getId());
+        else { // No viene en el archivo, marcar
+          updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
         }
       }
     }
@@ -500,8 +539,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     }
   }
+
   // Agrega movimiento a investigar
-  private void createClearingResearch(String fileName,Long clearingId) throws Exception {
+  public void createClearingResearch(String fileName,Long clearingId) throws Exception {
     String idToResearch = String.format("ClearingId=%d",clearingId);
     getPrepaidMovementEJBBean10().createMovementResearch(null,idToResearch, ReconciliationOriginType.CLEARING,fileName);
   }
@@ -522,6 +562,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (Map<String, Object> row) -> {
       ClearingData10 clearing10 = new ClearingData10();
       clearing10.setId(getNumberUtils().toLong(row.get("_id")));
+      clearing10.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
       clearing10.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
       clearing10.setUserAccountId(getNumberUtils().toLong(row.get("_user_account_id")));
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));

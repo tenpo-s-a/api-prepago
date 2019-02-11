@@ -402,6 +402,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         String messageId = this.getMailDelegate().sendTopupMail(prepaidTopup, user, prepaidMovement);
         prepaidTopup.setMessageId(messageId);
+
+        // Se envia informacion a accounting/clearing
+        this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");
@@ -706,11 +709,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         null,
         status);
 
+      UserAccount userAccount = null;
+
       if(isWebWithdraw) {
         // Lanzar async a clearing
-        UserAccount userAccount = new UserAccount();
+        userAccount = new UserAccount();
         userAccount.setId(withdrawRequest.getBankAccountId());
-        this.getDelegate().sendWithdrawToAccounting(prepaidMovement, userAccount);
       } else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
@@ -718,6 +722,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
       }
+      // Se envia informacion a accounting/clearing
+      this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
@@ -2610,7 +2616,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       // Si necesita actualizar la ifnormacion
       if(needPersonalDataUpdate) {
-        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1());
+        user = getUserClient().updatePersonalData(headers, user.getId(), user.getName(), user.getLastname_1(), user.getOccupation());
       }
 
       user = this.processSuccessfulIdentityVerification(headers, prepaidUser);

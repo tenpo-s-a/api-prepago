@@ -188,6 +188,11 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
+              //TODO: Se debe guardar el movimiento en accounting -> PENDING y clearing -> INITIAL
+              log.info("Enviando comprobante de carga por mail");
+              Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
+              redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
+
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
@@ -290,11 +295,6 @@ public class PendingTopup10 extends BaseProcessor10 {
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
           // tan rapido. Investigar?
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
-          Map<String, Object> templateData = new HashMap<String, Object>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP, templateData);
-
           // Comienza el proceso de devolucion
 
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga

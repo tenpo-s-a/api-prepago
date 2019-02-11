@@ -9,10 +9,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.TipoAlta;
-import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -676,6 +673,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
     User user = registerUser();
     user.getRut().setStatus(RutStatus.VERIFIED);
     user.setNameStatus(NameStatus.IN_REVIEW);
+    user.setOccupation("Test");
     user = updateUser(user);
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);

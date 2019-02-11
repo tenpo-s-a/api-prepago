@@ -88,7 +88,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
   }
 
-  //TODO: este metodo no tiene tests?
+  public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
+
+    if(idTrx == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idTrx"));
+    }
+    List<AccountingData10> data = this.searchAccountingData(null, null, idTrx);
+    return (data == null || data.isEmpty()) ? null : data.get(0);
+  }
+
   public List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception {
 
     if(dateToSearch == null){
@@ -96,20 +104,22 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     Date date = Date.from(dateToSearch.atZone(ZoneId.of("UTC")).toInstant());
-    return searchAccountingData(null, date);
+    return this.searchAccountingData(null, date, null);
   }
 
-  //TODO: este metodo no tiene tests?
-  @Override
-  public List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception {
-    if(dateToSearch == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "dateToSearch"));
-    }
+  private List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch, Long idTrx) throws Exception {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    String dateString = dateFormatter.format(new Date());
+
+    String dateString = null;
+
+    if(dateToSearch != null){
+      dateString = dateFormatter.format(dateToSearch);
+    }
+
 
     Object[] params = {
-      new InParam(dateString, Types.VARCHAR)
+      dateString == null ? new NullParam(Types.VARCHAR): new InParam(dateString, Types.VARCHAR),
+      idTrx == null ? new NullParam(Types.BIGINT) : new InParam(idTrx, Types.BIGINT)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -140,6 +150,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       account.setAmountMastercard(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_mcar"))));
       account.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_amount_balance"))));
       account.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      account.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_accounting_status"))));
       account.setFileId(getNumberUtils().toLong(row.get("file_id")));
       return account;
     };
@@ -178,6 +189,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getStatus"));
     }
 
+    // La fecha ya esta en UTC
+    LocalDateTime date = accounting10.getTransactionDate().toLocalDateTime();
+    String d = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
     Object[] params = {
       new InParam(accounting10.getIdTransaction(), Types.BIGINT),
       new InParam(accounting10.getType().getValue(), Types.VARCHAR),
@@ -193,10 +208,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       accounting10.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFee(), Types.NUMERIC),
       accounting10.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFeeIva(),Types.NUMERIC),
       accounting10.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountBalance().getValue(),Types.NUMERIC),
-      new InParam(accounting10.getTransactionDateInFormat(),Types.VARCHAR),
+      new InParam(d,Types.VARCHAR),
       new InParam(accounting10.getConciliationDateInFormat(),Types.VARCHAR),
       new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
       new InParam(accounting10.getFileId(), Types.BIGINT),
+      new InParam(accounting10.getAccountingStatus().getValue(), Types.VARCHAR),
       new OutParam("_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -330,7 +346,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       List<AccountingData10> accountingMovements = new ArrayList<>();
 
       for (PrepaidAccountingMovement m : movements) {
-        AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK);
+        AccountingData10 accounting = buildAccounting10(m, AccountingStatusType.OK, AccountingStatusType.OK);
         accountingMovements.add(accounting);
       }
 
@@ -353,7 +369,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
-  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType accountingStatus) {
+  public AccountingData10 buildAccounting10(PrepaidAccountingMovement accountingMovement, AccountingStatusType status, AccountingStatusType accountingStatus) {
     AccountingTxType type = AccountingTxType.RETIRO_WEB;
     AccountingMovementType movementType = AccountingMovementType.RETIRO_WEB;
     TransactionOriginType trxOriginType = TransactionOriginType.WEB;
@@ -433,7 +449,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         break;
     }
     accounting.setTransactionDate(movement.getFechaCreacion());
-    accounting.setStatus(accountingStatus);
+    accounting.setStatus(status);
+    accounting.setAccountingStatus(accountingStatus);
     accounting.setFileId(0L);
 
     // Monto que afecta al saldo del usuario
@@ -788,6 +805,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       //TODO: Revisar Fecha. Usar fecha del archivo IPM?
       acc.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
       acc.setStatus(AccountingStatusType.PENDING);
+      acc.setAccountingStatus(AccountingStatusType.PENDING);
 
       transactions.add(acc);
     }
@@ -871,6 +889,70 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return merchants
       .stream()
       .anyMatch(m -> merchantName.toLowerCase().contains(m.toLowerCase()));
+  }
+
+  @Override
+  public void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception {
+    if(fileId == null && status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
+    }
+
+    this.updateAccountingData(header, id, fileId, status, null, null);
+  }
+
+  @Override
+  public void updateAccountingStatus(Map<String, Object> header, Long id, AccountingStatusType accountingStatus) throws Exception {
+    if(accountingStatus == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingStatus"));
+    }
+
+    this.updateAccountingData(header, id, null, null, accountingStatus, null);
+  }
+
+  @Override
+  public void updateStatus(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    this.updateAccountingData(header, id, null, status, null, null);
+  }
+
+  @Override
+  public void updateAccountingStatusAndConciliationDate(Map<String, Object> header, Long id, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {
+    if(accountingStatus == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingStatus"));
+    }
+    if(StringUtils.isAllBlank(conciliationDate)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "conciliationDate"));
+    }
+
+    this.updateAccountingData(header, id, null, null, accountingStatus, conciliationDate);
+  }
+
+  private void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status, AccountingStatusType accountingStatus, String conciliationDate) throws Exception {
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    Object[] params = {
+      new InParam(id, Types.BIGINT),
+      fileId == null ? new NullParam(Types.BIGINT) : new InParam(fileId, Types.BIGINT),
+      status == null ? new NullParam(Types.VARCHAR) : new InParam(status.getValue(), Types.VARCHAR),
+      conciliationDate == null ? new NullParam(Types.VARCHAR) : new InParam(conciliationDate, Types.VARCHAR),
+      accountingStatus == null ? new NullParam(Types.VARCHAR) : new InParam(accountingStatus.getValue(), Types.VARCHAR),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_accounting_data_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_acc_update_accounting_data_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+    return;
   }
 
 }

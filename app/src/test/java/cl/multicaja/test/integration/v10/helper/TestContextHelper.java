@@ -68,6 +68,8 @@ public class TestContextHelper extends TestBaseUnit {
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
+      MailRoute10 mailRoute10 = new MailRoute10(); // Agregar ruta al cammel para probar los emails salientes
+
      /*
       camelFactory.startCamelContextWithRoutes(true,
         prepaidTopupRoute10 ,transactionReversalRoute10,
@@ -75,7 +77,7 @@ public class TestContextHelper extends TestBaseUnit {
         tecnocomReconciliationRoute10);
         */
       camelFactory.startCamelContextWithRoutes(true,
-        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10);
+        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }

@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public enum AccountingTxType {
 
-  COMPRA_SUSCRIPCION("SUSCRPCION"),
+  COMPRA_SUSCRIPCION("SUSCRIPCION"),
   COMPRA_PESOS("COMPRA_PESOS"),
   COMPRA_MONEDA("COMPRA_OTRA_MONEDA"),
   CARGA_WEB("CARGA_WEB"),
