@@ -19,6 +19,7 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUnitAsync {
 
   // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP)
+  @Ignore
   @Test
   public void processReconciliationCase2Topup() throws Exception {
 
@@ -43,9 +44,11 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-
+    //TODO: no tiene asserts
   }
+
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW)
+  @Ignore
   @Test
   public void processReconciliationCase2Withdraw() throws Exception {
 
@@ -70,8 +73,11 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
+    //TODO: no tiene asserts
   }
+
   // Se hace movimiento contrario al no estar conciliado con el switch (TOPUP) STATUS ERROR
+  @Ignore
   @Test
   public void processReconciliationCase6Topup() throws Exception {
 
@@ -96,8 +102,12 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
+    //TODO: no tiene asserts
+
   }
+
   // Se hace movimiento contrario al no estar conciliado con el switch (WITHDRAW) STATUS ERROR RESPONSE
+  @Ignore
   @Test
   public void processReconciliationCase7Withdraw() throws Exception {
 
@@ -119,6 +129,10 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+
+    getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
+
+    //TODO: no tiene asserts
   }
 
   @Ignore

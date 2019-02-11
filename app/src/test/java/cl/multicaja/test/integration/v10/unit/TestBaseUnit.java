@@ -1366,6 +1366,7 @@ public class TestBaseUnit extends TestApiBase {
     amountBalance.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountBalance(amountBalance);
     accounting10.setStatus(AccountingStatusType.OK);
+    accounting10.setAccountingStatus(AccountingStatusType.OK);
     accounting10.setFileId(0L);
 
     NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
@@ -1404,6 +1405,7 @@ public class TestBaseUnit extends TestApiBase {
     amountBalance.setValue(new BigDecimal(getUniqueInteger()));
     accounting10.setAmountBalance(amountBalance);
     accounting10.setStatus(AccountingStatusType.OK);
+    accounting10.setAccountingStatus(AccountingStatusType.OK);
     accounting10.setFileId(0L);
 
     NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();
@@ -1445,6 +1447,7 @@ public class TestBaseUnit extends TestApiBase {
          amountBalance.setValue(new BigDecimal(getUniqueInteger()));
          accounting10.setAmountBalance(amountBalance);
          accounting10.setStatus(AccountingStatusType.OK);
+         accounting10.setAccountingStatus(AccountingStatusType.OK);
          accounting10.setFileId(0L);
 
          NewAmountAndCurrency10 amountMcar = new NewAmountAndCurrency10();

@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -114,7 +115,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
         break;
@@ -122,7 +123,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 
@@ -134,7 +135,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
       Assert.assertEquals("debe tener la misma fecha de transaccion", dbPrepaidMovement.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
       Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
 
@@ -215,7 +216,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(500);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
         break;
@@ -223,7 +224,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, new Date());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
 
@@ -235,7 +236,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
       Assert.assertEquals("debe tener la misma fecha de transaccion", dbPrepaidMovement.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
 
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
       Assert.assertEquals("Debe haber 1 movimientos de clearing", 1, clearing10s.size());
 

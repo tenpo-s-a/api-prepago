@@ -21,6 +21,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_search_clearing_data_v10
 (
     IN  _in_id                BIGINT,
     IN  _in_status            VARCHAR,
+    IN  _in_accounting_id      BIGINT,
     OUT _id                   BIGINT,
     OUT _accounting_id        BIGINT,
     OUT _user_account_id      BIGINT,
@@ -44,6 +45,7 @@ BEGIN
      ${schema.acc}.clearing
     WHERE
       (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
+      (COALESCE(_in_accounting_id,0) = 0 OR accounting_id = _in_accounting_id) AND
       (TRIM(COALESCE(_in_status,'')) = '' OR status = _in_status);
 
   RETURN;
@@ -53,4 +55,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_clearing_data_v10(BIGINT, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_clearing_data_v10(BIGINT, VARCHAR, BIGINT);

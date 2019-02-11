@@ -19,6 +19,7 @@
 CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_search_accounting_data_v10
 (
   IN _in_create_date VARCHAR,
+  IN _id_mov_ref    BIGINT,
   OUT _id BIGINT,
   OUT _id_tx BIGINT,
   OUT _type VARCHAR,
@@ -36,6 +37,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_search_accounting_data_v10
   OUT _amount_balance NUMERIC,
   OUT _status VARCHAR,
   OUT _file_id BIGINT,
+  OUT _accounting_status VARCHAR,
   OUT _transaction_date TIMESTAMP without time zone,
   OUT _conciliation_date TIMESTAMP without time zone,
   OUT _create_date TIMESTAMP without time zone,
@@ -65,6 +67,7 @@ RETURN QUERY
     amount_balance,
     status,
     file_id,
+    accounting_status,
     transaction_date,
     conciliation_date,
     create_date,
@@ -72,8 +75,8 @@ RETURN QUERY
   FROM
     ${schema.acc}.accounting
   WHERE
-    create_date::DATE >= _in_create_date::DATE AND
-    create_date::DATE <= _in_create_date::DATE
+    (COALESCE(_id_mov_ref,0) = 0 OR id_tx = _id_mov_ref) AND
+    (COALESCE(_in_create_date,'') = '' OR (create_date::DATE >= _in_create_date::DATE AND create_date::DATE <= _in_create_date::DATE))
   ORDER BY
     create_date DESC;
 RETURN;
@@ -82,6 +85,6 @@ $function$
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_search_accounting_data_v10(VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_search_accounting_data_v10(VARCHAR, BIGINT);
 
 

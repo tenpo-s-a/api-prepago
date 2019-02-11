@@ -37,6 +37,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_insert_accounting_data_v10
   IN _conciliation_date  VARCHAR,
   IN _status             VARCHAR,
   IN _file_id            BIGINT,
+  IN _accounting_status  VARCHAR,
   OUT _id                BIGINT,
   OUT _error_code        VARCHAR,
   OUT _error_msg         VARCHAR
@@ -95,6 +96,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_insert_accounting_data_v10
     amount_balance,
     status,
     file_id,
+    accounting_status,
     transaction_date,
     conciliation_date,
     create_date,
@@ -118,6 +120,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_prp_insert_accounting_data_v10
      COALESCE(_amount_balance,0),
     _status,
     COALESCE(_file_id,0),
+    _accounting_status,
     to_timestamp(_transaction_date,'yyyy-mm-dd hh24:mi:ss'),
     to_timestamp(_conciliation_date,'yyyy-mm-dd hh24:mi:ss'),
     timezone('utc', now()),
@@ -134,4 +137,4 @@ $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT,VARCHAR,VARCHAR,VARCHAR,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC,NUMERIC, VARCHAR,VARCHAR,VARCHAR,BIGINT);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_prp_insert_accounting_data_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, BIGINT, VARCHAR);
