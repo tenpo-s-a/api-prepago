@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -152,6 +153,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             req.getData().getPrepaidMovementReverse().setEstadoNegocio(businessStatus);
             req.getData().getPrepaidMovementReverse().setEstado(status);
 
+            //actualiza movimiento original en accounting y clearing
+            getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, AccountingStatusType.REVERSED);
+
             log.debug("********** Reversa de retiro realizada exitosamente **********");
 
             // Si estaba abierta, cerrar la transaccion en el CDT
@@ -181,6 +185,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               req.getData().getPrepaidMovementReverse().setEstadoNegocio(businessStatus);
               req.getData().getPrepaidMovementReverse().setEstado(status);
 
+              //actualiza movimiento original en accounting y clearing
+              getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, AccountingStatusType.REVERSED);
+
               // Si estaba abierta, cerrar la transaccion en el CDT
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
               CdtTransaction10 movRefConf = getRoute().getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, originalMovement.getIdTxExterno(), movRef.getCdtTransactionTypeConfirm());
@@ -194,6 +201,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               if(!"0".equals(cdtTxReversa.getNumError())) {
                 log.error("Error al confirmar reversa en CDT");
               }
+              return req;
             } else {
               log.debug("********** Reversa de retiro rechazada **********");
               log.debug(inclusionMovimientosDTO.getDescRetorno());
@@ -231,6 +239,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.CONFIRMED);
           data.getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
           data.getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
+
+          // actualiza movimiento original en accounting y clearing
+          getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, AccountingStatusType.REVERSED);
         }
       } catch (Exception e) {
         e.printStackTrace();
