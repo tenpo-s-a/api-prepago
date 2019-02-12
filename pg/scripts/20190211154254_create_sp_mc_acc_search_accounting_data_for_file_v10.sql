@@ -42,7 +42,8 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_search_accounting_data_for_file_
   OUT _conciliation_date TIMESTAMP without time zone,
   OUT _create_date TIMESTAMP without time zone,
   OUT _update_date TIMESTAMP without time zone,
-  OUT _accounting_status VARCHAR
+  OUT _accounting_status VARCHAR,
+  OUT _accounting_mov VARCHAR
 )
 RETURNS SETOF record
 LANGUAGE plpgsql
@@ -71,7 +72,8 @@ RETURN QUERY
     a.conciliation_date,
     a.create_date,
     a.update_date,
-    a.accounting_status
+    a.accounting_status,
+    a.accounting_mov
   FROM
     ${schema.acc}.accounting a
     LEFT join ${schema.acc}.accounting_files f ON a.file_id = f.id

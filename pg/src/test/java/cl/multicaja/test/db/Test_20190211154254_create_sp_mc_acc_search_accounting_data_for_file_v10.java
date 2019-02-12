@@ -71,6 +71,7 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
       new OutParam("create_date", Types.TIMESTAMP),
       new OutParam("update_date", Types.TIMESTAMP),
       new OutParam("accounting_status", Types.VARCHAR),
+      new OutParam("accounting_mov", Types.VARCHAR)
     };
 
     return dbUtils.execute(SP_NAME, params);
@@ -108,7 +109,8 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
     map.put("conciliation_date", numberUtils.toLong(resp.get("conciliation_date")));
     map.put("create_date", numberUtils.toLong(resp.get("create_status")));
     map.put("update_date", numberUtils.toLong(resp.get("update_status")));
-    map.put("accounting_status", numberUtils.toLong(resp.get("updated_status")));
+    map.put("accounting_status", numberUtils.toLong(resp.get("accounting_status")));
+    map.put("accounting_mov", numberUtils.toLong(resp.get("accounting_mov")));
 
     return map;
   }
