@@ -330,7 +330,7 @@ public final class PrepaidResource10 extends BaseResource {
       if(errorCode == "002"){
 
         //Ok Service Response
-        returnResponse = Response.ok(notificationTecnocom).status(202).build();
+        returnResponse = Response.ok(notifResponse).status(202).build();
         log.info(textLogBase+notifResponse.toString());
 
         //Send Async Mail
