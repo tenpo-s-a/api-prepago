@@ -23,7 +23,7 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
   private static final String SP_NAME = SCHEMA_ACCOUNTING + ".mc_acc_search_accounting_data_for_file_v10";
 
   @BeforeClass
-  //@AfterClass
+  @AfterClass
   public static void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.accounting cascade", SCHEMA_ACCOUNTING));
   }
@@ -109,37 +109,6 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
     map.put("create_date", numberUtils.toLong(resp.get("create_status")));
     map.put("update_date", numberUtils.toLong(resp.get("update_status")));
     map.put("accounting_status", numberUtils.toLong(resp.get("updated_status")));
-
-    return map;
-  }
-
-  private static Map<String, Object> queryByFileId(Map<String, Object> paramsIn) throws SQLException {
-
-    Map<String, Object> resp = buildQuery(paramsIn);
-
-    Map<String, Object> map = new HashMap<>();
-
-    map.put("id", numberUtils.toBigDecimal(resp.get("id")));
-    map.put("id_tx", numberUtils.toBigDecimal(resp.get("id_tx")));
-    map.put("type", String.valueOf(resp.get("type")));
-    map.put("accounting_mov",String.valueOf(resp.get("accounting_mov")));
-    map.put("origin", String.valueOf(resp.get("origin")));
-    map.put("amount", numberUtils.toLong(resp.get("amount")));
-    map.put("currency", numberUtils.toLong(resp.get("currency")));
-    map.put("amount_usd", numberUtils.toLong(resp.get("amount_usd")));
-    map.put("amount_mcar", numberUtils.toLong(resp.get("amount_mcar")));
-    map.put("exchange_rate_dif", numberUtils.toLong(resp.get("exchange_rate_dif")));
-    map.put("fee", numberUtils.toLong(resp.get("fee")));
-    map.put("fee_iva", numberUtils.toLong(resp.get("fee_iva")));
-    map.put("collector_fee", numberUtils.toLong(resp.get("collector_fee")));
-    map.put("collector_fee_iva", numberUtils.toLong(resp.get("collector_fee_iva")));
-    map.put("amount_balance",numberUtils.toLong(resp.get("amount_balance")));
-    map.put("status", String.valueOf(resp.get("status")));
-    map.put("file_id",numberUtils.toBigDecimal(resp.get("file_id")));
-    map.put("transaction_date", numberUtils.toLong(resp.get("transaction_date")));
-    map.put("conciliation_date", numberUtils.toLong(resp.get("conciliation_date")));
-    map.put("create_date", numberUtils.toLong(resp.get("create_date")));
-    map.put("update_date", numberUtils.toLong(resp.get("update_date")));
 
     return map;
   }
