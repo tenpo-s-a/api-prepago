@@ -1,80 +1,44 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.BaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.annotation.Generated;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Generated("org.jsonschema2pojo")
-@JsonPropertyOrder({
-  "id",
-  "sd_currency_code",
-  "sd_value",
-  "il_currency_code",
-  "il_value",
-  "id_currency_code",
-  "id_value",
-  "tipo_tx",
-  "id_mensaje",
-  "merchant_code",
-  "merchant_name",
-  "country_iso_3266_code",
-  "country_description",
-  "place_name",
-  "resolucion_tx",
-  "base64_data"
-})
-
+//@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationTecnocom extends BaseModel {
 
   private static Log log = LogFactory.getLog(NotificationTecnocom.class);
 
-  @JsonProperty("id")
   private Long id;
-  @JsonProperty("sd_currency_code")
-  private Long sd_currency_code;
-  @JsonProperty("sd_value")
-  private String sd_value;
-  @JsonProperty("il_currency_code")
-  private Long il_currency_code;
-  @JsonProperty("il_value")
-  private String il_value;
-  @JsonProperty("id_currency_code")
-  private Long id_currency_code;
-  @JsonProperty("id_value")
-  private String id_value;
-  @JsonProperty("tipo_tx")
-  private Long tipo_tx;
-  @JsonProperty("id_mensaje")
-  private Long id_mensaje;
-  @JsonProperty("merchant_code")
-  private String merchant_code;
-  @JsonProperty("merchant_name")
-  private String merchant_name;
-  @JsonProperty("country_iso_3266_code")
-  private Long country_iso_3266_code;
-  @JsonProperty("country_description")
-  private String country_description;
-  @JsonProperty("place_name")
-  private String place_name;
-  @JsonProperty("resolucion_tx")
-  private Long resolucion_tx;
-  @JsonProperty("base64_data")
-  private String base64_data;
-  @JsonProperty("response_message")
-  private String response_message;
-  @JsonProperty("response_code")
-  private String response_code;
+  private Long sdCurrencyCode;
+  private String sdValue;
+  private Long ilCurrencyCode;
+  private String ilValue;
+  private Long idCurrencyCode;
+  private String idValue;
+  private Long tipoTx;
+  private Long idMensaje;
+  private String merchantCode;
+  private String merchantName;
+  private Long countryIso3266Code;
+  private String countryDescription;
+  private String placeName;
+  private Long resolucionTx;
+  private String base64Data;
+  private String responseMessage;
+  private String responseCode;
 
-  //@JsonProperty("base64_data")
+
+  @JsonProperty("id")
   public Long getId() {
     return id;
   }
@@ -83,140 +47,155 @@ public class NotificationTecnocom extends BaseModel {
     this.id = id;
   }
 
-  public Long getSd_currency_code() {
-    return sd_currency_code;
+  @JsonProperty("sd_currency_code")
+  public Long getSdCurrencyCode() {
+    return sdCurrencyCode;
   }
 
-  public void setSd_currency_code(Long sd_currency_code) {
-    this.sd_currency_code = sd_currency_code;
+  public void setSdCurrencyCode(Long sdCurrencyCode) {
+    this.sdCurrencyCode = sdCurrencyCode;
   }
 
-  public String getSd_value() {
-    return sd_value;
+  @JsonProperty("sd_value")
+  public String getSdValue() {
+    return sdValue;
   }
 
-  public void setSd_value(String sd_value) {
-    this.sd_value = sd_value;
+  public void setSdValue(String sd_value) {
+    this.sdValue = sd_value;
   }
 
-  public Long getIl_currency_code() {
-    return il_currency_code;
+  @JsonProperty("il_currency_code")
+  public Long getIlCurrencyCode() {
+    return ilCurrencyCode;
   }
 
-  public void setIl_currency_code(Long il_currency_code) {
-    this.il_currency_code = il_currency_code;
+  public void setIlCurrencyCode(Long ilCurrencyCode) {
+    this.ilCurrencyCode = ilCurrencyCode;
   }
 
-  public String getIl_value() {
-    return il_value;
+  @JsonProperty("il_value")
+  public String getIlValue() {
+    return ilValue;
   }
 
-  public void setIl_value(String il_value) {
-    this.il_value = il_value;
+  public void setIlValue(String ilValue) {
+    this.ilValue = ilValue;
   }
 
-  public Long getId_currency_code() {
-    return id_currency_code;
+  @JsonProperty("id_currency_code")
+  public Long getIdCurrencyCode() {
+    return idCurrencyCode;
   }
 
-  public void setId_currency_code(Long id_currency_code) {
-    this.id_currency_code = id_currency_code;
+  public void setIdCurrencyCode(Long idCurrencyCode) {
+    this.idCurrencyCode = idCurrencyCode;
   }
 
-  public String getId_value() {
-    return id_value;
+  @JsonProperty("id_value")
+  public String getIdValue() {
+    return idValue;
   }
 
-  public void setId_value(String id_value) {
-    this.id_value = id_value;
+  public void setIdValue(String idValue) {
+    this.idValue = idValue;
   }
 
-  public Long getTipo_tx() {
-    return tipo_tx;
+  @JsonProperty("tipo_tx")
+  public Long getTipoTx() {
+    return tipoTx;
   }
 
-  public void setTipo_tx(Long tipo_tx) {
-    this.tipo_tx = tipo_tx;
+  public void setTipoTx(Long tipoTx) {
+    this.tipoTx = tipoTx;
   }
 
-  public Long getId_mensaje() {
-    return id_mensaje;
+  @JsonProperty("id_mensaje")
+  public Long getIdMensaje() {
+    return idMensaje;
   }
 
-  public void setId_mensaje(Long id_mensaje) {
-    this.id_mensaje = id_mensaje;
+  public void setIdMensaje(Long idMensaje) {
+    this.idMensaje = idMensaje;
   }
 
-  public String getMerchant_code() {
-    return merchant_code;
+  @JsonProperty("merchant_code")
+  public String getMerchantCode() {
+    return merchantCode;
   }
 
-  public void setMerchant_code(String merchant_code) {
-    this.merchant_code = merchant_code;
+  public void setMerchantCode(String merchantCode) {
+    this.merchantCode = merchantCode;
   }
 
-  public String getMerchant_name() {
-    return merchant_name;
+  @JsonProperty("merchant_name")
+  public String getMerchantName() {
+    return merchantName;
   }
 
-  public void setMerchant_name(String merchant_name) {
-    this.merchant_name = merchant_name;
+  public void setMerchantName(String merchantName) {
+    this.merchantName = merchantName;
   }
 
-  public Long getCountry_iso_3266_code() {
-    return country_iso_3266_code;
+  @JsonProperty("country_iso_3266_code")
+  public Long getCountryIso3266Code() {
+    return countryIso3266Code;
   }
 
-  public void setCountry_iso_3266_code(Long country_iso_3266_code) {
-    this.country_iso_3266_code = country_iso_3266_code;
+  public void setCountryIso3266Code(Long countryIso3266Code) {
+    this.countryIso3266Code = countryIso3266Code;
   }
 
-  public String getCountry_description() {
-    return country_description;
+  @JsonProperty("country_description")
+  public String getCountryDescription() {
+    return countryDescription;
   }
 
-  public void setCountry_description(String country_description) {
-    this.country_description = country_description;
+  public void setCountryDescription(String countryDescription) {
+    this.countryDescription = countryDescription;
   }
 
-  public String getPlace_name() {
-    return place_name;
+  @JsonProperty("place_name")
+  public String getPlaceName() {
+    return placeName;
   }
 
-  public void setPlace_name(String place_name) {
-    this.place_name = place_name;
+  public void setPlaceName(String placeName) {
+    this.placeName = placeName;
   }
 
-  public Long getResolucion_tx() {
-    return resolucion_tx;
+  @JsonProperty("resolucion_tx")
+  public Long getResolucionTx() {
+    return resolucionTx;
   }
 
-  public void setResolucion_tx(Long resolucion_tx) {
-    this.resolucion_tx = resolucion_tx;
+  public void setResolucionTx(Long resolucionTx) {
+    this.resolucionTx = resolucionTx;
   }
 
-  public String getBase64_data() {
-    return base64_data;
+  @JsonProperty("base64_data")
+  public String getBase64Data() {
+    return base64Data;
   }
 
-  public void setBase64_data(String base64_data) {
-    this.base64_data = base64_data;
+  public void setBase64Data(String base64Data) {
+    this.base64Data = base64Data;
   }
 
-  public String getResponse_message() {
-    return response_message;
+  public String getResponseMessage() {
+    return responseMessage;
   }
 
-  public void setResponse_message(String response_message) {
-    this.response_message = response_message;
+  public void setResponseMessage(String responseMessage) {
+    this.responseMessage = responseMessage;
   }
 
-  public String getResponse_code() {
-    return response_code;
+  public String getResponseCode() {
+    return responseCode;
   }
 
-  public void setResponse_code(String response_code) {
-    this.response_code = response_code;
+  public void setResponseCode(String responseCode) {
+    this.responseCode = responseCode;
   }
 
   public HashMap<String,Object> checkNull(String [] notNullFields) throws IllegalAccessException {

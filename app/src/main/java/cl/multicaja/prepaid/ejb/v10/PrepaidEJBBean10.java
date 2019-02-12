@@ -2743,43 +2743,47 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // --Body
-    String[] mandatoryFieldsFromHttpBody = {"sd_currency_code",
-      "sd_value",
-      "il_currency_code",
-      "il_value",
-      "id_currency_code",
-      "id_value",
-      "tipo_tx",
-      "id_mensaje",
-      "merchant_code",
-      "merchant_name",
-      "country_iso_3266_code",
-      "country_description",
-      "place_name",
-      "resolucion_tx",
-      "base64_data"};
+
+    String [] mandatoryFieldsFromHttpBody = {
+      NotificationTecnocom.class.getDeclaredField("sdCurrencyCode").getName(),
+      NotificationTecnocom.class.getDeclaredField("sdValue").getName(),
+      NotificationTecnocom.class.getDeclaredField("ilCurrencyCode").getName(),
+      NotificationTecnocom.class.getDeclaredField("ilValue").getName(),
+      NotificationTecnocom.class.getDeclaredField("idCurrencyCode").getName(),
+      NotificationTecnocom.class.getDeclaredField("idValue").getName(),
+      NotificationTecnocom.class.getDeclaredField("tipoTx").getName(),
+      NotificationTecnocom.class.getDeclaredField("idMensaje").getName(),
+      NotificationTecnocom.class.getDeclaredField("merchantCode").getName(),
+      NotificationTecnocom.class.getDeclaredField("merchantName").getName(),
+      NotificationTecnocom.class.getDeclaredField("countryIso3266Code").getName(),
+      NotificationTecnocom.class.getDeclaredField("countryDescription").getName(),
+      NotificationTecnocom.class.getDeclaredField("placeName").getName(),
+      NotificationTecnocom.class.getDeclaredField("resolucionTx").getName(),
+      NotificationTecnocom.class.getDeclaredField("base64Data").getName()
+    };
+
     HashMap<String,Object> fieldsOnNullFromHttpBody = notificationTecnocom.checkNull(mandatoryFieldsFromHttpBody);
 
     Boolean isBase64 = false;
-    isBase64 = this.validateBase64(notificationTecnocom.getBase64_data());
+    isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
 
     //Error conditions
     if(fieldsOnNullFromHttpBody.size() >= 1){
 
-      if(notificationTecnocom.getBase64_data()==null && fieldsOnNullFromHttpBody.size() == 1){
+      if(notificationTecnocom.getBase64Data()==null && fieldsOnNullFromHttpBody.size() == 1){
         responseCode = "101007";
         responseMessage = "Base64 is empty";
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
 
-      if(notificationTecnocom.getBase64_data()!=null && isBase64 == false && fieldsOnNullFromHttpBody.size() >= 1){
+      if(notificationTecnocom.getBase64Data()!=null && isBase64 == false && fieldsOnNullFromHttpBody.size() >= 1){
         responseCode = "101007";
         responseMessage = "Base64 is not valid";
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
 
       if(fieldsOnNullFromHttpBody.size() >= 1 || fieldsOnNullFromHttpHeader.size() >= 1){
@@ -2796,49 +2800,49 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         responseMessage = responseMessage+committedFields;
 
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
     }else {
 
-      if(notificationTecnocom.getBase64_data()!=null && isBase64 == true && isNotNullMandatoryHeadersFields==false){
+      if(notificationTecnocom.getBase64Data()!=null && isBase64 == true && isNotNullMandatoryHeadersFields==false){
         responseCode = "101004";
         responseMessage = responseMessage+" These header fields are null or empty: "+fieldsOnNullFromHttpHeader.keySet();
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
 
-      if(notificationTecnocom.getBase64_data()!=null && isBase64 == false
+      if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
         && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
       ){
         responseCode = "101007";
         responseMessage = "Base64 is not valid";
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
 
-      /*if(notificationTecnocom.getBase64_data()!=null && isBase64 == false
+      /*if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
         && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == false
       ){
         responseCode = "101007";
         responseMessage = "Base64 is not valid--4";
-        //responseMessage = notificationTecnocom.getResponse_message();
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.error(textLogBase+notificationTecnocom.getResponse_code()+" "+notificationTecnocom.getResponse_message());
+        //responseMessage = notificationTecnocom.getResponseMessage();
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.error(textLogBase+notificationTecnocom.getResponseCode()+" "+notificationTecnocom.getResponseMessage());
       }*/
 
-      if(notificationTecnocom.getBase64_data()!=null && isBase64 == true
+      if(notificationTecnocom.getBase64Data()!=null && isBase64 == true
         && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
       ){
         responseCode = "002";
         responseMessage = "Accepted";
-        notificationTecnocom.setResponse_code(responseCode);
-        notificationTecnocom.setResponse_message(responseMessage);
-        log.info(textLogBase+ notificationTecnocom.getResponse_code()+" "+ notificationTecnocom.getResponse_message());
+        notificationTecnocom.setResponseCode(responseCode);
+        notificationTecnocom.setResponseMessage(responseMessage);
+        log.info(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
       }
     }
     

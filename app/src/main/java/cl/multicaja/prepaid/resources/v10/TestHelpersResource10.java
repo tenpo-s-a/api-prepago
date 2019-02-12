@@ -1319,9 +1319,12 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @POST
   @Path("/processor/notification")
-  public Response callNotificationTecnocom(Map<String, Object> body,@Context HttpHeaders headers) throws Exception {
-
+  public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
     Response returnResponse = null;
+
+    //System.out.println("JSON_IN "+body);
+
+
     NotificationTecnocom notificationTecnocom = null;
     String textLogBase = "TestHelperResource-callNotification: ";
     try{
@@ -1354,15 +1357,19 @@ public final class TestHelpersResource10 extends BaseResource {
       //Test Body
       ObjectMapper mapper = new ObjectMapper();
 
+      //NotificationTecnocom notificationTecnocom1 = mapper.readValue(body.toString(),NotificationTecnocom.class);
+      //System.out.println("TECNOCOM CLASS: "+notificationTecnocom1);
+
       if(body != null){
-        String json = new ObjectMapper().writeValueAsString(body);
+        //String json = new ObjectMapper().writeValueAsString(body);
+        String json = body.toString();
         notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(
           mapHeaders,mapper.readValue(json, NotificationTecnocom.class));
 
-        errorCodeOnBody = notificationTecnocom.getResponse_code() == null ?
-          "001": notificationTecnocom.getResponse_code();
-        errorMessageOnBody = notificationTecnocom.getResponse_message() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getResponse_message();
+        errorCodeOnBody = notificationTecnocom.getResponseCode() == null ?
+          "001": notificationTecnocom.getResponseCode();
+        errorMessageOnBody = notificationTecnocom.getResponseMessage() == null ?
+          "Not Error, but not Accepted": notificationTecnocom.getResponseMessage();
       }else{
         errorCodeOnBody = "101004";
         errorMessageOnBody = "Empty Body, must to add body params";
@@ -1408,7 +1415,7 @@ public final class TestHelpersResource10 extends BaseResource {
         emailBody.setTemplateData(templateData);
         emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
         emailBody.setAddress("notification_tecnocom@multicaja.cl");
-        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
+        //mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
 
       }
 

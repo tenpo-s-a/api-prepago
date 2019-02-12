@@ -21,18 +21,6 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     return httpResponse;
   }
 
-  /*@Test
-  public void testCallNotification(){
-    HttpResponse httpResponse = callNotification();
-    Assert.assertEquals("Notificación exitosa pero proceso indiferente",202, httpResponse.getStatus());
-  }
-
-  @Test
-  public void testBadRequest402(){
-    HttpResponse httpResponse = callNotification();
-    Assert.assertEquals("Notificatión con Bad Request",402,httpResponse.getStatus());
-  }*/
-
   @Test
   public void testCallNotificationAllParamsWithSuccessProcess() {
 

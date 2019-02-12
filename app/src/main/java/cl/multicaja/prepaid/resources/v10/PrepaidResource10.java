@@ -291,10 +291,10 @@ public final class PrepaidResource10 extends BaseResource {
         notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(
           mapHeaders,mapper.readValue(json, NotificationTecnocom.class));
 
-        errorCodeOnBody = notificationTecnocom.getResponse_code() == null ?
-          "001": notificationTecnocom.getResponse_code();
-        errorMessageOnBody = notificationTecnocom.getResponse_message() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getResponse_message();
+        errorCodeOnBody = notificationTecnocom.getResponseCode() == null ?
+          "001": notificationTecnocom.getResponseCode();
+        errorMessageOnBody = notificationTecnocom.getResponseMessage() == null ?
+          "Not Error, but not Accepted": notificationTecnocom.getResponseMessage();
       }else{
         errorCodeOnBody = "101004";
         errorMessageOnBody = "Empty Body, must to add body params";
