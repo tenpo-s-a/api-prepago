@@ -5,7 +5,9 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -14,6 +16,14 @@ import java.util.List;
 
 public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBaseUnitAsync {
 
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
+  }
 
   @Test
   public void processClearingResolution_BankStatus_Rejected() throws Exception {
@@ -49,10 +59,10 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
 
     ClearingData10 clearingData10 = new ClearingData10();
-    clearingData10.setId(getUniqueLong());
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.REJECTED); // Banco rechaza deposito
     clearingData10.setUserBankAccount(userAccount);
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Banco rechaza retiro
     getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
@@ -129,10 +139,10 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
 
     ClearingData10 clearingData10 = new ClearingData10();
-    clearingData10.setId(getUniqueLong());
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.REJECTED_FORMAT); // MC rechaza archivo
     clearingData10.setUserBankAccount(userAccount);
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Rechazo formato
     getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);

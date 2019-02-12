@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.async;
 
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
@@ -7,18 +8,30 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * @autor abarazarte
  */
 
 public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
+
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
+  }
 
   @Test
   public void reverseRetryCount4() throws Exception {
@@ -31,7 +44,6 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
-
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -99,7 +111,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   }
 
   @Test
-  public void testPendingTopupReverseOk() throws Exception {
+  public void testPendingTopupReverseOk_pos() throws Exception {
 
     User user = registerUser();
 
@@ -110,17 +122,19 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(getRandomString(15));
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    System.out.println(prepaidMovement);
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
@@ -147,11 +161,112 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
 
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
   }
 
   @Test
-  public void testPendingTopupReverseOkMovementTimeOutResponseError1() throws Exception {
+  public void testPendingTopupReverseOk_web() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
+
+    PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
+
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+
+    //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
+    Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
+    ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+    Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+
+    System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
+
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+    Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+    Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+    PrepaidMovement10 prepaidMovementReverseResp = remoteTopup.getData().getPrepaidMovementReverse();
+
+    Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
+    Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+    Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.CARGA_WEB, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+  }
+
+  @Test
+  public void testPendingTopupReverseOkMovementTimeOutResponseError1_pos() throws Exception {
 
     User user = registerUser();
 
@@ -166,6 +281,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(getRandomString(15));
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
@@ -176,6 +292,9 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
@@ -221,10 +340,36 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
     }
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
   }
 
   @Test
-  public void testPendingTopupReverseOkMovementTimeOutResponseError2() throws Exception {
+  public void testPendingTopupReverseOkMovementTimeOutResponseError1_web() throws Exception {
 
     User user = registerUser();
 
@@ -239,6 +384,110 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+
+    PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
+
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    // Primera vez
+    {
+      //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
+      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
+
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+      Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+      PrepaidMovement10 prepaidMovementReverseResp = remoteTopup.getData().getPrepaidMovementReverse();
+      Thread.sleep(2000);
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
+      Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PENDING, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.IN_PROCESS, prepaidMovementReverseResp.getEstadoNegocio());
+    }
+    // Segunda vez
+    {
+      //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
+      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertEquals("Cantidad de intentos: ",2,remoteTopup.getRetryCount());
+      System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
+
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+      Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+      PrepaidMovement10 prepaidMovementReverseResp = remoteTopup.getData().getPrepaidMovementReverse();
+      Thread.sleep(2000);
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
+      Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
+    }
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_WEB, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+  }
+
+  @Test
+  public void testPendingTopupReverseOkMovementTimeOutResponseError2_pos() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(getRandomString(15));
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
@@ -251,6 +500,9 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
+
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
     {
@@ -295,6 +547,157 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
       Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
     }
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+  }
+
+  @Test
+  public void testPendingTopupReverseOkMovementTimeOutResponseError2_web() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
+    prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    prepaidMovement = createPrepaidMovement10(prepaidMovement);
+    inclusionMovimientosTecnocom(prepaidCard,prepaidMovement);
+
+    PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
+    prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(prepaidMovement);
+
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    // Primera vez
+    {
+      //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
+      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
+
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+      Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+      PrepaidMovement10 prepaidMovementReverseResp = remoteTopup.getData().getPrepaidMovementReverse();
+      Thread.sleep(2000);
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
+      Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PENDING, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.IN_PROCESS, prepaidMovementReverseResp.getEstadoNegocio());
+    }
+    // Segunda vez
+    {
+      //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
+      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertEquals("Cantidad de intentos: ",2,remoteTopup.getRetryCount());
+      System.out.println("Steps: " + remoteTopup.getProcessorMetadata());
+
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+      Assert.assertNotNull("Deberia tener una PrepaidCard", remoteTopup.getData().getPrepaidCard10());
+
+      PrepaidMovement10 prepaidMovementReverseResp = remoteTopup.getData().getPrepaidMovementReverse();
+      Thread.sleep(2000);
+      Assert.assertNotNull("Deberia existir un prepaidMovement", prepaidMovementReverseResp);
+      Assert.assertEquals("Deberia contener una codent", prepaidMovement.getCodent(), prepaidMovementReverseResp.getCodent());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementReverseResp.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado exitosamente", BusinessStatusType.CONFIRMED, prepaidMovementReverseResp.getEstadoNegocio());
+    }
+
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = prepaidMovement.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_WEB, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
+    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+  }
+
+  private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement, AccountingStatusType clearingStatus) throws Exception {
+    PrepaidAccountingMovement pam = new PrepaidAccountingMovement();
+    pam.setPrepaidMovement10(prepaidMovement);
+    pam.setReconciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toInstant()));
+
+    AccountingData10 accounting = getPrepaidAccountingEJBBean10().buildAccounting10(pam, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+
+    accounting = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting);
+
+    // Insertar en clearing
+    ClearingData10 clearing10 = new ClearingData10();
+    clearing10.setStatus(clearingStatus);
+    clearing10.setUserBankAccount(null);
+    clearing10.setAccountingId(accounting.getId());
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearing10);
+  }
+
+  private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement) throws Exception {
+    addAccountingAndClearing(prepaidMovement, AccountingStatusType.INITIAL);
   }
 
 }
