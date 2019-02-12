@@ -955,4 +955,94 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return;
   }
 
+  private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+  /**
+   * Busca los movimientos de accounting segun estado y rango de fechas. Las fechas ya deben venir en UTC.
+   * @param headers
+   * @param from fecha desde en UTC
+   * @param to fecha hasta en UTC
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  public List<AccountingData10> getAccountingDataForFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to, AccountingStatusType status) throws Exception {
+
+    if(from == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "from"));
+    }
+
+    if(to == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
+    }
+
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    String f = from.format(formatter);
+    String t = to.format(formatter);
+
+    Object[] params = {
+      f == null ? new NullParam(Types.VARCHAR) : f,
+      t == null ? new NullParam(Types.VARCHAR) : t,
+      status == null ? new NullParam(Types.VARCHAR) : status.getValue()
+    };
+    log.info(params);
+    RowMapper rm = (Map<String, Object> row) -> {
+      AccountingData10 data = new AccountingData10();
+
+      data.setId(getNumberUtils().toLong(row.get("_id")));
+      data.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
+      data.setType(AccountingTxType.fromValue(String.valueOf(row.get("_type"))));
+      data.setOrigin(AccountingOriginType.fromValue(String.valueOf(row.get("_origin"))));
+      data.setAccountingMovementType(AccountingMovementType.fromValue(String.valueOf(row.get("_accounting_mov"))));
+
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount")));
+      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmount(amount);
+
+      NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+      amountUsd.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
+      amountUsd.setCurrencyCode(CodigoMoneda.USA_USD);
+      data.setAmountUsd(amountUsd);
+
+      NewAmountAndCurrency10 amountMc = new NewAmountAndCurrency10();
+      amountMc.setValue(getNumberUtils().toBigDecimal(row.get("_amount_mcar")));
+      amountMc.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmountMastercard(amountMc);
+
+      data.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
+      data.setFee(getNumberUtils().toBigDecimal(row.get("_fee")));
+      data.setFeeIva(getNumberUtils().toBigDecimal(row.get("_fee_iva")));
+      data.setCollectorFee(getNumberUtils().toBigDecimal(row.get("_collector_fee")));
+      data.setCollectorFeeIva(getNumberUtils().toBigDecimal(row.get("_collector_fee_iva")));
+
+      NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+      amountBalance.setValue(getNumberUtils().toBigDecimal(row.get("_amount_balance")));
+      amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmountBalance(amountBalance);
+
+      data.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      data.setFileId(getNumberUtils().toLong(row.get("file_id")));
+      data.setTransactionDate((Timestamp) row.get("_transaction_date"));
+      data.setConciliationDate((Timestamp) row.get("_conciliation_date"));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_create_date"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_update_date"));
+      data.setTimestamps(timestamps);
+
+      data.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_accounting_status"))));
+
+      return data;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_accounting_data_for_file_v10", rm, params);
+    log.info("Respuesta Busca Movimiento: "+ resp);
+
+    List<AccountingData10> result = (List<AccountingData10>)resp.get("result");
+    return result != null ? result : Collections.EMPTY_LIST;
+  }
+
 }
