@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
+import cl.multicaja.prepaid.model.v10.NotificationTecnocom;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -15,8 +16,8 @@ import java.util.*;
 public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   
 
-  private HttpResponse callNotification(JsonObject body,HttpHeader[] headers) {
-    HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid_testhelpers/processor/notification"), body.toString(),headers);
+  private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers) {
+    HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid_testhelpers/processor/notification"), toJson(notificationTecnocom),headers);
     System.out.println("RESP HTTP: " + httpResponse);
     return httpResponse;
   }
@@ -36,7 +37,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     };
 
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
-    JsonObject jsonBody = Json.createObjectBuilder().
+    /*JsonObject jsonBody = Json.createObjectBuilder().
       add("sd_currency_code",152).
       add("sd_value","1000.00").
       add("il_currency_code",152).
@@ -51,7 +52,15 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       add("country_description","Republica de Chile").
       add("place_name","Santiago").
       add("resolucion_tx",100).
-      add("base64_data",base64String).build();
+      add("base64_data",base64String).build();*/
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSdCurrencyCode(new Long(152));
+    notificationTecnocom.setSdValue("1000.00");
+    notificationTecnocom.setIlCurrencyCode(new Long(152));
+    notificationTecnocom.setIlValue("1000.00");
+    notificationTecnocom.setIdCurrencyCode(new Long(152));
+    notificationTecnocom.setIdValue("1000.00");
+    notificationTecnocom.setTipoTx(new Long(100));
 
     HttpResponse httpResponse = callNotification(jsonBody,headers);
 

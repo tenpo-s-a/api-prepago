@@ -1319,13 +1319,14 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @POST
   @Path("/processor/notification")
-  public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
+  //public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
+  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
     Response returnResponse = null;
 
     //System.out.println("JSON_IN "+body);
 
 
-    NotificationTecnocom notificationTecnocom = null;
+    //NotificationTecnocom notificationTecnocom = null;
     String textLogBase = "TestHelperResource-callNotification: ";
     try{
 
@@ -1360,11 +1361,11 @@ public final class TestHelpersResource10 extends BaseResource {
       //NotificationTecnocom notificationTecnocom1 = mapper.readValue(body.toString(),NotificationTecnocom.class);
       //System.out.println("TECNOCOM CLASS: "+notificationTecnocom1);
 
-      if(body != null){
+      if(notificationTecnocom != null){
         //String json = new ObjectMapper().writeValueAsString(body);
-        String json = body.toString();
+        //String json = body.toString();
         notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(
-          mapHeaders,mapper.readValue(json, NotificationTecnocom.class));
+          mapHeaders,notificationTecnocom);
 
         errorCodeOnBody = notificationTecnocom.getResponseCode() == null ?
           "001": notificationTecnocom.getResponseCode();
