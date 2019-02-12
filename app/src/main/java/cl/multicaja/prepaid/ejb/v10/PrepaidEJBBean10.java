@@ -42,6 +42,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -2683,14 +2685,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private Boolean validateBase64(String base64String){
 
-    Boolean boolResponse = false;
+    Boolean boolResponse;
 
-    Base64.Decoder decoder = Base64.getDecoder();
-    if(base64String != null && base64String.length()!=0 && base64String.isEmpty() == false) {
-      try {
-        decoder.decode(base64String);
+    String line = base64String;
+    String pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
+
+    if(base64String != null && base64String.length()!=0) {
+      Pattern r = Pattern.compile(pattern);
+      Matcher m = r.matcher(line);
+      if (m.find( )) {
         boolResponse = true;
-      } catch (IllegalArgumentException iae) {
+      }else {
         boolResponse = false;
       }
     }else{
