@@ -186,7 +186,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(fileId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
     }
-    return searchFullClearingData(headers,null,fileId,null);
+    return searchFullClearingData(headers,null, fileId,null);
   }
 
   private List<ClearingData10> searchFullClearingData(Map<String, Object> headers, LocalDateTime to, String fileId, AccountingStatusType status) throws Exception{
@@ -420,7 +420,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     String fileId = fileName.replace("TRX_PREPAGO_","").replace(".CSV","");
     List<ClearingData10> clearingData10s = processClearingResponseDataFile(inputStream);
     log.info(String.format("Registro procesados: %d", clearingData10s.size()));
-    processClearingBankResponse(clearingData10s,fileName,fileId);
+    processClearingBankResponse(clearingData10s, fileName, fileId);
     log.info("processClearingResponse OUT");
   }
 
@@ -438,11 +438,11 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         while ((record = csvReader.readNext()) != null) {
           log.debug(Arrays.toString(record));
           ClearingData10 clearingData = new ClearingData10();
-          clearingData.setId(numberUtil.toLong(record[0]));
+          clearingData.setId(getNumberUtils().toLong(record[0]));
           clearingData.setType(AccountingTxType.fromValue(String.valueOf(record[4])));
-          clearingData.setAmount(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[8])));
-          clearingData.setAmountMastercard(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[9])));
-          clearingData.setAmountBalance(new NewAmountAndCurrency10(numberUtil.toBigDecimal(record[17])));
+          clearingData.setAmount(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(record[8])));
+          clearingData.setAmountMastercard(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(record[9])));
+          clearingData.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
 
           Rut accountRut = new Rut();
@@ -471,15 +471,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
       log.info("OUT");
       return clearingData10s;
-
   }
 
-  private void processClearingBankResponse(List<ClearingData10> clearingDataInFile,String fileName,String fileId) throws Exception {
-    //TODO (poca prioridad):  Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
-    final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null,fileId);
+  private void processClearingBankResponse(List<ClearingData10> clearingDataInFile, String fileName, String fileId) throws Exception {
+    //TODO (poca prioridad): Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
+    final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null, fileId);
+
     //Verifica lo que debe venir en el archivo.
     for (ClearingData10 data : clearingDataInTable) {
-      if (AccountingTxType.RETIRO_WEB.equals(data.getType())) {
+      ReconciliedMovement reconciliedMovement = getPrepaidMovementEJBBean10().getReconciliedMovementById(data.getIdTransaction());
+      if (AccountingTxType.RETIRO_WEB.equals(data.getType()) && AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement == null) {
         // Busca todos los retiros web que tienen que venir en el archivo
         ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
         //Existe
@@ -498,13 +499,18 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
             updateClearingData(null, data.getId(),null, result.getStatus());
           }
-          else {//Si  viene en el archivo, pero los montos no concuerdan, marcar.
+          else { // Si  viene en el archivo, pero los montos no concuerdan, marcar.
             updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
           }
         }
         else { // No viene en el archivo, marcar
           updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
         }
+      } else {
+        // Era un movimiento que no era retiro web,
+        // O el movimiento ya esta procesado en clearing (estado distinto de pending)
+        // O el movimiento ya estaba conciliado
+        this.createClearingResearch(fileName, data.getId());
       }
     }
     //Verifica que no venga algo extra en el archivo.
@@ -515,24 +521,26 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Viene en el archivo y no existe en nuestra tabla
         if(result == null) {
           //Agregar a Investigar
-          this.createClearingResearch(fileName,data.getId());
+          this.createClearingResearch(fileName, data.getId());
         }
+      } else {
+        // Llego en el archivo un movimiento que no es un retiro web, mandar a investigar
+        this.createClearingResearch(fileName, data.getId());
       }
     }
   }
 
   // Agrega movimiento a investigar
-  public void createClearingResearch(String fileName,Long clearingId) throws Exception {
-    String idToResearch = String.format("ClearingId=%d",clearingId);
-    getPrepaidMovementEJBBean10().createMovementResearch(null,idToResearch, ReconciliationOriginType.CLEARING,fileName);
+  public void createClearingResearch(String fileName, Long clearingId) throws Exception {
+    String idToResearch = String.format("ClearingId=%d", clearingId);
+    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING, fileName);
   }
-
 
   @Override
   public List<ClearingData10> getWebWithdrawForReconciliation(Map<String, Object> headers) throws Exception {
 
     RowMapper rm = getClearingDataRowMapper();
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_acc_busca_retiros_web_conciliar_v10",getSchemaAccounting()), rm);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_acc_busca_retiros_web_conciliar_v10", getSchemaAccounting()), rm);
 
     List list = (List)resp.get("result");
 

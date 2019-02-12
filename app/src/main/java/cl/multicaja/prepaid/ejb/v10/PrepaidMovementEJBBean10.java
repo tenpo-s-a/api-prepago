@@ -23,6 +23,7 @@ import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -34,8 +35,10 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -1092,24 +1095,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<ClearingData10> clearingData10s = getPrepaidClearingEJB10().getWebWithdrawForReconciliation(null);
 
     for(ClearingData10 clearingData10 : clearingData10s) {
-      PrepaidMovement10 prepaidMovement10 = this.getPrepaidMovementById(clearingData10.getIdTransaction());
-      System.out.println("Procesando: " + prepaidMovement10);
       try {
-        this.processClearingResolution(prepaidMovement10, clearingData10);
+        this.processClearingResolution(clearingData10);
       } catch (Exception e) {
-        log.error("Error al procesar la resolucion del movimiento [" + (prepaidMovement10 != null ? prepaidMovement10.getId() : null) + "]");
+        log.error("Error al procesar la resolucion del movimiento [" + (clearingData10 != null ? clearingData10.getIdTransaction() : null) + "]");
       }
     }
   }
 
-  public void processClearingResolution(PrepaidMovement10 prepaidMovement10, ClearingData10 clearingData10) throws Exception {
-    if(prepaidMovement10 == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovement10"));
-    }
-
+  public void processClearingResolution(ClearingData10 clearingData10) throws Exception {
     if(clearingData10 == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "clearingData10"));
     }
+
+    PrepaidMovement10 prepaidMovement10 = this.getPrepaidMovementById(clearingData10.getIdTransaction());
 
     // Solo se procesan los retiros web
     if(!PrepaidMovementType.WITHDRAW.equals(prepaidMovement10.getTipoMovimiento()) ||
@@ -1119,8 +1118,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
     if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
-      String idToResearch = String.format("idClearing=%d", clearingData10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+      String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1129,8 +1128,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
     if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
-      String idToResearch = String.format("idClearing=%d", clearingData10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+      String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1140,7 +1139,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1210,8 +1209,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             break;
           default: // Nunca deberia llegar aqui
             {
-              String idToResearch = String.format("idClearing=%d", clearingData10.getId());
-              createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+              String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+              createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1222,7 +1221,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       case NOT_RECONCILED: // Tecnocom NO conciliado -> todos los casos mandan a INVESTIGAR
         {
           String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-          createMovementResearch(null, idToResearch, ReconciliationOriginType.RESOLUTION, "");
+          createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
 
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1231,6 +1230,32 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       default:
         break;
     }
+  }
+
+  @Override
+  public ReconciliedMovement getReconciliedMovementById(Long idMov) throws BaseException, SQLException {
+    log.info("[getReonciliedMovementById In Id] : " + idMov);
+    if(idMov == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
+    }
+    log.info(String.format("ID IN : %s", idMov));
+    RowMapper rm = getReconciliedMovementRowMapper();
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_acc_busca_retiros_web_conciliar_v10", getSchemaAccounting()), rm);
+    List list = (List)resp.get("result");
+    log.info("getReconciliedMovementById: " + list);
+    return list != null && !list.isEmpty() ? (ReconciliedMovement) list.get(0) : null;
+  }
+
+  private RowMapper getReconciliedMovementRowMapper() {
+    return (Map<String, Object> row) -> {
+      ReconciliedMovement reconciliedMovement = new ReconciliedMovement();
+      reconciliedMovement.setId(getNumberUtils().toLong(row.get("_id")));
+      reconciliedMovement.setIdMovRef(getNumberUtils().toLong(row.get("_id_mov_ref")));
+      reconciliedMovement.setActionType(ReconciliationActionType.valueOfEnum(String.valueOf(row.get("_status"))));
+      reconciliedMovement.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(row.get("_status"))));
+      reconciliedMovement.setCreatedAt((Timestamp)row.get("_fecha_registro"));
+      return reconciliedMovement;
+    };
   }
 
 }

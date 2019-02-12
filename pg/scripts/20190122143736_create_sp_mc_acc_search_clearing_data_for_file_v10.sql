@@ -73,11 +73,13 @@ RETURN QUERY
     a.conciliation_date,
     c.created,
     c.updated,
-    c.user_account_id
+    c.user_account_id,
+    pmc.id_mov_ref
   FROM
     ${schema.acc}.clearing c
     INNER JOIN ${schema.acc}.accounting a ON a.id = c.accounting_id
     LEFT join ${schema.acc}.accounting_files f ON c.file_id = f.id
+    LEFT JOIN ${schema}.prp_movimiento_conciliado pmc on a.id_tx = pmc.id_mov_ref
   WHERE
     (COALESCE(_in_to,'') = '' OR c.created <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS')) AND
     (COALESCE(_in_status,'') = '' OR c.status = _in_status) AND

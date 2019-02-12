@@ -52,9 +52,10 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.OK);
     clearingData10.setUserBankAccount(userAccount);
+    clearingData10.setIdTransaction(prepaidMovement10.getId());
 
     // Todo OK
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
+    getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
 
     // Revisar que haya confirmado en el cdt
     CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
@@ -76,30 +77,40 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
   }
 
   @Test(expected = BadRequestException.class)
-  public void processClearingResolution_badRequest_allNull() throws Exception {
-    getPrepaidMovementEJBBean10().processClearingResolution(null, null);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void processClearingResolution_badRequest_movementNull() throws Exception {
-    ClearingData10 clearingData10 = new ClearingData10();
-    getPrepaidMovementEJBBean10().processClearingResolution(null, clearingData10);
-  }
-
-  @Test(expected = BadRequestException.class)
   public void processClearingResolution_badRequest_clearingNull() throws Exception {
-    PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, null);
+    getPrepaidMovementEJBBean10().processClearingResolution(null);
   }
 
   @Test(expected = ValidationException.class)
   public void processClearingResolution_ValidationException_notWithdraw() throws Exception {
-    PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
-    prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
+    User user = registerUser();
+    UserAccount userAccount = createBankAccount(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    prepaidCard = createPrepaidCard10(prepaidCard);
+
+    PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+    prepaidWithdraw.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
+    prepaidWithdraw.setBankAccountId(userAccount.getId());
+    prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
+    prepaidWithdraw.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+    prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+    prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+    prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    prepaidMovement10.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     ClearingData10 clearingData10 = new ClearingData10();
+    clearingData10.setIdTransaction(prepaidMovement10.getId());
 
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
+    getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
   }
 
   @Test(expected = ValidationException.class)
@@ -110,7 +121,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
 
     ClearingData10 clearingData10 = new ClearingData10();
 
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
+    getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
   }
 
   @Test
@@ -209,7 +220,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
   }
 
   @Test
@@ -261,11 +272,11 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idClearing=%d", clearingData10.getId()));
+    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
   }
 
   @Test
@@ -317,11 +328,11 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado necesita verificacion", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idClearing=%d", clearingData10.getId()));
+    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
   }
 
   private List<ReconciliedResearch> getResearchMovement(String movId) {

@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.prepaid.model.v10.ReconciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -10,6 +11,7 @@ import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -225,6 +227,14 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception;
+
+  /**
+   * Busca un movimiento conciliado en la tabla de conciliados
+   *
+   * @param idMov unique movement id
+   * @return
+   */
+  ReconciliedMovement getReconciliedMovementById(Long idMov) throws BaseException, SQLException;
 
   /**
    *

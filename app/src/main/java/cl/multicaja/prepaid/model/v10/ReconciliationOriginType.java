@@ -6,7 +6,7 @@ public enum ReconciliationOriginType {
   TECNOCOM,
   MOTOR,
   CLEARING,
-  RESOLUTION;
+  CLEARING_RESOLUTION;
 
   public static ReconciliationOriginType valueOfEnum(String name) {
     try {

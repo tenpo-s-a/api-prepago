@@ -49,7 +49,6 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     return clearing10;
   }
 
-
   @Test
   public void testProcessFileAllOK() throws Exception {
 
