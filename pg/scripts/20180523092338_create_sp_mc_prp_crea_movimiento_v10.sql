@@ -55,15 +55,26 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
   _linref               NUMERIC,
   _numbencta            NUMERIC,
   _numplastico          NUMERIC,
+  _create_date          TIMESTAMP,
   OUT _r_id             NUMERIC,
   OUT _error_code       VARCHAR,
   OUT _error_msg        VARCHAR
 )AS $$
   DECLARE
-
+    create_date TIMESTAMP;
+    update_date TIMESTAMP;
   BEGIN
     _error_code := '0';
     _error_msg := '';
+
+    IF _create_date IS NULL THEN
+      create_date:=  timezone('utc', now());
+      update_date:=  timezone('utc', now());
+    ELSE
+      create_date := _create_date;
+      update_date := _create_date;
+    END IF;
+
 
     INSERT INTO
         ${schema}.prp_movimiento(
@@ -119,8 +130,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_v10(
           _estado_con_switch,
           _estado_con_tecnocom,
           _origen_movimiento,
-          timezone('utc', now()),
-          timezone('utc', now()),
+           create_date,
+           update_date,
           _codent,
           _centalta,
           _cuenta,
@@ -176,4 +187,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_v10(NUMERIC, NUMERIC,VARCHAR, VARCHAR, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_v10(NUMERIC, NUMERIC,VARCHAR, VARCHAR, NUMERIC, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC,TIMESTAMP);
