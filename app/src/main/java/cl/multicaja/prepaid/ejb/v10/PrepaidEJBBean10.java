@@ -2705,150 +2705,83 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return boolResponse;
   }
 
-  public NotificationTecnocom setNotificationCallback(Map<String, Object>headers, NotificationTecnocom notificationTecnocom) throws Exception {
+  public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
 
-    //Initial states
-    String responseCode = "000";
-    String responseMessage = "";
-    String textLogBase = "NotificationTecnocom-setNotificationCallback: ";
+    String committedFields = null;
+    BadRequestException badRequestException = null;
 
-    //Logic
-
-    //-- Header
-    String[] mandatoryFieldsFromHttpHeader = {
-      "entidad",
-      "centro_alta",
-      "cuenta",
-      "pan"
-    };
-
-    Boolean isNotNullMandatoryHeadersFields = null;
-
-    HashMap <String,Object> fieldsOnNullFromHttpHeader = new HashMap<String,Object>();
-    if(headers.size()!=0) {
-      for (String field : mandatoryFieldsFromHttpHeader) {
-        isNotNullMandatoryHeadersFields = false;
-        if (headers.containsKey(field)) {
-          isNotNullMandatoryHeadersFields = true;
-        }
-        if(isNotNullMandatoryHeadersFields == false){
-          fieldsOnNullFromHttpHeader.put(field, null);
-        }
-      }
-    }else{
-      for (String field : mandatoryFieldsFromHttpHeader) {
-        fieldsOnNullFromHttpHeader.put(field, null);
-      }
-      isNotNullMandatoryHeadersFields = false;
+    if(notificationTecnocom.getBase64Data() == null){
+      badRequestException =  new BadRequestException();
+      badRequestException.setData(new KeyValue("value", "base64Data"));
+      badRequestException.setCode(PARAMETRO_FALTANTE_$VALUE.getValue());
+      badRequestException.setStatus(400);
+      throw badRequestException;
     }
 
-    // --Body
+    Boolean isBase64;
+    if(notificationTecnocom.getBase64Data() != null){
+      isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
 
-    String [] mandatoryFieldsFromHttpBody = {
-      NotificationTecnocom.class.getDeclaredField("sdCurrencyCode").getName(),
-      NotificationTecnocom.class.getDeclaredField("sdValue").getName(),
-      NotificationTecnocom.class.getDeclaredField("ilCurrencyCode").getName(),
-      NotificationTecnocom.class.getDeclaredField("ilValue").getName(),
-      NotificationTecnocom.class.getDeclaredField("idCurrencyCode").getName(),
-      NotificationTecnocom.class.getDeclaredField("idValue").getName(),
-      NotificationTecnocom.class.getDeclaredField("tipoTx").getName(),
-      NotificationTecnocom.class.getDeclaredField("idMensaje").getName(),
-      NotificationTecnocom.class.getDeclaredField("merchantCode").getName(),
-      NotificationTecnocom.class.getDeclaredField("merchantName").getName(),
-      NotificationTecnocom.class.getDeclaredField("countryIso3266Code").getName(),
-      NotificationTecnocom.class.getDeclaredField("countryDescription").getName(),
-      NotificationTecnocom.class.getDeclaredField("placeName").getName(),
-      NotificationTecnocom.class.getDeclaredField("resolucionTx").getName(),
-      NotificationTecnocom.class.getDeclaredField("base64Data").getName()
-    };
-
-    HashMap<String,Object> fieldsOnNullFromHttpBody = notificationTecnocom.checkNull(mandatoryFieldsFromHttpBody);
-
-    Boolean isBase64 = false;
-    isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
-
-    //Error conditions
-    if(fieldsOnNullFromHttpBody.size() >= 1){
-
-      if(notificationTecnocom.getBase64Data()==null && fieldsOnNullFromHttpBody.size() == 1){
-        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();
-        responseMessage = "Base64 is empty";
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
+      if(isBase64 == false){
+        badRequestException =  new BadRequestException();
+        badRequestException.setData(new KeyValue("value", "base64Data"));
+        badRequestException.setCode(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue());
+        badRequestException.setStatus(422);
+        throw badRequestException;
       }
 
-      if(notificationTecnocom.getBase64Data()!=null && isBase64 == false && fieldsOnNullFromHttpBody.size() >= 1){
-        responseCode = PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString();
-        responseMessage = "Base64 is not valid";
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
-      }
+      NotificationTecnocomHeader notificationTecnocomHeader = new NotificationTecnocomHeader();
+      NotificationTecnocomBody notificationTecnocomBody = new NotificationTecnocomBody();
 
-      if(fieldsOnNullFromHttpBody.size() >= 1 || fieldsOnNullFromHttpHeader.size() >= 1){
-        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
+      String[] mandatoryFieldsHeader = {
+        NotificationTecnocomHeader.class.getDeclaredField("centroAlta").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("cuenta").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("entidad").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("pan").getName()
+      };
+      HashMap<String,Object> fieldsOnNullFromHeader = notificationTecnocomHeader.checkNull(mandatoryFieldsHeader);
 
-        System.out.println("PARAMETRO FALTANTE:"+responseCode);
-        log.error("PARAMETRO FALTANTE:"+responseCode);
+      String [] mandatoryFieldsBody = {
+        NotificationTecnocomBody.class.getDeclaredField("sdCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("sdValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("ilCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("ilValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("tipoTx").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idMensaje").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("merchantCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("merchantName").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("countryIso3266Code").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("countryDescription").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("placeName").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("resolucionTx").getName()
+      };
+      HashMap<String,Object> fieldsOnNullFromBody = notificationTecnocomBody.checkNull(mandatoryFieldsBody);
 
-        String committedFields = "";
-        if(fieldsOnNullFromHttpBody.size() >= 1 && fieldsOnNullFromHttpHeader.size() == 0){
-          committedFields = " These body fields are null or empty: "+fieldsOnNullFromHttpBody.keySet();
-        }else if(fieldsOnNullFromHttpBody.size() == 0 && fieldsOnNullFromHttpHeader.size() >= 1){
-          committedFields = " These header fields are null or empty: "+fieldsOnNullFromHttpBody.keySet();
-        }else if(fieldsOnNullFromHttpBody.size() >= 1 && fieldsOnNullFromHttpHeader.size() >= 1){
-          committedFields = " These fields are null or empty, "+"By Headers: "+fieldsOnNullFromHttpHeader.keySet()
-            +", By Body: "+fieldsOnNullFromHttpHeader.keySet();
+      if((fieldsOnNullFromHeader.size() >= 1 || fieldsOnNullFromBody.size() >= 1) && isBase64 == true) {
+
+        if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() == 0) {
+          committedFields = " These body fields are null or empty: " + fieldsOnNullFromBody.keySet();
+        } else if (fieldsOnNullFromBody.size() == 0 && fieldsOnNullFromHeader.size() >= 1) {
+          committedFields = " These header fields are null or empty: " + fieldsOnNullFromHeader.keySet();
+        } else if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() >= 1) {
+          committedFields = " These fields are null or empty, " + "By Headers: " + fieldsOnNullFromHeader.keySet()
+            + ", By Body: " + fieldsOnNullFromBody.keySet();
         }
-        responseMessage = responseMessage+committedFields;
-
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
-      }
-    }else {
-
-      if(notificationTecnocom.getBase64Data()!=null && isBase64 == true && isNotNullMandatoryHeadersFields==false){
-        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
-        responseMessage = responseMessage+" These header fields are null or empty: "+fieldsOnNullFromHttpHeader.keySet();
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
+        badRequestException = new BadRequestException();
+        badRequestException.setData(new KeyValue("value", committedFields));
+        badRequestException.setCode(PARAMETRO_FALTANTE_$VALUE.getValue());
+        badRequestException.setStatus(400);
+        throw badRequestException;
       }
 
-      if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
-        && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
-      ){
-        responseCode = PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString();//"101007";
-        responseMessage = "Base64 is not valid";
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
+      if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){
+        notificationTecnocom.setErrorCode("202");
       }
 
-      /*if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
-        && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == false
-      ){
-        responseCode = "101007";
-        responseMessage = "Base64 is not valid--4";
-        //responseMessage = notificationTecnocom.getResponseMessage();
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+notificationTecnocom.getResponseCode()+" "+notificationTecnocom.getResponseMessage());
-      }*/
-
-      if(notificationTecnocom.getBase64Data()!=null && isBase64 == true
-        && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
-      ){
-        responseCode = "202";
-        responseMessage = "Accepted";
-        notificationTecnocom.setCode(responseCode);
-        notificationTecnocom.setMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
-      }
     }
-    
+
     return notificationTecnocom;
   }
 

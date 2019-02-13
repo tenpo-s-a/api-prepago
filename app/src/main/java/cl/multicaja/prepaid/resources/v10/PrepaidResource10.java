@@ -248,119 +248,30 @@ public final class PrepaidResource10 extends BaseResource {
     return returnResponse;
   }
 
-
   @POST
   @Path("/processor/notification")
-  public Response callNotificationTecnocom(Map<String, Object> body,@Context HttpHeaders headers) throws Exception {
-
+  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
     Response returnResponse = null;
-    NotificationTecnocom notificationTecnocom = null;
+
     String textLogBase = "TestHelperResource-callNotification: ";
+    NotificationTecnocom notificationTecnocomResponse = null;
     try{
 
-      String errorCode;
-      String errorMessage;
+      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
 
-      String errorCodeOnHeader = "";
-      String errorMessageOnHeader = "";
-
-      String errorCodeOnBody;
-      String errorMessageOnBody;
-
-      //Test Headers
-      Map<String, Object> mapHeaders = null;
-      if (headers != null) {
-        mapHeaders = new HashMap<>();
-        MultivaluedMap<String, String> mapHeadersTmp = headers.getRequestHeaders();
-        Set<String> keys = mapHeadersTmp.keySet();
-        for (String k : keys) {
-          mapHeaders.put(k, mapHeadersTmp.getFirst(k));
-        }
+      if(notificationTecnocomResponse.getErrorCode() == "200"){
+        returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
       }
-
-      if(mapHeaders.keySet().size() == 0 || mapHeaders == null){
-        errorCodeOnHeader = "101004";
-        errorMessageOnHeader = "Empty Header, must to add header params";
-      }
-
-      //Test Body
-      ObjectMapper mapper = new ObjectMapper();
-
-      if(body != null){
-        String json = new ObjectMapper().writeValueAsString(body);
-        notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(
-          mapHeaders,mapper.readValue(json, NotificationTecnocom.class));
-
-
-        /*errorCodeOnBody = notificationTecnocom.getResponseCode() == null ?
-          "001": notificationTecnocom.getResponseCode();
-        errorMessageOnBody = notificationTecnocom.getResponseMessage() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getResponseMessage();*/
-
-        errorCodeOnBody = notificationTecnocom.getCode() == null ?
-          "001": notificationTecnocom.getCode();
-        errorMessageOnBody = notificationTecnocom.getMessage() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getMessage();
-
-      }else{
-        errorCodeOnBody = "101004";
-        errorMessageOnBody = "Empty Body, must to add body params";
-      }
-      errorCode = errorCodeOnBody;
-      errorMessage = errorMessageOnBody;
-
-      if(errorCodeOnHeader == errorCodeOnBody){
-        errorCode = errorCodeOnBody;
-        errorMessage = "Error Description, "+errorMessageOnHeader+" , "+errorMessageOnBody;
-      }
-
-      //Final Response
-      JsonObject notifResponse = Json.createObjectBuilder().
-        add("code", errorCode).
-        add("message",errorMessage).build();
-
-      if(errorCode == "101004"){
-        returnResponse = Response.ok(notifResponse).status(400).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == "101007"){
-        returnResponse = Response.ok(notifResponse).status(422).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == "001"){
-        returnResponse = Response.ok(notifResponse).status(201).build();
-        log.info(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == "002"){
-
-        //Ok Service Response
-        returnResponse = Response.ok(notifResponse).status(202).build();
-        log.info(textLogBase+notifResponse.toString());
-
-        //Send Async Mail
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("notification_tecnocom@multicaja.cl");
-        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
-
-      }
-
+      log.info(textLogBase+notificationTecnocomResponse.toString());
 
     }catch(Exception ex){
       log.error(textLogBase+ex.toString());
       ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(410).build();
+      returnResponse = Response.ok(ex).build();
     }
 
     return returnResponse;
 
   }
-
 
 }

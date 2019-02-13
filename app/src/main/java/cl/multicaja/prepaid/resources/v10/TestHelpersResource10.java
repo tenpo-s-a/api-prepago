@@ -1316,56 +1316,5 @@ public final class TestHelpersResource10 extends BaseResource {
 
   }
 
-  @POST
-  @Path("/processor/notification")
-  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
-    Response returnResponse = null;
-
-    String textLogBase = "TestHelperResource-callNotification: ";
-    try{
-
-      //Set Headers
-      Map<String, Object> mapHeaders = null;
-      if (headers != null) {
-        mapHeaders = new HashMap<>();
-        MultivaluedMap<String, String> mapHeadersTmp = headers.getRequestHeaders();
-        Set<String> keys = mapHeadersTmp.keySet();
-        for (String k : keys) {
-          mapHeaders.put(k, mapHeadersTmp.getFirst(k));
-        }
-      }
-
-      //System.out.println("AAAAAAA notificationTecnocom: "+notificationTecnocom);
-      NotificationTecnocom notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(mapHeaders,notificationTecnocom);
-
-      //Set Response
-      JsonObject notifResponse = Json.createObjectBuilder().
-        add("code", notificationTecnocomResponse.getCode()).
-        add("message",notificationTecnocomResponse.getMessage()).build();
-
-      //System.out.println("BBBBBBB notificationTecnocomResponse: "+notificationTecnocomResponse);
-      if(notificationTecnocomResponse.getCode() == "202"){
-        returnResponse = Response.ok(notifResponse).status(202).build();
-      }
-
-      if(notificationTecnocomResponse.getCode() == PARAMETRO_FALTANTE_$VALUE.getValue().toString()/*"101004"*/){
-        returnResponse = Response.ok(notifResponse).status(400).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-      if(notificationTecnocomResponse.getCode() == PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString()/*"101007"*/){
-        returnResponse = Response.ok(notifResponse).status(422).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-    }catch(Exception ex){
-      log.error(textLogBase+ex.toString());
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(410).build();
-    }
-
-    return returnResponse;
-
-  }
 
 }
