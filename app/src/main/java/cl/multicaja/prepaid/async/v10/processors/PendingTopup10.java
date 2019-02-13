@@ -4,36 +4,30 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
-import cl.multicaja.core.utils.DateUtils;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
-import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.SEDA_PENDING_SEND_MAIL_TOPUP;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
@@ -300,11 +294,16 @@ public class PendingTopup10 extends BaseProcessor10 {
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga
           Map<String, Object> templateDataToUser = new HashMap<String, Object>();
           templateDataToUser.put("user_name", data.getUser().getName());
-          templateDataToUser.put("monto_carga", String.valueOf(data.getPrepaidTopup10().getTotal().getValue().doubleValue()));
+          templateDataToUser.put("amount", getRoute().getNumberUtils().toClp(String.valueOf(data.getPrepaidTopup10().getTotal().getValue().doubleValue())));
 
           PrepaidMovement10 refundMovement = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(data.getPrepaidMovement10().getId());
+
           LocalDateTime topupDateTime = refundMovement.getFechaCreacion().toLocalDateTime();
-          templateDataToUser.put("fecha_topup", topupDateTime.toLocalDate());
+
+          ZonedDateTime local = ZonedDateTime.ofInstant(topupDateTime.toInstant(ZoneOffset.UTC), ZoneId.of("America/Santiago"));
+
+          templateDataToUser.put("date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+          templateDataToUser.put("time", local.format(DateTimeFormatter.ofPattern("HH:mm")));
 
           EmailBody emailBody = new EmailBody();
           emailBody.setTemplateData(templateDataToUser);
