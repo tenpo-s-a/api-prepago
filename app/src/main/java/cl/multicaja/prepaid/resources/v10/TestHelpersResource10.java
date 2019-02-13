@@ -1316,115 +1316,8 @@ public final class TestHelpersResource10 extends BaseResource {
 
   }
 
-
-  @POST
-  @Path("/processor/notificationA")
-  public Response callNotificationTecnocomA(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
-    Response returnResponse = null;
-
-    String textLogBase = "TestHelperResource-callNotification: ";
-    try{
-
-      String errorCode;
-      String errorMessage;
-
-      String errorCodeOnHeader = "";
-      String errorMessageOnHeader = "";
-
-      String errorCodeOnBody;
-      String errorMessageOnBody;
-
-      //Test Headers
-      Map<String, Object> mapHeaders = null;
-      if (headers != null) {
-        mapHeaders = new HashMap<>();
-        MultivaluedMap<String, String> mapHeadersTmp = headers.getRequestHeaders();
-        Set<String> keys = mapHeadersTmp.keySet();
-        for (String k : keys) {
-          mapHeaders.put(k, mapHeadersTmp.getFirst(k));
-        }
-      }
-
-      if(mapHeaders.keySet().size() == 0 || mapHeaders == null){
-        errorCodeOnHeader = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
-        errorMessageOnHeader = "Empty Header, must to add header params";
-      }
-
-      //Test Body
-      if(notificationTecnocom != null){
-        notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(mapHeaders,notificationTecnocom);
-
-        errorCodeOnBody = notificationTecnocom.getCode() == null ?
-          "001": notificationTecnocom.getCode();
-        errorMessageOnBody = notificationTecnocom.getMessage() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getMessage();
-
-      }else{
-        errorCodeOnBody = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
-        errorMessageOnBody = "Empty Body, must to add body params";
-      }
-      errorCode = errorCodeOnBody;
-      errorMessage = errorMessageOnBody;
-
-      if(errorCodeOnHeader == errorCodeOnBody){
-        errorCode = errorCodeOnBody;
-        errorMessage = "Error Description, "+errorMessageOnHeader+" , "+errorMessageOnBody;
-      }
-
-      //Final Response
-      JsonObject notifResponse = Json.createObjectBuilder().
-        add("code", errorCode).
-        add("message",errorMessage).build();
-
-      if(errorCode == PARAMETRO_FALTANTE_$VALUE.getValue().toString()/*"101004"*/){
-        System.out.println("ERROR_A");
-        returnResponse = Response.ok(notifResponse).status(400).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString()/*"101007"*/){
-        System.out.println("ERROR_B");
-        returnResponse = Response.ok(notifResponse).status(422).build();
-        log.error(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == "001"){
-        System.out.println("ERROR_C");
-        returnResponse = Response.ok(notifResponse).status(201).build();
-        log.info(textLogBase+notifResponse.toString());
-      }
-
-      if(errorCode == "002"){
-        System.out.println("ERROR_D");
-        //Ok Service Response
-        returnResponse = Response.ok(notifResponse).status(202).build();
-        log.info(textLogBase+notifResponse.toString());
-
-        //Send Async Mail
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("notification_tecnocom@multicaja.cl");
-        //mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
-
-      }
-
-
-    }catch(Exception ex){
-      log.error(textLogBase+ex.toString());
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(410).build();
-    }
-
-    return returnResponse;
-
-  }
-
   @POST
   @Path("/processor/notification")
-  //public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
   public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
     Response returnResponse = null;
 
@@ -1442,14 +1335,27 @@ public final class TestHelpersResource10 extends BaseResource {
         }
       }
 
+      //System.out.println("AAAAAAA notificationTecnocom: "+notificationTecnocom);
+      NotificationTecnocom notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(mapHeaders,notificationTecnocom);
+
       //Set Response
       JsonObject notifResponse = Json.createObjectBuilder().
-        add("code", notificationTecnocom.getCode()).
-        add("message",notificationTecnocom.getMessage()).build();
+        add("code", notificationTecnocomResponse.getCode()).
+        add("message",notificationTecnocomResponse.getMessage()).build();
 
-      System.out.println("NotificationTecnocom: "+notificationTecnocom);
-      if(notificationTecnocom.getCode() == "202"){
+      //System.out.println("BBBBBBB notificationTecnocomResponse: "+notificationTecnocomResponse);
+      if(notificationTecnocomResponse.getCode() == "202"){
         returnResponse = Response.ok(notifResponse).status(202).build();
+      }
+
+      if(notificationTecnocomResponse.getCode() == PARAMETRO_FALTANTE_$VALUE.getValue().toString()/*"101004"*/){
+        returnResponse = Response.ok(notifResponse).status(400).build();
+        log.error(textLogBase+notifResponse.toString());
+      }
+
+      if(notificationTecnocomResponse.getCode() == PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString()/*"101007"*/){
+        returnResponse = Response.ok(notifResponse).status(422).build();
+        log.error(textLogBase+notifResponse.toString());
       }
 
     }catch(Exception ex){

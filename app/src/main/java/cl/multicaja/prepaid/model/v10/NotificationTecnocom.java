@@ -19,20 +19,65 @@ public class NotificationTecnocom extends BaseModel {
   private static Log log = LogFactory.getLog(NotificationTecnocom.class);
 
   private Long id;
+
+  //@JsonProperty("sd_currency_code")
+  //@JsonIgnore
   private Long sdCurrencyCode;
+
+  //@JsonProperty("sd_value")
+  //@JsonIgnore
   private String sdValue;
+
+  //@JsonProperty("il_currency_code")
+  //@JsonIgnore
   private Long ilCurrencyCode;
+
+  //@JsonProperty("il_value")
+  //@JsonIgnore
   private String ilValue;
+
+  //@JsonProperty("id_currency_code")
+  //@JsonIgnore
   private Long idCurrencyCode;
+
+  //@JsonProperty("id_value")
+  //@JsonIgnore
   private String idValue;
+
+  //@JsonProperty("tipo_tx")
+  //@JsonIgnore
   private Long tipoTx;
+
+  //@JsonProperty("id_mensaje")
+  //@JsonIgnore
   private Long idMensaje;
+
+  //@JsonProperty("merchant_code")
+  //@JsonIgnore
   private String merchantCode;
+
+  //@JsonProperty("merchant_name")
+  //@JsonIgnore
   private String merchantName;
+
+  //@JsonProperty("country_iso_3266_code")
+  //@JsonIgnore
   private Long countryIso3266Code;
+
+  //@JsonProperty("country_description")
+  //@JsonIgnore
   private String countryDescription;
+
+  //@JsonProperty("place_name")
+  //@JsonIgnore
   private String placeName;
+
+  //@JsonProperty("resolucion_tx")
+  //@JsonIgnore
   private Long resolucionTx;
+
+  //@JsonProperty("base64_data")
+  //@JsonIgnore
   private String base64Data;
 
   public Long getId() {

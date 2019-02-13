@@ -13,14 +13,18 @@ import java.util.*;
 public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   
 
-  private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers) {
-    HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid_testhelpers/processor/notification"), toJson(notificationTecnocom),headers);
+  private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers) throws Exception{
+    String jsontToSend = null;
+    jsontToSend = new ObjectMapper().writeValueAsString(notificationTecnocom);
+    //jsontToSend = toJson(notificationTecnocom);
+    System.out.println("callNotification Params: "+toJson(notificationTecnocom));
+    HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid_testhelpers/processor/notification"), jsontToSend,headers);
     System.out.println("RESP HTTP: " + httpResponse);
     return httpResponse;
   }
 
   @Test
-  public void testCallNotificationAllParamsWithSuccessProcess() {
+  public void testCallNotificationAllParamsWithSuccessProcess() throws Exception {
 
     ObjectMapper mapperObj = new ObjectMapper();
     String messageResponse;
@@ -60,7 +64,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   }
 
   @Test
-  public void testCallNotificationWithoutBase64ParamOrNullValue(){
+  public void testCallNotificationWithoutBase64ParamOrNullValue() throws Exception {
     ObjectMapper mapperObj = new ObjectMapper();
     String messageResponse;
 
@@ -87,7 +91,6 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     notificationTecnocom.setCountryDescription("Republica de chile");
     notificationTecnocom.setPlaceName("Santiago");
     notificationTecnocom.setResolucionTx(new Long(100));
-    notificationTecnocom.setBase64Data(null);
 
     HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
@@ -97,7 +100,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   }
 
   @Test
-  public void testCallNotificationWithBase64NotValidParamValue(){
+  public void testCallNotificationWithBase64NotValidParamValue() throws Exception {
     ObjectMapper mapperObj = new ObjectMapper();
     String messageResponse = null;
 
@@ -135,7 +138,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
 
 
   @Test
-  public void testCallNotificationMoreThanOneParamsOnNull(){
+  public void testCallNotificationMoreThanOneParamsOnNull() throws Exception {
     ObjectMapper mapperObj = new ObjectMapper();
     String messageResponse = null;
 
@@ -172,7 +175,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   }
 
   @Test
-  public void testCallNotificationEmptyHeaderDataAndEmptyBodyData(){
+  public void testCallNotificationEmptyHeaderDataAndEmptyBodyData() throws Exception {
 
     String messageResponse;
 
@@ -189,7 +192,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   }
 
   @Test
-  public void testCallNotificationEmptyHeaderDataAndCompleteBodyData(){
+  public void testCallNotificationEmptyHeaderDataAndCompleteBodyData() throws Exception {
 
     String messageResponse;
 
@@ -223,7 +226,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
   }
 
   @Test
-  public void testcallNotificationHeaderDataAndEmptyBodyData(){
+  public void testcallNotificationHeaderDataAndEmptyBodyData() throws Exception {
     ObjectMapper mapperObj = new ObjectMapper();
     String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
