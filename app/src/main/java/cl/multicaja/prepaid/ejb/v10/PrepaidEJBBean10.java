@@ -2771,23 +2771,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(fieldsOnNullFromHttpBody.size() >= 1){
 
       if(notificationTecnocom.getBase64Data()==null && fieldsOnNullFromHttpBody.size() == 1){
-        responseCode = "101007";
+        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();
         responseMessage = "Base64 is empty";
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
 
       if(notificationTecnocom.getBase64Data()!=null && isBase64 == false && fieldsOnNullFromHttpBody.size() >= 1){
-        responseCode = "101007";
+        responseCode = PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString();
         responseMessage = "Base64 is not valid";
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
 
       if(fieldsOnNullFromHttpBody.size() >= 1 || fieldsOnNullFromHttpHeader.size() >= 1){
-        responseCode = "101004";
+        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
+
+        System.out.println("PARAMETRO FALTANTE:"+responseCode);
+        log.error("PARAMETRO FALTANTE:"+responseCode);
 
         String committedFields = "";
         if(fieldsOnNullFromHttpBody.size() >= 1 && fieldsOnNullFromHttpHeader.size() == 0){
@@ -2800,28 +2803,28 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         responseMessage = responseMessage+committedFields;
 
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
     }else {
 
       if(notificationTecnocom.getBase64Data()!=null && isBase64 == true && isNotNullMandatoryHeadersFields==false){
-        responseCode = "101004";
+        responseCode = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
         responseMessage = responseMessage+" These header fields are null or empty: "+fieldsOnNullFromHttpHeader.keySet();
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
 
       if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
         && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
       ){
-        responseCode = "101007";
+        responseCode = PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString();//"101007";
         responseMessage = "Base64 is not valid";
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.error(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
 
       /*if(notificationTecnocom.getBase64Data()!=null && isBase64 == false
@@ -2838,11 +2841,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if(notificationTecnocom.getBase64Data()!=null && isBase64 == true
         && fieldsOnNullFromHttpBody.size() == 0 && isNotNullMandatoryHeadersFields == true
       ){
-        responseCode = "002";
+        responseCode = "202";
         responseMessage = "Accepted";
-        notificationTecnocom.setResponseCode(responseCode);
-        notificationTecnocom.setResponseMessage(responseMessage);
-        log.info(textLogBase+ notificationTecnocom.getResponseCode()+" "+ notificationTecnocom.getResponseMessage());
+        notificationTecnocom.setCode(responseCode);
+        notificationTecnocom.setMessage(responseMessage);
+        log.error(textLogBase+ notificationTecnocom.getCode()+" "+ notificationTecnocom.getMessage());
       }
     }
     

@@ -34,11 +34,7 @@ public class NotificationTecnocom extends BaseModel {
   private String placeName;
   private Long resolucionTx;
   private String base64Data;
-  private String responseMessage;
-  private String responseCode;
 
-
-  //@JsonProperty("id")
   public Long getId() {
     return id;
   }
@@ -47,7 +43,6 @@ public class NotificationTecnocom extends BaseModel {
     this.id = id;
   }
 
-  //@JsonProperty("sd_currency_code")
   public Long getSdCurrencyCode() {
     return sdCurrencyCode;
   }
@@ -56,7 +51,6 @@ public class NotificationTecnocom extends BaseModel {
     this.sdCurrencyCode = sdCurrencyCode;
   }
 
-  //@JsonProperty("sd_value")
   public String getSdValue() {
     return sdValue;
   }
@@ -65,7 +59,6 @@ public class NotificationTecnocom extends BaseModel {
     this.sdValue = sd_value;
   }
 
-  //@JsonProperty("il_currency_code")
   public Long getIlCurrencyCode() {
     return ilCurrencyCode;
   }
@@ -74,7 +67,6 @@ public class NotificationTecnocom extends BaseModel {
     this.ilCurrencyCode = ilCurrencyCode;
   }
 
-  //@JsonProperty("il_value")
   public String getIlValue() {
     return ilValue;
   }
@@ -83,7 +75,6 @@ public class NotificationTecnocom extends BaseModel {
     this.ilValue = ilValue;
   }
 
-  //@JsonProperty("id_currency_code")
   public Long getIdCurrencyCode() {
     return idCurrencyCode;
   }
@@ -92,7 +83,6 @@ public class NotificationTecnocom extends BaseModel {
     this.idCurrencyCode = idCurrencyCode;
   }
 
-  //@JsonProperty("id_value")
   public String getIdValue() {
     return idValue;
   }
@@ -101,7 +91,6 @@ public class NotificationTecnocom extends BaseModel {
     this.idValue = idValue;
   }
 
-  //@JsonProperty("tipo_tx")
   public Long getTipoTx() {
     return tipoTx;
   }
@@ -110,7 +99,6 @@ public class NotificationTecnocom extends BaseModel {
     this.tipoTx = tipoTx;
   }
 
-  //@JsonProperty("id_mensaje")
   public Long getIdMensaje() {
     return idMensaje;
   }
@@ -119,7 +107,6 @@ public class NotificationTecnocom extends BaseModel {
     this.idMensaje = idMensaje;
   }
 
-  //@JsonProperty("merchant_code")
   public String getMerchantCode() {
     return merchantCode;
   }
@@ -128,7 +115,6 @@ public class NotificationTecnocom extends BaseModel {
     this.merchantCode = merchantCode;
   }
 
-  //@JsonProperty("merchant_name")
   public String getMerchantName() {
     return merchantName;
   }
@@ -137,7 +123,6 @@ public class NotificationTecnocom extends BaseModel {
     this.merchantName = merchantName;
   }
 
-  //@JsonProperty("country_iso_3266_code")
   public Long getCountryIso3266Code() {
     return countryIso3266Code;
   }
@@ -146,7 +131,6 @@ public class NotificationTecnocom extends BaseModel {
     this.countryIso3266Code = countryIso3266Code;
   }
 
-  //@JsonProperty("country_description")
   public String getCountryDescription() {
     return countryDescription;
   }
@@ -155,7 +139,6 @@ public class NotificationTecnocom extends BaseModel {
     this.countryDescription = countryDescription;
   }
 
-  //@JsonProperty("place_name")
   public String getPlaceName() {
     return placeName;
   }
@@ -164,7 +147,6 @@ public class NotificationTecnocom extends BaseModel {
     this.placeName = placeName;
   }
 
-  //@JsonProperty("resolucion_tx")
   public Long getResolucionTx() {
     return resolucionTx;
   }
@@ -173,29 +155,12 @@ public class NotificationTecnocom extends BaseModel {
     this.resolucionTx = resolucionTx;
   }
 
-  //@JsonProperty("base64_data")
   public String getBase64Data() {
     return base64Data;
   }
 
   public void setBase64Data(String base64Data) {
     this.base64Data = base64Data;
-  }
-
-  public String getResponseMessage() {
-    return responseMessage;
-  }
-
-  public void setResponseMessage(String responseMessage) {
-    this.responseMessage = responseMessage;
-  }
-
-  public String getResponseCode() {
-    return responseCode;
-  }
-
-  public void setResponseCode(String responseCode) {
-    this.responseCode = responseCode;
   }
 
   public HashMap<String,Object> checkNull(String [] notNullFields) throws IllegalAccessException {

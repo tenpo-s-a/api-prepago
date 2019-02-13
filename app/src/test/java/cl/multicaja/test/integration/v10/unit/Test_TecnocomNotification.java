@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
+
 public class Test_TecnocomNotification extends TestBaseUnit {
 
   private NotificationTecnocom notificationTecnocom;
@@ -44,9 +47,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom.setBase64Data(base64String);
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"002",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,"002",notifResult.getCode());
 
   }
 
@@ -77,10 +80,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom.setResolucionTx(new Long(100));
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    //String assertMessage = "Base 64 is Empty";
-    String assertMessage = notifResult.getResponseMessage();
-    System.out.println(assertMessage);
-    Assert.assertEquals(assertMessage,"101004",notifResult.getResponseCode());
+    String assertMessage = notifResult.getMessage();
+    System.out.println(notifResult.getCode());
+    Assert.assertEquals(assertMessage,PARAMETRO_FALTANTE_$VALUE.getValue().toString(),notifResult.getCode());
 
 
   }
@@ -116,9 +118,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom.setBase64Data(base64String);
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"101007",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString(),notifResult.getCode());
 
   }
 
@@ -153,9 +155,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     //notificationTecnocom.setBase64Data(base64String);
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"101004",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,PARAMETRO_FALTANTE_$VALUE.getValue().toString(),notifResult.getCode());
 
   }
 
@@ -169,9 +171,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom = new NotificationTecnocom();
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"101004",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,PARAMETRO_FALTANTE_$VALUE.getValue().toString(),notifResult.getCode());
 
   }
 
@@ -201,9 +203,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom.setBase64Data(base64String);
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"101004",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,PARAMETRO_FALTANTE_$VALUE.getValue().toString(),notifResult.getCode());
 
   }
 
@@ -223,9 +225,9 @@ public class Test_TecnocomNotification extends TestBaseUnit {
     notificationTecnocom = new NotificationTecnocom();
 
     NotificationTecnocom notifResult = getPrepaidEJBBean10().setNotificationCallback(headers, notificationTecnocom);
-    messageResponse = notifResult.getResponseMessage();
+    messageResponse = notifResult.getMessage();
     System.out.println(messageResponse);
-    Assert.assertEquals(messageResponse,"101004",notifResult.getResponseCode());
+    Assert.assertEquals(messageResponse,PARAMETRO_FALTANTE_$VALUE.getValue().toString(),notifResult.getCode());
 
   }
 

@@ -1318,15 +1318,10 @@ public final class TestHelpersResource10 extends BaseResource {
 
 
   @POST
-  @Path("/processor/notification")
-  //public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
-  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
+  @Path("/processor/notificationA")
+  public Response callNotificationTecnocomA(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
     Response returnResponse = null;
 
-    //System.out.println("JSON_IN "+body);
-
-
-    //NotificationTecnocom notificationTecnocom = null;
     String textLogBase = "TestHelperResource-callNotification: ";
     try{
 
@@ -1351,28 +1346,21 @@ public final class TestHelpersResource10 extends BaseResource {
       }
 
       if(mapHeaders.keySet().size() == 0 || mapHeaders == null){
-        errorCodeOnHeader = "101004";
+        errorCodeOnHeader = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
         errorMessageOnHeader = "Empty Header, must to add header params";
       }
 
       //Test Body
-      ObjectMapper mapper = new ObjectMapper();
-
-      //NotificationTecnocom notificationTecnocom1 = mapper.readValue(body.toString(),NotificationTecnocom.class);
-      //System.out.println("TECNOCOM CLASS: "+notificationTecnocom1);
-
       if(notificationTecnocom != null){
-        //String json = new ObjectMapper().writeValueAsString(body);
-        //String json = body.toString();
-        notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(
-          mapHeaders,notificationTecnocom);
+        notificationTecnocom = this.prepaidEJBBean10.setNotificationCallback(mapHeaders,notificationTecnocom);
 
-        errorCodeOnBody = notificationTecnocom.getResponseCode() == null ?
-          "001": notificationTecnocom.getResponseCode();
-        errorMessageOnBody = notificationTecnocom.getResponseMessage() == null ?
-          "Not Error, but not Accepted": notificationTecnocom.getResponseMessage();
+        errorCodeOnBody = notificationTecnocom.getCode() == null ?
+          "001": notificationTecnocom.getCode();
+        errorMessageOnBody = notificationTecnocom.getMessage() == null ?
+          "Not Error, but not Accepted": notificationTecnocom.getMessage();
+
       }else{
-        errorCodeOnBody = "101004";
+        errorCodeOnBody = PARAMETRO_FALTANTE_$VALUE.getValue().toString();//"101004";
         errorMessageOnBody = "Empty Body, must to add body params";
       }
       errorCode = errorCodeOnBody;
@@ -1388,23 +1376,26 @@ public final class TestHelpersResource10 extends BaseResource {
         add("code", errorCode).
         add("message",errorMessage).build();
 
-      if(errorCode == "101004"){
+      if(errorCode == PARAMETRO_FALTANTE_$VALUE.getValue().toString()/*"101004"*/){
+        System.out.println("ERROR_A");
         returnResponse = Response.ok(notifResponse).status(400).build();
         log.error(textLogBase+notifResponse.toString());
       }
 
-      if(errorCode == "101007"){
+      if(errorCode == PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue().toString()/*"101007"*/){
+        System.out.println("ERROR_B");
         returnResponse = Response.ok(notifResponse).status(422).build();
         log.error(textLogBase+notifResponse.toString());
       }
 
       if(errorCode == "001"){
+        System.out.println("ERROR_C");
         returnResponse = Response.ok(notifResponse).status(201).build();
         log.info(textLogBase+notifResponse.toString());
       }
 
       if(errorCode == "002"){
-
+        System.out.println("ERROR_D");
         //Ok Service Response
         returnResponse = Response.ok(notifResponse).status(202).build();
         log.info(textLogBase+notifResponse.toString());
@@ -1431,6 +1422,44 @@ public final class TestHelpersResource10 extends BaseResource {
 
   }
 
+  @POST
+  @Path("/processor/notification")
+  //public Response callNotificationTecnocom(JsonObject body,@Context HttpHeaders headers) throws Exception {
+  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
+    Response returnResponse = null;
 
+    String textLogBase = "TestHelperResource-callNotification: ";
+    try{
+
+      //Set Headers
+      Map<String, Object> mapHeaders = null;
+      if (headers != null) {
+        mapHeaders = new HashMap<>();
+        MultivaluedMap<String, String> mapHeadersTmp = headers.getRequestHeaders();
+        Set<String> keys = mapHeadersTmp.keySet();
+        for (String k : keys) {
+          mapHeaders.put(k, mapHeadersTmp.getFirst(k));
+        }
+      }
+
+      //Set Response
+      JsonObject notifResponse = Json.createObjectBuilder().
+        add("code", notificationTecnocom.getCode()).
+        add("message",notificationTecnocom.getMessage()).build();
+
+      System.out.println("NotificationTecnocom: "+notificationTecnocom);
+      if(notificationTecnocom.getCode() == "202"){
+        returnResponse = Response.ok(notifResponse).status(202).build();
+      }
+
+    }catch(Exception ex){
+      log.error(textLogBase+ex.toString());
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).status(410).build();
+    }
+
+    return returnResponse;
+
+  }
 
 }

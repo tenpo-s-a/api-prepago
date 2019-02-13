@@ -3,13 +3,10 @@ package cl.multicaja.test.integration.v10.api;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.NotificationTecnocom;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -37,22 +34,7 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     };
 
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
-    /*JsonObject jsonBody = Json.createObjectBuilder().
-      add("sd_currency_code",152).
-      add("sd_value","1000.00").
-      add("il_currency_code",152).
-      add("il_value","1000.00").
-      add("id_currency_code",152).
-      add("id_value","1000.00").
-      add("tipo_tx", 100).
-      add("id_mensaje",1200).
-      add("merchant_code","0008902131").
-      add("merchant_name","AMAZON UK").
-      add("country_iso_3266_code",152).
-      add("country_description","Republica de Chile").
-      add("place_name","Santiago").
-      add("resolucion_tx",100).
-      add("base64_data",base64String).build();*/
+
     NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
     notificationTecnocom.setSdCurrencyCode(new Long(152));
     notificationTecnocom.setSdValue("1000.00");
@@ -61,8 +43,16 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     notificationTecnocom.setIdCurrencyCode(new Long(152));
     notificationTecnocom.setIdValue("1000.00");
     notificationTecnocom.setTipoTx(new Long(100));
+    notificationTecnocom.setIdMensaje(new Long(1200));
+    notificationTecnocom.setMerchantCode("0008902131");
+    notificationTecnocom.setMerchantName("AMAZON UK");
+    notificationTecnocom.setCountryIso3266Code(new Long(152));
+    notificationTecnocom.setCountryDescription("Republica de chile");
+    notificationTecnocom.setPlaceName("Santiago");
+    notificationTecnocom.setResolucionTx(new Long(100));
+    notificationTecnocom.setBase64Data(base64String);
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     messageResponse = httpResponse.getResp();
     Assert.assertEquals(messageResponse,202,httpResponse.getStatus());
@@ -82,24 +72,24 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       new HttpHeader("pan","411111******1111")
     };
 
-    JsonObject jsonBody = Json.createObjectBuilder().
-      add("sd_currency_code",152).
-      add("sd_value","1000.00").
-      add("il_currency_code",152).
-      add("il_value","1000.00").
-      add("id_currency_code",152).
-      add("id_value","1000.00").
-      add("tipo_tx", 100).
-      add("id_mensaje",1200).
-      add("merchant_code","0008902131").
-      add("merchant_name","AMAZON UK").
-      add("country_iso_3266_code",152).
-      add("country_description","Republica de Chile").
-      add("place_name","Santiago").
-      add("resolucion_tx",100).build();
-      //add("base64_data","test").build();
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSdCurrencyCode(new Long(152));
+    notificationTecnocom.setSdValue("1000.00");
+    notificationTecnocom.setIlCurrencyCode(new Long(152));
+    notificationTecnocom.setIlValue("1000.00");
+    notificationTecnocom.setIdCurrencyCode(new Long(152));
+    notificationTecnocom.setIdValue("1000.00");
+    notificationTecnocom.setTipoTx(new Long(100));
+    notificationTecnocom.setIdMensaje(new Long(1200));
+    notificationTecnocom.setMerchantCode("0008902131");
+    notificationTecnocom.setMerchantName("AMAZON UK");
+    notificationTecnocom.setCountryIso3266Code(new Long(152));
+    notificationTecnocom.setCountryDescription("Republica de chile");
+    notificationTecnocom.setPlaceName("Santiago");
+    notificationTecnocom.setResolucionTx(new Long(100));
+    notificationTecnocom.setBase64Data(null);
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     messageResponse = "Error:"+httpResponse.getResp();
     System.out.println(messageResponse);
@@ -119,24 +109,24 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       new HttpHeader("pan","411111******1111")
     };
 
-    JsonObject jsonBody = Json.createObjectBuilder().
-      add("sd_currency_code",152).
-      add("sd_value","1000.00").
-      add("il_currency_code",152).
-      add("il_value","1000.00").
-      add("id_currency_code",152).
-      add("id_value","1000.00").
-      add("tipo_tx", 100).
-      add("id_mensaje",1200).
-      add("merchant_code","0008902131").
-      add("merchant_name","AMAZON UK").
-      add("country_iso_3266_code",152).
-      add("country_description","Republica de Chile").
-      add("place_name","Santiago").
-      add("resolucion_tx",100).
-      add("base64_data","This is a Test").build();
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSdCurrencyCode(new Long(152));
+    notificationTecnocom.setSdValue("1000.00");
+    notificationTecnocom.setIlCurrencyCode(new Long(152));
+    notificationTecnocom.setIlValue("1000.00");
+    notificationTecnocom.setIdCurrencyCode(new Long(152));
+    notificationTecnocom.setIdValue("1000.00");
+    notificationTecnocom.setTipoTx(new Long(100));
+    notificationTecnocom.setIdMensaje(new Long(1200));
+    notificationTecnocom.setMerchantCode("0008902131");
+    notificationTecnocom.setMerchantName("AMAZON UK");
+    notificationTecnocom.setCountryIso3266Code(new Long(152));
+    notificationTecnocom.setCountryDescription("Republica de chile");
+    notificationTecnocom.setPlaceName("Santiago");
+    notificationTecnocom.setResolucionTx(new Long(100));
+    notificationTecnocom.setBase64Data("This is a Test");
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     messageResponse = "Error: "+httpResponse.getResp();
     System.out.println(messageResponse);
@@ -157,24 +147,24 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       new HttpHeader("pan","411111******1111")
     };
 
-    JsonObject jsonBody = Json.createObjectBuilder().
-      add("sd_currency_code",152).
-      add("sd_value","1000.00").
-      add("il_currency_code",152).
-      add("il_value","1000.00").
-      add("id_currency_code",152).
-      add("id_value","1000.00").
-      add("tipo_tx", 100).
-      add("id_mensaje",1200).
-      add("merchant_code","0008902131").
-      add("merchant_name","AMAZON UK").
-      add("country_iso_3266_code",152).
-      add("country_description","Republica de Chile").
-      add("place_name","Santiago").build();
-      //add("resolucion_tx",100).
-      //add("base64_data","This is a Test").build();
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSdCurrencyCode(new Long(152));
+    notificationTecnocom.setSdValue("1000.00");
+    notificationTecnocom.setIlCurrencyCode(new Long(152));
+    notificationTecnocom.setIlValue("1000.00");
+    notificationTecnocom.setIdCurrencyCode(new Long(152));
+    notificationTecnocom.setIdValue("1000.00");
+    notificationTecnocom.setTipoTx(new Long(100));
+    notificationTecnocom.setIdMensaje(new Long(1200));
+    notificationTecnocom.setMerchantCode("0008902131");
+    notificationTecnocom.setMerchantName("AMAZON UK");
+    notificationTecnocom.setCountryIso3266Code(new Long(152));
+    notificationTecnocom.setCountryDescription("Republica de chile");
+    notificationTecnocom.setPlaceName("Santiago");
+    notificationTecnocom.setResolucionTx(null);
+    notificationTecnocom.setBase64Data(null);
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     messageResponse = httpResponse.getResp();
     System.out.println(messageResponse);
@@ -190,9 +180,9 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       new HttpHeader("Content-Type","application/json")
     };
 
-    JsonObject jsonBody = Json.createObjectBuilder().build();
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
     messageResponse = "Error: "+httpResponse.getResp();
     System.out.println(messageResponse);
     Assert.assertEquals(messageResponse,400,httpResponse.getStatus());
@@ -208,24 +198,25 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
     };
 
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
-    JsonObject jsonBody = Json.createObjectBuilder().
-      add("sd_currency_code",152).
-      add("sd_value","1000.00").
-      add("il_currency_code",152).
-      add("il_value","1000.00").
-      add("id_currency_code",152).
-      add("id_value","1000.00").
-      add("tipo_tx", 100).
-      add("id_mensaje",1200).
-      add("merchant_code","0008902131").
-      add("merchant_name","AMAZON UK").
-      add("country_iso_3266_code",152).
-      add("country_description","Republica de Chile").
-      add("place_name","Santiago").
-      add("resolucion_tx",100).
-      add("base64_data",base64String).build();
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setSdCurrencyCode(new Long(152));
+    notificationTecnocom.setSdValue("1000.00");
+    notificationTecnocom.setIlCurrencyCode(new Long(152));
+    notificationTecnocom.setIlValue("1000.00");
+    notificationTecnocom.setIdCurrencyCode(new Long(152));
+    notificationTecnocom.setIdValue("1000.00");
+    notificationTecnocom.setTipoTx(new Long(100));
+    notificationTecnocom.setIdMensaje(new Long(1200));
+    notificationTecnocom.setMerchantCode("0008902131");
+    notificationTecnocom.setMerchantName("AMAZON UK");
+    notificationTecnocom.setCountryIso3266Code(new Long(152));
+    notificationTecnocom.setCountryDescription("Republica de chile");
+    notificationTecnocom.setPlaceName("Santiago");
+    notificationTecnocom.setResolucionTx(new Long(100));
+    notificationTecnocom.setBase64Data(base64String);
+
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
     messageResponse = "Error: "+httpResponse.getResp();
     System.out.println(messageResponse);
     Assert.assertEquals(messageResponse,400,httpResponse.getStatus());
@@ -245,9 +236,10 @@ public class Test_sendNotificationTecnocom extends TestBaseUnitApi {
       new HttpHeader("pan","411111******1111")
     };
 
-    JsonObject jsonBody = Json.createObjectBuilder().build();
+    NotificationTecnocom notificationTecnocom = new NotificationTecnocom();
 
-    HttpResponse httpResponse = callNotification(jsonBody,headers);
+
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
     messageResponse = "Error: "+httpResponse.getResp();
     Assert.assertEquals(messageResponse,400,httpResponse.getStatus());
   }
