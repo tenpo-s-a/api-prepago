@@ -239,7 +239,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomHeader = new NotificationTecnocomHeader();
 
-    NotificationTecnocomBody notificationTecnocomBody = new NotificationTecnocomBody();
+    notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
     notificationTecnocomBody.setSdValue("1000.00");
     notificationTecnocomBody.setIlCurrencyCode(152);
@@ -283,7 +283,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
     notificationTecnocomHeader.setCuenta("000000012345");
     notificationTecnocomHeader.setPan("411111******1111");
 
-    NotificationTecnocomBody notificationTecnocomBody = new NotificationTecnocomBody();
+    notificationTecnocomBody = new NotificationTecnocomBody();
 
     notificationTecnocom = new NotificationTecnocom();
     notificationTecnocom.setHeader(notificationTecnocomHeader);
@@ -296,6 +296,34 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Status 400",400,errorObj.get("status"));
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), errorObj.get("code"));
+  }
+
+  @Test
+  public void testCallNotificationMakeError500(){
+    String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
+
+    HttpHeader[] headers = {
+      new HttpHeader("Content-Type","application/json")
+    };
+
+    notificationTecnocomHeader = new NotificationTecnocomHeader();
+
+    notificationTecnocomBody = new NotificationTecnocomBody();
+
+    notificationTecnocom = new NotificationTecnocom();
+    notificationTecnocom.setHeader(null);
+    notificationTecnocom.setBody(notificationTecnocomBody);
+    notificationTecnocom.setBase64Data(base64String);
+
+    HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
+
+    Map<String, Object> errorObj = httpResponse.toMap();
+    System.out.println(errorObj);
+
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Status 500",500,errorObj.get("status"));
+    Assert.assertEquals("Deberia tener error code = 500", 500, errorObj.get("code"));
+
   }
 
 }

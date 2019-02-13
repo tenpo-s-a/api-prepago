@@ -2710,6 +2710,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     String committedFields = null;
     BadRequestException badRequestException = null;
 
+    if(notificationTecnocom.getHeader() == null){
+      badRequestException =  new BadRequestException();
+      badRequestException.setData(new KeyValue("value", "header null / error"));
+      badRequestException.setCode(500);
+      badRequestException.setStatus(500);
+      throw badRequestException;
+    }
+
+    if(notificationTecnocom.getBody() == null){
+      badRequestException =  new BadRequestException();
+      badRequestException.setData(new KeyValue("value", "body null / error"));
+      badRequestException.setCode(500);
+      badRequestException.setStatus(500);
+      throw badRequestException;
+    }
+
     if(notificationTecnocom.getBase64Data() == null){
       badRequestException =  new BadRequestException();
       badRequestException.setData(new KeyValue("value", "base64Data"));
