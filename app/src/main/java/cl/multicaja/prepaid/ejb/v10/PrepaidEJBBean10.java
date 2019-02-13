@@ -2680,4 +2680,48 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
+  public void processRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
+
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
+    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
+    if (prepaidUserTest == null){
+      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: "+userPrepagoId);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
+    if(prepaidMovement == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    if(!BusinessStatusType.TO_REFUND.equals(prepaidMovement.getEstadoNegocio())){
+      log.error("Error on processRefundMovement: prepaid movement is not set to refund");
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.REFUND_OK);
+
+    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
+
+    if(transaction10s.size() > 0){
+
+      for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
+        CdtTransaction10 cdtTransaction = iter.next();
+
+        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(cdtTransaction.getTransactionType())){
+
+          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+          cdtTransaction.setIndSimulacion(Boolean.FALSE);
+          cdtTransaction.setTransactionReference(cdtTransaction.getId());
+          cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+
+        }
+
+      }
+
+    }
+  }
+
 }
