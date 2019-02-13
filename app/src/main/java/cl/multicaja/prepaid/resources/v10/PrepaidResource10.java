@@ -258,19 +258,7 @@ public final class PrepaidResource10 extends BaseResource {
     try{
 
       notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
-      if(notificationTecnocomResponse.getErrorCode() == "202"){ //set mandatory condition
-        returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
-
-        //Send Async Mail
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("notification_tecnocom@multicaja.cl");
-        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
-
-      }
+      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
       log.info(textLogBase+notificationTecnocomResponse.toString());
 
     }catch(Exception ex){

@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,6 +104,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @EJB
   private FilesEJBBean10 filesEJBBean10;
+
+  @EJB
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   private TecnocomService tecnocomService;
 
@@ -2790,7 +2794,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-        notificationTecnocom.setErrorCode("202");
+        //notificationTecnocom.setErrorCode("202");
+
+        //Send Async Mail
+        Map<String, Object> templateData = new HashMap<String, Object>();
+        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
+        emailBody.setAddress("notification_tecnocom@multicaja.cl");
+        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
       }
 
     }
