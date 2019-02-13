@@ -75,6 +75,7 @@ public class Test_PrepaidAccountingEJBBean10_generateAccountingFile extends Test
       for (int i = 0; i < 10; i++) {
         AccountingData10 accounting1 = buildRandomAccouting();
         accounting1.setStatus(AccountingStatusType.PENDING);
+        accounting1.setAccountingStatus(AccountingStatusType.OK);
         accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
 
         accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
@@ -86,7 +87,8 @@ public class Test_PrepaidAccountingEJBBean10_generateAccountingFile extends Test
     // Reversed
     {
       AccountingData10 accounting1 = buildRandomAccouting();
-      accounting1.setStatus(AccountingStatusType.REVERSED);
+      accounting1.setStatus(AccountingStatusType.PENDING);
+      accounting1.setAccountingStatus(AccountingStatusType.REVERSED);
       accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
       accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
     }
@@ -131,7 +133,7 @@ public class Test_PrepaidAccountingEJBBean10_generateAccountingFile extends Test
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
 
-    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT);
+    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT, null);
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertEquals("Debe tener 10 registros", 10,data.size());
     data.forEach(d-> {
@@ -212,7 +214,7 @@ public class Test_PrepaidAccountingEJBBean10_generateAccountingFile extends Test
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
 
-    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT_PENDING_CON);
+    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT_PENDING_CON, null);
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertEquals("Debe tener 10 registros", 10,data.size());
     data.forEach(d-> {

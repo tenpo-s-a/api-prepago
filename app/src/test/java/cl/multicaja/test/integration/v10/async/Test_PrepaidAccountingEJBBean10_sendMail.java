@@ -141,7 +141,7 @@ public class Test_PrepaidAccountingEJBBean10_sendMail extends TestBaseUnitAsync 
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
 
-    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT);
+    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT, null);
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertEquals("Debe tener 10 registros", 10,data.size());
     data.forEach(d-> {

@@ -13,6 +13,7 @@ app/datos-mock.cache
 target/
 
 app/clearing_files
+app/accounting_files
 app/activemq-data-prepaid
 app/activemq-data
 app/.idea

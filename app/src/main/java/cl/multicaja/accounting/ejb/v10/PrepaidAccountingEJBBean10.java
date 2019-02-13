@@ -1035,7 +1035,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
    * @return
    * @throws Exception
    */
-  public List<AccountingData10> getAccountingDataForFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to, AccountingStatusType status) throws Exception {
+  public List<AccountingData10> getAccountingDataForFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to, AccountingStatusType status, AccountingStatusType accountingStatus) throws Exception {
 
     if(from == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "from"));
@@ -1055,7 +1055,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     Object[] params = {
       f == null ? new NullParam(Types.VARCHAR) : f,
       t == null ? new NullParam(Types.VARCHAR) : t,
-      status == null ? new NullParam(Types.VARCHAR) : status.getValue()
+      status == null ? new NullParam(Types.VARCHAR) : status.getValue(),
+      accountingStatus == null ? new NullParam(Types.VARCHAR) : accountingStatus.getValue()
     };
     log.info(params);
     RowMapper rm = (Map<String, Object> row) -> {
@@ -1143,7 +1144,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
-    List<AccountingData10> movements = this.getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.PENDING);
+    List<AccountingData10> movements = this.getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.PENDING, AccountingStatusType.OK);
 
     if(movements.isEmpty()){
       return null;
