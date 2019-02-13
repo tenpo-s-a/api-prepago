@@ -2,16 +2,24 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationTecnocomHeader extends BaseModel {
 
+    //@JsonProperty("entidad")
     private String entidad;
+    //@JsonProperty("centro_alta")
     private String centroAlta;
+    //@JsonProperty("cuenta")
     private String cuenta;
+    //@JsonProperty("pan")
     private String pan;
 
     public String getEntidad() {

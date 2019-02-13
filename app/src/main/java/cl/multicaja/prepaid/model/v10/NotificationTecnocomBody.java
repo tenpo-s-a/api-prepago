@@ -6,23 +6,41 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import cl.multicaja.core.model.BaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationTecnocomBody extends BaseModel {
 
-    private Integer sdCurrencyCode;
-    private String sdValue;
-    private Integer ilCurrencyCode;
-    private String ilValue;
-    private Integer idCurrencyCode;
-    private String idValue;
-    private Integer tipoTx;
-    private Integer idMensaje;
-    private String merchantCode;
-    private String merchantName;
-    private Integer countryIso3266Code;
-    private String countryDescription;
-    private String placeName;
-    private Integer resolucionTx;
+  //@JsonProperty("sd_currency_code")
+  private Integer sdCurrencyCode;
+  //@JsonProperty("sd_value")
+  private String sdValue;
+  //@JsonProperty("il_currency_code")
+  private Integer ilCurrencyCode;
+  //@JsonProperty("il_value")
+  private String ilValue;
+  //@JsonProperty("id_currency_code")
+  private Integer idCurrencyCode;
+  //@JsonProperty("id_value")
+  private String idValue;
+  //@JsonProperty("tipo_tx")
+  private Integer tipoTx;
+  //@JsonProperty("id_mensaje")
+  private Integer idMensaje;
+  //@JsonProperty("merchant_code")
+  private String merchantCode;
+  //@JsonProperty("merchant_name")
+  private String merchantName;
+  @JsonProperty("country_iso_3266_code")
+  private Integer countryIso3266Code;
+  //@JsonProperty("country_description")
+  private String countryDescription;
+  //@JsonProperty("place_name")
+  private String placeName;
+  //@JsonProperty("resolucion_tx")
+  private Integer resolucionTx;
 
     public Integer getSdCurrencyCode() {
         return sdCurrencyCode;
