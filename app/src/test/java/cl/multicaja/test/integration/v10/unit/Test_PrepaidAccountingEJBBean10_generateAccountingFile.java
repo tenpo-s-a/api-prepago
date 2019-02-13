@@ -1,4 +1,4 @@
-package cl.multicaja.test.integration.v10.async;
+package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingFiles10;
@@ -6,20 +6,20 @@ import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
+import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
 import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
@@ -30,13 +30,7 @@ import java.util.stream.Stream;
 import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
-
-public class Test_PrepaidAccountingEJBBean10_sendMail extends TestBaseUnitAsync {
-
-  @Test(expected = FileNotFoundException.class)
-  public void sendReportEmail_ErrorNoReport() throws Exception {
-    getPrepaidAccountingEJBBean10().sendFile("", getConfigUtils().getProperty("accounting.email"));
-  }
+public class Test_PrepaidAccountingEJBBean10_generateAccountingFile extends TestBaseUnitAsync {
 
   private static List<ZonedDateTime> dates = new ArrayList<>();
 
@@ -81,9 +75,8 @@ public class Test_PrepaidAccountingEJBBean10_sendMail extends TestBaseUnitAsync 
       for (int i = 0; i < 10; i++) {
         AccountingData10 accounting1 = buildRandomAccouting();
         accounting1.setStatus(AccountingStatusType.PENDING);
-        Timestamp ts = Timestamp.valueOf(getRandomDateInUTC());
-        accounting1.setTransactionDate(ts);
-        accounting1.setConciliationDate(ts);
+        accounting1.setAccountingStatus(AccountingStatusType.OK);
+        accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
 
         accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
 
@@ -94,10 +87,9 @@ public class Test_PrepaidAccountingEJBBean10_sendMail extends TestBaseUnitAsync 
     // Reversed
     {
       AccountingData10 accounting1 = buildRandomAccouting();
-      accounting1.setStatus(AccountingStatusType.REVERSED);
-      Timestamp ts = Timestamp.valueOf(getRandomDateInUTC());
-      accounting1.setTransactionDate(ts);
-      accounting1.setConciliationDate(ts);
+      accounting1.setStatus(AccountingStatusType.PENDING);
+      accounting1.setAccountingStatus(AccountingStatusType.REVERSED);
+      accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
       accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
     }
 
@@ -152,11 +144,97 @@ public class Test_PrepaidAccountingEJBBean10_sendMail extends TestBaseUnitAsync 
     Assert.assertTrue("Debe existir el archivo", Files.exists(file));
 
     validateCsvFile("accounting_files/" + accountingFile.getName(), 10, Boolean.TRUE);
+    Files.delete(file);
+  }
 
-    try {
-      getPrepaidAccountingEJBBean10().sendFile(accountingFile.getName(), "test.soporte-prepago@multicaja.cl");
-    } catch(Exception ex) {
+  @Test
+  public void generateFile_sentPendingConciliation() throws Exception {
+    Map<Long, AccountingData10> okData = new HashMap<>();
+
+    // ok
+    {
+      for (int i = 0; i < 10; i++) {
+        AccountingData10 accounting1 = buildRandomAccouting();
+        accounting1.setStatus(AccountingStatusType.PENDING);
+        accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
+
+        accounting1.setConciliationDate(Timestamp.valueOf(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime()));
+
+        accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
+
+        okData.put(accounting1.getId(), accounting1);
+      }
+    }
+
+    // Reversed
+    {
+      AccountingData10 accounting1 = buildRandomAccouting();
+      accounting1.setStatus(AccountingStatusType.REVERSED);
+      accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
+      accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
+    }
+
+    // Not in  range
+    {
+      {
+        AccountingData10 accounting1 = buildRandomAccouting();
+        accounting1.setStatus(AccountingStatusType.PENDING);
+        accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC().plusMonths(2)));
+        accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
+      }
+      {
+        AccountingData10 accounting1 = buildRandomAccouting();
+        accounting1.setStatus(AccountingStatusType.PENDING);
+        accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC().minusMonths(2)));
+        accounting1 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting1);
+      }
+    }
+
+    ZonedDateTime zd = ZonedDateTime.now();
+
+    AccountingFiles10 accountingFile = getPrepaidAccountingEJBBean10().generateAccountingFile(null, zd);
+    Assert.assertNotNull("No deberia ser null", accountingFile);
+    Assert.assertTrue("Debe tener id", accountingFile.getId() > 0);
+    Assert.assertEquals("Debe estar en status PENDING", AccountingStatusType.PENDING, accountingFile.getStatus());
+
+
+    // primer dia del mes anterior
+    ZonedDateTime firstDay = zd
+      .minusMonths(1)
+      .with(TemporalAdjusters.firstDayOfMonth()).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    // ultimo dia del mes anterior
+    ZonedDateTime lastDay = zd
+      .minusMonths(1)
+      .with(TemporalAdjusters.lastDayOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+    ZonedDateTime firstDayUtc = ZonedDateTime.ofInstant(firstDay.toInstant(), ZoneOffset.UTC);
+    ZonedDateTime lastDayUtc = ZonedDateTime.ofInstant(lastDay.toInstant(), ZoneOffset.UTC);
+
+    LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
+    LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
+
+
+    List<AccountingData10> data =  getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT_PENDING_CON, null);
+    Assert.assertNotNull("No deberia ser null", data);
+    Assert.assertEquals("Debe tener 10 registros", 10,data.size());
+    data.forEach(d-> {
+      Assert.assertEquals("Debe tener el fileId", accountingFile.getId(), d.getFileId());
+    });
+
+    Path file = Paths.get("accounting_files/" + accountingFile.getName());
+    Assert.assertTrue("Debe existir el archivo", Files.exists(file));
+
+    validateCsvFile("accounting_files/" + accountingFile.getName(), 10, Boolean.FALSE);
+    Files.delete(file);
+  }
+
+  @Test
+  public void shouldFail_missingDate() throws Exception{
+    try{
+      getPrepaidAccountingEJBBean10().generateAccountingFile(null, null);
       Assert.fail("Should not be here");
+    } catch (BadRequestException brex) {
+      Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
     }
   }
 

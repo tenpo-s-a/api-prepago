@@ -50,6 +50,7 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
       new InParam(paramsIn.get("_in_from"), Types.VARCHAR),
       new InParam(paramsIn.get("_in_to"), Types.VARCHAR),
       new InParam(paramsIn.get("_in_status"), Types.VARCHAR),
+      new InParam(paramsIn.get("_in_accounting_status"), Types.VARCHAR),
       new OutParam("id", Types.BIGINT),
       new OutParam("id_tx", Types.BIGINT),
       new OutParam("type", Types.VARCHAR),
@@ -154,6 +155,7 @@ public class Test_20190211154254_create_sp_mc_acc_search_accounting_data_for_fil
         dateToSearch.put("_in_from", f);
         dateToSearch.put("_in_to", t);
         dateToSearch.put("_in_status", "OK");
+        dateToSearch.put("_in_accounting_status", "OK");
 
         Map<String, Object> resp = queryByDate(dateToSearch);
         Assert.assertNotNull("Debe retornar respuesta", resp);

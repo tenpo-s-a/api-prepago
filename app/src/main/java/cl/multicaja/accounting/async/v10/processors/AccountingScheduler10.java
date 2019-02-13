@@ -26,7 +26,7 @@ public class AccountingScheduler10 extends BaseProcessor10 {
       @Override
       public void process(Exchange exchange) throws Exception {
         log.info(String.format("Generating and sending accounting file", LocalDateTime.now()));
-        getRoute().getPrepaidAccountingEJBBean10().generateAccountingFile(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
+        //getRoute().getPrepaidAccountingEJBBean10().generateAccountingFile(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
       }
     };
   }
