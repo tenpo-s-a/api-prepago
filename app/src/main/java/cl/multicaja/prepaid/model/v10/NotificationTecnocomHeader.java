@@ -13,13 +13,9 @@ import java.util.HashMap;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationTecnocomHeader extends BaseModel {
 
-    //@JsonProperty("entidad")
     private String entidad;
-    //@JsonProperty("centro_alta")
     private String centroAlta;
-    //@JsonProperty("cuenta")
     private String cuenta;
-    //@JsonProperty("pan")
     private String pan;
 
     public String getEntidad() {
