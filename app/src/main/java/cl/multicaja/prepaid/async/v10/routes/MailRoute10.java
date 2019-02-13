@@ -46,8 +46,6 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS = "seda:MailRoute10.pendingSendMailTopupRefundSuccess";
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
-  public static final String ERROR_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
-  public static final String ERROR_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
 
 
   @Override
