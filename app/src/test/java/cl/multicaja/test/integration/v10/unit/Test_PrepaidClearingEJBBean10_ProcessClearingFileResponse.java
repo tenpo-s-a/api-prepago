@@ -309,7 +309,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
   }
 
   public InputStream createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
-    InputStream targetStream = new FileInputStream(getPrepaidClearingEJBBean10().createAccountingCSV(filename, fileId, lstClearingMovement10s));
+    InputStream targetStream = new FileInputStream(getPrepaidClearingEJBBean10().createClearingCSV(filename, fileId, lstClearingMovement10s));
     return targetStream;
   }
 

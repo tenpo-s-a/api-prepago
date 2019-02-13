@@ -7,6 +7,7 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmMessage;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.InParam;
@@ -17,6 +18,7 @@ import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
@@ -30,6 +32,7 @@ import org.springframework.util.Base64Utils;
 import javax.ejb.*;
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
@@ -38,11 +41,11 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * Todos los metodos para el nuevo esquema de contabilidad.
@@ -65,6 +68,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
+  @EJB
+  private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
+
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
@@ -86,6 +92,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setPrepaidClearingEJBBean10(PrepaidClearingEJBBean10 prepaidClearingEJBBean10) {
     this.prepaidClearingEJBBean10 = prepaidClearingEJBBean10;
+  }
+
+  public PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10() {
+    return prepaidAccountingFileEJBBean10;
+  }
+
+  public void setPrepaidAccountingFileEJBBean10(PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10) {
+    this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -191,7 +205,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     // La fecha ya esta en UTC
     LocalDateTime date = accounting10.getTransactionDate().toLocalDateTime();
-    String d = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    String transactionDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    //
+    LocalDateTime rD = accounting10.getConciliationDate().toLocalDateTime();
+    String conciliationDate = rD.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     Object[] params = {
       new InParam(accounting10.getIdTransaction(), Types.BIGINT),
@@ -208,8 +226,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       accounting10.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFee(), Types.NUMERIC),
       accounting10.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFeeIva(),Types.NUMERIC),
       accounting10.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountBalance().getValue(),Types.NUMERIC),
-      new InParam(d,Types.VARCHAR),
-      new InParam(accounting10.getConciliationDateInFormat(),Types.VARCHAR),
+      new InParam(transactionDate,Types.VARCHAR),
+      new InParam(conciliationDate,Types.VARCHAR),
       new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
       new InParam(accounting10.getFileId(), Types.BIGINT),
       new InParam(accounting10.getAccountingStatus().getValue(), Types.VARCHAR),
@@ -493,60 +511,111 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return accounting;
   }
 
-  /**
-   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
-   * @param headers
-   * @param date la fecha recibida debe estar en UTC
-   * @return
-   * @throws Exception
-   */
-  @Override
-  public void generateAccountingFile(Map<String, Object> headers, LocalDateTime date) throws Exception {
-    if(date == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
-    }
-
-    List<AccountingData10> movements = this.searchAccountingData(null, date);
-    String fileName = "src/main/resources/accounting_file.csv";
-    createAccountingCSV(fileName, movements); // Crear archivo csv temporal
-    sendFile(fileName, getConfigUtils().getProperty("accounting.email.dailyreport")); // envia archivo al email de reportes
-    new File(fileName).delete(); // borra el archivo creado
-  }
-
-  public void createAccountingCSV(String filename, List<AccountingData10> lstAccountingMovement10s) throws IOException {
+  public File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    String[] header = new String[]{"ID", "FECHA", "TIPO", "MONTO_IPM", "MONTO_USD", "DIF_TIPO_CAMBIO", "COMISION", "IVA"};
+    // TODO: Agregar tasa de intercambio
+    String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
+      "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
+      "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
+      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS"};
     writer.writeNext(header);
 
-    for (AccountingData10 mov : lstAccountingMovement10s) {
-      String[] data = new String[]{ mov.getId().toString(),
-                                    mov.getTransactionDateInFormat(),
-                                    mov.getType().getValue(),
-                                    mov.getAmount().getValue().toString(),
-                                    mov.getAmountUsd().getValue().toString(),
-                                    mov.getExchangeRateDif().toString(),
-                                    mov.getFee().toString(),
-                                    mov.getFeeIva().toString() };
+    for (AccountingData10 mov : accountingData) {
+
+      String transactionDate = getTimestampAtTimezone(mov.getTransactionDate(), null, null);
+
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null);
+
+      String reconciliationDate = "";
+
+      /**
+       * Se evalua la fecha de conciliacion:
+       *  - Si la fecha de conciliacion es mayor a hoy, el movimiento no ha sido conciliado.
+       *  - Si la fecha de conciliacion es menor a hoy, ya el movimiento fue conciliado.
+       */
+      if(conciliationDate.isBefore(ZonedDateTime.now())) {
+        reconciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null, null);
+      }
+
+      String usdValue = "";
+      if(mov.getAmountMastercard().getValue().doubleValue() > 0) {
+        usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
+      }
+
+      String[] data = new String[]{
+        mov.getId().toString(), //ID_PREPAGO,
+        fileId, //ID_LIQUIDACION,
+        mov.getIdTransaction().toString(), //ID_TRX
+        "", //ID_CUENTA_ORIGEN - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+        mov.getType().getValue(), //TIPO_TRX
+        mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
+        transactionDate, //FECHA_TRX
+        reconciliationDate, //FECHA_CONCILIACION
+        mov.getAmount().getValue().toBigInteger().toString(), //MONTO_TRX_PESOS
+        mov.getAmountMastercard().getValue().toBigInteger().toString(), //MONTO_TRX_MCARD_PESOS
+        mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
+        usdValue, //VALOR_USD
+        mov.getExchangeRateDif().toString(), //DIF_TIPO_CAMBIO
+        mov.getFee().toBigInteger().toString(), //COMISION_PREPAGO_PESOS
+        mov.getFeeIva().toBigInteger().toString(), //IVA_COMISION_PREPAGO_PESOS
+        mov.getCollectorFee().toBigInteger().toString(), //COMISION_RECAUDADOR_MC_PESOS
+        mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
+        mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
+        "" //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+      };
       writer.writeNext(data);
     }
     writer.close();
+    return file;
+  }
+
+  private static final String TIME_ZONE = "America/Santiago";
+  private static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+  private String getTimestampAtTimezone(Timestamp ts, String timeZone, String pattern) {
+    if(StringUtils.isAllBlank(pattern)) {
+      pattern = DATE_PATTERN;
+    }
+
+    ZonedDateTime atTimezone = getTimestampAtTimezone(ts, timeZone);
+    return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
+  }
+
+  private ZonedDateTime getTimestampAtTimezone(Timestamp ts, String timeZone) {
+    if(ts == null) {
+      ts = Timestamp.from(Instant.now());
+    }
+    if(StringUtils.isAllBlank(timeZone)) {
+      timeZone = TIME_ZONE;
+    }
+    LocalDateTime localDateTime = ts.toLocalDateTime();
+    ZonedDateTime utc = localDateTime.atZone(ZoneOffset.UTC);
+
+    return utc.withZoneSameInstant(ZoneId.of(timeZone));
   }
 
   public void sendFile(String fileName, String emailAddress) throws Exception {
-    FileInputStream attachmentFile = new FileInputStream(fileName);
+
+    String file = "accounting_files/" + fileName;
+
+    FileInputStream attachmentFile = new FileInputStream(file);
     String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
+
+    attachmentFile.close();
 
     // Enviamos el archivo al mail de reportes diarios
     EmailBody emailBodyToSend = new EmailBody();
-    String fileNameToSend = String.format("reporte_contable_%s.csv", LocalDateTime.now().atZone(ZoneId.of("America/Santiago")).toLocalDate().toString());
-    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileNameToSend);
+
+    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
     emailBodyToSend.setTemplateData(null);
     emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
     emailBodyToSend.setAddress(emailAddress);
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+    Files.delete(Paths.get(file));
   }
 
   @Override
@@ -975,6 +1044,171 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     return;
+  }
+
+  private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
+
+  /**
+   * Busca los movimientos de accounting segun estado y rango de fechas. Las fechas ya deben venir en UTC.
+   * @param headers
+   * @param from fecha desde en UTC
+   * @param to fecha hasta en UTC
+   * @param status
+   * @return
+   * @throws Exception
+   */
+  public List<AccountingData10> getAccountingDataForFile(Map<String, Object> headers, LocalDateTime from, LocalDateTime to, AccountingStatusType status, AccountingStatusType accountingStatus) throws Exception {
+
+    if(from == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "from"));
+    }
+
+    if(to == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "to"));
+    }
+
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    String f = from.format(formatter);
+    String t = to.format(formatter);
+
+    Object[] params = {
+      f == null ? new NullParam(Types.VARCHAR) : f,
+      t == null ? new NullParam(Types.VARCHAR) : t,
+      status == null ? new NullParam(Types.VARCHAR) : status.getValue(),
+      accountingStatus == null ? new NullParam(Types.VARCHAR) : accountingStatus.getValue()
+    };
+    log.info(params);
+    RowMapper rm = (Map<String, Object> row) -> {
+      AccountingData10 data = new AccountingData10();
+
+      data.setId(getNumberUtils().toLong(row.get("_id")));
+      data.setIdTransaction(getNumberUtils().toLong(row.get("_id_tx")));
+      data.setType(AccountingTxType.fromValue(String.valueOf(row.get("_type"))));
+      data.setOrigin(AccountingOriginType.fromValue(String.valueOf(row.get("_origin"))));
+      data.setAccountingMovementType(AccountingMovementType.fromValue(String.valueOf(row.get("_accounting_mov"))));
+      data.setFileId(getNumberUtils().toLong(row.get("_file_id")));
+
+      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
+      amount.setValue(getNumberUtils().toBigDecimal(row.get("_amount")));
+      amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmount(amount);
+
+      NewAmountAndCurrency10 amountUsd = new NewAmountAndCurrency10();
+      amountUsd.setValue(getNumberUtils().toBigDecimal(row.get("_amount_usd")));
+      amountUsd.setCurrencyCode(CodigoMoneda.USA_USD);
+      data.setAmountUsd(amountUsd);
+
+      NewAmountAndCurrency10 amountMc = new NewAmountAndCurrency10();
+      amountMc.setValue(getNumberUtils().toBigDecimal(row.get("_amount_mcar")));
+      amountMc.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmountMastercard(amountMc);
+
+      data.setExchangeRateDif(getNumberUtils().toBigDecimal(row.get("_exchange_rate_dif")));
+      data.setFee(getNumberUtils().toBigDecimal(row.get("_fee")));
+      data.setFeeIva(getNumberUtils().toBigDecimal(row.get("_fee_iva")));
+      data.setCollectorFee(getNumberUtils().toBigDecimal(row.get("_collector_fee")));
+      data.setCollectorFeeIva(getNumberUtils().toBigDecimal(row.get("_collector_fee_iva")));
+
+      NewAmountAndCurrency10 amountBalance = new NewAmountAndCurrency10();
+      amountBalance.setValue(getNumberUtils().toBigDecimal(row.get("_amount_balance")));
+      amountBalance.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+      data.setAmountBalance(amountBalance);
+
+      data.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
+      data.setTransactionDate((Timestamp) row.get("_transaction_date"));
+      data.setConciliationDate((Timestamp) row.get("_conciliation_date"));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt((Timestamp)row.get("_create_date"));
+      timestamps.setUpdatedAt((Timestamp)row.get("_update_date"));
+      data.setTimestamps(timestamps);
+
+      data.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_accounting_status"))));
+
+      return data;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_accounting_data_for_file_v10", rm, params);
+    log.info("Respuesta Busca Movimiento: "+ resp);
+
+    List<AccountingData10> result = (List<AccountingData10>)resp.get("result");
+    return result != null ? result : Collections.EMPTY_LIST;
+  }
+
+  /**
+   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
+   * @param headers
+   * @param date
+   * @return
+   * @throws Exception
+   */
+  public AccountingFiles10 generateAccountingFile(Map<String, Object> headers, ZonedDateTime date) throws Exception {
+    if(date == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
+    }
+
+    // primer dia del mes anterior
+    ZonedDateTime firstDay = date.minusMonths(1)
+      .with(TemporalAdjusters.firstDayOfMonth())
+      .withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    // ultimo dia del mes anterior
+    ZonedDateTime lastDay = date
+      .minusMonths(1)
+      .with(TemporalAdjusters.lastDayOfMonth())
+      .withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+    ZonedDateTime firstDayUtc = ZonedDateTime.ofInstant(firstDay.toInstant(), ZoneOffset.UTC);
+    ZonedDateTime lastDayUtc = ZonedDateTime.ofInstant(lastDay.toInstant(), ZoneOffset.UTC);
+
+    LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
+    LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
+
+    List<AccountingData10> movements = this.getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.PENDING, AccountingStatusType.OK);
+
+    if(movements.isEmpty()){
+      return null;
+    }
+
+    String directoryName = "accounting_files";
+    File directory = new File(directoryName);
+    if (! directory.exists()){
+      directory.mkdir();
+    }
+
+    String fileId = date.minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMM"));
+    String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
+
+    createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+
+    AccountingFiles10 file = new AccountingFiles10();
+    file.setStatus(AccountingStatusType.PENDING);
+    file.setName(fileName);
+    file.setFileId(fileId);
+    file.setFileFormatType(AccountingFileFormatType.CSV);
+    file.setFileType(AccountingFileType.ACCOUNTING);
+    file.setUrl("");
+
+    file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
+
+    movements = this.updateAccountingData(headers, movements, file.getId());
+
+    return file;
+  }
+
+  private List<AccountingData10> updateAccountingData (Map<String, Object> header, List<AccountingData10> data, Long fileId) throws Exception {
+    if(data == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "data"));
+    }
+
+    for (AccountingData10 m : data) {
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(m.getConciliationDate(), null);
+      AccountingStatusType status = conciliationDate.isBefore(ZonedDateTime.now()) ? AccountingStatusType.SENT : AccountingStatusType.SENT_PENDING_CON;
+      this.updateAccountingData(null, m.getId(), fileId, status, null, null);
+    }
+    return data;
   }
 
 }
