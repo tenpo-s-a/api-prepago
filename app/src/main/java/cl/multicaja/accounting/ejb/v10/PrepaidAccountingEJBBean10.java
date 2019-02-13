@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -489,7 +490,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return accounting;
   }
 
-  public File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+  private File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -498,7 +499,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
-      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS"};
+      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO"};
     writer.writeNext(header);
 
     for (AccountingData10 mov : accountingData) {
@@ -543,6 +544,72 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "" //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+      };
+      writer.writeNext(data);
+    }
+    writer.close();
+    return file;
+  }
+
+  private File createAccountingReconciliationCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+    File file = new File(filename);
+    FileWriter outputFile = new FileWriter(file);
+    CSVWriter writer = new CSVWriter(outputFile,',');
+
+    // TODO: Agregar tasa de intercambio
+    String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
+      "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
+      "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
+      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO", "ESTADO_CONTABLE"};
+    writer.writeNext(header);
+
+    for (AccountingData10 mov : accountingData) {
+
+      String transactionDate = getTimestampAtTimezone(mov.getTransactionDate(), null, null);
+
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null);
+
+      String reconciliationDate = "";
+
+      /**
+       * Se evalua la fecha de conciliacion:
+       *  - Si la fecha de conciliacion es mayor a hoy, el movimiento no ha sido conciliado.
+       *  - Si la fecha de conciliacion es menor a hoy, ya el movimiento fue conciliado.
+       */
+      if(conciliationDate.isBefore(ZonedDateTime.now())) {
+        reconciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null, null);
+      }
+
+      String usdValue = "";
+      if(mov.getAmountMastercard().getValue().doubleValue() > 0) {
+        usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
+      }
+
+      Boolean printStatus = Stream.of(AccountingStatusType.OK, AccountingStatusType.PENDING, AccountingStatusType.INITIAL)
+        .anyMatch(s -> mov.getAccountingStatus().equals(s));
+
+      String[] data = new String[]{
+        mov.getId().toString(), //ID_PREPAGO,
+        fileId, //ID_LIQUIDACION,
+        mov.getIdTransaction().toString(), //ID_TRX
+        "", //ID_CUENTA_ORIGEN - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+        mov.getType().getValue(), //TIPO_TRX
+        mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
+        transactionDate, //FECHA_TRX
+        reconciliationDate, //FECHA_CONCILIACION
+        mov.getAmount().getValue().toBigInteger().toString(), //MONTO_TRX_PESOS
+        mov.getAmountMastercard().getValue().toBigInteger().toString(), //MONTO_TRX_MCARD_PESOS
+        mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
+        usdValue, //VALOR_USD
+        mov.getExchangeRateDif().toString(), //DIF_TIPO_CAMBIO
+        mov.getFee().toBigInteger().toString(), //COMISION_PREPAGO_PESOS
+        mov.getFeeIva().toBigInteger().toString(), //IVA_COMISION_PREPAGO_PESOS
+        mov.getCollectorFee().toBigInteger().toString(), //COMISION_RECAUDADOR_MC_PESOS
+        mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
+        mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
+        "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+        StringUtils.isAllBlank(reconciliationDate) ? AccountingStatusType.NOT_CONFIRMED.getValue() :
+          printStatus ? "" : mov.getAccountingStatus().getValue() //ESTADO_CONTABLE
       };
       writer.writeNext(data);
     }
@@ -1172,6 +1239,67 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
 
     movements = this.updateAccountingData(headers, movements, file.getId());
+
+    return file;
+  }
+
+  public AccountingFiles10 generatePendingConciliationResultFile(Map<String, Object> headers, ZonedDateTime date) throws Exception {
+    if(date == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
+    }
+
+    // primer dia de dos meses antes
+    ZonedDateTime firstDay = date
+      .minusMonths(2)
+      .with(TemporalAdjusters.firstDayOfMonth())
+      .withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    // ultimo dia de dos meses antes
+    ZonedDateTime lastDay = date
+      .minusMonths(2)
+      .with(TemporalAdjusters.lastDayOfMonth())
+      .withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+    ZonedDateTime firstDayUtc = ZonedDateTime.ofInstant(firstDay.toInstant(), ZoneOffset.UTC);
+    ZonedDateTime lastDayUtc = ZonedDateTime.ofInstant(lastDay.toInstant(), ZoneOffset.UTC);
+
+    LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
+    LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
+
+    List<AccountingData10> movements = this.getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT_PENDING_CON, null);
+
+    if(movements.isEmpty()){
+      return null;
+    }
+
+    String directoryName = "accounting_files";
+    File directory = new File(directoryName);
+    if (! directory.exists()){
+      directory.mkdir();
+    }
+
+    String fileId = date.minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMM"));
+    String month = date.minusMonths(2).format(DateTimeFormatter.ofPattern("yyyyyMM"));
+    String fileName = String.format("%s_CUADRATURA_%s_PREPAGO.CSV", fileId, month);
+
+    createAccountingReconciliationCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+
+    AccountingFiles10 file = new AccountingFiles10();
+    file.setStatus(AccountingStatusType.PENDING);
+    file.setName(fileName);
+    file.setFileId(fileId);
+    file.setFileFormatType(AccountingFileFormatType.CSV);
+    file.setFileType(AccountingFileType.ACCOUNTING_RECONCILIATION);
+    file.setUrl("");
+
+    file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
+
+    for (AccountingData10 m : movements) {
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(m.getConciliationDate(), null);
+      AccountingStatusType status = conciliationDate.isBefore(ZonedDateTime.now()) ? m.getAccountingStatus() : AccountingStatusType.NOT_CONFIRMED;
+
+      this.updateAccountingData(null, m.getId(), file.getId(), AccountingStatusType.SENT, status, null);
+    }
 
     return file;
   }

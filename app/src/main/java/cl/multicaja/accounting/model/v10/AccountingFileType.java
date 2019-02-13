@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 public enum AccountingFileType {
 
   ACCOUNTING("Accounting"),
+  ACCOUNTING_RECONCILIATION("Accounting Reconciliation"),
   CLEARING("Clearing");
 
 
