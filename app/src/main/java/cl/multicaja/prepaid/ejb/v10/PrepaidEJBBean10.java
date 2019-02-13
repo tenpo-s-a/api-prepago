@@ -2715,27 +2715,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BadRequestException badRequestException = null;
 
     if(notificationTecnocom.getHeader() == null){
-      badRequestException =  new BadRequestException();
-      badRequestException.setData(new KeyValue("value", "header null / error"));
-      badRequestException.setCode(500);
-      badRequestException.setStatus(500);
-      throw badRequestException;
+      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "header"));
     }
 
     if(notificationTecnocom.getBody() == null){
-      badRequestException =  new BadRequestException();
-      badRequestException.setData(new KeyValue("value", "body null / error"));
-      badRequestException.setCode(500);
-      badRequestException.setStatus(500);
-      throw badRequestException;
+      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "body"));
     }
 
     if(notificationTecnocom.getBase64Data() == null){
-      badRequestException =  new BadRequestException();
-      badRequestException.setData(new KeyValue("value", "base64Data"));
-      badRequestException.setCode(PARAMETRO_FALTANTE_$VALUE.getValue());
-      badRequestException.setStatus(400);
-      throw badRequestException;
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "base64Data"));
     }
 
     Boolean isBase64;
@@ -2743,11 +2731,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
 
       if(isBase64 == false){
-        badRequestException =  new BadRequestException();
-        badRequestException.setData(new KeyValue("value", "base64Data"));
-        badRequestException.setCode(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue());
-        badRequestException.setStatus(422);
-        throw badRequestException;
+        throw new ValidationException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "base64Data"));
       }
 
       String[] mandatoryFieldsHeader = {
@@ -2786,11 +2770,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           committedFields = " These fields are null or empty, " + "By Headers: " + fieldsOnNullFromHeader.keySet()
             + ", By Body: " + fieldsOnNullFromBody.keySet();
         }
-        badRequestException = new BadRequestException();
-        badRequestException.setData(new KeyValue("value", committedFields));
-        badRequestException.setCode(PARAMETRO_FALTANTE_$VALUE.getValue());
-        badRequestException.setStatus(400);
-        throw badRequestException;
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", committedFields));
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted

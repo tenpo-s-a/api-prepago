@@ -155,7 +155,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     Map<String, Object> errorObj = httpResponse.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Status 400",422,errorObj.get("status"));
+    Assert.assertEquals("Status 422",422,errorObj.get("status"));
     Assert.assertEquals("Deberia tener error code = 101007", PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue(), errorObj.get("code"));
   }
 
@@ -322,7 +322,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Status 500",500,errorObj.get("status"));
-    Assert.assertEquals("Deberia tener error code = 500", 500, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
 
   }
 
