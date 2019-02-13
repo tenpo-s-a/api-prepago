@@ -43,15 +43,6 @@ public interface PrepaidAccountingEJB10 {
   List<AccountingData10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
 
   /**
-   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
-   * @param headers
-   * @param date la fecha recibida debe estar en UTC
-   * @return
-   * @throws Exception
-   */
-  void generateAccountingFile(Map<String, Object> headers, LocalDateTime date) throws Exception;
-
-  /**
    * Agrega registro de archivo IPM
    * @param headers
    * @param file

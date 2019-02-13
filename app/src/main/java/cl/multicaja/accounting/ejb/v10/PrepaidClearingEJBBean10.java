@@ -285,7 +285,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   /**
-   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
+   * Busca los movimientos en clearing y genera un archivo csv que se envia por correo
    * @param headers
    * @param date
    * @return
@@ -337,7 +337,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
 
-    createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+    createClearingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
 
     AccountingFiles10 file = new AccountingFiles10();
     file.setStatus(AccountingStatusType.PENDING);
@@ -375,7 +375,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
 
-  public File createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
+  public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');

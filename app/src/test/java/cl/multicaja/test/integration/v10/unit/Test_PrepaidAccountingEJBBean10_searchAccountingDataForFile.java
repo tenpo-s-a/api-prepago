@@ -99,7 +99,7 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingDataForFile extends
     LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
-    List<AccountingData10> data = getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.PENDING);
+    List<AccountingData10> data = getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.PENDING, null);
 
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertFalse("La lista no debe estar vacia", data.isEmpty());
@@ -148,7 +148,7 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingDataForFile extends
     LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
     LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
 
-    List<AccountingData10> data = getPrepaidAccountingEJBBean10().getAccountingDataForFile(null,  ldtFrom, ldtTo, AccountingStatusType.PENDING);
+    List<AccountingData10> data = getPrepaidAccountingEJBBean10().getAccountingDataForFile(null,  ldtFrom, ldtTo, AccountingStatusType.PENDING, null);
 
     Assert.assertNotNull("No deberia ser null", data);
     Assert.assertTrue("La lista debe estar vacia", data.isEmpty());
@@ -157,7 +157,7 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingDataForFile extends
   @Test
   public void shouldFail_missingFrom() throws Exception{
     try{
-      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, null, null, null);
+      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, null, null, null, null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -167,7 +167,7 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingDataForFile extends
   @Test
   public void shouldFail_missingTo() throws Exception{
     try{
-      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, LocalDateTime.now(), null, null);
+      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, LocalDateTime.now(), null, null, null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -177,7 +177,7 @@ public class Test_PrepaidAccountingEJBBean10_searchAccountingDataForFile extends
   @Test
   public void shouldFail_missingStatus() throws Exception{
     try{
-      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, LocalDateTime.now(), LocalDateTime.now(), null);
+      getPrepaidAccountingEJBBean10().getAccountingDataForFile(null, LocalDateTime.now(), LocalDateTime.now(), null, null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Falta parametro", PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());

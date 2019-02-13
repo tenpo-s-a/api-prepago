@@ -22,6 +22,7 @@ CREATE OR REPLACE FUNCTION ${schema.acc}.mc_acc_search_accounting_data_for_file_
   IN _in_from VARCHAR,
   IN _in_to VARCHAR,
   IN _in_status VARCHAR,
+  IN _in_accounting_status VARCHAR,
   OUT _id BIGINT,
   OUT _id_tx BIGINT,
   OUT _type VARCHAR,
@@ -76,11 +77,11 @@ RETURN QUERY
     a.accounting_mov
   FROM
     ${schema.acc}.accounting a
-    LEFT join ${schema.acc}.accounting_files f ON a.file_id = f.id
   WHERE
     (COALESCE(_in_from,'') = '' OR a.transaction_date >= TO_TIMESTAMP(_in_from, 'YYYY-MM-DD HH24:MI:SS')) AND
     (COALESCE(_in_to,'') = '' OR a.transaction_date <= TO_TIMESTAMP(_in_to, 'YYYY-MM-DD HH24:MI:SS')) AND
-    (COALESCE(_in_status,'') = '' OR a.status = _in_status)
+    (COALESCE(_in_status,'') = '' OR a.status = _in_status) AND
+    (COALESCE(_in_accounting_status,'') = '' OR a.accounting_status = _in_accounting_status)
   ORDER BY
     a.transaction_date ASC;
 RETURN;
@@ -90,4 +91,4 @@ $function$
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_accounting_data_for_file_v10(VARCHAR, VARCHAR,VARCHAR);
+DROP FUNCTION IF EXISTS ${schema.acc}.mc_acc_search_accounting_data_for_file_v10(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
