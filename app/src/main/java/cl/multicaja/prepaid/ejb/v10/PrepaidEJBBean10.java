@@ -2704,23 +2704,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
 
-    if(transaction10s.size() > 0){
+    if(!transaction10s.isEmpty()){
 
-      for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
-        CdtTransaction10 cdtTransaction = iter.next();
+      CdtTransaction10 cdtTransaction10 = transaction10s.stream().filter(t ->
+        CdtTransactionType.REVERSA_CARGA.equals(t.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(t.getTransactionType())
+      ).findFirst().orElse(null);
 
-        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType()) ||
-          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(cdtTransaction.getTransactionType())){
+      if(cdtTransaction10 != null) {
+        cdtTransaction10.setTransactionType(cdtTransaction10.getCdtTransactionTypeConfirm());
+        cdtTransaction10.setIndSimulacion(Boolean.FALSE);
+        cdtTransaction10.setTransactionReference(cdtTransaction10.getId());
+        cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
 
-          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
-          cdtTransaction.setIndSimulacion(Boolean.FALSE);
-          cdtTransaction.setTransactionReference(cdtTransaction.getId());
-          cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-        }
-
+        this.getMailDelegate().sendTopupRefundCompleteMail(getUserClient().getUserById(null, prepaidUserTest.getUserIdMc()), prepaidMovement);
       }
-
     }
   }
 

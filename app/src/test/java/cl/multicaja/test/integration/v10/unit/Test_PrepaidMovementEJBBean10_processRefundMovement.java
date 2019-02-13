@@ -30,12 +30,8 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     User user = registerUser();
 
-    System.out.println("userRut: "+user.getRut());
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-
-    System.out.println("prepaidUserId: "+prepaidUser.getId());
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
@@ -103,12 +99,8 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     User user = registerUser();
 
-    System.out.println("userRut: "+user.getRut());
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-
-    System.out.println("prepaidUserId: "+prepaidUser.getId());
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);

@@ -40,6 +40,15 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ = "MailRoute10.errorSendMailWithdrawFailed.req";
   public static final String ERROR_SEND_MAIL_WITHDRAW_FAILED_RESP = "MailRoute10.errorSendMailWithdrawFailed.resp";
 
+  /*
+    Comprobante de devolucion exitosa
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS = "seda:MailRoute10.pendingSendMailTopupRefundSuccess";
+  public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
+  public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
+  public static final String ERROR_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
+  public static final String ERROR_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
+
 
   @Override
   public void configure() throws Exception {
@@ -115,5 +124,18 @@ public class MailRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processErrorPendingWithdrawFailedMail())
       .to(createJMSEndpoint(ERROR_SEND_MAIL_WITHDRAW_FAILED_RESP)).end();
+
+
+    /**
+     * Envio de confirmacion de devolucion
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingTopupRefundConfirmationMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP + confResp)).end();
+
   }
 }

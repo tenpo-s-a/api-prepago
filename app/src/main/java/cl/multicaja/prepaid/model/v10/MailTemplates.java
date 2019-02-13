@@ -26,5 +26,6 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_WITHDRAW = String.format("%s/RecepcionRetiro", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_SUCCESS = String.format("%s/RetiroExitoso", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_FAILED = String.format("%s/RetiroFallado", APPNAME);
+  public static final String TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE = String.format("%s/DevolucionCargaOk", APPNAME);
 
 }
