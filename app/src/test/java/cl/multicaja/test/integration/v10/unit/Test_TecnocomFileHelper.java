@@ -29,8 +29,9 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertEquals("Deberia tener 16 registros", 16, file.getDetails().size());
   }
 
+  //Archivo con autorizaciones.
   @Test
-  public void shouldProcessFile_Full() throws Exception {
+  public void shouldProcessFileAut() throws Exception {
     InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0004");
     ReconciliationFile file = TecnocomFileHelper.getInstance().validateFile(inputStream);
     inputStream.close();
