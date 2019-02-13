@@ -26,7 +26,7 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertNotNull("Deberia detalles", file.getDetails());
     Assert.assertFalse("Deberia detalles", file.getDetails().isEmpty());
     Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
-    Assert.assertEquals("Deberia tener 26 registros", 16, file.getDetails().size());
+    Assert.assertEquals("Deberia tener 16 registros", 16, file.getDetails().size());
   }
 
   @Test
@@ -41,7 +41,7 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertNotNull("Deberia detalles", file.getDetails());
     Assert.assertFalse("Deberia detalles", file.getDetails().isEmpty());
     Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
-    Assert.assertEquals("Deberia tener 36 registros", 18, file.getDetails().size());
+    Assert.assertEquals("Deberia tener 18 registros", 18, file.getDetails().size());
     for(ReconciliationFileDetail detail :file.getDetails()){
       System.out.println(detail);
     }
