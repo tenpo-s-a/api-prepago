@@ -2730,16 +2730,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw badRequestException;
       }
 
-      NotificationTecnocomHeader notificationTecnocomHeader = new NotificationTecnocomHeader();
-      NotificationTecnocomBody notificationTecnocomBody = new NotificationTecnocomBody();
-
       String[] mandatoryFieldsHeader = {
         NotificationTecnocomHeader.class.getDeclaredField("centroAlta").getName(),
         NotificationTecnocomHeader.class.getDeclaredField("cuenta").getName(),
         NotificationTecnocomHeader.class.getDeclaredField("entidad").getName(),
         NotificationTecnocomHeader.class.getDeclaredField("pan").getName()
       };
-      HashMap<String,Object> fieldsOnNullFromHeader = notificationTecnocomHeader.checkNull(mandatoryFieldsHeader);
+      HashMap<String,Object> fieldsOnNullFromHeader = notificationTecnocom.getHeader().checkNull(mandatoryFieldsHeader);
 
       String [] mandatoryFieldsBody = {
         NotificationTecnocomBody.class.getDeclaredField("sdCurrencyCode").getName(),
@@ -2757,7 +2754,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         NotificationTecnocomBody.class.getDeclaredField("placeName").getName(),
         NotificationTecnocomBody.class.getDeclaredField("resolucionTx").getName()
       };
-      HashMap<String,Object> fieldsOnNullFromBody = notificationTecnocomBody.checkNull(mandatoryFieldsBody);
+      HashMap<String,Object> fieldsOnNullFromBody = notificationTecnocom.getBody().checkNull(mandatoryFieldsBody);
 
       if((fieldsOnNullFromHeader.size() >= 1 || fieldsOnNullFromBody.size() >= 1) && isBase64 == true) {
 
@@ -2776,7 +2773,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw badRequestException;
       }
 
-      if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){
+      if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
         notificationTecnocom.setErrorCode("202");
       }
 

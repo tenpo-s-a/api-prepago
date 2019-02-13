@@ -5,7 +5,6 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.NotificationTecnocom;
 import cl.multicaja.prepaid.model.v10.NotificationTecnocomBody;
 import cl.multicaja.prepaid.model.v10.NotificationTecnocomHeader;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -70,13 +69,13 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
     HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     messageResponse = httpResponse.getResp();
-    System.out.println(messageResponse);
-    //Assert.assertEquals(messageResponse,202,httpResponse.getStatus());
+    Assert.assertEquals(messageResponse,202,httpResponse.getStatus());
 
   }
 
   @Test
   public void testCallNotificationWithoutBase64ParamOrNullValue() {
+
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
@@ -119,6 +118,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
   @Test
   public void testCallNotificationWithBase64NotValidParamValue() {
+
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
@@ -161,6 +161,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
   @Test
   public void testCallNotificationMoreThanOneParamsOnNull() {
+
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
@@ -204,7 +205,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
   @Test
   public void testCallNotificationEmptyHeaderDataAndEmptyBodyData() {
 
-    String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
@@ -231,7 +231,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
   @Test
   public void testCallNotificationEmptyHeaderDataAndCompleteBodyData() {
 
-    String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
@@ -271,7 +270,7 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
   @Test
   public void testcallNotificationHeaderDataAndEmptyBodyData() {
-    String messageResponse;
+
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
 
     HttpHeader[] headers = {
