@@ -2,6 +2,8 @@ package cl.multicaja.prepaid.helpers.tecnocom.model;
 
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
+import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
+import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.math.BigDecimal;
@@ -15,8 +17,7 @@ import java.util.Set;
 public class ReconciliationFileDetail {
 
   public static final String FECFACT_DATE_FORMAT = "yyyy-MM-dd";
-  public static final String OPERATION_TYPE = "OP";
-  public static final String SAT_ORIGIN = "ONLI";
+  private static final String SAT_ORIGIN = "ONLI";
 
   private String detail;
   private Boolean hasError;
@@ -31,11 +32,14 @@ public class ReconciliationFileDetail {
     TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA,
     TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA));
 
+  //Datos Comunes
   private final ReconciliationFileLayout CODENT = new ReconciliationFileLayout(120, 4, null);
   private final ReconciliationFileLayout CENTALTA = new ReconciliationFileLayout(124, 4, null);
   private final ReconciliationFileLayout CUENTA = new ReconciliationFileLayout(128, 12, null);
   private final ReconciliationFileLayout PAN = new ReconciliationFileLayout(140, 22, null);
   private final ReconciliationFileLayout TIPOREG = new ReconciliationFileLayout(162, 2, null);
+
+  //DATOS OP
   private final ReconciliationFileLayout CLAMON = new ReconciliationFileLayout(176, 3, null);
   private final ReconciliationFileLayout INDNORCOR = new ReconciliationFileLayout(209, 1, null);
   private final ReconciliationFileLayout TIPOFAC = new ReconciliationFileLayout(225, 4, null);
@@ -50,6 +54,25 @@ public class ReconciliationFileDetail {
   private final ReconciliationFileLayout NUMEXTCTA = new ReconciliationFileLayout(776, 3, null);
   private final ReconciliationFileLayout TIPOLIN = new ReconciliationFileLayout(942, 4, null);
   private final ReconciliationFileLayout LINREF = new ReconciliationFileLayout(988, 8, null);
+  private final ReconciliationFileLayout NOMCOMRED = new ReconciliationFileLayout(2094, 27, null);
+
+  //DATOS AU
+  private final ReconciliationFileLayout CLAMON_AU = new ReconciliationFileLayout(176, 3, null);
+  private final ReconciliationFileLayout INDNORCOR_AU = new ReconciliationFileLayout(209, 1, null);
+  private final ReconciliationFileLayout TIPOFAC_AU = new ReconciliationFileLayout(240, 4, null);
+  private final ReconciliationFileLayout FECTRN_AU = new ReconciliationFileLayout(274, 10, null);
+  private final ReconciliationFileLayout HORTRN_AU = new ReconciliationFileLayout(284, 8, null);
+  private final ReconciliationFileLayout CLAMONDIV_AU = new ReconciliationFileLayout(292, 3, null);
+  private final ReconciliationFileLayout SIGNODIV_AU = new ReconciliationFileLayout(325, 1, null);
+  private final ReconciliationFileLayout IMPDIV_AU = new ReconciliationFileLayout(326, 17, 2);
+  private final ReconciliationFileLayout SIGNOAUT_AU = new ReconciliationFileLayout(343, 1, null);
+  private final ReconciliationFileLayout IMPAUTCON_AU = new ReconciliationFileLayout(344, 17, 2);
+  private final ReconciliationFileLayout CMBAPLI_AU = new ReconciliationFileLayout(361, 9, 4);
+  private final ReconciliationFileLayout NUMAUT_AU = new ReconciliationFileLayout(370, 6, null);
+  private final ReconciliationFileLayout CODCOM_AU = new ReconciliationFileLayout(376, 15, null);
+  private final ReconciliationFileLayout NOMCOMRED_AU = new ReconciliationFileLayout(391, 27, null);
+  private final ReconciliationFileLayout CODACT_AU = new ReconciliationFileLayout(418, 4, null);
+
 
 
   public ReconciliationFileDetail() {
@@ -84,63 +107,194 @@ public class ReconciliationFileDetail {
   }
 
   public String getClamon() {
-    return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON_AU.getStart(), this.CLAMON_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   private String getIndnorcor() {
-    return this.detail.substring(this.INDNORCOR.getStart(), this.INDNORCOR.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.INDNORCOR.getStart(), this.INDNORCOR.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.INDNORCOR_AU.getStart(), this.INDNORCOR_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   private String getTipoFactura() {
-    return this.detail.substring(this.TIPOFAC.getStart(), this.TIPOFAC.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.TIPOFAC.getStart(), this.TIPOFAC.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.TIPOFAC_AU.getStart(), this.TIPOFAC_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public TipoFactura getTipoFac() {
     return TipoFactura.valueOfEnumByCodeAndCorrector(NumberUtils.getInstance().toInt(this.getTipoFactura()), NumberUtils.getInstance().toInt(this.getIndnorcor()));
   }
+  public TecnocomOperationType getOperationType(){
+    return TecnocomOperationType.fromValue(this.getTiporeg());
+  }
 
   public String getFecfac() {
-    return this.detail.substring(this.FECFAC.getStart(), this.FECFAC.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())) {
+      return this.detail.substring(this.FECFAC.getStart(), this.FECFAC.getEnd());
+    } else {
+      return "";
+    }
+
   }
 
   public String getNumaut() {
-    return this.detail.substring(this.NUMAUT.getStart(), this.NUMAUT.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.NUMAUT.getStart(), this.NUMAUT.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.NUMAUT_AU.getStart(), this.NUMAUT_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public BigDecimal getImpfac() {
-    return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal());
+    } else{
+      return BigDecimal.ZERO;
+    }
   }
 
   public String getCodcom() {
-    return this.detail.substring(this.CODCOM.getStart(), this.CODCOM.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CODCOM.getStart(), this.CODCOM.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CODCOM_AU.getStart(), this.CODCOM_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public String getCodact() {
-    return this.detail.substring(this.CODACT.getStart(), this.CODACT.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CODACT.getStart(), this.CODACT.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CODACT_AU.getStart(), this.CODACT_AU.getEnd());
+    } else{
+      return "";
+    }
+  }
+
+
+  public String getCmbApli() {
+    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CMBAPLI_AU.getStart(), this.CMBAPLI_AU.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public String getCodpais() {
-    return this.detail.substring(this.CODPAIS.getStart(), this.CODPAIS.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CODPAIS.getStart(), this.CODPAIS.getEnd());
+    } else{
+      return CodigoPais.CHILE.getValue().toString();
+    }
   }
 
   public String getOrigenope() {
-    return this.detail.substring(this.ORIGENOPE.getStart(), this.ORIGENOPE.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.ORIGENOPE.getStart(), this.ORIGENOPE.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public String getNummovext() {
-    return this.detail.substring(this.NUMMOVEXT.getStart(), this.NUMMOVEXT.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.NUMMOVEXT.getStart(), this.NUMMOVEXT.getEnd());
+    } else{
+      return "";
+    }
+
   }
 
   public String getNumextcta() {
-    return this.detail.substring(this.NUMEXTCTA.getStart(), this.NUMEXTCTA.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.NUMEXTCTA.getStart(), this.NUMEXTCTA.getEnd());
+    } else{
+      return "";
+    }
   }
 
   public String getTipolin() {
-    return this.detail.substring(this.TIPOLIN.getStart(), this.TIPOLIN.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.TIPOLIN.getStart(), this.TIPOLIN.getEnd());
+    } else{
+      return "";
+    }
+
   }
 
   public String getLinref() {
-    return this.detail.substring(this.LINREF.getStart(), this.LINREF.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.LINREF.getStart(), this.LINREF.getEnd());
+    } else{
+      return "";
+    }
+  }
+
+  public String getFecTrn(){
+    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.FECTRN_AU.getStart(),this.FECTRN_AU.getEnd());
+    } else{
+      return "";
+    }
+  }
+
+  public String getHorTrn(){
+    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return  this.detail.substring(this.HORTRN_AU.getStart(),this.HORTRN_AU.getEnd());
+    } else{
+      return "";
+    }
+  }
+
+  public BigDecimal getImpDiv() {
+    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.getScaledValue(this.detail.substring(this.IMPDIV_AU.getStart(), this.IMPDIV_AU.getEnd()), this.IMPDIV_AU.getDecimal());
+    } else{
+      return BigDecimal.ZERO;
+    }
+  }
+
+  public String getClamonDiv() {
+    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMONDIV_AU.getStart(), this.CLAMONDIV_AU.getEnd());
+    } else{
+      return "";
+    }
+  }
+
+
+  public BigDecimal getImpAutCon() {
+    return this.getScaledValue(this.detail.substring(this.IMPAUTCON_AU.getStart(), this.IMPAUTCON_AU.getEnd()), this.IMPAUTCON_AU.getDecimal());
+  }
+
+  public String getNomComRed(){
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.NOMCOMRED.getStart(),this.NOMCOMRED.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.NOMCOMRED_AU.getStart(),this.NOMCOMRED_AU.getEnd());
+    } else{
+      return "";
+    }
+
   }
 
 
@@ -169,8 +323,12 @@ public class ReconciliationFileDetail {
         break;
       case COMISION_APERTURA:
         type = PrepaidMovementType.ISSUANCE_FEE;
+      case SUSCRIPCION_INTERNACIONAL:
+        type = PrepaidMovementType.SUSCRIPTION;
+        break;
+      case COMPRA_INTERNACIONAL:
+        type = PrepaidMovementType.PURCHASE;
     }
-
     return type;
   }
 
@@ -201,6 +359,7 @@ public class ReconciliationFileDetail {
 
   @Override
   public String toString() {
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
     return "ReconciliationFileDetail{" +
       "contrato='" + this.getContrato() + '\'' +
       "indnorcor='" + this.getIndnorcor() + '\'' +
@@ -211,5 +370,25 @@ public class ReconciliationFileDetail {
       "impfac='" + this.getImpfac() + '\'' +
       "origenope='" + this.getOrigenope() + '\'' +
       '}';
+    }else if(TecnocomOperationType.AU.equals(this.getOperationType())){
+      return "ReconciliationFileDetail{" +
+        "pan='" + this.getPan() + '\'' +
+        "contrato='" + this.getContrato() + '\'' +
+        "indnorcor='" + this.getIndnorcor() + '\'' +
+        "tipofac='" + this.getTipoFac() + '\'' +
+        "desctipofac='" + this.getTipoFac().getDescription() + '\'' +
+        "fectrx='" + this.getFecTrn() + '\'' +
+        "hortrn='" + this.getHorTrn() + '\'' +
+        "impfac='" + this.getImpfac() + '\'' +
+        "origenope='" + this.getOrigenope() + '\'' +
+        "clamondiv='" + this.getClamonDiv() + '\'' +
+        "impautcon='" + this.getImpAutCon() + '\'' +
+        "impdiv='" + this.getImpDiv() + '\'' +
+        "cmbapli='" + this.getCmbApli() + '\'' +
+        '}';
+    }
+    else{
+      return "";
+    }
   }
 }

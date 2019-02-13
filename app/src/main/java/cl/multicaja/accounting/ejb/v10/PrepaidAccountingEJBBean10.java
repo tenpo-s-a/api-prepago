@@ -298,14 +298,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         p.setNumreffac(String.valueOf(row.get("_numreffac")));
         p.setPan(String.valueOf(row.get("_pan")));
         p.setClamondiv(getNumberUtils().toInteger(row.get("_clamondiv")));
-        p.setImpdiv(getNumberUtils().toLong(row.get("_impdiv")));
+        p.setImpdiv(getNumberUtils().toBigDecimal(row.get("_impdiv")));
         p.setImpfac(getNumberUtils().toBigDecimal(row.get("_impfac")));
         p.setCmbapli(getNumberUtils().toInteger(row.get("_cmbapli")));
         p.setNumaut(String.valueOf(row.get("_numaut")));
         p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("_indproaje"))));
         p.setCodcom(String.valueOf(row.get("_codcom")));
         p.setCodact(getNumberUtils().toInteger(row.get("_codact")));
-        p.setImpliq(getNumberUtils().toLong(row.get("_impliq")));
+        p.setImpliq(getNumberUtils().toBigDecimal(row.get("_impliq")));
         p.setClamonliq(getNumberUtils().toInteger(row.get("_clamonliq")));
         p.setCodpais(CodigoPais.fromValue(getNumberUtils().toInteger(row.get("_codpais"))));
         p.setNompob(String.valueOf(row.get("_nompob")));
@@ -394,19 +394,31 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     PrepaidMovement10 movement = accountingMovement.getPrepaidMovement10();
 
-    if(TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
+    if (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
       type = AccountingTxType.CARGA_WEB;
       movementType = AccountingMovementType.CARGA_WEB;
-    } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
+    } else if (TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
       type = AccountingTxType.CARGA_POS;
-      movementType =AccountingMovementType.CARGA_POS;
+      movementType = AccountingMovementType.CARGA_POS;
       trxOriginType = TransactionOriginType.POS;
-    } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac())) {
+    } else if (TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac())) {
       type = AccountingTxType.RETIRO_POS;
-      movementType =AccountingMovementType.RETIRO_POS;
+      movementType = AccountingMovementType.RETIRO_POS;
       trxOriginType = TransactionOriginType.POS;
+    } else if (TipoFactura.SUSCRIPCION_INTERNACIONAL.equals(movement.getTipofac())) {
+      type = AccountingTxType.COMPRA_SUSCRIPCION;
+      movementType = AccountingMovementType.SUSCRIPCION;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+      type = AccountingTxType.COMPRA_PESOS;
+      movementType = AccountingMovementType.COMPRA_PESOS;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+      type = AccountingTxType.COMPRA_MONEDA;
+      movementType = AccountingMovementType.COMPRA_MONEDA;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
-
+    //TODO: Verificar todo lo que son devolucione y anulaciones.
     AccountingData10 accounting = new AccountingData10();
     accounting.setIdTransaction(movement.getId());
     accounting.setOrigin(AccountingOriginType.MOVEMENT);
@@ -445,7 +457,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           accounting.setCollectorFeeIva(feeIva);
         }
         break;
-      case WITHDRAW:
+      case WITHDRAW:{
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
           fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
@@ -465,6 +477,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           accounting.setCollectorFeeIva(feeIva);
         }
         break;
+      }
+
+      default: {
+        //TODO: Se debe verificar.
+        accounting.setFee(BigDecimal.ZERO);
+        accounting.setFeeIva(BigDecimal.ZERO);
+        accounting.setCollectorFee(BigDecimal.ZERO);
+        accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        break;
+      }
     }
     accounting.setTransactionDate(movement.getFechaCreacion());
     accounting.setStatus(status);

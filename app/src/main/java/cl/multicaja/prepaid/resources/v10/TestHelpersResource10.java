@@ -588,14 +588,14 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
     prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
-    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
     prepaidMovement.setNompob(""); // se debe actualizar despues
@@ -796,14 +796,14 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(reverseRequest != null ? reverseRequest.getAmount().getValue() : null);
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(getRandomNumericString(6)); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(reverseRequest != null ? reverseRequest.getMerchantCode() : null);
     prepaidMovement.setCodact(reverseRequest != null ? reverseRequest.getMerchantCategory() : null);
-    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
     prepaidMovement.setNompob(""); // se debe actualizar despues
