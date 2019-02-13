@@ -574,4 +574,11 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       return clearing10;
     };
   }
+
+  public ClearingData10 buildClearing(Long accountingId,UserAccount userAccount){
+    ClearingData10 clearingData10 = new ClearingData10();
+    clearingData10.setAccountingId(accountingId);
+    clearingData10.setUserBankAccount(userAccount);
+    return clearingData10;
+  }
 }

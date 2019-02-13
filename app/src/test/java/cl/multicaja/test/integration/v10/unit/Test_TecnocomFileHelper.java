@@ -2,6 +2,8 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
+import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
+import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,6 +28,7 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
     Assert.assertEquals("Deberia tener 26 registros", 16, file.getDetails().size());
   }
+
   @Test
   public void shouldProcessFile_Full() throws Exception {
     InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0004");
@@ -38,8 +41,10 @@ public class Test_TecnocomFileHelper extends TestBaseUnit {
     Assert.assertNotNull("Deberia detalles", file.getDetails());
     Assert.assertFalse("Deberia detalles", file.getDetails().isEmpty());
     Assert.assertFalse("No debe ser sospechoso", file.isSuspicious());
-    Assert.assertEquals("Deberia tener 26 registros", 191, file.getDetails().size());
-
+    Assert.assertEquals("Deberia tener 36 registros", 36, file.getDetails().size());
+    for(ReconciliationFileDetail detail :file.getDetails()){
+      System.out.println(detail);
+    }
   }
 
   @Test

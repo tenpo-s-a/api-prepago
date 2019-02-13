@@ -5,7 +5,8 @@ package cl.multicaja.prepaid.model.v10;
  */
 public enum TransactionOriginType {
   POS,
-  WEB;
+  WEB,
+  MASTERCARDINT;
 
   public static TransactionOriginType valueOfEnum(String name) {
     try {

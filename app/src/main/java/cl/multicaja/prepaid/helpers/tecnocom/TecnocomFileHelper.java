@@ -2,10 +2,7 @@ package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.model.*;
-import cl.multicaja.prepaid.model.v10.BusinessStatusType;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -15,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -292,14 +290,14 @@ public class TecnocomFileHelper {
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
     prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(batchTrx.getImpfac());
     prepaidMovement.setCmbapli(0);
     prepaidMovement.setNumaut(batchTrx.getNumaut());
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
     prepaidMovement.setCodcom(batchTrx.getCodcom());
     prepaidMovement.setCodact(NumberUtils.getInstance().toInteger(batchTrx.getCodact()));
-    prepaidMovement.setImpliq(0L);
+    prepaidMovement.setImpliq(BigDecimal.ZERO);
     prepaidMovement.setClamonliq(0);
     prepaidMovement.setCodpais(CodigoPais.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCodpais())));
     prepaidMovement.setNompob("");
