@@ -65,12 +65,6 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
   @Before
   public void beforeEach() throws Exception {
     clearTransactions();
-    {
-      autFile = null;
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0004");
-      autFile= TecnocomFileHelper.getInstance().validateFile(inputStream);
-      inputStream.close();
-    }
     prepareUsersAndCards();
   }
 
@@ -94,38 +88,24 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
     Thread.sleep(1500);
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API);
+    List<PrepaidMovement10> purchase = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.PURCHASE, null,
+      null, null, null, null, null, null, null, null, MovementOriginType.OPE);
 
-    Assert.assertNotNull("Debe tener movimientos", movements);
-    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 16 movimientos", 16, movements.size());
+    Assert.assertNotNull("Debe tener movimientos de compra", purchase);
+    Assert.assertFalse("Debe tener movimientos de compra", purchase.isEmpty());
+    Assert.assertEquals("Debe tener 16 movimientos de compra", 13, purchase.size());
 
-  }
+    List<PrepaidMovement10> suscriptions = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.SUSCRIPTION, null,
+      null, null, null, null, null, null, null, null, MovementOriginType.OPE);
 
+    Assert.assertNotNull("Debe tener movimientos de suscripcion", suscriptions);
+    Assert.assertFalse("Debe tener movimientos de suscripcion", suscriptions.isEmpty());
+    Assert.assertEquals("Debe tener 16 movimientos de suscripcion", 5, suscriptions.size());
 
-  private void changeMovement(Object idMovimiento, String newDate, Integer tipofac, Integer indnorcor)  {
-    final String SCHEMA = ConfigUtils.getInstance().getProperty("schema");
-    DBUtils.getInstance().getJdbcTemplate().execute(
-      "UPDATE " + SCHEMA + ".prp_movimiento SET fecha_creacion = "
-        + "TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS'), "
-        + "indnorcor = " + indnorcor + ", "
-        + "tipofac = " + tipofac + " "
-        + "WHERE ID = " + idMovimiento.toString());
   }
 
   private InputStream putSuccessFileIntoSftp(String filename) throws Exception {
     return this.getClass().getClassLoader().getResourceAsStream("tecnocom/files/" + filename);
-  }
-
-  private String getNewDateForPastMovement(String date, String time, Integer unit, Integer amount){
-
-    Timestamp ts = Timestamp.valueOf(String.format("%s %s", date, time));
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(ts);
-    cal.add(unit, amount);
-    ts.setTime(cal.getTime().getTime());
-    return ts.toString();
   }
 
 }
