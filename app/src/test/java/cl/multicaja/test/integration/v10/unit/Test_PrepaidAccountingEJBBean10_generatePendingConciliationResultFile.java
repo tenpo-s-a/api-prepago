@@ -172,7 +172,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
       }
     });
 
-    //Files.delete(file);
+    Files.delete(file);
   }
 
   @Test
