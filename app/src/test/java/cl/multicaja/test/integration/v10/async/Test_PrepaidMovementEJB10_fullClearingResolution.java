@@ -26,7 +26,7 @@ import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearin
 import org.springframework.jdbc.core.RowMapper;
 
 public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUnitAsync {
-  static String folderDir = "src/test/resources/multicajared/clearing/clearing_test/";
+  static String folderDir = ""; //"src/test/resources/multicajared/clearing/clearing_test/";
 
   @Test
   public void fullClearingResolution() throws Exception {
