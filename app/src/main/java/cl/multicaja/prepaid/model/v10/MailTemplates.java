@@ -20,11 +20,13 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION = "Prepago/ReintentoValidacionIdentidad";
   public static final String TEMPLATE_MAIL_ACCOUNTING_FILE_OK = "Prepago/ArchivoContabilidad";
   public static final String TEMPLATE_MAIL_ACCOUNTING_FILE_ERROR = "Prepago/ErrorArchivoContabilidad";
+  public static final String TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM = "Prepago/NotificacionTecnocom";
 
   public static final String TEMPLATE_PDF_CARD = "card_pdf";//Template para el PDF
   public static final String TEMPLATE_MAIL_TOPUP = String.format("%s/RecepcionCarga", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW = String.format("%s/RecepcionRetiro", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_SUCCESS = String.format("%s/RetiroExitoso", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_FAILED = String.format("%s/RetiroFallado", APPNAME);
+  public static final String TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE = String.format("%s/DevolucionCargaOk", APPNAME);
 
 }
