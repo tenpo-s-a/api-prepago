@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -102,6 +105,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private FilesEJBBean10 filesEJBBean10;
 
+  @EJB
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
   private TecnocomService tecnocomService;
 
   private TecnocomServiceHelper tecnocomServiceHelper;
@@ -115,6 +121,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private CalculationsHelper calculationsHelper;
 
   private static CalculatorParameter10 calculatorParameter10;
+
+  private NotificationTecnocom notificationTecnocom;
 
 
   public PrepaidTopupDelegate10 getDelegate() {
@@ -2633,7 +2641,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       EmailBody emailBody = new EmailBody();
 
 
-
       if("No".equalsIgnoreCase(identityValidation.getIsGsintelOk())){
         // Si el usuario no pasa la validacion Gsintel, se finaliza la validacion de identidad y se indica que el usuario esta en lista negra y se bloquea el usuario prepago
         user = getUserClient().finishIdentityValidation(headers, user.getId(), Boolean.FALSE, Boolean.TRUE);
@@ -2678,6 +2685,151 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
+  }
+
+  public void processRefundMovement(Long userPrepagoId, Long movementId) throws Exception {
+
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
+    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null, userPrepagoId);
+    if (prepaidUserTest == null) {
+      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: " + userPrepagoId);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId, movementId);
+    if (prepaidMovement == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:" + userPrepagoId + " & movementId:" + movementId);
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    if (!BusinessStatusType.TO_REFUND.equals(prepaidMovement.getEstadoNegocio())) {
+      log.error("Error on processRefundMovement: prepaid movement is not set to refund");
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.REFUND_OK);
+
+    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null, prepaidMovement.getIdTxExterno());
+
+    if (!transaction10s.isEmpty()) {
+
+      CdtTransaction10 cdtTransaction10 = transaction10s.stream().filter(t ->
+        CdtTransactionType.REVERSA_CARGA.equals(t.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(t.getTransactionType())
+      ).findFirst().orElse(null);
+
+      if (cdtTransaction10 != null) {
+        cdtTransaction10.setTransactionType(cdtTransaction10.getCdtTransactionTypeConfirm());
+        cdtTransaction10.setIndSimulacion(Boolean.FALSE);
+        cdtTransaction10.setTransactionReference(cdtTransaction10.getId());
+        cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
+
+        this.getMailDelegate().sendTopupRefundCompleteMail(getUserClient().getUserById(null, prepaidUserTest.getUserIdMc()), prepaidMovement);
+      }
+    }
+  }
+
+  private Boolean validateBase64(String base64String){
+
+    Boolean boolResponse;
+
+    String line = base64String;
+    String pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
+
+    if(base64String != null && base64String.length()!=0) {
+      Pattern r = Pattern.compile(pattern);
+      Matcher m = r.matcher(line);
+      if (m.find( )) {
+        boolResponse = true;
+      }else {
+        boolResponse = false;
+      }
+    }else{
+      boolResponse = false;
+    }
+
+    return boolResponse;
+  }
+
+  public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
+
+    String committedFields = null;
+    BadRequestException badRequestException = null;
+
+    if(notificationTecnocom.getHeader() == null){
+      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "header"));
+    }
+
+    if(notificationTecnocom.getBody() == null){
+      throw new BaseException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "body"));
+    }
+
+    if(notificationTecnocom.getBase64Data() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "base64Data"));
+    }
+
+    Boolean isBase64;
+    if(notificationTecnocom.getBase64Data() != null){
+      isBase64 = this.validateBase64(notificationTecnocom.getBase64Data());
+
+      if(isBase64 == false){
+        throw new ValidationException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "base64Data"));
+      }
+
+      String[] mandatoryFieldsHeader = {
+        NotificationTecnocomHeader.class.getDeclaredField("centroAlta").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("cuenta").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("entidad").getName(),
+        NotificationTecnocomHeader.class.getDeclaredField("pan").getName()
+      };
+      HashMap<String,Object> fieldsOnNullFromHeader = notificationTecnocom.getHeader().checkNull(mandatoryFieldsHeader);
+
+      String [] mandatoryFieldsBody = {
+        NotificationTecnocomBody.class.getDeclaredField("sdCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("sdValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("ilCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("ilValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idCurrencyCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idValue").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("tipoTx").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("idMensaje").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("merchantCode").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("merchantName").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("countryIso3266Code").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("countryDescription").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("placeName").getName(),
+        NotificationTecnocomBody.class.getDeclaredField("resolucionTx").getName()
+      };
+      HashMap<String,Object> fieldsOnNullFromBody = notificationTecnocom.getBody().checkNull(mandatoryFieldsBody);
+
+      if((fieldsOnNullFromHeader.size() >= 1 || fieldsOnNullFromBody.size() >= 1) && isBase64 == true) {
+
+        if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() == 0) {
+          committedFields = " These body fields are null or empty: " + fieldsOnNullFromBody.keySet();
+        } else if (fieldsOnNullFromBody.size() == 0 && fieldsOnNullFromHeader.size() >= 1) {
+          committedFields = " These header fields are null or empty: " + fieldsOnNullFromHeader.keySet();
+        } else if (fieldsOnNullFromBody.size() >= 1 && fieldsOnNullFromHeader.size() >= 1) {
+          committedFields = " These fields are null or empty, " + "By Headers: " + fieldsOnNullFromHeader.keySet()
+            + ", By Body: " + fieldsOnNullFromBody.keySet();
+        }
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", committedFields));
+      }
+
+      if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
+
+        //Send Async Mail
+        Map<String, Object> templateData = new HashMap<String, Object>();
+        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
+        emailBody.setAddress("notification_tecnocom@multicaja.cl");
+        mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
+      }
+
+    }
+
+    return notificationTecnocom;
   }
 
 }

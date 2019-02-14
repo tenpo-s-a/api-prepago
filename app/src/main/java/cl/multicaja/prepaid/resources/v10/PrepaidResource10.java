@@ -8,20 +8,17 @@ import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.persistence.PostUpdate;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import javax.ws.rs.core.*;
+import java.util.*;
 
 /**
  * @author vutreras
@@ -234,21 +231,35 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response processRefundMovement(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId, @Context HttpHeaders headers) {
-
-    Response returnResponse = null;
     try{
-      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
-      if(cdtTransaction == null){
-        System.out.println("CDT_TRANSACTION_IS_NULL");
-        log.error("processRefundMovement:CDT_TRANSACTION_IS_NULL");
-      }
-      returnResponse = Response.ok(cdtTransaction).status(201).build();
+      this.prepaidEJBBean10.processRefundMovement(userPrepagoId,movementId);
     }catch (Exception ex) {
-      log.error("Error processing refund for movement: "+movementId+" with status rejected");
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(410).build();
+      log.error("Error processing refund for movement: "+movementId, ex);
     }
+    return Response.accepted().build();
+  }
+
+  @POST
+  @Path("/processor/notification")
+  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
+    Response returnResponse = null;
+
+    String textLogBase = "TestHelperResource-callNotification: ";
+    NotificationTecnocom notificationTecnocomResponse = null;
+    try{
+
+      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
+      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
+      log.info(textLogBase+notificationTecnocomResponse.toString());
+
+    }catch(Exception ex){
+      log.error(textLogBase+ex.toString());
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).build();
+    }
+
     return returnResponse;
+
   }
 
 }

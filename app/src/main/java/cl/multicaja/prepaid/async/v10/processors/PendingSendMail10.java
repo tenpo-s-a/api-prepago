@@ -306,7 +306,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
   }
 
   /**
-   * Envio confirmacion de retiro exitoso
+   * Envio confirmacion de retiro rechazado
    */
   public ProcessorRoute processPendingWithdrawFailedMail() {
 
@@ -338,6 +338,37 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         templateData.put("date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         templateData.put("time", local.format(DateTimeFormatter.ofPattern("HH:mm")));
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW_FAILED);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
+  /**
+   * Envio confirmacion de devolucion
+   */
+  public ProcessorRoute processPendingTopupRefundConfirmationMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingTopupRefundConfirmationMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName());
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);

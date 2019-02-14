@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
@@ -12,6 +13,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.ListIterator;
 
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
 import static cl.multicaja.prepaid.model.v10.BusinessStatusType.REFUND_OK;
 import static cl.multicaja.prepaid.model.v10.BusinessStatusType.TO_REFUND;
 import static cl.multicaja.prepaid.model.v10.CdtTransactionType.*;
@@ -27,12 +30,8 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     User user = registerUser();
 
-    System.out.println("userRut: "+user.getRut());
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-
-    System.out.println("prepaidUserId: "+prepaidUser.getId());
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
@@ -74,23 +73,23 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
     Assert.assertEquals("Movimiento es Reversa de Carga",CdtTransactionType.REVERSA_CARGA,cdtTransaction.getTransactionType());
 
-    Assert.assertNotNull("Transaccion exitosa",getPrepaidMovementEJBBean10().
-      processRefundMovement(prepaidUser.getId(),prepaidMovementTest.getId()));
+    getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId());
+
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId());
 
     Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstado());
+      dbMovement.getEstado());
 
     Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstadoNegocio());
+      dbMovement.getEstadoNegocio());
+
+    CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
+      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF);
 
     Assert.assertEquals("Se cumple la condición: "+CdtTransactionType.REVERSA_CARGA_CONF.getName(),
-      CdtTransactionType.REVERSA_CARGA_CONF, getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF).getTransactionType());
+      CdtTransactionType.REVERSA_CARGA_CONF, cdtMovement.getTransactionType());
 
-    String externalTrxIdCdt = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF).getExternalTransactionId();
-    String externalTrxIdPrepMov = prepaidMovementTest.getIdTxExterno();
-    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt: "+externalTrxIdPrepMov,externalTrxIdPrepMov,externalTrxIdCdt);
+    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovementTest.getIdTxExterno(), cdtMovement.getExternalTransactionId());
 
 
   }
@@ -100,12 +99,8 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
 
     User user = registerUser();
 
-    System.out.println("userRut: "+user.getRut());
-
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
-
-    System.out.println("prepaidUserId: "+prepaidUser.getId());
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
@@ -147,25 +142,23 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
     Assert.assertEquals("Movimiento es Reversa de Carga",CdtTransactionType.REVERSA_CARGA,cdtTransaction.getTransactionType());
 
-    Assert.assertNotNull("Transaccion exitosa",getPrepaidMovementEJBBean10().
-      processRefundMovement(prepaidUser.getId(),prepaidMovementTest.getId()));
+    getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId());
+
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId());
 
     Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstado());
+      dbMovement.getEstado());
 
     Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementTest.getId()).getEstadoNegocio());
+      dbMovement.getEstadoNegocio());
+
+    CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
+      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF);
 
     Assert.assertEquals("Se cumple la condición: "+CdtTransactionType.REVERSA_CARGA_CONF.getName(),
-      CdtTransactionType.REVERSA_CARGA_CONF, getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-        prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF).getTransactionType());
+      CdtTransactionType.REVERSA_CARGA_CONF, cdtMovement.getTransactionType());
 
-    String externalTrxIdCdt = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_CARGA_CONF).getExternalTransactionId();
-    String externalTrxIdPrepMov = prepaidMovementTest.getIdTxExterno();
-    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt: "+externalTrxIdPrepMov,externalTrxIdPrepMov,externalTrxIdCdt);
-
-
+    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovementTest.getIdTxExterno(), cdtMovement.getExternalTransactionId());
   }
 
   @Test
@@ -217,22 +210,19 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
 
-    Assert.assertNotNull("Transaccion exitosa",
-      getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId()));
+    getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId());
 
-    Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstado());
-    Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstadoNegocio());
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
 
-    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(),
-      REVERSA_PRIMERA_CARGA_CONF,getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-        prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF).getTransactionType());
+    Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED, dbMovement.getEstado());
+    Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK, dbMovement.getEstadoNegocio());
 
-    String externalTrxIdCdt = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF).getExternalTransactionId();
-    String externalTrxIdPrepMov = prepaidMovement10.getIdTxExterno();
-    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt: "+externalTrxIdPrepMov,externalTrxIdPrepMov,externalTrxIdCdt);
+    CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
+      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF);
+
+    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(), REVERSA_PRIMERA_CARGA_CONF, cdtMovement.getTransactionType());
+
+    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovement10.getIdTxExterno(), cdtMovement.getExternalTransactionId());
 
   }
 
@@ -285,23 +275,75 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
 
-    Assert.assertNotNull("Transaccion exitosa",
-      getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId()));
+    getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(),prepaidMovement10.getId());
 
-    Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstado());
-    Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(),REFUND_OK,
-      getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId()).getEstadoNegocio());
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
 
-    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(),
-      REVERSA_PRIMERA_CARGA_CONF,getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-        prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF).getTransactionType());
+    Assert.assertEquals("Se encuentra con estado "+REJECTED.name(), REJECTED, dbMovement.getEstado());
+    Assert.assertEquals("Se encuentra con estado "+REFUND_OK.getValue(), REFUND_OK, dbMovement.getEstadoNegocio());
 
-    String externalTrxIdCdt = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
-      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF).getExternalTransactionId();
-    String externalTrxIdPrepMov = prepaidMovement10.getIdTxExterno();
-    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt: "+externalTrxIdPrepMov,externalTrxIdPrepMov,externalTrxIdCdt);
+    CdtTransaction10 cdtMovement = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null,
+      prepaidMovement10.getIdTxExterno(),CdtTransactionType.REVERSA_PRIMERA_CARGA_CONF);
 
+    Assert.assertEquals("Se cumple la condición: "+REVERSA_PRIMERA_CARGA_CONF.getName(), REVERSA_PRIMERA_CARGA_CONF, cdtMovement.getTransactionType());
+
+    Assert.assertEquals("Id de Transacción coincide en movimiento y cdt", prepaidMovement10.getIdTxExterno(), cdtMovement.getExternalTransactionId());
+  }
+
+  @Test
+  public void refund_status_on_movement_with_status_not_to_refund() throws  Exception {
+
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+
+    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
+    prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
+    prepaidTopup.setFirstTopup(true);
+    prepaidTopup.setMerchantCode(TransactionOriginType.POS.toString());
+
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    cdtTransaction = createCdtTransaction10(cdtTransaction);
+    //cdtTransaction.setIndSimulacion(Boolean.FALSE);
+
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+
+    prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+    prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
+    prepaidMovement10.setEstado(REJECTED);
+    prepaidMovement10.setTipoMovimiento(TOPUP);
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+    Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
+
+    // Enviar movimiento a REFUND
+    PrepaidMovementEJBBean10 prepaidMovementEJBBean10 = getPrepaidMovementEJBBean10();
+    prepaidMovementEJBBean10.updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.CONFIRMED);
+
+    CdtEJBBean10 cdtEJBBean10 = getCdtEJBBean10();
+
+    // Confirmar el topup en el CDT
+    cdtTransaction = cdtEJBBean10.buscaMovimientoByIdExterno(null, prepaidMovement10.getIdTxExterno());
+
+    CdtTransactionType reverseTransactionType = cdtTransaction.getCdtTransactionTypeReverse();
+    cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction.setTransactionReference(cdtTransaction.getId());
+    cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+    // Iniciar reversa en CDT
+    cdtTransaction.setTransactionType(reverseTransactionType);
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
+
+    try{
+      getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(), prepaidMovement10.getId());
+    } catch (NotFoundException ex) {
+      Assert.assertEquals("Movimiento no esta en status TO_REFUND", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
+    }
   }
 
 
@@ -332,10 +374,11 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
 
-    Integer _idUser = 1234567890;
-    CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(_idUser.longValue(),prepaidMovement10.getId());
-    Assert.assertNull("Transaccion fallida, el idUser:"+_idUser+" no contiene movimientos o transacciones asociadas",cdtTransactionTest);
-
+    try{
+      getPrepaidEJBBean10().processRefundMovement(Long.MAX_VALUE,prepaidMovement10.getId());
+    } catch (NotFoundException ex) {
+      Assert.assertEquals("Cliente no tiene prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
+    }
   }
 
   @Test
@@ -365,9 +408,11 @@ public class Test_PrepaidMovementEJBBean10_processRefundMovement  extends TestBa
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     Assert.assertEquals("Movimiento es TopUp",PrepaidMovementType.TOPUP,prepaidMovement10.getTipoMovimiento());
 
-    Integer _idMovimiento = 123456789;
-    CdtTransaction10 cdtTransactionTest = getPrepaidMovementEJBBean10().processRefundMovement(prepaidUser.getId(),_idMovimiento.longValue());
-    Assert.assertNull("Transaccion fallida, el idMovimiento:"+_idMovimiento+" no contiene movimientos o transacciones asociadass",cdtTransactionTest);
+    try{
+      getPrepaidEJBBean10().processRefundMovement(prepaidUser.getId(), Long.MAX_VALUE);
+    } catch (NotFoundException ex) {
+      Assert.assertEquals("Cliente no tiene prepago", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
+    }
   }
 
 }
