@@ -1165,6 +1165,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           BigDecimal commission = getCalculationsHelper().calculateFee(transaction.getAmount().getValue(),getPercentage().getTOPUP_POS_FEE_PERCENTAGE());
           fee.setValue(commission);
         }
+
+        //TODO: se debe agregar al calculo el cobro de emision
+
         // Calculo el total
         total.setValue(transaction.getAmount().getValue().subtract(fee.getValue()));
       break;
