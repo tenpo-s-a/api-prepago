@@ -1274,14 +1274,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
     prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(0L);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
     prepaidMovement.setImpfac(transaction.getAmount().getValue());
     prepaidMovement.setCmbapli(0); // se debe actualizar despues
     prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
     prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
     prepaidMovement.setCodcom(transaction.getMerchantCode());
     prepaidMovement.setCodact(transaction.getMerchantCategory());
-    prepaidMovement.setImpliq(0L); // se debe actualizar despues
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
     prepaidMovement.setClamonliq(0); // se debe actualizar despues
     prepaidMovement.setCodpais(CodigoPais.CHILE);
     prepaidMovement.setNompob(""); // se debe actualizar despues

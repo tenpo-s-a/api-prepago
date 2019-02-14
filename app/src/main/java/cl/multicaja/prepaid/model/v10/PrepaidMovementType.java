@@ -6,7 +6,9 @@ package cl.multicaja.prepaid.model.v10;
 public enum PrepaidMovementType {
   ISSUANCE_FEE,
   TOPUP,
-  WITHDRAW;
+  WITHDRAW,
+  SUSCRIPTION,
+  PURCHASE;
 
   public static PrepaidMovementType valueOfEnum(String name) {
     try {

@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -298,14 +299,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         p.setNumreffac(String.valueOf(row.get("_numreffac")));
         p.setPan(String.valueOf(row.get("_pan")));
         p.setClamondiv(getNumberUtils().toInteger(row.get("_clamondiv")));
-        p.setImpdiv(getNumberUtils().toLong(row.get("_impdiv")));
+        p.setImpdiv(getNumberUtils().toBigDecimal(row.get("_impdiv")));
         p.setImpfac(getNumberUtils().toBigDecimal(row.get("_impfac")));
         p.setCmbapli(getNumberUtils().toInteger(row.get("_cmbapli")));
         p.setNumaut(String.valueOf(row.get("_numaut")));
         p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("_indproaje"))));
         p.setCodcom(String.valueOf(row.get("_codcom")));
         p.setCodact(getNumberUtils().toInteger(row.get("_codact")));
-        p.setImpliq(getNumberUtils().toLong(row.get("_impliq")));
+        p.setImpliq(getNumberUtils().toBigDecimal(row.get("_impliq")));
         p.setClamonliq(getNumberUtils().toInteger(row.get("_clamonliq")));
         p.setCodpais(CodigoPais.fromValue(getNumberUtils().toInteger(row.get("_codpais"))));
         p.setNompob(String.valueOf(row.get("_nompob")));
@@ -394,19 +395,31 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     PrepaidMovement10 movement = accountingMovement.getPrepaidMovement10();
 
-    if(TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
+    if (TipoFactura.CARGA_TRANSFERENCIA.equals(movement.getTipofac())) {
       type = AccountingTxType.CARGA_WEB;
       movementType = AccountingMovementType.CARGA_WEB;
-    } else if(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
+    } else if (TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA.equals(movement.getTipofac())) {
       type = AccountingTxType.CARGA_POS;
-      movementType =AccountingMovementType.CARGA_POS;
+      movementType = AccountingMovementType.CARGA_POS;
       trxOriginType = TransactionOriginType.POS;
-    } else if(TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac())) {
+    } else if (TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(movement.getTipofac())) {
       type = AccountingTxType.RETIRO_POS;
-      movementType =AccountingMovementType.RETIRO_POS;
+      movementType = AccountingMovementType.RETIRO_POS;
       trxOriginType = TransactionOriginType.POS;
+    } else if (TipoFactura.SUSCRIPCION_INTERNACIONAL.equals(movement.getTipofac())) {
+      type = AccountingTxType.COMPRA_SUSCRIPCION;
+      movementType = AccountingMovementType.SUSCRIPCION;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+      type = AccountingTxType.COMPRA_PESOS;
+      movementType = AccountingMovementType.COMPRA_PESOS;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
+    } else if (TipoFactura.COMPRA_INTERNACIONAL.equals(movement.getTipofac()) && !movement.getClamondiv().equals(CodigoMoneda.CHILE_CLP)) {
+      type = AccountingTxType.COMPRA_MONEDA;
+      movementType = AccountingMovementType.COMPRA_MONEDA;
+      trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
-
+    //TODO: Verificar todo lo que son devolucione y anulaciones.
     AccountingData10 accounting = new AccountingData10();
     accounting.setIdTransaction(movement.getId());
     accounting.setOrigin(AccountingOriginType.MOVEMENT);
@@ -445,7 +458,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           accounting.setCollectorFeeIva(feeIva);
         }
         break;
-      case WITHDRAW:
+      case WITHDRAW:{
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
           fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
@@ -465,6 +478,16 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           accounting.setCollectorFeeIva(feeIva);
         }
         break;
+      }
+
+      default: {
+        //TODO: Se debe verificar.
+        accounting.setFee(BigDecimal.ZERO);
+        accounting.setFeeIva(BigDecimal.ZERO);
+        accounting.setCollectorFee(BigDecimal.ZERO);
+        accounting.setCollectorFeeIva(BigDecimal.ZERO);
+        break;
+      }
     }
     accounting.setTransactionDate(movement.getFechaCreacion());
     accounting.setStatus(status);
@@ -489,7 +512,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return accounting;
   }
 
-  public File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+  private File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -498,7 +521,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
-      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS"};
+      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO"};
     writer.writeNext(header);
 
     for (AccountingData10 mov : accountingData) {
@@ -543,6 +566,72 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "" //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+      };
+      writer.writeNext(data);
+    }
+    writer.close();
+    return file;
+  }
+
+  private File createAccountingReconciliationCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+    File file = new File(filename);
+    FileWriter outputFile = new FileWriter(file);
+    CSVWriter writer = new CSVWriter(outputFile,',');
+
+    // TODO: Agregar tasa de intercambio
+    String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
+      "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
+      "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
+      "IVA_COMISION_RECAUDADOR_MC_PESOS", "MONTO_AFECTO_A_SALDO_PESOS", "ID_CUENTA_DESTINO", "ESTADO_CONTABLE"};
+    writer.writeNext(header);
+
+    for (AccountingData10 mov : accountingData) {
+
+      String transactionDate = getTimestampAtTimezone(mov.getTransactionDate(), null, null);
+
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null);
+
+      String reconciliationDate = "";
+
+      /**
+       * Se evalua la fecha de conciliacion:
+       *  - Si la fecha de conciliacion es mayor a hoy, el movimiento no ha sido conciliado.
+       *  - Si la fecha de conciliacion es menor a hoy, ya el movimiento fue conciliado.
+       */
+      if(conciliationDate.isBefore(ZonedDateTime.now())) {
+        reconciliationDate = getTimestampAtTimezone(mov.getConciliationDate(), null, null);
+      }
+
+      String usdValue = "";
+      if(mov.getAmountMastercard().getValue().doubleValue() > 0) {
+        usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
+      }
+
+      Boolean printStatus = Stream.of(AccountingStatusType.OK, AccountingStatusType.PENDING, AccountingStatusType.INITIAL)
+        .anyMatch(s -> mov.getAccountingStatus().equals(s));
+
+      String[] data = new String[]{
+        mov.getId().toString(), //ID_PREPAGO,
+        fileId, //ID_LIQUIDACION,
+        mov.getIdTransaction().toString(), //ID_TRX
+        "", //ID_CUENTA_ORIGEN - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+        mov.getType().getValue(), //TIPO_TRX
+        mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
+        transactionDate, //FECHA_TRX
+        reconciliationDate, //FECHA_CONCILIACION
+        mov.getAmount().getValue().toBigInteger().toString(), //MONTO_TRX_PESOS
+        mov.getAmountMastercard().getValue().toBigInteger().toString(), //MONTO_TRX_MCARD_PESOS
+        mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
+        usdValue, //VALOR_USD
+        mov.getExchangeRateDif().toString(), //DIF_TIPO_CAMBIO
+        mov.getFee().toBigInteger().toString(), //COMISION_PREPAGO_PESOS
+        mov.getFeeIva().toBigInteger().toString(), //IVA_COMISION_PREPAGO_PESOS
+        mov.getCollectorFee().toBigInteger().toString(), //COMISION_RECAUDADOR_MC_PESOS
+        mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
+        mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
+        "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
+        StringUtils.isAllBlank(reconciliationDate) ? AccountingStatusType.NOT_CONFIRMED.getValue() :
+          printStatus ? "" : mov.getAccountingStatus().getValue() //ESTADO_CONTABLE
       };
       writer.writeNext(data);
     }
@@ -1172,6 +1261,67 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
 
     movements = this.updateAccountingData(headers, movements, file.getId());
+
+    return file;
+  }
+
+  public AccountingFiles10 generatePendingConciliationResultFile(Map<String, Object> headers, ZonedDateTime date) throws Exception {
+    if(date == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "date"));
+    }
+
+    // primer dia de dos meses antes
+    ZonedDateTime firstDay = date
+      .minusMonths(2)
+      .with(TemporalAdjusters.firstDayOfMonth())
+      .withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    // ultimo dia de dos meses antes
+    ZonedDateTime lastDay = date
+      .minusMonths(2)
+      .with(TemporalAdjusters.lastDayOfMonth())
+      .withHour(23).withMinute(59).withSecond(59).withNano( 999999999);
+
+    ZonedDateTime firstDayUtc = ZonedDateTime.ofInstant(firstDay.toInstant(), ZoneOffset.UTC);
+    ZonedDateTime lastDayUtc = ZonedDateTime.ofInstant(lastDay.toInstant(), ZoneOffset.UTC);
+
+    LocalDateTime ldtFrom = firstDayUtc.toLocalDateTime();
+    LocalDateTime ldtTo = lastDayUtc.toLocalDateTime();
+
+    List<AccountingData10> movements = this.getAccountingDataForFile(null, ldtFrom, ldtTo, AccountingStatusType.SENT_PENDING_CON, null);
+
+    if(movements.isEmpty()){
+      return null;
+    }
+
+    String directoryName = "accounting_files";
+    File directory = new File(directoryName);
+    if (! directory.exists()){
+      directory.mkdir();
+    }
+
+    String fileId = date.minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMM"));
+    String month = date.minusMonths(2).format(DateTimeFormatter.ofPattern("yyyyyMM"));
+    String fileName = String.format("%s_CUADRATURA_%s_PREPAGO.CSV", fileId, month);
+
+    createAccountingReconciliationCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+
+    AccountingFiles10 file = new AccountingFiles10();
+    file.setStatus(AccountingStatusType.PENDING);
+    file.setName(fileName);
+    file.setFileId(fileId);
+    file.setFileFormatType(AccountingFileFormatType.CSV);
+    file.setFileType(AccountingFileType.ACCOUNTING_RECONCILIATION);
+    file.setUrl("");
+
+    file = getPrepaidAccountingFileEJBBean10().insertAccountingFile(headers, file);
+
+    for (AccountingData10 m : movements) {
+      ZonedDateTime conciliationDate = getTimestampAtTimezone(m.getConciliationDate(), null);
+      AccountingStatusType status = conciliationDate.isBefore(ZonedDateTime.now()) ? m.getAccountingStatus() : AccountingStatusType.NOT_CONFIRMED;
+
+      this.updateAccountingData(null, m.getId(), file.getId(), AccountingStatusType.SENT, status, null);
+    }
 
     return file;
   }
