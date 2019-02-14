@@ -17,7 +17,7 @@ public class Test_20190110172632_create_table_accounting_files extends TestDbBas
       new ColumnInfo("id", SqlType.BIGSERIAL.getGetJavaType()),
       new ColumnInfo("name",  SqlType.VARCHAR.getGetJavaType(),100),
       new ColumnInfo("file_id", SqlType.VARCHAR.getGetJavaType(), 30),
-      new ColumnInfo("type",SqlType.VARCHAR.getGetJavaType(),20),
+      new ColumnInfo("type",SqlType.VARCHAR.getGetJavaType(),30),
       new ColumnInfo("format", SqlType.VARCHAR.getGetJavaType(), 20),
       new ColumnInfo("url", SqlType.VARCHAR.getGetJavaType(), 200),
       new ColumnInfo("status", SqlType.VARCHAR.getGetJavaType(), 20),
