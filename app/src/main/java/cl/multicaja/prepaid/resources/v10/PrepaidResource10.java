@@ -231,21 +231,12 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response processRefundMovement(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId, @Context HttpHeaders headers) {
-
-    Response returnResponse = null;
     try{
-      CdtTransaction10 cdtTransaction = this.prepaidMovementEJBBean10.processRefundMovement(userPrepagoId,movementId);
-      if(cdtTransaction == null){
-        System.out.println("CDT_TRANSACTION_IS_NULL");
-        log.error("processRefundMovement:CDT_TRANSACTION_IS_NULL");
-      }
-      returnResponse = Response.ok(cdtTransaction).status(201).build();
+      this.prepaidEJBBean10.processRefundMovement(userPrepagoId,movementId);
     }catch (Exception ex) {
-      log.error("Error processing refund for movement: "+movementId+" with status rejected");
-      ex.printStackTrace();
-      returnResponse = Response.ok(ex).status(410).build();
+      log.error("Error processing refund for movement: "+movementId, ex);
     }
-    return returnResponse;
+    return Response.accepted().build();
   }
 
   @POST

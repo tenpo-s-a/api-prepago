@@ -2687,6 +2687,48 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
+  public void processRefundMovement(Long userPrepagoId, Long movementId) throws Exception {
+
+    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
+    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null, userPrepagoId);
+    if (prepaidUserTest == null) {
+      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: " + userPrepagoId);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    PrepaidMovement10 prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId, movementId);
+    if (prepaidMovement == null) {
+      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:" + userPrepagoId + " & movementId:" + movementId);
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    if (!BusinessStatusType.TO_REFUND.equals(prepaidMovement.getEstadoNegocio())) {
+      log.error("Error on processRefundMovement: prepaid movement is not set to refund");
+      throw new NotFoundException(TRANSACCION_ERROR_GENERICO_$VALUE);
+    }
+
+    getPrepaidMovementEJB10().updatePrepaidBusinessStatus(null, prepaidMovement.getId(), BusinessStatusType.REFUND_OK);
+
+    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null, prepaidMovement.getIdTxExterno());
+
+    if (!transaction10s.isEmpty()) {
+
+      CdtTransaction10 cdtTransaction10 = transaction10s.stream().filter(t ->
+        CdtTransactionType.REVERSA_CARGA.equals(t.getTransactionType()) ||
+          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(t.getTransactionType())
+      ).findFirst().orElse(null);
+
+      if (cdtTransaction10 != null) {
+        cdtTransaction10.setTransactionType(cdtTransaction10.getCdtTransactionTypeConfirm());
+        cdtTransaction10.setIndSimulacion(Boolean.FALSE);
+        cdtTransaction10.setTransactionReference(cdtTransaction10.getId());
+        cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
+
+        this.getMailDelegate().sendTopupRefundCompleteMail(getUserClient().getUserById(null, prepaidUserTest.getUserIdMc()), prepaidMovement);
+      }
+    }
+  }
+
   private Boolean validateBase64(String base64String){
 
     Boolean boolResponse;

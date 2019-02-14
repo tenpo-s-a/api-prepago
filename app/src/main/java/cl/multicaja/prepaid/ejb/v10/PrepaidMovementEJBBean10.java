@@ -658,57 +658,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
-  public CdtTransaction10 processRefundMovement(Long userPrepagoId, Long movementId) throws Exception{
-
-    CdtTransaction10 cdtTransaction = null;
-
-    PrepaidUserEJBBean10 prepaidUserEJBBean10 = getPrepaidUserEJB10();
-    PrepaidUser10 prepaidUserTest = prepaidUserEJBBean10.getPrepaidUserById(null,userPrepagoId);
-    if (prepaidUserTest == null){
-      log.error("Error on processRefundMovement: prepaid user not found by using userPrepagoId: "+userPrepagoId);
-      return cdtTransaction;
-    }
-
-    PrepaidMovement10 prepaidMovementTest = getPrepaidMovementById(movementId.longValue());
-    if (prepaidMovementTest == null){
-      log.error("Error on processRefundMovement: prepaid movement not found by using movementId: "+movementId);
-      return cdtTransaction;
-    }
-
-    PrepaidMovement10 prepaidMovement = getPrepaidMovementByIdPrepaidUserAndIdMovement(userPrepagoId,movementId);
-    if(prepaidMovement == null) {
-      log.error("Error on processRefundMovement: prepaid movement not found by using userPrepagoId:"+userPrepagoId+" & movementId:"+movementId);
-      return cdtTransaction;
-    }
-
-    Long _movementId = prepaidMovement.getId();
-
-    updatePrepaidBusinessStatus(null, _movementId, BusinessStatusType.REFUND_OK);
-
-    List<CdtTransaction10> transaction10s = getCdtEJB10().buscaListaMovimientoByIdExterno(null,prepaidMovement.getIdTxExterno());
-
-    if(transaction10s.size() > 0){
-
-      for (ListIterator<CdtTransaction10> iter = transaction10s.listIterator(); iter.hasNext();) {
-        cdtTransaction = iter.next();
-
-        if(CdtTransactionType.REVERSA_CARGA.equals(cdtTransaction.getTransactionType()) ||
-          CdtTransactionType.REVERSA_PRIMERA_CARGA.equals(cdtTransaction.getTransactionType())){
-
-          cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
-          cdtTransaction.setIndSimulacion(Boolean.FALSE);
-          cdtTransaction.setTransactionReference(cdtTransaction.getId());
-          cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
-
-        }
-
-      }
-
-    }
-
-    return cdtTransaction;
-  }
-
   @Override
   public void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception {
     if(idMovRef == null){

@@ -177,4 +177,34 @@ public final class MailDelegate10 {
     return messageId;
   }
 
+  /**
+   * Envia la notificacion de devolucion de carga exitosa
+   *
+   * @param user
+   * @return
+   */
+  public String sendTopupRefundCompleteMail(User user, PrepaidMovement10 prepaidMovement) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s#%s", prepaidMovement.getCodcom(), prepaidMovement.getId(), Utils.uniqueCurrentTimeNano());
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+
+    PrepaidTopupData10 data = new PrepaidTopupData10();
+    data.setUser(user);
+    data.setPrepaidMovement10(prepaidMovement);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS));
+
+    this.getProducerTemplate().sendBodyAndHeaders(SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS, req, headers);
+
+    return messageId;
+  }
+
 }
