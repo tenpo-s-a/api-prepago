@@ -29,27 +29,6 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
   static String folderDir = "src/test/resources/multicajared/clearing/clearing_test/";
 
   @Test
-  public void runF1() throws Exception {
-    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
-    String dirName = folderDir;
-    dirName = dirName.concat(String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
-
-    File file = new File(dirName);
-    InputStream inputStream = new FileInputStream(file);
-
-    String[] splits = dirName.split("/");
-    String fileName = splits[splits.length - 1];
-    System.out.println("File name:" + fileName);
-    getPrepaidClearingEJBBean10().processClearingResponse(inputStream, fileName);
-    inputStream.close();
-  }
-
-  @Test
-  public void runF3() throws Exception {
-    getPrepaidMovementEJBBean10().clearingResolution();
-  }
-
-  @Test
   public void fullClearingResolution() throws Exception {
 
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", getSchema()));
@@ -795,5 +774,24 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     List<AccountingData10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT id, status FROM %s.accounting where id = %d", getSchemaAccounting(), idMov), rowMapper);
     AccountingData10 accountingData10 = data.get(0);
     return accountingData10;
+  }
+
+  private void runF1() throws Exception {
+    ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
+    String dirName = folderDir;
+    dirName = dirName.concat(String.format("TRX_PREPAGO_%s.CSV", date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
+
+    File file = new File(dirName);
+    InputStream inputStream = new FileInputStream(file);
+
+    String[] splits = dirName.split("/");
+    String fileName = splits[splits.length - 1];
+    System.out.println("File name:" + fileName);
+    getPrepaidClearingEJBBean10().processClearingResponse(inputStream, fileName);
+    inputStream.close();
+  }
+
+  private void runF3() throws Exception {
+    getPrepaidMovementEJBBean10().clearingResolution();
   }
 }
