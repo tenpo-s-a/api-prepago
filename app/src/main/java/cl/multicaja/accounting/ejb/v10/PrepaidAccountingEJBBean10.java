@@ -16,6 +16,7 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
@@ -72,6 +73,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
 
+  @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
@@ -101,6 +105,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setPrepaidAccountingFileEJBBean10(PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10) {
     this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
+    return prepaidMovementEJBBean10;
+  }
+
+  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
+    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -884,7 +896,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     List<AccountingData10> transactions = new ArrayList<>();
     for (IpmMessage trx: ipmFile.getTransactions()) {
-
+      PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByNumAutAndPan(trx.getPan(),String.valueOf(trx.getApprovalCode()));
+      log.info(trx);
       AccountingData10 acc = new AccountingData10();
       acc.setOrigin(AccountingOriginType.IPM);
       acc.setType(this.getTransactionType(trx));

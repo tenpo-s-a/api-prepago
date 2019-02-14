@@ -351,19 +351,24 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
+  public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut) throws Exception {
+    List<PrepaidMovement10> lst = getPrepaidMovements(null, null, null,null,
+      null, null, null, null, null, null,
+      null, numaut,null, null, MovementOriginType.OPE,pan);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
   @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
-
     return this.getPrepaidMovements(id, idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, cuenta,
-      clamon, indnorcor, tipofac, fecfac, numaut, null, null, null);
+      clamon, indnorcor, tipofac, fecfac, numaut, null, null, null,null);
   }
-
 
   @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                      PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen) throws Exception {
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen,String pan) throws Exception {
 
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
@@ -381,7 +386,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       tipofac != null ? tipofac.getCode() : new NullParam(Types.NUMERIC),
       fecfac != null ? fecfac : new NullParam(Types.DATE),
       numaut != null ? numaut : new NullParam(Types.VARCHAR),
-
+      pan != null ? pan : new NullParam(Types.VARCHAR)
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
