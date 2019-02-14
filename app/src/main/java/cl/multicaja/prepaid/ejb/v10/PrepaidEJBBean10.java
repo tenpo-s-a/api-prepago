@@ -618,9 +618,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
 
+    UserAccount userBankAccount = null;
     if(isWebWithdraw) {
-      UserAccount userAccount = getUserClient().getUserBankAccountById(null, user.getId(), withdrawRequest.getBankAccountId());
-      if(userAccount == null) {
+      userBankAccount = getUserClient().getUserBankAccountById(null, user.getId(), withdrawRequest.getBankAccountId());
+      if(userBankAccount == null) {
         throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
       }
     }
@@ -675,6 +676,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     /*
+      Agrega la informacion para el voucher
+    */
+    this.addVoucherData(prepaidWithdraw);
+
+    /*
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
@@ -716,20 +722,27 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         status);
 
       UserAccount userAccount = null;
-
+      String messageId = null;
       if(isWebWithdraw) {
-        // Lanzar async a clearing
-        userAccount = new UserAccount();
-        userAccount.setId(withdrawRequest.getBankAccountId());
+        /*
+          Enviar mail con solicitud de retiro tef de retiro
+         */
+        messageId = this.getMailDelegate().sendWithdrawRequestMail(prepaidWithdraw, user, prepaidMovement, userBankAccount);
       } else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
+
+        /*
+          Enviar mail con comprobante de retiro
+         */
+        messageId = this.getMailDelegate().sendWithdrawMail(prepaidWithdraw, user, prepaidMovement);
       }
       // Se envia informacion a accounting/clearing
-      this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
+      prepaidWithdraw.setMessageId(messageId);
+      this.getDelegate().sendMovementToAccounting(prepaidMovement, userBankAccount);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
@@ -786,16 +799,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
 
-    /*
-      Agrega la informacion para el voucher
-     */
-    this.addVoucherData(prepaidWithdraw);
 
-    /*
-      Enviar mensaje al proceso asincrono
-     */
-    String messageId = this.getMailDelegate().sendWithdrawRequestMail(prepaidWithdraw, user, prepaidMovement);
-    prepaidWithdraw.setMessageId(messageId);
 
     return prepaidWithdraw;
   }

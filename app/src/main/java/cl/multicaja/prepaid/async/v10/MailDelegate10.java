@@ -90,7 +90,41 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendWithdrawRequestMail(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidMovement10 prepaidMovement) {
+  public String sendWithdrawRequestMail(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidMovement10 prepaidMovement, UserAccount userBankAccount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    String messageId = String.format("%s#%s#%s#%s", prepaidWithdraw.getMerchantCode(), prepaidWithdraw.getTransactionId(), prepaidWithdraw.getId(), Utils.uniqueCurrentTimeNano());
+
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("JMSCorrelationID", messageId);
+    prepaidWithdraw.setMessageId(messageId);
+
+    PrepaidTopupData10 data = new PrepaidTopupData10();
+    data.setPrepaidWithdraw10(prepaidWithdraw);
+    data.setUser(user);
+    data.setPrepaidMovement10(prepaidMovement);
+    data.setUserAccount(userBankAccount);
+
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST));
+
+    this.getProducerTemplate().sendBodyAndHeaders(SEDA_PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST, req, headers);
+
+    return messageId;
+  }
+
+  /**
+   * Envia un registro de withdraw al proceso asincrono
+   *
+   * @param prepaidWithdraw
+   * @param user
+   * @return
+   */
+  public String sendWithdrawMail(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");

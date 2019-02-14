@@ -276,9 +276,58 @@ public class PendingSendMail10 extends BaseProcessor10 {
   }
 
   /**
-   * Envio confirmacion de retiro exitoso
+   * Envio solcitud retiro TEF
    */
-  public ProcessorRoute processPendingWithdrawSuccessMail() {
+  public ProcessorRoute processPendingWebWithdrawRequestMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingWebWithdrawRequestMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        if(req.getRetryCount() > getMaxRetryCount()) {
+          Endpoint endpoint = createJMSEndpoint(MailRoute10.ERROR_SEND_MAIL_WITHDRAW_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
+        }
+
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName());
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
+        templateData.put("bank_name", data.getUserAccount().getBankName());
+
+        String accountNumber = data.getUserAccount().getAccountNumber();
+        //FIXME: este replace se puede hacer con un regex
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < accountNumber.length() - 4; i++){
+          sb.append("X");
+        }
+        sb.append(accountNumber.substring(accountNumber.length()-4));
+
+        templateData.put("account_number", sb.toString());
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_WEB_WITHDRAW_REQUEST);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
+  /**
+   * Envio confirmacion de retiro tef exitoso
+   */
+  public ProcessorRoute processPendingWebWithdrawSuccessMail() {
 
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
@@ -314,9 +363,9 @@ public class PendingSendMail10 extends BaseProcessor10 {
   }
 
   /**
-   * Envio confirmacion de retiro rechazado
+   * Envio confirmacion de retiro tef rechazado
    */
-  public ProcessorRoute processPendingWithdrawFailedMail() {
+  public ProcessorRoute processPendingWebWithdrawFailedMail() {
 
     return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
       @Override
