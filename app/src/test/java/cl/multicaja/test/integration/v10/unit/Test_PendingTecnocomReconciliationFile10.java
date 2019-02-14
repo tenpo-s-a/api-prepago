@@ -23,8 +23,8 @@ import java.util.*;
  **/
 public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync {
 
-  private List<String> pans = Arrays.asList("5176081182052131", "5176081118047031", "5176081144225379");
-  private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093");
+  private List<String> pans = Arrays.asList("5176081182052131", "5176081118047031", "5176081144225379","5176081135830583","5176081111866841");
+  private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
   private static ReconciliationFile onlineFile;
@@ -64,12 +64,14 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   @Before
   public void beforeEach() throws Exception {
     clearTransactions();
+
     {
       onlineFile = null;
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0003.ONLINE");
       onlineFile = TecnocomFileHelper.getInstance().validateFile(inputStream);
       inputStream.close();
     }
+
     {
       apiFile = null;
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream("tecnocom/files/PLJ61110.FINT0003");
