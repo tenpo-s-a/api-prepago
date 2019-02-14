@@ -207,9 +207,13 @@ public class PendingSendMail10 extends BaseProcessor10 {
         templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
         templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
         templateData.put("transaction_type_gloss", WEB_MERCHANT_CODE.equals(data.getPrepaidWithdraw10().getMerchantCode()) ? "Retiro por transferencia" : "Retiro en comercio");
-        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
-        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue()));
-        templateData.put("transaction_date", DateUtils.getInstance().dateToStringFormat(prepaidMovement.getFecfac(), "dd/MM/yyyy"));
+        templateData.put("transaction_total_paid", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
+        templateData.put("transaction_amount", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue()));
+        templateData.put("transaction_fee", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getFee().getValue()));
+
+        LocalDateTime topupDateTime = prepaidMovement.getFechaCreacion().toLocalDateTime();
+        ZonedDateTime local = ZonedDateTime.ofInstant(topupDateTime.toInstant(ZoneOffset.UTC), ZoneId.of("America/Santiago"));
+        templateData.put("transaction_date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
