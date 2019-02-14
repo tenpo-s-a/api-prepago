@@ -8,20 +8,17 @@ import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.persistence.PostUpdate;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import javax.ws.rs.core.*;
+import java.util.*;
 
 /**
  * @author vutreras
@@ -240,6 +237,29 @@ public final class PrepaidResource10 extends BaseResource {
       log.error("Error processing refund for movement: "+movementId, ex);
     }
     return Response.accepted().build();
+  }
+
+  @POST
+  @Path("/processor/notification")
+  public Response callNotificationTecnocom(NotificationTecnocom notificationTecnocom,@Context HttpHeaders headers) throws Exception {
+    Response returnResponse = null;
+
+    String textLogBase = "TestHelperResource-callNotification: ";
+    NotificationTecnocom notificationTecnocomResponse = null;
+    try{
+
+      notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
+      returnResponse = Response.ok(notificationTecnocomResponse).status(202).build();
+      log.info(textLogBase+notificationTecnocomResponse.toString());
+
+    }catch(Exception ex){
+      log.error(textLogBase+ex.toString());
+      ex.printStackTrace();
+      returnResponse = Response.ok(ex).build();
+    }
+
+    return returnResponse;
+
   }
 
 }

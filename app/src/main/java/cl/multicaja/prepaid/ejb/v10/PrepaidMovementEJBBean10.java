@@ -411,14 +411,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setNumreffac(String.valueOf(row.get("_numreffac")));
       p.setPan(String.valueOf(row.get("_pan")));
       p.setClamondiv(getNumberUtils().toInteger(row.get("_clamondiv")));
-      p.setImpdiv(getNumberUtils().toLong(row.get("_impdiv")));
+      p.setImpdiv(getNumberUtils().toBigDecimal(row.get("_impdiv")));
       p.setImpfac(getNumberUtils().toBigDecimal(row.get("_impfac")));
       p.setCmbapli(getNumberUtils().toInteger(row.get("_cmbapli")));
       p.setNumaut(String.valueOf(row.get("_numaut")));
       p.setIndproaje(IndicadorPropiaAjena.fromValue(String.valueOf(row.get("_indproaje"))));
       p.setCodcom(String.valueOf(row.get("_codcom")));
       p.setCodact(getNumberUtils().toInteger(row.get("_codact")));
-      p.setImpliq(getNumberUtils().toLong(row.get("_impliq")));
+      p.setImpliq(getNumberUtils().toBigDecimal(row.get("_impliq")));
       p.setClamonliq(getNumberUtils().toInteger(row.get("_clamonliq")));
       p.setCodpais(CodigoPais.fromValue(getNumberUtils().toInteger(row.get("_codpais"))));
       p.setNompob(String.valueOf(row.get("_nompob")));
@@ -546,6 +546,16 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, idTxExterno, tipoMovimiento, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, null, null);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUse,TipoFactura tipoFactura, String numaut)throws Exception{
+    if(idPrepaidUse == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUse"));
+    }
+    if(numaut == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUse, null, null, null, null, null, null,tipoFactura , null, numaut);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
