@@ -156,7 +156,7 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendWithdrawToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
+  public String sendMovementToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;

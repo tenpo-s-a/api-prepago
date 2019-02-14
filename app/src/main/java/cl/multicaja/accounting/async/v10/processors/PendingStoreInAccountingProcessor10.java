@@ -61,10 +61,11 @@ public class PendingStoreInAccountingProcessor10 extends BaseProcessor10 {
         mov.setPrepaidMovement10(prepaidMovement);
 
         // Los movimientos se insertan con fecha de conciliacion lejana, esta se debe actualizar cuando el movimiento es conciliado
-        mov.setReconciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toInstant()));
+        mov.setReconciliationDate(Timestamp.valueOf(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime()));
 
         // Insertar en accounting como PENDING
-        AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(mov, AccountingStatusType.PENDING);
+        AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(mov, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
         // Insertar en clearing

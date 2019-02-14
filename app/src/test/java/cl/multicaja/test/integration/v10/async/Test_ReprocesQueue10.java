@@ -68,7 +68,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup.getData());
@@ -115,7 +115,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Thread.sleep(3000);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
     System.out.println("Encontre un remoteTopup: " + remoteTopup);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
@@ -412,7 +412,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
       Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
 

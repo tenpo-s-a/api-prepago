@@ -9,7 +9,6 @@ import cl.multicaja.prepaid.model.v10.PrepaidAccountingMovement;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,9 @@ import java.util.Map;
  */
 public interface PrepaidAccountingEJB10 {
 
-  List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch) throws Exception;
+  AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception;
+
+  List<AccountingData10> searchAccountingData(Map<String, Object> header, LocalDateTime dateToSearch) throws Exception;
 
   List<AccountingData10> saveAccountingData (Map<String, Object> header, List<AccountingData10> accounting10s) throws Exception;
 
@@ -40,15 +41,6 @@ public interface PrepaidAccountingEJB10 {
    * @throws Exception
    */
   List<AccountingData10> processMovementForAccounting(Map<String, Object> headers, LocalDateTime date) throws Exception;
-
-  /**
-   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
-   * @param headers
-   * @param date la fecha recibida debe estar en UTC
-   * @return
-   * @throws Exception
-   */
-  void generateAccountingFile(Map<String, Object> headers, LocalDateTime date) throws Exception;
 
   /**
    * Agrega registro de archivo IPM
@@ -108,7 +100,7 @@ public interface PrepaidAccountingEJB10 {
   Boolean isSubscriptionMerchant(final String merchantName) throws Exception;
 
   /**
-   * Actualiza el estado
+   * Actualiza el fileId y estado
    *
    * @param header
    * @param id
@@ -117,4 +109,32 @@ public interface PrepaidAccountingEJB10 {
    * @throws Exception
    */
   void updateAccountingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception;
+
+  /**
+   * Actualiza el AccountingStatus
+   * @param header
+   * @param id
+   * @param accountingStatus
+   * @throws Exception
+   */
+  void updateAccountingStatus(Map<String, Object> header, Long id, AccountingStatusType accountingStatus) throws Exception;
+
+  /**
+   * Actualiza es estado
+   * @param header
+   * @param id
+   * @param status
+   * @throws Exception
+   */
+  void updateStatus(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception;
+
+  /**
+   * Actualiza accounting status y fecha de conciliacion
+   * @param header
+   * @param id
+   * @param accountingStatus
+   * @param conciliationDate
+   * @throws Exception
+   */
+  void updateAccountingStatusAndConciliationDate(Map<String, Object> header, Long id, AccountingStatusType accountingStatus, String conciliationDate) throws Exception;
 }

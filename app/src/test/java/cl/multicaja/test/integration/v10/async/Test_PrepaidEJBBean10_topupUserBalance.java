@@ -1,5 +1,6 @@
 package cl.multicaja.test.integration.v10.async;
 
+import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.exceptions.NotFoundException;
@@ -18,13 +19,15 @@ import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -35,11 +38,20 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
  */
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
+  private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
 
   @BeforeClass
   public static void startTecnocom(){
     tc = TecnocomServiceHelper.getInstance();
+  }
+
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
   }
 
   @Test
@@ -217,7 +229,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3000, 10000)));
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(4000, 10000)));
 
     PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
 
@@ -287,6 +299,48 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(1000);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    AccountingTxType txType = AccountingTxType.CARGA_POS;
+    AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
+    if(TransactionOriginType.WEB.equals(prepaidTopup10.getTransactionOriginType())) {
+      txType = AccountingTxType.CARGA_WEB;
+      movementType = AccountingMovementType.CARGA_WEB;
+    }
+
+    if (dataFound) {
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+
+      AccountingData10 accounting10 = accounting10s.get(0);
+      Assert.assertEquals(String.format("Debe tener tipo %s", prepaidTopup10.getTransactionOriginType()), txType, accounting10.getType());
+      Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
+      Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+      Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+
+      ClearingData10 clearing10 = clearing10s.get(0);
+      Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+      Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+      Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
+    }
   }
 
   @Test
@@ -330,6 +384,48 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener un movimiento", topup);
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(1000);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    AccountingTxType txType = AccountingTxType.CARGA_POS;
+    AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
+    if(TransactionOriginType.WEB.equals(prepaidTopup10.getTransactionOriginType())) {
+      txType = AccountingTxType.CARGA_WEB;
+      movementType = AccountingMovementType.CARGA_WEB;
+    }
+
+    if (dataFound) {
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+
+      AccountingData10 accounting10 = accounting10s.get(0);
+      Assert.assertEquals(String.format("Debe tener tipo %s", prepaidTopup10.getTransactionOriginType()), txType, accounting10.getType());
+      Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
+      Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+      Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+
+      ClearingData10 clearing10 = clearing10s.get(0);
+      Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+      Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+      Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
+    }
   }
 
   @Test
@@ -478,6 +574,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_sync() throws Exception {
 
+    Map<Long, PrepaidMovement10> movements = new HashMap<>();
+
     User user = registerUser();
     user.setNameStatus(NameStatus.VERIFIED);
     user.getRut().setStatus(RutStatus.VERIFIED);
@@ -517,6 +615,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
+    movements.put(topup.getId(), topup);
+
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, resp.getMessageId());
 
@@ -545,15 +645,53 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
-      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+      PrepaidMovement10 topup2 = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp2.getId());
       Assert.assertNotNull("debe tener un movimiento", topup);
       Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
       Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup2.getEstadoNegocio());
+
+      movements.put(topup2.getId(), topup2);
 
       Queue qResp2 = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
       ExchangeData<PrepaidTopupData10> remoteTopup2 = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(1000l, 1000l).getMessage(qResp2, resp2.getMessageId());
 
       Assert.assertNull("No Deberia existir un topup en la cola", remoteTopup2);
+    }
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(1000);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    if (dataFound) {
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 2 movimientos de accounting", 2, accounting10s.size());
+
+      accounting10s.forEach(acc -> {
+        PrepaidMovement10 mov = movements.get(acc.getIdTransaction());
+        Assert.assertNotNull("Debe tener el mismo id", mov);
+        Assert.assertEquals("Debe tener el mismo imp fac", mov.getImpfac().stripTrailingZeros(), acc.getAmount().getValue().stripTrailingZeros());
+        Assert.assertEquals("debe tener la misma fecha de transaccion", mov.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), acc.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+      });
+
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+
+      clearing10s.forEach(cle -> {
+        Assert.assertTrue("Debe tener el id de accounting", accounting10s.stream().anyMatch(a -> a.getId().equals(cle.getAccountingId())));
+        Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), cle.getUserBankAccount().getId());
+        Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, cle.getStatus());
+      });
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
   }
 

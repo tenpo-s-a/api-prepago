@@ -108,12 +108,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
+  public ClearingData10 updateClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    return updateClearingData(header, id, null, status);
+  }
+
+  @Override
   public ClearingData10 updateClearingData(Map<String, Object> header, Long id, Long fileId, AccountingStatusType status) throws Exception {
 
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    if(fileId == null && status == null){
+    if(status == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "allNull"));
     }
 
@@ -149,15 +159,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   //TODO: este metodo no tiene test usando el parametro "status"
   @Override
-  public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status) throws Exception {
+  public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId) throws Exception {
 
-    if(id == null && status == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value","allNull"));
-    }
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       status != null ? status.getValue() : new NullParam(Types.VARCHAR),
+      accountingId != null ? accountingId : new NullParam(Types.BIGINT),
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
@@ -174,7 +182,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    List<ClearingData10> clearing10s = searchClearingData(null,id,null);
+    List<ClearingData10> clearing10s = this.searchClearingData(null,id,null, null);
+    return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
+  }
+
+  @Override
+  public ClearingData10 searchClearingDataByAccountingId(Map<String, Object> header, Long accountingId) throws Exception {
+    if(accountingId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountingId"));
+    }
+    List<ClearingData10> clearing10s = searchClearingData(null,null,null, accountingId);
     return clearing10s != null && !clearing10s.isEmpty() ? clearing10s.get(0) : null;
   }
 
@@ -265,7 +282,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   /**
-   * Busca los movimientos en accounting y genera un archivo csv que se envia por correo
+   * Busca los movimientos en clearing y genera un archivo csv que se envia por correo
    * @param headers
    * @param date
    * @return
@@ -317,7 +334,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = String.format("TRX_PREPAGO_%s.CSV", fileId);
 
-    createAccountingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
+    createClearingCSV(directoryName + "/" + fileName, fileId, movements); // Crear archivo csv temporal
 
     AccountingFiles10 file = new AccountingFiles10();
     file.setStatus(AccountingStatusType.PENDING);
@@ -355,7 +372,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
 
-  public File createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
+  public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -567,5 +584,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setTimestamps(timestamps);
       return clearing10;
     };
+  }
+
+  public ClearingData10 buildClearing(Long accountingId,UserAccount userAccount){
+    ClearingData10 clearingData10 = new ClearingData10();
+    clearingData10.setAccountingId(accountingId);
+    clearingData10.setUserBankAccount(userAccount);
+    clearingData10.setStatus(AccountingStatusType.INITIAL);
+    return clearingData10;
   }
 }

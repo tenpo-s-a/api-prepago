@@ -34,14 +34,14 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private String numreffac;
   private String pan;
   private Integer clamondiv;
-  private Long impdiv;
+  private BigDecimal impdiv;
   private BigDecimal impfac;
   private Integer cmbapli;
   private String numaut;
   private IndicadorPropiaAjena indproaje;
   private String codcom;
   private Integer codact;
-  private Long impliq;
+  private BigDecimal impliq;
   private Integer clamonliq;
   private CodigoPais codpais;
   private String nompob;
@@ -206,11 +206,11 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
     this.clamondiv = clamondiv;
   }
 
-  public Long getImpdiv() {
+  public BigDecimal getImpdiv() {
     return impdiv;
   }
 
-  public void setImpdiv(Long impdiv) {
+  public void setImpdiv(BigDecimal impdiv) {
     this.impdiv = impdiv;
   }
 
@@ -262,11 +262,11 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
     this.codact = codact;
   }
 
-  public Long getImpliq() {
+  public BigDecimal getImpliq() {
     return impliq;
   }
 
-  public void setImpliq(Long impliq) {
+  public void setImpliq(BigDecimal impliq) {
     this.impliq = impliq;
   }
 

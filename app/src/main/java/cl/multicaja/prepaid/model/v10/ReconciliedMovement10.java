@@ -15,8 +15,7 @@ public class ReconciliedMovement10 {
   private Long idMovRef;
   private ReconciliationStatusType reconciliationStatusType;
   private ReconciliationActionType actionType;
-
-  private Timestamp createdAt;
+  private Timestamp fechaRegistro;
 
   public Long getId() {
     return id;
@@ -50,7 +49,11 @@ public class ReconciliedMovement10 {
     this.actionType = actionType;
   }
 
-  public Timestamp getCreatedAt() { return createdAt; }
+  public Timestamp getFechaRegistro() {
+    return fechaRegistro;
+  }
 
-  public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+  public void setFechaRegistro(Timestamp fechaRegistro) {
+    this.fechaRegistro = fechaRegistro;
+  }
 }

@@ -31,6 +31,7 @@ public class AccountingData10 implements Serializable {
  private Timestamp conciliationDate;
  private AccountingStatusType status;
  private Timestamps timestamps;
+ private AccountingStatusType accountingStatus;
 
   public AccountingData10() {
   }
@@ -204,6 +205,14 @@ public class AccountingData10 implements Serializable {
 
   public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
+  }
+
+  public AccountingStatusType getAccountingStatus() {
+    return accountingStatus;
+  }
+
+  public void setAccountingStatus(AccountingStatusType accountingStatus) {
+    this.accountingStatus = accountingStatus;
   }
 
   @Override

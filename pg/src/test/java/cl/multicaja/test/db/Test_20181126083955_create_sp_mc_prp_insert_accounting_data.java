@@ -43,6 +43,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status","OK");
+    testCase.put("accounting_status","OK");
     testCase.put("origin", "2");
     testCase.put("amount", 500);
     testCase.put("currency", 3);
@@ -89,6 +90,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status","OK");
+    testCase.put("accounting_status","OK");
     testCase.put("file_id",0);
     testSuite.add(testCase);
 
@@ -118,6 +120,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status","OK");
+    testCase.put("accounting_status","OK");
     testCase.put("origin", "2");
     testCase.put("amount", 500);
     testCase.put("currency", 3);
@@ -148,6 +151,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status","OK");
+    testCase.put("accounting_status","OK");
     testCase.put("file_id",0);
     testSuite.add(testCase);
 
@@ -171,6 +175,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status",null);
+    testCase.put("accounting_status", "OK");
     testCase.put("file_id",0);
     testSuite.add(testCase);
 
@@ -193,6 +198,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     testCase.put("collector_fee_iva",numberUtils.random(1000,9999));
     testCase.put("amount_balance",numberUtils.random(1000,9999));
     testCase.put("status","OK");
+    testCase.put("accounting_status", "OK");
     testCase.put("file_id",0);
     testSuite.add(testCase);
 
@@ -222,7 +228,8 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
       new InParam(paramsIn.get("conciliation_date"),Types.TIMESTAMP), //_transaction_date
       new InParam(paramsIn.get("status"),Types.VARCHAR), //origin
       new InParam(paramsIn.get("file_id"), Types.BIGINT), //id_tx
-      
+      new InParam(paramsIn.get("accounting_status"), Types.VARCHAR), //id_tx
+
       new OutParam("_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -263,6 +270,7 @@ public class Test_20181126083955_create_sp_mc_prp_insert_accounting_data extends
     map.put("conciliation_date", paramsIn.get("_conciliation_date"));
     map.put("status",String.valueOf(paramsIn.get("status")));
     map.put("file_id",numberUtils.toLong(paramsIn.get("file_id")));
+    map.put("accounting_status",numberUtils.toLong(paramsIn.get("accounting_status")));
     map.put("_error_code",resp.get("_error_code"));
     map.put("_error_msg",resp.get("_error_msg"));
 

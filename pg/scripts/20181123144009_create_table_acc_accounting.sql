@@ -36,6 +36,7 @@
       amount_balance        NUMERIC(15,2) NOT NULL,
       status                VARCHAR(20) NOT NULL,
       file_id               BIGINT NOT NULL, -- Puede ser null
+      accounting_status     VARCHAR(20) NOT NULL,
       transaction_date      TIMESTAMP NOT NULL,
       conciliation_date     TIMESTAMP NOT NULL,
       create_date           TIMESTAMP NOT NULL,

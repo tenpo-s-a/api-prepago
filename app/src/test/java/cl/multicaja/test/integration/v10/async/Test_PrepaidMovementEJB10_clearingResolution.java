@@ -7,10 +7,7 @@ import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +32,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
   }
 
+  @Ignore
   @Test
   public void clearingResolution_Reversed() throws Exception {
     // Banco rechaza

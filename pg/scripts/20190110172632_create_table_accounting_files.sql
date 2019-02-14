@@ -21,7 +21,7 @@
       id            BIGSERIAL NOT NULL,
       name          VARCHAR(100) NOT NULL,
       file_id       VARCHAR(30) NOT NULL,
-      type          VARCHAR(20) NOT NULL,
+      type          VARCHAR(30) NOT NULL,
       format        VARCHAR(20) NOT NULL,
       url           VARCHAR(200) NOT NULL,
       status        VARCHAR(20) NOT NULL,
