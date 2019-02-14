@@ -125,12 +125,14 @@ public class Test_20181010114033_create_sp_busca_movimientos_conciliados extends
     List results = (List)resp.get("result");
     Assert.assertNull("No debe existir", results);
   }
+
+  class ReconciledMovement {
+    public Long id;
+    public Long idMovRef;
+    public String reconciliationStatusType;
+    public String actionType;
+    public Timestamp createdAt;
+  }
 }
 
-class ReconciledMovement {
-  public Long id;
-  public Long idMovRef;
-  public String reconciliationStatusType;
-  public String actionType;
-  public Timestamp createdAt;
-}
+

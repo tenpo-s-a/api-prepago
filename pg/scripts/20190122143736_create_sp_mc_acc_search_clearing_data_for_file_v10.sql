@@ -73,8 +73,7 @@ RETURN QUERY
     a.conciliation_date,
     c.created,
     c.updated,
-    c.user_account_id,
-    pmc.id_mov_ref
+    c.user_account_id
   FROM
     ${schema.acc}.clearing c
     INNER JOIN ${schema.acc}.accounting a ON a.id = c.accounting_id

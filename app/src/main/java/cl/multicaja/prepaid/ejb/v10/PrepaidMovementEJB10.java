@@ -231,10 +231,10 @@ public interface PrepaidMovementEJB10 {
   /**
    * Busca un movimiento conciliado en la tabla de conciliados
    *
-   * @param idMov unique movement id
+   * @param idMovRef id del movimiento referenciado
    * @return
    */
-  ReconciliedMovement getReconciliedMovementById(Long idMov) throws BaseException, SQLException;
+  ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException;
 
   /**
    *
@@ -245,6 +245,14 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileNme) throws Exception;
+
+  /**
+   * Busca un movimiento de investigacion en la tabla de conciliados
+   *
+   * @param idMovRef id de referencia del movimiento a investigar
+   * @return
+   */
+  ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException;
 
   /**
    *

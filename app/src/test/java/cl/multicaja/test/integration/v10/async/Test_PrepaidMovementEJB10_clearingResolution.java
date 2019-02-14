@@ -151,9 +151,24 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     accountingData.setAmountMastercard(new NewAmountAndCurrency10(amount.getValue()));
     accountingData.setAmountUsd(new NewAmountAndCurrency10(amount.getValue().divide(new BigDecimal(680), 2, RoundingMode.HALF_UP)));
     accountingData.setFileId(fileId);
-    accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+    if(PrepaidMovementType.TOPUP.equals(prepaidMovement.getTipoMovimiento())) {
+      if(NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidMovement.getCodcom())) {
+        accountingData.setAccountingMovementType(AccountingMovementType.CARGA_WEB);
+        accountingData.setType(AccountingTxType.CARGA_WEB);
+      } else {
+        accountingData.setAccountingMovementType(AccountingMovementType.CARGA_POS);
+        accountingData.setType(AccountingTxType.CARGA_POS);
+      }
+    } else if(PrepaidMovementType.WITHDRAW.equals(prepaidMovement.getTipoMovimiento())) {
+      if(NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidMovement.getCodcom())) {
+        accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+        accountingData.setType(AccountingTxType.RETIRO_WEB);
+      } else {
+        accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_POS);
+        accountingData.setType(AccountingTxType.RETIRO_POS);
+      }
+    }
     accountingData.setIdTransaction(prepaidMovement.getId());
-    accountingData.setType(AccountingTxType.RETIRO_WEB);
     accountingData.setStatus(AccountingStatusType.PENDING);
     accountingData = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData);
 
@@ -179,10 +194,10 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
   }
 
   static public class ResolutionPreparedVariables {
-    PrepaidMovement10 prepaidMovement10;
-    CdtTransaction10 cdtTransaction10;
-    AccountingData10 accountingData10;
-    ClearingData10 clearingData10;
+    public PrepaidMovement10 prepaidMovement10;
+    public CdtTransaction10 cdtTransaction10;
+    public AccountingData10 accountingData10;
+    public ClearingData10 clearingData10;
   }
 
   static public void copyAccountingValues(AccountingData10 accountingData, ClearingData10 clearingData) {

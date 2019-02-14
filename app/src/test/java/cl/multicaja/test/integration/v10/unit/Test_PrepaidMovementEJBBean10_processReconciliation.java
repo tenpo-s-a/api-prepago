@@ -25,7 +25,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
   }
@@ -44,7 +44,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
@@ -98,7 +98,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
@@ -121,7 +121,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
@@ -152,7 +152,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
@@ -168,16 +168,16 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
   }
 
-  private ReconciliedMovement getMovimientoConciliado(Long idMovRef){
+  private ReconciliedMovement10 getMovimientoConciliado(Long idMovRef){
     RowMapper rowMapper = (rs, rowNum) -> {
-      ReconciliedMovement reconciliedMovement = new ReconciliedMovement();
-      reconciliedMovement.setId(numberUtils.toLong(rs.getLong("id")));
-      reconciliedMovement.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
-      reconciliedMovement.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
-      reconciliedMovement.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
-      return reconciliedMovement;
+      ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
+      reconciliedMovement10.setId(numberUtils.toLong(rs.getLong("id")));
+      reconciliedMovement10.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
+      reconciliedMovement10.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
+      reconciliedMovement10.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
+      return reconciliedMovement10;
     };
-    List<ReconciliedMovement> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %s",getSchema(),idMovRef),rowMapper);
+    List<ReconciliedMovement10> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %s",getSchema(),idMovRef),rowMapper);
     return data.get(0);
   }
   private ReconciliedResearch getMovimientoInvestigarMotor(Long idMovRef){
@@ -189,7 +189,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
       reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
       return reconciliedResearch;
     };
-    List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref LIKE 'idMov=%s'",getSchema(),idMovRef),rowMapper);
+    List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
     return data.get(0);
   }
 }

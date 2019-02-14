@@ -1,8 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJB10;
 import cl.multicaja.accounting.ejb.v10.PrepaidAccountingEJBBean10;
-import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJB10;
 import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
@@ -12,8 +10,8 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -23,7 +21,6 @@ import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -38,7 +35,6 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -1152,8 +1148,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         switch(clearingData10.getStatus()) {
           case OK: // Linea 1: OK tecnocom, Banco OK
             {
-              System.out.println("Camino felix");
-
               // Confirmar movimiento en cdt
               CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB);
               cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
@@ -1182,6 +1176,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
           case REJECTED_FORMAT: // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
             {
+              // Actualizar estado en accounting
+              getPrepaidAccountingEJB10().updateAccountingData(null, clearingData10.getAccountingId(), null, clearingData10.getStatus());
+
               //Se busca usuario prepago para obtener user
               PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
@@ -1233,29 +1230,64 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public ReconciliedMovement getReconciliedMovementById(Long idMov) throws BaseException, SQLException {
-    log.info("[getReonciliedMovementById In Id] : " + idMov);
-    if(idMov == null){
+  public ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException {
+    log.info("[getReonciliedMovementByIdMovRef In Id] : " + idMovRef);
+    if(idMovRef == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
     }
-    log.info(String.format("ID IN : %s", idMov));
+
+    Object[] params = {
+      new InParam(idMovRef, Types.BIGINT)
+    };
+
+    log.info(String.format("ID IN : %s", idMovRef));
     RowMapper rm = getReconciliedMovementRowMapper();
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_acc_busca_retiros_web_conciliar_v10", getSchemaAccounting()), rm);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_conciliados_v10", getSchema()), rm, params);
     List list = (List)resp.get("result");
-    log.info("getReconciliedMovementById: " + list);
-    return list != null && !list.isEmpty() ? (ReconciliedMovement) list.get(0) : null;
+    log.info("getReconciliedMovementByIdMovRef: " + list);
+    return list != null && !list.isEmpty() ? (ReconciliedMovement10) list.get(0) : null;
   }
 
   private RowMapper getReconciliedMovementRowMapper() {
     return (Map<String, Object> row) -> {
-      ReconciliedMovement reconciliedMovement = new ReconciliedMovement();
-      reconciliedMovement.setId(getNumberUtils().toLong(row.get("_id")));
-      reconciliedMovement.setIdMovRef(getNumberUtils().toLong(row.get("_id_mov_ref")));
-      reconciliedMovement.setActionType(ReconciliationActionType.valueOfEnum(String.valueOf(row.get("_status"))));
-      reconciliedMovement.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(row.get("_status"))));
-      reconciliedMovement.setCreatedAt((Timestamp)row.get("_fecha_registro"));
-      return reconciliedMovement;
+      ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
+      reconciliedMovement10.setId(getNumberUtils().toLong(row.get("_id")));
+      reconciliedMovement10.setIdMovRef(getNumberUtils().toLong(row.get("_id_mov_ref")));
+      reconciliedMovement10.setActionType(ReconciliationActionType.valueOfEnum(String.valueOf(row.get("_accion"))));
+      reconciliedMovement10.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado"))));
+      reconciliedMovement10.setCreatedAt((Timestamp)row.get("_fecha_registro"));
+      return reconciliedMovement10;
     };
   }
 
+  @Override
+  public ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException {
+    log.info("[getResearchMovementByIdMovRef In Id] : " + idMovRef);
+    if(idMovRef == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
+    }
+
+    Object[] params = {
+      new InParam(idMovRef, Types.VARCHAR)
+    };
+
+    log.info(String.format("ID IN : %s", idMovRef));
+    RowMapper rm = getResearchMovementRowMapper();
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
+    List list = (List)resp.get("result");
+    log.info("getResearchMovementByIdMovRef: " + list);
+    return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
+  }
+
+  private RowMapper getResearchMovementRowMapper() {
+    return (Map<String, Object> row) -> {
+      ResearchMovement10 researchMovement = new ResearchMovement10();
+      researchMovement.setId(NumberUtils.getInstance().toLong(row.get("_id")));
+      researchMovement.setIdRef(String.valueOf(row.get("_mov_ref")));
+      researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
+      researchMovement.setOrigen(ReconciliationOriginType.valueOf(String.valueOf(row.get("_origen"))));
+      researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
+      return researchMovement;
+    };
+  }
 }
