@@ -32,6 +32,11 @@ import org.springframework.util.Base64Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -320,10 +325,19 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
+        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
+
         Map<String, Object> templateData = new HashMap<>();
 
         templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-        templateData.put("withdraw_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(prepaidMovement.getMonto())));
+
+        LocalDateTime topupDateTime = prepaidMovement.getFechaCreacion().toLocalDateTime();
+
+        ZonedDateTime local = ZonedDateTime.ofInstant(topupDateTime.toInstant(ZoneOffset.UTC), ZoneId.of("America/Santiago"));
+
+        templateData.put("date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        templateData.put("time", local.format(DateTimeFormatter.ofPattern("HH:mm")));
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
