@@ -33,47 +33,48 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_v10(
   IN _in_tipofac              NUMERIC,
   IN _in_fecfac               DATE,
   IN _in_numaut               VARCHAR,
-  OUT _id                   BIGINT,
-  OUT _id_movimiento_ref    BIGINT,
-  OUT _id_usuario           BIGINT,
-  OUT _id_tx_externo        VARCHAR,
-  OUT _tipo_movimiento      VARCHAR,
-  OUT _monto                NUMERIC,
-  OUT _estado               VARCHAR,
-  OUT _estado_de_negocio    VARCHAR,
-  OUT _estado_con_switch    VARCHAR,
-  OUT _estado_con_tecnocom  VARCHAR,
-  OUT _origen_movimiento    VARCHAR,
-  OUT _fecha_creacion       TIMESTAMP,
-  OUT _fecha_actualizacion  TIMESTAMP,
-  OUT _codent             VARCHAR,
-  OUT _centalta           VARCHAR,
-  OUT _cuenta             VARCHAR,
-  OUT _clamon             NUMERIC,
-  OUT _indnorcor          NUMERIC,
-  OUT _tipofac            NUMERIC,
-  OUT _fecfac             DATE,
-  OUT _numreffac          VARCHAR,
-  OUT _pan                VARCHAR,
-  OUT _clamondiv          NUMERIC,
-  OUT _impdiv             NUMERIC,
-  OUT _impfac             NUMERIC,
-  OUT _cmbapli            NUMERIC,
-  OUT _numaut             VARCHAR,
-  OUT _indproaje          VARCHAR,
-  OUT _codcom             VARCHAR,
-  OUT _codact             NUMERIC,
-  OUT _impliq             NUMERIC,
-  OUT _clamonliq          NUMERIC,
-  OUT _codpais            NUMERIC,
-  OUT _nompob             VARCHAR,
-  OUT _numextcta          NUMERIC,
-  OUT _nummovext          NUMERIC,
-  OUT _clamone            NUMERIC,
-  OUT _tipolin            VARCHAR,
-  OUT _linref             NUMERIC,
-  OUT _numbencta          NUMERIC,
-  OUT _numplastico        NUMERIC
+  IN _in_pan                  VARCHAR,
+  OUT _id                     BIGINT,
+  OUT _id_movimiento_ref      BIGINT,
+  OUT _id_usuario             BIGINT,
+  OUT _id_tx_externo          VARCHAR,
+  OUT _tipo_movimiento        VARCHAR,
+  OUT _monto                  NUMERIC,
+  OUT _estado                 VARCHAR,
+  OUT _estado_de_negocio      VARCHAR,
+  OUT _estado_con_switch      VARCHAR,
+  OUT _estado_con_tecnocom    VARCHAR,
+  OUT _origen_movimiento      VARCHAR,
+  OUT _fecha_creacion         TIMESTAMP,
+  OUT _fecha_actualizacion    TIMESTAMP,
+  OUT _codent                 VARCHAR,
+  OUT _centalta               VARCHAR,
+  OUT _cuenta                 VARCHAR,
+  OUT _clamon                 NUMERIC,
+  OUT _indnorcor              NUMERIC,
+  OUT _tipofac                NUMERIC,
+  OUT _fecfac                 DATE,
+  OUT _numreffac              VARCHAR,
+  OUT _pan                    VARCHAR,
+  OUT _clamondiv              NUMERIC,
+  OUT _impdiv                 NUMERIC,
+  OUT _impfac                 NUMERIC,
+  OUT _cmbapli                NUMERIC,
+  OUT _numaut                 VARCHAR,
+  OUT _indproaje              VARCHAR,
+  OUT _codcom                 VARCHAR,
+  OUT _codact                 NUMERIC,
+  OUT _impliq                 NUMERIC,
+  OUT _clamonliq              NUMERIC,
+  OUT _codpais                NUMERIC,
+  OUT _nompob                 VARCHAR,
+  OUT _numextcta              NUMERIC,
+  OUT _nummovext              NUMERIC,
+  OUT _clamone                NUMERIC,
+  OUT _tipolin                VARCHAR,
+  OUT _linref                 NUMERIC,
+  OUT _numbencta              NUMERIC,
+  OUT _numplastico            NUMERIC
 )
 RETURNS SETOF RECORD AS $$
 BEGIN
@@ -137,7 +138,8 @@ BEGIN
     (TRIM(COALESCE(_in_cuenta,'')) = '' OR cuenta = _in_cuenta) AND
     (COALESCE(_in_clamon, 0) = 0 OR clamon = _in_clamon) AND
     (COALESCE(_in_indnorcor, -1) = -1 OR indnorcor = _in_indnorcor) AND
-    (COALESCE(_in_tipofac, 0) = 0 OR tipofac = _in_tipofac)
+    (COALESCE(_in_tipofac, 0) = 0 OR tipofac = _in_tipofac) AND
+    (TRIM(COALESCE(_in_pan,'')) = '' OR pan = _in_pan)
     ORDER BY id DESC;
    RETURN;
 END;
@@ -146,4 +148,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_v10(BIGINT, BIGINT, BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC,  NUMERIC, DATE, VARCHAR,VARCHAR);
