@@ -279,7 +279,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
     // Revisar los que venian en el archivo pero no estan en nuestra BD
     for(ClearingData10 originalMovement : notInBDMovements) {
-      List<ReconciliedResearch> researchMovs = getResearchMovement(originalMovement.getId());
+      List<ReconciliedResearch> researchMovs = getResearchMovement(originalMovement.getIdTransaction());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }

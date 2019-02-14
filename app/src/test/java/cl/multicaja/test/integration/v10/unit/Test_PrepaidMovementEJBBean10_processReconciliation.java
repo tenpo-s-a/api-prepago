@@ -54,7 +54,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
     // verifica movimiento conciliado
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
 
@@ -109,7 +109,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
     // verifica movimiento conciliado
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
 
@@ -164,7 +164,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     getPrepaidMovementEJBBean10().processReconciliation(prepaidMovement10);
 
     // verifica movimiento conciliado
-    ReconciliedMovement movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
+    ReconciliedMovement10 movConciliado = getMovimientoConciliado(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
 

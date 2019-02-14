@@ -33,11 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.Date;
-<<<<<<< HEAD
 import java.sql.SQLException;
-=======
-import java.sql.Time;
->>>>>>> master
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
@@ -1276,10 +1272,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ZonedDateTime zdt = instant.atZone(z);
     getPrepaidAccountingEJB10().updateAccountingStatusAndConciliationDate(null, accounting.getId(), accountingStatus, zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-    // Obtengo el movimiento correspondiente en Clearing
-    ClearingData10 clearing = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accounting.getId());
-
-    getPrepaidClearingEJB10().updateClearingData(null, clearing.getId(), clearingStatus);
+    if(clearingStatus != null) {
+      // Obtengo el movimiento correspondiente en Clearing
+      ClearingData10 clearing = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accounting.getId());
+      getPrepaidClearingEJB10().updateClearingData(null, clearing.getId(), clearingStatus);
+    }
   }
 
   public void clearingResolution() throws Exception {
@@ -1450,7 +1447,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       reconciliedMovement10.setIdMovRef(getNumberUtils().toLong(row.get("_id_mov_ref")));
       reconciliedMovement10.setActionType(ReconciliationActionType.valueOfEnum(String.valueOf(row.get("_accion"))));
       reconciliedMovement10.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(row.get("_estado"))));
-      reconciliedMovement10.setCreatedAt((Timestamp)row.get("_fecha_registro"));
+      reconciliedMovement10.setFechaRegistro((Timestamp)row.get("_fecha_registro"));
       return reconciliedMovement10;
     };
   }

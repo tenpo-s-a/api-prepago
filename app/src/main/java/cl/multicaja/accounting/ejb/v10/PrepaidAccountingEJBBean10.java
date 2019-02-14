@@ -512,7 +512,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return accounting;
   }
 
-  private File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+  public File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');

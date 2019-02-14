@@ -4,12 +4,10 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import com.sun.xml.internal.ws.wsdl.writer.document.ParamType;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.*;
 import cl.multicaja.test.TestDbBasePg;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;

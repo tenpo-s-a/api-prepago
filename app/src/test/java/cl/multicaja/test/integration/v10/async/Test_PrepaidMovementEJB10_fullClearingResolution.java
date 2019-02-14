@@ -241,7 +241,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     notInFile = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
     // Este caso NO va en el archivo
 
-    getPrepaidClearingEJBBean10().createAccountingCSV(fileName, fileId, clearingData10ToFile);
+    getPrepaidClearingEJBBean10().createClearingCSV(fileName, fileId, clearingData10ToFile);
 
     runF1();
     runF3();
@@ -653,6 +653,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedClearing.accountingData10.getId());
       Assert.assertEquals("Debe tener estado REJECTED", AccountingStatusType.REJECTED, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado REVERSED", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
 
       // Revisar que el estado de clearing haya cambiado a rejected
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, rejectedClearing.clearingData10.getId());
@@ -707,6 +708,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedFormatClearing.accountingData10.getId());
       Assert.assertEquals("Debe tener estado REJECTED FORMAT", AccountingStatusType.REJECTED_FORMAT, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado accounting REJECTED FORMAT", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
 
       // Revisar que el estado de clearing haya cambiado a rejected
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, rejectedFormatClearing.clearingData10.getId());
@@ -772,9 +774,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       AccountingData10 accountingData10 = new AccountingData10();
       accountingData10.setId(numberUtils.toLong(rs.getLong("id")));
       accountingData10.setStatus(AccountingStatusType.fromValue(String.valueOf(rs.getString("status"))));
+      accountingData10.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(rs.getString("accounting_status"))));
       return accountingData10;
     };
-    List<AccountingData10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT id, status FROM %s.accounting where id = %d", getSchemaAccounting(), idMov), rowMapper);
+    List<AccountingData10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT id, status, accounting_status FROM %s.accounting where id = %d", getSchemaAccounting(), idMov), rowMapper);
     AccountingData10 accountingData10 = data.get(0);
     return accountingData10;
   }
