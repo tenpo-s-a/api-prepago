@@ -758,6 +758,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigen());
     }
+
+    File file = new File(fileName);
+    file.delete();
   }
 
   private Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables prepareTest(Long fileId, String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
