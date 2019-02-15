@@ -6,6 +6,7 @@ import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -24,12 +25,14 @@ public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
   public void pendingSendWithdrawMailOk() throws Exception {
 
     User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     PrepaidWithdraw10 withdraw = buildPrepaidWithdraw10(user);
     withdraw.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
-    PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
-    prepaidMovement10.setFecfac(new Date());
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, withdraw);
+    prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
     String messageId = sendPendingWithdrawMail(user, withdraw,prepaidMovement10,0);
 
