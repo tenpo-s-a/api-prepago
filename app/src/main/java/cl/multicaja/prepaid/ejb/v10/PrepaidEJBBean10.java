@@ -1186,7 +1186,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           fee.setValue(commission);
         }
         // Calculo el total
-        total.setValue(transaction.getAmount().getValue().subtract(fee.getValue()));
+        total.setValue(transaction.getAmount().getValue().add(fee.getValue()));
       break;
     }
 
