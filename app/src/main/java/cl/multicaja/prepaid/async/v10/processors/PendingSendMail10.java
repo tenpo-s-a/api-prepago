@@ -53,14 +53,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
     super(route);
   }
 
-  private String replaceDataHTML(String template, Map<String, String> data) {
-    for (Map.Entry<String, String> entry : data.entrySet())
-    {
-      template = template.replace(entry.getKey(), entry.getValue());
-    }
-    return template;
-  }
-
   /**
    * ENVIO DE TARJETA
    */
@@ -429,7 +421,39 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW_FAILED);
+        emailBody.setTemplate(TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
+  /**
+   * Envio comprobante de compra Ok
+   */
+  public ProcessorRoute processPendingPurchaseSuccessMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingPurchaseSuccessMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", data.getUser().getName());
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+        templateData.put("merchant_name", data.getPrepaidMovement10().getCodcom());
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_PURCHASE_SUCCESS);
         emailBody.setAddress(data.getUser().getEmail().getValue());
         getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
 
