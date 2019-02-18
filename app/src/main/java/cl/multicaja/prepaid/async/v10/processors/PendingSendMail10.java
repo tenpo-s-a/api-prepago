@@ -161,10 +161,15 @@ public class PendingSendMail10 extends BaseProcessor10 {
           /**
            *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
            */
-          Map<String, Object> templateData = new HashMap<String, Object>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+          //Map<String, Object> templateData = new HashMap<String, Object>();
+          //templateData.put("idUsuario", data.getUser().getId().toString());
+          //templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+
+          EmailBody emailBody = new EmailBody();
+          emailBody.setTemplate(TEMPLATE_MAIL_MAIL_CARD_ERROR_USER);
+          emailBody.setAddress(data.getUser().getEmail().getValue());
+          getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
         }
 
         return req;
@@ -332,7 +337,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<>();
 
         templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
-        templateData.put("withdraw_amount", String.valueOf(NumberUtils.getInstance().toClp(withdraw10.getTotal())));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(withdraw10.getTotal())));
         templateData.put("bank_account", data.getUserAccount().getCensoredAccount());
         templateData.put("bank_name", data.getUserAccount().getBankName());
 
