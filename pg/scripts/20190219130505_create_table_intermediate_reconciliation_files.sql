@@ -28,12 +28,7 @@ CREATE TABLE ${schema}.prp_archivos_reconciliacion (
   CONSTRAINT prp_archivos_reconciliacion_pk PRIMARY KEY(id)
 );
 
-CREATE INDEX prp_archivos_reconciliacion_i1 ON ${schema}.prp_archivos_reconciliacion (id);
-CREATE INDEX prp_archivos_reconciliacion_i2 ON ${schema}.prp_archivos_reconciliacion (nombre_de_archivo);
-CREATE INDEX prp_archivos_reconciliacion_i3 ON ${schema}.prp_archivos_reconciliacion (proceso);
-CREATE INDEX prp_archivos_reconciliacion_i4 ON ${schema}.prp_archivos_reconciliacion (status);
-CREATE INDEX prp_archivos_reconciliacion_i5 ON ${schema}.prp_archivos_reconciliacion (created_at);
-CREATE INDEX prp_archivos_reconciliacion_i6 ON ${schema}.prp_archivos_reconciliacion (updated_at);
+CREATE INDEX prp_archivos_reconciliacion_i1 ON ${schema}.prp_archivos_reconciliacion (id,proceso,tipo,status);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
