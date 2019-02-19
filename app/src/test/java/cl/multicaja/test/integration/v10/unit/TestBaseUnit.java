@@ -77,7 +77,6 @@ public class TestBaseUnit extends TestApiBase {
   private static MailDelegate10 mailDelegate;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
-    System.out.println("Exist: " + getPrepaidCardEJBBean10());
     calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
   }
 

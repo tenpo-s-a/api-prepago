@@ -9,7 +9,7 @@ import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import java.sql.Timestamp;
 import java.util.Map;
 
-public class ReconciliedMovement {
+public class ReconciliedMovement10 {
 
   private Long id;
   private Long idMovRef;

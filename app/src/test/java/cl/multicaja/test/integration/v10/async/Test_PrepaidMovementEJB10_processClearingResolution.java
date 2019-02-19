@@ -62,16 +62,17 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.REJECTED); // Banco rechaza deposito
     clearingData10.setUserBankAccount(userAccount);
+    clearingData10.setIdTransaction(prepaidMovement10.getId());
     getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Banco rechaza retiro
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
+    getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
 
     // Debe existir el movimiento conciliado
-    ReconciliedMovement reconciliedMovement = getReconciliedMovement(prepaidMovement10.getId());
-    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement);
-    Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement.getReconciliationStatusType());
-    Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement.getActionType());
+    ReconciliedMovement10 reconciliedMovement10 = getReconciliedMovement(prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement10);
+    Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement10.getReconciliationStatusType());
+    Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement10.getActionType());
 
     PrepaidMovement10 foundMovement = null;
     for(int i = 0; i < 20; i++) {
@@ -142,16 +143,17 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.REJECTED_FORMAT); // MC rechaza archivo
     clearingData10.setUserBankAccount(userAccount);
+    clearingData10.setIdTransaction(prepaidMovement10.getId());
     getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Rechazo formato
-    getPrepaidMovementEJBBean10().processClearingResolution(prepaidMovement10, clearingData10);
+    getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
 
     // Debe existir el movimiento conciliado
-    ReconciliedMovement reconciliedMovement = getReconciliedMovement(prepaidMovement10.getId());
-    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement);
-    Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement.getReconciliationStatusType());
-    Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement.getActionType());
+    ReconciliedMovement10 reconciliedMovement10 = getReconciliedMovement(prepaidMovement10.getId());
+    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement10);
+    Assert.assertEquals("Debe estar en estado counter movement", ReconciliationStatusType.COUNTER_MOVEMENT, reconciliedMovement10.getReconciliationStatusType());
+    Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement10.getActionType());
 
     PrepaidMovement10 foundMovement = null;
     for(int i = 0; i < 20; i++) {
@@ -185,17 +187,17 @@ public class Test_PrepaidMovementEJB10_processClearingResolution extends TestBas
     Assert.assertNotNull("Debe exitir la confirmacion de la reversa", reverseConfirm);
   }
 
-  private ReconciliedMovement getReconciliedMovement(Long idMov) {
+  private ReconciliedMovement10 getReconciliedMovement(Long idMov) {
     RowMapper rowMapper = (rs, rowNum) -> {
-      ReconciliedMovement reconciliedMovement = new ReconciliedMovement();
-      reconciliedMovement.setId(numberUtils.toLong(rs.getLong("id")));
-      reconciliedMovement.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
-      reconciliedMovement.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
-      reconciliedMovement.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
-      return reconciliedMovement;
+      ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
+      reconciliedMovement10.setId(numberUtils.toLong(rs.getLong("id")));
+      reconciliedMovement10.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
+      reconciliedMovement10.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
+      reconciliedMovement10.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
+      return reconciliedMovement10;
     };
-    List<ReconciliedMovement> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %d", getSchema(), idMov), rowMapper);
-    ReconciliedMovement reconciliedMovement = data.get(0);
-    return reconciliedMovement;
+    List<ReconciliedMovement10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %d", getSchema(), idMov), rowMapper);
+    ReconciliedMovement10 reconciliedMovement10 = data.get(0);
+    return reconciliedMovement10;
   }
 }

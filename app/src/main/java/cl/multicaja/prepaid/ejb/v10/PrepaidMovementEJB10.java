@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.prepaid.model.v10.ReconciliationStatusType;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
@@ -10,6 +11,7 @@ import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -227,6 +229,14 @@ public interface PrepaidMovementEJB10 {
   void createMovementConciliate(Map<String, Object> headers, Long idMovRef, ReconciliationActionType actionType, ReconciliationStatusType statusType) throws Exception;
 
   /**
+   * Busca un movimiento conciliado en la tabla de conciliados
+   *
+   * @param idMovRef id del movimiento referenciado
+   * @return
+   */
+  ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException;
+
+  /**
    *
    * @param headers
    * @param movRef
@@ -235,6 +245,14 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileNme) throws Exception;
+
+  /**
+   * Busca un movimiento de investigacion en la tabla de conciliados
+   *
+   * @param idMovRef id de referencia del movimiento a investigar
+   * @return
+   */
+  ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException;
 
   /**
    *

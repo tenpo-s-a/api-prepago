@@ -176,7 +176,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -184,7 +184,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   @Test
@@ -254,7 +254,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -262,7 +262,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   @Test
@@ -357,7 +357,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -365,7 +365,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   @Test
@@ -460,7 +460,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -468,7 +468,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   @Test
@@ -564,7 +564,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -572,7 +572,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   @Test
@@ -668,7 +668,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.REVERSED, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -676,7 +676,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.REVERSED, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
   }
 
   private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement, AccountingStatusType clearingStatus) throws Exception {
