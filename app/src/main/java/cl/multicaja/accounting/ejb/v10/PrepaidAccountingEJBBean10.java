@@ -512,7 +512,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return accounting;
   }
 
-  private File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
+  public File createAccountingCSV(String filename, String fileId, List<AccountingData10> accountingData) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -1109,8 +1109,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       log.error("mc_acc_update_accounting_data_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
-
-    return;
   }
 
   private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);

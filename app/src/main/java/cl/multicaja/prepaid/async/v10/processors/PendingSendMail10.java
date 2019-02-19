@@ -53,14 +53,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
     super(route);
   }
 
-  private String replaceDataHTML(String template, Map<String, String> data) {
-    for (Map.Entry<String, String> entry : data.entrySet())
-    {
-      template = template.replace(entry.getKey(), entry.getValue());
-    }
-    return template;
-  }
-
   /**
    * ENVIO DE TARJETA
    */
@@ -93,7 +85,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
               String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()));
 
             Map<String, Object> templateData = new HashMap<>();
-            templateData.put("cliente", data.getUser().getName());
+            templateData.put("cliente", StringUtils.capitalize(data.getUser().getName()));
 
             EmailBody emailBody = new EmailBody();
             emailBody.setTemplateData(templateData);
@@ -169,10 +161,15 @@ public class PendingSendMail10 extends BaseProcessor10 {
           /**
            *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
            */
-          Map<String, Object> templateData = new HashMap<String, Object>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+          //Map<String, Object> templateData = new HashMap<String, Object>();
+          //templateData.put("idUsuario", data.getUser().getId().toString());
+          //templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
+
+          EmailBody emailBody = new EmailBody();
+          emailBody.setTemplate(TEMPLATE_MAIL_MAIL_CARD_ERROR_USER);
+          emailBody.setAddress(data.getUser().getEmail().getValue());
+          getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
         }
 
         return req;
@@ -204,11 +201,11 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         Map<String, Object> templateData = new HashMap<>();
 
-        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
         templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
         templateData.put("transaction_type_gloss", WEB_MERCHANT_CODE.equals(data.getPrepaidWithdraw10().getMerchantCode()) ? "Retiro por transferencia" : "Retiro en comercio");
-        templateData.put("transaction_total_paid", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
-        templateData.put("transaction_amount", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue()));
+        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
+        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue()));
         templateData.put("transaction_fee", NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getFee().getValue()));
 
         LocalDateTime topupDateTime = prepaidMovement.getFechaCreacion().toLocalDateTime();
@@ -251,7 +248,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         Map<String, Object> templateData = new HashMap<>();
 
-        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
         templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
         templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(topup.getTotal().getValue())));
         templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(topup.getAmount().getValue()));
@@ -295,23 +292,12 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
-        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-
         Map<String, Object> templateData = new HashMap<>();
 
         templateData.put("user_name", data.getUser().getName());
-        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getAmount().getValue())));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidWithdraw10().getTotal().getValue())));
         templateData.put("bank_name", data.getUserAccount().getBankName());
-
-        String accountNumber = data.getUserAccount().getAccountNumber();
-        //FIXME: este replace se puede hacer con un regex
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < accountNumber.length() - 4; i++){
-          sb.append("X");
-        }
-        sb.append(accountNumber.substring(accountNumber.length()-4));
-
-        templateData.put("account_number", sb.toString());
+        templateData.put("account_number", data.getUserAccount().getCensoredAccount());
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
@@ -344,10 +330,15 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
+        PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10();
+        withdraw10.setAmount(new NewAmountAndCurrency10(data.getPrepaidMovement10().getMonto()));
+        withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
+        getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
+
         Map<String, Object> templateData = new HashMap<>();
 
-        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-        templateData.put("withdraw_amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(withdraw10.getTotal())));
         templateData.put("bank_account", data.getUserAccount().getCensoredAccount());
         templateData.put("bank_name", data.getUserAccount().getBankName());
 
@@ -384,10 +375,15 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
 
+        PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10();
+        withdraw10.setAmount(new NewAmountAndCurrency10(prepaidMovement.getMonto()));
+        withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
+        getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
+
         Map<String, Object> templateData = new HashMap<>();
 
-        templateData.put("user_name", data.getUser().getName().toUpperCase() + " " + data.getUser().getLastname_1().toUpperCase());
-        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(prepaidMovement.getMonto())));
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(withdraw10.getTotal())));
 
         LocalDateTime topupDateTime = prepaidMovement.getFechaCreacion().toLocalDateTime();
 
@@ -424,12 +420,44 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         Map<String, Object> templateData = new HashMap<>();
 
-        templateData.put("user_name", data.getUser().getName());
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
         templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
 
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(TEMPLATE_MAIL_WITHDRAW_FAILED);
+        emailBody.setTemplate(TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE);
+        emailBody.setAddress(data.getUser().getEmail().getValue());
+        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+
+        return req;
+      }
+    };
+  }
+
+  /**
+   * Envio comprobante de compra Ok
+   */
+  public ProcessorRoute processPendingPurchaseSuccessMail() {
+
+    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
+      @Override
+      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
+
+        log.info("processPendingPurchaseSuccessMail - REQ: " + req);
+
+        req.retryCountNext();
+
+        PrepaidTopupData10 data = req.getData();
+
+        Map<String, Object> templateData = new HashMap<>();
+
+        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
+        templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
+        templateData.put("merchant_name", data.getPrepaidMovement10().getCodcom());
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setTemplateData(templateData);
+        emailBody.setTemplate(TEMPLATE_MAIL_PURCHASE_SUCCESS);
         emailBody.setAddress(data.getUser().getEmail().getValue());
         getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
 

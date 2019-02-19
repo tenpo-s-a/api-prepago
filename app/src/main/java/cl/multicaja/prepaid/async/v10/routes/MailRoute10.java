@@ -54,6 +54,13 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
 
+  /*
+    Comprobante de compra exitosa
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_PURCHASE_SUCCESS = "seda:MailRoute10.pendingSendMailPurchaseSuccess";
+  public static final String PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ = "MailRoute10.pendingSendMailPurchaseSuccess.req";
+  public static final String PENDING_SEND_MAIL_PURCHASE_SUCCESS_RESP = "MailRoute10.pendingSendMailPurchaseSuccess.resp";
+
 
   @Override
   public void configure() throws Exception {
@@ -153,6 +160,17 @@ public class MailRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processPendingWebWithdrawRequestMail())
       .to(createJMSEndpoint(PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_RESP + confResp)).end();
+
+    /**
+     * Envio de comprobante compra exitosa
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_PURCHASE_SUCCESS, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingPurchaseSuccessMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_PURCHASE_SUCCESS_RESP + confResp)).end();
 
   }
 }

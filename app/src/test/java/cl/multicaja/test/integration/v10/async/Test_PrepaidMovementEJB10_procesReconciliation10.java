@@ -225,19 +225,19 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
 
     // Debe existir el movimiento conciliado como refund
     RowMapper rowMapper = (rs, rowNum) -> {
-      ReconciliedMovement reconciliedMovement = new ReconciliedMovement();
-      reconciliedMovement.setId(numberUtils.toLong(rs.getLong("id")));
-      reconciliedMovement.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
-      reconciliedMovement.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
-      reconciliedMovement.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
-      return reconciliedMovement;
+      ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
+      reconciliedMovement10.setId(numberUtils.toLong(rs.getLong("id")));
+      reconciliedMovement10.setIdMovRef(numberUtils.toLong(rs.getLong("id_mov_ref")));
+      reconciliedMovement10.setReconciliationStatusType(ReconciliationStatusType.fromValue(String.valueOf(rs.getString("estado"))));
+      reconciliedMovement10.setActionType(ReconciliationActionType.valueOf(String.valueOf(rs.getString("accion"))));
+      return reconciliedMovement10;
     };
-    List<ReconciliedMovement> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %s", getSchema(), prepaidMovement10.getId()), rowMapper);
-    ReconciliedMovement reconciliedMovement = data.get(0);
+    List<ReconciliedMovement10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_conciliado where id_mov_ref = %s", getSchema(), prepaidMovement10.getId()), rowMapper);
+    ReconciliedMovement10 reconciliedMovement10 = data.get(0);
 
-    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement);
-    Assert.assertEquals("Debe estr en estado refund", ReconciliationStatusType.TO_REFUND, reconciliedMovement.getReconciliationStatusType());
-    Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.REFUND, reconciliedMovement.getActionType());
+    Assert.assertNotNull("Debe existir en conciliados", reconciliedMovement10);
+    Assert.assertEquals("Debe estr en estado refund", ReconciliationStatusType.TO_REFUND, reconciliedMovement10.getReconciliationStatusType());
+    Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.REFUND, reconciliedMovement10.getActionType());
 
     // Debe tener estado de negocio refund
     PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
