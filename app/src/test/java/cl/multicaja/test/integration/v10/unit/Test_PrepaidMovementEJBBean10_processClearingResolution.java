@@ -52,6 +52,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     clearingData10.setStatus(AccountingStatusType.OK);
     clearingData10.setUserBankAccount(userAccount);
     clearingData10.setIdTransaction(prepaidMovement10.getId());
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Todo OK
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
