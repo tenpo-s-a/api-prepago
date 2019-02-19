@@ -15,6 +15,7 @@ import java.util.Map;
 public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_files extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".prp_inserta_archivo_reconciliacion";
+  private static final String TABLE_NAME = "prp_archivos_reconciliacion";
 
   /*
     IN _nombre_de_archivo VARCHAR,
@@ -50,10 +51,20 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
   @Test
   public void insertReconciliationFileLogOK () throws Exception{
 
-    Map<String, Object> data = insertArchivoReconcialicionLog("Archivo Prueba","TECNOCOM","CARGAS","OK");
+    String nombreArchivo = "Archivo Prueba "+ getRandomNumericString(10);
+    String proceso = "TECNOCOM";
+    String tipo = "CARGAS";
+    String ok = "OK";
+
+    Map<String, Object> data = insertArchivoReconcialicionLog(nombreArchivo,proceso,tipo,ok);
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
     Assert.assertEquals("Codigo de error tiene que ser","0", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","", data.get("_error_msg"));
+
+    String sql = "SELECT * FROM "+SCHEMA+"."+TABLE_NAME+" WHERE nombre_de_archivo = '"+nombreArchivo+"'";
+    Map<String, Object> dataFound = dbUtils.getJdbcTemplate().queryForMap(sql);
+    Assert.assertEquals("Id Encontrado igual a Id registrado?",data.get("_r_id"),dataFound.get("id"));
+
   }
 
   @Test
