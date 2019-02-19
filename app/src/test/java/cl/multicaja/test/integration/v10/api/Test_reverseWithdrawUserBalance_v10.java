@@ -607,7 +607,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn201_OriginalWithdrawNull_POS() throws Exception {
+  public void shouldReturn202_OriginalWithdrawNull_POS() throws Exception {
     User user = registerUser("1234");
     user = updateUserPassword(user, "1234");
 
@@ -622,7 +622,11 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
-    Assert.assertEquals("status 201", 201, resp.getStatus());
+    Assert.assertEquals("status 202", 202, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 130001", REVERSA_MOVIMIENTO_ORIGINAL_NO_RECIBIDO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
     List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
@@ -633,7 +637,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn201_OriginalWithdrawNull_WEB() throws Exception {
+  public void shouldReturn202_OriginalWithdrawNull_WEB() throws Exception {
     User user = registerUser("1234");
     user = updateUserPassword(user, "1234");
 
@@ -648,7 +652,11 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
-    Assert.assertEquals("status 201", 201, resp.getStatus());
+    Assert.assertEquals("status 202", 202, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 130001", REVERSA_MOVIMIENTO_ORIGINAL_NO_RECIBIDO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
     List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
