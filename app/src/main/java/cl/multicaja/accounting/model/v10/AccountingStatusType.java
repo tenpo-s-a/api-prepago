@@ -7,20 +7,47 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Descripcion de uso de los status
+ *
+ * Accounting:
+ *  - status:
+ *    - PENDING
+ *    - SENT
+ *    - SENT_PENDING_CON
+ *    - NOT_SEND
+ *  - accountingStatus:
+ *    - OK
+ *    - NOT_OK
+ * -------------------------------
+ * Clearing:
+ *  - INITIAL
+ *  - NOT_SEND
+ *  - OK
+ *  - REVERSED
+ *  - RESEARCH
+ *  - REVERSED
+ *  - REJECTED
+ *  - REJECTED_FORMAT
+ *  - NOT_IN_FILE
+ *  - INVALID_INFORMATION
+ */
 public enum AccountingStatusType {
 
-  // GENERALES
+  // Accounting - status
   PENDING("PENDING"),
-  OK("OK"),
   SENT("SENT"),
+  SENT_PENDING_CON("SENT_PENDING_CON"),
+  NOT_SEND("NOT_SEND"),
+
+  // Accounting - accountingStatus
+  OK("OK"),
+  NOT_OK("NOT_OK"),
+
+  // Clearing - status
   REVERSED("REVERSED"),
   RESEARCH("INVESTIGAR"),
-
-  // ACCOUNTING y ACCOUNTING_STATUS
-  SENT_PENDING_CON("SENT_PENDING_CON"),
   NOT_CONFIRMED("NO_CONFIRMADA"),
-
-  // CLEARING
   INITIAL("INITIAL"),
   REJECTED("RECHAZADO"),
   REJECTED_FORMAT("RECHAZADO_FORMATO"),

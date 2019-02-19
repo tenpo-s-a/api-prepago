@@ -95,7 +95,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
       for (int i = 0; i < 10; i++) {
         AccountingData10 accounting1 = buildRandomAccouting();
         accounting1.setStatus(AccountingStatusType.SENT_PENDING_CON);
-        accounting1.setAccountingStatus(AccountingStatusType.REVERSED);
+        accounting1.setAccountingStatus(AccountingStatusType.NOT_OK);
         LocalDateTime date = getRandomDateInUTC();
         accounting1.setTransactionDate(Timestamp.valueOf(date));
         accounting1.setConciliationDate(Timestamp.valueOf(getRandomDateInUTC().plusMonths(1)));
@@ -111,7 +111,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
       for (int i = 0; i < 10; i++) {
         AccountingData10 accounting1 = buildRandomAccouting();
         accounting1.setStatus(AccountingStatusType.SENT_PENDING_CON);
-        accounting1.setAccountingStatus(AccountingStatusType.OK);
+        accounting1.setAccountingStatus(AccountingStatusType.NOT_OK);
         accounting1.setTransactionDate(Timestamp.valueOf(getRandomDateInUTC()));
         accounting1.setConciliationDate(Timestamp.valueOf(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime()));
 
@@ -163,7 +163,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
         Assert.assertNull("No debe tener estado contable", d.getAccountingStatus());
       } else if( reversedData.containsKey(d.getId())) {
         Assert.assertNotNull("Debe tener fecha de conciliacion", d.getConciliationDate());
-        Assert.assertEquals("Debe tener estado contable REVERSED", AccountingStatusType.REVERSED, d.getAccountingStatus());
+        Assert.assertEquals("Debe tener estado contable REVERSED", AccountingStatusType.NOT_CONFIRMED, d.getAccountingStatus());
       } else if(notConfirmedData.containsKey(d.getId())) {
         Assert.assertNull("No debe tener fecha de conciliacion", d.getConciliationDate());
         Assert.assertEquals("Debe tener estado contable NO CONFIRMADA", AccountingStatusType.NOT_CONFIRMED, d.getAccountingStatus());

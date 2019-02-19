@@ -67,7 +67,8 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
 
     // Revisar que el estado de accounting haya cambiado a OK
     AccountingData10 foundAccounting = getAccountingData(accountingData10.getId());
-    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getAccountingStatus());
 
     // El movimiento debe quedar conciliado para que no vuelva a ser procesado
     ReconciliedMovement reconciliedMovement = getReconciliedMovement(prepaidMovement10.getId());
@@ -356,9 +357,10 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
       AccountingData10 accountingData10 = new AccountingData10();
       accountingData10.setId(numberUtils.toLong(rs.getLong("id")));
       accountingData10.setStatus(AccountingStatusType.fromValue(String.valueOf(rs.getString("status"))));
+      accountingData10.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(rs.getString("accounting_status"))));
       return accountingData10;
     };
-    List<AccountingData10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT id, status FROM %s.accounting where id = %d", getSchemaAccounting(), idMov), rowMapper);
+    List<AccountingData10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT id, status, accounting_status FROM %s.accounting where id = %d", getSchemaAccounting(), idMov), rowMapper);
     AccountingData10 accountingData10 = data.get(0);
     return accountingData10;
   }
