@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.model.v10.NotificationTecnocomHeader;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -47,11 +48,11 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
-    notificationTecnocomBody.setSdValue("1000.00");
+    notificationTecnocomBody.setSdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIlCurrencyCode(152);
-    notificationTecnocomBody.setIlValue("1000.00");
+    notificationTecnocomBody.setIlValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIdCurrencyCode(152);
-    notificationTecnocomBody.setIdValue("1000.00");
+    notificationTecnocomBody.setIdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setTipoTx(100);
     notificationTecnocomBody.setIdMensaje(1200);
     notificationTecnocomBody.setMerchantCode("0008902131");
@@ -90,11 +91,11 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
-    notificationTecnocomBody.setSdValue("1000.00");
+    notificationTecnocomBody.setSdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIlCurrencyCode(152);
-    notificationTecnocomBody.setIlValue("1000.00");
+    notificationTecnocomBody.setIlValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIdCurrencyCode(152);
-    notificationTecnocomBody.setIdValue("1000.00");
+    notificationTecnocomBody.setIdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setTipoTx(100);
     notificationTecnocomBody.setIdMensaje(1200);
     notificationTecnocomBody.setMerchantCode("0008902131");
@@ -133,11 +134,11 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
-    notificationTecnocomBody.setSdValue("1000.00");
+    notificationTecnocomBody.setSdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIlCurrencyCode(152);
-    notificationTecnocomBody.setIlValue("1000.00");
+    notificationTecnocomBody.setIlValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIdCurrencyCode(152);
-    notificationTecnocomBody.setIdValue("1000.00");
+    notificationTecnocomBody.setIdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setTipoTx(100);
     notificationTecnocomBody.setIdMensaje(1200);
     notificationTecnocomBody.setMerchantCode("0008902131");
@@ -176,11 +177,11 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
-    notificationTecnocomBody.setSdValue("1000.00");
+    notificationTecnocomBody.setSdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIlCurrencyCode(152);
-    notificationTecnocomBody.setIlValue("1000.00");
+    notificationTecnocomBody.setIlValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIdCurrencyCode(152);
-    notificationTecnocomBody.setIdValue("1000.00");
+    notificationTecnocomBody.setIdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setTipoTx(100);
     notificationTecnocomBody.setIdMensaje(1200);
     notificationTecnocomBody.setMerchantCode("0008902131");
@@ -241,11 +242,11 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     notificationTecnocomBody = new NotificationTecnocomBody();
     notificationTecnocomBody.setSdCurrencyCode(152);
-    notificationTecnocomBody.setSdValue("1000.00");
+    notificationTecnocomBody.setSdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIlCurrencyCode(152);
-    notificationTecnocomBody.setIlValue("1000.00");
+    notificationTecnocomBody.setIlValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setIdCurrencyCode(152);
-    notificationTecnocomBody.setIdValue("1000.00");
+    notificationTecnocomBody.setIdValue(BigDecimal.valueOf(1000.00));
     notificationTecnocomBody.setTipoTx(100);
     notificationTecnocomBody.setIdMensaje(1200);
     notificationTecnocomBody.setMerchantCode("0008902131");

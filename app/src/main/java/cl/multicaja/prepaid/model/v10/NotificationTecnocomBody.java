@@ -2,6 +2,7 @@
 package cl.multicaja.prepaid.model.v10;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -13,11 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class NotificationTecnocomBody extends BaseModel {
 
   private Integer sdCurrencyCode;
-  private String sdValue;
+  private BigDecimal sdValue;
   private Integer ilCurrencyCode;
-  private String ilValue;
+  private BigDecimal ilValue;
   private Integer idCurrencyCode;
-  private String idValue;
+  private BigDecimal idValue;
   private Integer tipoTx;
   private Integer idMensaje;
   private String merchantCode;
@@ -36,11 +37,11 @@ public class NotificationTecnocomBody extends BaseModel {
         this.sdCurrencyCode = sdCurrencyCode;
     }
 
-    public String getSdValue() {
+    public BigDecimal getSdValue() {
         return sdValue;
     }
 
-    public void setSdValue(String sdValue) {
+    public void setSdValue(BigDecimal sdValue) {
         this.sdValue = sdValue;
     }
 
@@ -52,11 +53,11 @@ public class NotificationTecnocomBody extends BaseModel {
         this.ilCurrencyCode = ilCurrencyCode;
     }
 
-    public String getIlValue() {
+    public BigDecimal getIlValue() {
         return ilValue;
     }
 
-    public void setIlValue(String ilValue) {
+    public void setIlValue(BigDecimal ilValue) {
         this.ilValue = ilValue;
     }
 
@@ -68,11 +69,11 @@ public class NotificationTecnocomBody extends BaseModel {
         this.idCurrencyCode = idCurrencyCode;
     }
 
-    public String getIdValue() {
+    public BigDecimal getIdValue() {
         return idValue;
     }
 
-    public void setIdValue(String idValue) {
+    public void setIdValue(BigDecimal idValue) {
         this.idValue = idValue;
     }
 

@@ -69,6 +69,7 @@ public class TestContextHelper extends TestBaseUnit {
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
       MailRoute10 mailRoute10 = new MailRoute10(); // Agregar ruta al cammel para probar los emails salientes
+      mailRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
 
      /*
       camelFactory.startCamelContextWithRoutes(true,

@@ -52,6 +52,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     clearingData10.setStatus(AccountingStatusType.OK);
     clearingData10.setUserBankAccount(userAccount);
     clearingData10.setIdTransaction(prepaidMovement10.getId());
+    getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
     // Todo OK
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
@@ -67,7 +68,8 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
 
     // Revisar que el estado de accounting haya cambiado a OK
     AccountingData10 foundAccounting = getAccountingData(accountingData10.getId());
-    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getStatus());
+    Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
+    Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getAccountingStatus());
 
     // El movimiento debe quedar conciliado para que no vuelva a ser procesado
     ReconciliedMovement10 reconciliedMovement10 = getReconciliedMovement(prepaidMovement10.getId());

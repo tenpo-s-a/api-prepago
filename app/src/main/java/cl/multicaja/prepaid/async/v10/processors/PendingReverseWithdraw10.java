@@ -154,7 +154,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             req.getData().getPrepaidMovementReverse().setEstado(status);
 
             //actualiza movimiento original en accounting y clearing
-            getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+            getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
             log.debug("********** Reversa de retiro realizada exitosamente **********");
 
@@ -186,7 +186,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               req.getData().getPrepaidMovementReverse().setEstado(status);
 
               //actualiza movimiento original en accounting y clearing
-              getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+              getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
               // Si estaba abierta, cerrar la transaccion en el CDT
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
@@ -241,7 +241,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           data.getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
           // actualiza movimiento original en accounting y clearing
-          getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+          getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
         }
       } catch (Exception e) {
         e.printStackTrace();

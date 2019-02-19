@@ -127,7 +127,8 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
 
       // Revisar que el estado de accounting haya cambiado a OK
       AccountingData10 foundAccounting = getAccountingData(allOk.accountingData10.getId());
-      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.PENDING, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getAccountingStatus());
 
       // El movimiento debe quedar conciliado para que no vuelva a ser procesado
       ReconciliedMovement10 reconciliedMovement10 = getReconciliedMovement(allOk.prepaidMovement10.getId());

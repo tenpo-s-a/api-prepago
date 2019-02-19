@@ -36,10 +36,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ListIterator;
@@ -752,7 +749,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA.equals(mov.getTipofac())) {
 
         // se actualiza informacion en accounting y clearing
-        this.updateAccountingAndClearing(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
       }
     }
     /**
@@ -803,6 +800,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+          // se actualiza informacion en accounting y clearing
+          this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
         }
         /**
          * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
@@ -849,6 +849,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           getPrepaidEJBBean10().reverseWithdrawUserBalance(null,newPrepaidWithdraw10,false);
           // Se agrega a la tabla para que no vuelva a ser enviado
           createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+          // se actualiza informacion en accounting y clearing
+          this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
         }
         /**
          * Si es una reversa de retiro - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
@@ -917,7 +920,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
 
         // se actualiza informacion en accounting y clearing
-        this.updateAccountingAndClearing(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
 
       } else {
         //TODO: si el movimiento es una reversa, no deberia actualizar el status de negocio del movimiento original a REVERSED?
@@ -968,6 +971,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
         // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
       }
       /**
        * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
@@ -995,6 +1001,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if(movFull != null ) {
         if(PrepaidMovementStatus.PROCESS_OK.equals(movFull.getEstado())) {
           createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+
+          // se actualiza informacion en accounting y clearing
+          this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.OK, AccountingStatusType.PENDING);
+
         } else {
           //TODO: que se hace en los otros casos?
         }
@@ -1023,6 +1033,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         getPrepaidEJBBean10().reverseTopupUserBalance(null,newPrepaidTopup10,false);
         // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
       }
     }
     /**
@@ -1087,6 +1100,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, "");
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
       }
       /**
        * Si es una reversa -
@@ -1129,6 +1145,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Enviar movimiento a REFUND
         createMovementConciliate(null, movFull.getId(), ReconciliationActionType.REFUND, ReconciliationStatusType.TO_REFUND);
         updatePrepaidBusinessStatus(null, movFull.getId(), BusinessStatusType.TO_REFUND);
+
+        // se actualiza informacion en accounting y clearing
+        this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
         // Confirmar el topup en el CDT
         CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExterno(null, movFull.getIdTxExterno());
@@ -1212,18 +1231,37 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  public void updateAccountingAndClearing(Long idTrx, AccountingStatusType accountingStatus, AccountingStatusType clearingStatus) throws Exception{
+  public void updateAccountingStatusReconciliationDateAndClearingStatus(Long idTrx, AccountingStatusType accountingStatus, AccountingStatusType clearingStatus) throws Exception {
+
     // Obtengo el movimiento correspondiente en Accounting
     AccountingData10 accounting = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null, idTrx);
 
     Instant instant = Instant.now();
     ZoneId z = ZoneId.of( "UTC" );
-    ZonedDateTime zdt = instant.atZone(z);
-    getPrepaidAccountingEJB10().updateAccountingStatusAndConciliationDate(null, accounting.getId(), accountingStatus, zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    ZonedDateTime nowUtc = instant.atZone(z);
 
-    if(clearingStatus != null) {
-      // Obtengo el movimiento correspondiente en Clearing
-      ClearingData10 clearing = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accounting.getId());
+    LocalDateTime localDateTime = accounting.getConciliationDate().toLocalDateTime();
+    ZonedDateTime reconciliationDateUtc = localDateTime.atZone(ZoneOffset.UTC);
+
+    String date = null;
+    if(nowUtc.isBefore(reconciliationDateUtc)) {
+      date = nowUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    } else {
+      date = reconciliationDateUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    getPrepaidAccountingEJB10().updateAccountingStatusAndConciliationDate(null, accounting.getId(), accountingStatus,  date);
+
+    // Si el movimiento en accounting todavia esta PENDING y se actualiza el accountingStatus a NOT_OK, el movimiento se deja en NOT_SEND para no ser enviado en el archivo de contabilidad
+    if(AccountingStatusType.PENDING.equals(accounting.getStatus()) && AccountingStatusType.NOT_OK.equals(accountingStatus)) {
+      getPrepaidAccountingEJB10().updateAccountingData(null, accounting.getId(), null, AccountingStatusType.NOT_SEND);
+    }
+
+    // Obtengo el movimiento correspondiente en Clearing
+    ClearingData10 clearing = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, accounting.getId());
+
+    // Solo actualiza el status en clearing si es INITIAL
+    if(AccountingStatusType.INITIAL.equals(clearing.getStatus())){
       getPrepaidClearingEJB10().updateClearingData(null, clearing.getId(), clearingStatus);
     }
   }
@@ -1301,8 +1339,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
               // Actualiza estado accounting
-              System.out.println("Actualizando el accounting id: " + clearingData10.getAccountingId());
-              getPrepaidAccountingEJB10().updateAccountingData(null, clearingData10.getAccountingId(), null, AccountingStatusType.OK);
+              log.info("Actualizando el accounting id: " + clearingData10.getAccountingId());
+
+              this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.OK, clearingData10.getStatus());
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
@@ -1311,15 +1350,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               PrepaidUser10 prepaidUser = getPrepaidUserEJB10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User mcUser = getUserClient().getUserById(null, prepaidUser.getUserIdMc());
               UserAccount userAccount = getUserClient().getUserBankAccountById(null, mcUser.getId(), clearingData10.getUserBankAccount().getId());
-              mailDelegate.sendWithdrawSuccessMail(mcUser, prepaidMovement10, userAccount);
+              getMailDelegate().sendWithdrawSuccessMail(mcUser, prepaidMovement10, userAccount);
             }
             break;
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
           case REJECTED_FORMAT: // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
             {
-              // Actualizar estado en accounting
-              getPrepaidAccountingEJB10().updateAccountingData(null, clearingData10.getAccountingId(), null, clearingData10.getStatus());
-
               //Se busca usuario prepago para obtener user
               PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
@@ -1339,10 +1375,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
 
+              this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.NOT_OK, clearingData10.getStatus());
+
               //Enviar correo al usuario
               PrepaidUser10 prepaidUser = prepaidUserEJB10.getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User mcUser = getUserClient().getUserById(null, prepaidUser.getUserIdMc());
-              mailDelegate.sendWithdrawFailedMail(mcUser, prepaidMovement10);
+              getMailDelegate().sendWithdrawFailedMail(mcUser, prepaidMovement10);
             }
             break;
           default: // Nunca deberia llegar aqui
