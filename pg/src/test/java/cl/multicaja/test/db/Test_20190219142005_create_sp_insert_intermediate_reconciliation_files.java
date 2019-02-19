@@ -54,9 +54,9 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
     String nombreArchivo = "Archivo Prueba "+ getRandomNumericString(10);
     String proceso = "TECNOCOM";
     String tipo = "CARGAS";
-    String ok = "OK";
+    String status = "OK";
 
-    Map<String, Object> data = insertArchivoReconcialicionLog(nombreArchivo,proceso,tipo,ok);
+    Map<String, Object> data = insertArchivoReconcialicionLog(nombreArchivo,proceso,tipo,status);
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
     Assert.assertEquals("Codigo de error tiene que ser","0", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","", data.get("_error_msg"));
@@ -64,6 +64,10 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
     String sql = "SELECT * FROM "+SCHEMA+"."+TABLE_NAME+" WHERE nombre_de_archivo = '"+nombreArchivo+"'";
     Map<String, Object> dataFound = dbUtils.getJdbcTemplate().queryForMap(sql);
     Assert.assertEquals("Id Encontrado igual a Id registrado?",data.get("_r_id"),dataFound.get("id"));
+    Assert.assertEquals("Nombre de Archivo Encontrado igual a Nombre de Archivo registrado?",nombreArchivo,dataFound.get("nombre_de_archivo"));
+    Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?",proceso,dataFound.get("proceso"));
+    Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?",tipo,dataFound.get("tipo"));
+    Assert.assertEquals("Status igual a Status registrado?",status,dataFound.get("status"));
 
   }
 
