@@ -17,23 +17,25 @@
 -- // create_table_intermediate_reconciliation_files
 -- Migration SQL that makes the change goes here.
 
-CREATE TABLE ${schema}.prp_reconciliation_files (
+CREATE TABLE ${schema}.prp_archivos_reconciliacion (
   id                  BIGSERIAL NOT NULL,
   nombre_de_archivo   VARCHAR(255) NOT NULL,
   proceso   		      VARCHAR(50) NOT NULL,
-  fecha_recepcion     TIMESTAMP NOT NULL,
   tipo 				        VARCHAR(50) NOT NULL,
   status			        VARCHAR(50) NOT NULL,
-  CONSTRAINT prp_reconciliation_files_pk PRIMARY KEY(id)
+  created_at          TIMESTAMP NOT NULL,
+  updated_at          TIMESTAMP NOT NULL,
+  CONSTRAINT prp_archivos_reconciliacion_pk PRIMARY KEY(id)
 );
 
-CREATE INDEX prp_reconciliation_files_i1 ON ${schema}.prp_reconciliation_files (id);
-CREATE INDEX prp_reconciliation_files_i2 ON ${schema}.prp_reconciliation_files (nombre_de_archivo);
-CREATE INDEX prp_reconciliation_files_i3 ON ${schema}.prp_reconciliation_files (proceso);
-CREATE INDEX prp_reconciliation_files_i4 ON ${schema}.prp_reconciliation_files (fecha_recepcion);
-CREATE INDEX prp_reconciliation_files_i5 ON ${schema}.prp_reconciliation_files (status);
+CREATE INDEX prp_archivos_reconciliacion_i1 ON ${schema}.prp_archivos_reconciliacion (id);
+CREATE INDEX prp_archivos_reconciliacion_i2 ON ${schema}.prp_archivos_reconciliacion (nombre_de_archivo);
+CREATE INDEX prp_archivos_reconciliacion_i3 ON ${schema}.prp_archivos_reconciliacion (proceso);
+CREATE INDEX prp_archivos_reconciliacion_i4 ON ${schema}.prp_archivos_reconciliacion (status);
+CREATE INDEX prp_archivos_reconciliacion_i5 ON ${schema}.prp_archivos_reconciliacion (created_at);
+CREATE INDEX prp_archivos_reconciliacion_i6 ON ${schema}.prp_archivos_reconciliacion (updated_at);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP TABLE IF EXISTS ${schema}.prp_reconciliation_files;
+DROP TABLE IF EXISTS ${schema}.prp_archivos_reconciliacion;
 
