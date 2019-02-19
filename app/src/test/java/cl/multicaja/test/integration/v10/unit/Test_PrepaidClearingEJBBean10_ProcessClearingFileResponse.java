@@ -508,7 +508,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
     {
       List<ReconciliedResearch> researchMovs = getResearchMovement(notWebWithdraw.getIdTransaction());
-      Assert.assertNull("No debe estar en reasearch", researchMovs);
+      Assert.assertEquals("No debe estar en reasearch", 0, researchMovs.size());
     }
 
     {
