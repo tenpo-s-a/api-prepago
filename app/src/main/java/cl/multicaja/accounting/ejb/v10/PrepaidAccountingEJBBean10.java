@@ -36,6 +36,7 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
@@ -1335,6 +1336,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       this.updateAccountingData(null, m.getId(), fileId, status, null, null);
     }
     return data;
+  }
+
+  @Override
+  public void expireIpmMovements() throws SQLException {
+    getDbUtils().execute(String.format("%s.create_sp_mc_acc_expire_old_ipm_movements_v10", getSchemaAccounting()));
   }
 
 }

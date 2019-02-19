@@ -19,7 +19,7 @@ public class Test_20190219142132_create_sp_mc_acc_expire_old_ipm_movements_v10 e
   }
 
   @Test
-  public void expireOldSubscriptionMovements() throws SQLException, InterruptedException {
+  public void expireOldSuscriptionMovements() throws SQLException, InterruptedException {
 
     // Preparar usuario
     Map<String, Object> mapCard = Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard("ACTIVA");
@@ -29,7 +29,7 @@ public class Test_20190219142132_create_sp_mc_acc_expire_old_ipm_movements_v10 e
     ArrayList<Map<String, Object>> allMovements = new ArrayList<>();
     for(int i = 0; i < 10; i++) {
       Test_20181218135154_create_sp_mc_acc_create_ipm_file_v10.createIpmFile(String.format("FileName%d", i), "FileId", 10, "Status");
-      Map<String, Object> newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "SUBSCRIPTION", "PENDING", "API", getRandomNumericString(10), 152, 0, 3001);
+      Map<String, Object> newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "SUSCRIPTION", "PENDING", "API", getRandomNumericString(10), 152, 0, 3001);
       allMovements.add(0, newMovement);
       Thread.sleep(10);
     }

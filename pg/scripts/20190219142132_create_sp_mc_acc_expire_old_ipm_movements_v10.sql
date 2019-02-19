@@ -28,7 +28,7 @@ SET
   estado = 'EXPIRED'
 WHERE
   mov.estado = 'PENDING' AND
-  (mov.tipo_movimiento = 'SUBSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') AND
+  (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') AND
   (SELECT COUNT(f.id)
    FROM ${schema.acc}.ipm_file f
    WHERE f.create_date >= mov.fecha_creacion) >= 7;
