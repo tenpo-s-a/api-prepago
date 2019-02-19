@@ -436,6 +436,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info(String.format("Registro procesados: %d", clearingData10s.size()));
     processClearingBankResponse(clearingData10s, fileName, fileId);
     log.info("processClearingResponse OUT");
+    getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
   }
 
   private List<ClearingData10> processClearingResponseDataFile(InputStream inputStream) throws IOException, ValidationException {
@@ -493,7 +494,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null, fileId);
 
     //Verifica lo que debe venir en el archivo.
-    for (ClearingData10 data : clearingDataInTable) {
+    for(ClearingData10 data : clearingDataInTable) {
       // Buscar si está conciliado
       ReconciliedMovement10 reconciliedMovement10 = getPrepaidMovementEJBBean10().getReconciliedMovementByIdMovRef(data.getIdTransaction());
       // Buscar el movimiento en si
@@ -501,53 +502,53 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       // Buscar su par en el archivo
       ClearingData10 result = clearingDataInFile.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
 
-      if(AccountingTxType.RETIRO_WEB.equals(data.getType()) &&
-         AccountingStatusType.PENDING.equals(data.getStatus()) &&
-         reconciliedMovement10 == null &&
-         !ReconciliationStatusType.PENDING.equals(prepaidMovement10.getConTecnocom()))
-      {
-        //Existe en el archivo
-        if(result != null) {
-          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
-          UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
+      if(AccountingTxType.RETIRO_WEB.equals(data.getType())) {
+        if(AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) { // Aun no ha sido procesado?
+          if(result != null) { //Existe tambien en el archivo?
+            PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
+            UserAccount userAccount = getUserClient().getUserBankAccountById(null, prepaidUser10.getUserIdMc(), data.getUserBankAccount().getId());
 
-          //Coinciden
-          if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
-            data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
-            data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
-            getNumberUtils().toLong(userAccount.getAccountNumber()).toString().equals(result.getUserBankAccount().getAccountNumber()) &&
-            userAccount.getRut().getValue().equals(result.getUserBankAccount().getRut().getValue())
-          ) {
-            // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
-            updateClearingData(null, data.getId(),null, result.getStatus());
-          } else { // Si  viene en el archivo, pero los montos no concuerdan, marcar.
-            updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
+            //Coinciden todos sus valores
+            if(data.getAmount().getValue().compareTo(result.getAmount().getValue()) == 0 &&
+              data.getAmountBalance().getValue().compareTo(result.getAmountBalance().getValue()) == 0 &&
+              data.getAmountMastercard().getValue().compareTo(result.getAmountMastercard().getValue()) == 0 &&
+              getNumberUtils().toLong(userAccount.getAccountNumber()).toString().equals(result.getUserBankAccount().getAccountNumber()) &&
+              userAccount.getRut().getValue().equals(result.getUserBankAccount().getRut().getValue())
+            ) {
+              // Si existe en el archivo y concuerda se actualiza al estado que dice el banco.
+              updateClearingData(null, data.getId(),null, result.getStatus());
+            } else { // Si  viene en el archivo, pero los montos no concuerdan, marcar.
+              updateClearingData(null, data.getId(),null, AccountingStatusType.INVALID_INFORMATION);
+            }
+          } else { // No viene en el archivo, marcar
+            updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
           }
-        } else { // No viene en el archivo, marcar
-          updateClearingData(null, data.getId(),null, AccountingStatusType.NOT_IN_FILE);
-        }
-      } else {
-        // El movimiento no es retiro web
-        // O su estado clearing es distinto de PENDING
-        // O ya esta conciliado
-        // O tecnocom esta PENDING
-        updateClearingData(null, data.getId(),null, result.getStatus());
-        createClearingResearch(fileName, data.getIdTransaction());
+        } else {
+          // Este movimiento ya fue procesado anteriormente, dado que:
+          // O su estado clearing es distinto de PENDING
+          // O ya esta conciliado
+          createClearingResearch(fileName, data.getIdTransaction());
 
-        // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
-        if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
-          getPrepaidMovementEJBBean10().createMovementConciliate(null, data.getIdTransaction(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+          // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
+          if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
+            getPrepaidMovementEJBBean10().createMovementConciliate(null, data.getIdTransaction(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+          }
         }
       }
     }
     //Verifica que no venga algo extra en el archivo.
     for(ClearingData10 data : clearingDataInFile) {
-      // Busca todos los retiros web que tienen que venir en el archivo
-      ClearingData10 result = clearingDataInTable.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
-      //Viene en el archivo y no existe en nuestra tabla
-      if(result == null) {
-        //Agregar a Investigar
-        this.createClearingResearch(fileName, data.getIdTransaction());
+      if(AccountingTxType.RETIRO_WEB.equals(data.getType())) {
+        // Busca todos los retiros web que tienen que venir en el archivo
+        ClearingData10 result = clearingDataInTable.stream().filter(x ->data.getId().equals(x.getId())).findAny().orElse(null);
+        //Viene en el archivo y no existe en nuestra tabla
+        if(result == null) {
+          //Agregar a Investigar
+          this.createClearingResearch(fileName, data.getIdTransaction());
+        }
+      } else {
+        // Todo: Por ahora todo los movimientos que no sean RETIRO_WEB son aceptados
+        // En un futuro este archivo vendran mas tipos de movimientos que deben ser chequeados tambien si existen
       }
     }
   }

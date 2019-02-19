@@ -309,6 +309,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
+    ClearingData10 notWebWithdraw;
     // Not web withdraw
     {
       PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
@@ -368,8 +369,11 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       clearingData10.setUserBankAccount(userAccount);
 
       allClearingData.add(clearingData10);
+
+      notWebWithdraw = clearingData10;
     }
 
+    ClearingData10 clearingOK;
     // Ya esta clearing OK
     {
       PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
@@ -429,9 +433,12 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       clearingData10.setUserBankAccount(userAccount);
 
       allClearingData.add(clearingData10);
+
+      clearingOK = clearingData10;
     }
 
     // Ya esta conciliado
+    ClearingData10 alreadyReconciled;
     {
       PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
       prepaidWithdraw.setMerchantCode(getRandomNumericString(7));
@@ -491,19 +498,31 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       clearingData10.setUserBankAccount(userAccount);
 
       allClearingData.add(clearingData10);
+
+      alreadyReconciled = clearingData10;
     }
 
     InputStream is = createAccountingCSV(fileName, fileId, allClearingData); // Crear archivo csv temporal
     Assert.assertNotNull("InputStream not Null", is);
     getPrepaidClearingEJBBean10().processClearingResponse(is, fileName);
 
-    // Los 3 casos deben quedar en research
-    for(ClearingData10 clearingData10 : allClearingData) {
-      System.out.println("Buscando clearing...");
-      List<ReconciliedResearch> researchMovs = getResearchMovement(clearingData10.getIdTransaction());
+    {
+      List<ReconciliedResearch> researchMovs = getResearchMovement(notWebWithdraw.getIdTransaction());
+      Assert.assertNull("No debe estar en reasearch", researchMovs);
+    }
+
+    {
+      List<ReconciliedResearch> researchMovs = getResearchMovement(clearingOK.getIdTransaction());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
+
+    {
+      List<ReconciliedResearch> researchMovs = getResearchMovement(alreadyReconciled.getIdTransaction());
+      Assert.assertNotNull("Debe haber una respuesta", researchMovs);
+      Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
+    }
+
   }
 
   private List<ReconciliedResearch> getResearchMovement(Long movId) {

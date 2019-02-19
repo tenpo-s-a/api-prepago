@@ -192,6 +192,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     invalidInformation_bankAccount.clearingData10.getUserBankAccount().setAccountNumber("11111111"); // Altera cuenta bancaria
     clearingData10ToFile.add(invalidInformation_bankAccount.clearingData10);
 
+    // TODO: agregar comprobacion de nombre de banco al F1
+
     // 14.- Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + >>Clearing Rejected
     Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables rejectedClearing;
     rejectedClearing = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
@@ -243,8 +245,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
     getPrepaidClearingEJBBean10().createClearingCSV(fileName, fileId, clearingData10ToFile);
 
-    runF1();
-    runF3();
+    runF1(); // F3 es llamado desde F1
 
     // 1. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     {
@@ -259,7 +260,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
       // Revisar que el estado de accounting haya cambiado a OK
       AccountingData10 foundAccounting = getAccountingData(allOk.accountingData10.getId());
-      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundAccounting.getAccountingStatus());
 
       // Revisar que el estado de clearing haya cambiado a OK
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, allOk.clearingData10.getId());
@@ -285,18 +286,17 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       AccountingData10 foundAccounting = getAccountingData(notWithdraw.accountingData10.getId());
       Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
 
-      // Revisar que el estado de clearing haya cambiado a lo que venga en el archivo
+      // Revisar que el estado de clearing NO haya cambiado
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, notWithdraw.clearingData10.getId());
-      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundClearing.getStatus());
+      Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundClearing.getStatus());
 
       // El movimiento no debe quedar conciliado
       ReconciliedMovement10 reconciliedMovement10 = getPrepaidMovementEJBBean10().getReconciliedMovementByIdMovRef(notWithdraw.prepaidMovement10.getId());
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
-      // Debe estar en research
+      // No debe estar en research
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notWithdraw.prepaidMovement10.getId()));
-      Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigen());
+      Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
     // 3. Chequea test: Es RETIRO + >> No es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -313,18 +313,17 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       AccountingData10 foundAccounting = getAccountingData(notWeb.accountingData10.getId());
       Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
 
-      // Revisar que el estado de clearing haya cambiado a lo que venga en el archivo
+      // Revisar que el estado de clearing NO haya cambiado
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, notWeb.clearingData10.getId());
-      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundClearing.getStatus());
+      Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundClearing.getStatus());
 
       // El movimiento no debe quedar conciliado
       ReconciliedMovement10 reconciliedMovement10 = getPrepaidMovementEJBBean10().getReconciliedMovementByIdMovRef(notWeb.prepaidMovement10.getId());
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
-      // Debe estar en research
+      // No debe estar en research
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notWeb.prepaidMovement10.getId()));
-      Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigen());
+      Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
     // 4. Chequea test: Es RETIRO + Es WEB + >> Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -378,10 +377,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       ReconciliedMovement10 reconciliedMovement10 = getPrepaidMovementEJBBean10().getReconciliedMovementByIdMovRef(pendingTecnocom.prepaidMovement10.getId());
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
-      // Debe estar en research
+      // No debe estar en research
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", pendingTecnocom.prepaidMovement10.getId()));
-      Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigen());
+      Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
     // 6. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + >> Ya Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -398,9 +396,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       AccountingData10 foundAccounting = getAccountingData(reconciledMovement.accountingData10.getId());
       Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
 
-      // Revisar que el estado de clearing haya cambiado a lo que venga en el archivo
+      // Revisar que el estado de clearing no haya cambiado
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, reconciledMovement.clearingData10.getId());
-      Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundClearing.getStatus());
+      Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundClearing.getStatus());
 
       // El movimiento debe estar conciliado
       ReconciliedMovement10 reconciliedMovement10 = getPrepaidMovementEJBBean10().getReconciliedMovementByIdMovRef(reconciledMovement.prepaidMovement10.getId());
@@ -455,7 +453,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       AccountingData10 foundAccounting = getAccountingData(clearingAlreadyOK.accountingData10.getId());
       Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, foundAccounting.getStatus());
 
-      // Revisar que el estado de clearing haya cambiado a lo que venga en el archivo
+      // Revisar que el estado de clearing no haya cambiado
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, clearingAlreadyOK.clearingData10.getId());
       Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, foundClearing.getStatus());
 
@@ -652,6 +650,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedClearing.accountingData10.getId());
+      //TODO: el estado de accounting no debe cambiar a rejected
       Assert.assertEquals("Debe tener estado REJECTED", AccountingStatusType.REJECTED, foundAccounting.getStatus());
       Assert.assertEquals("Debe tener estado REVERSED", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
 
@@ -707,6 +706,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedFormatClearing.accountingData10.getId());
+      //TODO: el estado de accounting no debe cambiar a rejected
       Assert.assertEquals("Debe tener estado REJECTED FORMAT", AccountingStatusType.REJECTED_FORMAT, foundAccounting.getStatus());
       Assert.assertEquals("Debe tener estado accounting REJECTED FORMAT", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
 
