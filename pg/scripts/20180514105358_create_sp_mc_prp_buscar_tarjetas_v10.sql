@@ -24,17 +24,18 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_tarjetas_v10
   IN _in_expiracion      INTEGER,
   IN _in_estado          VARCHAR,
   IN _in_contrato        VARCHAR,
-  OUT _id BIGINT,
-  OUT _id_usuario BIGINT,
-  OUT _pan VARCHAR,
-  OUT _pan_encriptado VARCHAR,
-  OUT _contrato VARCHAR,
-  OUT _expiracion INTEGER,
-  OUT _estado VARCHAR,
-  OUT _nombre_tarjeta VARCHAR,
-  OUT _producto VARCHAR,
-  OUT _numero_unico VARCHAR,
-  OUT _fecha_creacion TIMESTAMP,
+  IN _in_pan_encriptado  VARCHAR,
+  OUT _id                BIGINT,
+  OUT _id_usuario        BIGINT,
+  OUT _pan               VARCHAR,
+  OUT _pan_encriptado    VARCHAR,
+  OUT _contrato          VARCHAR,
+  OUT _expiracion        INTEGER,
+  OUT _estado            VARCHAR,
+  OUT _nombre_tarjeta    VARCHAR,
+  OUT _producto          VARCHAR,
+  OUT _numero_unico      VARCHAR,
+  OUT _fecha_creacion    TIMESTAMP,
   OUT _fecha_actualizacion TIMESTAMP
 )
 RETURNS SETOF RECORD AS $$
@@ -60,8 +61,9 @@ BEGIN
     (COALESCE(_in_id_usuario, 0) = 0 OR id_usuario = _in_id_usuario) AND
     (COALESCE(_in_expiracion, 0) = 0 OR expiracion = _in_expiracion) AND
     (TRIM(COALESCE(_in_estado,'')) = '' OR estado = _in_estado) AND
-    (TRIM(COALESCE(_in_contrato,'')) = '' OR contrato = _in_contrato)
-    ORDER BY id DESC;
+    (TRIM(COALESCE(_in_contrato,'')) = '' OR contrato = _in_contrato) AND
+    (TRIM(COALESCE(_in_pan_encriptado,'')) = '' OR pan_encriptado = _in_pan_encriptado)
+  ORDER BY id DESC;
   RETURN;
 END;
 $$ LANGUAGE plpgsql;
@@ -69,5 +71,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_tarjetas_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_tarjetas_v10(BIGINT, BIGINT, INTEGER, VARCHAR, VARCHAR,VARCHAR);
 

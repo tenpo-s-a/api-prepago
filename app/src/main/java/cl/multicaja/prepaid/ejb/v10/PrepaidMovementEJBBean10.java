@@ -156,6 +156,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     this.mailDelegate = mailDelegate;
   }
 
+  public void addPrepaidMovement(Map<String, Object> header, List<PrepaidMovement10> data) throws Exception {
+    for(PrepaidMovement10 movement : data){
+      addPrepaidMovement(header,movement);
+    }
+  }
+
   @Override
   public PrepaidMovement10 addPrepaidMovement(Map<String, Object> header, PrepaidMovement10 data) throws Exception {
 
