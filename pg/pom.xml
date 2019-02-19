@@ -43,7 +43,7 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-base</artifactId>
-      <version>9c3127bc032fb8ff35269722580af8be35828a6a</version>
+      <version>42634659c44945a7fff594483e4da8bcbccb0e3d</version>
     </dependency>
 
     <dependency>
