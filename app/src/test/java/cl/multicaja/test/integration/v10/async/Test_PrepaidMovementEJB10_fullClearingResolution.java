@@ -651,8 +651,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedClearing.accountingData10.getId());
       //TODO: el estado de accounting no debe cambiar a rejected
-      Assert.assertEquals("Debe tener estado REJECTED", AccountingStatusType.REJECTED, foundAccounting.getStatus());
-      Assert.assertEquals("Debe tener estado REVERSED", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
+      Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.NOT_SEND, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado REVERSED", AccountingStatusType.NOT_OK, foundAccounting.getAccountingStatus());
 
       // Revisar que el estado de clearing haya cambiado a rejected
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, rejectedClearing.clearingData10.getId());
@@ -707,8 +707,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Revisar que el estado de accounting haya cambiado a rejected
       AccountingData10 foundAccounting = getAccountingData(rejectedFormatClearing.accountingData10.getId());
       //TODO: el estado de accounting no debe cambiar a rejected
-      Assert.assertEquals("Debe tener estado REJECTED FORMAT", AccountingStatusType.REJECTED_FORMAT, foundAccounting.getStatus());
-      Assert.assertEquals("Debe tener estado accounting REJECTED FORMAT", AccountingStatusType.REVERSED, foundAccounting.getAccountingStatus());
+      Assert.assertEquals("Debe tener estado REJECTED FORMAT", AccountingStatusType.NOT_SEND, foundAccounting.getStatus());
+      Assert.assertEquals("Debe tener estado accounting REJECTED FORMAT", AccountingStatusType.NOT_OK, foundAccounting.getAccountingStatus());
 
       // Revisar que el estado de clearing haya cambiado a rejected
       ClearingData10 foundClearing = getPrepaidClearingEJBBean10().searchClearingDataById(null, rejectedFormatClearing.clearingData10.getId());
