@@ -13,9 +13,7 @@ import org.junit.*;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.List;
 
 /**
@@ -173,10 +171,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -184,7 +184,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   @Test
@@ -250,11 +250,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.CARGA_WEB, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -262,7 +263,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   @Test
@@ -353,11 +354,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -365,7 +367,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   @Test
@@ -456,11 +458,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_WEB, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -468,7 +471,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   @Test
@@ -560,11 +563,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_POS, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_POS, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -572,7 +576,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   @Test
@@ -664,11 +668,12 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener tipo POS", AccountingTxType.CARGA_WEB, accounting10.getType());
     Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.CARGA_WEB, accounting10.getAccountingMovementType());
     Assert.assertEquals("Debe tener el mismo imp fac", prepaidMovement.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
-    Assert.assertEquals("Debe tener status PENDING", AccountingStatusType.PENDING, accounting10.getStatus());
-    Assert.assertEquals("Debe tener accountingStatus REVERSED", AccountingStatusType.REVERSED, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
     Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
 
-    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
     Assert.assertNotNull("No debe ser null", clearing10s);
     Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
 
@@ -676,7 +681,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     Assert.assertNotNull("deberia tener un retiro", clearing10);
     Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
     Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
-    Assert.assertEquals("Debe estar en estado REVERSED", AccountingStatusType.INITIAL, clearing10.getStatus());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
   }
 
   private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement, AccountingStatusType clearingStatus) throws Exception {
@@ -698,6 +703,18 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
   private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement) throws Exception {
     addAccountingAndClearing(prepaidMovement, AccountingStatusType.INITIAL);
+  }
+
+  private Boolean checkReconciliationDate(Timestamp ts) {
+
+    Instant instant = Instant.now();
+    ZoneId z = ZoneId.of( "UTC" );
+    ZonedDateTime nowUtc = instant.atZone(z);
+
+    LocalDateTime localDateTime = ts.toLocalDateTime();
+    ZonedDateTime reconciliationDateUtc = localDateTime.atZone(ZoneOffset.UTC);
+
+    return reconciliationDateUtc.isBefore(nowUtc);
   }
 
 }

@@ -608,9 +608,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         usdValue = (mov.getAmountMastercard().getValue().divide(mov.getAmountUsd().getValue(),2, RoundingMode.HALF_UP)).toString();
       }
 
-      Boolean printStatus = Stream.of(AccountingStatusType.OK, AccountingStatusType.PENDING, AccountingStatusType.INITIAL)
-        .anyMatch(s -> mov.getAccountingStatus().equals(s));
-
       String[] data = new String[]{
         mov.getId().toString(), //ID_PREPAGO,
         fileId, //ID_LIQUIDACION,
@@ -631,8 +628,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         mov.getCollectorFeeIva().toBigInteger().toString(), //IVA_COMISION_RECAUDADOR_MC_PESOS
         mov.getAmountBalance().getValue().toBigInteger().toString(), //MONTO_AFECTO_A_SALDO_PESOS
         "", //ID_CUENTA_DESTINO - Este campo es utilizado solo por MulticajaRed. No lo utiliza ni setea Prepago
-        StringUtils.isAllBlank(reconciliationDate) ? AccountingStatusType.NOT_CONFIRMED.getValue() :
-          printStatus ? "" : mov.getAccountingStatus().getValue() //ESTADO_CONTABLE
+        AccountingStatusType.NOT_OK.equals(mov.getAccountingStatus()) ? AccountingStatusType.NOT_CONFIRMED.getValue() : "" //ESTADO_CONTABLE
       };
       writer.writeNext(data);
     }
@@ -661,6 +657,10 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
     LocalDateTime localDateTime = ts.toLocalDateTime();
     ZonedDateTime utc = localDateTime.atZone(ZoneOffset.UTC);
+
+    if(timeZone.equalsIgnoreCase("utc")){
+      return utc;
+    }
 
     return utc.withZoneSameInstant(ZoneId.of(timeZone));
   }

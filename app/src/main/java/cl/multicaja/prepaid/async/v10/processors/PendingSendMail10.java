@@ -332,6 +332,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10();
         withdraw10.setAmount(new NewAmountAndCurrency10(data.getPrepaidMovement10().getMonto()));
+        withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
         getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
 
         Map<String, Object> templateData = new HashMap<>();
@@ -376,6 +377,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10();
         withdraw10.setAmount(new NewAmountAndCurrency10(prepaidMovement.getMonto()));
+        withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
         getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
 
         Map<String, Object> templateData = new HashMap<>();

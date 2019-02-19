@@ -157,8 +157,8 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 log.error("Error al confirmar reversa en CDT");
               }
 
-              //actualiza movimiento original en accounting
-              getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+              //actualiza movimiento original en accounting y clearing
+              getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
               return req;
             } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
@@ -175,8 +175,8 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 if(!"0".equals(cdtTxReversa.getNumError())){
                   log.error("Error al confirmar reversa en CDT");
                 }
-                //actualiza movimiento original en accounting
-                getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+                //actualiza movimiento original en accounting y clearing
+                getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
               } else {
                 log.debug("********** Reversa de retiro rechazada **********");
                 log.debug(inclusionMovimientosDTO.getDescRetorno());
@@ -210,8 +210,9 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
             req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
-            //actualiza movimiento original en accounting
-            getRoute().getPrepaidMovementEJBBean10().updateAccountingAndClearing(originalMovement.getId(), AccountingStatusType.REVERSED, null);
+            //actualiza movimiento original en accounting y clearing
+            getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
+
           }
         }catch (Exception e){
           e.printStackTrace();
