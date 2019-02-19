@@ -179,6 +179,7 @@ public class Test_PrepaidMovementEJB10_procesReconciliation10 extends TestBaseUn
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
