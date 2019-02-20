@@ -503,41 +503,42 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         topupRequest.getTransactionId(), PrepaidMovementType.TOPUP, tipoFacTopup);
 
       // Verifica si existe la carga original topup
-      if(originalTopup != null && originalTopup.getMonto().equals(topupRequest.getAmount().getValue())) {
-        String timezone;
-        if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
-          timezone="America/Santiago";
-        } else{
-          timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
-        }
-        if(getDateUtils().inLastHours(24L, originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
-          // Agrego la reversa al cdt
-          CdtTransaction10 cdtTransaction = new CdtTransaction10();
-          cdtTransaction.setTransactionReference(0L);
-          cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
-
-          PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
-
-          PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
-          if(!fromEndPoint){
-            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      if(originalTopup != null) {
+        if(originalTopup.getMonto().stripTrailingZeros().equals(topupRequest.getAmount().getValue().stripTrailingZeros())) {
+          String timezone;
+          if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
+            timezone="America/Santiago";
+          } else{
+            timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
           }
-          prepaidMovement.setCentalta(originalTopup.getCentalta());
-          prepaidMovement.setCuenta(originalTopup.getCuenta());
-          prepaidMovement.setPan(originalTopup.getPan());
-          prepaidMovement.setTipofac(tipoFacReverse);
-          prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-          prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-          prepaidMovement.setNumaut(TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString()));
-          this.getDelegate().sendPendingTopupReverse(reverse,prepaidCard,prepaidUser,prepaidMovement);
+          if(getDateUtils().inLastHours(24L, originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
+            // Agrego la reversa al cdt
+            CdtTransaction10 cdtTransaction = new CdtTransaction10();
+            cdtTransaction.setTransactionReference(0L);
+            cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
 
+            PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
+
+            PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+            if(!fromEndPoint){
+              prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+            }
+            prepaidMovement.setCentalta(originalTopup.getCentalta());
+            prepaidMovement.setCuenta(originalTopup.getCuenta());
+            prepaidMovement.setPan(originalTopup.getPan());
+            prepaidMovement.setTipofac(tipoFacReverse);
+            prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+            prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+            prepaidMovement.setNumaut(TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString()));
+            this.getDelegate().sendPendingTopupReverse(reverse,prepaidCard,prepaidUser,prepaidMovement);
+
+          } else {
+            log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
+            throw new ReverseTimeExpiredException();
+          }
         } else {
-          log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
-          BaseException bex = new BaseException();
-          bex.setStatus(410);
-          bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
-          bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
-          throw bex;
+          log.error(String.format("Monto de la transaccion no concuerda. Original -> [%s], Reversa -> [%s].", originalTopup.getMonto(), topupRequest.getAmount().getValue()));
+          throw new ValidationException(REVERSA_INFORMACION_NO_CONCUERDA);
         }
       } else {
         log.info(String.format("No existe una carga con los datos -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), topupRequest.getTransactionId(), topupRequest.getAmount().getValue()));
@@ -552,11 +553,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
+        prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
         this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+
+        throw new ReverseOriginalMovementNotFoundException();
       }
     } else {
       log.info(String.format("Ya existe una reversa para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), topupRequest.getTransactionId(), topupRequest.getAmount().getValue()));
+      throw new ReverseAlreadyReceivedException();
     }
 
   }
@@ -841,47 +847,46 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
         withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, tipoFacTopup);
 
-      if(originalwithdraw != null && originalwithdraw.getMonto().equals(withdrawRequest.getAmount().getValue())) {
-
-        String timezone;
-        if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
-          timezone ="America/Santiago";
-        } else{
-          timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
-        }
-
-        if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone) || !fromEndPoint) {
-          // Agrego la reversa al cdt
-          CdtTransaction10 cdtTransaction = new CdtTransaction10();
-          cdtTransaction.setTransactionReference(0L);
-          cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
-
-          PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
-
-          PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
-          if(!fromEndPoint){
-            prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+      if(originalwithdraw != null) {
+        if(originalwithdraw.getMonto().stripTrailingZeros().equals(withdrawRequest.getAmount().getValue().stripTrailingZeros())) {
+          String timezone;
+          if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
+            timezone ="America/Santiago";
+          } else{
+            timezone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
           }
-          prepaidMovement.setPan(originalwithdraw.getPan());
-          prepaidMovement.setCentalta(originalwithdraw.getCentalta());
-          prepaidMovement.setCuenta(originalwithdraw.getCuenta());
-          prepaidMovement.setTipofac(tipoFacReverse);
-          prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
-          prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
-          prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
-          this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovement);
 
+          if(getDateUtils().inLastHours(Long.valueOf(24), originalwithdraw.getFechaCreacion(), timezone) || !fromEndPoint) {
+            // Agrego la reversa al cdt
+            CdtTransaction10 cdtTransaction = new CdtTransaction10();
+            cdtTransaction.setTransactionReference(0L);
+            cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
+
+            PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
+
+            PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
+            if(!fromEndPoint){
+              prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+            }
+            prepaidMovement.setPan(originalwithdraw.getPan());
+            prepaidMovement.setCentalta(originalwithdraw.getCentalta());
+            prepaidMovement.setCuenta(originalwithdraw.getCuenta());
+            prepaidMovement.setTipofac(tipoFacReverse);
+            prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+            prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+            prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
+            this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovement);
+
+          } else {
+            log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalwithdraw.getIdTxExterno(), originalwithdraw.getMonto()));
+            throw new ReverseTimeExpiredException();
+          }
         } else {
-          log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalwithdraw.getIdTxExterno(), originalwithdraw.getMonto()));
-          BaseException bex = new BaseException();
-          bex.setStatus(410);
-          bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
-          bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
-          throw bex;
+          log.error(String.format("Monto de la transaccion no concuerda. Original -> [%s], Reversa -> [%s].", originalwithdraw.getMonto(), withdrawRequest.getAmount().getValue()));
+          throw new ValidationException(REVERSA_INFORMACION_NO_CONCUERDA);
         }
-
       } else {
-        log.info(String.format("No existe un retiro con los datos -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), withdrawRequest.getTransactionId(), withdrawRequest.getAmount().getValue()));
+        log.info(String.format("No existe un retiro con los datos -> idPrepaidUser: %s, idTxExterna: %s", prepaidUser.getId(), withdrawRequest.getTransactionId()));
         CdtTransaction10 cdtTransaction = new CdtTransaction10();
         cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
         cdtTransaction.setTransactionReference(0L);
@@ -893,11 +898,16 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
+        prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
         this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+
+        throw new ReverseOriginalMovementNotFoundException();
       }
     } else {
-    log.info(String.format("Ya existe una reversa para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), withdrawRequest.getTransactionId(), withdrawRequest.getAmount().getValue()));
+      log.info(String.format("Ya existe una reversa para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), withdrawRequest.getTransactionId(), withdrawRequest.getAmount().getValue()));
+      throw new ReverseAlreadyReceivedException();
     }
   }
 
