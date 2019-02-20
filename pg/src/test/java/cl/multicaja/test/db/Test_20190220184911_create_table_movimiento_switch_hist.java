@@ -6,11 +6,11 @@ import cl.multicaja.test.TestDbBasePg;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class Test_20190220181609_create_table_movimiento_switch extends TestDbBasePg {
+public class Test_20190220184911_create_table_movimiento_switch_hist extends TestDbBasePg {
 
   @Test
-  public void checkIfExistsTable_prp_movimiento_switch() {
-    boolean exists = dbUtils.tableExists(SCHEMA, "prp_movimiento_switch", true,
+  public void checkIfExistsTable_prp_movimiento_switch_hist() {
+    boolean exists = dbUtils.tableExists(SCHEMA, "prp_movimiento_switch_hist", true,
       new ColumnInfo("id", SqlType.BIGSERIAL.getGetJavaType()),
       new ColumnInfo("id_archivo", SqlType.BIGINT.getGetJavaType()),
       new ColumnInfo("id_multicaja", SqlType.VARCHAR.getGetJavaType(), 50),

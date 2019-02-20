@@ -25,9 +25,9 @@ CREATE TABLE ${schema}.prp_movimiento_switch_hist (
   id_multicaja_ref  BIGINT,
   monto             NUMERIC NOT NULL,
   fecha_trx         TIMESTAMP NOT NULL,
-  CONSTRAINT prp_movimiento_switch_pk PRIMARY KEY(id)
+  CONSTRAINT prp_movimiento_switch_hist_pk PRIMARY KEY(id)
 );
-CREATE INDEX prp_movimiento_switch_hist_i1 ON ${schema}.prp_movimiento_hist_switch (id_archivo);
+CREATE INDEX prp_movimiento_switch_hist_i1 ON ${schema}.prp_movimiento_switch_hist (id_archivo);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
