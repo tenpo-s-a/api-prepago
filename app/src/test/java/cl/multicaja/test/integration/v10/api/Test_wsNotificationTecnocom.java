@@ -25,7 +25,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
   private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers){
     HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid/processor/notification"), toJson(notificationTecnocom),headers);
-    System.out.println("RESP HTTP: " + httpResponse);
     return httpResponse;
   }
 
@@ -319,7 +318,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
     HttpResponse httpResponse = callNotification(notificationTecnocom,headers);
 
     Map<String, Object> errorObj = httpResponse.toMap();
-    System.out.println(errorObj);
 
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Status 500",500,errorObj.get("status"));
