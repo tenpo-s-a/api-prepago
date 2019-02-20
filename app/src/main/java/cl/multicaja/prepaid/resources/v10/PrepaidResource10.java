@@ -81,7 +81,7 @@ public final class PrepaidResource10 extends BaseResource {
   @Path("/withdrawal/reverse")
   public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), withdrawRequest,true);
-    return Response.ok().status(201).build();
+    return Response.status(201).build();
   }
 
   /*
