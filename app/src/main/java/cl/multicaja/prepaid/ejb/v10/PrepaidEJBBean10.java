@@ -114,7 +114,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private UserClient userClient;
 
-  private static EncryptUtil encryptUtil;
+  private EncryptUtil encryptUtil;
 
   private ParametersUtil parametersUtil;
 

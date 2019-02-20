@@ -30,7 +30,6 @@ public abstract class PrepaidBaseEJBBean10 {
 
   private static DateUtils dateUtils;
 
-  //private static EncryptUtil encryptUtil;
 
   public final static String APP_NAME = "prepaid.appname";
 
