@@ -23,20 +23,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  extends TestDbBasePg {
+public class Test_20190219152955_create_sp_search_intermediate_reconciliation_files extends TestDbBasePg {
 
   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  private static final String SP_NAME = SCHEMA + ".prp_busca_archivo_reconciliacion";
-  private static final String TABLE_NAME = "prp_archivos_reconciliacion";
+  private static final String SP_NAME = SCHEMA + ".prp_busca_archivo_conciliacion";
+  private static final String TABLE_NAME = "prp_archivos_conciliacion";
 
   @BeforeClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_reconciliacion", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion", SCHEMA));
   }
 
   @AfterClass
   public static void afterClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_reconciliacion", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion", SCHEMA));
   }
 
   //Opciones Filtros
@@ -56,30 +56,7 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
       status != null ? status : new NullParam(Types.VARCHAR)
     };
 
-    return dbUtils.execute(SCHEMA + ".prp_busca_archivo_reconciliacion", params);
-  }
-
-  /**
-   *
-   * @param map
-   */
-  private void checkColumns(Map<String, Object> map) {
-
-    String[] columns = {
-      "_id",
-      "_nombre_de_archivo",
-      "_proceso",
-      "_tipo",
-      "_status",
-      "_created_at",
-      "_updated_at"
-    };
-
-    for (String column : columns) {
-      Assert.assertTrue("Debe contener la columna " + column, map.containsKey(column));
-    }
-
-    Assert.assertEquals("Debe contener solamente las columnas definidas", columns.length, map.keySet().size());
+    return dbUtils.execute(SCHEMA + ".prp_busca_archivo_conciliacion", params);
   }
 
   /**
@@ -145,8 +122,6 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
 
     Map<String, Object> archRecon = (Map)result.get(0);
 
-    checkColumns(archRecon);
-
     String keyToFind;
     for (Map.Entry<String, Object> entry : archRecon.entrySet()) {
       keyToFind = entry.getKey().substring(1,entry.getKey().length()).trim();
@@ -176,8 +151,6 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
-
-    checkColumns(archRecon);
 
     String keyToFind;
     for (Map.Entry<String, Object> entry : archRecon.entrySet()) {
@@ -216,8 +189,6 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
 
     Map<String, Object> archRecon = (Map)result.get(0);
 
-    checkColumns(archRecon);
-
     String keyToFind;
     for (Map.Entry<String, Object> entry : archRecon.entrySet()) {
       keyToFind = entry.getKey().substring(1,entry.getKey().length()).trim();
@@ -249,8 +220,6 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
 
     Map<String, Object> archRecon = (Map)result.get(0);
 
-    checkColumns(archRecon);
-
     String keyToFind;
     for (Map.Entry<String, Object> entry : archRecon.entrySet()) {
       keyToFind = entry.getKey().substring(1,entry.getKey().length()).trim();
@@ -281,8 +250,6 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
     List result = (List)searchDataResponse.get("result");
 
     Map<String, Object> archRecon = (Map)result.get(0);
-
-    checkColumns(archRecon);
 
     String keyToFind;
     for (Map.Entry<String, Object> entry : archRecon.entrySet()) {

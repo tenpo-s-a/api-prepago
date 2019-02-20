@@ -17,7 +17,7 @@
 -- // create_sp_prp_busca_archivo_reconciliacion
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.prp_busca_archivo_reconciliacion
+CREATE OR REPLACE FUNCTION ${schema}.prp_busca_archivo_conciliacion
 (
     IN _in_nombre_de_archivo  VARCHAR,
     IN _in_proceso            VARCHAR,
@@ -42,7 +42,7 @@ BEGIN
     created_at,
     updated_at
   FROM
-   ${schema}.prp_archivos_reconciliacion
+   ${schema}.prp_archivos_conciliacion
   WHERE
     (TRIM(COALESCE(_in_nombre_de_archivo,'')) = '' OR nombre_de_archivo = _in_nombre_de_archivo) AND
     (TRIM(COALESCE(_in_proceso,'')) = '' OR proceso = _in_proceso) AND
@@ -56,4 +56,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.prp_busca_archivo_reconciliacion(VARCHAR,VARCHAR,VARCHAR,VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.prp_busca_archivo_conciliacion(VARCHAR,VARCHAR,VARCHAR,VARCHAR);
