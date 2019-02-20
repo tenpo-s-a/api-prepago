@@ -30,7 +30,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.xml.bind.ValidationException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -208,6 +207,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doNothing()
       .when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.any(), Mockito.any());
 
+    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(),
+      Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
+      Mockito.any(TipoFactura.class));
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers, withdrawRequest,true);

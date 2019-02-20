@@ -8,15 +8,18 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.ZONEID;
+import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
@@ -36,6 +39,7 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
@@ -72,6 +76,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10;
 
+  @EJB
+  private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+
+
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
@@ -101,6 +113,22 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setPrepaidAccountingFileEJBBean10(PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJBBean10) {
     this.prepaidAccountingFileEJBBean10 = prepaidAccountingFileEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
+    return prepaidMovementEJBBean10;
+  }
+
+  public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
+    this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
+    return prepaidCardEJBBean10;
+  }
+
+  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
+    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -185,6 +213,50 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       accounting10sFinal.add(account);
     }
     return accounting10sFinal;
+  }
+
+
+  public AccountingData10 updateAccountingDataFull(Map<String, Object> header, AccountingData10 accounting10) throws Exception {
+
+    if(accounting10.getIdTransaction() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "getIdTransaction"));
+    }
+    // La fecha ya esta en UTC
+    LocalDateTime date = accounting10.getTransactionDate().toLocalDateTime();
+    String transactionDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    //
+    LocalDateTime rD = accounting10.getConciliationDate().toLocalDateTime();
+    String conciliationDate = rD.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    Object[] params = {
+      new InParam(accounting10.getIdTransaction(), Types.BIGINT),
+      accounting10.getAmount() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getAmount().getValue(), Types.NUMERIC),
+      accounting10.getAmount().getCurrencyCode() == null ?  new NullParam(Types.NUMERIC) : new InParam(accounting10.getAmount().getCurrencyCode().getValue(), Types.NUMERIC),
+      accounting10.getAmountUsd().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountUsd().getValue(), Types.NUMERIC),
+      accounting10.getAmountMastercard().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountMastercard().getValue(), Types.NUMERIC),
+      accounting10.getExchangeRateDif() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getExchangeRateDif(), Types.NUMERIC),
+      accounting10.getFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getFee(), Types.NUMERIC),
+      accounting10.getFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getFeeIva(),Types.NUMERIC),
+      accounting10.getCollectorFee() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFee(), Types.NUMERIC),
+      accounting10.getCollectorFeeIva() == null ? new NullParam(Types.NUMERIC) : new InParam(accounting10.getCollectorFeeIva(),Types.NUMERIC),
+      accounting10.getAmountBalance().getValue() == null ? new NullParam(Types.NUMERIC) : new InParam( accounting10.getAmountBalance().getValue(),Types.NUMERIC),
+      new InParam(transactionDate,Types.VARCHAR),
+      new InParam(conciliationDate,Types.VARCHAR),
+      new InParam(accounting10.getStatus().getValue(), Types.VARCHAR),
+      new InParam(accounting10.getAccountingStatus().getValue(), Types.VARCHAR),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchemaAccounting() + ".mc_acc_update_accounting_full_data_v10",params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_acc_update_accounting_full_data_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+    accounting10 = searchAccountingByIdTrx(header,accounting10.getIdTransaction());
+    return accounting10;
   }
 
   public AccountingData10 saveAccountingData(Map<String, Object> header, AccountingData10 accounting10) throws Exception {
@@ -883,13 +955,30 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     List<AccountingData10> transactions = new ArrayList<>();
-    for (IpmMessage trx: ipmFile.getTransactions()) {
+    List<PrepaidMovement10> movement10s = new ArrayList<>();
 
-      AccountingData10 acc = new AccountingData10();
-      acc.setOrigin(AccountingOriginType.IPM);
-      acc.setType(this.getTransactionType(trx));
-      acc.setAccountingMovementType(this.getMovementType(trx));
-      acc.setIdTransaction(Long.valueOf(trx.getApprovalCode()));
+    for (IpmMessage trx: ipmFile.getTransactions()) {
+      System.out.println(trx);
+      AccountingData10 acc = null;
+      PrepaidMovement10 prepaidMovement10 = null;
+      try {
+        // Se cambian los * por X que es como esta en nuestra BD.
+        prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByNumAutAndPan(trx.getPan().replace("*","X"),String.valueOf(trx.getApprovalCode()),MovementOriginType.OPE);
+      } catch (Exception e) {
+        log.error("PrepaidMovement10 Not Found");
+      }
+      if(prepaidMovement10 != null){
+        acc = this.searchAccountingByIdTrx(headers,prepaidMovement10.getId());
+      }
+
+      if(acc == null){
+        acc = new AccountingData10();
+        acc.setOrigin(AccountingOriginType.IPM);
+        acc.setType(this.getTransactionType(trx));
+        acc.setAccountingMovementType(this.getMovementType(trx));
+        acc.setIdTransaction(Long.valueOf(trx.getApprovalCode()));
+      }
+
       acc.setTransactionDate(Timestamp.from(trx.getTransactionLocalDate().toInstant()));
       acc.setAmount(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
@@ -965,16 +1054,117 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setStatus(AccountingStatusType.PENDING);
       acc.setAccountingStatus(AccountingStatusType.PENDING);
 
-      transactions.add(acc);
+      // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
+      if(prepaidMovement10 == null) {
+        //Se busca la tarjeta correspondiente al movimiento
+       // PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptUtil().encrypt(trx.getPan()));
+        //PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
+        //movement10s.add(mov);
+        transactions.add(acc);
+      }
+      else {
+        // Si El movimiento ya existe, se actualiza la data y los status.
+        acc.setStatus(AccountingStatusType.OK);
+        this.updateAccountingDataFull(headers,acc); // Actualizar todos los valores de Accounting
+        // Busca el movimiento de clearing  y luego le actualiza el status
+        ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(headers,acc.getId());
+        getPrepaidClearingEJBBean10().updateClearingData(headers,clearingData10.getId(),AccountingStatusType.PENDING);
+        // Movimiento actualizado a procesado OK
+        getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
+      }
     }
-
+    // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
+    //  this.getPrepaidMovementEJBBean10().addPrepaidMovement(headers,movement10s);
+    // Se guarda data en Accounting
     this.saveAccountingData(null, transactions);
     // Se guarda la data en Clearing.
     this.saveClearingData(transactions);
-
     ipmFile.setStatus(IpmFileStatus.PROCESSED);
     this.updateIpmFileRecord(null, ipmFile);
+
   }
+  private PrepaidMovementType getTipoMovimientoFromAccTxType(AccountingTxType txType){
+    PrepaidMovementType movementType = null;
+    switch (txType) {
+      case COMPRA_PESOS:
+      case COMPRA_MONEDA:
+        movementType = PrepaidMovementType.PURCHASE;
+        break;
+      case COMPRA_SUSCRIPCION:
+        movementType = PrepaidMovementType.SUSCRIPTION;
+        break;
+    }
+   return movementType;
+  }
+  private TipoFactura getTipoFacFromAccTxType(AccountingTxType txType){
+    TipoFactura tipoFactura = null;
+    switch (txType) {
+      case COMPRA_PESOS:
+      case COMPRA_MONEDA:
+        tipoFactura = TipoFactura.COMPRA_INTERNACIONAL;
+        break;
+      case COMPRA_SUSCRIPCION:
+        tipoFactura = TipoFactura.COMPRA_INTERNACIONAL;
+        break;
+    }
+    return tipoFactura;
+  }
+  private PrepaidMovement10 buildMovementAut(Long userId, PrepaidCard10 prepaidCard, IpmMessage batchTrx,PrepaidMovementType prepaidMovementType, TipoFactura tipoFactura) {
+
+    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
+
+    prepaidMovement.setIdMovimientoRef(0L);
+    prepaidMovement.setIdPrepaidUser(userId);
+    prepaidMovement.setIdTxExterno(batchTrx.getApprovalCode().toString());
+    prepaidMovement.setTipoMovimiento(prepaidMovementType);
+    prepaidMovement.setMonto(getNumberUtils().toBigDecimal(batchTrx.getCardholderBillingAmount()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+
+    String centalta = prepaidCard.getProcessorUserId().substring(4, 8);
+    String cuenta = prepaidCard.getProcessorUserId().substring(8, 20);
+
+    prepaidMovement.setCodent("");//Desde tarjeta Contrato
+    prepaidMovement.setCentalta(centalta);//Desde tarjeta Contrato
+    prepaidMovement.setCuenta(cuenta);//Desde tarjeta Contrato
+    prepaidMovement.setClamon(CodigoMoneda.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCardholderBillingCurrencyCode())));
+
+    //
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector()));
+    prepaidMovement.setTipofac(tipoFactura);// Revisar
+    prepaidMovement.setFecfac(java.sql.Date.valueOf(batchTrx.getTransactionLocalDate().toLocalDate()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(batchTrx.getPan());
+    prepaidMovement.setClamondiv(batchTrx.getTransactionCurrencyCode());
+
+    prepaidMovement.setImpdiv(getNumberUtils().toBigDecimal(batchTrx.getTransactionAmount()));
+    prepaidMovement.setImpfac(getNumberUtils().toBigDecimal(batchTrx.getCardholderBillingAmount()));
+    prepaidMovement.setCmbapli(0);
+    prepaidMovement.setNumaut(batchTrx.getApprovalCode().toString());
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA);
+    prepaidMovement.setCodact(0);
+    prepaidMovement.setImpliq(BigDecimal.ZERO);
+    prepaidMovement.setClamonliq(0);
+    prepaidMovement.setNompob("");
+    prepaidMovement.setNumextcta(0);
+    prepaidMovement.setNummovext(0);
+    prepaidMovement.setClamone(0);
+    prepaidMovement.setTipolin("");
+    prepaidMovement.setLinref(0);
+    prepaidMovement.setNumbencta(1);
+    prepaidMovement.setNumplastico(0L);
+    prepaidMovement.setCodent("");
+    prepaidMovement.setOriginType(MovementOriginType.OPE);
+
+    //Tecnocom No conciliado
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+    // Switch Conciliado ya que no pasa por switch
+    prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+
+    return prepaidMovement;
+  }
+
+
 
   private void saveClearingData(List<AccountingData10> accounting10s){
     for(AccountingData10 data: accounting10s){
@@ -1335,6 +1525,11 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       this.updateAccountingData(null, m.getId(), fileId, status, null, null);
     }
     return data;
+  }
+
+  @Override
+  public void expireIpmMovements() throws SQLException {
+    getDbUtils().execute(String.format("%s.create_sp_mc_acc_expire_old_ipm_movements_v10", getSchemaAccounting()));
   }
 
 }

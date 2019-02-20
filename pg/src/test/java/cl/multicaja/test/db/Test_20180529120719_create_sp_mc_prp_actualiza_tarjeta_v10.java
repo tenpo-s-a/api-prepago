@@ -62,7 +62,7 @@ public class Test_20180529120719_create_sp_mc_prp_actualiza_tarjeta_v10 extends 
     Assert.assertNotNull("Debe retornar respuesta", resp);
     Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
 
-    Map<String, Object> cardSearch = searchCards(null,(Long) card.get("id_usuario"),null,"CREATED",null);
+    Map<String, Object> cardSearch = searchCards(null,(Long) card.get("id_usuario"),null,"CREATED",null,null);
     List  mCard1 = (List) cardSearch.get("result");
     Assert.assertEquals("El estado debe ser CREATED","CREATED",((HashMap<String,Object>)mCard1.get(0)).get("_estado"));
   }

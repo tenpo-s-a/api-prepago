@@ -9,7 +9,7 @@ public class Test_20190219130505_create_table_intermediate_reconciliation_files 
 
   @Test
   public void checkIfExistsTable_prp_reconciliation_files() {
-    boolean exists = dbUtils.tableExists(SCHEMA, "prp_archivos_reconciliacion", true,
+    boolean exists = dbUtils.tableExists(SCHEMA, "prp_archivos_conciliacion", true,
       new ColumnInfo("id", "bigserial", 19),
       new ColumnInfo("nombre_de_archivo", "varchar", 255),
       new ColumnInfo("proceso", "varchar", 50),
@@ -18,6 +18,8 @@ public class Test_20190219130505_create_table_intermediate_reconciliation_files 
       new ColumnInfo("created_at", "timestamp", 29),
       new ColumnInfo("updated_at", "timestamp", 29)
     );
-    Assert.assertEquals("Existe tabla prp_archivos_reconciliacion", true, exists);
+
+
+    Assert.assertEquals("Existe tabla prp_archivos_conciliacion", true, exists);
   }
 }
