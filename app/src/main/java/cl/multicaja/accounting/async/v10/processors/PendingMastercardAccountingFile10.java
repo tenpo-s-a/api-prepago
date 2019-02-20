@@ -105,13 +105,14 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
 
           getRoute().getPrepaidAccountingEJBBean10().processMovementForAccounting(null, ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime());
 
+          // Expirar aquellos movimientos que no hayan sido confirmados despues de 7 archivos ipm
+          getRoute().getPrepaidAccountingEJBBean10().expireIpmMovements();
+
         } catch (Exception e) {
           log.info(String.format("Error processing file: %s", fileName));
           log.error(e);
           throw e;
         }
-
-
       }
     };
   }
