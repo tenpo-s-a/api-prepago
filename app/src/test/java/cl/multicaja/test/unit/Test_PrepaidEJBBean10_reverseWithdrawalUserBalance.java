@@ -1,10 +1,7 @@
 package cl.multicaja.test.unit;
 
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
@@ -497,7 +494,11 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverseRequest.setMerchantCategory(1);
     reverseRequest.setTransactionId("0987654321");
 
-    prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    try {
+      prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    } catch(ReverseAlreadyReceivedException ex) {
+      Assert.assertEquals("Debe retornar error de reversa ya recibida", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), ex.getCode());
+    }
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
   }
@@ -557,7 +558,11 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverseRequest.setMerchantCategory(1);
     reverseRequest.setTransactionId("0987654321");
 
-    prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    try {
+      prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    } catch (ReverseOriginalMovementNotFoundException ex) {
+      Assert.assertEquals("Debe retornar error de movimiento original no recibido", REVERSA_MOVIMIENTO_ORIGINAL_NO_RECIBIDO.getValue(), ex.getCode());
+    }
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
@@ -623,13 +628,16 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverseRequest.setMerchantCategory(1);
     reverseRequest.setTransactionId("0987654321");
 
-    prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    try {
+      prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
+    } catch (ValidationException ex) {
+      Assert.assertEquals("Debe retornar error de monto no concuerda", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), ex.getCode());
+    }
 
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
       Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
-
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
+    Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).updatePrepaidMovementStatus(Mockito.any(), Mockito.anyLong(), Mockito.any(PrepaidMovementStatus.class));
   }
 
   @Test
