@@ -620,8 +620,11 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("status 410", 410, resp.getStatus());
 
-    // Se verifica que se tenga un registro de reversa
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
+    // Se verifica que se tenga un registro de reversa
     List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
       prepaidUser.getId(), prepaidTopup.getTransactionId(), PrepaidMovementType.TOPUP, PrepaidMovementStatus.PROCESS_OK, null, null, IndicadorNormalCorrector.CORRECTORA, TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA, null, null);
 
@@ -652,6 +655,10 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
 
     Assert.assertEquals("status 410", 410, resp.getStatus());
+
+    Map<String, Object> errorObj = resp.toMap();
+    Assert.assertNotNull("Deberia tener error", errorObj);
+    Assert.assertEquals("Deberia tener error code = 130004", REVERSA_TIEMPO_EXPIRADO.getValue(), errorObj.get("code"));
 
     // Se verifica que se tenga un registro de reversa
     List<PrepaidMovement10> movement = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,

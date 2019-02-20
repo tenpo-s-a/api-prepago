@@ -643,8 +643,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     try {
       prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
       Assert.fail("Sould not be here");
-    } catch (BaseException ex) {
-      Assert.assertEquals("Deberia tener error de transaccion", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
+    } catch (ReverseTimeExpiredException ex) {
+      Assert.assertEquals("Deberia tener error de transaccion", REVERSA_TIEMPO_EXPIRADO.getValue(), ex.getCode());
       Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
       Mockito.verify(prepaidMovementEJBBean10, Mockito.never()).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));

@@ -534,11 +534,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           } else {
             log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
-            BaseException bex = new BaseException();
-            bex.setStatus(410);
-            bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
-            bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
-            throw bex;
+            throw new ReverseTimeExpiredException();
           }
         } else {
           log.error(String.format("Monto de la transaccion no concuerda. Original -> [%s], Reversa -> [%s].", originalTopup.getMonto(), topupRequest.getAmount().getValue()));
@@ -557,6 +553,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
+        prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
         this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
@@ -881,11 +879,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
           } else {
             log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalwithdraw.getIdTxExterno(), originalwithdraw.getMonto()));
-            BaseException bex = new BaseException();
-            bex.setStatus(410);
-            bex.setCode(TRANSACCION_ERROR_GENERICO_$VALUE.getValue());
-            bex.setData(new KeyValue("value", "tiempo de reversaexpirado"));
-            throw bex;
+            throw new ReverseTimeExpiredException();
           }
         } else {
           log.error(String.format("Monto de la transaccion no concuerda. Original -> [%s], Reversa -> [%s].", originalwithdraw.getMonto(), withdrawRequest.getAmount().getValue()));
@@ -904,6 +898,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         prepaidMovement.setTipofac(tipoFacReverse);
         prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
+        // Se coloca conciliada contra tecnocom, ya que nunca se hace la reversa y por lo tanto no vendra en el archivo de operaciones diarias
+        prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
         prepaidMovement = this.getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
         this.getPrepaidMovementEJB10().updatePrepaidMovementStatus(headers, prepaidMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
 
