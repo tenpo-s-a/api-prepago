@@ -3,12 +3,22 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.junit.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAsync {
 
@@ -27,11 +37,11 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
   public void clearingResolution_Reversed() throws Exception {
     // Banco rechaza
     ResolutionPreparedVariables rejectedClearing;
-    rejectedClearing = prepareTest(NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.REJECTED);
+    rejectedClearing = prepareTest(0L, NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.REJECTED);
 
     // Banco rechaza por formato
     ResolutionPreparedVariables rejectedFormatClearing;
-    rejectedFormatClearing = prepareTest(NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.REJECTED_FORMAT);
+    rejectedFormatClearing = prepareTest(0L, NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.REJECTED_FORMAT);
 
     getPrepaidMovementEJBBean10().clearingResolution();
 
@@ -106,7 +116,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     }
   }
 
-  private ResolutionPreparedVariables prepareTest(String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
+  public ResolutionPreparedVariables prepareTest(Long fileId, String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
     User user = registerUser();
     UserAccount userAccount = createBankAccount(user);
 
@@ -131,18 +141,47 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
+    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(new BigDecimal(numberUtils.random(5000, 200000)));
+
     AccountingData10 accountingData = buildRandomAccouting();
-    accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+    accountingData.setAmount(amount);
+    accountingData.setAmountBalance(new NewAmountAndCurrency10(amount.getValue()));
+    accountingData.setAmountMastercard(new NewAmountAndCurrency10(amount.getValue()));
+    accountingData.setAmountUsd(new NewAmountAndCurrency10(amount.getValue().divide(new BigDecimal(680), 2, RoundingMode.HALF_UP)));
+    accountingData.setFileId(fileId);
+    if(PrepaidMovementType.TOPUP.equals(prepaidMovement.getTipoMovimiento())) {
+      if(NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidMovement.getCodcom())) {
+        accountingData.setAccountingMovementType(AccountingMovementType.CARGA_WEB);
+        accountingData.setType(AccountingTxType.CARGA_WEB);
+      } else {
+        accountingData.setAccountingMovementType(AccountingMovementType.CARGA_POS);
+        accountingData.setType(AccountingTxType.CARGA_POS);
+      }
+    } else if(PrepaidMovementType.WITHDRAW.equals(prepaidMovement.getTipoMovimiento())) {
+      if(NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidMovement.getCodcom())) {
+        accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_WEB);
+        accountingData.setType(AccountingTxType.RETIRO_WEB);
+      } else {
+        accountingData.setAccountingMovementType(AccountingMovementType.RETIRO_POS);
+        accountingData.setType(AccountingTxType.RETIRO_POS);
+      }
+    }
     accountingData.setIdTransaction(prepaidMovement.getId());
-    accountingData.setType(AccountingTxType.RETIRO_WEB);
     accountingData.setStatus(AccountingStatusType.PENDING);
     accountingData = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData);
 
     ClearingData10 clearingData = new ClearingData10();
+    clearingData.setFileId(accountingData.getFileId());
     clearingData.setAccountingId(accountingData.getId());
     clearingData.setStatus(clearingStatus);
     clearingData.setUserBankAccount(userAccount);
+    clearingData.setFileId(accountingData.getFileId());
     clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
+
+    // Set values not returned by insertClearing
+    copyAccountingValues(accountingData, clearingData);
+    clearingData.setUserBankAccount(userAccount);
+    System.out.println("Creada clearing con id: " + clearingData.getId());
 
     ResolutionPreparedVariables resolutionPreparedVariables = new ResolutionPreparedVariables();
     resolutionPreparedVariables.accountingData10 = accountingData;
@@ -152,10 +191,29 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     return resolutionPreparedVariables;
   }
 
-  private class ResolutionPreparedVariables {
-    PrepaidMovement10 prepaidMovement10;
-    CdtTransaction10 cdtTransaction10;
-    AccountingData10 accountingData10;
-    ClearingData10 clearingData10;
+  static public class ResolutionPreparedVariables {
+    public PrepaidMovement10 prepaidMovement10;
+    public CdtTransaction10 cdtTransaction10;
+    public AccountingData10 accountingData10;
+    public ClearingData10 clearingData10;
+  }
+
+  static public void copyAccountingValues(AccountingData10 accountingData, ClearingData10 clearingData) {
+    clearingData.setIdTransaction(accountingData.getIdTransaction());
+    clearingData.setAmountMastercard(accountingData.getAmountMastercard());
+    clearingData.setAmount(accountingData.getAmount());
+    clearingData.setAmountUsd(accountingData.getAmountUsd());
+    clearingData.setAmountBalance(accountingData.getAmountBalance());
+    clearingData.setCollectorFee(accountingData.getCollectorFee());
+    clearingData.setCollectorFeeIva(accountingData.getCollectorFeeIva());
+    clearingData.setFee(accountingData.getFee());
+    clearingData.setFeeIva(accountingData.getFeeIva());
+    clearingData.setExchangeRateDif(accountingData.getExchangeRateDif());
+    clearingData.setAccountingMovementType(accountingData.getAccountingMovementType());
+    clearingData.setType(accountingData.getType());
+    clearingData.setOrigin(accountingData.getOrigin());
+    clearingData.setConciliationDate(accountingData.getConciliationDate());
+    clearingData.setTimestamps(accountingData.getTimestamps());
+    clearingData.setTransactionDate(accountingData.getTransactionDate());
   }
 }

@@ -25,8 +25,11 @@ public class MailTemplates {
   public static final String TEMPLATE_PDF_CARD = "card_pdf";//Template para el PDF
   public static final String TEMPLATE_MAIL_TOPUP = String.format("%s/RecepcionCarga", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW = String.format("%s/RecepcionRetiro", APPNAME);
+  public static final String TEMPLATE_MAIL_WEB_WITHDRAW_REQUEST = String.format("%s/SolicitudRetiroWeb", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_SUCCESS = String.format("%s/RetiroExitoso", APPNAME);
   public static final String TEMPLATE_MAIL_WITHDRAW_FAILED = String.format("%s/RetiroFallado", APPNAME);
   public static final String TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE = String.format("%s/DevolucionCargaOk", APPNAME);
+  public static final String TEMPLATE_MAIL_PURCHASE_SUCCESS = String.format("%s/ComprobanteCompraOk", APPNAME);
+  public static final String TEMPLATE_MAIL_MAIL_CARD_ERROR_USER = String.format("%s/ErrorEnvioTarjetaUsuario", APPNAME);
 
 }

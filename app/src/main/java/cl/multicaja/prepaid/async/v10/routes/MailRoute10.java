@@ -23,6 +23,13 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String ERROR_SEND_MAIL_WITHDRAW_RESP = "MailRoute10.errorSendMailWithdraw.resp";
 
   /*
+    Comprobante de solicitud retiro TEF
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST = "seda:MailRoute10.pendingSendMailWebWithdrawRequest";
+  public static final String PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_REQ = "MailRoute10.pendingSendMailWebWithdrawRequest.req";
+  public static final String PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_RESP = "MailRoute10.pendingSendMailWebWithdrawRequest.resp";
+
+  /*
     Comprobante de retiro exitoso
    */
   public static final String SEDA_PENDING_SEND_MAIL_WITHDRAW_SUCCESS = "seda:MailRoute10.pendingSendMailWithdrawSuccess";
@@ -46,6 +53,13 @@ public class MailRoute10 extends BaseRoute10 {
   public static final String SEDA_PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS = "seda:MailRoute10.pendingSendMailTopupRefundSuccess";
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ = "MailRoute10.pendingSendMailTopupRefundSuccess.req";
   public static final String PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP = "MailRoute10.pendingSendMailTopupRefundSuccess.resp";
+
+  /*
+    Comprobante de compra exitosa
+   */
+  public static final String SEDA_PENDING_SEND_MAIL_PURCHASE_SUCCESS = "seda:MailRoute10.pendingSendMailPurchaseSuccess";
+  public static final String PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ = "MailRoute10.pendingSendMailPurchaseSuccess.req";
+  public static final String PENDING_SEND_MAIL_PURCHASE_SUCCESS_RESP = "MailRoute10.pendingSendMailPurchaseSuccess.resp";
 
 
   @Override
@@ -99,7 +113,7 @@ public class MailRoute10 extends BaseRoute10 {
       .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_SUCCESS_REQ));
 
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_SUCCESS_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processPendingWithdrawSuccessMail())
+      .process(new PendingSendMail10(this).processPendingWebWithdrawSuccessMail())
       .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_SUCCESS_RESP + confResp)).end();
 
     //Errores
@@ -115,7 +129,7 @@ public class MailRoute10 extends BaseRoute10 {
       .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_FAILED_REQ));
 
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WITHDRAW_FAILED_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processPendingWithdrawFailedMail())
+      .process(new PendingSendMail10(this).processPendingWebWithdrawFailedMail())
       .to(createJMSEndpoint(PENDING_SEND_MAIL_WITHDRAW_FAILED_RESP + confResp)).end();
 
     //Errores
@@ -134,6 +148,29 @@ public class MailRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_REQ, concurrentConsumers)))
       .process(new PendingSendMail10(this).processPendingTopupRefundConfirmationMail())
       .to(createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REFUND_SUCCESS_RESP + confResp)).end();
+
+
+    /**
+     * Envio de solicitud retiro TEF
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingWebWithdrawRequestMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_WEB_WITHDRAW_REQUEST_RESP + confResp)).end();
+
+    /**
+     * Envio de comprobante compra exitosa
+     */
+
+    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_PURCHASE_SUCCESS, concurrentConsumers, sedaSize))
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ));
+
+    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_PURCHASE_SUCCESS_REQ, concurrentConsumers)))
+      .process(new PendingSendMail10(this).processPendingPurchaseSuccessMail())
+      .to(createJMSEndpoint(PENDING_SEND_MAIL_PURCHASE_SUCCESS_RESP + confResp)).end();
 
   }
 }
