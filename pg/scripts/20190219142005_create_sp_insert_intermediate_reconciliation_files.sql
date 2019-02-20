@@ -34,25 +34,25 @@ CREATE OR REPLACE FUNCTION ${schema}.prp_inserta_archivo_reconciliacion
   _error_msg := '';
 
 IF COALESCE(_nombre_de_archivo, '') = '' THEN
-  _error_code := 'CF001';
+  _error_code := 'MC001';
   _error_msg := 'El _nombre_de_archivo es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_proceso, '') = '' THEN
-  _error_code := 'CF002';
+  _error_code := 'MC002';
   _error_msg := 'El _proceso es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_tipo, '') = '' THEN
-  _error_code := 'CF003';
+  _error_code := 'MC003';
   _error_msg := 'El _tipo es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_status, '') = '' THEN
-  _error_code := 'CF004';
+  _error_code := 'MC004';
   _error_msg := 'El _status es obligatorio';
 RETURN;
 END IF;
