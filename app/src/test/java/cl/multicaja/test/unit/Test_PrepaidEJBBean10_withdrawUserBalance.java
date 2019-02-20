@@ -208,6 +208,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doNothing()
       .when(prepaidMovementEJBBean10).updatePrepaidMovementStatus(Mockito.any(), Mockito.any(), Mockito.any());
 
+    Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(),
+      Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
+      Mockito.any(TipoFactura.class));
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers, withdrawRequest,true);
