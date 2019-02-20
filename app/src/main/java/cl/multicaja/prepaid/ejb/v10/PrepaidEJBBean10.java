@@ -320,7 +320,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidTopup.setStatus("exitoso");
     prepaidTopup.setTimestamps(new Timestamps());
 
-    /*
+     /*
       Calcular monto a cargar y comisiones
      */
     prepaidTopup = (PrepaidTopup10) this.calculateFeeAndTotal(prepaidTopup);
@@ -334,6 +334,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(topupRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
+
+    TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+
+    // Se verifica si ya se tiene una reversa con los mismos datos
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
+      tipoFacReverse);
+
+    if(previousReverse != null && previousReverse.getImpfac().stripTrailingZeros().equals(topupRequest.getAmount().getValue().stripTrailingZeros())) {
+      cdtTransaction.setTransactionReference(0L);
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
+      prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
+      prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
+      prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      //TODO: deberia tambien ser conciliada con swtich asi se responda error?
+      prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+
+      throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
+    }
+
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
     // Si no cumple con los limites
@@ -423,8 +443,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransactionReverse.setExternalTransactionId(topupRequest.getTransactionId());
 
         PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
-
-        TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
         PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
         prepaidMovementReverse.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -663,6 +681,27 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
+
+    TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+
+    // Se verifica si ya se tiene una reversa con los mismos datos
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+      withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW,
+      tipoFacReverse);
+
+    if(previousReverse != null && previousReverse.getImpfac().stripTrailingZeros().equals(withdrawRequest.getAmount().getValue().stripTrailingZeros())) {
+      cdtTransaction.setTransactionReference(0L);
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
+      prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
+      prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
+      prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      //TODO: deberia tambien ser conciliada con swtich asi se responda error?
+      prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+
+      throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
+    }
+
+
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(headers, cdtTransaction);
 
     // Si no cumple con los limites
@@ -756,8 +795,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
 
-      TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
-
       PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
       if(!fromEndPoint || isWebWithdraw) {
         prepaidMovementReverse.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -798,8 +835,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()));
     }
-
-
 
     return prepaidWithdraw;
   }
