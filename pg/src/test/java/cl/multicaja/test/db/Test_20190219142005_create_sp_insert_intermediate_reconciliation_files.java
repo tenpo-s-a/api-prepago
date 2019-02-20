@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_files extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".prp_inserta_archivo_reconciliacion";
-  private static final String TABLE_NAME = "prp_archivos_reconciliacion";
+  private static final String SP_NAME = SCHEMA + ".prp_inserta_archivo_conciliacion";
+  private static final String TABLE_NAME = "prp_archivos_conciliacion";
 
   /*
     IN _nombre_de_archivo VARCHAR,
