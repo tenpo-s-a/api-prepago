@@ -197,6 +197,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     this.filesEJBBean10 = filesEJBBean10;
   }
 
+  public EncryptUtil getEncryptUtil() {
+    if(encryptUtil == null) {
+      encryptUtil = EncryptUtil.getInstance();
+    }
+    return encryptUtil;
+  }
+
+  public void setEncryptUtil(EncryptUtil encryptUtil) {
+     this.encryptUtil = encryptUtil;
+  }
+
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
       calculationsHelper = CalculationsHelper.getInstance();
@@ -235,13 +246,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return map;
   }
 
-  private EncryptUtil getEncryptUtil() {
-    if(encryptUtil == null) {
-      encryptUtil = EncryptUtil.getInstance();
-    }
-    return encryptUtil;
-  }
-
   public ParametersUtil getParametersUtil() {
     if(parametersUtil == null) {
       parametersUtil = ParametersUtil.getInstance();
@@ -256,9 +260,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return calculatorParameter10;
   }
 
-  public void setEncryptUtil(EncryptUtil encryptUtil) {
-    this.encryptUtil = encryptUtil;
-  }
 
   @Override
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
