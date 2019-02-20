@@ -51,7 +51,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
    */
   public static Map<String, Object> searchMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, String tipoMovimiento,
                                                     String estado, String estado_con_switch, String estado_con_tecnocom, String origen_movimiento,
-                                                    String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac, String numaut) throws SQLException {
+                                                    String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac, String numaut,String pan) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       idMovimientoRef != null ? idMovimientoRef : new NullParam(Types.BIGINT),
@@ -67,7 +67,8 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       indnorcor != null ? indnorcor : new NullParam(Types.NUMERIC),
       tipofac != null ? tipofac : new NullParam(Types.NUMERIC),
       fecfac != null ? fecfac :  new NullParam(Types.DATE),
-      numaut != null ? numaut : new NullParam(Types.VARCHAR)
+      numaut != null ? numaut : new NullParam(Types.VARCHAR),
+      pan != null ? pan : new NullParam(Types.VARCHAR)
     };
 
     return dbUtils.execute(SP_NAME, params);
@@ -78,7 +79,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
                                                     String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac) throws SQLException {
     return searchMovements(id, idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento,
       estado, estado_con_switch, estado_con_tecnocom, origen_movimiento,
-      cuenta, clamon, indnorcor, tipofac, fecfac, null);
+      cuenta, clamon, indnorcor, tipofac, fecfac, null,null);
   }
 
   /**
@@ -159,7 +160,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     {
       Long id = numberUtils.toLong(mapMov1.get("_id"));
 
-      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null, null, null, null, null);
+      Map<String, Object> resp = searchMovements(id, null, null, null, null, null, null, null, null, null, null, null, null, null,null,null);
 
       List result = (List)resp.get("result");
 
@@ -256,7 +257,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
     insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
-    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null, null, null, null, null);
+    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, tipoMovimiento, null, null, null, null, null, null, null, null, null,null,null);
 
     List result = (List)resp.get("result");
 
@@ -303,7 +304,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
     insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac);
 
-    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null, null, null, null, null);
+    Map<String, Object> resp = searchMovements(null, null, idPrepaidUser, null, null, estado, null, null, null, null, null, null, null, null,null,null);
 
     List result = (List)resp.get("result");
 
@@ -440,7 +441,7 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
     insertMovement(idMovimientoRef, idPrepaidUser, idTxExterno, tipoMovimiento, estado, trxSource, cuenta, clamon, indnorcor, tipofac, numaut);
 
 
-    Map<String, Object> resp = searchMovements(null, null, null, null, null, null, null, null, null, null, null, null, null, null, numaut);
+    Map<String, Object> resp = searchMovements(null, null, null, null, null, null, null, null, null, null, null, null, null, null, numaut,null);
 
     List result = (List)resp.get("result");
 

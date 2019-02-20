@@ -140,7 +140,7 @@ BEGIN
     (COALESCE(_in_indnorcor, -1) = -1 OR indnorcor = _in_indnorcor) AND
     (COALESCE(_in_tipofac, 0) = 0 OR tipofac = _in_tipofac) AND
     (TRIM(COALESCE(_in_pan,'')) = '' OR pan = _in_pan)
-    ORDER BY id DESC;
+      ORDER BY id DESC;
    RETURN;
 END;
 $$ LANGUAGE plpgsql;

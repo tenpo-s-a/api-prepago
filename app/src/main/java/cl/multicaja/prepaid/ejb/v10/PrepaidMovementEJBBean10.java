@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import javax.persistence.criteria.Order;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -357,10 +358,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut) throws Exception {
+  public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut,MovementOriginType movementOriginType) throws Exception {
     List<PrepaidMovement10> lst = getPrepaidMovements(null, null, null,null,
       null, null, null, null, null, null,
-      null, numaut,null, null, MovementOriginType.OPE,pan);
+      null, numaut,null, null, movementOriginType,pan);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
@@ -374,7 +375,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Override
   public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
                                                      PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
-                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen,String pan) throws Exception {
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan) throws Exception {
 
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
