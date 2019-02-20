@@ -57,7 +57,8 @@ END IF;
 UPDATE
 ${schema}.prp_archivos_conciliacion
 SET
-status = _in_status
+status = _in_status,
+updated_at = timezone('utc', now())
 WHERE
 nombre_de_archivo = _in_nombre_de_archivo AND
 proceso = _in_proceso AND

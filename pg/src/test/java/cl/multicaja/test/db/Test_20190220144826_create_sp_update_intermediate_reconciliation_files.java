@@ -94,8 +94,6 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    System.out.println(params);
-
     return dbUtils.execute(SP_NAME, params);
   }
 
@@ -220,6 +218,5 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
 
     Assert.assertEquals("EL Cambio de OK A READING fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
   }
-
 
 }
