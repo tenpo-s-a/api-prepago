@@ -23,7 +23,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
   @BeforeClass
-  @AfterClass
+  //@AfterClass
   public static void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", SCHEMA));
@@ -120,6 +120,9 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
 
   }
+
+
+
 
   private List<ClearingData10> getDbClearingTransactions() {
     List<ClearingData10> trxs = new ArrayList<>();

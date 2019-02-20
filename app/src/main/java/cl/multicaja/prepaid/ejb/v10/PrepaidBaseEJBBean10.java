@@ -30,7 +30,7 @@ public abstract class PrepaidBaseEJBBean10 {
 
   private static DateUtils dateUtils;
 
-  private static EncryptUtil encryptUtil;
+  //private static EncryptUtil encryptUtil;
 
   public final static String APP_NAME = "prepaid.appname";
 
@@ -51,13 +51,6 @@ public abstract class PrepaidBaseEJBBean10 {
   }
   public CalculationsHelper getCalculationsHelper(){
     return CalculationsHelper.getInstance();
-  }
-
-  public static EncryptUtil getEncryptUtil(){
-    if(encryptUtil == null){
-      encryptUtil = EncryptUtil.getInstance();
-    }
-    return encryptUtil;
   }
 
   /**

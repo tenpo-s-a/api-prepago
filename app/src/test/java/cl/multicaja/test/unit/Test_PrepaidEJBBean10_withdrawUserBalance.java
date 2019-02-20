@@ -30,7 +30,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.xml.bind.ValidationException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;

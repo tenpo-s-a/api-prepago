@@ -114,7 +114,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private UserClient userClient;
 
-  private EncryptUtil encryptUtil;
+  private static EncryptUtil encryptUtil;
 
   private ParametersUtil parametersUtil;
 
@@ -195,6 +195,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void setFilesEJBBean10(FilesEJBBean10 filesEJBBean10) {
     this.filesEJBBean10 = filesEJBBean10;
+  }
+
+  public EncryptUtil getEncryptUtil() {
+    if(encryptUtil == null) {
+      encryptUtil = EncryptUtil.getInstance();
+    }
+    return encryptUtil;
+  }
+
+  public void setEncryptUtil(EncryptUtil encryptUtil) {
+     this.encryptUtil = encryptUtil;
   }
 
   public CalculationsHelper getCalculationsHelper(){

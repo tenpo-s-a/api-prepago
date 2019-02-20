@@ -957,6 +957,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     List<PrepaidMovement10> movement10s = new ArrayList<>();
 
     for (IpmMessage trx: ipmFile.getTransactions()) {
+      System.out.println(trx);
       AccountingData10 acc = null;
       PrepaidMovement10 prepaidMovement10 = null;
       try {
