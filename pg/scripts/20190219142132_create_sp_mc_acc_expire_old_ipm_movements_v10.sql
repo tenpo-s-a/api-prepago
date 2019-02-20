@@ -22,16 +22,42 @@ RETURNS VOID
 AS $$
 BEGIN
 
+WITH updatedMovements AS (
+  UPDATE
+    ${schema}.prp_movimiento mov
+  SET
+    estado = 'EXPIRED'
+  WHERE
+    mov.estado = 'PENDING' AND
+    (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') AND
+    (SELECT COUNT(f.id)
+     FROM ${schema.acc}.ipm_file f
+     WHERE f.create_date >= mov.fecha_creacion) >= 7
+  RETURNING
+    mov.id
+),
+updatedAccountings AS (
+  UPDATE
+    ${schema.acc}.accounting a
+  SET
+    accounting_status = 'NOT_OK',
+    status = CASE WHEN status = 'PENDING' THEN 'NOT_SEND' ELSE status END,
+    conciliation_date = timezone('utc', now())
+  FROM
+    updatedMovements
+  WHERE
+    a.id_tx = updatedMovements.id
+  RETURNING
+    a.id
+)
 UPDATE
-  ${schema}.prp_movimiento mov
+  ${schema.acc}.clearing cle
 SET
-  estado = 'EXPIRED'
+  status = 'NO_CONFIRMADA'
+FROM
+  updatedAccountings
 WHERE
-  mov.estado = 'PENDING' AND
-  (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') AND
-  (SELECT COUNT(f.id)
-   FROM ${schema.acc}.ipm_file f
-   WHERE f.create_date >= mov.fecha_creacion) >= 7;
+  cle.accounting_id = updatedAccountings.id;
 
 RETURN;
 END;
