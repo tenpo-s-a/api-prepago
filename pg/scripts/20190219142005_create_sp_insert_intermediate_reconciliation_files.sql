@@ -16,7 +16,7 @@
 
 -- // create_sp_insert_intermediate_reconciliation_files
 -- Migration SQL that makes the change goes here.
-CREATE OR REPLACE FUNCTION ${schema}.prp_inserta_archivo_reconciliacion
+CREATE OR REPLACE FUNCTION ${schema}.prp_inserta_archivo_conciliacion
 (
   IN _nombre_de_archivo VARCHAR,
   IN _proceso           VARCHAR,
@@ -57,7 +57,7 @@ IF COALESCE(_status, '') = '' THEN
 RETURN;
 END IF;
 
-INSERT INTO ${schema}.prp_archivos_reconciliacion (
+INSERT INTO ${schema}.prp_archivos_conciliacion (
 nombre_de_archivo,
 proceso,
 tipo,
@@ -77,7 +77,7 @@ timezone('utc', now())
 EXCEPTION
 WHEN OTHERS THEN
 _error_code := SQLSTATE;
-_error_msg := '[prp_inserta_archivo_reconciliacion] Error al guardar archivo reconciliacion. CAUSA ('|| SQLERRM ||')';
+_error_msg := '[prp_inserta_archivo_conciliacion] Error al guardar archivo conciliacion. CAUSA ('|| SQLERRM ||')';
 RETURN;
 
 END;
@@ -87,4 +87,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.prp_inserta_archivo_reconciliacion(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.prp_inserta_archivo_conciliacion(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
