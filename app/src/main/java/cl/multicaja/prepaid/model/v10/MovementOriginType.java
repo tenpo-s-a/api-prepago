@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 public enum MovementOriginType {
   API("API"),
   SAT("SAT"),
-  OPE("OPE");
+  OPE("OPE"),
+  IPM("IPM");
   String value;
 
   MovementOriginType(String value) {
