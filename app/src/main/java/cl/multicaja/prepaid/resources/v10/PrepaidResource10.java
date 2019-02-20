@@ -56,7 +56,7 @@ public final class PrepaidResource10 extends BaseResource {
   @Path("/topup/reverse")
   public Response reverseTopupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.reverseTopupUserBalance(headersToMap(headers), topupRequest,true);
-    return Response.ok().status(201).build();
+    return Response.status(201).build();
   }
 
   @GET
