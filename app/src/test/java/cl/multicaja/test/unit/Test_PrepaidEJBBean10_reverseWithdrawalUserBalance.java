@@ -695,8 +695,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     try {
       prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
       Assert.fail("Sould not be here");
-    } catch (BaseException ex) {
-      Assert.assertEquals("Deberia tener error de transaccion", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), ex.getCode());
+    } catch (ReverseTimeExpiredException ex) {
+      Assert.assertEquals("Deberia tener error de transaccion", REVERSA_TIEMPO_EXPIRADO.getValue(), ex.getCode());
       Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
         PrepaidMovementType.WITHDRAW, TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
       Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321",
