@@ -77,7 +77,7 @@ timezone('utc', now())
 EXCEPTION
 WHEN OTHERS THEN
 _error_code := SQLSTATE;
-_error_msg := '[prp_inserta_archivo_conciliacion] Error al guardar archivo reconciliacion. CAUSA ('|| SQLERRM ||')';
+_error_msg := '[prp_inserta_archivo_conciliacion] Error al guardar archivo conciliacion. CAUSA ('|| SQLERRM ||')';
 RETURN;
 
 END;

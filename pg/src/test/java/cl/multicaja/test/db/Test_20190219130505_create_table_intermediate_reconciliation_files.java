@@ -19,6 +19,7 @@ public class Test_20190219130505_create_table_intermediate_reconciliation_files 
       new ColumnInfo("updated_at", "timestamp", 29)
     );
 
+
     Assert.assertEquals("Existe tabla prp_archivos_conciliacion", true, exists);
   }
 }
