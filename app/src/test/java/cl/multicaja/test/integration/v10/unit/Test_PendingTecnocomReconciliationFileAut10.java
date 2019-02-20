@@ -89,14 +89,14 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
     Thread.sleep(1500);
 
     List<PrepaidMovement10> purchase = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.PURCHASE, null,
-      null, null, null, null, null, null, null, null, MovementOriginType.OPE);
+      null, null, null, null, null, null, null, null, MovementOriginType.OPE,null);
 
     Assert.assertNotNull("Debe tener movimientos de compra", purchase);
     Assert.assertFalse("Debe tener movimientos de compra", purchase.isEmpty());
     Assert.assertEquals("Debe tener 16 movimientos de compra", 13, purchase.size());
 
     List<PrepaidMovement10> suscriptions = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.SUSCRIPTION, null,
-      null, null, null, null, null, null, null, null, MovementOriginType.OPE);
+      null, null, null, null, null, null, null, null, MovementOriginType.OPE,null);
 
     Assert.assertNotNull("Debe tener movimientos de suscripcion", suscriptions);
     Assert.assertFalse("Debe tener movimientos de suscripcion", suscriptions.isEmpty());

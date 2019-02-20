@@ -17,7 +17,7 @@
 -- // create_table_intermediate_reconciliation_files
 -- Migration SQL that makes the change goes here.
 
-CREATE TABLE ${schema}.prp_archivos_reconciliacion (
+CREATE TABLE ${schema}.prp_archivos_conciliacion (
   id                  BIGSERIAL NOT NULL,
   nombre_de_archivo   VARCHAR(255) NOT NULL,
   proceso   		      VARCHAR(50) NOT NULL,
@@ -25,12 +25,13 @@ CREATE TABLE ${schema}.prp_archivos_reconciliacion (
   status			        VARCHAR(50) NOT NULL,
   created_at          TIMESTAMP NOT NULL,
   updated_at          TIMESTAMP NOT NULL,
-  CONSTRAINT prp_archivos_reconciliacion_pk PRIMARY KEY(id)
+  CONSTRAINT prp_archivos_conciliacion_pk PRIMARY KEY(id)
 );
 
-CREATE INDEX prp_archivos_reconciliacion_i1 ON ${schema}.prp_archivos_reconciliacion (id,proceso,tipo,status);
+CREATE INDEX prp_archivos_conciliacion_i1 ON ${schema}.prp_archivos_conciliacion (id,proceso,tipo,status);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP TABLE IF EXISTS ${schema}.prp_archivos_reconciliacion;
+
+DROP TABLE IF EXISTS ${schema}.prp_archivos_conciliacion;
 

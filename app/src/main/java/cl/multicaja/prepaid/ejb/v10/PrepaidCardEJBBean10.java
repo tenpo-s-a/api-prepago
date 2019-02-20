@@ -95,14 +95,15 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
    * @return
    * @throws Exception
    */
-  private List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, int fetchCount, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
+  private List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, int fetchCount, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId,String encryptedPan) throws Exception {
     //si viene algun parametro en null se establece NullParam
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       userId != null ? userId : new NullParam(Types.BIGINT),
       expiration != null ? expiration : new NullParam(Types.INTEGER),
       status != null ? status.toString() : new NullParam(Types.VARCHAR),
-      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR)
+      processorUserId != null ? processorUserId : new NullParam(Types.VARCHAR),
+      encryptedPan!= null ? encryptedPan : new NullParam(Types.VARCHAR)
     };
 
     //se registra un OutParam del tipo cursor (OTHER) y se agrega un rowMapper para transformar el row al objeto necesario
@@ -129,10 +130,15 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return (List)resp.get("result");
   }
 
+  public PrepaidCard10 getPrepaidCardByEncryptedPan(Map<String, Object> headers, String encryptedPan) throws Exception{
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, null, null, null, null,encryptedPan);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
   @Override
   public List<PrepaidCard10> getPrepaidCards(Map<String, Object> headers, Long id, Long userId, Integer expiration, PrepaidCardStatus status, String processorUserId) throws Exception {
     //busca todas las tarjetas para los criterios de busqueda (fetchCount = -1 significa todas)
-    return this.getPrepaidCards(headers, -1, id, userId, expiration, status, processorUserId);
+    return this.getPrepaidCards(headers, -1, id, userId, expiration, status, processorUserId,null);
   }
 
   @Override
@@ -170,7 +176,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null,null);
 
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
@@ -185,7 +191,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null);
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, 1,null, userId, null, null, null,null);
 
     PrepaidCard10 prepaidCard10 = lst != null && !lst.isEmpty() ? lst.get(0) : null;
 
@@ -262,7 +268,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "processorUserId"));
     }
 
-    List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId);
+    List<PrepaidCard10> lst = this.getPrepaidCards(headers, -1,null, null, null, null, processorUserId,null );
 
     if( lst != null) {
       PrepaidCard10 prepaidCard10 = lst.stream()
