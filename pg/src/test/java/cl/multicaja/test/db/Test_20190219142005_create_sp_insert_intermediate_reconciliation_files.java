@@ -76,7 +76,7 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
 
     Map<String, Object> data = insertArchivoReconcialicionLog(null,"TECNOCOM","CARGAS","OK");
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","CF001", data.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC001", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","El _nombre_de_archivo es obligatorio", data.get("_error_msg"));
   }
 
@@ -84,7 +84,7 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
   public void insertReconciliationFileLogFail2 () throws Exception{
     Map<String, Object> data = insertArchivoReconcialicionLog("Archivo Prueba",null,"CARGAS","OK");
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","CF002", data.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC002", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","El _proceso es obligatorio", data.get("_error_msg"));
   }
 
@@ -92,7 +92,7 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
   public void insertReconciliationFileLogFail3 () throws Exception{
     Map<String, Object> data = insertArchivoReconcialicionLog("Archivo Prueba","TECNOCOM",null,"OK");
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","CF003", data.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC003", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","El _tipo es obligatorio", data.get("_error_msg"));
   }
 
@@ -100,7 +100,7 @@ public class Test_20190219142005_create_sp_insert_intermediate_reconciliation_fi
   public void insertReconciliationFileLogFail4 () throws Exception{
     Map<String, Object> data = insertArchivoReconcialicionLog("Archivo Prueba","TECNOCOM","CARGAS",null);
     System.out.println(String.format("Num Err: %s Msj: %s",data.get("_error_code"),data.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","CF004", data.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC004", data.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","El _status es obligatorio", data.get("_error_msg"));
   }
 
