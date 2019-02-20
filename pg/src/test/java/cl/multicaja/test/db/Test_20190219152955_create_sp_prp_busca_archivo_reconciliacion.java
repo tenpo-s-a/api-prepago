@@ -39,7 +39,7 @@ public class Test_20190219152955_create_sp_prp_busca_archivo_reconciliacion  ext
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_reconciliacion", SCHEMA));
   }
 
-  //Opciones
+  //Opciones Filtros
   /*
    proceso: tecnocom, switch
    tipo: cargas, retiros, retiros_rechazados, cargas_rechazadas, tecnocom_file
