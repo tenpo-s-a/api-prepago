@@ -51,6 +51,11 @@ EOT
 
 resource "kong_plugin" "key_auth" {
 	name                = "key-auth"
-  "config.key_names"    = "x-api-key,api-key"
 	service_id = "${kong_service.service.id}"
+
+  config_json = <<EOT
+        {
+	    "key_names": "x-api-key,api-key"
+	}
+EOT
 }
