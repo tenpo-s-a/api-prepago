@@ -32,5 +32,6 @@ CREATE INDEX prp_archivos_conciliacion_i1 ON ${schema}.prp_archivos_conciliacion
 
 -- //@UNDO
 -- SQL to undo the change goes here.
+
 DROP TABLE IF EXISTS ${schema}.prp_archivos_conciliacion;
 
