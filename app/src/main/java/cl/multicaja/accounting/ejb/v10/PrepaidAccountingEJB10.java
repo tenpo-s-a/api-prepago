@@ -8,6 +8,7 @@ import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.prepaid.model.v10.PrepaidAccountingMovement;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,12 @@ public interface PrepaidAccountingEJB10 {
    * @throws Exception
    */
   void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception;
+
+  /**
+   * Busca los movimientos de compra y subscriopciones que no hayan sido
+   * confirmados por 7 archivos ipm (o mas) y los deja en estado EXPIRED
+   */
+  void expireIpmMovements() throws SQLException;
 
   /**
    * Obtiene el tipo de transaccion del mensaje IPM
