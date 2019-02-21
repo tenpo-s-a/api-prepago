@@ -24,6 +24,7 @@ CREATE OR REPLACE FUNCTION ${schema}.prp_crea_movimiento_switch_v10 (
   IN _monto             NUMERIC,
   IN _fecha_trx         TIMESTAMP,
   OUT _r_id             BIGINT,
+  OUT _r_id_hist        BIGINT,
   OUT _error_code       VARCHAR,
   OUT _error_msg        VARCHAR
 ) AS $$
@@ -94,7 +95,7 @@ BEGIN
     _id_multicaja_ref,
     _monto,
     _fecha_trx
-  );
+  ) RETURNING id INTO _r_id_hist;
 
   EXCEPTION
     WHEN OTHERS THEN
