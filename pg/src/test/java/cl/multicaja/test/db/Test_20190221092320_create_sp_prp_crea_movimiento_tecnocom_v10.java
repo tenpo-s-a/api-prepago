@@ -45,12 +45,24 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     List<Map<String, Object>> rows = dbUtils.getJdbcTemplate().queryForList(String.format("select * from  %s.prp_movimientos_tecnocom", SCHEMA));
     Assert.assertNotNull("Rows no debe ser vacio",rows);
     Assert.assertEquals("El resultado debe ser ",3,rows.size());
-
+    for(Map<String, Object> data: rows){
+      Assert.assertNotNull("pan No debe ser null",data.get("pan"));
+      Assert.assertNotNull("tipofac No debe ser null",data.get("tipofac"));
+      Assert.assertNotNull("numaut No debe ser null",data.get("numaut"));
+      Assert.assertNotNull("impfac No debe ser null",data.get("impfac"));
+    }
     // Verifica que se insertaron los datos en la tabla prp_movimientos_tecnocom_hist
     List<Map<String, Object>> rowsHis = dbUtils.getJdbcTemplate().queryForList(String.format("select * from  %s.prp_movimientos_tecnocom_hist", SCHEMA));
     Assert.assertNotNull("Rows no debe ser vacio",rows);
     Assert.assertEquals("El resultado debe ser ",3,rows.size());
 
+    for(Map<String, Object> data: rowsHis){
+      Assert.assertNotNull("pan No debe ser null",data.get("pan"));
+      Assert.assertNotNull("tipofac No debe ser null",data.get("tipofac"));
+      Assert.assertNotNull("numaut No debe ser null",data.get("numaut"));
+      Assert.assertNotNull("impfac No debe ser null",data.get("impfac"));
+    }
+    
   }
 
 
