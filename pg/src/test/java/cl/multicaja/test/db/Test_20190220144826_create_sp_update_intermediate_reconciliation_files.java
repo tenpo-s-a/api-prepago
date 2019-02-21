@@ -95,71 +95,6 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
     return dbUtils.execute(SP_NAME, params);
   }
 
-
-  @Test
-  public void testChangeStatusOK() throws Exception{
-    String nombreDeArchivo;
-    String proceso;
-    String tipo;
-    String status;
-    String futureStatusChange;
-    Long id;
-
-
-    nombreDeArchivo = "Archivo Prueba "+getRandomNumericString(10);
-    proceso = "TECNOCOM";
-    tipo = "CARGAS";
-    status = "NADA";
-    futureStatusChange = "OK";
-
-    Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
-    id = (long)insertDataResponse.get("id");
-
-    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(id,futureStatusChange);
-    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","0", updateDataResponse.get("_error_code"));
-    Assert.assertEquals("Codigo de error tiene que ser","", updateDataResponse.get("_error_msg"));
-
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
-    List result = (List)searchDataResponse.get("result");
-    Map<String, Object> archRecon = (Map)result.get(0);
-
-    Assert.assertEquals("El Cambio a OK fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
-
-  }
-
-  @Test
-  public void testChangeStatusReading() throws Exception{
-    String nombreDeArchivo;
-    String proceso;
-    String tipo;
-    String status;
-    String futureStatusChange;
-    Long id;
-
-
-    nombreDeArchivo = "Archivo Prueba "+getRandomNumericString(10);
-    proceso = "TECNOCOM";
-    tipo = "CARGAS";
-    status = "NADA";
-    futureStatusChange = "READING";
-
-    Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
-    id = (long)insertDataResponse.get("id");
-
-    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(id,futureStatusChange);
-    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","0", updateDataResponse.get("_error_code"));
-    Assert.assertEquals("Codigo de error tiene que ser","", updateDataResponse.get("_error_msg"));
-
-
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
-    List result = (List)searchDataResponse.get("result");
-    Map<String, Object> archRecon = (Map)result.get(0);
-
-    Assert.assertEquals("El Cambio a READING fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
-  }
-
   @Test
   public void testChangeStatusFromOKToReading() throws Exception{
     String nombreDeArchivo;
@@ -220,7 +155,42 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
     List result = (List)searchDataResponse.get("result");
     Map<String, Object> archRecon = (Map)result.get(0);
 
-    Assert.assertEquals("El Cambio de OK A READING fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
+    Assert.assertEquals("El Cambio de READING a OK fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
+  }
+
+  @Test
+  public void testChangeStatusFail() throws Exception{
+
+    String nombreDeArchivo;
+    String proceso;
+    String tipo;
+    String status;
+    String futureStatusChange;
+    Long id;
+    Long wrongId;
+
+    nombreDeArchivo = "Archivo Prueba "+getRandomNumericString(10);
+    proceso = "TECNOCOM";
+    tipo = "CARGAS";
+    status = "READING";
+    futureStatusChange = "OK";
+
+    Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
+    id = (long)insertDataResponse.get("id");
+    wrongId = new Long(100001);
+
+    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(wrongId,futureStatusChange);
+    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
+    Assert.assertEquals("Codigo de error tiene que ser","0", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","", updateDataResponse.get("_error_msg"));
+
+
+    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
+    List result = (List)searchDataResponse.get("result");
+    Map<String, Object> archRecon = (Map)result.get(0);
+
+    Assert.assertNotEquals("El Cambio de OK A READING no fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
+
   }
 
 }
