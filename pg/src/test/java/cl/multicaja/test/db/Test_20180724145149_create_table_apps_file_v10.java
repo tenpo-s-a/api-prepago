@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class Test_20180724145149_create_table_apps_file_v10 extends TestDbBasePg {
+
   @Test
   public void checkIfTableExists_apps_file() {
     Boolean exists = dbUtils.tableExists(SCHEMA, "prp_app_file", Boolean.TRUE,
@@ -23,4 +24,5 @@ public class Test_20180724145149_create_table_apps_file_v10 extends TestDbBasePg
 
     Assert.assertTrue("Existe la tabla prp_app_file", exists);
   }
+
 }
