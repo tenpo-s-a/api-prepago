@@ -27,17 +27,9 @@ CREATE OR REPLACE FUNCTION ${schema}.prp_crea_movimiento_switch_v10 (
   OUT _error_code       VARCHAR,
   OUT _error_msg        VARCHAR
 ) AS $$
-DECLARE
-  in_id_multicaja_ref BIGINT;
 BEGIN
   _error_code := '0';
   _error_msg := '';
-
-  IF _id_multicaja_ref IS NULL THEN
-    in_id_multicaja_ref := 0;
-  ELSE
-    in_id_multicaja_ref := _id_multicaja_ref;
-  END IF;
 
   IF COALESCE(_id_archivo, 0) = 0 THEN
     _error_code := 'MC001';
@@ -64,7 +56,7 @@ BEGIN
   END IF;
 
   IF _fecha_trx IS NULL THEN
-    _error_code := 'MC006';
+    _error_code := 'MC005';
     _error_msg := 'La fecha de transaccion es obligatoria';
     RETURN;
   END IF;
@@ -82,16 +74,34 @@ BEGIN
     _id_archivo,
     _id_multicaja,
     _id_cliente,
-    in_id_multicaja_ref,
+    _id_multicaja_ref,
     _monto,
-    fecha_trx
+    _fecha_trx
   ) RETURNING id INTO _r_id;
+
+  INSERT INTO ${schema}.prp_movimiento_switch_hist (
+    id_archivo,
+    id_multicaja,
+    id_cliente,
+    id_multicaja_ref,
+    monto,
+    fecha_trx
+  )
+  VALUES (
+    _id_archivo,
+    _id_multicaja,
+    _id_cliente,
+    _id_multicaja_ref,
+    _monto,
+    _fecha_trx
+  );
+
   EXCEPTION
     WHEN OTHERS THEN
       _error_code := SQLSTATE;
-      _error_msg := '[prp_crea_movimiento_switch] Error al guardar movimiento switch. CAUSA ('|| SQLERRM ||')';
-  RETURN;
+      _error_msg := '[prp_crea_movimiento_switch] Error al guardar movimiento switch hist. CAUSA ('|| SQLERRM ||')';
 
+  RETURN;
 END;
 $$ LANGUAGE plpgsql;
 

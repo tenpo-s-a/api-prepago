@@ -19,18 +19,31 @@
 
 CREATE TABLE ${schema}.prp_movimiento_switch (
   id                BIGSERIAL NOT NULL,
-  id_archivo        BIGINT NOT NULL,
+  id_archivo        BIGINT NOT NULL REFERENCES ${schema}.prp_archivos_conciliacion(id),
   id_multicaja      VARCHAR(50) NOT NULL,
   id_cliente        BIGINT NOT NULL,
   id_multicaja_ref  BIGINT,
-  monto             NUMERIC NOT NULL,
+  monto             NUMERIC(17,2) NOT NULL,
   fecha_trx         TIMESTAMP NOT NULL,
   CONSTRAINT prp_movimiento_switch_pk PRIMARY KEY(id)
 );
 CREATE INDEX prp_movimiento_switch_i1 ON ${schema}.prp_movimiento_switch (id_archivo);
 
+CREATE TABLE ${schema}.prp_movimiento_switch_hist (
+  id                BIGSERIAL NOT NULL,
+  id_archivo        BIGINT NOT NULL REFERENCES ${schema}.prp_archivos_conciliacion(id),
+  id_multicaja      VARCHAR(50) NOT NULL,
+  id_cliente        BIGINT NOT NULL,
+  id_multicaja_ref  BIGINT,
+  monto             NUMERIC(17,2) NOT NULL,
+  fecha_trx         TIMESTAMP NOT NULL,
+  CONSTRAINT prp_movimiento_switch_hist_pk PRIMARY KEY(id)
+);
+CREATE INDEX prp_movimiento_switch_hist_i1 ON ${schema}.prp_movimiento_switch_hist (id_archivo);
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 DROP TABLE IF EXISTS ${schema}.prp_movimiento_switch;
+DROP TABLE IF EXISTS ${schema}.prp_movimiento_switch_hist;
 
 
