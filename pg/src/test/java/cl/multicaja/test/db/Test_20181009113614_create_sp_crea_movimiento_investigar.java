@@ -8,7 +8,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
 import java.util.Map;
 
 public class Test_20181009113614_create_sp_crea_movimiento_investigar extends TestDbBasePg {
@@ -25,14 +27,14 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       Map<String, Object> data = creaMovimientoInvestigar(null, null, null);
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","El _mov_ref es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","El id_archivo_origen es obligatorio",data.get("_error_msg"));
     }
 
     {
       Map<String, Object> data = creaMovimientoInvestigar(getRandomString(10), null, null);
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertNotEquals("No debe ser 0","0",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","El _origen es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","El origen es obligatorio",data.get("_error_msg"));
     }
 
     {
@@ -43,11 +45,24 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
     }
   }
-  public static Map<String, Object> creaMovimientoInvestigar(String mov_ref, String origen, String nombreArchivo) throws SQLException {
+
+  public static Map<String, Object> creaMovimientoInvestigar(
+    String id_archivo_origen, String origen, String nombreArchivo) throws SQLException {
+
+    //TODO: Estas variables deben colocarse como nuevos parámetros de esta función y asi mismo en implementaciones similares que usen el procedimiento, con sus nuevos cambios
+    Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
+    String responsable = " ";
+    String descripcion = " ";
+    Long movRef = new Long(10);
+
     Object[] params = {
-      mov_ref != null ? mov_ref : new NullParam(Types.VARCHAR),
+      id_archivo_origen != null ? id_archivo_origen : new NullParam(Types.VARCHAR),
       origen != null ? origen : new NullParam(Types.VARCHAR),
       nombreArchivo != null ? nombreArchivo : new NullParam(Types.VARCHAR),
+      fechaDeTransaccion != null ? fechaDeTransaccion : new NullParam(Types.TIMESTAMP),
+      responsable != null ? responsable : new NullParam(Types.VARCHAR),
+      descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
+      movRef != null ? movRef : new NullParam(Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR) };
     return dbUtils.execute(SCHEMA + ".mc_prp_crea_movimiento_investigar_v10", params);

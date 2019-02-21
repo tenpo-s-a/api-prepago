@@ -695,9 +695,17 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileName) throws Exception {
-    if(movRef == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
+  public void createMovementResearch(Map<String, Object> headers, String id_archivo_origen, ReconciliationOriginType originType, String fileName) throws Exception {
+
+    //TODO movRef es ahora id_archivo_origen, y movRef ahora es de tipo Long
+    //TODO: Estas variables deben colocarse como nuevos parámetros de esta función y asi mismo en implementaciones similares que usen el procedimiento, con sus nuevos cambios
+    Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date()).getTime());
+    String responsable = " ";
+    String descripcion = " ";
+    Long movRef = new Long(10);
+
+    if(id_archivo_origen == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id_archivo_origen"));
     }
     if(originType == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originType"));
@@ -705,10 +713,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(fileName == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileName"));
     }
+
     Object[] params = {
-      movRef,
-      originType.name(),
-      fileName,
+      id_archivo_origen != null ? id_archivo_origen : new NullParam(Types.VARCHAR),
+      originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),
+      fileName != null ? fileName : new NullParam(Types.VARCHAR),
+      fechaDeTransaccion != null ? fechaDeTransaccion : new NullParam(Types.TIMESTAMP),
+      responsable != null ? responsable : new NullParam(Types.VARCHAR),
+      descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
+      movRef != null ? movRef : new NullParam(Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
