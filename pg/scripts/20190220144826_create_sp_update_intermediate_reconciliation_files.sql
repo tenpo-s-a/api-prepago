@@ -18,10 +18,8 @@
 -- Migration SQL that makes the change goes here.
 
 CREATE OR REPLACE FUNCTION ${schema}.prp_actualiza_archivo_conciliacion (
-  IN _in_nombre_de_archivo  VARCHAR,
-  IN _in_proceso            VARCHAR,
-  IN _in_tipo               VARCHAR,
-  IN _in_status             VARCHAR,
+  IN  _in_id                 BIGINT,
+  IN  _in_status             VARCHAR,
   OUT _error_code           VARCHAR,
   OUT _error_msg            VARCHAR
 ) AS $$
@@ -30,21 +28,9 @@ BEGIN
 _error_code := '0';
 _error_msg := '';
 
-IF TRIM(COALESCE(_in_nombre_de_archivo, '')) = '' THEN
-_error_code := 'MC001';
-_error_msg := '[prp_actualiza_archivo_conciliacion] El nombre de archivo es obligatoria';
-RETURN;
-END IF;
-
-IF TRIM(COALESCE(_in_proceso, '')) = '' THEN
-_error_code := 'MC002';
-_error_msg := '[prp_actualiza_archivo_conciliacion] El proceso es obligatoria';
-RETURN;
-END IF;
-
-IF TRIM(COALESCE(_in_tipo, '')) = '' THEN
-_error_code := 'MC003';
-_error_msg := '[prp_actualiza_archivo_conciliacion] El tipo es obligatorio';
+IF COALESCE(_in_id, 0) = 0 THEN
+_error_code := 'MC000';
+_error_msg := '[prp_actualiza_archivo_conciliacion] El id de registro es obligatoria';
 RETURN;
 END IF;
 
@@ -60,9 +46,7 @@ SET
 status = _in_status,
 updated_at = timezone('utc', now())
 WHERE
-nombre_de_archivo = _in_nombre_de_archivo AND
-proceso = _in_proceso AND
-tipo = _in_tipo;
+id = _in_id;
 
 EXCEPTION
 WHEN OTHERS THEN
@@ -75,4 +59,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.prp_actualiza_archivo_conciliacion(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.prp_actualiza_archivo_conciliacion(BIGINT, VARCHAR);
