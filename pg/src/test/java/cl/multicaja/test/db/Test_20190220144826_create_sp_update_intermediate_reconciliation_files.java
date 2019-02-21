@@ -154,7 +154,7 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
   public void testChangeStatusFieldIdAndStatusNull() throws Exception{
     Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(null,null);
     System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","MC005", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC006", updateDataResponse.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El id y el status son obligatorios", updateDataResponse.get("_error_msg"));
   }
 
