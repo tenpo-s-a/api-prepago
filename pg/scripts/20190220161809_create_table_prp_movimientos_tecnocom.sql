@@ -19,9 +19,9 @@
 
  CREATE TABLE ${schema}.prp_movimientos_tecnocom (
       id                  BIGSERIAL NOT NULL,
-      fileId              BIGINT  REFERENCES ${schema}.prp_movimiento(id),
+      idArchivo           BIGINT  REFERENCES ${schema}.prp_archivos_conciliacion(id),
       cuenta              VARCHAR(20) NOT NULL,
-      pan                 VARCHAR(20) NOT NULL,
+      pan                 VARCHAR(100) NOT NULL,
       codent              VARCHAR(4) NOT NULL,
       centalta            VARCHAR(4) NOT NULL,
       clamon              NUMERIC(3) NOT NULL,
@@ -30,14 +30,14 @@
       fecfac              DATE NOT NULL,
       numreffac           VARCHAR(23) NOT NULL,
       clamondiv           NUMERIC(3) NOT NULL,
-      impdiv              NUMERIC(17) NOT NULL,
-      impfac              NUMERIC(17) NOT NULL,
-      cmbapli             NUMERIC(9) NOT NULL,
+      impdiv              NUMERIC(17,2) NOT NULL,
+      impfac              NUMERIC(17,2) NOT NULL,
+      cmbapli             NUMERIC(9,2) NOT NULL,
       numaut              VARCHAR(6) NOT NULL,
       indproaje           VARCHAR(1) NOT NULL,
       codcom              VARCHAR(15) NOT NULL,
       codact              NUMERIC(4) NOT NULL,
-      impliq              NUMERIC(17) NOT NULL,
+      impliq              NUMERIC(17,2) NOT NULL,
       clamonliq           NUMERIC(3) NOT NULL,
       codpais             NUMERIC(3) NOT NULL,
       nompob              VARCHAR(26) NOT NULL,
@@ -49,15 +49,15 @@
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
       CONSTRAINT prp_movimientos_tecnocom_pk PRIMARY KEY(id),
-      CONSTRAINT prp_movimientos_tecnocom_u1 UNIQUE(id_movimiento,tipo)
+      CONSTRAINT prp_movimientos_tecnocom_u1 UNIQUE(cuenta,pan,fecfac,numaut)
   );
-  CREATE INDEX prp_movimientos_tecnocom_i1 ON ${schema}.prp_movimientos_tecnocom (tipo);
+  CREATE INDEX prp_movimientos_tecnocom_i1 ON ${schema}.prp_movimientos_tecnocom (idArchivo);
 
  CREATE TABLE ${schema}.prp_movimientos_tecnocom_hist (
       id                  BIGSERIAL NOT NULL,
-      fileId              BIGINT  REFERENCES ${schema}.prp_movimiento(id),
+      idArchivo           BIGINT  REFERENCES ${schema}.prp_archivos_conciliacion(id),
       cuenta              VARCHAR(20) NOT NULL,
-      pan                 VARCHAR(20) NOT NULL,
+      pan                 VARCHAR(100) NOT NULL,
       codent              VARCHAR(4) NOT NULL,
       centalta            VARCHAR(4) NOT NULL,
       clamon              NUMERIC(3) NOT NULL,
@@ -66,14 +66,14 @@
       fecfac              DATE NOT NULL,
       numreffac           VARCHAR(23) NOT NULL,
       clamondiv           NUMERIC(3) NOT NULL,
-      impdiv              NUMERIC(17) NOT NULL,
-      impfac              NUMERIC(17) NOT NULL,
-      cmbapli             NUMERIC(9) NOT NULL,
+      impdiv              NUMERIC(17,2) NOT NULL,
+      impfac              NUMERIC(17,2) NOT NULL,
+      cmbapli             NUMERIC(9,2) NOT NULL,
       numaut              VARCHAR(6) NOT NULL,
       indproaje           VARCHAR(1) NOT NULL,
       codcom              VARCHAR(15) NOT NULL,
       codact              NUMERIC(4) NOT NULL,
-      impliq              NUMERIC(17) NOT NULL,
+      impliq              NUMERIC(17,2) NOT NULL,
       clamonliq           NUMERIC(3) NOT NULL,
       codpais             NUMERIC(3) NOT NULL,
       nompob              VARCHAR(26) NOT NULL,
@@ -85,11 +85,13 @@
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
       CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id),
-      CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(id_movimiento,tipo)
+      CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut)
   );
-  CREATE INDEX prp_movimientos_tecnocom_hist_i1 ON ${schema}.prp_movimientos_tecnocom_hist (tipo);
+  CREATE INDEX prp_movimientos_tecnocom_hist_i1 ON ${schema}.prp_movimientos_tecnocom_hist (idArchivo);
 
 
 -- //@UNDO
 -- SQL to undo the change goes here.
+  DROP TABLE IF EXISTS ${schema}.prp_movimientos_tecnocom_hist;
+
   DROP TABLE IF EXISTS ${schema}.prp_movimientos_tecnocom;
