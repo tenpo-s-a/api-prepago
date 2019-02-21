@@ -47,6 +47,11 @@ status = _in_status,
 updated_at = timezone('utc', now())
 WHERE
 id = _in_id;
+IF NOT FOUND THEN
+  _error_code := 'MC005';
+  _error_msg := '[prp_actualiza_archivo_conciliacion] El id no se encuentra, el registro no se pudo actualizar';
+  RETURN;
+END IF;
 
 EXCEPTION
 WHEN OTHERS THEN

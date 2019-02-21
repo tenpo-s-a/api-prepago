@@ -27,7 +27,7 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
   @BeforeClass
   @AfterClass
   public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion",SCHEMA));
   }
 
   public Map<String, Object> searchArchivosReconciliacionLog(
@@ -96,7 +96,7 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
   }
 
   @Test
-  public void testChangeStatusFromOKToReading() throws Exception{
+  public void testChangeStatusOK() throws Exception{
     String nombreDeArchivo;
     String proceso;
     String tipo;
@@ -128,37 +128,6 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
   }
 
   @Test
-  public void testChangeStatusFromReadingToOK() throws Exception{
-    String nombreDeArchivo;
-    String proceso;
-    String tipo;
-    String status;
-    String futureStatusChange;
-    Long id;
-
-    nombreDeArchivo = "Archivo Prueba "+getRandomNumericString(10);
-    proceso = "TECNOCOM";
-    tipo = "CARGAS";
-    status = "READING";
-    futureStatusChange = "OK";
-
-    Map<String, Object> insertDataResponse = insertArchivoReconcialicionLog(nombreDeArchivo,proceso,tipo,status);
-    id = (long)insertDataResponse.get("id");
-
-    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(id,futureStatusChange);
-    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","0", updateDataResponse.get("_error_code"));
-    Assert.assertEquals("Codigo de error tiene que ser","", updateDataResponse.get("_error_msg"));
-
-
-    Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
-    List result = (List)searchDataResponse.get("result");
-    Map<String, Object> archRecon = (Map)result.get(0);
-
-    Assert.assertEquals("El Cambio de READING a OK fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
-  }
-
-  @Test
   public void testChangeStatusFail() throws Exception{
 
     String nombreDeArchivo;
@@ -181,8 +150,8 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
 
     Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(wrongId,futureStatusChange);
     System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
-    Assert.assertEquals("Codigo de error tiene que ser","0", updateDataResponse.get("_error_code"));
-    Assert.assertEquals("Codigo de error tiene que ser","", updateDataResponse.get("_error_msg"));
+    Assert.assertEquals("Codigo de error tiene que ser","MC005", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El id no se encuentra, el registro no se pudo actualizar", updateDataResponse.get("_error_msg"));
 
 
     Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
