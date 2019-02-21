@@ -44,6 +44,7 @@ CREATE INDEX prp_movimiento_switch_hist_i1 ON ${schema}.prp_movimiento_switch_hi
 -- //@UNDO
 -- SQL to undo the change goes here.
 DROP TABLE IF EXISTS ${schema}.prp_movimiento_switch;
+
 DROP TABLE IF EXISTS ${schema}.prp_movimiento_switch_hist;
 
 

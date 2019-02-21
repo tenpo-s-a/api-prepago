@@ -3,7 +3,9 @@ package cl.multicaja.test.db;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -17,6 +19,13 @@ import java.util.Map;
 public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".prp_crea_movimiento_switch_v10";
+
+  @BeforeClass
+  @AfterClass
+  public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento_switch cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion cascade", SCHEMA));
+  }
 
   public static Map<String, Object> insertSwitchMovement(Long fileId, String multicajaId, Long clientId, Long idMulticajaRef, BigDecimal amount, Timestamp trxDate) throws SQLException {
     Object[] params = {
@@ -61,6 +70,9 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     Timestamp todayTimestamp = Timestamp.valueOf(LocalDateTime.now());
     Map<String, Object> switchMovement = insertSwitchMovement(fileId, multicajaId, clienId, idMulticajaRef, amount, todayTimestamp);
 
+    Assert.assertEquals("Debe tener codigo error 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener mensaje de error vacio", "", switchMovement.get("_error_msg").toString());
+
     // Buscar movmiento para chequear que se guardo correctamente
     Map<String, Object> storedSwitchMovement = getSwitchMovement("prp_movimiento_switch", numberUtils.toLong(switchMovement.get("id")));
     Assert.assertNotNull("Debe existir", storedSwitchMovement);
@@ -91,7 +103,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     // Insertar movimiento switch
     Map<String, Object> switchMovement = insertSwitchMovement(null, "multiId38", 55L, 88L, new BigDecimal(500), Timestamp.valueOf(LocalDateTime.now()));
 
-    Assert.assertNotEquals("Debe tener codigo de error != 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener codigo de error MC001", "MC001", switchMovement.get("_error_code").toString());
     Assert.assertNotEquals("Debe tener mensaje de error", "", switchMovement.get("_error_msg").toString());
   }
 
@@ -102,7 +114,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     // Insertar movimiento switch
     Map<String, Object> switchMovement = insertSwitchMovement(numberUtils.toLong(fileData.get("_r_id")), null, 55L, 88L, new BigDecimal(500), Timestamp.valueOf(LocalDateTime.now()));
 
-    Assert.assertNotEquals("Debe tener codigo de error != 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener codigo de error MC002", "MC002", switchMovement.get("_error_code").toString());
     Assert.assertNotEquals("Debe tener mensaje de error", "", switchMovement.get("_error_msg").toString());
   }
 
@@ -113,7 +125,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     // Insertar movimiento switch
     Map<String, Object> switchMovement = insertSwitchMovement(numberUtils.toLong(fileData.get("_r_id")), "multiId38", null, 88L, new BigDecimal(500), Timestamp.valueOf(LocalDateTime.now()));
 
-    Assert.assertNotEquals("Debe tener codigo de error != 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener codigo de error MC003", "MC003", switchMovement.get("_error_code").toString());
     Assert.assertNotEquals("Debe tener mensaje de error", "", switchMovement.get("_error_msg").toString());
   }
 
@@ -128,6 +140,9 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     BigDecimal amount = new BigDecimal(500);
     Timestamp todayTimestamp = Timestamp.valueOf(LocalDateTime.now());
     Map<String, Object> switchMovement = insertSwitchMovement(fileId, multicajaId, clienId, null, amount, todayTimestamp);
+
+    Assert.assertEquals("Debe tener codigo error 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener mensaje de error vacio", "", switchMovement.get("_error_msg").toString());
 
     // Buscar movmiento para chequear que se guardo correctamente
     Map<String, Object> storedSwitchMovement = getSwitchMovement("prp_movimiento_switch", numberUtils.toLong(switchMovement.get("id")));
@@ -159,7 +174,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     // Insertar movimiento switch
     Map<String, Object> switchMovement = insertSwitchMovement(numberUtils.toLong(fileData.get("_r_id")), "multiId38", 55L, 88L, null, Timestamp.valueOf(LocalDateTime.now()));
 
-    Assert.assertNotEquals("Debe tener codigo de error != 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener codigo de error MC004", "MC004", switchMovement.get("_error_code").toString());
     Assert.assertNotEquals("Debe tener mensaje de error", "", switchMovement.get("_error_msg").toString());
   }
 
@@ -170,7 +185,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
     // Insertar movimiento switch
     Map<String, Object> switchMovement = insertSwitchMovement(numberUtils.toLong(fileData.get("_r_id")), "multiId38", 55L, 88L, new BigDecimal(500), null);
 
-    Assert.assertNotEquals("Debe tener codigo de error != 0", "0", switchMovement.get("_error_code").toString());
+    Assert.assertEquals("Debe tener codigo de error MC005", "MC005", switchMovement.get("_error_code").toString());
     Assert.assertNotEquals("Debe tener mensaje de error", "", switchMovement.get("_error_msg").toString());
   }
 
