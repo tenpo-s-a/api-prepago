@@ -104,24 +104,14 @@ public class IpmMessage extends BaseModel {
   private String currencyExponents;
 
   /**
-   * DE43 Merchat info
-   */
-  private String merchantInfo;
-
-  /**
    * DE43 - Merchant name
    */
   private String merchantName;
 
   /**
-   * DE43 - Merchant suburb
+   * DE43 Merchant info
    */
-  private String merchantSuburb;
-
-  /**
-   * DE43 - Merchant postal code
-   */
-  private String merchantPostalCode;
+  private String merchantState;
 
   /**
    * DE43 - Merchant country
@@ -137,6 +127,16 @@ public class IpmMessage extends BaseModel {
    * PDS0105 - File Id
    */
   private String fileId;
+
+  /**
+   * DE42 Card acceptor id
+   */
+  private String cardAcceptorId;
+
+  /**
+   * DE63 TransactionLifeCycleId
+   */
+  private String transactionLifeCycleId;
 
   public IpmMessage() {
     super();
@@ -268,30 +268,32 @@ public class IpmMessage extends BaseModel {
     return merchantName;
   }
 
-  public String getMerchantSuburb() {
-    if(merchantSuburb == null) {
-      merchantSuburb = data[20];
+  public String getMerchantState() {
+    if(merchantState == null) {
+      merchantState = data[20];
     }
-    return merchantSuburb;
-  }
-
-  public String getMerchantPostalCode() {
-    if(merchantPostalCode == null) {
-      merchantPostalCode = data[21];
-    }
-    return merchantPostalCode;
+    return merchantState;
   }
 
   public String getMerchantCountry() {
     if(merchantCountry == null) {
-      merchantCountry = data[22];
+      merchantCountry = data[21];
     }
     return merchantCountry;
   }
 
-  public String getMerchantInfo() {
-    //23
-    return merchantInfo;
+  public String getCardAcceptorId() {
+    if(cardAcceptorId == null) {
+      cardAcceptorId = data[22];
+    }
+    return cardAcceptorId;
+  }
+
+  public String getTransactionLifeCycleId() {
+    if(transactionLifeCycleId == null) {
+      transactionLifeCycleId = data[23];
+    }
+    return transactionLifeCycleId;
   }
 
   public Integer getMessageCount() {
@@ -470,13 +472,6 @@ public class IpmMessage extends BaseModel {
     this.currencyExponents = currencyExponents;
   }
 
-  public void setMerchantInfo(String merchantInfo) {
-    if(!ConfigUtils.isEnvCI() && !ConfigUtils.isEnvTest()) {
-      throw new SecurityException("Only available in tests");
-    }
-    this.merchantInfo = merchantInfo;
-  }
-
   public void setMerchantName(String merchantName) {
     if(!ConfigUtils.isEnvCI() && !ConfigUtils.isEnvTest()) {
       throw new SecurityException("Only available in tests");
@@ -484,18 +479,25 @@ public class IpmMessage extends BaseModel {
     this.merchantName = merchantName;
   }
 
-  public void setMerchantSuburb(String merchantSuburb) {
+  public void setMerchantState(String merchantState) {
     if(!ConfigUtils.isEnvCI() && !ConfigUtils.isEnvTest()) {
       throw new SecurityException("Only available in tests");
     }
-    this.merchantSuburb = merchantSuburb;
+    this.merchantState = merchantState;
   }
 
-  public void setMerchantPostalCode(String merchantPostalCode) {
+  public void setCardAcceptorId(String cardAcceptorId) {
     if(!ConfigUtils.isEnvCI() && !ConfigUtils.isEnvTest()) {
       throw new SecurityException("Only available in tests");
     }
-    this.merchantPostalCode = merchantPostalCode;
+    this.cardAcceptorId = cardAcceptorId;
+  }
+
+  public void setTransactionLifeCycleId(String transactionLifeCycleId) {
+    if(!ConfigUtils.isEnvCI() && !ConfigUtils.isEnvTest()) {
+      throw new SecurityException("Only available in tests");
+    }
+    this.transactionLifeCycleId = transactionLifeCycleId;
   }
 
   public void setMerchantCountry(String merchantCountry) {
