@@ -127,6 +127,37 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
     Assert.assertEquals("El Cambio de OK A READING fue satisfactorio ",futureStatusChange,archRecon.get("_status"));
   }
 
+
+  @Test
+  public void testChangeStatusFieldIdNull() throws Exception{
+    String futureStatusChange;
+    futureStatusChange = "READING";
+
+    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(null,futureStatusChange);
+    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
+    Assert.assertEquals("Codigo de error tiene que ser","MC000", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El id de registro es obligatoria", updateDataResponse.get("_error_msg"));
+
+  }
+
+  @Test
+  public void testChangeStatusFieldStatusNull() throws Exception{
+    Long id = new Long(1);
+
+    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(id,null);
+    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
+    Assert.assertEquals("Codigo de error tiene que ser","MC004", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El status es obligatorio", updateDataResponse.get("_error_msg"));
+  }
+
+  @Test
+  public void testChangeStatusFieldIdAndStatusNull() throws Exception{
+    Map<String, Object> updateDataResponse = updateArchivoReconcialicionLog(null,null);
+    System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
+    Assert.assertEquals("Codigo de error tiene que ser","MC005", updateDataResponse.get("_error_code"));
+    Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El id y el status son obligatorios", updateDataResponse.get("_error_msg"));
+  }
+
   @Test
   public void testChangeStatusFail() throws Exception{
 
@@ -152,7 +183,6 @@ public class Test_20190220144826_create_sp_update_intermediate_reconciliation_fi
     System.out.println(String.format("Num Err: %s Msj: %s",updateDataResponse.get("_error_code"),updateDataResponse.get("_error_msg")));
     Assert.assertEquals("Codigo de error tiene que ser","MC005", updateDataResponse.get("_error_code"));
     Assert.assertEquals("Codigo de error tiene que ser","[prp_actualiza_archivo_conciliacion] El id no se encuentra, el registro no se pudo actualizar", updateDataResponse.get("_error_msg"));
-
 
     Map<String, Object> searchDataResponse = searchArchivosReconciliacionLog(nombreDeArchivo,proceso, tipo, null);
     List result = (List)searchDataResponse.get("result");

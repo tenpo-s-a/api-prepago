@@ -28,6 +28,12 @@ BEGIN
 _error_code := '0';
 _error_msg := '';
 
+IF COALESCE(_in_id, 0) = 0 AND TRIM(COALESCE(_in_status, '')) = '' THEN
+  _error_code := 'MC005';
+  _error_msg := '[prp_actualiza_archivo_conciliacion] El id y el status son obligatorios';
+  RETURN;
+END IF;
+
 IF COALESCE(_in_id, 0) = 0 THEN
 _error_code := 'MC000';
 _error_msg := '[prp_actualiza_archivo_conciliacion] El id de registro es obligatoria';
