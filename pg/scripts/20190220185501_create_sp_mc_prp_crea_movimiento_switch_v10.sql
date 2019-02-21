@@ -100,7 +100,7 @@ BEGIN
   EXCEPTION
     WHEN OTHERS THEN
       _error_code := SQLSTATE;
-      _error_msg := '[prp_crea_movimiento_switch] Error al guardar movimiento switch hist. CAUSA ('|| SQLERRM ||')';
+      _error_msg := '[prp_crea_movimiento_switch] Error al guardar movimiento switch. CAUSA ('|| SQLERRM ||')';
 
   RETURN;
 END;
