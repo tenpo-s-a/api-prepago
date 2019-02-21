@@ -109,7 +109,7 @@ public class IpmMessage extends BaseModel {
   private String merchantName;
 
   /**
-   * DE43 Merchant info
+   * DE43 Merchant state
    */
   private String merchantState;
 
