@@ -55,7 +55,10 @@ resource "kong_plugin" "key_auth" {
 
   config_json = <<EOT
         {
-	    "key_names": "x-api-key,api-key"
+	    "key_names": [
+        "x-api-key",
+        "api-key"
+      ]
 	}
 EOT
 }
