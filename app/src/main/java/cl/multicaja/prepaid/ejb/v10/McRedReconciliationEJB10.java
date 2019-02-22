@@ -24,5 +24,5 @@ public interface McRedReconciliationEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidMovement10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception;
+  ReconciliationMcRed10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception;
 }

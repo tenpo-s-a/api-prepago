@@ -1,9 +1,12 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
+import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -11,6 +14,7 @@ import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.util.Times;
 
 import javax.ejb.*;
 import java.io.BufferedReader;
@@ -18,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,8 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
-import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -222,61 +226,50 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   @Override
-  public PrepaidMovement10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception {
+  public ReconciliationMcRed10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception {
+    if(newSwitchMovement == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement"));
+    }
+
+    if(newSwitchMovement.getFileId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.fileId"));
+    }
+
+    if(newSwitchMovement.getDateTrx() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
+    }
+
+    if(newSwitchMovement.getMcCode() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.McCode"));
+    }
+
+    if(newSwitchMovement.getClientId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.clientId"));
+    }
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    LocalDateTime dateTime = LocalDateTime.parse(newSwitchMovement.getDateTrx(), formatter);
+    Timestamp timestamp = Timestamp.valueOf(dateTime);
+
     Object[] params = {
-      new InParam(newSwitchMovement.get .getIdMovimientoRef(), Types.NUMERIC), //_id_mov_ref NUMERIC
-      new InParam(data.getIdPrepaidUser(),Types.NUMERIC), //_id_usuario NUMERIC
-      data.getIdTxExterno(), //_id_tx_externo VARCHAR
-      data.getTipoMovimiento().toString(), //_tipo_movimiento VARCHAR
-      new InParam(data.getMonto(),Types.NUMERIC), //_monto NUMERIC
-      data.getEstado().toString(), //_estado VARCHAR
-      data.getEstadoNegocio().getValue(), // _estado_de_negocio VARCHAR
-      data.getConSwitch().getValue(), //_estado_con_switch VARCHAR
-      data.getConTecnocom().getValue(), //_estado_con_tecnocom VARCHAR
-      data.getOriginType().getValue(), //_origen_movimiento VARCHAR
-      data.getCodent(),//_codent VARCHAR
-      data.getCentalta(),//_centalta VARCHAR
-      data.getCuenta(),//_cuenta VARCHAR
-      new InParam(data.getClamon().getValue(), Types.NUMERIC),//_clamon NUMERIC
-      new InParam(data.getIndnorcor().getValue(),Types.NUMERIC),//_indnorcor NUMERIC
-      new InParam(data.getTipofac().getCode(),Types.NUMERIC),//_tipofac NUMERIC
-      new Date(data.getFecfac().getTime()),//_fecfac DATE
-      data.getNumreffac(),//_numreffac VARCHAR
-      data.getPan(),// _pan VARCHAR
-      new InParam(data.getClamondiv(), Types.NUMERIC),//_clamondiv NUMERIC
-      new InParam(data.getImpdiv(), Types.NUMERIC),//_impdiv NUMERIC
-      new InParam(data.getImpfac(), Types.NUMERIC),//_impfac NUMERIC
-      new InParam(data.getCmbapli(), Types.NUMERIC),//_cmbapli NUMERIC
-      !StringUtils.isBlank(data.getNumaut()) ? data.getNumaut() : "",//_numaut    VARCHAR
-      data.getIndproaje().getValue(),//_indproaje VARCHAR
-      data.getCodcom(),//_codcom VARCHAR
-      data.getCodact(),//_codact VARCHAR
-      new InParam(data.getImpliq(), Types.NUMERIC),//_impliq NUMERIC
-      new InParam(data.getClamonliq(),Types.NUMERIC), //_clamonliq NUMERIC
-      new InParam(data.getCodpais().getValue(), Types.NUMERIC), //_codpais NUMERIC
-      data.getNompob(),//_nompob VARCHAR
-      new InParam(data.getNumextcta(),Types.NUMERIC),//_numextcta NUMERIC
-      new InParam(data.getNummovext(),Types.NUMERIC),//_nummovext NUMERIC
-      new InParam(data.getClamone(),Types.NUMERIC),// _clamone NUMERIC
-      data.getTipolin(),//_tipolin VARCHAR
-      new InParam(data.getLinref(), Types.NUMERIC),//_linref NUMERIC
-      new InParam(data.getNumbencta(),Types.NUMERIC),//_numbencta NUMERIC
-      new InParam(data.getNumplastico(),Types.NUMERIC),//_numplastico NUMERIC
-      new InParam(data.getFechaCreacion(),Types.TIMESTAMP),// Nuevo dato entrada Fecha para movimiento compra
-      new OutParam("_r_id", Types.NUMERIC),
+      newSwitchMovement.getFileId(),
+      timestamp,
+      newSwitchMovement.getMcCode(),
+      newSwitchMovement.getClientId(),
+      newSwitchMovement.getAmount(),
+      newSwitchMovement.getExternalId() != null ? newSwitchMovement.getClientId() : new NullParam(Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_switch_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      data.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      return this.getPrepaidMovementById(data.getId());
+      newSwitchMovement.setId(getNumberUtils().toLong(resp.get("_r_id")));
+      return newSwitchMovement;
     } else {
       log.error("addPrepaidMovement resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
-    return null;
   }
 }
