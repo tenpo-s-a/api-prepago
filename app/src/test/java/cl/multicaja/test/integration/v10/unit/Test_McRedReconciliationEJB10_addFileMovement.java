@@ -1,11 +1,9 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
-import org.apache.derby.client.am.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,14 +25,7 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     Map<String, Object> fileMap = insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setFileId(fileId);
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     ReconciliationMcRed10 insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
 
     // Buscar movmiento para chequear que se guardo correctamente
@@ -62,40 +53,19 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
 
   @Test(expected = BadRequestException.class)
   public void addFileMovement_fileIdNull() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(null);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(null, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
   @Test(expected = BadRequestException.class)
   public void addFileMovement_mcCodeNull() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(23L);
-    reconciliationMcRed10.setMcCode(null);
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(23L, null, 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
   @Test(expected = BadRequestException.class)
   public void addFileMovement_clientIdNull() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(23L);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setClientId(null);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(23L, "MC23", null, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
@@ -104,14 +74,7 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     Map<String, Object> fileMap = insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-    reconciliationMcRed10.setExternalId(null);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setFileId(fileId);
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(fileId, "MC23", 49L, null, new BigDecimal(1000), "03-02-1998 14:23");
     ReconciliationMcRed10 insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
 
     // Buscar movmiento para chequear que se guardo correctamente
@@ -134,44 +97,34 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
 
   @Test(expected = BadRequestException.class)
   public void addFileMovement_amountNull() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(23L);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(null);
-    reconciliationMcRed10.setDateTrx("03-02-1998 14:23");
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(23L, "MC23", 49L, 88L, null, "03-02-1998 14:23");
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
   @Test(expected = BadRequestException.class)
   public void addFileMovement_dateTrxNull() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(23L);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setDateTrx(null);
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(23L, "MC23", 49L, 88L, new BigDecimal(1000), null);
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
   @Test(expected = DateTimeParseException.class)
   public void addFileMovement_dateTrxWrongFormat() throws Exception {
-    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-    reconciliationMcRed10.setFileId(23L);
-    reconciliationMcRed10.setMcCode("MC23");
-    reconciliationMcRed10.setClientId(49L);
-    reconciliationMcRed10.setExternalId(88L);
-    reconciliationMcRed10.setAmount(new BigDecimal(1000));
-    reconciliationMcRed10.setDateTrx("14:23 03-02-1998"); // Mal formato de fecha
-
+    ReconciliationMcRed10 reconciliationMcRed10 = buildReconciliationMcRed10(23L, "MC23", 49L, 88L, new BigDecimal(1000), "14:23 03-02-1998");
     getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
   }
 
-  public static Map<String, Object> insertArchivoReconcialicionLog(String nombreArchivo, String proceso, String tipo, String status) throws SQLException {
+  static public ReconciliationMcRed10 buildReconciliationMcRed10(Long fileId, String mcCode, Long clientId, Long externalId, BigDecimal amount, String dateTrx) {
+    ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
+    reconciliationMcRed10.setFileId(fileId);
+    reconciliationMcRed10.setMcCode(mcCode);
+    reconciliationMcRed10.setClientId(clientId);
+    reconciliationMcRed10.setExternalId(externalId);
+    reconciliationMcRed10.setAmount(amount);
+    reconciliationMcRed10.setDateTrx(dateTrx);
+    return reconciliationMcRed10;
+  }
+
+  static public Map<String, Object> insertArchivoReconcialicionLog(String nombreArchivo, String proceso, String tipo, String status) throws SQLException {
     Object[] params = {
       nombreArchivo != null ? nombreArchivo : new NullParam(Types.VARCHAR),
       proceso != null ? proceso : new NullParam(Types.VARCHAR),

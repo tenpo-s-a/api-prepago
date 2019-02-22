@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
@@ -21,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -273,12 +275,44 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_crea_movimiento_switch_v10", params);
 
-    if ("0".equals(resp.get("_error_code"))) {
+    if("0".equals(resp.get("_error_code"))) {
       newSwitchMovement.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return newSwitchMovement;
     } else {
       log.error("addPrepaidMovement resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
+  }
+
+  @Override
+  public List<ReconciliationMcRed10> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
+    Object[] params = {
+      new InParam("prp_movimiento_switch", Types.VARCHAR),
+      movementId != null ? new InParam(movementId, Types.BIGINT) : new NullParam(Types.BIGINT),
+      fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
+      mcId != null ? new InParam(mcId, Types.VARCHAR) : new NullParam(Types.VARCHAR)
+    };
+
+    RowMapper rm = (Map<String, Object> row) -> {
+      ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
+      reconciliationMcRed10.setId(getNumberUtils().toLong(row.get("_id")));
+      reconciliationMcRed10.setFileId(getNumberUtils().toLong(row.get("_id_archivo")));
+      reconciliationMcRed10.setMcCode(row.get("_id_multicaja").toString());
+      reconciliationMcRed10.setClientId(getNumberUtils().toLong(row.get("_id_cliente")));
+      reconciliationMcRed10.setExternalId(getNumberUtils().toLong(row.get("_id_multicaja_ref")));
+      reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(row.get("_monto")));
+
+      Timestamp storedTimestamp = (Timestamp) row.get("_fecha_trx");
+      LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
+      ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
+      ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
+      String chileFormated = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm").format(chileTime);
+      reconciliationMcRed10.setDateTrx(chileFormated);
+
+      return reconciliationMcRed10;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_switch_v10", rm,params);
+    return (List)resp.get("result");
   }
 }
