@@ -54,6 +54,5 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-
 DROP FUNCTION IF EXISTS ${schema}.mc_prp_elimina_movimientos_tecnocom_v10(BIGINT);
 

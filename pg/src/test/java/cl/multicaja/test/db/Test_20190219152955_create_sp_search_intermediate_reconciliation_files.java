@@ -31,11 +31,15 @@ public class Test_20190219152955_create_sp_search_intermediate_reconciliation_fi
 
   @BeforeClass
   public static void beforeClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom_hist", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion", SCHEMA));
   }
 
   @AfterClass
   public static void afterClass() {
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom", SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom_hist", SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion", SCHEMA));
   }
 

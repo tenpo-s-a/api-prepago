@@ -93,13 +93,14 @@ public class Test_20190221170407_create_sp_prp_elimina_movimientos_tecnocom_v10 
     Assert.assertEquals("Debe ser MC001","MC001",resp.get("_error_code"));
     Assert.assertEquals("El mensaje debe ser igual a:","El _idArchivo es obligatorio",resp.get("_error_msg"));
   }
+
   public Map<String, Object> eliminaMovimientosTc(Long fileId)throws Exception{
     Object[] params = {
       new InParam(fileId, Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
-
     return dbUtils.execute(SCHEMA + ".mc_prp_elimina_movimientos_tecnocom_v10", params);
   }
+
 }

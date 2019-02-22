@@ -17,9 +17,88 @@
 -- // create_sp_prp_busca_movimientos_tecnocom_v10
 -- Migration SQL that makes the change goes here.
 
+CREATE OR REPLACE FUNCTION ${schema}.prp_busca_movimientos_tecnocom_v10
+(
+  IN  _in_fileId BIGINT,
+  OUT _id BIGINT,
+  OUT _idarchivo BIGINT,
+  OUT _cuenta VARCHAR,
+  OUT _pan VARCHAR,
+  OUT _codent VARCHAR,
+  OUT _centalta VARCHAR,
+  OUT _clamon NUMERIC,
+  OUT _indnorcor NUMERIC,
+  OUT _tipofac NUMERIC,
+  OUT _fecfac DATE,
+  OUT _numreffac VARCHAR,
+  OUT _clamondiv NUMERIC,
+  OUT _impdiv NUMERIC,
+  OUT _impfac NUMERIC,
+  OUT _cmbapli NUMERIC,
+  OUT _numaut VARCHAR,
+  OUT _indproaje VARCHAR,
+  OUT _codcom VARCHAR,
+  OUT _codact NUMERIC,
+  OUT _impliq NUMERIC,
+  OUT _clamonliq NUMERIC,
+  OUT _codpais NUMERIC,
+  OUT _nompob VARCHAR,
+  OUT _numextcta NUMERIC,
+  OUT _nummovext NUMERIC,
+  OUT _clamone NUMERIC,
+  OUT _tipolin VARCHAR,
+  OUT _linref NUMERIC,
+  OUT _fecha_creacion TIMESTAMP,
+  OUT _fecha_actualizacion TIMESTAMP
+)
+RETURNS SETOF record
+LANGUAGE plpgsql
+AS $function$
+BEGIN
 
+  RETURN QUERY
+    SELECT
+      id,
+      idarchivo,
+      cuenta,
+      pan,
+      codent,
+      centalta,
+      clamon,
+      indnorcor,
+      tipofac,
+      fecfac,
+      numreffac,
+      clamondiv,
+      impdiv,
+      impfac,
+      cmbapli,
+      numaut,
+      indproaje,
+      codcom,
+      codact,
+      impliq,
+      clamonliq,
+      codpais,
+      nompob,
+      numextcta,
+      nummovext,
+      clamone,
+      tipolin,
+      linref,
+      fecha_creacion,
+      fecha_actualizacion
+    FROM
+      ${schema}.prp_movimientos_tecnocom
+    WHERE
+      idarchivo = _in_fileId;
+
+RETURN;
+END;
+$function$
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
+DROP FUNCTION IF EXISTS ${schema}.prp_busca_movimientos_tecnocom_v10(BIGINT);
 
