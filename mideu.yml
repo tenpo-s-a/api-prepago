@@ -8,7 +8,6 @@ bit_config:
     field_name: PAN
     field_type: LLVAR
     field_length: 0
-    field_processor: PAN
   3:
     field_name: Processing code
     field_type: FIXED
@@ -220,8 +219,7 @@ output_data_elements:
   - DE51
   - PDS0148
   - DE43_NAME
-  - DE43_SUBURB
-  - DE43_POSTCODE
+  - DE43_STATE
   - DE43_COUNTRY
-  - DE43
-  - DE48
+  - DE42
+  - DE63
