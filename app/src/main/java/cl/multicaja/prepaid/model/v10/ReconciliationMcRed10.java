@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class ReconciliationMcRed10 {
 
+  private Long id;
 
   private String mcCode;
 
