@@ -235,10 +235,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.fileId"));
     }
 
-    if(newSwitchMovement.getDateTrx() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
-    }
-
     if(newSwitchMovement.getMcCode() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.McCode"));
     }
@@ -247,22 +243,35 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.clientId"));
     }
 
+    if(newSwitchMovement.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.amount"));
+    }
+
+    if(newSwitchMovement.getDateTrx() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
+    }
+
+    // La fecha viene en string hora chile, hay que convertirla a timestamp hora utc
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     LocalDateTime dateTime = LocalDateTime.parse(newSwitchMovement.getDateTrx(), formatter);
-    Timestamp timestamp = Timestamp.valueOf(dateTime);
+    ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
+    ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
+    Timestamp fechaTrxUTC = Timestamp.valueOf(utcTime.toLocalDateTime());
 
     Object[] params = {
-      newSwitchMovement.getFileId(),
-      timestamp,
-      newSwitchMovement.getMcCode(),
-      newSwitchMovement.getClientId(),
-      newSwitchMovement.getAmount(),
-      newSwitchMovement.getExternalId() != null ? newSwitchMovement.getClientId() : new NullParam(Types.NUMERIC),
+      new InParam(newSwitchMovement.getFileId(), Types.BIGINT),
+      new InParam(newSwitchMovement.getMcCode(), Types.VARCHAR),
+      new InParam(newSwitchMovement.getClientId(), Types.BIGINT),
+      newSwitchMovement.getExternalId() != null ? new InParam(newSwitchMovement.getExternalId(), Types.BIGINT) : new NullParam(Types.BIGINT),
+      new InParam(newSwitchMovement.getAmount(), Types.NUMERIC),
+      new InParam(fechaTrxUTC, Types.TIMESTAMP),
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_r_id_int", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_switch_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_crea_movimiento_switch_v10", params);
 
     if ("0".equals(resp.get("_error_code"))) {
       newSwitchMovement.setId(getNumberUtils().toLong(resp.get("_r_id")));
