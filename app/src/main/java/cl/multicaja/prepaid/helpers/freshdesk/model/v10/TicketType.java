@@ -13,7 +13,8 @@ public enum TicketType {
   VALIDACION_IDENTIDAD("Validación de identidad"),
   GENERICO("Genérico"),
   COLAS_NEGATIVAS("Cola Negativa"),
-  DEVOLUCION("devolucion");
+  DEVOLUCION("devolucion"),
+  EMERGENCIA("Emergencia");
 
   private String value;
 

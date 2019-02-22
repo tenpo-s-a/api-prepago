@@ -25,18 +25,6 @@ public class NewTicket extends BaseModel implements Serializable {
   private Long responderId;
   private Map<String,Object> customFields;
 
-  public void addCustomField(String name,String data){
-    if(customFields == null){
-      customFields = new HashMap<>();
-    }
-    customFields.put(name,data);
-  }
-  public void addCustomField(String name,Integer data){
-    if(customFields == null){
-      customFields = new HashMap<>();
-    }
-    customFields.put(name,data);
-  }
   public String getName() {
     return name;
   }
@@ -163,5 +151,18 @@ public class NewTicket extends BaseModel implements Serializable {
 
   public void setCustomFields(Map<String, Object> customFields) {
     this.customFields = customFields;
+  }
+
+  public void addCustomField(String name,String data){
+    if(customFields == null){
+      customFields = new HashMap<>();
+    }
+    customFields.put(name,data);
+  }
+  public void addCustomField(String name,Integer data){
+    if(customFields == null){
+      customFields = new HashMap<>();
+    }
+    customFields.put(name,data);
   }
 }

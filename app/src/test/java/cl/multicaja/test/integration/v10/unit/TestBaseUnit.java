@@ -74,6 +74,7 @@ public class TestBaseUnit extends TestApiBase {
   private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
   private static PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJB10;
   private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
+  private static BackofficeEJBBean10 backofficeEJBBEan10;
   private static MailDelegate10 mailDelegate;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -259,6 +260,13 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setMailDelegate(getMailDelegate());
     }
     return prepaidEJBBean10;
+  }
+
+  public static BackofficeEJBBean10 getBackofficeEJBBEan10() {
+    if(backofficeEJBBEan10 == null) {
+      backofficeEJBBEan10 = new BackofficeEJBBean10();
+    }
+    return backofficeEJBBEan10;
   }
 
   public static FilesEJBBean10 getFilesEJBBean10() {
