@@ -51,13 +51,7 @@ public class Test_TecnocomReconciliationEJBBean10_eliminarMovimientos extends Te
 
     List<MovimientoTecnocom10> movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId);
     Assert.assertEquals("Debe existir 3 movimientos",3, movimientoTecnocom10s2.size());
-
-    for(int i=0;i<movimientoTecnocom10s2.size();i++) {
-      Assert.assertEquals("Deben tener el mismo id",movimientoTecnocom10s.get(i).getId(),movimientoTecnocom10s2.get(i).getId());
-      Assert.assertEquals("Deben tener el mismo pan",movimientoTecnocom10s.get(i).getPan(),movimientoTecnocom10s2.get(i).getPan());
-      Assert.assertEquals("Deben tener el mismo numaut",movimientoTecnocom10s.get(i).getNumAut(),movimientoTecnocom10s2.get(i).getNumAut());
-    }
-
+    
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(fileId);
 
     List<MovimientoTecnocom10> respPosElim = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId);
