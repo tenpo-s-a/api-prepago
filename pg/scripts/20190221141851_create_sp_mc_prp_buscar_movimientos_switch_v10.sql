@@ -18,6 +18,7 @@
 -- Migration SQL that makes the change goes here.
 
 CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_switch_v10(
+  IN _in_nombre_tabla         VARCHAR,
   IN _in_id                   BIGINT,
   IN _in_id_archivo           BIGINT,
   IN _in_id_multicaja         VARCHAR,
@@ -31,26 +32,29 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_movimientos_switch_v10(
 )
 RETURNS SETOF RECORD AS $$
 BEGIN
+
+  IF COALESCE(_in_nombre_tabla, '') = '' THEN
+    _in_nombre_tabla = 'prp_movimiento_switch';
+  END IF;
+
   RETURN QUERY
-  SELECT
-    id,
-    id_archivo,
-    id_multicaja,
-    id_cliente,
-    id_multicaja_ref,
-    monto,
-    fecha_trx
-  FROM
-    ${schema}.prp_movimiento_switch
-  WHERE
-    (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
-    (COALESCE(_in_id_archivo, 0) = 0 OR id_archivo = _in_id_archivo) AND
-    (TRIM(COALESCE(_in_id_multicaja,'')) = '' OR id_multicaja = _in_id_multicaja)
-   ORDER BY id DESC;
-   RETURN;
+  EXECUTE
+    format(
+      'SELECT id, id_archivo, id_multicaja, id_cliente, id_multicaja_ref, monto, fecha_trx '
+      'FROM ${schema}.%s '
+      'WHERE '
+      '  (COALESCE( $1 , 0) = 0 OR id = $1 ) AND '
+      '  (COALESCE( $2 , 0) = 0 OR id_archivo = $2 ) AND '
+      '  (TRIM(COALESCE( $3 ,'''')) = '''' OR id_multicaja = $3 ) '
+      'ORDER BY id DESC',
+      _in_nombre_tabla
+    )
+  USING
+    _in_id, _in_id_archivo, _in_id_multicaja;
+  RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_switch_v10(BIGINT, BIGINT, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_movimientos_switch_v10(VARCHAR, BIGINT, BIGINT, VARCHAR);

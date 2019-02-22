@@ -56,7 +56,7 @@ public class Test_20190221171243_create_sp_mc_prp_borrar_movimientos_switch_v10 
 
     // Borrar por fileId
     {
-      Map<String, Object> foundSwitchMovement = Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10.searchSwitchMovements(null, fileId, null);
+      Map<String, Object> foundSwitchMovement = Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10.searchSwitchMovements("prp_movimiento_switch", null, fileId, null);
       List result = (List) foundSwitchMovement.get("result");
 
       Assert.assertNull("No deben existir", result);
@@ -64,7 +64,7 @@ public class Test_20190221171243_create_sp_mc_prp_borrar_movimientos_switch_v10 
 
     // Buscar por id
     {
-      Map<String, Object> resp = Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10.searchSwitchMovements(numberUtils.toLong(insertedMovement.get("id")), null, null);
+      Map<String, Object> resp = Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10.searchSwitchMovements("prp_movimiento_switch", numberUtils.toLong(insertedMovement.get("id")), null, null);
       List result = (List) resp.get("result");
 
       Assert.assertNotNull("Debe existir", result);

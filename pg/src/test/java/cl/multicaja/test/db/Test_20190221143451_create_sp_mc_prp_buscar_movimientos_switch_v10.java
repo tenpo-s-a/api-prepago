@@ -1,6 +1,7 @@
 package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
+import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.AfterClass;
@@ -33,9 +34,9 @@ public class Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10 
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion cascade", SCHEMA));
   }
 
-  public static Map<String, Object> searchSwitchMovements(Long id, Long fileId, String multicajaID) throws SQLException {
-    System.out.println("Buscando con fileid_ " + fileId);
+  public static Map<String, Object> searchSwitchMovements(String tableName, Long id, Long fileId, String multicajaID) throws SQLException {
     Object[] params = {
+      tableName != null ? tableName : new NullParam(Types.VARCHAR),
       id != null ? id : new NullParam(Types.BIGINT),
       fileId != null ? fileId : new NullParam(Types.BIGINT),
       multicajaID != null ? multicajaID : new NullParam(Types.VARCHAR)
@@ -62,7 +63,7 @@ public class Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10 
 
     // Buscar por fileId
     {
-      Map<String, Object> foundSwitchMovement = searchSwitchMovements(null, fileId, null);
+      Map<String, Object> foundSwitchMovement = searchSwitchMovements("prp_movimiento_switch", null, fileId, null);
       List result = (List) foundSwitchMovement.get("result");
 
       Assert.assertNotNull("Debe existir", result);
@@ -87,9 +88,63 @@ public class Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10 
       Assert.assertEquals("Debe comparar 3 elementos", 3, comparedMovements);
     }
 
+    // Buscar en tabla nula, busca en la tabla por defecto
+    {
+      Map<String, Object> foundSwitchMovement = searchSwitchMovements(null, null, fileId, null);
+      List result = (List) foundSwitchMovement.get("result");
+
+      Assert.assertNotNull("Debe existir", result);
+      Assert.assertEquals("Debe tener 3 elementos", 3, result.size());
+
+      int comparedMovements = 0;
+      for (Map<String, Object> createdMovement : createdMovements) { // Por cada movimiento insertado
+        for (Object foundMovObj : result) { // Por cada movimiento encontrado
+          Map<String, Object> foundMovMap = (Map) foundMovObj;
+          if (foundMovMap.get("_id").equals(createdMovement.get("id"))) { // Buscar si tienen el mismo id
+            Assert.assertEquals("Debe tener mismo archivo_id", fileId, numberUtils.toLong(foundMovMap.get("_id_archivo")));
+            Assert.assertEquals("Debe tener mismo multicaja id", createdMovement.get("id_multicaja").toString(), foundMovMap.get("_id_multicaja").toString());
+            Assert.assertEquals("Debe tener mismo cliente_id", numberUtils.toLong(createdMovement.get("id_cliente")), numberUtils.toLong(foundMovMap.get("_id_cliente")));
+            Assert.assertEquals("Debe tener mismo id_multicaja_ref", numberUtils.toLong(createdMovement.get("id_multicaja_ref")), numberUtils.toLong(foundMovMap.get("_id_multicaja_ref")));
+            Assert.assertEquals("Debe tener mismo monto", ((BigDecimal)createdMovement.get("monto")).stripTrailingZeros(), ((BigDecimal)foundMovMap.get("_monto")).stripTrailingZeros());
+            Assert.assertEquals("Debe tener misma fecha", createdMovement.get("fecha_trx"), foundMovMap.get("_fecha_trx"));
+
+            comparedMovements++;
+          }
+        }
+      }
+      Assert.assertEquals("Debe comparar 3 elementos", 3, comparedMovements);
+    }
+
+    // Buscar por fileId en tabla hist
+    {
+      Map<String, Object> foundSwitchMovement = searchSwitchMovements("prp_movimiento_switch_hist", null, fileId, null);
+      List result = (List) foundSwitchMovement.get("result");
+
+      Assert.assertNotNull("Debe existir", result);
+      Assert.assertEquals("Debe tener 3 elementos", 3, result.size());
+
+      int comparedMovements = 0;
+      for (Map<String, Object> createdMovement : createdMovements) { // Por cada movimiento insertado
+        for (Object foundMovObj : result) { // Por cada movimiento encontrado
+          Map<String, Object> foundMovMap = (Map) foundMovObj;
+          if (foundMovMap.get("_id").equals(createdMovement.get("id_hist"))) { // Buscar si tienen el mismo id
+            Assert.assertEquals("Debe tener mismo archivo_id", fileId, numberUtils.toLong(foundMovMap.get("_id_archivo")));
+            Assert.assertEquals("Debe tener mismo multicaja id", createdMovement.get("id_multicaja").toString(), foundMovMap.get("_id_multicaja").toString());
+            Assert.assertEquals("Debe tener mismo cliente_id", numberUtils.toLong(createdMovement.get("id_cliente")), numberUtils.toLong(foundMovMap.get("_id_cliente")));
+            Assert.assertEquals("Debe tener mismo id_multicaja_ref", numberUtils.toLong(createdMovement.get("id_multicaja_ref")), numberUtils.toLong(foundMovMap.get("_id_multicaja_ref")));
+            Assert.assertEquals("Debe tener mismo monto", ((BigDecimal)createdMovement.get("monto")).stripTrailingZeros(), ((BigDecimal)foundMovMap.get("_monto")).stripTrailingZeros());
+            Assert.assertEquals("Debe tener misma fecha", createdMovement.get("fecha_trx"), foundMovMap.get("_fecha_trx"));
+
+            comparedMovements++;
+          }
+        }
+      }
+      Assert.assertEquals("Debe comparar 3 elementos", 3, comparedMovements);
+    }
+
     // Buscar por id
     {
-      Map<String, Object> resp = searchSwitchMovements(numberUtils.toLong(insertedMovement.get("id")), null, null);
+      Map<String, Object> resp = searchSwitchMovements("prp_movimiento_switch", numberUtils.toLong(insertedMovement.get("id")), null, null);
       List result = (List) resp.get("result");
 
       Assert.assertNotNull("Debe existir", result);
@@ -106,7 +161,7 @@ public class Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10 
 
     // Buscar por id multicaja
     {
-      Map<String, Object> resp = searchSwitchMovements(null, null, insertedMovement.get("id_multicaja").toString());
+      Map<String, Object> resp = searchSwitchMovements("prp_movimiento_switch", null, null, insertedMovement.get("id_multicaja").toString());
       List result = (List) resp.get("result");
 
       Assert.assertNotNull("Debe existir", result);
@@ -123,7 +178,7 @@ public class Test_20190221143451_create_sp_mc_prp_buscar_movimientos_switch_v10 
 
     // Buscar todos
     {
-      Map<String, Object> foundSwitchMovement = searchSwitchMovements(null, null, null);
+      Map<String, Object> foundSwitchMovement = searchSwitchMovements("prp_movimiento_switch", null, null, null);
       List result = (List) foundSwitchMovement.get("result");
 
       Assert.assertNotNull("Debe existir", result);
