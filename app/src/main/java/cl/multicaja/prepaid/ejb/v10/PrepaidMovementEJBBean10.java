@@ -725,7 +725,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
-    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    //Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v1_1",getSchema()),params);
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
@@ -1465,19 +1466,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException {
-    log.info("[getResearchMovementByIdMovRef In Id] : " + idMovRef);
-    if(idMovRef == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
+  public ResearchMovement10 getResearchMovementByIdMovRef(String idArchivoOrigen) throws BaseException, SQLException {
+    log.info("[getResearchMovementByIdMovRef In Id] : " + idArchivoOrigen);
+    if(idArchivoOrigen == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idArchivoOrigen"));
     }
 
     Object[] params = {
-      new InParam(idMovRef, Types.VARCHAR)
+      new InParam(idArchivoOrigen, Types.VARCHAR)
     };
 
-    log.info(String.format("ID IN : %s", idMovRef));
+    log.info(String.format("ID IN : %s", idArchivoOrigen));
     RowMapper rm = getResearchMovementRowMapper();
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
+    //Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v1_1", getSchema()), rm, params);
     List list = (List)resp.get("result");
     log.info("getResearchMovementByIdMovRef: " + list);
     return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
@@ -1487,7 +1489,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (Map<String, Object> row) -> {
       ResearchMovement10 researchMovement = new ResearchMovement10();
       researchMovement.setId(NumberUtils.getInstance().toLong(row.get("_id")));
-      researchMovement.setIdRef(String.valueOf(row.get("_mov_ref")));
+      //researchMovement.setIdRef(String.valueOf(row.get("_mov_ref")));
+      researchMovement.setIdRef(String.valueOf(row.get("_id_archivo_origen")));
       researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
       researchMovement.setOrigen(ReconciliationOriginType.valueOf(String.valueOf(row.get("_origen"))));
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
