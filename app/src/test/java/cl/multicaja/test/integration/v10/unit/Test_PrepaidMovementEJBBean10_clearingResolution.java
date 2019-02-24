@@ -338,12 +338,13 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
-      reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
+      //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
+      reconciliedResearch.setId_archivo_origen(String.valueOf(rs.getString("id_archivo_origen")));
       reconciliedResearch.setNombre_archivo(String.valueOf(rs.getString("nombre_archivo")));
       reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
       return reconciliedResearch;
     };
-    List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = '%s'", getSchema(), movId), rowMapper);
+    List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = '%s'", getSchema(), movId), rowMapper);
     return data;
   }
 

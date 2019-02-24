@@ -1320,7 +1320,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
     if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1330,7 +1331,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
     if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1340,7 +1342,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "FileTest");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1423,7 +1426,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       case NOT_RECONCILED: // Tecnocom NO conciliado -> todos los casos mandan a INVESTIGAR
         {
           String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-          createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+          //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+          createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "FileTest");
 
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);

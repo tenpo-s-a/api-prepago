@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -274,7 +275,8 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedResearch reconciliedResearch = getMovimientoInvestigarMotor(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento a investigar",reconciliedResearch);
-    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getId_archivo_origen().replace("idMov=",""));
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
@@ -301,7 +303,8 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedResearch reconciliedResearch = getMovimientoInvestigarMotor(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento a investigar",reconciliedResearch);
-    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getId_archivo_origen().replace("idMov=",""));
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
@@ -357,7 +360,8 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedResearch reconciliedResearch = getMovimientoInvestigarMotor(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento a investigar",reconciliedResearch);
-    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getId_archivo_origen().replace("idMov=",""));
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
 
@@ -388,7 +392,8 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     ReconciliedResearch reconciliedResearch = getMovimientoInvestigarMotor(prepaidMovement10.getId());
 
     Assert.assertNotNull("Debe contener un movimiento a investigar",reconciliedResearch);
-    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
+    Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getId_archivo_origen().replace("idMov=",""));
     Assert.assertEquals("El Origen debe ser Motot","MOTOR",reconciliedResearch.getOrigen());
     Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
 
@@ -433,21 +438,29 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
-      reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
+      //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
+      reconciliedResearch.setId_archivo_origen(String.valueOf(rs.getString("id_archivo_origen")));
       reconciliedResearch.setNombre_archivo(String.valueOf(rs.getString("nombre_archivo")));
       reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
       return reconciliedResearch;
     };
-    List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
+    //List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
+    List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
     return data.get(0);
   }
 }
 
 class ReconciliedResearch {
   private Long id;
-  private String idRef;
-  private String nombre_archivo;
+  //private String idRef;
+  private String id_archivo_origen;
   private String origen;
+  private String nombre_archivo;
+  private Timestamp fecha_registro;
+  private Timestamp fecha_de_transaccion;
+  private String responsable;
+  private String descripcion;
+  private Long mov_ref;
 
   public Long getId() {
     return id;
@@ -457,20 +470,12 @@ class ReconciliedResearch {
     this.id = id;
   }
 
-  public String getIdRef() {
-    return idRef;
+  public String getId_archivo_origen() {
+    return id_archivo_origen;
   }
 
-  public void setIdRef(String idRef) {
-    this.idRef = idRef;
-  }
-
-  public String getNombre_archivo() {
-    return nombre_archivo;
-  }
-
-  public void setNombre_archivo(String nombre_archivo) {
-    this.nombre_archivo = nombre_archivo;
+  public void setId_archivo_origen(String id_archivo_origen) {
+    this.id_archivo_origen = id_archivo_origen;
   }
 
   public String getOrigen() {
@@ -481,4 +486,51 @@ class ReconciliedResearch {
     this.origen = origen;
   }
 
+  public String getNombre_archivo() {
+    return nombre_archivo;
+  }
+
+  public void setNombre_archivo(String nombre_archivo) {
+    this.nombre_archivo = nombre_archivo;
+  }
+
+  public Timestamp getFecha_registro() {
+    return fecha_registro;
+  }
+
+  public void setFecha_registro(Timestamp fecha_registro) {
+    this.fecha_registro = fecha_registro;
+  }
+
+  public Timestamp getFecha_de_transaccion() {
+    return fecha_de_transaccion;
+  }
+
+  public void setFecha_de_transaccion(Timestamp fecha_de_transaccion) {
+    this.fecha_de_transaccion = fecha_de_transaccion;
+  }
+
+  public String getResponsable() {
+    return responsable;
+  }
+
+  public void setResponsable(String responsable) {
+    this.responsable = responsable;
+  }
+
+  public String getDescripcion() {
+    return descripcion;
+  }
+
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
+
+  public Long getMov_ref() {
+    return mov_ref;
+  }
+
+  public void setMov_ref(Long mov_ref) {
+    this.mov_ref = mov_ref;
+  }
 }
