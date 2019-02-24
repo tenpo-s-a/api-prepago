@@ -25,7 +25,6 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
   @AfterClass
   public static void afterClass() {
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", SCHEMA));
-
   }
 
 
