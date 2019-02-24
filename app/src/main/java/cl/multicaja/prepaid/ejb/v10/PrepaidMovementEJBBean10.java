@@ -900,7 +900,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -917,7 +918,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -939,7 +941,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ) && mov.getTipoMovimiento().equals(PrepaidMovementType.TOPUP)
     ){
       log.debug("XLS ID 5");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
       updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.CONFIRMED);
@@ -1079,7 +1082,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -1228,7 +1232,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
       if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
