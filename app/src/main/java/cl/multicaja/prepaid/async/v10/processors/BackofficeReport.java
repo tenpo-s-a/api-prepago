@@ -6,6 +6,7 @@ import org.apache.camel.Processor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.time.ZonedDateTime;
 
 public class BackofficeReport extends BaseProcessor10 {
@@ -21,7 +22,15 @@ public class BackofficeReport extends BaseProcessor10 {
       @Override
       public void process(Exchange exchange) throws Exception {
         log.info(String.format("Generating and sending e06 report file", ZonedDateTime.now()));
-        //getRoute().getBackofficeEJBBEan10().generateE06Report(ZonedDateTime.now().minusMonths(1));
+
+        // Genera el reporte del mes anterior
+        //File file = getRoute().getBackofficeEJBBEan10().generateE06Report(ZonedDateTime.now().minusMonths(1));
+
+        // Upload file to SFTP
+        //getRoute().getBackofficeEJBBEan10().uploadE06Report(file.getName());
+
+        // Delete local file
+        //file.delete();
       }
     };
   }

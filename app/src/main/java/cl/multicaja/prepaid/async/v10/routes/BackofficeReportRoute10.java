@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.async.v10.routes;
 
+import cl.multicaja.prepaid.async.v10.processors.BackofficeReport;
 import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.commons.logging.Log;
@@ -31,7 +32,7 @@ public class BackofficeReportRoute10 extends BaseRoute10 {
   @Override
   public void configure() throws Exception {
     //Se ejecuta todos los dias a la 1am America/Santiago
-    //from("quartz2://prepaid/clearing_file?cron=0+0+0+2+*+?+*&trigger.timeZone=America/Santiago")
+    //from("quartz2://prepaid/clearing_file?cron=0+0+1+2+*+?+*&trigger.timeZone=America/Santiago")
     // .process(new BackofficeReport(this).generateE06Report());
 
     //Ruta para la subida de archivos

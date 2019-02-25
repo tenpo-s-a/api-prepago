@@ -17,6 +17,7 @@ import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.BackofficeDelegate10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
@@ -100,6 +101,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @Inject
   private ClearingFileDelegate10 clearingFileDelegate;
+
+  @Inject
+  private BackofficeDelegate10 backofficeDelegate10;
 
   private UserClient userClient;
 
@@ -467,6 +471,8 @@ public final class TestHelpersResource10 extends BaseResource {
       emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_E06_REPORT);
       emailBodyToSend.setAddress("e06_report@multicaja.cl");
       mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+      //backofficeDelegate10.uploadE06ReportFile(file.getName());
 
       file.delete();
 

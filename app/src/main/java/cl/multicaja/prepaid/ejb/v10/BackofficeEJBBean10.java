@@ -1,16 +1,17 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.prepaid.async.v10.routes.BackofficeDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.TicketsResponse;
 import cl.multicaja.prepaid.model.v10.MailTemplates;
-import cl.multicaja.prepaid.model.v10.MimeType;
 import com.opencsv.CSVWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
+  @Inject
+  private BackofficeDelegate10 backofficeDelegate10;
 
   public BackofficeEJBBean10() {
     super();
@@ -71,7 +75,6 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
       .withMinute(0)
       .withSecond(0)
       .withNano(0).toInstant(), ZoneId.of("UTC")).toLocalDateTime();
-
 
     LocalDateTime lastDayForSearch = ZonedDateTime.ofInstant(date
       .with(TemporalAdjusters.lastDayOfMonth())
@@ -160,7 +163,7 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
     return this.createReportCsv(directoryName + "/" + fileName, localTickets);
   }
 
-  public File createReportCsv(String filename, List<Ticket> tickets) throws IOException {
+  private File createReportCsv(String filename, List<Ticket> tickets) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
@@ -202,5 +205,9 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
     }
     writer.close();
     return file;
+  }
+
+  public void uploadE06Report(String fileName) {
+    backofficeDelegate10.uploadE06ReportFile(fileName);
   }
 }
