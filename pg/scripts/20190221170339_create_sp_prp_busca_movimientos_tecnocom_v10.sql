@@ -91,7 +91,8 @@ BEGIN
     FROM
       ${schema}.prp_movimientos_tecnocom
     WHERE
-      idarchivo = _in_fileId;
+      idarchivo = _in_fileId
+    ORDER BY id ASC;
 
 RETURN;
 END;
