@@ -22,17 +22,12 @@ import java.util.Map;
 
 public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends TestBaseUnit {
 
-  private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
   private List<String> pans = Arrays.asList("5176081118013603");
-  private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013","09870001000000000014");
-  private List<PrepaidUser10> users = new ArrayList<>();
-  private List<PrepaidCard10> prepaidCards = new ArrayList<>();
+  private List<String> contracts = Arrays.asList("09870001000000000014");
 
-
-
-  @AfterClass
   public static void clearData() {
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", getSchemaAccounting()));
@@ -41,14 +36,12 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
   @Before
   public void prepData() throws Exception {
+    clearData();
     prepareUsersAndCards();
   }
 
 
   private void prepareUsersAndCards() throws Exception {
-
-    users.clear();
-    prepaidCards.clear();
 
     for (int i = 0; i < pans.size(); i++) {
       String pan = pans.get(i);
@@ -60,18 +53,24 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       User user = registerUser();
 
       // Crea usuario prepago
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+      buildPrepaidUser10(user);
 
       PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
       prepaidCard10.setPan(Utils.replacePan(pan));
       prepaidCard10.setProcessorUserId(processorUserId);
       prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
       System.out.println("Crypted PAN: "+encryptUtil.encrypt(pan));
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-      users.add(prepaidUser10);
-      prepaidCards.add(prepaidCard10);
+      createPrepaidCard10(prepaidCard10);
     }
+    //
+    String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, 848, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema()));
+
+    String accounting = "INSERT INTO %s.accounting VALUES (575, 1030, 'COMPRA_OTRA_MONEDA', 'Cargo por compra cm', 'IpmFile', 0, 152, 0, 0, 0, 0, 0, 0.00, 0.00, 0, 'PENDING', 0, 'PENDING', '2018-08-08 05:28:21', '2019-02-25 12:12:55', '2019-02-25 15:12:55.489402', '2019-02-25 15:12:55.489402');";
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format(accounting, getSchemaAccounting()));
+
+    String clearing = "INSERT INTO prepaid_accounting.clearing VALUES (464, 575, 0, 0, 'PENDING', '2019-02-25 15:12:55.670868', '2019-02-25 15:12:55.670868');";
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format(clearing, getSchemaAccounting()));
   }
 
   @Test
@@ -189,42 +188,38 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       Assert.assertEquals("Debe tener mismo fileName", ipmFile.getFileName(), bdIpmFile.getFileName());
       Assert.assertEquals("Debe tener status [PROCESSING]", IpmFileStatus.PROCESSING, bdIpmFile.getStatus());
 
-      getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, ipmFile);
 
+      // ANTES DE PROCESAR EL IPM LOS VALORES FUERON INSERTADOS COMO QUE FUERA DESDE UN OP DIARIAS
       List<AccountingData10> trxs = getDbTransactions();
       List<ClearingData10> trxcle = getDbClearingTransactions();
 
-      Assert.assertEquals("Debe tener 50 transacciones", Integer.valueOf(50), Integer.valueOf(trxs.size()));
-      Assert.assertEquals("Debe tener 50 tx", Integer.valueOf(50),Integer.valueOf(trxcle.size()));
-      Assert.assertEquals("Tamaños Iguales",trxs.size(),trxcle.size());
+      Assert.assertNotNull("No debe ser null: ",trxs);
+      Assert.assertEquals("No debe tener 1 trx Accounting: ",1,trxs.size());
+      Assert.assertEquals("No debe tener 1 trx Clearing: ",1,trxcle.size());
+      Assert.assertEquals("El valor del ammount MCAR 0", BigDecimal.ZERO,trxs.get(0).getAmountMastercard().getValue().setScale(0));
+      Assert.assertEquals("El valor del ammount USD 0", BigDecimal.ZERO.longValue(),trxs.get(0).getAmountUsd().getValue().longValue());
+      Assert.assertEquals("El valor del fee", BigDecimal.ZERO.longValue(),trxs.get(0).getFee().longValue());
+      Assert.assertEquals("El valor del fee iva", BigDecimal.ZERO.longValue(),trxs.get(0).getFeeIva().longValue());
 
-      for(AccountingData10 trx : trxs) {
-        Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
-        Assert.assertEquals("Debe tener type [COMPRA_MONEDA]", AccountingTxType.COMPRA_MONEDA, trx.getType());
-        Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
+      getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, ipmFile);
 
-        BigDecimal amountBalance = BigDecimal.ZERO
-          .add(trx.getAmountMastercard().getValue())
-          .add(trx.getFee())
-          .add(trx.getFeeIva())
-          .add(trx.getExchangeRateDif()).setScale(0, BigDecimal.ROUND_UP);
-        Assert.assertEquals("El monto afecto a saldo debe ser la suma", amountBalance, trx.getAmountBalance().getValue().setScale(0, BigDecimal.ROUND_UP));
+      trxs = getDbTransactions();
+      trxcle = getDbClearingTransactions();
+
+      Assert.assertEquals("No debe tener 1 trx Accounting: ",50,trxs.size());
+      Assert.assertEquals("No debe tener 1 trx Clearing: ",50,trxcle.size());
+      boolean found = false;
+      for(AccountingData10 acc : trxs){
+        if(acc.getId() == 575){
+          found = true;
+          Assert.assertNotEquals("El valor del ammount MCAR 0", BigDecimal.ZERO,trxs.get(0).getAmountMastercard().getValue().setScale(0));
+          Assert.assertNotEquals("El valor del ammount USD 0", BigDecimal.ZERO,trxs.get(0).getAmountUsd().getValue().longValue());
+          Assert.assertNotEquals("El valor del fee", BigDecimal.ZERO.longValue(),trxs.get(0).getFee());
+          Assert.assertNotEquals("El valor del fee iva", BigDecimal.ZERO.longValue(),trxs.get(0).getFeeIva());
+          System.out.println("FOUND");
+        }
       }
-
-      {
-        bdIpmFiles = getPrepaidAccountingEJBBean10().findIpmFile(null, null, ipmFile.getFileName(), null, null);
-
-        Assert.assertEquals("Debe tener 1 archivo", Long.valueOf(1), Long.valueOf(bdIpmFiles.size()));
-
-        bdIpmFile = bdIpmFiles.get(0);
-
-        Assert.assertNotNull("Debe tener id", bdIpmFile.getId());
-        Assert.assertNotNull("Debe tener timestamps", bdIpmFile.getTimestamps());
-        Assert.assertNotNull("Debe tener timestamps.created_at", bdIpmFile.getTimestamps().getCreatedAt());
-        Assert.assertNotNull("Debe tener timestamps.updated_at", bdIpmFile.getTimestamps().getUpdatedAt());
-        Assert.assertEquals("Debe tener mismo fileName", ipmFile.getFileName(), bdIpmFile.getFileName());
-        Assert.assertEquals("Debe tener status [PROCESSING]", IpmFileStatus.PROCESSED, bdIpmFile.getStatus());
-      }
+      Assert.assertTrue("Debe encontrar el movimiento",found);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -237,7 +232,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   private List<ClearingData10> getDbClearingTransactions() {
     List<ClearingData10> trxs = new ArrayList<>();
 
-    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", SCHEMA));
+    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.clearing", getSchemaAccounting()));
 
     for (Map row : rows) {
       ClearingData10 cle = new ClearingData10();
@@ -255,7 +250,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
     List<AccountingData10> trxs = new ArrayList<>();
 
 
-    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.accounting", SCHEMA));
+    List<Map<String, Object>> rows = DBUtils.getInstance().getJdbcTemplate().queryForList(String.format("SELECT * FROM %s.accounting", getSchemaAccounting()));
 
     for (Map row : rows) {
       AccountingData10 acc = new AccountingData10();
