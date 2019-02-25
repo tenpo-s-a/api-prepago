@@ -158,7 +158,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
         nombreArchivo, fechaDeTransaccion, responsable, descripcion,movRef);
       System.out.println("Movimiento ingresado satisfactoriamente");
       Assert.assertNotNull("Data no debe ser null", data);
-      Assert.assertEquals("No debe ser 0","0",data.get("_error_code"));
+      Assert.assertEquals("Debe ser 0","0",data.get("_error_code"));
       Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
 
       Map<String, Object> resp = searchMovimientoInvestigar(idArchivoOrigen);
@@ -194,7 +194,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
         nombreArchivo, fechaDeTransaccion, responsable, descripcion,movRef);
       System.out.println("Movimiento ingresado satisfactoriamente");
       Assert.assertNotNull("Data no debe ser null", data);
-      Assert.assertEquals("No debe ser 0","0",data.get("_error_code"));
+      Assert.assertEquals("Debe ser 0","0",data.get("_error_code"));
       Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
       Assert.assertNotEquals("No debe ser igual a 0",0,data.get("_r_id"));
 
