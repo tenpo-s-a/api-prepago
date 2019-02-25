@@ -695,9 +695,17 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileName) throws Exception {
-    if(movRef == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
+  public void createMovementResearch(Map<String, Object> headers, String id_archivo_origen, ReconciliationOriginType originType, String fileName) throws Exception {
+
+    //TODO movRef es ahora id_archivo_origen, y movRef ahora es de tipo Long
+    //TODO: Estas variables deben colocarse como nuevos parámetros de esta función y asi mismo en implementaciones similares que usen el procedimiento, con sus nuevos cambios
+    Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date()).getTime());
+    String responsable = " ";
+    String descripcion = " ";
+    Long movRef = new Long(10);
+
+    if(id_archivo_origen == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id_archivo_origen"));
     }
     if(originType == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originType"));
@@ -705,14 +713,21 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(fileName == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileName"));
     }
+
     Object[] params = {
-      movRef,
-      originType.name(),
-      fileName,
+      id_archivo_origen != null ? id_archivo_origen : new NullParam(Types.VARCHAR),
+      originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),
+      fileName != null ? fileName : new NullParam(Types.VARCHAR),
+      fechaDeTransaccion != null ? fechaDeTransaccion : new NullParam(Types.TIMESTAMP),
+      responsable != null ? responsable : new NullParam(Types.VARCHAR),
+      descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
+      movRef != null ? movRef : new NullParam(Types.BIGINT),
+      new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
-    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    //Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v11",getSchema()),params);
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
@@ -886,7 +901,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -903,7 +919,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -925,7 +942,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ) && mov.getTipoMovimiento().equals(PrepaidMovementType.TOPUP)
     ){
       log.debug("XLS ID 5");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
       updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.CONFIRMED);
@@ -1065,7 +1083,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(mov.getEstado())
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
       //TODO: actualizar status -> RESEARCH en clearing
@@ -1214,7 +1233,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     //Movimientos que esten en estado pendiente o en proceso y vengan en alguno de los archivos Caso 19 al 24
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      //createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"");
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"FileTest");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
       if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
@@ -1306,7 +1326,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
     if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1316,7 +1337,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
     if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1326,7 +1348,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+      createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "FileTest");
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1409,7 +1432,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       case NOT_RECONCILED: // Tecnocom NO conciliado -> todos los casos mandan a INVESTIGAR
         {
           String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-          createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+          //createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "");
+          createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "FileTest");
 
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1452,19 +1476,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public ResearchMovement10 getResearchMovementByIdMovRef(String idMovRef) throws BaseException, SQLException {
-    log.info("[getResearchMovementByIdMovRef In Id] : " + idMovRef);
-    if(idMovRef == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idMov"));
+  public ResearchMovement10 getResearchMovementByIdMovRef(String idArchivoOrigen) throws BaseException, SQLException {
+    log.info("[getResearchMovementByIdMovRef In Id] : " + idArchivoOrigen);
+    if(idArchivoOrigen == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idArchivoOrigen"));
     }
 
     Object[] params = {
-      new InParam(idMovRef, Types.VARCHAR)
+      new InParam(idArchivoOrigen, Types.VARCHAR)
     };
 
-    log.info(String.format("ID IN : %s", idMovRef));
+    log.info(String.format("ID IN : %s", idArchivoOrigen));
     RowMapper rm = getResearchMovementRowMapper();
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
+    //Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v11", getSchema()), rm, params);
     List list = (List)resp.get("result");
     log.info("getResearchMovementByIdMovRef: " + list);
     return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
@@ -1474,7 +1499,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return (Map<String, Object> row) -> {
       ResearchMovement10 researchMovement = new ResearchMovement10();
       researchMovement.setId(NumberUtils.getInstance().toLong(row.get("_id")));
-      researchMovement.setIdRef(String.valueOf(row.get("_mov_ref")));
+      //researchMovement.setIdRef(String.valueOf(row.get("_mov_ref")));
+      researchMovement.setIdRef(String.valueOf(row.get("_id_archivo_origen")));
       researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
       researchMovement.setOrigen(ReconciliationOriginType.valueOf(String.valueOf(row.get("_origen"))));
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
