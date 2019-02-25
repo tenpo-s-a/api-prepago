@@ -35,9 +35,8 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   }
 
   @Before
-  public void prepData() throws Exception {
+  public void clear(){
     clearData();
-    prepareUsersAndCards();
   }
 
 
@@ -166,7 +165,11 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
 
   @Test
-  public void processIpmFileTransactions2() {
+  public void processIpmFileTransactions2() throws Exception {
+
+    // Prepara la data de prueba
+    prepareUsersAndCards();
+
     IpmFile ipmFile = new IpmFile();
     ipmFile.setFileName("test2.ipm");
 
@@ -268,7 +271,8 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       acc.setCollectorFee(BigDecimal.valueOf(numberUtils.toDouble(row.get("collector_fee"))));
       acc.setCollectorFeeIva(BigDecimal.valueOf(numberUtils.toDouble(row.get("collector_fee_iva"))));
       acc.setExchangeRateDif(BigDecimal.valueOf(numberUtils.toDouble(row.get("exchange_rate_dif"))));
-
+      acc.setAccountingStatus(AccountingStatusType.fromValue((String)row.get("accounting_status")));
+      acc.setStatus(AccountingStatusType.fromValue((String)row.get("status")));
       trxs.add(acc);
     }
 

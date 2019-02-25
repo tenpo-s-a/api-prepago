@@ -1076,6 +1076,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
       else {
         // Si El movimiento ya existe, se actualiza la data y los status.
+        System.out.println("!! OPD Accounting");
         acc.setStatus(AccountingStatusType.OK);
         this.updateAccountingDataFull(headers,acc); // Actualizar todos los valores de Accounting
         // Busca el movimiento de clearing  y luego le actualiza el status
