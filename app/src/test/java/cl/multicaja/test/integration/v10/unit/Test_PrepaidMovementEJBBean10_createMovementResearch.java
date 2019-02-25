@@ -33,7 +33,8 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser idMovRef","movRef",e.getData()[0].getValue());
+      //Assert.assertEquals("Msj Debe ser idMovRef","movRef",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser idArchivoOrigen","id_archivo_origen",e.getData()[0].getValue());
     } catch (Exception e) {
       Assert.fail("No debe caer aca");
     }

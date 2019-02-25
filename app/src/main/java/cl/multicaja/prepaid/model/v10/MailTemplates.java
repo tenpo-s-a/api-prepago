@@ -31,5 +31,6 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_TOPUP_REFUND_COMPLETE = String.format("%s/DevolucionCargaOk", APPNAME);
   public static final String TEMPLATE_MAIL_PURCHASE_SUCCESS = String.format("%s/ComprobanteCompraOk", APPNAME);
   public static final String TEMPLATE_MAIL_MAIL_CARD_ERROR_USER = String.format("%s/ErrorEnvioTarjetaUsuario", APPNAME);
+  public static final String TEMPLATE_MAIL_E06_REPORT = String.format("%s/ReporteE06", APPNAME);
 
 }

@@ -1,27 +1,23 @@
 package cl.multicaja.prepaid.helpers.freshdesk.model.v10;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-public class Ticket extends BaseModel implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Ticket extends NewTicket implements Serializable {
 
-  private Integer source;
-  private Integer status;
+  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
   private Long id;
+  private String createdAt;
+  private String updatedAt;
 
-  public Integer getSource() {
-    return source;
-  }
-
-  public void setSource(Integer source) {
-    this.source = source;
-  }
-
-  public Integer getStatus() {
-    return status;
-  }
-
-  public void setStatus(Integer status) {
-    this.status = status;
+  public Ticket() {
+    super();
   }
 
   public Long getId() {
@@ -30,5 +26,33 @@ public class Ticket extends BaseModel implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getCreatedAt() {
+    return createdAt;
+  }
+
+  public LocalDateTime getCreatedAtLocalDateTime() {
+    return LocalDateTime.parse(getCreatedAt(), formatter);
+  }
+
+  public void setCreatedAt(String createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public String getUpdatedAt() {
+    return updatedAt;
+  }
+  public LocalDateTime getUpdatedAtLocalDateTime() {
+    return LocalDateTime.parse(getUpdatedAt(), formatter);
+  }
+
+  public void setUpdatedAt(String updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  @JsonIgnore
+  public Boolean isClosedOrResolved() {
+    return (this.getStatus().equals(StatusType.CLOSED) || this.getStatus().equals(StatusType.RESOLVED));
   }
 }

@@ -14,12 +14,16 @@ import cl.multicaja.core.utils.http.HttpUtils;
 import cl.multicaja.core.utils.json.JsonMapper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
+import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class UserClient {
@@ -421,6 +425,29 @@ public class UserClient {
       return null;
     }
     return this.processResponse("createFreshdeskTicket", httpResponse, Ticket.class);
+  }
+
+  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+  private TicketsResponse getFreshdeskTicketsByTypeAndCreatedDate(Map<String, Object> headers, Integer page, TicketType type, LocalDateTime from, LocalDateTime to) throws Exception {
+    log.info("******** getFreshdeskTicketsByTypeAndCreatedDate IN ********");
+    HttpResponse httpResponse = apiGET(String.format("%s/backoffice/tickets?page=%d&type=%s&from=%s&to=%s", getApiUrl(),
+      page,
+      URLEncoder.encode(type.getValue(), "UTF-8"),
+      from.format(formatter),
+      to.format(formatter)));
+
+    httpResponse.setJsonParser(getJsonMapper());
+
+    if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())) {
+      return null;
+    }
+    return this.processResponse("getEmergencyTickets", httpResponse, TicketsResponse.class);
+  }
+
+  public TicketsResponse getEmergencyTickets(Map<String, Object> headers, Integer page, LocalDateTime from, LocalDateTime to) throws Exception {
+    log.info("******** getEmergencyTickets IN ********");
+    return this.getFreshdeskTicketsByTypeAndCreatedDate(headers, page, TicketType.EMERGENCIA, from, to);
   }
 
   /**

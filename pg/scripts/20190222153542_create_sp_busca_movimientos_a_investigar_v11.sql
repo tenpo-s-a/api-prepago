@@ -14,37 +14,46 @@
 --    limitations under the License.
 --
 
--- // create_sp_busca_movimientos_a_investigar
+-- // create_sp_busca_movimientos_a_investigar_v11
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_a_investigar_v10
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_a_investigar_v11
 (
-    IN  _in_id_mov_ref        VARCHAR,
+    IN  _in_id_archivo_origen VARCHAR,
     OUT _id                   BIGINT,
-    OUT _mov_ref              VARCHAR,
+    OUT _id_archivo_origen    VARCHAR,
     OUT _origen               VARCHAR,
     OUT _nombre_archivo       VARCHAR,
-    OUT _fecha_registro       TIMESTAMP
+    OUT _fecha_registro       TIMESTAMP,
+    OUT _fecha_de_transaccion TIMESTAMP,
+    OUT _responsable          VARCHAR,
+    OUT _descripcion          VARCHAR,
+    OUT _mov_ref              BIGINT
 )
 RETURNS SETOF RECORD AS $$
 BEGIN
   RETURN QUERY
-    SELECT
-      id,
-      mov_ref,
+    SELECT id,
+      id_archivo_origen,
       origen,
       nombre_archivo,
-      fecha_registro
+      fecha_registro,
+      fecha_de_transaccion,
+      responsable,
+      descripcion,
+      mov_ref
     FROM
-      ${schema}.prp_movimiento_investigar
+    ${schema}.prp_movimiento_investigar
     WHERE
-      COALESCE(_in_id_mov_ref, '') = '' OR mov_ref = _in_id_mov_ref;
-  RETURN;
+    (TRIM(COALESCE(_in_id_archivo_origen,'')) = '' OR id_archivo_origen = _in_id_archivo_origen)
+    ORDER BY id DESC;
+   RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v10(VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v11(VARCHAR);
+
 

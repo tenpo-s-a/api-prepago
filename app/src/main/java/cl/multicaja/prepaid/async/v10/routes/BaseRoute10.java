@@ -55,6 +55,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
 
+  @EJB
+  private BackofficeEJBBean10 backofficeEJBBEan10;
+
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -222,5 +225,11 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.mastercardCurrencyUpdateEJBBean10 = mastercardCurrencyUpdateEJBBean10;
   }
 
+  public BackofficeEJBBean10 getBackofficeEJBBEan10() {
+    return backofficeEJBBEan10;
+  }
 
+  public void setBackofficeEJBBEan10(BackofficeEJBBean10 backofficeEJBBEan10) {
+    this.backofficeEJBBEan10 = backofficeEJBBEan10;
+  }
 }
