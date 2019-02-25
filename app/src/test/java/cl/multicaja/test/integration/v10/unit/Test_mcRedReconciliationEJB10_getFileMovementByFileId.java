@@ -126,7 +126,7 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     for (ReconciliationMcRed10 createdMovement : allInserted) { // Por cada movimiento insertado
       for (ReconciliationMcRed10 foundMovement : foundMovements) { // Por cada movimiento encontrado
         if (foundMovement.getId().equals(createdMovement.getId())) { // Buscar si tienen el mismo id
-          Assert.assertEquals("Debe tener mismo archivo_id", fileId, foundMovement.getFileId());
+          Assert.assertEquals("Debe tener mismo archivo_id", createdMovement.getFileId(), foundMovement.getFileId());
           Assert.assertEquals("Debe tener mismo multicaja id", createdMovement.getMcCode(), foundMovement.getMcCode());
           Assert.assertEquals("Debe tener mismo cliente_id", createdMovement.getClientId(), foundMovement.getClientId());
           Assert.assertEquals("Debe tener mismo id_multicaja_ref", createdMovement.getExternalId(), foundMovement.getExternalId());
