@@ -58,6 +58,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       prepaidCard10.setPan(Utils.replacePan(pan));
       prepaidCard10.setProcessorUserId(processorUserId);
       prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
+      prepaidCard10.setIdUser(user.getId());
       System.out.println("Crypted PAN: "+encryptUtil.encrypt(pan));
       createPrepaidCard10(prepaidCard10);
     }
