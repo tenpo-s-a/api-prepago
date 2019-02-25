@@ -722,6 +722,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       responsable != null ? responsable : new NullParam(Types.VARCHAR),
       descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
       movRef != null ? movRef : new NullParam(Types.BIGINT),
+      new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
