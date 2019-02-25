@@ -27,6 +27,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   private List<String> contracts = Arrays.asList("09870001000000000014");
 
   public static void clearData() {
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
@@ -35,6 +36,7 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   }
 
   @Before
+  @After
   public void clear(){
     clearData();
   }
