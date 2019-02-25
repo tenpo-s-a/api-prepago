@@ -17,6 +17,7 @@ import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.BackofficeDelegate10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
@@ -30,21 +31,22 @@ import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Base64Utils;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.jms.Queue;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -58,7 +60,6 @@ import static cl.multicaja.core.test.TestBase.*;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.APP_NAME;
 import static cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10.getConfigUtils;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM;
 import static cl.multicaja.prepaid.model.v10.PrepaidMovementStatus.REJECTED;
 import static cl.multicaja.prepaid.model.v10.PrepaidMovementType.TOPUP;
 
@@ -93,10 +94,16 @@ public final class TestHelpersResource10 extends BaseResource {
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   @EJB
+  private BackofficeEJBBean10 backofficeEJBBEan10;
+
+  @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   @Inject
   private ClearingFileDelegate10 clearingFileDelegate;
+
+  @Inject
+  private BackofficeDelegate10 backofficeDelegate10;
 
   private UserClient userClient;
 
@@ -433,6 +440,46 @@ public final class TestHelpersResource10 extends BaseResource {
 	    response.put("error", e.getMessage());
     }
 
+
+    return Response.ok(response).status(202).build();
+  }
+
+  @GET
+  @Path("/generate_e06_report")
+  public Response generateE06ReportFile(@Context HttpHeaders headers) throws Exception {
+    Map<String, Object> response = new HashMap<>();
+    try{
+      validate();
+
+      File file = backofficeEJBBEan10.generateE06Report(ZonedDateTime.now());
+
+      response.put("file_name", file.getName());
+      response.put("file_exists", Files.exists(Paths.get("report_e06/" + file.getName())));
+
+      FileInputStream attachmentFile = new FileInputStream(file);
+      String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
+      attachmentFile.close();
+
+      Map<String, Object> templateData = new HashMap<>();
+
+      templateData.put("description", "Se adjunta archivo para reporte E06");
+
+      // Enviamos el archivo al mail de reportes diarios
+      EmailBody emailBodyToSend = new EmailBody();
+      emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), file.getName());
+      emailBodyToSend.setTemplateData(templateData);
+      emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_E06_REPORT);
+      emailBodyToSend.setAddress("e06_report@multicaja.cl");
+      mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+      //backofficeDelegate10.uploadE06ReportFile(file.getName());
+
+      file.delete();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      response.put("error", e.getMessage());
+    }
 
     return Response.ok(response).status(202).build();
   }
