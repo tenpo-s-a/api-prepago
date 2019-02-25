@@ -166,7 +166,8 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
   @Test
   public void processIpmFileTransactions2() throws Exception {
-
+    // Limpia los datos para no tener problemas con ID
+    clearData();
     // Prepara la data de prueba
     prepareUsersAndCards();
 
