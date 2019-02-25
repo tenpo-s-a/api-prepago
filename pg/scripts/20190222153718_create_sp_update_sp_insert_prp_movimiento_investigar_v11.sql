@@ -14,10 +14,10 @@
 --    limitations under the License.
 --
 
--- // create_sp_update_sp_insert_prp_movimiento_investigar_v1_1
+-- // create_sp_update_sp_insert_prp_movimiento_investigar_v11
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_investigar_v1_1(
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_investigar_v11(
 	IN _id_archivo_origen	    VARCHAR,
 	IN _origen			          VARCHAR,
 	IN _nombre_archivo	      VARCHAR,
@@ -25,6 +25,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_investigar_v1_1(
 	IN _responsable           VARCHAR,
 	IN _descripcion           VARCHAR,
 	IN _mov_ref               BIGINT,
+	OUT _r_id                 BIGINT,
 	OUT _error_code		        VARCHAR,
 	OUT _error_msg		        VARCHAR
 )AS $$
@@ -43,43 +44,43 @@ COALESCE(_descripcion,'') = '' AND
 COALESCE(_mov_ref,0) = 0
 THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] id_archivo_origen, origen, nombre_archivo, fecha_de_transaccion, responsable, descripcion y mov_ref son campos obligatorios';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] id_archivo_origen, origen, nombre_archivo, fecha_de_transaccion, responsable, descripcion y mov_ref son campos obligatorios';
 RETURN;
 END IF;
 
 IF COALESCE(_id_archivo_origen,'') = '' THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] El id_archivo_origen es obligatorio';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] El id_archivo_origen es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_origen,'') = '' THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] El origen es obligatorio';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] El origen es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_nombre_archivo,'') = '' THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] El nombre_archivo es obligatorio';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] El nombre_archivo es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_fecha_de_transaccion,to_timestamp(0)) = to_timestamp(0) THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] La fecha_de_transaccion es obligatoria';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] La fecha_de_transaccion es obligatoria';
 RETURN;
 END IF;
 
 IF COALESCE(_responsable,'') = '' THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] El responsable es obligatorio';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] El responsable es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_descripcion,'') = '' THEN
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] La descripcion es obligatoria';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] La descripcion es obligatoria';
 RETURN;
 END IF;
 
@@ -104,7 +105,7 @@ _fecha_de_transaccion,
 _responsable,
 _descripcion,
 _mov_ref
-);
+) RETURNING id INTO _r_id;
 
 EXCEPTION WHEN OTHERS THEN
 
@@ -112,13 +113,13 @@ IF COALESCE(_mov_ref,cast(_mov_ref as bigint)) = cast(_mov_ref as bigint) THEN
 RETURN;
 ELSE
 _error_code := '101000';
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] El mov_ref es obligatorio';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] El mov_ref es obligatorio';
 RETURN;
 END IF;
 
 IF COALESCE(_mov_ref,NOT NULL) = NOT NULL THEN
 _error_code := SQLSTATE;
-_error_msg := '[mc_prp_crea_movimiento_investigar_v1_1] Error al insertar Movimiento conciliado. CAUSA ('|| SQLERRM ||')';
+_error_msg := '[mc_prp_crea_movimiento_investigar_v11] Error al insertar Movimiento conciliado. CAUSA ('|| SQLERRM ||')';
 RETURN;
 END IF;
 
@@ -128,7 +129,7 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_investigar_v1_1(VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,BIGINT);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_investigar_v11(VARCHAR,VARCHAR,VARCHAR,TIMESTAMP,VARCHAR,VARCHAR,BIGINT);
 
 
 

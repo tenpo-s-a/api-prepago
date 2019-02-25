@@ -14,10 +14,10 @@
 --    limitations under the License.
 --
 
--- // create_sp_busca_movimientos_a_investigar_v1_1
+-- // create_sp_busca_movimientos_a_investigar_v11
 -- Migration SQL that makes the change goes here.
 
-CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_a_investigar_v1_1
+CREATE OR REPLACE FUNCTION ${schema}.mc_prp_busca_movimientos_a_investigar_v11
 (
     IN  _in_id_archivo_origen VARCHAR,
     OUT _id                   BIGINT,
@@ -54,6 +54,6 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v1_1(VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v11(VARCHAR);
 
 

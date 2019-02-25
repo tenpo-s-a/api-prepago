@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Test_20181010114034_create_sp_busca_movimientos_a_investigar extends TestDbBasePg {
-  private static final String SP_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v1_1";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v11";
 
   @Before
   public void before() {

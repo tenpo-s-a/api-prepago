@@ -18,8 +18,8 @@ import java.util.Map;
 
 public class Test_20181009113614_create_sp_crea_movimiento_investigar extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_investigar_v1_1";
-  private static final String SP_BUSCAR_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v1_1";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_investigar_v11";
+  private static final String SP_BUSCAR_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v11";
   private static final String TABLE_NAME = "prp_archivos_conciliacion";
 
   @AfterClass
@@ -64,7 +64,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
       Assert.assertEquals("Deben ser iguales",
-        "[mc_prp_crea_movimiento_investigar_v1_1] id_archivo_origen, origen, nombre_archivo, fecha_de_transaccion, responsable, descripcion y mov_ref son campos obligatorios",
+        "[mc_prp_crea_movimiento_investigar_v11] id_archivo_origen, origen, nombre_archivo, fecha_de_transaccion, responsable, descripcion y mov_ref son campos obligatorios",
         data.get("_error_msg"));
     }
 
@@ -75,7 +75,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] El origen es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] El origen es obligatorio",data.get("_error_msg"));
     }
 
     {
@@ -85,7 +85,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] El nombre_archivo es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] El nombre_archivo es obligatorio",data.get("_error_msg"));
     }
 
     {
@@ -95,7 +95,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] La fecha_de_transaccion es obligatoria",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] La fecha_de_transaccion es obligatoria",data.get("_error_msg"));
     }
 
     {
@@ -106,7 +106,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] El responsable es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] El responsable es obligatorio",data.get("_error_msg"));
     }
 
     {
@@ -117,7 +117,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] La descripcion es obligatoria",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] La descripcion es obligatoria",data.get("_error_msg"));
     }
 
     {
@@ -128,7 +128,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
-      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v1_1] El mov_ref es obligatorio",data.get("_error_msg"));
+      Assert.assertEquals("Deben ser iguales","[mc_prp_crea_movimiento_investigar_v11] El mov_ref es obligatorio",data.get("_error_msg"));
     }
 
     {
@@ -177,6 +177,46 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
 
     }
 
+    {
+      System.out.println("TEST 10");
+
+      String idArchivoOrigen = getRandomString(10);
+      String origen = getRandomString(10);
+      String nombreArchivo = getRandomString(10);
+      Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
+      String responsable = getRandomString(10);
+      String descripcion = getRandomString(10);
+      Long movRef = new Long(0);
+      Long idCreated;
+
+      Map<String, Object> data = setMovimientoInvestigar(
+        idArchivoOrigen, origen,
+        nombreArchivo, fechaDeTransaccion, responsable, descripcion,movRef);
+      System.out.println("Movimiento ingresado satisfactoriamente");
+      Assert.assertNotNull("Data no debe ser null", data);
+      Assert.assertEquals("No debe ser 0","0",data.get("_error_code"));
+      Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));
+      Assert.assertNotEquals("No debe ser igual a 0",0,data.get("_r_id"));
+
+      idCreated = (long)data.get("_r_id");
+
+      Map<String, Object> resp = searchMovimientoInvestigar(idArchivoOrigen);
+      List results = (List)resp.get("result");
+      Assert.assertNotNull("Debe existir", results);
+      Assert.assertEquals("Deben encontrar 1 movimiento", 1, results.size());
+
+      ResearchMovement researchMovement = (ResearchMovement) results.get(0);
+      Assert.assertEquals("Deben ser iguales",idArchivoOrigen,researchMovement.idArchivoOrigen);
+      Assert.assertEquals("Deben ser iguales",origen,researchMovement.origen);
+      Assert.assertEquals("Deben ser iguales",nombreArchivo,researchMovement.nombreArchivo);
+      Assert.assertEquals("Deben ser iguales",fechaDeTransaccion,researchMovement.fechaDeTransaccion);
+      Assert.assertEquals("Deben ser iguales",responsable,researchMovement.responsable);
+      Assert.assertEquals("Deben ser iguales",descripcion,researchMovement.descripcion);
+      Assert.assertEquals("Deben ser iguales",movRef,researchMovement.movRef);
+      Assert.assertEquals("Id Creado debe ser igual a retornado",idCreated,researchMovement.id);
+
+    }
+
   }
 
   public static Map<String, Object> setMovimientoInvestigar (
@@ -197,6 +237,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       responsable != null ? responsable : new NullParam(Types.VARCHAR),
       descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
       mov_ref != null ? mov_ref : new NullParam(Types.BIGINT),
+      new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -221,6 +262,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       responsable != null ? responsable : new NullParam(Types.VARCHAR),
       descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
       movRef != null ? movRef : new NullParam(Types.BIGINT),
+      new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR) };
     return dbUtils.execute(SP_NAME, params);

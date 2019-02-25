@@ -366,8 +366,8 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
       //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
-      reconciliedResearch.setId_archivo_origen(String.valueOf(rs.getString("id_archivo_origen")));
-      reconciliedResearch.setNombre_archivo(String.valueOf(rs.getString("nombre_archivo")));
+      reconciliedResearch.setIdArchivoOrigen(String.valueOf(rs.getString("id_archivo_origen")));
+      reconciliedResearch.setNombreArchivo(String.valueOf(rs.getString("nombre_archivo")));
       reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
       return reconciliedResearch;
     };

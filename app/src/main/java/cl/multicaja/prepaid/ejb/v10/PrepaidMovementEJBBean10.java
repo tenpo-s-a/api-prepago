@@ -726,7 +726,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new OutParam("_error_msg", Types.VARCHAR)
     };
     //Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v10",getSchema()),params);
-    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v1_1",getSchema()),params);
+    Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v11",getSchema()),params);
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
@@ -1488,7 +1488,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info(String.format("ID IN : %s", idArchivoOrigen));
     RowMapper rm = getResearchMovementRowMapper();
     //Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v1_1", getSchema()), rm, params);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v11", getSchema()), rm, params);
     List list = (List)resp.get("result");
     log.info("getResearchMovementByIdMovRef: " + list);
     return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
