@@ -5,16 +5,18 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import org.junit.*;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,12 +24,54 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
   private static final String SCHEMA = ConfigUtils.getInstance().getProperty("schema.acc");
 
-  @BeforeClass
-  //@AfterClass
+  private List<String> pans = Arrays.asList("5176081118013603");
+  private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013","09870001000000000014");
+  private List<PrepaidUser10> users = new ArrayList<>();
+  private List<PrepaidCard10> prepaidCards = new ArrayList<>();
+
+
+
+  @AfterClass
   public static void clearData() {
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", SCHEMA));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", SCHEMA));
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", SCHEMA));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", getSchemaAccounting()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+  }
+
+  @Before
+  public void prepData() throws Exception {
+    prepareUsersAndCards();
+  }
+
+
+  private void prepareUsersAndCards() throws Exception {
+
+    users.clear();
+    prepaidCards.clear();
+
+    for (int i = 0; i < pans.size(); i++) {
+      String pan = pans.get(i);
+      String processorUserId =  contracts.get(i);
+
+      System.out.println(String.format("%s -> %s", pan, processorUserId));
+
+      // Crea usuario
+      User user = registerUser();
+
+      // Crea usuario prepago
+      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
+      prepaidCard10.setPan(Utils.replacePan(pan));
+      prepaidCard10.setProcessorUserId(processorUserId);
+      prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
+      System.out.println("Crypted PAN: "+encryptUtil.encrypt(pan));
+      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+
+      users.add(prepaidUser10);
+      prepaidCards.add(prepaidCard10);
+    }
   }
 
   @Test
@@ -122,7 +166,73 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
   }
 
 
+  @Test
+  public void processIpmFileTransactions2() {
+    IpmFile ipmFile = new IpmFile();
+    ipmFile.setFileName("test2.ipm");
 
+    try {
+      File file = new File("src/test/resources/mastercard/files/ipm/good.ipm2.csv");
+
+      ipmFile = getPrepaidAccountingEJBBean10().processIpmFile(null, file, ipmFile);
+
+      List<IpmFile> bdIpmFiles = getPrepaidAccountingEJBBean10().findIpmFile(null, null, ipmFile.getFileName(), null, null);
+
+      Assert.assertEquals("Debe tener 1 archivo", Long.valueOf(1), Long.valueOf(bdIpmFiles.size()));
+
+      IpmFile bdIpmFile = bdIpmFiles.get(0);
+
+      Assert.assertNotNull("Debe tener id", bdIpmFile.getId());
+      Assert.assertNotNull("Debe tener timestamps", bdIpmFile.getTimestamps());
+      Assert.assertNotNull("Debe tener timestamps.created_at", bdIpmFile.getTimestamps().getCreatedAt());
+      Assert.assertNotNull("Debe tener timestamps.updated_at", bdIpmFile.getTimestamps().getUpdatedAt());
+      Assert.assertEquals("Debe tener mismo fileName", ipmFile.getFileName(), bdIpmFile.getFileName());
+      Assert.assertEquals("Debe tener status [PROCESSING]", IpmFileStatus.PROCESSING, bdIpmFile.getStatus());
+
+      getPrepaidAccountingEJBBean10().processIpmFileTransactions(null, ipmFile);
+
+      List<AccountingData10> trxs = getDbTransactions();
+      List<ClearingData10> trxcle = getDbClearingTransactions();
+
+      Assert.assertEquals("Debe tener 50 transacciones", Integer.valueOf(50), Integer.valueOf(trxs.size()));
+      Assert.assertEquals("Debe tener 50 tx", Integer.valueOf(50),Integer.valueOf(trxcle.size()));
+      Assert.assertEquals("Tamaños Iguales",trxs.size(),trxcle.size());
+
+      for(AccountingData10 trx : trxs) {
+        Assert.assertNotNull(String.format("Debe tener id [%s]", trx.getId()), trx.getId());
+        Assert.assertEquals("Debe tener type [COMPRA_MONEDA]", AccountingTxType.COMPRA_MONEDA, trx.getType());
+        Assert.assertEquals("Debe origin [IPM]", AccountingOriginType.IPM, trx.getOrigin());
+
+        BigDecimal amountBalance = BigDecimal.ZERO
+          .add(trx.getAmountMastercard().getValue())
+          .add(trx.getFee())
+          .add(trx.getFeeIva())
+          .add(trx.getExchangeRateDif()).setScale(0, BigDecimal.ROUND_UP);
+        Assert.assertEquals("El monto afecto a saldo debe ser la suma", amountBalance, trx.getAmountBalance().getValue().setScale(0, BigDecimal.ROUND_UP));
+      }
+
+      {
+        bdIpmFiles = getPrepaidAccountingEJBBean10().findIpmFile(null, null, ipmFile.getFileName(), null, null);
+
+        Assert.assertEquals("Debe tener 1 archivo", Long.valueOf(1), Long.valueOf(bdIpmFiles.size()));
+
+        bdIpmFile = bdIpmFiles.get(0);
+
+        Assert.assertNotNull("Debe tener id", bdIpmFile.getId());
+        Assert.assertNotNull("Debe tener timestamps", bdIpmFile.getTimestamps());
+        Assert.assertNotNull("Debe tener timestamps.created_at", bdIpmFile.getTimestamps().getCreatedAt());
+        Assert.assertNotNull("Debe tener timestamps.updated_at", bdIpmFile.getTimestamps().getUpdatedAt());
+        Assert.assertEquals("Debe tener mismo fileName", ipmFile.getFileName(), bdIpmFile.getFileName());
+        Assert.assertEquals("Debe tener status [PROCESSING]", IpmFileStatus.PROCESSED, bdIpmFile.getStatus());
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail("No debe estar aca");
+    }
+
+
+  }
 
   private List<ClearingData10> getDbClearingTransactions() {
     List<ClearingData10> trxs = new ArrayList<>();
