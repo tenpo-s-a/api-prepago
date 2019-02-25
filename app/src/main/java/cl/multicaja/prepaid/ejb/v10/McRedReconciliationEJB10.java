@@ -35,4 +35,12 @@ public interface McRedReconciliationEJB10 {
    * @throws Exception
    */
   List<ReconciliationMcRed10> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
+
+  /**
+   * Borra de la tabla switch_movement todos los registros de cierto archivo
+   * @param header
+   * @param fileId
+   * @throws Exception
+   */
+  void deleteFileMovementsByFileId(Map<String,Object> header, Long fileId) throws Exception;
 }

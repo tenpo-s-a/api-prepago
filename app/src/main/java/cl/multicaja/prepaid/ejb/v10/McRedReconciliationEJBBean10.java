@@ -279,7 +279,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       newSwitchMovement.setId(getNumberUtils().toLong(resp.get("_r_id")));
       return newSwitchMovement;
     } else {
-      log.error("addPrepaidMovement resp: " + resp);
+      log.error("addFileMovement resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
@@ -314,5 +314,25 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_switch_v10", rm,params);
     return (List)resp.get("result");
+  }
+
+  @Override
+  public void deleteFileMovementsByFileId(Map<String,Object> header, Long fileId) throws Exception {
+    if(fileId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
+    }
+
+    Object[] params = {
+      new InParam(fileId, Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_borrar_movimientos_switch_v10", params);
+
+    if(!"0".equals(resp.get("_error_code"))) {
+      log.error("deleteFileMovementsByFileId resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
   }
 }
