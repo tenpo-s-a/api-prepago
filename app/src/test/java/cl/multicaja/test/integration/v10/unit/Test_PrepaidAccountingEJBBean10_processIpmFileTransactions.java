@@ -22,13 +22,10 @@ import java.util.Map;
 
 public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends TestBaseUnit {
 
-
-  private List<String> pans = Arrays.asList("5176081118013603");
-  private List<String> contracts = Arrays.asList("09870001000000000014");
-
   public static void clearData() {
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
+
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_tarjeta CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.ipm_file CASCADE", getSchemaAccounting()));
@@ -44,29 +41,29 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
   private void prepareUsersAndCards() throws Exception {
 
-    for (int i = 0; i < pans.size(); i++) {
-      String pan = pans.get(i);
-      String processorUserId =  contracts.get(i);
+    String pan = "5176081118013603";
+    String processorUserId = "09870001000000000014";
 
-      System.out.println(String.format("%s -> %s", pan, processorUserId));
+    System.out.println(String.format("%s -> %s", pan, processorUserId));
 
-      // Crea usuario
-      User user = registerUser();
+    // Crea usuario
+    User user = registerUser();
 
-      // Crea usuario prepago
-      buildPrepaidUser10(user);
+    // Crea usuario prepago
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
-      prepaidCard10.setPan(Utils.replacePan(pan));
-      prepaidCard10.setProcessorUserId(processorUserId);
-      prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
-      prepaidCard10.setIdUser(user.getId());
-      System.out.println("Crypted PAN: "+encryptUtil.encrypt(pan));
-      createPrepaidCard10(prepaidCard10);
-    }
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
+    prepaidCard10.setPan(Utils.replacePan(pan));
+    prepaidCard10.setProcessorUserId(processorUserId);
+    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
+    prepaidCard10.setIdUser(prepaidUser10.getId());
+    createPrepaidCard10(prepaidCard10);
+
+
     //
-    String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, 848, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema()));
+    String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, %d, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema(),prepaidUser10.getId()));
 
     String accounting = "INSERT INTO %s.accounting VALUES (575, 1030, 'COMPRA_OTRA_MONEDA', 'Cargo por compra cm', 'IpmFile', 0, 152, 0, 0, 0, 0, 0, 0.00, 0.00, 0, 'PENDING', 0, 'PENDING', '2018-08-08 05:28:21', '2019-02-25 12:12:55', '2019-02-25 15:12:55.489402', '2019-02-25 15:12:55.489402');";
     DBUtils.getInstance().getJdbcTemplate().execute(String.format(accounting, getSchemaAccounting()));
