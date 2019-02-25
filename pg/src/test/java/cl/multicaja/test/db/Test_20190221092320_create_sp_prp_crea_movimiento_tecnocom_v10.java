@@ -53,8 +53,8 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     }
     // Verifica que se insertaron los datos en la tabla prp_movimientos_tecnocom_hist
     List<Map<String, Object>> rowsHis = dbUtils.getJdbcTemplate().queryForList(String.format("select * from  %s.prp_movimientos_tecnocom_hist", SCHEMA));
-    Assert.assertNotNull("Rows no debe ser vacio",rows);
-    Assert.assertEquals("El resultado debe ser ",3,rows.size());
+    Assert.assertNotNull("Rows no debe ser vacio",rowsHis);
+    Assert.assertEquals("El resultado debe ser ",3,rowsHis.size());
 
     for(Map<String, Object> data: rowsHis){
       Assert.assertNotNull("pan No debe ser null",data.get("pan"));
@@ -155,7 +155,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
 
 
 
-  public Map<String, Object>  creaMovimientoTecnocom(Long fileId, String cuenta, String pan, Integer tipoFac, BigDecimal impFac,String numAut)throws Exception{
+  public static Map<String, Object>  creaMovimientoTecnocom(Long fileId, String cuenta, String pan, Integer tipoFac, BigDecimal impFac, String numAut)throws Exception{
     Object[] params = {
       new InParam(fileId,Types.BIGINT),
       new InParam(cuenta,Types.VARCHAR), // Cuenta

@@ -5,10 +5,17 @@ import cl.multicaja.accounting.ejb.v10.PrepaidClearingEJBBean10;
 import cl.multicaja.accounting.model.v10.AccountingData10;
 import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.ZONEID;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
+import cl.multicaja.core.utils.db.InParam;
+import cl.multicaja.core.utils.db.NullParam;
+import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
@@ -23,12 +30,13 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author abarazarte
@@ -419,4 +427,163 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
     return result.toLocalDate().format(dbFormatter);
   }
+
+  /**
+   * Permite buscar movientos en la tabla de tecnocom.
+   * @param fileId
+   * @return
+   * @throws Exception
+   */
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId) throws Exception{
+
+    if(fileId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
+    }
+
+    Object[] params = {
+      new InParam(fileId, Types.BIGINT),
+    };
+    RowMapper rm = (Map<String, Object> row) -> {
+      MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
+      movimientoTecnocom10.setId(getNumberUtils().toLong(row.get("_id")));
+      movimientoTecnocom10.setIdArchivo(getNumberUtils().toLong(row.get("_idarchivo")));
+      movimientoTecnocom10.setCuenta(String.valueOf(row.get("_cuenta")));
+      movimientoTecnocom10.setPan(String.valueOf(row.get("_pan")));
+      movimientoTecnocom10.setCodEnt(String.valueOf(row.get("_codent")));
+      movimientoTecnocom10.setCentAlta(String.valueOf(row.get("_centalta")));
+
+      NewAmountAndCurrency10 impFac = new NewAmountAndCurrency10();
+      impFac.setValue(getNumberUtils().toBigDecimal(row.get("_impfac")));
+      impFac.setCurrencyCode(CodigoMoneda.fromValue(getNumberUtils().toInt(row.get("_clamon"))));
+      movimientoTecnocom10.setImpFac(impFac);
+
+      NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
+      impDiv.setValue(getNumberUtils().toBigDecimal(row.get("_impdiv")));
+      impDiv.setCurrencyCode(CodigoMoneda.fromValue(getNumberUtils().toInt(row.get("_clamondiv"))));
+      movimientoTecnocom10.setImpDiv(impDiv);
+
+      NewAmountAndCurrency10 impLiq = new NewAmountAndCurrency10();
+      impLiq.setValue(getNumberUtils().toBigDecimal(row.get("_impliq")));
+      impLiq.setCurrencyCode(CodigoMoneda.fromValue(getNumberUtils().toInt(row.get("_clamonliq"))));
+      movimientoTecnocom10.setImpLiq(impLiq);
+
+      movimientoTecnocom10.setIndNorCor(getNumberUtils().toInteger(row.get("_indnorcor")));
+      movimientoTecnocom10.setTipoFac(TipoFactura.fromValue(getNumberUtils().toInteger(row.get("_tipofac"))));
+      movimientoTecnocom10.setFecFac((Date)row.get("_fecfac"));
+      movimientoTecnocom10.setNumRefFac(String.valueOf(row.get("_numreffac")));
+
+      movimientoTecnocom10.setCmbApli(getNumberUtils().toBigDecimal(row.get("_cmbapli")));
+      movimientoTecnocom10.setNumAut(String.valueOf(row.get("_numaut")));
+      movimientoTecnocom10.setIndProaje(String.valueOf(row.get("_indproaje")));
+      movimientoTecnocom10.setCodCom(String.valueOf(row.get("_codcom")));
+      movimientoTecnocom10.setCodAct(getNumberUtils().toInteger(row.get("_codact")));
+      movimientoTecnocom10.setCodPais(getNumberUtils().toInteger(row.get("_codpais")));
+      movimientoTecnocom10.setNomPob(String.valueOf(row.get("_nompob")));
+      movimientoTecnocom10.setNumExtCta(getNumberUtils().toLong(row.get("_numextcta")));
+      movimientoTecnocom10.setNumMovExt(getNumberUtils().toLong(row.get("_nummovext")));
+      movimientoTecnocom10.setClamone(CodigoMoneda.fromValue(getNumberUtils().toInteger(row.get("_clamone"))));
+      movimientoTecnocom10.setTipoLin(String.valueOf(row.get("_tipolin")));
+      movimientoTecnocom10.setLinRef(getNumberUtils().toInteger(row.get("_linref")));
+      movimientoTecnocom10.setFechaCreacion((Timestamp)row.get("_fecha_creacion"));
+      movimientoTecnocom10.setFechaActualizacion((Timestamp)row.get("_fecha_actualizacion"));
+      return movimientoTecnocom10;
+    };
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_movimientos_tecnocom_v10", rm,params);
+
+    return (List)resp.get("result");
+  }
+
+  /**
+   * Permite eliminar Movimientos de la tabla de Tecnocom
+   * @param fileId
+   * @throws Exception
+   */
+  public void eliminaMovimientosTecnocom(Long fileId) throws Exception {
+
+    if(fileId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
+    }
+    Object[] params = {
+      new InParam(fileId, Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_elimina_movimientos_tecnocom_v10", params);
+
+    // Si hay algun error al eliminar se retorna Excepcion
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_elimina_movimientos_tecnocom_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+  }
+
+  /**
+   * Inserta un movimiento de archivo de op diarias en la tabla de movimientos.
+   * @param movTc
+   * @return
+   * @throws Exception
+   */
+  public MovimientoTecnocom10 insertaMovimientoTecnocom(MovimientoTecnocom10 movTc) throws Exception{
+
+    if(movTc == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "empty"));
+    }
+    if(movTc.getIdArchivo() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "IdArchivo"));
+    }
+    if(movTc.getCuenta() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Cuenta"));
+    }
+    if(movTc.getPan() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Pan"));
+    }
+    if(movTc.getTipoFac() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "TipoFac"));
+    }
+    if(movTc.getImpFac() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "ImpFac"));
+    }
+
+    Object[] params = {
+      movTc.getIdArchivo() != null ? new InParam(movTc.getIdArchivo(), Types.BIGINT) : new NullParam(Types.BIGINT),
+      movTc.getCuenta() != null ? new InParam(movTc.getCuenta(),Types.VARCHAR): new NullParam(Types.BIGINT), // Cuenta
+      movTc.getPan() != null ? new InParam(movTc.getPan(),Types.VARCHAR): new NullParam(Types.VARCHAR), // PAN encriptado
+      movTc.getCodEnt() != null ? new InParam(movTc.getCodEnt(),Types.VARCHAR): new NullParam(Types.VARCHAR),// COD ENT
+      movTc.getCentAlta() != null ? new InParam(movTc.getCentAlta(),Types.VARCHAR): new NullParam(Types.VARCHAR), // CENALTA
+      movTc.getImpFac().getCurrencyCode().getValue() != null ? new InParam(movTc.getImpFac().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamon
+      movTc.getIndNorCor() != null ? new InParam(movTc.getIndNorCor(),Types.NUMERIC): new NullParam(Types.NUMERIC),//indnorcor
+      movTc.getTipoFac() != null ? new InParam(movTc.getTipoFac().getCode(),Types.NUMERIC): new NullParam(Types.NUMERIC),//tipofac
+      movTc.getFecFac() != null ? new InParam(movTc.getFecFac(),Types.DATE): new NullParam(Types.DATE),//tipofac
+      movTc.getNumRefFac() != null ? new InParam(movTc.getNumRefFac(),Types.VARCHAR): new NullParam(Types.VARCHAR), // numreffac
+      movTc.getImpDiv().getCurrencyCode() != null ? new InParam(movTc.getImpDiv().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamondiv
+      movTc.getImpDiv().getValue() != null ? new InParam(movTc.getImpDiv().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impdiv
+      movTc.getImpFac().getValue() != null ? new InParam(movTc.getImpFac().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impfac
+      movTc.getCmbApli() != null ? new InParam(movTc.getCmbApli(),Types.NUMERIC): new NullParam(Types.NUMERIC),//cmbapli
+      movTc.getNumAut() != null ? new InParam(movTc.getNumAut(),Types.VARCHAR): new NullParam(Types.VARCHAR), // numaut
+      movTc.getIndProaje() != null ? new InParam(movTc.getIndProaje(),Types.VARCHAR): new NullParam(Types.VARCHAR), // indproaje
+      movTc.getCodCom() != null ? new InParam(movTc.getCodCom(),Types.VARCHAR): new NullParam(Types.VARCHAR),//codcom
+      movTc.getCodAct() != null ? new InParam(movTc.getCodAct(),Types.NUMERIC): new NullParam(Types.NUMERIC),//codact
+      movTc.getImpLiq().getValue() != null ? new InParam(movTc.getImpLiq().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impliq
+      movTc.getImpLiq().getCurrencyCode() != null ?new InParam(movTc.getImpLiq().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamonliq
+      movTc.getCodPais() != null ? new InParam(movTc.getCodPais(),Types.NUMERIC): new NullParam(Types.NUMERIC),//codpais
+      movTc.getNomPob() != null ? new InParam(movTc.getNomPob(),Types.VARCHAR): new NullParam(Types.VARCHAR),//nompob
+      movTc.getNumExtCta() != null ? new InParam(movTc.getNumExtCta(),Types.NUMERIC): new NullParam(Types.NUMERIC),//numextcta
+      movTc.getNumMovExt() != null ? new InParam(movTc.getNumMovExt(),Types.NUMERIC): new NullParam(Types.NUMERIC),//nummovext
+      movTc.getClamone() != null ? new InParam(movTc.getClamone().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamone
+      movTc.getTipoLin() != null ? new InParam(movTc.getTipoLin(),Types.VARCHAR): new NullParam(Types.VARCHAR),//tipolin
+      movTc.getLinRef() != null ? new InParam(movTc.getLinRef(),Types.NUMERIC): new NullParam(Types.NUMERIC),//linref
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+    Map<String, Object> resp = getDbUtils().execute(getSchema()+ ".mc_prp_crea_movimiento_tecnocom_v10", params);
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("mc_prp_crea_movimiento_tecnocom_v10 resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+    movTc.setId(getNumberUtils().toLong(resp.get("_r_id")));
+    return movTc;
+  }
+
 }
