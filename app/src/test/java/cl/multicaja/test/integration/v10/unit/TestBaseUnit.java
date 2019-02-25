@@ -229,6 +229,8 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10(){
     if(prepaidAccountingFileEJB10 == null){
       prepaidAccountingFileEJB10 = new PrepaidAccountingFileEJBBean10();
+      prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return prepaidAccountingFileEJB10;
   }
@@ -908,6 +910,8 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, PrepaidTopup10 prepaidTopup, CdtTransaction10 cdtTransaction) {
     return buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
   }
+
+
 
   /**
    *

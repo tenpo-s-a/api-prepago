@@ -82,7 +82,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
 
-
+  private EncryptUtil encryptUtil;
 
   public CalculationsHelper getCalculationsHelper(){
     if(calculationsHelper == null){
@@ -129,6 +129,13 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
+
+  public EncryptUtil getEncryptUtil(){
+    if(encryptUtil == null){
+      encryptUtil = EncryptUtil.getInstance();
+    }
+    return encryptUtil;
   }
 
   public AccountingData10 searchAccountingByIdTrx(Map<String, Object> header, Long  idTrx) throws Exception {
@@ -1057,13 +1064,19 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       // Si el movimiento no existe en nuestra BD se agrega  como uno nuevo, si no  se actualiza.
       if(prepaidMovement10 == null) {
         //Se busca la tarjeta correspondiente al movimiento
-       // PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptUtil().encrypt(trx.getPan()));
-        //PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
-        //movement10s.add(mov);
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getPrepaidCardByEncryptedPan(null, getEncryptUtil().encrypt(trx.getPan()));
+        // Se agrega movimiento solo si existe la tarjeta.
+        if(prepaidCard10 != null){
+          PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
+          movement10s.add(mov);
+        }else{
+          //TODO: Si la tarjeta no existe se debe investigar.
+        }
         transactions.add(acc);
       }
       else {
         // Si El movimiento ya existe, se actualiza la data y los status.
+        System.out.println("!! OPD Accounting");
         acc.setStatus(AccountingStatusType.OK);
         this.updateAccountingDataFull(headers,acc); // Actualizar todos los valores de Accounting
         // Busca el movimiento de clearing  y luego le actualiza el status
@@ -1074,7 +1087,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       }
     }
     // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
-    //  this.getPrepaidMovementEJBBean10().addPrepaidMovement(headers,movement10s);
+    this.getPrepaidMovementEJBBean10().addPrepaidMovement(headers,movement10s);
     // Se guarda data en Accounting
     this.saveAccountingData(null, transactions);
     // Se guarda la data en Clearing.
@@ -1130,8 +1143,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     prepaidMovement.setClamon(CodigoMoneda.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getCardholderBillingCurrencyCode())));
 
     //
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector()));
     prepaidMovement.setTipofac(tipoFactura);// Revisar
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector()));
+
     prepaidMovement.setFecfac(java.sql.Date.valueOf(batchTrx.getTransactionLocalDate().toLocalDate()));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(batchTrx.getPan());
@@ -1154,6 +1168,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     prepaidMovement.setNumbencta(1);
     prepaidMovement.setNumplastico(0L);
     prepaidMovement.setCodent("");
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setCodcom(batchTrx.getCardAcceptorId());
     prepaidMovement.setOriginType(MovementOriginType.OPE);
 
     //Tecnocom No conciliado
