@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
@@ -47,46 +48,46 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   @Override
   public void processFile(InputStream inputStream, String fileName) throws Exception {
-    List<ReconciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
+    List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails = getCsvData(fileName, inputStream);
     if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
       log.info("IN rendicion_cargas_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 26, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_cargas_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
-      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
+      //conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
     }
     else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
       log.info("IN rendicion_cargas_reversadas_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 37, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_cargas_reversadas_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
       log.info("IN rendicion_retiros_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 27, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_retiros_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
-      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
+      //conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
     }
     else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
       log.info("IN rendicion_retiros_reversados_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 38, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_retiros_reversados_mcpsa_mc");
     }
   }
 
-  private void conciliation(List<ReconciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
+  private void conciliation(List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
     try {
-      for (ReconciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
+      for (McRedReconciliationFileDetail recTmp : lstMcRedReconciliationFileDetails) {
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null)
@@ -132,27 +133,27 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
    * @param is
    * @return
    */
-  private List<ReconciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
-    List<ReconciliationMcRed10> lstReconciliationMcRed10;
+  private List<McRedReconciliationFileDetail> getCsvData(String fileName, InputStream is) throws Exception {
+    List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetail;
     log.info("IN");
     try {
       Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       CSVReader csvReader = new CSVReader(reader,';');
       csvReader.readNext();
       String[] record;
-      lstReconciliationMcRed10 = new ArrayList<>();
+      lstMcRedReconciliationFileDetail = new ArrayList<>();
 
       while ((record = csvReader.readNext()) != null) {
         log.debug(Arrays.toString(record));
-        ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-        reconciliationMcRed10.setMcCode(record[0]);
-        reconciliationMcRed10.setDateTrx(record[1]);
-        reconciliationMcRed10.setClientId(Long.valueOf(record[2]));
-        reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(record[3]));
+        McRedReconciliationFileDetail mcRedReconciliationFileDetail = new McRedReconciliationFileDetail();
+        mcRedReconciliationFileDetail.setMcCode(record[0]);
+        mcRedReconciliationFileDetail.setDateTrx(record[1]);
+        mcRedReconciliationFileDetail.setClientId(Long.valueOf(record[2]));
+        mcRedReconciliationFileDetail.setAmount(getNumberUtils().toBigDecimal(record[3]));
         if(!fileName.contains("reversa")) {
-          reconciliationMcRed10.setExternalId(Long.valueOf(record[4]));
+          mcRedReconciliationFileDetail.setExternalId(Long.valueOf(record[4]));
         }
-        lstReconciliationMcRed10.add(reconciliationMcRed10);
+        lstMcRedReconciliationFileDetail.add(mcRedReconciliationFileDetail);
       }
       is.close();
     }catch (Exception e){
@@ -163,7 +164,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
     }
     log.info("OUT");
-    return lstReconciliationMcRed10;
+    return lstMcRedReconciliationFileDetail;
   }
 
   /**

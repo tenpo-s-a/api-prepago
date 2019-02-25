@@ -3,7 +3,7 @@ package cl.multicaja.prepaid.helpers.tecnocom.model;
 /**
  * @author abarazarte
  **/
-public class ReconciliationFileLayout {
+public class TecnocomReconciliationFileLayout {
 
   public static final String HEADER_PREFIX = "C";
   public static final String DETAIL_PREFIX = "D";
@@ -13,7 +13,7 @@ public class ReconciliationFileLayout {
   private Integer length;
   private Integer decimal;
 
-  public ReconciliationFileLayout(Integer start, Integer length, Integer decimal) {
+  public TecnocomReconciliationFileLayout(Integer start, Integer length, Integer decimal) {
     this.start = start;
     this.length = length;
     this.decimal = decimal;

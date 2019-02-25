@@ -1,9 +1,8 @@
-package cl.multicaja.prepaid.model.v10;
+package cl.multicaja.prepaid.helpers.mcRed;
 
 import java.math.BigDecimal;
 
-public class ReconciliationMcRed10 {
-
+public class McRedReconciliationFileDetail {
 
   private String mcCode;
 

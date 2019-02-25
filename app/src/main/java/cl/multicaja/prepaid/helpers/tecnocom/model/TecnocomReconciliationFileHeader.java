@@ -5,25 +5,25 @@ import cl.multicaja.core.utils.NumberUtils;
 /**
  * @author abarazarte
  **/
-public class ReconciliationFileHeader {
+public class TecnocomReconciliationFileHeader {
 
   public static final String DATE_FORMAT = "yyyy-MM-dd";
   public static final String TIME_FORMAT = "HH.mm.ss";
 
   private String detail;
 
-  private final ReconciliationFileLayout CODENT = new ReconciliationFileLayout(0, 4, null);
-  private final ReconciliationFileLayout NSECFIC = new ReconciliationFileLayout(4, 10, null);
-  private final ReconciliationFileLayout TIPOCINTA = new ReconciliationFileLayout(14, 2, null);
-  private final ReconciliationFileLayout TIPOREG = new ReconciliationFileLayout(16, 1, null);
-  private final ReconciliationFileLayout FECENVIO = new ReconciliationFileLayout(17, 10, null);
-  private final ReconciliationFileLayout HORAENVIO = new ReconciliationFileLayout(27, 8, null);
-  private final ReconciliationFileLayout NUMREGTOT = new ReconciliationFileLayout(35, 12, 0);
+  private final TecnocomReconciliationFileLayout CODENT = new TecnocomReconciliationFileLayout(0, 4, null);
+  private final TecnocomReconciliationFileLayout NSECFIC = new TecnocomReconciliationFileLayout(4, 10, null);
+  private final TecnocomReconciliationFileLayout TIPOCINTA = new TecnocomReconciliationFileLayout(14, 2, null);
+  private final TecnocomReconciliationFileLayout TIPOREG = new TecnocomReconciliationFileLayout(16, 1, null);
+  private final TecnocomReconciliationFileLayout FECENVIO = new TecnocomReconciliationFileLayout(17, 10, null);
+  private final TecnocomReconciliationFileLayout HORAENVIO = new TecnocomReconciliationFileLayout(27, 8, null);
+  private final TecnocomReconciliationFileLayout NUMREGTOT = new TecnocomReconciliationFileLayout(35, 12, 0);
 
-  public ReconciliationFileHeader() {
+  public TecnocomReconciliationFileHeader() {
   }
 
-  public ReconciliationFileHeader(String detail) {
+  public TecnocomReconciliationFileHeader(String detail) {
     this.detail = detail;
   }
 
