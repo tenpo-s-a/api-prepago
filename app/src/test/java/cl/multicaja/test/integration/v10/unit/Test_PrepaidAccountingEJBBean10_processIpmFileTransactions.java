@@ -212,10 +212,11 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
       for(AccountingData10 acc : trxs){
         if(acc.getId() == 575){
           found = true;
-          Assert.assertNotEquals("El valor del ammount MCAR 0", BigDecimal.ZERO,trxs.get(0).getAmountMastercard().getValue().setScale(0));
-          Assert.assertNotEquals("El valor del ammount USD 0", BigDecimal.ZERO,trxs.get(0).getAmountUsd().getValue().longValue());
-          Assert.assertNotEquals("El valor del fee", BigDecimal.ZERO.longValue(),trxs.get(0).getFee());
-          Assert.assertNotEquals("El valor del fee iva", BigDecimal.ZERO.longValue(),trxs.get(0).getFeeIva());
+          Assert.assertNotEquals("El valor del ammount MCAR 0", BigDecimal.ZERO,acc.getAmountMastercard().getValue().setScale(0));
+          Assert.assertNotEquals("El valor del ammount USD 0", BigDecimal.ZERO,acc.getAmountUsd().getValue().longValue());
+          Assert.assertNotEquals("El valor del fee", BigDecimal.ZERO.longValue(),acc.getFee());
+          Assert.assertNotEquals("El valor del fee iva", BigDecimal.ZERO.longValue(),acc.getFeeIva());
+          Assert.assertEquals("Status OK",AccountingStatusType.OK,acc.getStatus());
           System.out.println("FOUND");
         }
       }
