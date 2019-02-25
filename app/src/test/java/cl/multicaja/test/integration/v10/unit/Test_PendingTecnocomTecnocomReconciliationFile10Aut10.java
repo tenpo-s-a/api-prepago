@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-public class Test_PendingTecnocomTecnocomReconciliationFileAut10 extends TestBaseUnit {
+public class Test_PendingTecnocomTecnocomReconciliationFile10Aut10 extends TestBaseUnit {
 
   private List<String> pans = Arrays.asList("5176081135830583","5176081111866841");
   private List<String> contracts = Arrays.asList("09870001000000000012","09870001000000000013");

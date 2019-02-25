@@ -21,7 +21,7 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-public class Test_PendingTecnocomTecnocomReconciliationFile10 extends TestBaseUnitAsync {
+public class Test_PendingTecnocomTecnocomReconciliationFile1010 extends TestBaseUnitAsync {
 
   private List<String> pans = Arrays.asList("5176081182052131", "5176081118047031", "5176081144225379","5176081135830583","5176081111866841");
   private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013");

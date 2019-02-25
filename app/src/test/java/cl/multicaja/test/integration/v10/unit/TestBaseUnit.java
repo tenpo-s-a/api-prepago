@@ -71,6 +71,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
   private static McRedReconciliationEJBBean10 mcRedReconciliationEJBBean10;
+  private static ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
   private static MastercardCurrencyUpdateEJBBean10 mastercardCurrencyUpdateEJBBean10;
   private static PrepaidAccountingFileEJBBean10 prepaidAccountingFileEJB10;
   private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
@@ -303,6 +304,13 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return mcRedReconciliationEJBBean10;
+  }
+
+  public static ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
+    if(reconciliationFilesEJBBean10 == null) {
+      reconciliationFilesEJBBean10 = new ReconciliationFilesEJBBean10();
+    }
+    return reconciliationFilesEJBBean10;
   }
 
   public static MastercardCurrencyUpdateEJBBean10 getMastercardCurrencyUpdateEJBBean10() {
