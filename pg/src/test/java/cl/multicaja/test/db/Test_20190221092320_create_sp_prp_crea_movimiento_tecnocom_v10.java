@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
@@ -184,6 +185,8 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
       new InParam(numberUtils.random(1,999),Types.NUMERIC),//clamone
       new InParam(getRandomString(4),Types.VARCHAR),//tipolin
       new InParam(numberUtils.random(3000,9999),Types.NUMERIC),//linref
+      new InParam(new Timestamp(System.currentTimeMillis()),Types.TIMESTAMP),
+      new InParam(numberUtils.random(3000,9999),Types.NUMERIC),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

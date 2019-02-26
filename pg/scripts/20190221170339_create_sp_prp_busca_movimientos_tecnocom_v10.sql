@@ -48,6 +48,8 @@ CREATE OR REPLACE FUNCTION ${schema}.prp_busca_movimientos_tecnocom_v10
   OUT _clamone NUMERIC,
   OUT _tipolin VARCHAR,
   OUT _linref NUMERIC,
+  OUT _fectrn TIMESTAMP,
+  OUT _impautcon NUMERIC,
   OUT _fecha_creacion TIMESTAMP,
   OUT _fecha_actualizacion TIMESTAMP
 )
@@ -86,6 +88,8 @@ BEGIN
       clamone,
       tipolin,
       linref,
+      fectrn,
+      impautcon,
       fecha_creacion,
       fecha_actualizacion
     FROM

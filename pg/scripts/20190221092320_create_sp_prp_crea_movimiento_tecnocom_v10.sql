@@ -46,6 +46,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
   IN	_clamone             NUMERIC,
   IN	_tipolin             VARCHAR,
   IN	_linref              NUMERIC,
+  IN _fectrn               TIMESTAMP,
+  IN _impautcon            NUMERIC,
   OUT _r_id                BIGINT,
   OUT _error_code          VARCHAR,
   OUT _error_msg           VARCHAR
@@ -124,6 +126,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     clamone,
     tipolin,
     linref,
+    fectrn,
+    impautcon,
     fecha_creacion,
     fecha_actualizacion
   )
@@ -156,6 +160,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _clamone,
     _tipolin,
     _linref,
+    _fectrn,
+    _impautcon,
     timezone('utc', now()),
     timezone('utc', now())
   ) RETURNING id INTO _r_id;
@@ -189,6 +195,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     clamone,
     tipolin,
     linref,
+    fectrn,
+    impautcon,
     fecha_creacion,
     fecha_actualizacion
   )
@@ -221,6 +229,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _clamone,
     _tipolin,
     _linref,
+    _fectrn,
+    _impautcon,
     timezone('utc', now()),
     timezone('utc', now())
   );
