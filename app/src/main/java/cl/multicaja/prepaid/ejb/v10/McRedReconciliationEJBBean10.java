@@ -119,7 +119,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
           //TODO: Esta OK este Research?
           Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().localDateTimeInUTC(
-            getDateUtils().dateStringToLocalDateTime(recTmp.getDateTrx(),"yyyy-mm-dd HH:mm:ss"),
+            getDateUtils().dateStringToLocalDateTime(recTmp.getDateTrx(),"yyyy-MM-dd HH:mm:ss"),
             ZONEID.AMERICA_SANTIAGO));
           Long movRef = new Long(0);
           getPrepaidMovementEJBBean10().createMovementResearch(
