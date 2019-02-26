@@ -27,7 +27,7 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
   }
 
   @Test
-  public void expireOldSuscriptionMovements() throws SQLException, InterruptedException {
+  public void expireOldReconciledMovements() throws SQLException, InterruptedException {
 
     // Preparar usuario
     Map<String, Object> mapCard = Test_20180514105345_create_sp_mc_prp_crear_tarjeta_v10.insertCard("ACTIVA");
