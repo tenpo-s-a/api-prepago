@@ -17,7 +17,7 @@ public class MovimientoTecnocom10 {
   private String centAlta;
   private NewAmountAndCurrency10 impFac;
   private Integer indNorCor;
-  private TipoFactura TipoFac;
+  private TipoFactura tipoFac;
   private Date  fecFac;
   private String numRefFac;
   private NewAmountAndCurrency10 impDiv;
@@ -36,6 +36,15 @@ public class MovimientoTecnocom10 {
   private Integer linRef;
   private Timestamp fechaCreacion;
   private Timestamp fechaActualizacion;
+  private  Timestamp fecTrn;
+  private NewAmountAndCurrency10 impautcon;
+
+  // Variables para el proceso.
+  private Boolean hasError;
+  private String errorDetails;
+
+
+
 
   public Long getId() {
     return id;
@@ -102,11 +111,11 @@ public class MovimientoTecnocom10 {
   }
 
   public TipoFactura getTipoFac() {
-    return TipoFac;
+    return tipoFac;
   }
 
   public void setTipoFac(TipoFactura tipoFac) {
-    TipoFac = tipoFac;
+    tipoFac = tipoFac;
   }
 
   public Date getFecFac() {
@@ -252,4 +261,77 @@ public class MovimientoTecnocom10 {
   public void setFechaActualizacion(Timestamp fechaActualizacion) {
     this.fechaActualizacion = fechaActualizacion;
   }
+
+  public Timestamp getFecTrn() {
+    return fecTrn;
+  }
+
+  public void setFecTrn(Timestamp fecTrn) {
+    this.fecTrn = fecTrn;
+  }
+
+  public NewAmountAndCurrency10 getImpautcon() {
+    return impautcon;
+  }
+
+  public void setImpautcon(NewAmountAndCurrency10 impautcon) {
+    this.impautcon = impautcon;
+  }
+
+  public Boolean getHasError() {
+    return hasError;
+  }
+
+  public void setHasError(Boolean hasError) {
+    this.hasError = hasError;
+  }
+
+  public String getErrorDetails() {
+    return errorDetails;
+  }
+
+  public void setErrorDetails(String errorDetails) {
+    this.errorDetails = errorDetails;
+  }
+
+  public TecnocomOperationType getOperationType() {
+    TecnocomOperationType operationType;
+    switch (tipoFac){
+      case COMPRA_INTERNACIONAL:
+      case SUSCRIPCION_INTERNACIONAL:
+        operationType = TecnocomOperationType.AU;
+        break;
+      default:
+        operationType = TecnocomOperationType.OP;
+        break;
+    }
+    return operationType;
+  }
+
+  public PrepaidMovementType getMovementType() {
+    PrepaidMovementType type = null;
+    switch (this.getTipoFac()) {
+      case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case CARGA_TRANSFERENCIA:
+      case ANULA_CARGA_TRANSFERENCIA:
+        type = PrepaidMovementType.TOPUP;
+        break;
+      case RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case RETIRO_TRANSFERENCIA:
+      case ANULA_RETIRO_TRANSFERENCIA:
+        type = PrepaidMovementType.WITHDRAW;
+        break;
+      case COMISION_APERTURA:
+        type = PrepaidMovementType.ISSUANCE_FEE;
+      case SUSCRIPCION_INTERNACIONAL:
+        type = PrepaidMovementType.SUSCRIPTION;
+        break;
+      case COMPRA_INTERNACIONAL:
+        type = PrepaidMovementType.PURCHASE;
+    }
+    return type;
+  }
+
 }
