@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import org.junit.*;
 
 import java.math.BigDecimal;
@@ -22,14 +22,14 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Map<String, Object> fileMap = Test_McRedReconciliationEJB10_addFileMovement.insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
-    ArrayList<ReconciliationMcRed10> allInserted = new ArrayList<>();
-    ReconciliationMcRed10 reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
+    ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
+    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), "04-02-1998 16:23");
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    ReconciliationMcRed10 insertedMovement = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), "04-02-1999 18:23");
+    McRedReconciliationFileDetail insertedMovement = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), "04-02-1999 18:23");
     insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, insertedMovement);
     allInserted.add(insertedMovement);
 
@@ -40,14 +40,14 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
 
     // busca por file id
     {
-      List<ReconciliationMcRed10> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, fileId, null, null);
+      List<McRedReconciliationFileDetail> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, fileId, null, null);
 
       Assert.assertNotNull("Debe existir", foundMovements);
       Assert.assertEquals("Debe tener largo 3", 3, foundMovements.size());
 
       int comparedMovements = 0;
-      for (ReconciliationMcRed10 createdMovement : allInserted) { // Por cada movimiento insertado
-        for (ReconciliationMcRed10 foundMovement : foundMovements) { // Por cada movimiento encontrado
+      for (McRedReconciliationFileDetail createdMovement : allInserted) { // Por cada movimiento insertado
+        for (McRedReconciliationFileDetail foundMovement : foundMovements) { // Por cada movimiento encontrado
           if (foundMovement.getId().equals(createdMovement.getId())) { // Buscar si tienen el mismo id
             Assert.assertEquals("Debe tener mismo archivo_id", fileId, foundMovement.getFileId());
             Assert.assertEquals("Debe tener mismo multicaja id", createdMovement.getMcCode(), foundMovement.getMcCode());
@@ -66,12 +66,12 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
 
     // Busca por id
     {
-      List<ReconciliationMcRed10> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, insertedMovement.getId(), null);
+      List<McRedReconciliationFileDetail> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, insertedMovement.getId(), null);
 
       Assert.assertNotNull("Debe existir", foundMovements);
       Assert.assertEquals("Debe tener largo 1", 1, foundMovements.size());
 
-      ReconciliationMcRed10 foundMovement = foundMovements.get(0);
+      McRedReconciliationFileDetail foundMovement = foundMovements.get(0);
       Assert.assertEquals("Debe tener mismo archivo_id", fileId, foundMovement.getFileId());
       Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), foundMovement.getMcCode());
       Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), foundMovement.getClientId());
@@ -82,12 +82,12 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
 
     // Busca por id multicaja
     {
-      List<ReconciliationMcRed10> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, null, insertedMovement.getMcCode());
+      List<McRedReconciliationFileDetail> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, null, insertedMovement.getMcCode());
 
       Assert.assertNotNull("Debe existir", foundMovements);
       Assert.assertEquals("Debe tener largo 1", 1, foundMovements.size());
 
-      ReconciliationMcRed10 foundMovement = foundMovements.get(0);
+      McRedReconciliationFileDetail foundMovement = foundMovements.get(0);
       Assert.assertEquals("Debe tener mismo archivo_id", fileId, foundMovement.getFileId());
       Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), foundMovement.getMcCode());
       Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), foundMovement.getClientId());
@@ -102,8 +102,8 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Map<String, Object> fileMap = Test_McRedReconciliationEJB10_addFileMovement.insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
-    ArrayList<ReconciliationMcRed10> allInserted = new ArrayList<>();
-    ReconciliationMcRed10 reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
+    ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
+    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), "04-02-1998 16:23");
@@ -117,14 +117,14 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId2, "MC26", 52L, 91L, new BigDecimal(1003), "05-02-1999 18:23");
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    List<ReconciliationMcRed10> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, null, null);
+    List<McRedReconciliationFileDetail> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, null, null);
 
     Assert.assertNotNull("Debe existir", foundMovements);
     Assert.assertEquals("Debe tener largo 4", 4, foundMovements.size());
 
     int comparedMovements = 0;
-    for (ReconciliationMcRed10 createdMovement : allInserted) { // Por cada movimiento insertado
-      for (ReconciliationMcRed10 foundMovement : foundMovements) { // Por cada movimiento encontrado
+    for (McRedReconciliationFileDetail createdMovement : allInserted) { // Por cada movimiento insertado
+      for (McRedReconciliationFileDetail foundMovement : foundMovements) { // Por cada movimiento encontrado
         if (foundMovement.getId().equals(createdMovement.getId())) { // Buscar si tienen el mismo id
           Assert.assertEquals("Debe tener mismo archivo_id", createdMovement.getFileId(), foundMovement.getFileId());
           Assert.assertEquals("Debe tener mismo multicaja id", createdMovement.getMcCode(), foundMovement.getMcCode());
