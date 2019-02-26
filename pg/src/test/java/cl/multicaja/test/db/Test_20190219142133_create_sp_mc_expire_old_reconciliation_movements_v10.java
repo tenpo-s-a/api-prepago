@@ -1,6 +1,8 @@
 package cl.multicaja.test.db;
 
+import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.db.InParam;
+import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
 import org.junit.After;
@@ -35,6 +37,8 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
     Long idUsuario = (Long)mapCard.get("id_usuario");
 
     ArrayList<Map<String, Object>> okMovements = new ArrayList<>();
+    ArrayList<Map<String, Object>> otherTipofacMovements = new ArrayList<>();
+    ArrayList<Map<String, Object>> otherIndnorcorMovements = new ArrayList<>();
     ArrayList<Map<String, Object>> noPendingMovements = new ArrayList<>();
     ArrayList<Map<String, Object>> purchasesAndSuscriptionsMovements = new ArrayList<>();
 
@@ -52,6 +56,14 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
       Map<String, Object> newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "TOPUP", "PENDING", "API", getRandomNumericString(10), 152, 0, 3001, new Date(System.currentTimeMillis()), "", "PENDING", "PENDING");
       okMovements.add(0, newMovement);
 
+      // Insertar el movimiento con otro tipofac
+      newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "TOPUP", "PENDING", "API", getRandomNumericString(10), 152, 0, 3002, new Date(System.currentTimeMillis()), "", "PENDING", "PENDING");
+      otherTipofacMovements.add(0, newMovement);
+
+      // Insertar el movimiento con otro indnorcor
+      newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "TOPUP", "PENDING", "API", getRandomNumericString(10), 152, -1, 3001, new Date(System.currentTimeMillis()), "", "PENDING", "PENDING");
+      otherIndnorcorMovements.add(0, newMovement);
+
       // Movimiento switch no pending
       newMovement = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertMovement(idMovimientoRef, idUsuario, getUniqueLong().toString(), "TOPUP", "PENDING", "API", getRandomNumericString(10), 152, 0, 3001, new Date(System.currentTimeMillis()), "", "RECONCILED", "RECONCILED");
       noPendingMovements.add(0, newMovement);
@@ -66,6 +78,8 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
     Object[] params = {
       new InParam("estado_con_switch", Types.VARCHAR),
       new InParam("SWITCH_TOPUP", Types.VARCHAR),
+      new InParam(3001, Types.NUMERIC),
+      new InParam(0, Types.NUMERIC),
       new OutParam("_r_error_code", Types.VARCHAR),
       new OutParam("_r_error_msg", Types.VARCHAR)
     };
@@ -83,6 +97,22 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
       } else {
         Assert.assertEquals("Del 2 en adelante deben tener el estado NOT_RECONCILED", "NOT_RECONCILED", storedMovement.get("estado_con_switch").toString());
       }
+    }
+
+    for(int i = 0; i < otherTipofacMovements.size(); i++) {
+      Map<String, Object> movement = otherTipofacMovements.get(i);
+      Map<String, Object> storedMovement = getMovement(numberUtils.toLong(movement.get("_id")));
+      Assert.assertEquals("Debe tener el mismo id", movement.get("_id").toString(), storedMovement.get("id").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING", "PENDING", storedMovement.get("estado_con_switch").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING tecnocom", "PENDING", storedMovement.get("estado_con_tecnocom").toString());
+    }
+
+    for(int i = 0; i < otherIndnorcorMovements.size(); i++) {
+      Map<String, Object> movement = otherIndnorcorMovements.get(i);
+      Map<String, Object> storedMovement = getMovement(numberUtils.toLong(movement.get("_id")));
+      Assert.assertEquals("Debe tener el mismo id", movement.get("_id").toString(), storedMovement.get("id").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING", "PENDING", storedMovement.get("estado_con_switch").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING tecnocom", "PENDING", storedMovement.get("estado_con_tecnocom").toString());
     }
 
     for(int i = 0; i < noPendingMovements.size(); i++) {
@@ -106,6 +136,8 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
     Object[] paramsTc = {
       new InParam("estado_con_tecnocom", Types.VARCHAR),
       new InParam("TECNOCOM_FILE", Types.VARCHAR),
+      new InParam(3001, Types.NUMERIC),
+      new InParam(0, Types.NUMERIC),
       new OutParam("_r_error_code", Types.VARCHAR),
       new OutParam("_r_error_msg", Types.VARCHAR)
     };
@@ -125,6 +157,20 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
       }
     }
 
+    for(int i = 0; i < otherTipofacMovements.size(); i++) {
+      Map<String, Object> movement = otherTipofacMovements.get(i);
+      Map<String, Object> storedMovement = getMovement(numberUtils.toLong(movement.get("_id")));
+      Assert.assertEquals("Debe tener el mismo id", movement.get("_id").toString(), storedMovement.get("id").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING tecnocom", "PENDING", storedMovement.get("estado_con_tecnocom").toString());
+    }
+
+    for(int i = 0; i < otherIndnorcorMovements.size(); i++) {
+      Map<String, Object> movement = otherIndnorcorMovements.get(i);
+      Map<String, Object> storedMovement = getMovement(numberUtils.toLong(movement.get("_id")));
+      Assert.assertEquals("Debe tener el mismo id", movement.get("_id").toString(), storedMovement.get("id").toString());
+      Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING tecnocom", "PENDING", storedMovement.get("estado_con_tecnocom").toString());
+    }
+
     for(int i = 0; i < noPendingMovements.size(); i++) {
       Map<String, Object> movement = noPendingMovements.get(i);
       Map<String, Object> storedMovement = getMovement(numberUtils.toLong(movement.get("_id")));
@@ -138,6 +184,78 @@ public class Test_20190219142133_create_sp_mc_expire_old_reconciliation_movement
       Assert.assertEquals("Debe tener el mismo id", movement.get("_id").toString(), storedMovement.get("id").toString());
       Assert.assertEquals("Todos deben tener el estado sin cambiar PENDING", "PENDING", storedMovement.get("estado_con_tecnocom").toString());
     }
+  }
+
+  @Test
+  public void expire_columnNameNull() throws Exception {
+    Object[] paramsTc = {
+      new NullParam(Types.VARCHAR),
+      new InParam("TECNOCOM_FILE", Types.VARCHAR),
+      new InParam(3001, Types.NUMERIC),
+      new InParam(0, Types.NUMERIC),
+      new OutParam("_r_error_code", Types.VARCHAR),
+      new OutParam("_r_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_expire_old_reconciliation_movements_v10", paramsTc);
+    System.out.println("result: " + resp);
+
+    Assert.assertEquals("Debe tener codigo de error MC001", "MC001", resp.get("_r_error_code").toString());
+    Assert.assertNotEquals("Debe tener mensaje de error", "", resp.get("_r_error_msg").toString());
+  }
+
+  @Test
+  public void expire_fileTypeNull() throws Exception {
+    Object[] paramsTc = {
+      new InParam("estado_con_tecnocom", Types.VARCHAR),
+      new NullParam(Types.VARCHAR),
+      new InParam(3001, Types.NUMERIC),
+      new InParam(0, Types.NUMERIC),
+      new OutParam("_r_error_code", Types.VARCHAR),
+      new OutParam("_r_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_expire_old_reconciliation_movements_v10", paramsTc);
+    System.out.println("result: " + resp);
+
+    Assert.assertEquals("Debe tener codigo de error MC002", "MC002", resp.get("_r_error_code").toString());
+    Assert.assertNotEquals("Debe tener mensaje de error", "", resp.get("_r_error_msg").toString());
+  }
+
+  @Test
+  public void expire_tipofacNull() throws Exception {
+    Object[] paramsTc = {
+      new InParam("estado_con_tecnocom", Types.VARCHAR),
+      new InParam("TECNOCOM_FILE", Types.VARCHAR),
+      new NullParam(Types.NUMERIC),
+      new InParam(0, Types.NUMERIC),
+      new OutParam("_r_error_code", Types.VARCHAR),
+      new OutParam("_r_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_expire_old_reconciliation_movements_v10", paramsTc);
+    System.out.println("result: " + resp);
+
+    Assert.assertEquals("Debe tener codigo de error MC003", "MC003", resp.get("_r_error_code").toString());
+    Assert.assertNotEquals("Debe tener mensaje de error", "", resp.get("_r_error_msg").toString());
+  }
+
+  @Test
+  public void expire_indnorcorNull() throws Exception {
+    Object[] paramsTc = {
+      new InParam("estado_con_tecnocom", Types.VARCHAR),
+      new InParam("TECNOCOM_FILE", Types.VARCHAR),
+      new InParam(3001, Types.NUMERIC),
+      new NullParam(Types.NUMERIC),
+      new OutParam("_r_error_code", Types.VARCHAR),
+      new OutParam("_r_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_expire_old_reconciliation_movements_v10", paramsTc);
+    System.out.println("result: " + resp);
+
+    Assert.assertEquals("Debe tener codigo de error MC004", "MC004", resp.get("_r_error_code").toString());
+    Assert.assertNotEquals("Debe tener mensaje de error", "", resp.get("_r_error_msg").toString());
   }
 
   private Map<String, Object> getMovement(Long id) {
