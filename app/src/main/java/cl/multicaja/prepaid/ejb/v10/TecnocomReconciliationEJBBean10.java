@@ -25,7 +25,6 @@ import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.net.ntp.TimeStamp;
 
 import javax.ejb.*;
 import java.io.InputStream;
@@ -127,7 +126,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    */
   @Override
   public void processFile(InputStream inputStream, String fileName) throws Exception {
+
     TecnocomReconciliationFile file;
+
     try {
       file = TecnocomFileHelper.getInstance().validateFile(inputStream);
     } catch (Exception ex) {
@@ -143,20 +144,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
     }
 
-    List<TecnocomReconciliationFileDetail> manualTrx = new ArrayList<>();
-    List<TecnocomReconciliationFileDetail> otherTrx = new ArrayList<>();
-
-    file.getDetails().forEach(trx -> {
-      if(trx.isFromSat()) {
-        manualTrx.add(trx);
-      } else {
-        otherTrx.add(trx);
-      }
-    });
-    // TRX Insertadas por IPM
-    insertOrUpdateManualTrx(fileName, manualTrx);
-
-
     // Se crea referencia al archivo en la tabla
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(fileName);
@@ -164,15 +151,28 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setStatus(FileStatus.READING);
     reconciliationFile10 = getReconciliationFilesEJBBean10().createReconciliationFile(null,reconciliationFile10);
+
     // Insertar movimientos en tecnocom
-    this.insertTecnocomMovement(reconciliationFile10.getId(),otherTrx);
+    this.insertTecnocomMovement(reconciliationFile10.getId(),file.getDetails());
 
-    // Se buscan los movimientos en la tabla de tecnocom
-    List<MovimientoTecnocom10> movimientoTecnocom10s = this.buscaMovimientosTecnocom(reconciliationFile10.getId());
+    // Se buscan movimientos SAT
+    List<MovimientoTecnocom10> satList = this.buscaMovimientosTecnocom(reconciliationFile10.getId(),OriginOpeType.SAT_ORIGIN);
 
-    // Se procesa el resultado
-    this.validateTransactions(fileName, movimientoTecnocom10s);
+    // Se procesan TRX Insertadas por SAT
+    this.insertOrUpdateManualTrx(fileName, satList);
 
+    // Se buscan movimientos MAUT
+    List<MovimientoTecnocom10> mautList = this.buscaMovimientosTecnocom(reconciliationFile10.getId(),OriginOpeType.API_ORIGIN);
+    // TRX Insertadas x Servicio.
+    this.processReconciliation(fileName, mautList);
+
+    // Se procesan las autorizaciones
+    List<MovimientoTecnocom10> autoList = this.buscaMovimientosTecnocom(reconciliationFile10.getId(),OriginOpeType.API_ORIGIN);
+    // TRX Insertadas x Servicio.
+    this.insertAutorization(fileName, autoList);
+
+    //Elimina Trx de la tabla de Tecnocom.
+    this.eliminaMovimientosTecnocom(reconciliationFile10.getId());
     /**
      * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron
      * el archivo actual o anterior.
@@ -251,17 +251,15 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    * Insertar en la tabla prp_movimientos, las transcacciones realizadas de forma manual por SAT.
    * @param trxs
    */
-  private void insertOrUpdateManualTrx(String fileName, List<TecnocomReconciliationFileDetail> trxs) {
+  private void insertOrUpdateManualTrx(String fileName, List<MovimientoTecnocom10> trxs) {
 
-    for (TecnocomReconciliationFileDetail trx : trxs) {
+    for (MovimientoTecnocom10 trx : trxs) {
       try{
         //Se obtiene el pan
         String pan = Utils.replacePan(trx.getPan());
 
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null,
-          pan,
-          trx.getContrato());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
 
         if(prepaidCard10 == null) {
           String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
@@ -273,7 +271,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         //Se busca el movimiento
         PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-          trx.getNumaut(), Date.valueOf(trx.getFecfac()), trx.getTipoFac());
+          trx.getNumAut(), trx.getFecFac(), trx.getTipoFac());
 
         if(originalMovement == null) {
           // Movimiento original no existe.
@@ -287,7 +285,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           movement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
 
           String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-            prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumaut(), trx.getFecfac(), trx.getImpfac());
+            prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
@@ -295,8 +293,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           log.info("Movimiento no encontrado, no conciliado");
           // Construyendo un Id.
           String researchId = "ExtId:[";
-          if (trx.getNumaut() != null) {
-            researchId += trx.getNumaut();
+          if (trx.getNumAut() != null) {
+            researchId += trx.getNumAut();
           } else {
             researchId += "NoExternalId";
           }
@@ -305,7 +303,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
-          if(!originalMovement.getMonto().equals(trx.getImpfac())){
+          if(!originalMovement.getMonto().equals(trx.getImpFac().getValue())){
             getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
               originalMovement.getId(),
               ReconciliationStatusType.NOT_RECONCILED);
@@ -335,7 +333,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    * @param fileName
    * @param trxs
    */
-  private void validateTransactions(String fileName, List<MovimientoTecnocom10> trxs) {
+  private void processReconciliation(String fileName, List<MovimientoTecnocom10> trxs) {
 
     for (MovimientoTecnocom10 trx : trxs) {
       try{
@@ -344,10 +342,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
 
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
 
         if(prepaidCard10 == null) {
-          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, trx.getContrato());
           log.error(msg);
           trx.setHasError(Boolean.TRUE);
           trx.setErrorDetails(msg);
@@ -397,8 +395,36 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
           }
         }
-        // Procesa las autorizaciones
-        else if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
+        if(StringUtils.isBlank(trx.getErrorDetails())) {
+          trx.setErrorDetails(ex.getMessage());
+        }
+        processErrorTrx(fileName, trx);
+      }
+    }
+  }
+  private void insertAutorization(String fileName, List<MovimientoTecnocom10> trxs){
+
+    for (MovimientoTecnocom10 trx : trxs) {
+      try {
+
+        //Se obtiene el pan
+        String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
+
+        //Se busca la tarjeta correspondiente al movimiento
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+
+        if(prepaidCard10 == null) {
+          String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileName, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        }
+
+        if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
 
           PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(prepaidCard10.getIdUser(),trx.getTipoFac(), trx.getNumAut());
 
@@ -429,7 +455,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           clearingData10=getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
 
         }
-
       } catch (Exception ex) {
         ex.printStackTrace();
         log.error(String.format("Error processing transaction [%s]", trx.getNumAut()));
@@ -529,14 +554,19 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    * @return
    * @throws Exception
    */
-  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId) throws Exception{
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId,OriginOpeType originOpeType) throws Exception{
 
     if(fileId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
     }
 
+    if(originOpeType == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originope"));
+    }
+
     Object[] params = {
       new InParam(fileId, Types.BIGINT),
+      new InParam(originOpeType.getValue(),Types.VARCHAR)
     };
     RowMapper rm = (Map<String, Object> row) -> {
       MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
@@ -581,6 +611,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setLinRef(getNumberUtils().toInteger(row.get("_linref")));
       movimientoTecnocom10.setFechaCreacion((Timestamp)row.get("_fecha_creacion"));
       movimientoTecnocom10.setFechaActualizacion((Timestamp)row.get("_fecha_actualizacion"));
+      movimientoTecnocom10.setFecTrn((Timestamp)row.get("_fectrn"));
+      movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(row.get("_impautcon"))));
+      movimientoTecnocom10.setOriginOpe(String.valueOf(row.get("_originope")));
+      movimientoTecnocom10.setContrato(String.valueOf(row.get("_contrato")));
       return movimientoTecnocom10;
     };
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_movimientos_tecnocom_v10", rm,params);
@@ -668,6 +702,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movTc.getClamone() != null ? new InParam(movTc.getClamone().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamone
       movTc.getTipoLin() != null ? new InParam(movTc.getTipoLin(),Types.VARCHAR): new NullParam(Types.VARCHAR),//tipolin
       movTc.getLinRef() != null ? new InParam(movTc.getLinRef(),Types.NUMERIC): new NullParam(Types.NUMERIC),//linref
+      movTc.getFecTrn() != null ? new InParam(movTc.getFecTrn(),Types.TIMESTAMP): new NullParam(Types.TIMESTAMP),
+      movTc.getImpautcon().getValue() != null ? new InParam(movTc.getLinRef(),Types.NUMERIC) :  new NullParam(Types.NUMERIC),
+      movTc.getOriginOpe() != null ? new InParam(movTc.getOriginOpe(),Types.VARCHAR): new NullParam(Types.VARCHAR),
+      movTc.getContrato() != null ? new InParam(movTc.getContrato(),Types.VARCHAR): new NullParam(Types.VARCHAR),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

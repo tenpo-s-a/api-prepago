@@ -49,6 +49,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
   IN _fectrn               TIMESTAMP,
   IN _impautcon            NUMERIC,
   IN _originope            VARCHAR,
+  IN _contrato             VARCHAR,
   OUT _r_id                BIGINT,
   OUT _error_code          VARCHAR,
   OUT _error_msg           VARCHAR
@@ -131,7 +132,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     impautcon,
     originope,
     fecha_creacion,
-    fecha_actualizacion
+    fecha_actualizacion,
+    contrato
   )
   VALUES
   (
@@ -164,9 +166,10 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _linref,
     _fectrn,
     _impautcon,
-    _originope
+    _originope,
     timezone('utc', now()),
-    timezone('utc', now())
+    timezone('utc', now()),
+    _contrato
   ) RETURNING id INTO _r_id;
 
  INSERT INTO ${schema}.prp_movimientos_tecnocom_hist
@@ -202,7 +205,8 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     impautcon,
     originope,
     fecha_creacion,
-    fecha_actualizacion
+    fecha_actualizacion,
+    contrato
   )
   VALUES
   (
@@ -235,9 +239,10 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _linref,
     _fectrn,
     _impautcon,
-    _originope
+    _originope,
     timezone('utc', now()),
-    timezone('utc', now())
+    timezone('utc', now()),
+    _contrato
   );
 
   EXCEPTION
@@ -252,4 +257,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_tecnocom_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC,TIMESTAMP,NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_tecnocom_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC,TIMESTAMP,NUMERIC,VARCHAR);

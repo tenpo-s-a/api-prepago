@@ -269,7 +269,7 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  public PrepaidMovement10 buildMovement(Long userId, String pan, TecnocomReconciliationFileDetail batchTrx) {
+  public PrepaidMovement10 buildMovement(Long userId, String pan, MovimientoTecnocom10 batchTrx) {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
@@ -277,16 +277,16 @@ public class TecnocomFileHelper {
     prepaidMovement.setIdPrepaidUser(userId);
     prepaidMovement.setIdTxExterno(null);
     prepaidMovement.setTipoMovimiento(batchTrx.getMovementType());
-    prepaidMovement.setMonto(batchTrx.getImpfac());
+    prepaidMovement.setMonto(batchTrx.getImpFac().getValue());
     prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-    prepaidMovement.setCodent(batchTrx.getCodent());
-    prepaidMovement.setCentalta(batchTrx.getCentalta());
+    prepaidMovement.setCodent(batchTrx.getCodEnt());
+    prepaidMovement.setCentalta(batchTrx.getCentAlta());
     prepaidMovement.setCuenta(batchTrx.getCuenta());
-    prepaidMovement.setClamon(CodigoMoneda.fromValue(NumberUtils.getInstance().toInteger(batchTrx.getClamon())));
+    prepaidMovement.setClamon(batchTrx.getImpFac().getCurrencyCode());
     prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(batchTrx.getTipoFac().getCorrector()));
     prepaidMovement.setTipofac(batchTrx.getTipoFac());
-    prepaidMovement.setFecfac(Date.valueOf(batchTrx.getFecfac()));
+    prepaidMovement.setFecfac(Date.valueOf(batchTrx.getFecFac()e));
     prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
     prepaidMovement.setPan(pan);
     prepaidMovement.setClamondiv(0);

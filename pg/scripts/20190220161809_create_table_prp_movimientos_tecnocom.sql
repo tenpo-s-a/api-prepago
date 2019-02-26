@@ -51,6 +51,7 @@
       originope           VARCHAR(20) NOT NULL,
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
+      contrato            VARCHAR(30) NOT NULL,
       CONSTRAINT prp_movimientos_tecnocom_pk PRIMARY KEY(id),
       CONSTRAINT prp_movimientos_tecnocom_u1 UNIQUE(cuenta,pan,fecfac,numaut)
   );
@@ -90,6 +91,7 @@
       originope           VARCHAR(20) NOT NULL,
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
+      contrato            VARCHAR(30) NOT NULL,
       CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id),
       CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut)
   );

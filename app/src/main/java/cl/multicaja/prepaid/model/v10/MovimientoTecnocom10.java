@@ -36,13 +36,13 @@ public class MovimientoTecnocom10 {
   private Integer linRef;
   private Timestamp fechaCreacion;
   private Timestamp fechaActualizacion;
-  private  Timestamp fecTrn;
+  private Timestamp fecTrn;
   private NewAmountAndCurrency10 impautcon;
-
+  private String contrato;
   // Variables para el proceso.
   private Boolean hasError;
   private String errorDetails;
-  private String originOperacion;
+  private String originOpe;
 
 
 
@@ -278,12 +278,12 @@ public class MovimientoTecnocom10 {
     this.impautcon = impautcon;
   }
 
-  public String getOriginOperacion() {
-    return originOperacion;
+  public String getOriginOpe() {
+    return originOpe;
   }
 
-  public void setOriginOperacion(String originOperacion) {
-    this.originOperacion = originOperacion;
+  public void setOriginOpe(String originOpe) {
+    this.originOpe = originOpe;
   }
 
   public Boolean getHasError() {
@@ -300,6 +300,14 @@ public class MovimientoTecnocom10 {
 
   public void setErrorDetails(String errorDetails) {
     this.errorDetails = errorDetails;
+  }
+
+  public String getContrato() {
+    return contrato;
+  }
+
+  public void setContrato(String contrato) {
+    this.contrato = contrato;
   }
 
   public TecnocomOperationType getOperationType() {
