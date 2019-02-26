@@ -117,7 +117,21 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "]-";
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
-          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.SWITCH, fileName);
+          //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.SWITCH, fileName);
+
+          //TODO: Esta OK este Research?
+          Timestamp fechaDeTransaccion = prepaidMovement10.getFechaCreacion();
+          Long movRef = new Long(0);
+          getPrepaidMovementEJBBean10().createMovementResearch(
+            null,
+            researchId,
+            ReconciliationOriginType.SWITCH,
+            fileName,
+            fechaDeTransaccion,
+            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
+            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
+            new Long(0));
+
           continue;
         }
         else

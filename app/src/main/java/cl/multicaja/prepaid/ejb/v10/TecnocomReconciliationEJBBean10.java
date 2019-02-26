@@ -212,7 +212,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           }
 
           researchId += "]-";
-          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+
+          //new Timestamp((new java.util.Date()).getTime());
+          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecfac())).getTime());
+          Long movRef = new Long(0);
+
+          //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+          getPrepaidMovementEJBBean10().createMovementResearch(
+            null, researchId, ReconciliationOriginType.TECNOCOM,
+            fileName,fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
+            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,movRef);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpfac())){
@@ -279,7 +288,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             }
 
             researchId += "]-";
-            getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+
+            Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecfac())).getTime());
+            String responsable = "OTI-Prepago";
+            String descripcion = "Movimiento no encontrado en BBDD";
+            Long movRef = new Long(0);
+            //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+            getPrepaidMovementEJBBean10().createMovementResearch(
+              null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
+              fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
+              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,movRef);
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
