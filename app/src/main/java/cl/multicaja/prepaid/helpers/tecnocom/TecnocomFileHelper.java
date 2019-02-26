@@ -58,14 +58,14 @@ public class TecnocomFileHelper {
     }
   }
 
-  private ReconciliationFile validateHeader(String header, ReconciliationFile file) throws Exception {
+  private TecnocomReconciliationFile validateHeader(String header, TecnocomReconciliationFile file) throws Exception {
     if(StringUtils.isAllBlank(header)) {
       String msg = "Header not found";
       log.error(msg);
       throw new Exception(msg);
     }
 
-    file.setHeader(new ReconciliationFileHeader(header));
+    file.setHeader(new TecnocomReconciliationFileHeader(header));
 
     // validar codigo de entidad
     if(StringUtils.isBlank(file.getHeader().getCodent())) {
@@ -101,14 +101,14 @@ public class TecnocomFileHelper {
     }
 
     //Validar Fecha
-    if(!isValidHeaderDateTimeFormat(file.getHeader().getFecenvio(), ReconciliationFileHeader.DATE_FORMAT)) {
-      String msg = String.format("Invalid DATE FORMAT %s -> [%s]", ReconciliationFileHeader.DATE_FORMAT, file.getHeader().getFecenvio());
+    if(!isValidHeaderDateTimeFormat(file.getHeader().getFecenvio(), TecnocomReconciliationFileHeader.DATE_FORMAT)) {
+      String msg = String.format("Invalid DATE FORMAT %s -> [%s]", TecnocomReconciliationFileHeader.DATE_FORMAT, file.getHeader().getFecenvio());
       log.error(msg);
       throw new Exception(msg);
     }
     //Validar Hora
-    if(!isValidHeaderDateTimeFormat(file.getHeader().getHoraenvio(), ReconciliationFileHeader.TIME_FORMAT)) {
-      String msg = String.format("Invalid TIME FORMAT %s -> [%s]", ReconciliationFileHeader.TIME_FORMAT, file.getHeader().getHoraenvio());
+    if(!isValidHeaderDateTimeFormat(file.getHeader().getHoraenvio(), TecnocomReconciliationFileHeader.TIME_FORMAT)) {
+      String msg = String.format("Invalid TIME FORMAT %s -> [%s]", TecnocomReconciliationFileHeader.TIME_FORMAT, file.getHeader().getHoraenvio());
       log.error(msg);
       throw new Exception(msg);
     }
@@ -122,15 +122,15 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  private ReconciliationFile validateFooter(String footer, Integer records, ReconciliationFile file) throws Exception {
+  private TecnocomReconciliationFile validateFooter(String footer, Integer records, TecnocomReconciliationFile file) throws Exception {
     if(StringUtils.isAllBlank(footer)) {
       log.error("Footer not found");
       throw new Exception("Footer not found");
     }
-    ReconciliationFileHeader foot = new ReconciliationFileHeader(footer);
+    TecnocomReconciliationFileHeader foot = new TecnocomReconciliationFileHeader(footer);
     file.setFooter(foot);
 
-    ReconciliationFileHeader header = file.getHeader();
+    TecnocomReconciliationFileHeader header = file.getHeader();
 
     // validar codigo de entidad
     if(StringUtils.isBlank(foot.getCodent())) {
@@ -180,8 +180,8 @@ public class TecnocomFileHelper {
     }
 
     //Validar Fecha
-    if(!isValidHeaderDateTimeFormat(foot.getFecenvio(), ReconciliationFileHeader.DATE_FORMAT)) {
-      String msg = String.format("Invalid DATE FORMAT %s -> [%s]", ReconciliationFileHeader.DATE_FORMAT, foot.getFecenvio());
+    if(!isValidHeaderDateTimeFormat(foot.getFecenvio(), TecnocomReconciliationFileHeader.DATE_FORMAT)) {
+      String msg = String.format("Invalid DATE FORMAT %s -> [%s]", TecnocomReconciliationFileHeader.DATE_FORMAT, foot.getFecenvio());
       log.error(msg);
       throw new Exception(msg);
     }
@@ -191,8 +191,8 @@ public class TecnocomFileHelper {
       throw new Exception(msg);
     }
     //Validar Hora
-    if(!isValidHeaderDateTimeFormat(foot.getHoraenvio(), ReconciliationFileHeader.TIME_FORMAT)) {
-      String msg = String.format("Invalid TIME FORMAT %s -> [%s]", ReconciliationFileHeader.TIME_FORMAT, foot.getHoraenvio());
+    if(!isValidHeaderDateTimeFormat(foot.getHoraenvio(), TecnocomReconciliationFileHeader.TIME_FORMAT)) {
+      String msg = String.format("Invalid TIME FORMAT %s -> [%s]", TecnocomReconciliationFileHeader.TIME_FORMAT, foot.getHoraenvio());
       log.error(msg);
       throw new Exception(msg);
     }
@@ -224,10 +224,10 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  public ReconciliationFile validateFile(InputStream data) throws Exception {
+  public TecnocomReconciliationFile validateFile(InputStream data) throws Exception {
     Integer records = 0;
 
-    ReconciliationFile file = new ReconciliationFile();
+    TecnocomReconciliationFile file = new TecnocomReconciliationFile();
 
     Scanner scanner = new Scanner(data);
     try {
@@ -244,12 +244,12 @@ public class TecnocomFileHelper {
         if (line.startsWith(String.format("%sP", pattern))){
           footerLine = line;
         } else {
-          ReconciliationFileDetail detail = new ReconciliationFileDetail(line);
+          TecnocomReconciliationFileDetail detail = new TecnocomReconciliationFileDetail(line);
           if(TecnocomOperationType.OP.equals(detail.getOperationType())) {
-            file.getDetails().add(new ReconciliationFileDetail(line));
+            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
           }
           else if (TecnocomOperationType.AU.equals(detail.getOperationType())){
-            file.getDetails().add(new ReconciliationFileDetail(line));
+            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
           }
           if(!line.startsWith(String.format("%sD", pattern))) {
             if(!file.isSuspicious()) {
@@ -269,7 +269,7 @@ public class TecnocomFileHelper {
     return file;
   }
 
-  public PrepaidMovement10 buildMovement(Long userId, String pan, ReconciliationFileDetail batchTrx) {
+  public PrepaidMovement10 buildMovement(Long userId, String pan, TecnocomReconciliationFileDetail batchTrx) {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 

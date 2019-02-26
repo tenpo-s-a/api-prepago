@@ -43,6 +43,7 @@ public class Test_20190220161809_create_table_prp_movimientos_tecnocom extends T
       new ColumnInfo("linref", SqlType.NUMERIC.getGetJavaType(), 8),
       new ColumnInfo("impautcon", SqlType.NUMERIC.getGetJavaType(), 17),
       new ColumnInfo("fectrn", SqlType.TIMESTAMP.getGetJavaType()),
+      new ColumnInfo("originope",SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType())
     );
@@ -85,6 +86,7 @@ public class Test_20190220161809_create_table_prp_movimientos_tecnocom extends T
       new ColumnInfo("linref", SqlType.NUMERIC.getGetJavaType(), 8),
       new ColumnInfo("impautcon", SqlType.NUMERIC.getGetJavaType(), 17),
       new ColumnInfo("fectrn", SqlType.TIMESTAMP.getGetJavaType()),
+      new ColumnInfo("originope",SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType())
     );

@@ -4,8 +4,8 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -21,14 +21,14 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync {
+public class Test_PendingTecnocomTecnocomReconciliationFile1010 extends TestBaseUnitAsync {
 
   private List<String> pans = Arrays.asList("5176081182052131", "5176081118047031", "5176081144225379","5176081135830583","5176081111866841");
   private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
-  private static ReconciliationFile onlineFile;
-  private static ReconciliationFile apiFile;
+  private static TecnocomReconciliationFile onlineFile;
+  private static TecnocomReconciliationFile apiFile;
 
   private void clearTransactions() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
@@ -123,7 +123,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : onlineFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -189,7 +189,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : onlineFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : onlineFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -251,7 +251,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -318,7 +318,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -383,7 +383,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -448,7 +448,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -514,7 +514,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
@@ -576,7 +576,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
 
     // Se agregan transacciones con monto diferente
-    for (ReconciliationFileDetail trx : apiFile.getDetails()) {
+    for (TecnocomReconciliationFileDetail trx : apiFile.getDetails()) {
 
       Long userId = prepaidCards.stream()
         .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))

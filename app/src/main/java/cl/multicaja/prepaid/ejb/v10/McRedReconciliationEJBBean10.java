@@ -1,18 +1,32 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
+import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.InParam;
+import cl.multicaja.core.utils.db.NullParam;
+import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.util.Times;
 
 import javax.ejb.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,8 +35,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.ERROR_PROCESSING_FILE;
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -47,46 +62,46 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   @Override
   public void processFile(InputStream inputStream, String fileName) throws Exception {
-    List<ReconciliationMcRed10> lstReconciliationMcRed10s = getCsvData(fileName, inputStream);
+    List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails = getCsvData(fileName, inputStream);
     if (fileName.contains("rendicion_cargas_mcpsa_mc")) {
       log.info("IN rendicion_cargas_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 26, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_cargas_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_cargas_rechazadas_mcpsa_mc")) {
-      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
+      //conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, fileName);
     }
     else if (fileName.contains("rendicion_cargas_reversadas_mcpsa_mc")) {
       log.info("IN rendicion_cargas_reversadas_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 37, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_cargas_reversadas_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_retiros_mcpsa_mc")) {
       log.info("IN rendicion_retiros_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 27, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_retiros_mcpsa_mc");
     }
     else if (fileName.contains("rendicion_retiros_rechazados_mcpsa_mc")) {
-      //conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
+      //conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, fileName);
     }
     else if (fileName.contains("rendicion_retiros_reversados_mcpsa_mc")) {
       log.info("IN rendicion_retiros_reversados_mcpsa_mc");
-      conciliation(lstReconciliationMcRed10s, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, fileName);
+      conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, fileName);
       StringDateInterval utcInterval = convertFileNameToUTCInterval(fileName, 38, dateFormat);
       getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
       log.info("OUT rendicion_retiros_reversados_mcpsa_mc");
     }
   }
 
-  private void conciliation(List<ReconciliationMcRed10> lstReconciliationMcRed10s, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
+  private void conciliation(List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
     try {
-      for (ReconciliationMcRed10 recTmp : lstReconciliationMcRed10s) {
+      for (McRedReconciliationFileDetail recTmp : lstMcRedReconciliationFileDetails) {
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null)
@@ -132,27 +147,27 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
    * @param is
    * @return
    */
-  private List<ReconciliationMcRed10> getCsvData(String fileName, InputStream is) throws Exception {
-    List<ReconciliationMcRed10> lstReconciliationMcRed10;
+  private List<McRedReconciliationFileDetail> getCsvData(String fileName, InputStream is) throws Exception {
+    List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetail;
     log.info("IN");
     try {
       Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       CSVReader csvReader = new CSVReader(reader,';');
       csvReader.readNext();
       String[] record;
-      lstReconciliationMcRed10 = new ArrayList<>();
+      lstMcRedReconciliationFileDetail = new ArrayList<>();
 
       while ((record = csvReader.readNext()) != null) {
         log.debug(Arrays.toString(record));
-        ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
-        reconciliationMcRed10.setMcCode(record[0]);
-        reconciliationMcRed10.setDateTrx(record[1]);
-        reconciliationMcRed10.setClientId(Long.valueOf(record[2]));
-        reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(record[3]));
+        McRedReconciliationFileDetail mcRedReconciliationFileDetail = new McRedReconciliationFileDetail();
+        mcRedReconciliationFileDetail.setMcCode(record[0]);
+        mcRedReconciliationFileDetail.setDateTrx(record[1]);
+        mcRedReconciliationFileDetail.setClientId(Long.valueOf(record[2]));
+        mcRedReconciliationFileDetail.setAmount(getNumberUtils().toBigDecimal(record[3]));
         if(!fileName.contains("reversa")) {
-          reconciliationMcRed10.setExternalId(Long.valueOf(record[4]));
+          mcRedReconciliationFileDetail.setExternalId(Long.valueOf(record[4]));
         }
-        lstReconciliationMcRed10.add(reconciliationMcRed10);
+        lstMcRedReconciliationFileDetail.add(mcRedReconciliationFileDetail);
       }
       is.close();
     }catch (Exception e){
@@ -163,7 +178,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
     }
     log.info("OUT");
-    return lstReconciliationMcRed10;
+    return lstMcRedReconciliationFileDetail;
   }
 
   /**
@@ -211,5 +226,114 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   class StringDateInterval {
     private String beginDate;
     private String endDate;
+  }
+
+  @Override
+  public McRedReconciliationFileDetail addFileMovement(Map<String,Object> header, McRedReconciliationFileDetail newSwitchMovement) throws Exception {
+    if(newSwitchMovement == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement"));
+    }
+
+    if(newSwitchMovement.getFileId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.fileId"));
+    }
+
+    if(newSwitchMovement.getMcCode() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.McCode"));
+    }
+
+    if(newSwitchMovement.getClientId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.clientId"));
+    }
+
+    if(newSwitchMovement.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.amount"));
+    }
+
+    if(newSwitchMovement.getDateTrx() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
+    }
+
+    // La fecha viene en string hora chile, hay que convertirla a timestamp hora utc
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    LocalDateTime dateTime = LocalDateTime.parse(newSwitchMovement.getDateTrx(), formatter);
+    ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
+    ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
+    Timestamp fechaTrxUTC = Timestamp.valueOf(utcTime.toLocalDateTime());
+
+    Object[] params = {
+      new InParam(newSwitchMovement.getFileId(), Types.BIGINT),
+      new InParam(newSwitchMovement.getMcCode(), Types.VARCHAR),
+      new InParam(newSwitchMovement.getClientId(), Types.BIGINT),
+      newSwitchMovement.getExternalId() != null ? new InParam(newSwitchMovement.getExternalId(), Types.BIGINT) : new NullParam(Types.BIGINT),
+      new InParam(newSwitchMovement.getAmount(), Types.NUMERIC),
+      new InParam(fechaTrxUTC, Types.TIMESTAMP),
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_r_id_int", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_crea_movimiento_switch_v10", params);
+
+    if("0".equals(resp.get("_error_code"))) {
+      newSwitchMovement.setId(getNumberUtils().toLong(resp.get("_r_id")));
+      return newSwitchMovement;
+    } else {
+      log.error("addFileMovement resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  @Override
+  public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
+    Object[] params = {
+      new InParam("prp_movimiento_switch", Types.VARCHAR),
+      movementId != null ? new InParam(movementId, Types.BIGINT) : new NullParam(Types.BIGINT),
+      fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
+      mcId != null ? new InParam(mcId, Types.VARCHAR) : new NullParam(Types.VARCHAR)
+    };
+
+    RowMapper rm = (Map<String, Object> row) -> {
+      McRedReconciliationFileDetail reconciliationMcRed10 = new McRedReconciliationFileDetail();
+      reconciliationMcRed10.setId(getNumberUtils().toLong(row.get("_id")));
+      reconciliationMcRed10.setFileId(getNumberUtils().toLong(row.get("_id_archivo")));
+      reconciliationMcRed10.setMcCode(row.get("_id_multicaja").toString());
+      reconciliationMcRed10.setClientId(getNumberUtils().toLong(row.get("_id_cliente")));
+      reconciliationMcRed10.setExternalId(getNumberUtils().toLong(row.get("_id_multicaja_ref")));
+      reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(row.get("_monto")));
+
+      Timestamp storedTimestamp = (Timestamp) row.get("_fecha_trx");
+      LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
+      ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
+      ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
+      String chileFormated = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm").format(chileTime);
+      reconciliationMcRed10.setDateTrx(chileFormated);
+
+      return reconciliationMcRed10;
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_switch_v10", rm,params);
+    return (List)resp.get("result");
+  }
+
+  @Override
+  public void deleteFileMovementsByFileId(Map<String,Object> header, Long fileId) throws Exception {
+    if(fileId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
+    }
+
+    Object[] params = {
+      new InParam(fileId, Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_borrar_movimientos_switch_v10", params);
+
+    if(!"0".equals(resp.get("_error_code"))) {
+      log.error("deleteFileMovementsByFileId resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
   }
 }

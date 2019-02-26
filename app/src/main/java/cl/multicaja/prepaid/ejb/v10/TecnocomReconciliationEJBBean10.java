@@ -18,8 +18,8 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.ReconciliationFileDetail;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +69,17 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   @EJB
   private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
 
+  @EJB
+  private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  public ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
+    return reconciliationFilesEJBBean10;
+  }
+
+  public void setReconciliationFilesEJBBean10(ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10) {
+    this.reconciliationFilesEJBBean10 = reconciliationFilesEJBBean10;
+  }
+
   public PrepaidClearingEJBBean10 getPrepaidClearingEJBBean10() {
     return prepaidClearingEJBBean10;
   }
@@ -116,7 +127,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    */
   @Override
   public void processFile(InputStream inputStream, String fileName) throws Exception {
-    ReconciliationFile file;
+    TecnocomReconciliationFile file;
     try {
       file = TecnocomFileHelper.getInstance().validateFile(inputStream);
     } catch (Exception ex) {
@@ -132,8 +143,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
     }
 
-    List<ReconciliationFileDetail> manualTrx = new ArrayList<>();
-    List<ReconciliationFileDetail> otherTrx = new ArrayList<>();
+    List<TecnocomReconciliationFileDetail> manualTrx = new ArrayList<>();
+    List<TecnocomReconciliationFileDetail> otherTrx = new ArrayList<>();
 
     file.getDetails().forEach(trx -> {
       if(trx.isFromSat()) {
@@ -146,11 +157,21 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     insertOrUpdateManualTrx(fileName, manualTrx);
 
 
-    // TODO: Se debe usar EJB para crear referencia al archivo.
+    // Se crea referencia al archivo en la tabla
+    ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
+    reconciliationFile10.setFileName(fileName);
+    reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
+    reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
+    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10 = getReconciliationFilesEJBBean10().createReconciliationFile(null,reconciliationFile10);
     // Insertar movimientos en tecnocom
-    //this.insertTecnocomMovement(1l,otherTrx);
+    this.insertTecnocomMovement(reconciliationFile10.getId(),otherTrx);
 
-    //validateTransactions(fileName, otherTrx);
+    // Se buscan los movimientos en la tabla de tecnocom
+    List<MovimientoTecnocom10> movimientoTecnocom10s = this.buscaMovimientosTecnocom(reconciliationFile10.getId());
+
+    // Se procesa el resultado
+    this.validateTransactions(fileName, movimientoTecnocom10s);
 
     /**
      * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron
@@ -174,9 +195,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
   }
 
-  private void insertTecnocomMovement(Long fileId, List<ReconciliationFileDetail> reconciliationFileDetailList) throws Exception {
+  private void insertTecnocomMovement(Long fileId, List<TecnocomReconciliationFileDetail> reconciliationFileDetailList) throws Exception {
 
-    for (ReconciliationFileDetail data:reconciliationFileDetailList) {
+    for (TecnocomReconciliationFileDetail data:reconciliationFileDetailList) {
       MovimientoTecnocom10 movimientoTecnocom10 = buildMovimientoTecnocom(fileId, data);
       movimientoTecnocom10 = insertaMovimientoTecnocom(movimientoTecnocom10);
       if(movimientoTecnocom10.getId() == 0){
@@ -184,7 +205,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       }
     }
   }
-  private MovimientoTecnocom10 buildMovimientoTecnocom(Long fileId,ReconciliationFileDetail detail){
+  private MovimientoTecnocom10 buildMovimientoTecnocom(Long fileId,TecnocomReconciliationFileDetail detail){
     MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
 
     // IMPFAC
@@ -230,8 +251,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    * Insertar en la tabla prp_movimientos, las transcacciones realizadas de forma manual por SAT.
    * @param trxs
    */
-  private void insertOrUpdateManualTrx(String fileName, List<ReconciliationFileDetail> trxs) {
-    for (ReconciliationFileDetail trx : trxs) {
+  private void insertOrUpdateManualTrx(String fileName, List<TecnocomReconciliationFileDetail> trxs) {
+
+    for (TecnocomReconciliationFileDetail trx : trxs) {
       try{
         //Se obtiene el pan
         String pan = Utils.replacePan(trx.getPan());
@@ -306,9 +328,18 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
   }
 
+  /**
+   * Proceso que valida el archivo de transacciones diarias
+   * OP: Realiza el proceso de conciliacion.
+   * AU: Inserta los movimientos de compra.
+   * @param fileName
+   * @param trxs
+   */
   private void validateTransactions(String fileName, List<MovimientoTecnocom10> trxs) {
+
     for (MovimientoTecnocom10 trx : trxs) {
       try{
+
         //Se obtiene el pan
         String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
 
@@ -322,7 +353,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
-
         // Procesa las operaciones
         if(trx.getOperationType().equals(TecnocomOperationType.OP)) {
           //Se busca el movimiento
@@ -398,7 +428,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           clearingData10=getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
 
-
         }
 
       } catch (Exception ex) {
@@ -407,7 +436,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         if(StringUtils.isBlank(trx.getErrorDetails())) {
           trx.setErrorDetails(ex.getMessage());
         }
-        //processErrorTrx(fileName, trx);
+        processErrorTrx(fileName, trx);
       }
     }
   }
@@ -471,10 +500,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
   }
 
-  private void processErrorTrx(String fileName, ReconciliationFileDetail trx) {
+  private void processErrorTrx(String fileName, MovimientoTecnocom10 trx) {
     log.info("processErrorTrx");
     //TODO: definir como informar las transacciones
-    Map<String, Object> templateData = new HashMap<String, Object>();
+    Map<String, Object> templateData = new HashMap<>();
     //templateData.put("fileName", fileName);
     //TODO: definir template de correo
     //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);

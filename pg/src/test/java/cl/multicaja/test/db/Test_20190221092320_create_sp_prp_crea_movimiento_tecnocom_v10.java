@@ -187,6 +187,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
       new InParam(numberUtils.random(3000,9999),Types.NUMERIC),//linref
       new InParam(new Timestamp(System.currentTimeMillis()),Types.TIMESTAMP),
       new InParam(numberUtils.random(3000,9999),Types.NUMERIC),
+      new InParam("ONLI",Types.VARCHAR),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)

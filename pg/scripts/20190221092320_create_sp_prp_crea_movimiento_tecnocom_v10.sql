@@ -48,6 +48,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
   IN	_linref              NUMERIC,
   IN _fectrn               TIMESTAMP,
   IN _impautcon            NUMERIC,
+  IN _originope            VARCHAR,
   OUT _r_id                BIGINT,
   OUT _error_code          VARCHAR,
   OUT _error_msg           VARCHAR
@@ -128,6 +129,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     linref,
     fectrn,
     impautcon,
+    originope,
     fecha_creacion,
     fecha_actualizacion
   )
@@ -162,6 +164,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _linref,
     _fectrn,
     _impautcon,
+    _originope
     timezone('utc', now()),
     timezone('utc', now())
   ) RETURNING id INTO _r_id;
@@ -197,6 +200,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     linref,
     fectrn,
     impautcon,
+    originope,
     fecha_creacion,
     fecha_actualizacion
   )
@@ -231,6 +235,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _linref,
     _fectrn,
     _impautcon,
+    _originope
     timezone('utc', now()),
     timezone('utc', now())
   );
@@ -247,4 +252,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_tecnocom_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_crea_movimiento_tecnocom_v10(BIGINT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, DATE, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC, NUMERIC, NUMERIC, VARCHAR, NUMERIC,TIMESTAMP,NUMERIC);

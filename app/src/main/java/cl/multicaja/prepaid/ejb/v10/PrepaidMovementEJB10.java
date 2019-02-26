@@ -269,5 +269,12 @@ public interface PrepaidMovementEJB10 {
    */
   void processReconciliation(PrepaidMovement10 mov) throws Exception ;
 
+  /**
+   * Actualiza el estado de negocio de un movimiento
+   * @param header
+   * @param id
+   * @param businessStatusType
+   * @throws Exception
+   */
   void updatePrepaidBusinessStatus(Map<String, Object> header, Long id, BusinessStatusType businessStatusType) throws Exception;
 }

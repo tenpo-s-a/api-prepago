@@ -42,7 +42,7 @@ public class MovimientoTecnocom10 {
   // Variables para el proceso.
   private Boolean hasError;
   private String errorDetails;
-
+  private String originOperacion;
 
 
 
@@ -276,6 +276,14 @@ public class MovimientoTecnocom10 {
 
   public void setImpautcon(NewAmountAndCurrency10 impautcon) {
     this.impautcon = impautcon;
+  }
+
+  public String getOriginOperacion() {
+    return originOperacion;
+  }
+
+  public void setOriginOperacion(String originOperacion) {
+    this.originOperacion = originOperacion;
   }
 
   public Boolean getHasError() {
