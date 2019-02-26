@@ -1,7 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.ReconciliationMcRed10;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 
 import java.io.InputStream;
 import java.util.List;
@@ -25,7 +24,7 @@ public interface McRedReconciliationEJB10 {
    * @return
    * @throws Exception
    */
-  ReconciliationMcRed10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception;
+  McRedReconciliationFileDetail addFileMovement(Map<String,Object> header, McRedReconciliationFileDetail newSwitchMovement) throws Exception;
 
   /**
    * Busca la lista de movimientos que pertenecen a este fileId
@@ -34,7 +33,7 @@ public interface McRedReconciliationEJB10 {
    * @return
    * @throws Exception
    */
-  List<ReconciliationMcRed10> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
+  List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
 
   /**
    * Borra de la tabla switch_movement todos los registros de cierto archivo

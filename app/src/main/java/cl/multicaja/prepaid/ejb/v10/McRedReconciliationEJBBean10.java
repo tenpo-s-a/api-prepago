@@ -229,7 +229,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   @Override
-  public ReconciliationMcRed10 addFileMovement(Map<String,Object> header, ReconciliationMcRed10 newSwitchMovement) throws Exception {
+  public McRedReconciliationFileDetail addFileMovement(Map<String,Object> header, McRedReconciliationFileDetail newSwitchMovement) throws Exception {
     if(newSwitchMovement == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement"));
     }
@@ -286,7 +286,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   @Override
-  public List<ReconciliationMcRed10> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
+  public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
     Object[] params = {
       new InParam("prp_movimiento_switch", Types.VARCHAR),
       movementId != null ? new InParam(movementId, Types.BIGINT) : new NullParam(Types.BIGINT),
@@ -295,7 +295,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
-      ReconciliationMcRed10 reconciliationMcRed10 = new ReconciliationMcRed10();
+      McRedReconciliationFileDetail reconciliationMcRed10 = new McRedReconciliationFileDetail();
       reconciliationMcRed10.setId(getNumberUtils().toLong(row.get("_id")));
       reconciliationMcRed10.setFileId(getNumberUtils().toLong(row.get("_id_archivo")));
       reconciliationMcRed10.setMcCode(row.get("_id_multicaja").toString());
