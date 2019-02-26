@@ -356,6 +356,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
+  public void expireNotReconciliedMovements(TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationFileType fileType)
+
   public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut,MovementOriginType movementOriginType) throws Exception {
     List<PrepaidMovement10> lst = getPrepaidMovements(null, null, null,null,
       null, null, null, null, null, null,
