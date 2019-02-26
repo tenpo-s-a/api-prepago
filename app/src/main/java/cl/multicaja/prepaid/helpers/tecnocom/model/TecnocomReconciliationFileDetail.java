@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * @author abarazarte
  **/
-public class ReconciliationFileDetail {
+public class TecnocomReconciliationFileDetail {
 
   public static final String FECFACT_DATE_FORMAT = "yyyy-MM-dd";
   private static final String SAT_ORIGIN = "ONLI";
@@ -33,52 +33,52 @@ public class ReconciliationFileDetail {
     TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA));
 
   //Datos Comunes
-  private final ReconciliationFileLayout CODENT = new ReconciliationFileLayout(120, 4, null);
-  private final ReconciliationFileLayout CENTALTA = new ReconciliationFileLayout(124, 4, null);
-  private final ReconciliationFileLayout CUENTA = new ReconciliationFileLayout(128, 12, null);
-  private final ReconciliationFileLayout PAN = new ReconciliationFileLayout(140, 22, null);
-  private final ReconciliationFileLayout TIPOREG = new ReconciliationFileLayout(162, 2, null);
+  private final TecnocomReconciliationFileLayout CODENT = new TecnocomReconciliationFileLayout(120, 4, null);
+  private final TecnocomReconciliationFileLayout CENTALTA = new TecnocomReconciliationFileLayout(124, 4, null);
+  private final TecnocomReconciliationFileLayout CUENTA = new TecnocomReconciliationFileLayout(128, 12, null);
+  private final TecnocomReconciliationFileLayout PAN = new TecnocomReconciliationFileLayout(140, 22, null);
+  private final TecnocomReconciliationFileLayout TIPOREG = new TecnocomReconciliationFileLayout(162, 2, null);
 
   //DATOS OP
-  private final ReconciliationFileLayout CLAMON = new ReconciliationFileLayout(176, 3, null);
-  private final ReconciliationFileLayout INDNORCOR = new ReconciliationFileLayout(209, 1, null);
-  private final ReconciliationFileLayout TIPOFAC = new ReconciliationFileLayout(225, 4, null);
-  private final ReconciliationFileLayout FECFAC = new ReconciliationFileLayout(259, 10, null);
-  private final ReconciliationFileLayout IMPFAC = new ReconciliationFileLayout(344, 17, 2);
-  private final ReconciliationFileLayout NUMAUT = new ReconciliationFileLayout(370, 6, null);
-  private final ReconciliationFileLayout CODCOM = new ReconciliationFileLayout(376, 15, null);
-  private final ReconciliationFileLayout CODACT = new ReconciliationFileLayout(418, 4, null);
-  private final ReconciliationFileLayout CODPAIS = new ReconciliationFileLayout(531, 3, null);
-  private final ReconciliationFileLayout ORIGENOPE = new ReconciliationFileLayout(600, 4, null);
-  private final ReconciliationFileLayout NUMMOVEXT = new ReconciliationFileLayout(769, 7, null);
-  private final ReconciliationFileLayout NUMEXTCTA = new ReconciliationFileLayout(776, 3, null);
-  private final ReconciliationFileLayout TIPOLIN = new ReconciliationFileLayout(942, 4, null);
-  private final ReconciliationFileLayout LINREF = new ReconciliationFileLayout(988, 8, null);
-  private final ReconciliationFileLayout NOMCOMRED = new ReconciliationFileLayout(2094, 27, null);
+  private final TecnocomReconciliationFileLayout CLAMON = new TecnocomReconciliationFileLayout(176, 3, null);
+  private final TecnocomReconciliationFileLayout INDNORCOR = new TecnocomReconciliationFileLayout(209, 1, null);
+  private final TecnocomReconciliationFileLayout TIPOFAC = new TecnocomReconciliationFileLayout(225, 4, null);
+  private final TecnocomReconciliationFileLayout FECFAC = new TecnocomReconciliationFileLayout(259, 10, null);
+  private final TecnocomReconciliationFileLayout IMPFAC = new TecnocomReconciliationFileLayout(344, 17, 2);
+  private final TecnocomReconciliationFileLayout NUMAUT = new TecnocomReconciliationFileLayout(370, 6, null);
+  private final TecnocomReconciliationFileLayout CODCOM = new TecnocomReconciliationFileLayout(376, 15, null);
+  private final TecnocomReconciliationFileLayout CODACT = new TecnocomReconciliationFileLayout(418, 4, null);
+  private final TecnocomReconciliationFileLayout CODPAIS = new TecnocomReconciliationFileLayout(531, 3, null);
+  private final TecnocomReconciliationFileLayout ORIGENOPE = new TecnocomReconciliationFileLayout(600, 4, null);
+  private final TecnocomReconciliationFileLayout NUMMOVEXT = new TecnocomReconciliationFileLayout(769, 7, null);
+  private final TecnocomReconciliationFileLayout NUMEXTCTA = new TecnocomReconciliationFileLayout(776, 3, null);
+  private final TecnocomReconciliationFileLayout TIPOLIN = new TecnocomReconciliationFileLayout(942, 4, null);
+  private final TecnocomReconciliationFileLayout LINREF = new TecnocomReconciliationFileLayout(988, 8, null);
+  private final TecnocomReconciliationFileLayout NOMCOMRED = new TecnocomReconciliationFileLayout(2094, 27, null);
 
   //DATOS AU
-  private final ReconciliationFileLayout CLAMON_AU = new ReconciliationFileLayout(176, 3, null);
-  private final ReconciliationFileLayout INDNORCOR_AU = new ReconciliationFileLayout(209, 1, null);
-  private final ReconciliationFileLayout TIPOFAC_AU = new ReconciliationFileLayout(240, 4, null);
-  private final ReconciliationFileLayout FECTRN_AU = new ReconciliationFileLayout(274, 10, null);
-  private final ReconciliationFileLayout HORTRN_AU = new ReconciliationFileLayout(284, 8, null);
-  private final ReconciliationFileLayout CLAMONDIV_AU = new ReconciliationFileLayout(292, 3, null);
-  private final ReconciliationFileLayout SIGNODIV_AU = new ReconciliationFileLayout(325, 1, null);
-  private final ReconciliationFileLayout IMPDIV_AU = new ReconciliationFileLayout(326, 17, 2);
-  private final ReconciliationFileLayout SIGNOAUT_AU = new ReconciliationFileLayout(343, 1, null);
-  private final ReconciliationFileLayout IMPAUTCON_AU = new ReconciliationFileLayout(344, 17, 2);
-  private final ReconciliationFileLayout CMBAPLI_AU = new ReconciliationFileLayout(361, 9, 4);
-  private final ReconciliationFileLayout NUMAUT_AU = new ReconciliationFileLayout(370, 6, null);
-  private final ReconciliationFileLayout CODCOM_AU = new ReconciliationFileLayout(376, 15, null);
-  private final ReconciliationFileLayout NOMCOMRED_AU = new ReconciliationFileLayout(391, 27, null);
-  private final ReconciliationFileLayout CODACT_AU = new ReconciliationFileLayout(418, 4, null);
+  private final TecnocomReconciliationFileLayout CLAMON_AU = new TecnocomReconciliationFileLayout(176, 3, null);
+  private final TecnocomReconciliationFileLayout INDNORCOR_AU = new TecnocomReconciliationFileLayout(209, 1, null);
+  private final TecnocomReconciliationFileLayout TIPOFAC_AU = new TecnocomReconciliationFileLayout(240, 4, null);
+  private final TecnocomReconciliationFileLayout FECTRN_AU = new TecnocomReconciliationFileLayout(274, 10, null);
+  private final TecnocomReconciliationFileLayout HORTRN_AU = new TecnocomReconciliationFileLayout(284, 8, null);
+  private final TecnocomReconciliationFileLayout CLAMONDIV_AU = new TecnocomReconciliationFileLayout(292, 3, null);
+  private final TecnocomReconciliationFileLayout SIGNODIV_AU = new TecnocomReconciliationFileLayout(325, 1, null);
+  private final TecnocomReconciliationFileLayout IMPDIV_AU = new TecnocomReconciliationFileLayout(326, 17, 2);
+  private final TecnocomReconciliationFileLayout SIGNOAUT_AU = new TecnocomReconciliationFileLayout(343, 1, null);
+  private final TecnocomReconciliationFileLayout IMPAUTCON_AU = new TecnocomReconciliationFileLayout(344, 17, 2);
+  private final TecnocomReconciliationFileLayout CMBAPLI_AU = new TecnocomReconciliationFileLayout(361, 9, 4);
+  private final TecnocomReconciliationFileLayout NUMAUT_AU = new TecnocomReconciliationFileLayout(370, 6, null);
+  private final TecnocomReconciliationFileLayout CODCOM_AU = new TecnocomReconciliationFileLayout(376, 15, null);
+  private final TecnocomReconciliationFileLayout NOMCOMRED_AU = new TecnocomReconciliationFileLayout(391, 27, null);
+  private final TecnocomReconciliationFileLayout CODACT_AU = new TecnocomReconciliationFileLayout(418, 4, null);
 
 
 
-  public ReconciliationFileDetail() {
+  public TecnocomReconciliationFileDetail() {
   }
 
-  public ReconciliationFileDetail(String detail) {
+  public TecnocomReconciliationFileDetail(String detail) {
     this.detail = detail;
   }
 
@@ -360,7 +360,7 @@ public class ReconciliationFileDetail {
   @Override
   public String toString() {
     if(TecnocomOperationType.OP.equals(this.getOperationType())){
-    return "ReconciliationFileDetail{" +
+    return "TecnocomReconciliationFileDetail{" +
       "contrato='" + this.getContrato() + '\'' +
       "indnorcor='" + this.getIndnorcor() + '\'' +
       "tipofac='" + this.getTipoFac() + '\'' +
@@ -371,7 +371,7 @@ public class ReconciliationFileDetail {
       "origenope='" + this.getOrigenope() + '\'' +
       '}';
     }else if(TecnocomOperationType.AU.equals(this.getOperationType())){
-      return "ReconciliationFileDetail{" +
+      return "TecnocomReconciliationFileDetail{" +
         "pan='" + this.getPan() + '\'' +
         "contrato='" + this.getContrato() + '\'' +
         "indnorcor='" + this.getIndnorcor() + '\'' +
