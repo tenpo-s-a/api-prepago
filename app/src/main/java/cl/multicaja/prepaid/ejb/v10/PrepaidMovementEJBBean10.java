@@ -741,9 +741,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
+
     Map<String,Object> resp = getDbUtils().execute(String.format("%s.mc_prp_crea_movimiento_investigar_v11",getSchema()),params);
+
+    System.out.println("myResponse: "+resp.toString());
+
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_prp_crea_movimiento_investigar_v10 resp: " + resp);
+      log.error("mc_prp_crea_movimiento_investigar_v11 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }

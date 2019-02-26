@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.ZONEID;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.core.utils.KeyValue;
@@ -27,15 +28,14 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -117,10 +117,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "]-";
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
-          //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.SWITCH, fileName);
-
           //TODO: Esta OK este Research?
-          Timestamp fechaDeTransaccion = prepaidMovement10.getFechaCreacion();
+          Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().localDateTimeInUTC(
+            getDateUtils().dateStringToLocalDateTime(recTmp.getDateTrx(),"yyyy-mm-dd HH:mm:ss"),
+            ZONEID.AMERICA_SANTIAGO));
           Long movRef = new Long(0);
           getPrepaidMovementEJBBean10().createMovementResearch(
             null,
@@ -130,7 +130,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             fechaDeTransaccion,
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            new Long(0));
+            movRef);
 
           continue;
         }
