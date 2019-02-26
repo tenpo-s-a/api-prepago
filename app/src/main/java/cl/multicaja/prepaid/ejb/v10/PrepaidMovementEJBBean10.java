@@ -356,7 +356,31 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  public void expireNotReconciliedMovements(TipoFactura tipofac, IndicadorNormalCorrector indnorcor, ReconciliationFileType fileType)
+  public void expireNotReconciledMovements(ReconciliationFileType fileType) throws Exception {
+    if(fileType == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileType"));
+    }
+
+    TipoFactura tipofac = TipoFactura.RETIRO_TRANSFERENCIA; // Todo: determinar que tipo de factura es de acuerdo al fileType (ver la funcion mcred conciliation para ver el if como la determina)
+    String statusColumnName = "estado_con_tecnocom"; // Todo, definir columna
+
+    // Llamar a expirar movimientos con los parametros definidos
+    Object[] params = {
+      new InParam(statusColumnName, Types.VARCHAR),
+      new InParam(fileType.toString(), Types.VARCHAR),
+      new InParam(tipofac.getCode(), Types.NUMERIC),
+      new InParam(tipofac.getCorrector(), Types.NUMERIC),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".INSERTAR AQUI NOMBRE del procedimiento", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("expireNotReconciledMovements resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
 
   public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut,MovementOriginType movementOriginType) throws Exception {
     List<PrepaidMovement10> lst = getPrepaidMovements(null, null, null,null,
