@@ -368,28 +368,33 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     switch(fileType) {
       case TECNOCOM_FILE:
         movementType = null;
+        indnorcor = null;
         statusColumnName = "estado_con_tecnocom";
         break;
       case SWITCH_TOPUP:
         movementType = PrepaidMovementType.TOPUP;
         indnorcor = IndicadorNormalCorrector.NORMAL;
+        statusColumnName = "estado_con_switch";
         break;
-      case SWITCH_REJECTED_TOPUP:
-        return;
       case SWITCH_REVERSED_TOPUP:
         movementType = PrepaidMovementType.TOPUP;
         indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        statusColumnName = "estado_con_switch";
         break;
       case SWITCH_WITHDRAW:
         movementType = PrepaidMovementType.WITHDRAW;
         indnorcor = IndicadorNormalCorrector.NORMAL;
+        statusColumnName = "estado_con_switch";
         break;
-      case SWITCH_REJECTED_WITHDRAW:
-        return;
       case SWITCH_REVERSED_WITHDRAW:
         movementType = PrepaidMovementType.WITHDRAW;
         indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        statusColumnName = "estado_con_switch";
         break;
+      case SWITCH_REJECTED_TOPUP:
+        return;
+      case SWITCH_REJECTED_WITHDRAW:
+        return;
     }
 
     // Llamar a expirar movimientos con los parametros definidos
@@ -402,7 +407,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".INSERTAR AQUI NOMBRE del procedimiento", params);
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_expire_old_reconciliation_movements_v10", params);
 
     if (!"0".equals(resp.get("_error_code"))) {
       log.error("expireNotReconciledMovements resp: " + resp);
