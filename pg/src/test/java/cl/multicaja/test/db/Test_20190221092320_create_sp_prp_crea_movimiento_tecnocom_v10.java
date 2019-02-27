@@ -66,7 +66,6 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     
   }
 
-
   @Test
   public void creaMovimientoNoOk_f1() throws Exception{
 
@@ -78,6 +77,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     Assert.assertEquals("El mensaje debe ser igual a:","El _idArchivo es obligatorio",movTecnocom.get("_error_msg"));
     Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
   }
+
   @Test
   public void creaMovimientoNoOk_f2() throws Exception{
     Map<String, Object> conFile = Test_20190219142005_create_sp_insert_intermediate_reconciliation_files.insertArchivoReconcialicionLog(getRandomNumericString(10),getRandomNumericString(10),getRandomNumericString(10),"PENDING");
@@ -93,6 +93,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     Assert.assertEquals("El mensaje debe ser igual a:","El _cuenta es obligatorio",movTecnocom.get("_error_msg"));
     Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
   }
+
   @Test
   public void creaMovimientoNoOk_f3() throws Exception{
     Map<String, Object> conFile = Test_20190219142005_create_sp_insert_intermediate_reconciliation_files.insertArchivoReconcialicionLog(getRandomNumericString(10),getRandomNumericString(10),getRandomNumericString(10),"PENDING");
@@ -108,6 +109,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     Assert.assertEquals("El mensaje debe ser igual a:","El _pan es obligatorio",movTecnocom.get("_error_msg"));
     Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
   }
+
   @Test
   public void creaMovimientoNoOk_f4() throws Exception{
     Map<String, Object> conFile = Test_20190219142005_create_sp_insert_intermediate_reconciliation_files.insertArchivoReconcialicionLog(getRandomNumericString(10),getRandomNumericString(10),getRandomNumericString(10),"PENDING");
@@ -123,21 +125,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     Assert.assertEquals("El mensaje debe ser igual a:","El _tipofac es obligatorio",movTecnocom.get("_error_msg"));
     Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
   }
-  @Test
-  public void creaMovimientoNoOk_f5() throws Exception{
-    Map<String, Object> conFile = Test_20190219142005_create_sp_insert_intermediate_reconciliation_files.insertArchivoReconcialicionLog(getRandomNumericString(10),getRandomNumericString(10),getRandomNumericString(10),"PENDING");
-    Long fileId = numberUtils.toLong(conFile.get("_r_id"));
 
-    Assert.assertNotNull("Id Archivo no puede ser nulo",fileId);
-
-    Map<String, Object> movTecnocom = creaMovimientoTecnocom(fileId,getRandomString(10),getRandomString(30),
-      numberUtils.random(1,9999),null,getRandomNumericString(6));
-    System.out.println(movTecnocom);
-    Assert.assertNotNull("Respuesta no puede ser null",movTecnocom);
-    Assert.assertEquals("Debe ser MC001","MC005",movTecnocom.get("_error_code"));
-    Assert.assertEquals("El mensaje debe ser igual a:","El _impfac es obligatorio",movTecnocom.get("_error_msg"));
-    Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
-  }
   @Test
   public void creaMovimientoNoOk_f6() throws Exception{
     Map<String, Object> conFile = Test_20190219142005_create_sp_insert_intermediate_reconciliation_files.insertArchivoReconcialicionLog(getRandomNumericString(10),getRandomNumericString(10),getRandomNumericString(10),"PENDING");
@@ -153,8 +141,6 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     Assert.assertEquals("El mensaje debe ser igual a:","El _numaut es obligatorio",movTecnocom.get("_error_msg"));
     Assert.assertEquals("Id debe ser 0",0L,movTecnocom.get("_r_id"));
   }
-
-
 
   public static Map<String, Object>  creaMovimientoTecnocom(Long fileId, String cuenta, String pan, Integer tipoFac, BigDecimal impFac, String numAut)throws Exception{
     Object[] params = {
