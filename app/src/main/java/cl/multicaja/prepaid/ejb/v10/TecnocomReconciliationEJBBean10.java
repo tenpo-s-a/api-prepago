@@ -195,7 +195,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
   }
 
-  private void insertTecnocomMovement(Long fileId, List<TecnocomReconciliationFileDetail> reconciliationFileDetailList) throws Exception {
+  public void insertTecnocomMovement(Long fileId, List<TecnocomReconciliationFileDetail> reconciliationFileDetailList) throws Exception {
 
     for (TecnocomReconciliationFileDetail data:reconciliationFileDetailList) {
       MovimientoTecnocom10 movimientoTecnocom10 = buildMovimientoTecnocom(fileId, data);

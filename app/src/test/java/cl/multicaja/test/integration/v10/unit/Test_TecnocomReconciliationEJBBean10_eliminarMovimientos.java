@@ -5,6 +5,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.OriginOpeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -49,12 +50,12 @@ public class Test_TecnocomReconciliationEJBBean10_eliminarMovimientos extends Te
       Assert.assertNotEquals("Id debe ser != 0",0,movTec.getId().intValue());
     }
 
-    List<MovimientoTecnocom10> movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId);
+    List<MovimientoTecnocom10> movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN);
     Assert.assertEquals("Debe existir 3 movimientos",3, movimientoTecnocom10s2.size());
     
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(fileId);
 
-    List<MovimientoTecnocom10> respPosElim = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId);
+    List<MovimientoTecnocom10> respPosElim = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN);
     Assert.assertNull("No deben existir movimientos Resp Null",  respPosElim);
 
   }
