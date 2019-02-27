@@ -3,7 +3,6 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.model.ZONEID;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.core.utils.KeyValue;
@@ -14,26 +13,19 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.util.Times;
 
 import javax.ejb.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -118,11 +110,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
           //TODO: Esta OK este Research?
-          Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().localDateTimeInUTC(
-            getDateUtils().dateStringToLocalDateTime(recTmp.getDateTrx(),"yyyy-MM-dd HH:mm:ss"),
-            ZONEID.AMERICA_SANTIAGO));
+          DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+          java.util.Date date = formatter.parse(recTmp.getDateTrx());
+          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
 
-          
           Long movRef = new Long(0);
           getPrepaidMovementEJBBean10().createMovementResearch(
             null,
@@ -164,6 +155,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
    * @return
    */
   private List<McRedReconciliationFileDetail> getCsvData(String fileName, InputStream is) throws Exception {
+
     List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetail;
     log.info("IN");
     try {
@@ -180,6 +172,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         mcRedReconciliationFileDetail.setDateTrx(record[1]);
         mcRedReconciliationFileDetail.setClientId(Long.valueOf(record[2]));
         mcRedReconciliationFileDetail.setAmount(getNumberUtils().toBigDecimal(record[3]));
+
         if(!fileName.contains("reversa")) {
           mcRedReconciliationFileDetail.setExternalId(Long.valueOf(record[4]));
         }
