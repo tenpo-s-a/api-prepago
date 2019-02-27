@@ -22,7 +22,7 @@ public class Test_McRedReconciliationEJB10_deleteFileMovementsByFileId extends T
   }
 
   @Test
-  public void deleteAllMovements_allOK() throws Exception {
+  public void deleteAllMovements_allOK() throws Exception { 
     Map<String, Object> fileMap = Test_McRedReconciliationEJB10_addFileMovement.insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
