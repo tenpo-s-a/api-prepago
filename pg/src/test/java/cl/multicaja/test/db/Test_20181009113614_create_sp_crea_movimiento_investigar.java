@@ -246,7 +246,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     return dbUtils.execute(SP_NAME, params);
   };
 
-  public static Map<String, Object> creaMovimientoInvestigar(
+  /*public static Map<String, Object> creaMovimientoInvestigar(
     String id_archivo_origen, String origen, String nombreArchivo) throws SQLException {
 
     //TODO: Estas variables deben colocarse como nuevos parámetros de esta función y asi mismo en implementaciones similares que usen el procedimiento, con sus nuevos cambios
@@ -267,7 +267,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR) };
     return dbUtils.execute(SP_NAME, params);
-  }
+  }*/
 
   class ResearchMovement {
     private Long id;

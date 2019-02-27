@@ -533,13 +533,13 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Este movimiento ya fue procesado anteriormente, dado que:
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
-          //TODO: Esta OK este Research?
+          //TODO: Esta OK este Research? Revisar mañana.
           createClearingResearch(
             data.getIdTransaction(),
             fileName,
             data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
+            ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+            ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
             new Long(0));
 
           // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
@@ -557,7 +557,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Viene en el archivo y no existe en nuestra tabla
         if(result == null) {
           //Agregar a Investigar
-          //TODO: Esta OK este Research?
+          //TODO: Esta OK este Research? Revisar mañana.
           this.createClearingResearch(
             data.getIdTransaction(),
             fileName,
