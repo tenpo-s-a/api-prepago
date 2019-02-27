@@ -356,6 +356,65 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
+  public void expireNotReconciledMovements(ReconciliationFileType fileType) throws Exception {
+    if(fileType == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileType"));
+    }
+
+    PrepaidMovementType movementType = PrepaidMovementType.TOPUP;
+    String statusColumnName = "estado_con_switch";
+    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+
+    switch(fileType) {
+      case TECNOCOM_FILE:
+        movementType = null;
+        indnorcor = null;
+        statusColumnName = "estado_con_tecnocom";
+        break;
+      case SWITCH_TOPUP:
+        movementType = PrepaidMovementType.TOPUP;
+        indnorcor = IndicadorNormalCorrector.NORMAL;
+        statusColumnName = "estado_con_switch";
+        break;
+      case SWITCH_REVERSED_TOPUP:
+        movementType = PrepaidMovementType.TOPUP;
+        indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        statusColumnName = "estado_con_switch";
+        break;
+      case SWITCH_WITHDRAW:
+        movementType = PrepaidMovementType.WITHDRAW;
+        indnorcor = IndicadorNormalCorrector.NORMAL;
+        statusColumnName = "estado_con_switch";
+        break;
+      case SWITCH_REVERSED_WITHDRAW:
+        movementType = PrepaidMovementType.WITHDRAW;
+        indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        statusColumnName = "estado_con_switch";
+        break;
+      case SWITCH_REJECTED_TOPUP:
+        return;
+      case SWITCH_REJECTED_WITHDRAW:
+        return;
+    }
+
+    // Llamar a expirar movimientos con los parametros definidos
+    Object[] params = {
+      new InParam(statusColumnName, Types.VARCHAR),
+      new InParam(fileType.toString(), Types.VARCHAR),
+      movementType != null ? new InParam(movementType.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      indnorcor != null ? new InParam(indnorcor.getValue(), Types.NUMERIC) : new NullParam(Types.NUMERIC),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp =  getDbUtils().execute(getSchema() + ".mc_expire_old_reconciliation_movements_v10", params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error("expireNotReconciledMovements resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
   public PrepaidMovement10 getPrepaidMovementByNumAutAndPan(String pan, String numaut,MovementOriginType movementOriginType) throws Exception {
     List<PrepaidMovement10> lst = getPrepaidMovements(null, null, null,null,
       null, null, null, null, null, null,
