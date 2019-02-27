@@ -211,7 +211,7 @@ services:
         exclude: master
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-fa387b02ad39a9ab8fad7e221e02445df367e25a
+    image: mccontainerregistry.azurecr.io/api-users:ci-50a2f029d4ae61ad022a031b4f57cf16b319c679
     log-driver: none
     when:
       event: [ push ]
