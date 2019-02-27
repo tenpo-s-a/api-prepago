@@ -274,10 +274,12 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getClamonDiv() {
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
-      return this.detail.substring(this.CLAMONDIV_AU.getStart(), this.CLAMONDIV_AU.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON_AU.getStart(), this.CLAMON_AU.getEnd());
     } else{
-      return "";
+      return "0";
     }
   }
 

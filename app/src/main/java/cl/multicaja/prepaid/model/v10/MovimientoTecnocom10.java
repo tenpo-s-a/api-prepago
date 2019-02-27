@@ -3,11 +3,12 @@ package cl.multicaja.prepaid.model.v10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class MovimientoTecnocom10 {
+public class MovimientoTecnocom10 implements Serializable{
 
   private Long id;
   private Long idArchivo;
@@ -115,7 +116,7 @@ public class MovimientoTecnocom10 {
   }
 
   public void setTipoFac(TipoFactura tipoFac) {
-    tipoFac = tipoFac;
+    this.tipoFac = tipoFac;
   }
 
   public Date getFecFac() {
@@ -315,6 +316,8 @@ public class MovimientoTecnocom10 {
     switch (tipoFac){
       case COMPRA_INTERNACIONAL:
       case SUSCRIPCION_INTERNACIONAL:
+      case ANULA_COMPRA_INTERNACIONAL:
+      case ANULA_SUSCRIPCION_INTERNACIONAL:
         operationType = TecnocomOperationType.AU;
         break;
       default:
@@ -341,11 +344,15 @@ public class MovimientoTecnocom10 {
         break;
       case COMISION_APERTURA:
         type = PrepaidMovementType.ISSUANCE_FEE;
+        break;
       case SUSCRIPCION_INTERNACIONAL:
+      case ANULA_SUSCRIPCION_INTERNACIONAL:
         type = PrepaidMovementType.SUSCRIPTION;
         break;
       case COMPRA_INTERNACIONAL:
+      case ANULA_COMPRA_INTERNACIONAL:
         type = PrepaidMovementType.PURCHASE;
+        break;
     }
     return type;
   }

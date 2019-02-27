@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,16 +15,17 @@ import java.util.*;
 /**
  * @author abarazarte
  **/
-public class Test_PendingTecnocomTecnocomReconciliationFile10Aut10 extends TestBaseUnit {
+public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
   private List<String> pans = Arrays.asList("5176081135830583","5176081111866841");
   private List<String> contracts = Arrays.asList("09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
-  private static TecnocomReconciliationFile autFile;
 
   private void clearTransactions() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
   }
 
   private void prepareUsersAndCards() throws Exception {
@@ -54,6 +56,7 @@ public class Test_PendingTecnocomTecnocomReconciliationFile10Aut10 extends TestB
   }
 
   @Before
+  @After
   public void beforeEach() throws Exception {
     clearTransactions();
     prepareUsersAndCards();
@@ -74,6 +77,7 @@ public class Test_PendingTecnocomTecnocomReconciliationFile10Aut10 extends TestB
 
       getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
+      e.printStackTrace();
       Assert.fail("Should not be here");
     }
 
