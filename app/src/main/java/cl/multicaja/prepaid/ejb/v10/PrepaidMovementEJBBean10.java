@@ -401,8 +401,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Object[] params = {
       new InParam(statusColumnName, Types.VARCHAR),
       new InParam(fileType.toString(), Types.VARCHAR),
-      new InParam(movementType, Types.VARCHAR),
-      new InParam(indnorcor, Types.NUMERIC),
+      movementType != null ? new InParam(movementType.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      indnorcor != null ? new InParam(indnorcor.getValue(), Types.NUMERIC) : new NullParam(Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
