@@ -20,7 +20,7 @@
 CREATE OR REPLACE FUNCTION ${schema}.mc_expire_old_reconciliation_movements_v10(
   IN _in_nombre_columna   VARCHAR,
   IN _in_tipo_archivo     VARCHAR,
-  IN _in_tipofac          NUMERIC,
+  IN _in_tipo_movimiento  VARCHAR,
   IN _in_indnorcor        NUMERIC,
   OUT _error_code         VARCHAR,
   OUT _error_msg          VARCHAR
@@ -42,18 +42,6 @@ BEGIN
     RETURN;
   END IF;
 
-  IF COALESCE(_in_tipofac, 0) = 0 THEN
-    _error_code := 'MC003';
-    _error_msg := '[mc_expire_old_reconciliation_movements_v10] El _in_tipofac es obligatorio';
-    RETURN;
-  END IF;
-
-  IF COALESCE(_in_indnorcor, -1) = -1 THEN
-    _error_code := 'MC004';
-    _error_msg := '[mc_expire_old_reconciliation_movements_v10] El _in_indnorcor es obligatorio';
-    RETURN;
-  END IF;
-
   EXECUTE
     format(
       'UPDATE '
@@ -61,8 +49,8 @@ BEGIN
       'SET '
       '   %s = ''NOT_RECONCILED'' '
       'WHERE '
-      '   mov.tipofac = $1 AND '
-      '   mov.indnorcor = $2 AND '
+      '   (COALESCE( $1 , '''') = '''' OR mov.tipo_movimiento = $1 ) AND '
+      '   (COALESCE( $2 , -1) = -1 OR mov.indnorcor = $2 ) AND '
       '   mov.%s = ''PENDING'' AND '
       '   mov.tipo_movimiento != ''SUSCRIPTION'' AND '
       '   mov.tipo_movimiento != ''PURCHASE'' AND '
@@ -72,7 +60,7 @@ BEGIN
       _in_nombre_columna, _in_nombre_columna, _in_tipo_archivo
     )
   USING
-    _in_tipofac, _in_indnorcor;
+    _in_tipo_movimiento, _in_indnorcor;
 
   EXCEPTION
     WHEN OTHERS THEN
@@ -87,4 +75,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_expire_old_reconciliation_movements_v10(VARCHAR, VARCHAR, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_expire_old_reconciliation_movements_v10(VARCHAR, VARCHAR, VARCHAR, NUMERIC);
