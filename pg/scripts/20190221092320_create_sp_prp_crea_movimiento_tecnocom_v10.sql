@@ -85,13 +85,6 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     RETURN;
  END IF;
 
- IF COALESCE(_impfac, 0) = 0 THEN
-    _error_code := 'MC005';
-    _error_msg := 'El _impfac es obligatorio';
-    RETURN;
- END IF;
-
-
  IF COALESCE(_numaut, '') = '' THEN
     _error_code := 'MC006';
     _error_msg := 'El _numaut es obligatorio';
@@ -138,7 +131,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
   VALUES
   (
     _idArchivo,
-    _cuenta,
+    COALESCE(_cuenta,''),
     _pan,
     _codent,
     _centalta,
@@ -147,29 +140,29 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _tipofac,
     _fecfac,
     _numreffac,
-    _clamondiv,
-    _impdiv,
-    _impfac,
-    _cmbapli,
+    COALESCE(_clamondiv,0),
+    COALESCE(_impdiv,0),
+    COALESCE(_impfac,0),
+    COALESCE(_cmbapli,0),
     _numaut,
     _indproaje,
-    _codcom,
-    _codact,
-    _impliq,
-    _clamonliq,
-    _codpais,
-    _nompob,
-    _numextcta,
-    _nummovext,
-    _clamone,
+    COALESCE(_codcom,''),
+    COALESCE(_codact,0),
+    COALESCE(_impliq,0),
+    COALESCE(_clamonliq,0),
+    COALESCE(_codpais,0),
+    COALESCE(_nompob,''),
+    COALESCE(_numextcta,0),
+    COALESCE( _nummovext,0),
+    COALESCE(_clamone,0),
     _tipolin,
     _linref,
-    _fectrn,
-    _impautcon,
-    _originope,
+    COALESCE(_fectrn,TO_TIMESTAMP('1900-01-01 00:00:00','yyyy-MM-dd hh24:mi:ss')),
+    COALESCE(_impautcon,0),
+     COALESCE(_originope,''),
     timezone('utc', now()),
     timezone('utc', now()),
-    _contrato
+    COALESCE(_contrato,'')
   ) RETURNING id INTO _r_id;
 
  INSERT INTO ${schema}.prp_movimientos_tecnocom_hist
@@ -211,7 +204,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
   VALUES
   (
     _idArchivo,
-    _cuenta,
+    COALESCE(_cuenta,''),
     _pan,
     _codent,
     _centalta,
@@ -220,29 +213,29 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_crea_movimiento_tecnocom_v10
     _tipofac,
     _fecfac,
     _numreffac,
-    _clamondiv,
-    _impdiv,
-    _impfac,
-    _cmbapli,
+    COALESCE(_clamondiv,0),
+    COALESCE(_impdiv,0),
+    COALESCE(_impfac,0),
+    COALESCE(_cmbapli,0),
     _numaut,
     _indproaje,
-    _codcom,
-    _codact,
-    _impliq,
-    _clamonliq,
-    _codpais,
-    _nompob,
-    _numextcta,
-    _nummovext,
-    _clamone,
+    COALESCE(_codcom,''),
+    COALESCE(_codact,0),
+    COALESCE(_impliq,0),
+    COALESCE(_clamonliq,0),
+    COALESCE(_codpais,0),
+    COALESCE(_nompob,''),
+    COALESCE(_numextcta,0),
+    COALESCE( _nummovext,0),
+    COALESCE(_clamone,0),
     _tipolin,
     _linref,
-    _fectrn,
-    _impautcon,
-    _originope,
+    COALESCE(_fectrn,TO_TIMESTAMP('1900-01-01 00:00:00','yyyy-MM-dd hh24:mi:ss')),
+    COALESCE(_impautcon,0),
+     COALESCE(_originope,''),
     timezone('utc', now()),
     timezone('utc', now()),
-    _contrato
+    COALESCE(_contrato,'')
   );
 
   EXCEPTION

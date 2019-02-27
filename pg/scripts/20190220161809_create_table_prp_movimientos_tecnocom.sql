@@ -92,8 +92,8 @@
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
       contrato            VARCHAR(30) NOT NULL,
-      CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id),
-      CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut)
+      CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id)--,
+      --CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut) --Comentado ya que pueden llegar 2 veces los movimientos y chocan cn esta tabla
   );
   CREATE INDEX prp_movimientos_tecnocom_hist_i1 ON ${schema}.prp_movimientos_tecnocom_hist (idArchivo);
 

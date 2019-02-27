@@ -111,5 +111,5 @@ $function$
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.prp_busca_movimientos_tecnocom_v10(BIGINT,_in_originope);
+DROP FUNCTION IF EXISTS ${schema}.prp_busca_movimientos_tecnocom_v10(BIGINT,VARCHAR);
 
