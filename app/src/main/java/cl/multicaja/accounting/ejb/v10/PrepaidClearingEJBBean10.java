@@ -4,6 +4,7 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -461,6 +462,11 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           clearingData.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
 
+          Timestamps timestamps = new Timestamps();
+          Timestamp createdAt = new Timestamp(DateUtils.getInstance().dateStringToDate(record[6],DATE_PATTERN).getTime());
+          timestamps.setCreatedAt(createdAt);
+          clearingData.setTimestamps(timestamps);
+
           Rut accountRut = new Rut();
           String stringRut = String.valueOf(record[19]);
           System.out.println("Rut: " + stringRut);
@@ -551,7 +557,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Viene en el archivo y no existe en nuestra tabla
         if(result == null) {
           //Agregar a Investigar
-
           //TODO: Esta OK este Research?
           this.createClearingResearch(
             data.getIdTransaction(),
