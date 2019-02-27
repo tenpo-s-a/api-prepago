@@ -361,15 +361,43 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileType"));
     }
 
-    TipoFactura tipofac = TipoFactura.RETIRO_TRANSFERENCIA; // Todo: determinar que tipo de factura es de acuerdo al fileType (ver la funcion mcred conciliation para ver el if como la determina)
-    String statusColumnName = "estado_con_tecnocom"; // Todo, definir columna
+    PrepaidMovementType movementType = PrepaidMovementType.TOPUP;
+    String statusColumnName = "estado_con_switch";
+    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+
+    switch(fileType) {
+      case TECNOCOM_FILE:
+        movementType = null;
+        statusColumnName = "estado_con_tecnocom";
+        break;
+      case SWITCH_TOPUP:
+        movementType = PrepaidMovementType.TOPUP;
+        indnorcor = IndicadorNormalCorrector.NORMAL;
+        break;
+      case SWITCH_REJECTED_TOPUP:
+        return;
+      case SWITCH_REVERSED_TOPUP:
+        movementType = PrepaidMovementType.TOPUP;
+        indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        break;
+      case SWITCH_WITHDRAW:
+        movementType = PrepaidMovementType.WITHDRAW;
+        indnorcor = IndicadorNormalCorrector.NORMAL;
+        break;
+      case SWITCH_REJECTED_WITHDRAW:
+        return;
+      case SWITCH_REVERSED_WITHDRAW:
+        movementType = PrepaidMovementType.WITHDRAW;
+        indnorcor = IndicadorNormalCorrector.CORRECTORA;
+        break;
+    }
 
     // Llamar a expirar movimientos con los parametros definidos
     Object[] params = {
       new InParam(statusColumnName, Types.VARCHAR),
       new InParam(fileType.toString(), Types.VARCHAR),
-      new InParam(tipofac.getCode(), Types.NUMERIC),
-      new InParam(tipofac.getCorrector(), Types.NUMERIC),
+      new InParam(movementType, Types.VARCHAR),
+      new InParam(indnorcor, Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
