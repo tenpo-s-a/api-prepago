@@ -987,12 +987,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
 
-      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
-      String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
-      Long movRef = new Long(0);
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"TestFile",mov.getFechaCreacion(),
         ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-        ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR,movRef);
+        ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR,new Long(0));
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
@@ -1011,11 +1008,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
 
-      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
-      String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
-      Long movRef = new Long(0);
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR,movRef);
+      //TODO: Esta OK este Research
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"TestFile",mov.getFechaCreacion(),
+        ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR,new Long(0));
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
@@ -1187,11 +1182,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
 
-      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
-      String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
-      Long movRef = new Long(0);
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
+      //TODO: Esta OK este Research?
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"TestFile",mov.getFechaCreacion(),
+        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,new Long(0));
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
@@ -1346,11 +1339,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
 
-      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
-      String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
-      Long movRef = new Long(0);
-      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
+      //TODO: Esta OK este Research?
+      createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,"TestFile",mov.getFechaCreacion(),
+        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,new Long(0));
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
@@ -1557,7 +1548,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
               //TODO: Esta OK este Research?
-              
+
               createMovementResearch(
                 null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile",
                 prepaidMovement10.getFechaActualizacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
