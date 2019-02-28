@@ -407,7 +407,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             String responsable = "OTI-Prepago";
             String descripcion = "Movimiento no encontrado en BBDD";
             Long movRef = new Long(0);
-            //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
             getPrepaidMovementEJBBean10().createMovementResearch(null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
               fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED,movRef);
 

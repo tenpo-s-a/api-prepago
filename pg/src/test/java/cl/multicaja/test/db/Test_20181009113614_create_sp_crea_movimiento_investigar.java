@@ -38,7 +38,6 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     RowMapper rm = (Map<String, Object> row) -> {
       ResearchMovement researchMovement = new ResearchMovement();
       researchMovement.id = numberUtils.toLong(row.get("_id"));
-      //researchMovement.idRef = String.valueOf(row.get("_mov_ref"));
       researchMovement.idArchivoOrigen = String.valueOf(row.get("_id_archivo_origen"));
       researchMovement.origen = String.valueOf(row.get("_origen"));
       researchMovement.nombreArchivo = String.valueOf(row.get("_nombre_archivo"));
@@ -246,32 +245,8 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     return dbUtils.execute(SP_NAME, params);
   };
 
-  /*public static Map<String, Object> creaMovimientoInvestigar(
-    String id_archivo_origen, String origen, String nombreArchivo) throws SQLException {
-
-    //TODO: Estas variables deben colocarse como nuevos parámetros de esta función y asi mismo en implementaciones similares que usen el procedimiento, con sus nuevos cambios
-    Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
-    String responsable = " ";
-    String descripcion = " ";
-    Long movRef = new Long(10);
-
-    Object[] params = {
-      id_archivo_origen != null ? id_archivo_origen : new NullParam(Types.VARCHAR),
-      origen != null ? origen : new NullParam(Types.VARCHAR),
-      nombreArchivo != null ? nombreArchivo : new NullParam(Types.VARCHAR),
-      fechaDeTransaccion != null ? fechaDeTransaccion : new NullParam(Types.TIMESTAMP),
-      responsable != null ? responsable : new NullParam(Types.VARCHAR),
-      descripcion != null ? descripcion : new NullParam(Types.VARCHAR),
-      movRef != null ? movRef : new NullParam(Types.BIGINT),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR) };
-    return dbUtils.execute(SP_NAME, params);
-  }*/
-
   class ResearchMovement {
     private Long id;
-    //private String idRef;
     private String idArchivoOrigen;
     private String origen;
     private String nombreArchivo;
