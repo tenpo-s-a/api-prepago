@@ -318,12 +318,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           researchId += "]-";
 
-          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecFac().getTime())).getTime());
-          //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-          //LocalDateTime dateTime = LocalDateTime.parse(recTmp.getDateTrx(), formatter);
-          //ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
-          //ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
-          //Timestamp fechaDeTransaccion = Timestamp.valueOf(utcTime.toLocalDateTime());
+          Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
+            localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
 
           Long movRef = new Long(0);
           getPrepaidMovementEJBBean10().createMovementResearch(
@@ -406,7 +402,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
             researchId += "]-";
 
-            Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecFac().getTime())).getTime());
+            Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
+              localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
+            
             String responsable = "OTI-Prepago";
             String descripcion = "Movimiento no encontrado en BBDD";
             Long movRef = new Long(0);
