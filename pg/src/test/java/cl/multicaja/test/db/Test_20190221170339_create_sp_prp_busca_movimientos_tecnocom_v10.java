@@ -31,7 +31,7 @@ public class Test_20190221170339_create_sp_prp_busca_movimientos_tecnocom_v10 ex
       Assert.assertNotEquals("Id no puede ser 0",0,movTecnocom.get("_r_id"));
     }
 
-    Map<String, Object> searchResult =  buildQuery(fileId);
+    Map<String, Object> searchResult =  buildQuery(fileId,"ONLI");
     Assert.assertNotNull("El resultado no debe ser null",searchResult);
     List result = (List)searchResult.get("result");
     Assert.assertEquals("EL resultado debe ser 3",3,result.size());
@@ -40,10 +40,11 @@ public class Test_20190221170339_create_sp_prp_busca_movimientos_tecnocom_v10 ex
     }
   }
 
-  private static Map<String, Object> buildQuery(Long fileId) throws Exception {
+  private static Map<String, Object> buildQuery(Long fileId,String originope) throws Exception {
 
     Object[] params = {
       new InParam(fileId, Types.BIGINT),
+      new InParam(originope,Types.VARCHAR)
     };
     return dbUtils.execute(SP_NAME, params);
   }

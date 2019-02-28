@@ -66,6 +66,13 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
 
   public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
                                                    String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac, String numaut) throws SQLException {
+    return insertMovement(idMovimientoRef, idUsuario, idTxExterno, tipoMovimiento,
+      estado, origenMovimiento, cuenta, clamon, indnorcor, tipofac, fecfac, numaut,"PENDING", "PENDING");
+  }
+
+  public static Map<String, Object> insertMovement(Long idMovimientoRef, Long idUsuario, String idTxExterno, String tipoMovimiento,
+                                                   String estado, String origenMovimiento, String cuenta, Integer clamon, Integer indnorcor, Integer tipofac, Date fecfac, String numaut,
+                                                   String estado_con_tecnocom, String estado_con_switch) throws SQLException {
     Object[] params = {
       setInParam(idMovimientoRef), //_id_mov_ref NUMERIC
       setInParam(idUsuario), //_id_usuario NUMERIC
@@ -74,8 +81,8 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam(getUniqueLong()), //_monto NUMERIC
       estado, //_estado VARCHAR
       "OK", // estado_de_negocio VARCHAR
-      "PENDING", // estado_con_switch VARCHAR
-      "PENDING", // estado_con_tecnocom VARCHAR
+      estado_con_switch, // estado_con_switch VARCHAR
+      estado_con_tecnocom, // estado_con_tecnocom VARCHAR
       origenMovimiento, // origen_movimiento VARCHAR
       "AA",//_codent VARCHAR
       "CA",//_centalta VARCHAR

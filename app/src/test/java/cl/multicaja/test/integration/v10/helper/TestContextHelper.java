@@ -64,6 +64,8 @@ public class TestContextHelper extends TestBaseUnit {
       TecnocomReconciliationRoute10 tecnocomReconciliationRoute10 = new TecnocomReconciliationRoute10();
       tecnocomReconciliationRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       tecnocomReconciliationRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+      tecnocomReconciliationRoute10.setTecnocomReconciliationEJBBean10(getTecnocomReconciliationEJBBean10());
+
 
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());

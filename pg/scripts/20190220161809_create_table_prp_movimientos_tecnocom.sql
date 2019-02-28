@@ -46,8 +46,12 @@
       clamone             NUMERIC(3) NOT NULL,
       tipolin             VARCHAR(4) NOT NULL,
       linref              NUMERIC(8) NOT NULL,
+      fectrn              TIMESTAMP NOT NULL,
+      impautcon           NUMERIC(17,2) NOT NULL,
+      originope           VARCHAR(20) NOT NULL,
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
+      contrato            VARCHAR(30) NOT NULL,
       CONSTRAINT prp_movimientos_tecnocom_pk PRIMARY KEY(id),
       CONSTRAINT prp_movimientos_tecnocom_u1 UNIQUE(cuenta,pan,fecfac,numaut)
   );
@@ -82,10 +86,14 @@
       clamone             NUMERIC(3) NOT NULL,
       tipolin             VARCHAR(4) NOT NULL,
       linref              NUMERIC(8) NOT NULL,
+      fectrn              TIMESTAMP NOT NULL,
+      impautcon           NUMERIC(17,2) NOT NULL,
+      originope           VARCHAR(20) NOT NULL,
       fecha_creacion      TIMESTAMP NOT NULL,
       fecha_actualizacion TIMESTAMP NOT NULL,
-      CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id),
-      CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut)
+      contrato            VARCHAR(30) NOT NULL,
+      CONSTRAINT prp_movimientos_tecnocom_hist_pk PRIMARY KEY(id)--,
+      --CONSTRAINT prp_movimientos_tecnocom_hist_u1 UNIQUE(cuenta,pan,fecfac,numaut) --Comentado ya que pueden llegar 2 veces los movimientos y chocan cn esta tabla
   );
   CREATE INDEX prp_movimientos_tecnocom_hist_i1 ON ${schema}.prp_movimientos_tecnocom_hist (idArchivo);
 

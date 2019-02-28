@@ -15,6 +15,10 @@ import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
@@ -23,7 +27,11 @@ import java.util.Map;
 import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
+@Stateless
+@LocalBean
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
 public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implements ReconciliationFilesEJB10 {
+
   private static Log log = LogFactory.getLog(ReconciliationFilesEJBBean10.class);
 
   @Override

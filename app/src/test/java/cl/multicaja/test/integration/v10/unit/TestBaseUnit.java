@@ -297,6 +297,7 @@ public class TestBaseUnit extends TestApiBase {
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
+      tecnocomReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
     }
     return tecnocomReconciliationEJBBean10;
   }
