@@ -563,7 +563,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             fileName,
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
-            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,
+            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
             new Long(0));
 
         }

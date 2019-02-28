@@ -326,7 +326,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           getPrepaidMovementEJBBean10().createMovementResearch(
             null, researchId, ReconciliationOriginType.TECNOCOM,
             fileName,fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
-            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,movRef);
+            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpFac().getValue())){
@@ -413,7 +413,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             getPrepaidMovementEJBBean10().createMovementResearch(
               null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
               fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
-              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,movRef);
+              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 

@@ -1052,7 +1052,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_ON_DB,movRef);
+        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null,mov.getId(),PrepaidMovementStatus.PROCESS_OK);
@@ -1205,7 +1205,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_ON_DB,movRef);
+        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       //TODO: actualizar fecha de conciliacion y status -> RESEARCH en accounting
@@ -1367,7 +1367,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_ON_DB,movRef);
+        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
 
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
       // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
@@ -1512,7 +1512,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, fileName,fechaDeTransaccion,
         ResearchMovementResponsibleStatusType.OTI_PREPAID,
-        ResearchMovementDescriptionType.ERROR_STATUS_ON_DB,movRef);
+        ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,movRef);
 
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
