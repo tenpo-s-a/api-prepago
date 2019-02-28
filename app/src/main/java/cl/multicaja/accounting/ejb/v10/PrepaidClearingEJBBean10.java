@@ -565,7 +565,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_ON_DB,
             new Long(0));
-          
+
         }
       } else {
         // Todo: Por ahora todo los movimientos que no sean RETIRO_WEB son aceptados
