@@ -318,11 +318,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           researchId += "]-";
 
-          //new Timestamp((new java.util.Date()).getTime());
-          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecfac())).getTime());
+          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecFac().getTime())).getTime());
           Long movRef = new Long(0);
+          getPrepaidMovementEJBBean10().createMovementResearch(null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
+          fechaDeTransaccion,ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED,movRef);
 
-          //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
           getPrepaidMovementEJBBean10().createMovementResearch(
             null, researchId, ReconciliationOriginType.TECNOCOM,
             fileName,fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
@@ -403,11 +403,14 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
             researchId += "]-";
 
-            Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecfac())).getTime());
+            Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date(trx.getFecFac().getTime())).getTime());
             String responsable = "OTI-Prepago";
             String descripcion = "Movimiento no encontrado en BBDD";
             Long movRef = new Long(0);
             //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+            getPrepaidMovementEJBBean10().createMovementResearch(null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
+              fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED,movRef);
+
             getPrepaidMovementEJBBean10().createMovementResearch(
               null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
               fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
