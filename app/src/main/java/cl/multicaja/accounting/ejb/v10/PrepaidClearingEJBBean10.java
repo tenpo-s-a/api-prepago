@@ -533,7 +533,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Este movimiento ya fue procesado anteriormente, dado que:
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
-          //TODO: Esta OK este Research? Revisar mañana.
+          //TODO: Esta OK este Research?
           createClearingResearch(
             data.getIdTransaction(),
             fileName,
@@ -557,7 +557,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Viene en el archivo y no existe en nuestra tabla
         if(result == null) {
           //Agregar a Investigar
-          //TODO: Esta OK este Research? Revisar mañana.
+          //TODO: Esta OK este Research?
           this.createClearingResearch(
             data.getIdTransaction(),
             fileName,

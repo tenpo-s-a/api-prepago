@@ -912,7 +912,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
          */
         else {
-          //TODO: Esta OK este Research? Mañana
+          //TODO: Esta OK este Research?
           Timestamp fechaDeTransaccion = new Timestamp(movFull.getFechaCreacion().getTime());
           String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
           Long movRef = new Long(0);
@@ -969,7 +969,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          * Si es una reversa de retiro - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
          */
         else {
-          //TODO: Esta OK este Research? Mañana
+          //TODO: Esta OK este Research?
           Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
           String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
           Long movRef = new Long(0);
@@ -1120,7 +1120,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
        */
       else {
 
-        //TODO: Esta OK este Research? Mañana
+        //TODO: Esta OK este Research?
         Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
@@ -1253,7 +1253,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
 
-        //TODO: Esta OK este Research? Mañana, insertar en tecnocom, no a investigar
+        //TODO: Esta OK este Research?
         Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
@@ -1386,7 +1386,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else {
         log.error("No cae en ningun caso: "+mov);
 
-        //TODO: Esta OK este Research?, mañana y debe esclarecerse quien es el responsable.
+        //TODO: Esta OK este Research?
         Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
@@ -1504,7 +1504,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
-      //TODO: Esta OK este Research? Depende también que esté en tecnocom, se supone que está en tecnocom. mañana.
+      //TODO: Esta OK este Research?
       Timestamp fechaDeTransaccion =  new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       String descripcion = "";
