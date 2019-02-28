@@ -1449,11 +1449,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      //clearingData10.getTimestamps().getCreatedAt()
-      //prepaidMovement10.getFechaActualizacion();
       createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile",
-        clearingData10.getTimestamps().getCreatedAt(),ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+        prepaidMovement10.getFechaActualizacion(),ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
         ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE,new Long(0));
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -1466,11 +1464,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      //clearingData10.getTimestamps().getCreatedAt()
-      //prepaidMovement10.getFechaActualizacion();
       createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,"TestFile",
-        clearingData10.getTimestamps().getCreatedAt(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+        prepaidMovement10.getFechaActualizacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
         ResearchMovementDescriptionType.ERROR_INFO,new Long(0));
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -1483,11 +1479,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      //clearingData10.getTimestamps().getCreatedAt()
-      //prepaidMovement10.getFechaActualizacion();
       createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile",
-        clearingData10.getTimestamps().getCreatedAt(), ResearchMovementResponsibleStatusType.OTI_PREPAID,
+        prepaidMovement10.getFechaActualizacion(), ResearchMovementResponsibleStatusType.OTI_PREPAID,
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,new Long(0));
 
 
@@ -1563,11 +1557,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
               //TODO: Esta OK este Research?
-              //clearingData10.getTimestamps().getCreatedAt()
-              //prepaidMovement10.getFechaActualizacion();
               createMovementResearch(
                 null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile",
-                clearingData10.getTimestamps().getCreatedAt(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+                prepaidMovement10.getFechaActualizacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
                 ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE,new Long(0));
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -1581,11 +1573,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
           //TODO: Esta OK este Research?
-          //clearingData10.getTimestamps().getCreatedAt()
-          //prepaidMovement10.getFechaActualizacion();
           createMovementResearch(
             null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, "TestFile",
-            clearingData10.getTimestamps().getCreatedAt(), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
+            prepaidMovement10.getFechaActualizacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,new Long(0));
 
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
