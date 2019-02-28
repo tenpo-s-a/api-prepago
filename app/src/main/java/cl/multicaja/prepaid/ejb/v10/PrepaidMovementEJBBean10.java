@@ -1017,7 +1017,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
 
-      Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
@@ -1199,7 +1199,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
 
-      Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
@@ -1361,7 +1361,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
 
-      Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
