@@ -541,7 +541,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
             ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
-            new Long(0));
+            data.getId());
 
           // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
           if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
@@ -566,7 +566,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
-            new Long(0));
+            data.getId());
 
         }
       } else {
