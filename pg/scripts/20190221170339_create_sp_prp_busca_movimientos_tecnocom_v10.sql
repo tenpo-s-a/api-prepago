@@ -19,37 +19,42 @@
 
 CREATE OR REPLACE FUNCTION ${schema}.prp_busca_movimientos_tecnocom_v10
 (
-  IN  _in_fileId BIGINT,
-  OUT _id BIGINT,
-  OUT _idarchivo BIGINT,
-  OUT _cuenta VARCHAR,
-  OUT _pan VARCHAR,
-  OUT _codent VARCHAR,
-  OUT _centalta VARCHAR,
-  OUT _clamon NUMERIC,
-  OUT _indnorcor NUMERIC,
-  OUT _tipofac NUMERIC,
-  OUT _fecfac DATE,
-  OUT _numreffac VARCHAR,
-  OUT _clamondiv NUMERIC,
-  OUT _impdiv NUMERIC,
-  OUT _impfac NUMERIC,
-  OUT _cmbapli NUMERIC,
-  OUT _numaut VARCHAR,
-  OUT _indproaje VARCHAR,
-  OUT _codcom VARCHAR,
-  OUT _codact NUMERIC,
-  OUT _impliq NUMERIC,
-  OUT _clamonliq NUMERIC,
-  OUT _codpais NUMERIC,
-  OUT _nompob VARCHAR,
-  OUT _numextcta NUMERIC,
-  OUT _nummovext NUMERIC,
-  OUT _clamone NUMERIC,
-  OUT _tipolin VARCHAR,
-  OUT _linref NUMERIC,
+  IN  _in_fileId    BIGINT,
+  IN  _in_originope VARCHAR,
+  OUT _id           BIGINT,
+  OUT _idarchivo    BIGINT,
+  OUT _cuenta       VARCHAR,
+  OUT _pan          VARCHAR,
+  OUT _codent       VARCHAR,
+  OUT _centalta     VARCHAR,
+  OUT _clamon       NUMERIC,
+  OUT _indnorcor    NUMERIC,
+  OUT _tipofac      NUMERIC,
+  OUT _fecfac       DATE,
+  OUT _numreffac    VARCHAR,
+  OUT _clamondiv    NUMERIC,
+  OUT _impdiv       NUMERIC,
+  OUT _impfac       NUMERIC,
+  OUT _cmbapli      NUMERIC,
+  OUT _numaut       VARCHAR,
+  OUT _indproaje    VARCHAR,
+  OUT _codcom       VARCHAR,
+  OUT _codact       NUMERIC,
+  OUT _impliq       NUMERIC,
+  OUT _clamonliq    NUMERIC,
+  OUT _codpais      NUMERIC,
+  OUT _nompob       VARCHAR,
+  OUT _numextcta    NUMERIC,
+  OUT _nummovext    NUMERIC,
+  OUT _clamone      NUMERIC,
+  OUT _tipolin      VARCHAR,
+  OUT _linref       NUMERIC,
+  OUT _fectrn       TIMESTAMP,
+  OUT _impautcon    NUMERIC,
+  OUT _originope    VARCHAR,
   OUT _fecha_creacion TIMESTAMP,
-  OUT _fecha_actualizacion TIMESTAMP
+  OUT _fecha_actualizacion TIMESTAMP,
+  OUT _contrato     VARCHAR
 )
 RETURNS SETOF record
 LANGUAGE plpgsql
@@ -86,12 +91,17 @@ BEGIN
       clamone,
       tipolin,
       linref,
+      fectrn,
+      impautcon,
+      originope,
       fecha_creacion,
-      fecha_actualizacion
+      fecha_actualizacion,
+      contrato
     FROM
       ${schema}.prp_movimientos_tecnocom
     WHERE
-      idarchivo = _in_fileId
+      idarchivo = COALESCE(_in_fileId,0) AND
+      originope = COALESCE(_in_originope,'')
     ORDER BY id ASC;
 
 RETURN;
@@ -101,5 +111,5 @@ $function$
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.prp_busca_movimientos_tecnocom_v10(BIGINT);
+DROP FUNCTION IF EXISTS ${schema}.prp_busca_movimientos_tecnocom_v10(BIGINT,VARCHAR);
 
