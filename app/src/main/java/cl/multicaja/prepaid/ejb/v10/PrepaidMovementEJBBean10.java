@@ -911,7 +911,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          */
         else {
           //TODO: Esta OK este Research?
-          Timestamp fechaDeTransaccion = new Timestamp(movFull.getFechaCreacion().getTime());
+          Timestamp fechaDeTransaccion = movFull.getFechaCreacion();
           String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
           Long movRef = new Long(0);
           createMovementResearch(
@@ -968,7 +968,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          */
         else {
           //TODO: Esta OK este Research?
-          Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+          Timestamp fechaDeTransaccion = mov.getFechaCreacion();
           String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
           Long movRef = new Long(0);
           createMovementResearch(
@@ -993,7 +993,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
 
-      Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
@@ -1046,7 +1046,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 5");
 
       //TODO: Esta OK este Research?
-      Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+      Timestamp fechaDeTransaccion = mov.getFechaCreacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
@@ -1119,7 +1119,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       else {
 
         //TODO: Esta OK este Research?
-        Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+        Timestamp fechaDeTransaccion = mov.getFechaCreacion();
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, fileName,fechaDeTransaccion,
@@ -1252,7 +1252,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
 
         //TODO: Esta OK este Research?
-        Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+        Timestamp fechaDeTransaccion = mov.getFechaCreacion();
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
         createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR, fileName,fechaDeTransaccion,
@@ -1385,7 +1385,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.error("No cae en ningun caso: "+mov);
 
         //TODO: Esta OK este Research?
-        Timestamp fechaDeTransaccion = new Timestamp(mov.getFechaCreacion().getTime());
+        Timestamp fechaDeTransaccion = mov.getFechaCreacion();
         String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
         Long movRef = new Long(0);
         createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,fileName,fechaDeTransaccion,
@@ -1467,7 +1467,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      Timestamp fechaDeTransaccion = new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
+      Timestamp fechaDeTransaccion = prepaidMovement10.getFechaActualizacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(
@@ -1485,7 +1485,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      Timestamp fechaDeTransaccion = new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
+      Timestamp fechaDeTransaccion = prepaidMovement10.getFechaActualizacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       Long movRef = new Long(0);
       createMovementResearch(
@@ -1503,7 +1503,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      Timestamp fechaDeTransaccion =  new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
+      Timestamp fechaDeTransaccion =  prepaidMovement10.getFechaActualizacion();
       String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
       String descripcion = "";
       Long movRef = new Long(0);
@@ -1585,7 +1585,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
               //TODO: Esta OK este Research?
-              Timestamp fechaDeTransaccion = new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
+              Timestamp fechaDeTransaccion = prepaidMovement10.getFechaActualizacion();
               String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
               Long movRef = new Long(0);
               createMovementResearch(
@@ -1604,7 +1604,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
           //TODO: Esta OK este Research?
-          Timestamp fechaDeTransaccion = new Timestamp(prepaidMovement10.getFechaActualizacion().getTime());
+          Timestamp fechaDeTransaccion = prepaidMovement10.getFechaActualizacion();
           String fileName = "TestFile"; //TODO: De donde se toma el nombre del archivo
           Long movRef = new Long(0);
           createMovementResearch(
