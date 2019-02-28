@@ -1467,6 +1467,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
+      
       createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
         ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
