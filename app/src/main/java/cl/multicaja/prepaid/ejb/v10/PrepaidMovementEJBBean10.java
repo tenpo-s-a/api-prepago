@@ -1513,6 +1513,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION, fileName,fechaDeTransaccion,
         ResearchMovementResponsibleStatusType.OTI_PREPAID,
         ResearchMovementDescriptionType.ERROR_STATUS_ON_DB,movRef);
+      
 
       // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
       createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
