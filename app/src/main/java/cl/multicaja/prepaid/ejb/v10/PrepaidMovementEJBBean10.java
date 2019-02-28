@@ -1483,16 +1483,31 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     Object[] params = {
-      new InParam(idArchivoOrigen, Types.VARCHAR)
+      new InParam(idArchivoOrigen, Types.VARCHAR),
+      new NullParam(Types.TIMESTAMP),
+      new NullParam(Types.TIMESTAMP)
     };
 
     log.info(String.format("ID IN : %s", idArchivoOrigen));
     RowMapper rm = getResearchMovementRowMapper();
-    //Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v10", getSchema()), rm, params);
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v11", getSchema()), rm, params);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v12", getSchema()), rm, params);
     List list = (List)resp.get("result");
     log.info("getResearchMovementByIdMovRef: " + list);
     return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
+  }
+
+  public List<ResearchMovement10> getResearchMovementBetweenDates(Timestamp beginTs, Timestamp endTs) throws SQLException {
+    Object[] params = {
+      new NullParam(Types.VARCHAR),
+      new InParam(beginTs, Types.TIMESTAMP),
+      new InParam(endTs, Types.TIMESTAMP)
+    };
+
+    RowMapper rm = getResearchMovementRowMapper();
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v12", getSchema()), rm, params);
+    List list = (List)resp.get("result");
+    log.info("getResearchMovementByIdMovRef: " + list);
+    return list;
   }
 
   private RowMapper getResearchMovementRowMapper() {
