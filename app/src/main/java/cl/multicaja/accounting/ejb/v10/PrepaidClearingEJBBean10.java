@@ -535,15 +535,10 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // O ya esta conciliado
 
           //TODO: Esta OK este Research?
-          //TODO: Cual de las dos usar para fecha de Transaccion A o B
-          //A: data.getTimestamps().getCreatedAt(),
-          //B: prepaidMovement10.getFechaCreacion();
-
-          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date()).getTime());
           createClearingResearch(
             data.getIdTransaction(),
             fileName,
-            fechaDeTransaccion,
+            data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
             ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
             new Long(0));
@@ -565,15 +560,10 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           //Agregar a Investigar
 
           //TODO: Esta OK este Research?
-          //TODO: Cual de las dos usar para fecha de Transaccion A o B
-          //A: data.getTimestamps().getCreatedAt(),
-          //B: prepaidMovement10.getFechaCreacion();
-
-          Timestamp fechaDeTransaccion = new Timestamp((new java.util.Date()).getTime());
           this.createClearingResearch(
             data.getIdTransaction(),
             fileName,
-            fechaDeTransaccion,
+            data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
             new Long(0));
