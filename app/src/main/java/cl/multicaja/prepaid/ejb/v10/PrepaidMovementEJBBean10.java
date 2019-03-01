@@ -22,17 +22,26 @@ import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
+import com.opencsv.CSVWriter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Base64Utils;
 
 import javax.ejb.*;
 import javax.inject.Inject;
 import javax.persistence.criteria.Order;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -78,6 +87,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @EJB
   private PrepaidAccountingEJBBean10 prepaidAccountingEJB10;
+
+  @EJB
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   @Override
   public UserClient getUserClient() {
@@ -133,6 +145,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public PrepaidClearingEJBBean10 getPrepaidClearingEJB10() {
     return prepaidClearingEJB10;
+  }
+
+  public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
+    return mailPrepaidEJBBean10;
+  }
+
+  public void setMailPrepaidEJBBean10(MailPrepaidEJBBean10 mailPrepaidEJBBean10) {
+    this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
   }
 
   public void setPrepaidClearingEJB10(PrepaidClearingEJBBean10 prepaidClearingEJB10) {
@@ -1521,5 +1541,65 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
       return researchMovement;
     };
+  }
+
+  public void sendResearchEmail() throws Exception {
+    ZonedDateTime nowChileDateTime = ZonedDateTime.now(ZoneId.of("America/Santiago"));
+    ZonedDateTime yesterdayChileDateTime = nowChileDateTime.minusDays(1);
+    LocalDate yesterdayDate = yesterdayChileDateTime.toLocalDate();
+    LocalDateTime yesterdayBegining = yesterdayDate.atTime(0, 0, 0);
+    ZonedDateTime yesterdayBeginingZonedChile = yesterdayBegining.atZone(ZoneId.of("America/Santiago"));
+    ZonedDateTime startZonedUtc = yesterdayBeginingZonedChile.withZoneSameInstant(ZoneId.of("UTC"));
+    ZonedDateTime endZoneUtc = startZonedUtc.plusDays(1);
+
+    List<ResearchMovement10> yesterdayResearchMovements = getResearchMovementBetweenDates(Timestamp.valueOf(startZonedUtc.toLocalDateTime()), Timestamp.valueOf(endZoneUtc.toLocalDateTime()));
+
+    LocalDateTime todayLocal = LocalDateTime.now();
+    String todayString = todayLocal.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    String fileName = String.format("research_%s.csv", todayString);
+    File file = new File(fileName);
+    try {
+      FileWriter outputfile = new FileWriter(file);
+      CSVWriter writer = new CSVWriter(outputfile,',');
+      String[] header;
+      header = new String[]{"Id Unico", "Id Mov Referencia", "Id Archivo Origen", "Origen", "Tipo de Movimiento", "Nombre Archivo", "Fecha Trx", "Fecha Investigacion", "Responsable", "Descripcion"};
+      writer.writeNext(header);
+
+      for(ResearchMovement10 mov : yesterdayResearchMovements) {
+        ZonedDateTime utcDateTime = mov.getCreatedAt().toLocalDateTime().atZone(ZoneId.of("UTC"));
+        ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
+        String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String[] data = new String[]{ mov.getId().toString(), mov.getIdRef(), "", mov.getOrigen().toString(), "tipo mov", mov.getFileName(), "fecha trx", stringDate, "resposable", "descripcion"};
+        writer.writeNext(data);
+      }
+      writer.close();
+    } catch (Exception e) {
+      log.error("Exception : " + e);
+      e.printStackTrace();
+    }
+
+    sendResearchFile(fileName, "research_test@gmail.com");
+
+    file.delete();
+  }
+
+  private void sendResearchFile(String fileName, String emailAddress) throws Exception {
+
+    String file = fileName;
+    FileInputStream attachmentFile = new FileInputStream(file);
+    String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
+    attachmentFile.close();
+
+    // Enviamos el archivo al mail de reportes diarios
+    EmailBody emailBodyToSend = new EmailBody();
+
+    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
+    emailBodyToSend.setTemplateData(null);
+    emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
+    //emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
+    emailBodyToSend.setAddress(emailAddress);
+    mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+    Files.delete(Paths.get(file));
   }
 }
