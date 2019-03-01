@@ -1732,7 +1732,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ZonedDateTime utcDateTime = mov.getCreatedAt().toLocalDateTime().atZone(ZoneId.of("UTC"));
         ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
         String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        String[] data = new String[]{ mov.getId().toString(), mov.getIdRef(), "", mov.getOrigen().toString(), "tipo mov", mov.getFileName(), "fecha trx", stringDate, "resposable", "descripcion"};
+        String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
         writer.writeNext(data);
       }
       writer.close();

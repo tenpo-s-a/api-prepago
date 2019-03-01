@@ -3,6 +3,8 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
 import cl.multicaja.prepaid.model.v10.ResearchMovement10;
+import cl.multicaja.prepaid.model.v10.ResearchMovementDescriptionType;
+import cl.multicaja.prepaid.model.v10.ResearchMovementResponsibleStatusType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,23 +30,23 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
 
     String movementId = "idMov=3";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     changeResearch(movementId, "2015-01-01 00:00:00.0");
     ResearchMovement10 insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=4";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=5";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=6";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     changeResearch(movementId, "3015-01-01 00:00:00.0");
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
@@ -61,10 +63,10 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     int comparedMovements = 0;
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
-        if(insMovement.getIdRef().equals(foundMovement.getIdRef())) {
+        if(insMovement.getIdFileOrigin().equals(foundMovement.getIdFileOrigin())) {
           Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          Assert.assertEquals("Debe tener origen", insMovement.getOrigen(), foundMovement.getOrigen());
+          Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
           comparedMovements++;
         }
       }
@@ -77,10 +79,10 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     comparedMovements = 0;
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
-        if(insMovement.getIdRef().equals(foundMovement.getIdRef())) {
+        if(insMovement.getIdFileOrigin().equals(foundMovement.getIdFileOrigin())) {
           Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          Assert.assertEquals("Debe tener origen", insMovement.getOrigen(), foundMovement.getOrigen());
+          Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
           comparedMovements++;
         }
       }
@@ -93,10 +95,10 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     comparedMovements = 0;
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
-        if(insMovement.getIdRef().equals(foundMovement.getIdRef())) {
+        if(insMovement.getIdFileOrigin().equals(foundMovement.getIdFileOrigin())) {
           Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          Assert.assertEquals("Debe tener origen", insMovement.getOrigen(), foundMovement.getOrigen());
+          Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
           comparedMovements++;
         }
       }
@@ -109,10 +111,10 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     comparedMovements = 0;
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
-        if(insMovement.getIdRef().equals(foundMovement.getIdRef())) {
+        if(insMovement.getIdFileOrigin().equals(foundMovement.getIdFileOrigin())) {
           Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          Assert.assertEquals("Debe tener origen", insMovement.getOrigen(), foundMovement.getOrigen());
+          Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
           comparedMovements++;
         }
       }

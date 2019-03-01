@@ -1,14 +1,13 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
-import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
-import cl.multicaja.prepaid.model.v10.ResearchMovement10;
+import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -34,37 +33,35 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
 
     String movementId = "idMov=3";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     changeResearch(movementId, "2015-01-01 00:00:00.0");
     ResearchMovement10 insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=4";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, 32L);
     changeResearch(movementId, yesterdayString);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=5";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "sin_archivo", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, 57L);
     changeResearch(movementId, yesterdayString);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=6";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     changeResearch(movementId, "3015-01-01 00:00:00.0");
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     movementId = "idMov=7";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt");
+    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
 
     getPrepaidMovementEJBBean10().sendResearchEmail();
-
-    Thread.sleep(5000);
   }
 
   static public void changeResearch(String idMovimiento, String newDate)  {
