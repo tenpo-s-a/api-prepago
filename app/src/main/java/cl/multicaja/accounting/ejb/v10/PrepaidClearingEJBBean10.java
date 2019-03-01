@@ -4,6 +4,8 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.ZONEID;
+import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
@@ -461,6 +463,14 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           clearingData.setAmountBalance(new NewAmountAndCurrency10(getNumberUtils().toBigDecimal(record[17])));
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
 
+          Timestamps timestamps = new Timestamps();
+          LocalDateTime localDateTime = getDateUtils().dateStringToLocalDateTime(record[6],DATE_PATTERN);
+          ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
+          ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+          timestamps.setCreatedAt(Timestamp.valueOf(utcZoned.toLocalDateTime()));
+
+          clearingData.setTimestamps(timestamps);
+
           Rut accountRut = new Rut();
           String stringRut = String.valueOf(record[19]);
           System.out.println("Rut: " + stringRut);
@@ -527,7 +537,15 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // Este movimiento ya fue procesado anteriormente, dado que:
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
-          createClearingResearch(fileName, data.getIdTransaction());
+
+          //TODO: Esta OK este Research?
+          createClearingResearch(
+            data.getIdTransaction(),
+            fileName,
+            data.getTimestamps().getCreatedAt(),
+            ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+            ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
+            data.getId());
 
           // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
           if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
@@ -544,7 +562,16 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Viene en el archivo y no existe en nuestra tabla
         if(result == null) {
           //Agregar a Investigar
-          this.createClearingResearch(fileName, data.getIdTransaction());
+
+          //TODO: Esta OK este Research?
+          this.createClearingResearch(
+            data.getIdTransaction(),
+            fileName,
+            data.getTimestamps().getCreatedAt(),
+            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
+            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
+            new Long(0));
+
         }
       } else {
         // Todo: Por ahora todo los movimientos que no sean RETIRO_WEB son aceptados
@@ -554,9 +581,14 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   // Agrega movimiento a investigar
-  public void createClearingResearch(String fileName, Long movementId) throws Exception {
+  public void createClearingResearch(
+    Long movementId, String fileName, Timestamp dateOfTransaction, ResearchMovementResponsibleStatusType responsible,
+    ResearchMovementDescriptionType description, Long movRef) throws Exception {
+
     String idToResearch = String.format("idMov=%d", movementId);
-    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch, ReconciliationOriginType.CLEARING, fileName);
+
+    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
+      ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);
   }
 
   @Override

@@ -17,7 +17,7 @@ import java.util.Set;
 public class TecnocomReconciliationFileDetail {
 
   public static final String FECFACT_DATE_FORMAT = "yyyy-MM-dd";
-  private static final String SAT_ORIGIN = "ONLI";
+  public static final String SAT_ORIGIN = "ONLI";
 
   private String detail;
   private Boolean hasError;
@@ -208,10 +208,10 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getOrigenope() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomOperationType.OP.equals(this.getOperationType())) {
       return this.detail.substring(this.ORIGENOPE.getStart(), this.ORIGENOPE.getEnd());
-    } else{
-      return "";
+    } else {
+      return "AUTO";
     }
   }
 
@@ -274,10 +274,12 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getClamonDiv() {
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
-      return this.detail.substring(this.CLAMONDIV_AU.getStart(), this.CLAMONDIV_AU.getEnd());
+    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
+    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+      return this.detail.substring(this.CLAMON_AU.getStart(), this.CLAMON_AU.getEnd());
     } else{
-      return "";
+      return "0";
     }
   }
 

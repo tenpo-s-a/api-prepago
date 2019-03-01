@@ -5,6 +5,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.OriginOpeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +46,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     Assert.assertNotNull("Movimiento Tc despues de insertar no debe ser null",movTec);
     Assert.assertNotEquals("Id debe ser != 0",0,movTec.getId().intValue());
 
-    List<MovimientoTecnocom10> movTec2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId);
+    List<MovimientoTecnocom10> movTec2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(fileId, OriginOpeType.SAT_ORIGIN);
     Assert.assertEquals("Debe existir un movimiento",1,movTec2.size());
 
     Assert.assertEquals("Deben ser iguales getIdArchivo",movTec.getIdArchivo(),movTec2.get(0).getIdArchivo());
@@ -153,7 +155,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
   }
 
   public static MovimientoTecnocom10 buildRandomTcMov(Long fileId) {
-    MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
+    MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
     movimientoTecnocom10.setIdArchivo(fileId);
     movimientoTecnocom10.setLinRef(1);
     movimientoTecnocom10.setNumMovExt(1L);
@@ -162,7 +164,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     movimientoTecnocom10.setCodCom(getRandomNumericString(5));
     movimientoTecnocom10.setPan(getRandomNumericString(20));
     movimientoTecnocom10.setCuenta(getRandomNumericString(10));
-    movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_TRANSFERENCIA);
+    movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movimientoTecnocom10.setIndNorCor(TipoFactura.CARGA_TRANSFERENCIA.getCorrector());
     movimientoTecnocom10.setFecFac(new Date(System.currentTimeMillis()));
     movimientoTecnocom10.setNomPob(getRandomNumericString(10));
@@ -191,6 +193,11 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     imLiq.setValue(new BigDecimal(getUniqueInteger()));
     imLiq.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     movimientoTecnocom10.setImpLiq(imLiq);
+
+    movimientoTecnocom10.setContrato(getRandomNumericString(10));
+    movimientoTecnocom10.setOriginOpe("ONLI");
+    movimientoTecnocom10.setImpautcon(imLiq);
+    movimientoTecnocom10.setFecTrn(new Timestamp(System.currentTimeMillis()));
 
     return movimientoTecnocom10;
   }

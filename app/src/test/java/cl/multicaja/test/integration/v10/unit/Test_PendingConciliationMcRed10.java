@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -458,8 +458,15 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10 = new PrepaidMovement10();
         // Creando los valores necesarios para el movimiento que se guarda en el archivo
         prepaidMovement10.setIdTxExterno(RandomStringUtils.random(10, true, true));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        prepaidMovement10.setFecfac(formatter.parse("20180913"));
+
+        LocalDateTime localDateTime = LocalDateTime.parse("2018-09-13T00:00:00");
+        Timestamp currentTimeStamp1 = Timestamp.valueOf(localDateTime);
+        java.sql.Date currentTimeStamp2 = java.sql.Date.valueOf(localDateTime.toLocalDate());
+
+        prepaidMovement10.setFecfac(currentTimeStamp2);
+        prepaidMovement10.setFechaActualizacion(currentTimeStamp1);
+        prepaidMovement10.setFechaCreacion(currentTimeStamp1);
+
         prepaidMovement10.setIdPrepaidUser(new Random().nextLong());
         prepaidMovement10.setMonto(BigDecimal.valueOf (new Random().nextLong()));
         prepaidMovement10.setId((long)new Random().nextInt());

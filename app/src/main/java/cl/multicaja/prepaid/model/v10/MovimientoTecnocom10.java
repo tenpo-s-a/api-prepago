@@ -3,11 +3,12 @@ package cl.multicaja.prepaid.model.v10;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class MovimientoTecnocom10 {
+public class MovimientoTecnocom10 implements Serializable{
 
   private Long id;
   private Long idArchivo;
@@ -17,7 +18,7 @@ public class MovimientoTecnocom10 {
   private String centAlta;
   private NewAmountAndCurrency10 impFac;
   private Integer indNorCor;
-  private TipoFactura TipoFac;
+  private TipoFactura tipoFac;
   private Date  fecFac;
   private String numRefFac;
   private NewAmountAndCurrency10 impDiv;
@@ -36,6 +37,15 @@ public class MovimientoTecnocom10 {
   private Integer linRef;
   private Timestamp fechaCreacion;
   private Timestamp fechaActualizacion;
+  private Timestamp fecTrn;
+  private NewAmountAndCurrency10 impautcon;
+  private String contrato;
+  // Variables para el proceso.
+  private Boolean hasError;
+  private String errorDetails;
+  private String originOpe;
+
+
 
   public Long getId() {
     return id;
@@ -102,11 +112,11 @@ public class MovimientoTecnocom10 {
   }
 
   public TipoFactura getTipoFac() {
-    return TipoFac;
+    return tipoFac;
   }
 
   public void setTipoFac(TipoFactura tipoFac) {
-    TipoFac = tipoFac;
+    this.tipoFac = tipoFac;
   }
 
   public Date getFecFac() {
@@ -252,4 +262,99 @@ public class MovimientoTecnocom10 {
   public void setFechaActualizacion(Timestamp fechaActualizacion) {
     this.fechaActualizacion = fechaActualizacion;
   }
+
+  public Timestamp getFecTrn() {
+    return fecTrn;
+  }
+
+  public void setFecTrn(Timestamp fecTrn) {
+    this.fecTrn = fecTrn;
+  }
+
+  public NewAmountAndCurrency10 getImpautcon() {
+    return impautcon;
+  }
+
+  public void setImpautcon(NewAmountAndCurrency10 impautcon) {
+    this.impautcon = impautcon;
+  }
+
+  public String getOriginOpe() {
+    return originOpe;
+  }
+
+  public void setOriginOpe(String originOpe) {
+    this.originOpe = originOpe;
+  }
+
+  public Boolean getHasError() {
+    return hasError;
+  }
+
+  public void setHasError(Boolean hasError) {
+    this.hasError = hasError;
+  }
+
+  public String getErrorDetails() {
+    return errorDetails;
+  }
+
+  public void setErrorDetails(String errorDetails) {
+    this.errorDetails = errorDetails;
+  }
+
+  public String getContrato() {
+    return contrato;
+  }
+
+  public void setContrato(String contrato) {
+    this.contrato = contrato;
+  }
+
+  public TecnocomOperationType getOperationType() {
+    TecnocomOperationType operationType;
+    switch (tipoFac){
+      case COMPRA_INTERNACIONAL:
+      case SUSCRIPCION_INTERNACIONAL:
+      case ANULA_COMPRA_INTERNACIONAL:
+      case ANULA_SUSCRIPCION_INTERNACIONAL:
+        operationType = TecnocomOperationType.AU;
+        break;
+      default:
+        operationType = TecnocomOperationType.OP;
+        break;
+    }
+    return operationType;
+  }
+
+  public PrepaidMovementType getMovementType() {
+    PrepaidMovementType type = null;
+    switch (this.getTipoFac()) {
+      case CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA:
+      case CARGA_TRANSFERENCIA:
+      case ANULA_CARGA_TRANSFERENCIA:
+        type = PrepaidMovementType.TOPUP;
+        break;
+      case RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA:
+      case RETIRO_TRANSFERENCIA:
+      case ANULA_RETIRO_TRANSFERENCIA:
+        type = PrepaidMovementType.WITHDRAW;
+        break;
+      case COMISION_APERTURA:
+        type = PrepaidMovementType.ISSUANCE_FEE;
+        break;
+      case SUSCRIPCION_INTERNACIONAL:
+      case ANULA_SUSCRIPCION_INTERNACIONAL:
+        type = PrepaidMovementType.SUSCRIPTION;
+        break;
+      case COMPRA_INTERNACIONAL:
+      case ANULA_COMPRA_INTERNACIONAL:
+        type = PrepaidMovementType.PURCHASE;
+        break;
+    }
+    return type;
+  }
+
 }
