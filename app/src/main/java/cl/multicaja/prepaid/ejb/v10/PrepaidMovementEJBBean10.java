@@ -1233,8 +1233,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
         newPrepaidTopup10.setMerchantName("Conciliacion");
         newPrepaidTopup10.setRut(user.getRut().getValue());
-        String newTxId = String.valueOf(getNumberUtils().random(8000000L,9999999L));
-        newPrepaidTopup10.setTransactionId(newTxId);
+        // Referencia a movimiento original
+        newPrepaidTopup10.setTransactionId(String.format("MC_%s",movFull.getIdTxExterno()));
         // Se envia movimiento a reversar
         getPrepaidEJBBean10().topupUserBalance(null,newPrepaidTopup10,false);
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
