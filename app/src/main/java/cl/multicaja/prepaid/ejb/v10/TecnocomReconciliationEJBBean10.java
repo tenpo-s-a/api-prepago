@@ -317,7 +317,15 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           }
 
           researchId += "]-";
-          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+
+          Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
+            localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
+
+          Long movRef = new Long(0);
+          getPrepaidMovementEJBBean10().createMovementResearch(
+            null, researchId, ReconciliationOriginType.TECNOCOM,
+            fileName,fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
+            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpFac().getValue())){
@@ -393,7 +401,15 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             }
 
             researchId += "]-";
-            getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, fileName);
+
+            Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
+              localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
+            Long movRef = new Long(0);
+
+            getPrepaidMovementEJBBean10().createMovementResearch(
+              null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
+              fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
+              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 

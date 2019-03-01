@@ -230,8 +230,6 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10(){
     if(prepaidAccountingFileEJB10 == null){
       prepaidAccountingFileEJB10 = new PrepaidAccountingFileEJBBean10();
-      prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
-      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return prepaidAccountingFileEJB10;
   }
@@ -285,6 +283,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidAccountingEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
       prepaidAccountingEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       prepaidAccountingEJBBean10.setPrepaidAccountingFileEJBBean10(getPrepaidAccountingFileEJBBean10());
+
+      prepaidAccountingEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidAccountingEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
     }
     return prepaidAccountingEJBBean10;
   }
