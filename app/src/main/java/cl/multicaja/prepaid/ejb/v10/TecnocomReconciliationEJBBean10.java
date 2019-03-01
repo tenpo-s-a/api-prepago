@@ -404,9 +404,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
             Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
               localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
-
-            String responsable = "OTI-Prepago";
-            String descripcion = "Movimiento no encontrado en BBDD";
             Long movRef = new Long(0);
 
             getPrepaidMovementEJBBean10().createMovementResearch(

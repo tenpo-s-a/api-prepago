@@ -4,6 +4,7 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.ZONEID;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -463,8 +464,11 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           clearingData.setStatus(AccountingStatusType.fromValue(String.valueOf(record[23])));
 
           Timestamps timestamps = new Timestamps();
-          Timestamp createdAt = new Timestamp(DateUtils.getInstance().dateStringToDate(record[6],DATE_PATTERN).getTime());
-          timestamps.setCreatedAt(createdAt);
+          LocalDateTime localDateTime = getDateUtils().dateStringToLocalDateTime(record[6],DATE_PATTERN);
+          ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
+          ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+          timestamps.setCreatedAt(Timestamp.valueOf(utcZoned.toLocalDateTime()));
+
           clearingData.setTimestamps(timestamps);
 
           Rut accountRut = new Rut();
@@ -566,7 +570,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
-            data.getId());
+            new Long(0));
 
         }
       } else {
