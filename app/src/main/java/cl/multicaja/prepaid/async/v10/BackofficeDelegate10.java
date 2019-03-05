@@ -1,4 +1,4 @@
-package cl.multicaja.prepaid.async.v10.routes;
+package cl.multicaja.prepaid.async.v10;
 
 import cl.multicaja.camel.CamelFactory;
 import org.apache.camel.Exchange;

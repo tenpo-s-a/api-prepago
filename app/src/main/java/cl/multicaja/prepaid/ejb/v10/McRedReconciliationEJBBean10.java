@@ -13,29 +13,21 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.util.Times;
 
 import javax.ejb.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -107,6 +99,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         if (prepaidMovement10 == null)
         {
           log.info("Movimiento no encontrado, no conciliado");
+          //Todo: se puede utilizar un stringbuilder
+
           // Construyendo un Id.
           String researchId = "ExtId:[";
           if (recTmp.getExternalId() != null) {
@@ -117,7 +111,22 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "]-";
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
-          getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.SWITCH, fileName);
+          //TODO: Esta OK este Research?
+          DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+          java.util.Date date = formatter.parse(recTmp.getDateTrx());
+          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
+
+          Long movRef = Long.valueOf(0);
+          getPrepaidMovementEJBBean10().createMovementResearch(
+            null,
+            researchId,
+            ReconciliationOriginType.SWITCH,
+            fileName,
+            fechaDeTransaccion,
+            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
+            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
+            movRef);
+
           continue;
         }
         else
@@ -148,6 +157,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
    * @return
    */
   private List<McRedReconciliationFileDetail> getCsvData(String fileName, InputStream is) throws Exception {
+
     List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetail;
     log.info("IN");
     try {
@@ -164,6 +174,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         mcRedReconciliationFileDetail.setDateTrx(record[1]);
         mcRedReconciliationFileDetail.setClientId(Long.valueOf(record[2]));
         mcRedReconciliationFileDetail.setAmount(getNumberUtils().toBigDecimal(record[3]));
+
         if(!fileName.contains("reversa")) {
           mcRedReconciliationFileDetail.setExternalId(Long.valueOf(record[4]));
         }

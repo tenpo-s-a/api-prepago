@@ -37,7 +37,6 @@ public class Test_20181010114034_create_sp_busca_movimientos_a_investigar extend
     RowMapper rm = (Map<String, Object> row) -> {
       ResearchMovement researchMovement = new ResearchMovement();
       researchMovement.id = numberUtils.toLong(row.get("_id"));
-      //researchMovement.idRef = String.valueOf(row.get("_mov_ref"));
       researchMovement.idArchivoOrigen = String.valueOf(row.get("_id_archivo_origen"));
       researchMovement.origen = String.valueOf(row.get("_origen"));
       researchMovement.nombreArchivo = String.valueOf(row.get("_nombre_archivo"));
@@ -136,7 +135,6 @@ public class Test_20181010114034_create_sp_busca_movimientos_a_investigar extend
 
   class ResearchMovement {
     private Long id;
-    //private String idRef;
     private String idArchivoOrigen;
     private String origen;
     private String nombreArchivo;

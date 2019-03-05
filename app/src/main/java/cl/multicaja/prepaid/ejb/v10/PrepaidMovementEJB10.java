@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -236,15 +237,26 @@ public interface PrepaidMovementEJB10 {
    */
   ReconciliedMovement10 getReconciliedMovementByIdMovRef(Long idMovRef) throws BaseException, SQLException;
 
+
   /**
    *
    * @param headers
-   * @param movRef
+   * @param id_archivo_origen
    * @param originType
-   * @param fileNme
+   * @param fileName
+   * @param fechaDeTransaccion
+   * @param responsable
+   * @param descripcion
+   * @param movRef
    * @throws Exception
    */
-  void createMovementResearch(Map<String, Object> headers, String movRef, ReconciliationOriginType originType, String fileNme) throws Exception;
+  void createMovementResearch(Map<String, Object> headers, String id_archivo_origen,
+                              ReconciliationOriginType originType,
+                              String fileName,
+                              Timestamp fechaDeTransaccion,
+                              ResearchMovementResponsibleStatusType responsable,
+                              ResearchMovementDescriptionType descripcion,
+                              Long movRef) throws Exception;
 
   /**
    * Busca un movimiento de investigacion en la tabla de conciliados
