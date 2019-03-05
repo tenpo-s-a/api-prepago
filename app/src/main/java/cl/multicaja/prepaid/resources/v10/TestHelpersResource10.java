@@ -17,7 +17,7 @@ import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
-import cl.multicaja.prepaid.async.v10.routes.BackofficeDelegate10;
+import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;

@@ -1,6 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.async.v10.routes.BackofficeDelegate10;
+import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
