@@ -155,15 +155,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     // Insertar movimientos en tecnocom
     this.insertTecnocomMovement(reconciliationFile10.getId(),file.getDetails());
 
-<<<<<<< HEAD
     return reconciliationFile10.getId();
   }
 
   public void processTecnocomTableData(Long fileId) throws Exception {
-=======
-    //TODO: Se debe separar la logica de llenado de tabla desde archivo y la de procesamiento de dicha tabla
-
->>>>>>> master
     // Se buscan movimientos SAT
     List<MovimientoTecnocom10> satList = this.buscaMovimientosTecnocom(fileId,OriginOpeType.SAT_ORIGIN);
 
@@ -189,39 +184,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
 
     //Elimina Trx de la tabla de Tecnocom.
-<<<<<<< HEAD
     this.eliminaMovimientosTecnocom(fileId);
 
     // Expira los movimientos
     this.getPrepaidMovementEJBBean10().expireNotReconciledMovements(ReconciliationFileType.TECNOCOM_FILE);
-=======
-    this.eliminaMovimientosTecnocom(reconciliationFile10.getId());
-
-    //TODO: Falta expirar los movimientos despues de N archivos recibidos
-
-    /**
-     * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron
-     * el archivo actual o anterior.
-     */
-
-    String fileDate = getDateForNotReconciledTransactions(file.getHeader().getFecenvio(), file.getHeader().getHoraenvio());
-
-    List<TipoFactura> tipFacs = Arrays.asList(TipoFactura.CARGA_TRANSFERENCIA,
-      TipoFactura.ANULA_CARGA_TRANSFERENCIA,
-      TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA,
-      TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA,
-      TipoFactura.RETIRO_TRANSFERENCIA,
-      TipoFactura.ANULA_RETIRO_TRANSFERENCIA,
-      TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA,
-      TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA);
-
-    for (TipoFactura type : tipFacs) {
-      log.info(String.format("Changing status to not reconciled transaction from date [%s] and tipofac [%s]", fileDate, type.getDescription()));
-      getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsTecnocomStatus(null, fileDate, fileDate, type, IndicadorNormalCorrector.fromValue(type.getCorrector()), ReconciliationStatusType.NOT_RECONCILED);
-    }
-    // Actualiza el estatus del archivo a procesado
-    this.getReconciliationFilesEJBBean10().updateFileStatus(null,reconciliationFile10.getId(),FileStatus.OK);
->>>>>>> master
 
   }
 
@@ -336,19 +302,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           }
 
           researchId += "]-";
-<<<<<<< HEAD
           getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, "");
-=======
-
-          Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
-            localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
-
-          Long movRef = new Long(0);
-          getPrepaidMovementEJBBean10().createMovementResearch(
-            null, researchId, ReconciliationOriginType.TECNOCOM,
-            fileName,fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
-            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
->>>>>>> master
 
         } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
           if(!originalMovement.getMonto().equals(trx.getImpFac().getValue())){
@@ -424,20 +378,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             }
 
             researchId += "]-";
-<<<<<<< HEAD
             // TODO: Verificar lo que va aca y como obtenerlo
             getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, "");
-=======
-
-            Timestamp fechaDeTransaccion = Timestamp.valueOf(getDateUtils().
-              localDateTimeInUTC(trx.getFechaCreacion().toLocalDateTime(), ZONEID.AMERICA_SANTIAGO));
-            Long movRef = new Long(0);
-
-            getPrepaidMovementEJBBean10().createMovementResearch(
-              null,researchId,ReconciliationOriginType.TECNOCOM,fileName,
-              fechaDeTransaccion,ResearchMovementResponsibleStatusType.OTI_PREPAID,
-              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,movRef);
->>>>>>> master
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
