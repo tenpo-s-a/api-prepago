@@ -92,13 +92,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     final String filename = "PLJ61110.FINT0003.ONLINE";
 
+    Long fileId = null;
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId =getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.SAT,null);
@@ -172,15 +175,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId=null;
     final String filename = "PLJ61110.FINT0003.ONLINE";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
@@ -258,15 +262,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003.ONLINE";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
@@ -341,17 +346,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
-
-    Thread.sleep(1500);
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
@@ -431,13 +435,17 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
 
+    Long fileId = null;
+
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       //Assert.fail("Should not be here");
     }
+    // Se procesa lo guardado en la tabla de Tecnocom
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
@@ -514,15 +522,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
@@ -599,15 +608,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.RECONCILED, MovementOriginType.API,null);
@@ -685,15 +695,16 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     //Se eliminan movimientos de la tabla intermedia
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
-
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
@@ -846,41 +857,27 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getTecnocomReconciliationEJBBean10().eliminaMovimientosTecnocom(reconciliationFile10.getId());
 
 
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0003";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
-
-    Thread.sleep(1500);
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     // Verifica movimientos NO conciliados
-
     movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, null,
       null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.NOT_RECONCILED, MovementOriginType.API,null);
 
     Assert.assertNotNull("Debe tener movimientos", movements);
     Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 8 movimientos", 8, movements.size());
+    Assert.assertEquals("Debe tener 8 movimientos", 9, movements.size());
 
-    for (PrepaidMovement10 movement: movements) {
-      Assert.assertEquals("Debe tener estado conciliacion tecnocom NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, movement.getConTecnocom());
-      Assert.assertEquals("Debe tener estado conciliacion switch PENDING", ReconciliationStatusType.PENDING, movement.getConSwitch());
-      Assert.assertEquals("Debe tener origen API", MovementOriginType.API, movement.getOriginType());
-      Assert.assertEquals("Debe ser tipofac " + inserted.get(movement.getId()), inserted.get(movement.getId()).getCode(), movement.getTipofac().getCode());
-    }
 
-    // Verifica movimientos pendientes de conciliar
 
-    movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, null, PrepaidMovementStatus.PROCESS_OK,
-      null, null, null, null, null, null, ReconciliationStatusType.PENDING, ReconciliationStatusType.PENDING, MovementOriginType.API,null);
-
-    Assert.assertNotNull("Debe tener movimientos", movements);
-    Assert.assertFalse("Debe tener movimientos", movements.isEmpty());
-    Assert.assertEquals("Debe tener 1 movimiento", 1, movements.size());
   }
 
   private InputStream putSuccessFileIntoSftp(String filename) throws Exception {
