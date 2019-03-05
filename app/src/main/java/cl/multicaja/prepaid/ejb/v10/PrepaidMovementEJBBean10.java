@@ -813,7 +813,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),
       fileName != null ? fileName : new NullParam(Types.VARCHAR),
       dateOfTransaction != null ? dateOfTransaction : new NullParam(Types.TIMESTAMP),
-      responsible.name() != null ? responsible.name() : new NullParam(Types.VARCHAR),
+      responsible.name() != null ? responsible.name() : new NullParam(Types.VARCHAR), // TODO: esto debe insertar el getvalue()
       description.name() != null ? description.name() : new NullParam(Types.VARCHAR),
       movRef != null ? movRef : new NullParam(Types.BIGINT),
       new OutParam("_r_id", Types.BIGINT),
