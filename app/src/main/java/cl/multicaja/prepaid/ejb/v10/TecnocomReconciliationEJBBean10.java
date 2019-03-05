@@ -155,6 +155,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     // Insertar movimientos en tecnocom
     this.insertTecnocomMovement(reconciliationFile10.getId(),file.getDetails());
 
+    //TODO: Se debe separar la logica de llenado de tabla desde archivo y la de procesamiento de dicha tabla
+
     // Se buscan movimientos SAT
     List<MovimientoTecnocom10> satList = this.buscaMovimientosTecnocom(reconciliationFile10.getId(),OriginOpeType.SAT_ORIGIN);
 
@@ -180,6 +182,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
     //Elimina Trx de la tabla de Tecnocom.
     this.eliminaMovimientosTecnocom(reconciliationFile10.getId());
+
+    //TODO: Falta expirar los movimientos despues de N archivos recibidos
 
     /**
      * Se toma la fecha de envio del archivo y se marcan como NOT_RECONCILED los movimientos de 1 dia antes que no vinieron

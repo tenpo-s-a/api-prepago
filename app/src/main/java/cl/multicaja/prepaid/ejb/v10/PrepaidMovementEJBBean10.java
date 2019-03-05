@@ -808,6 +808,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
     }
 
+
+    //TODO: agregar los in como InParam()
     Object[] params = {
       idFileOrigin != null ? idFileOrigin : new NullParam(Types.VARCHAR),
       originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),

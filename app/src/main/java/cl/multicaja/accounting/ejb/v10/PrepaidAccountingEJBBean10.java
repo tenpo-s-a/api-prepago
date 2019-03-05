@@ -1071,6 +1071,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       else {
         // Si El movimiento ya existe, se actualiza la data y los status.
         System.out.println("!! OPD Accounting");
+        // TODO: deberia modificar es el accountingStatus
         acc.setStatus(AccountingStatusType.OK);
         this.updateAccountingDataFull(headers,acc); // Actualizar todos los valores de Accounting
         // Busca el movimiento de clearing  y luego le actualiza el status
@@ -1078,6 +1079,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         getPrepaidClearingEJBBean10().updateClearingData(headers,clearingData10.getId(),AccountingStatusType.PENDING);
         // Movimiento actualizado a procesado OK
         getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
+
+        //TODO: verificar si estos movimientos que solo vinieron en el IPM se deben agregar a investigar
       }
     }
     // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.

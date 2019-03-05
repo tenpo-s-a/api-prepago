@@ -99,6 +99,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         if (prepaidMovement10 == null)
         {
           log.info("Movimiento no encontrado, no conciliado");
+          //Todo: se puede utilizar un stringbuilder
+
           // Construyendo un Id.
           String researchId = "ExtId:[";
           if (recTmp.getExternalId() != null) {
@@ -114,7 +116,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           java.util.Date date = formatter.parse(recTmp.getDateTrx());
           java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
 
-          Long movRef = new Long(0);
+          Long movRef = Long.valueOf(0);
           getPrepaidMovementEJBBean10().createMovementResearch(
             null,
             researchId,
