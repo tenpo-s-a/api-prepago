@@ -104,7 +104,8 @@ coalesce(_nombre_archivo,''),
 timezone('utc', now()),
 _fecha_de_transaccion,
 _responsable,
-_descripcion
+_descripcion,
+_mov_ref
 -- TODO: se puede verificar el id de movimiento ref se puede validar de esta forma
 --,
 --coalesce(_mov_ref,0)
@@ -112,7 +113,7 @@ _descripcion
 
 EXCEPTION WHEN OTHERS THEN
 
--- TODO: verificar todo anterior
+-- TODO: esta validacion esta de mas, verificar todo anterior
 IF COALESCE(_mov_ref,cast(_mov_ref as bigint)) = cast(_mov_ref as bigint) THEN
 RETURN;
 ELSE
