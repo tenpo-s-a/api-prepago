@@ -30,7 +30,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         try {
           Long fileId = getRoute().getTecnocomReconciliationEJBBean10().processFile(inputStream, fileName);
           getRoute().getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
-        } catch(Exception e){
+        } catch(Exception e) {
           log.info("Error processing file: " + fileName);
           inputStream.close();
           throw e;
