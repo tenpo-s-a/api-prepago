@@ -34,6 +34,7 @@ BEGIN
 	_error_code := '0';
 	_error_msg := '';
 
+-- TODO: Esta validacion esta de mas
 IF
 COALESCE(_id_archivo_origen,'') = '' AND
 COALESCE(_origen,'') = '' AND
@@ -103,12 +104,15 @@ coalesce(_nombre_archivo,''),
 timezone('utc', now()),
 _fecha_de_transaccion,
 _responsable,
-_descripcion,
-_mov_ref
+_descripcion
+-- TODO: se puede verificar el id de movimiento ref se puede validar de esta forma
+--,
+--coalesce(_mov_ref,0)
 ) RETURNING id INTO _r_id;
 
 EXCEPTION WHEN OTHERS THEN
 
+-- TODO: verificar todo anterior
 IF COALESCE(_mov_ref,cast(_mov_ref as bigint)) = cast(_mov_ref as bigint) THEN
 RETURN;
 ELSE
