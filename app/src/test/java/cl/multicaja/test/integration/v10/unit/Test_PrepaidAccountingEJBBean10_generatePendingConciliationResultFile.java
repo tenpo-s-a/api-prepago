@@ -53,7 +53,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
   }
 
   @Before
-  //@After
+  @After
   public void clearData() {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
@@ -162,7 +162,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
         Assert.assertNotNull("Debe tener fecha de conciliacion", d.getConciliationDate());
         Assert.assertNull("No debe tener estado contable", d.getAccountingStatus());
       } else if( reversedData.containsKey(d.getId())) {
-        Assert.assertNotNull("Debe tener fecha de conciliacion", d.getConciliationDate());
+        Assert.assertNull("No debe tener fecha de conciliacion", d.getConciliationDate());
         Assert.assertEquals("Debe tener estado contable REVERSED", AccountingStatusType.NOT_CONFIRMED, d.getAccountingStatus());
       } else if(notConfirmedData.containsKey(d.getId())) {
         Assert.assertNull("No debe tener fecha de conciliacion", d.getConciliationDate());
@@ -172,7 +172,7 @@ public class Test_PrepaidAccountingEJBBean10_generatePendingConciliationResultFi
       }
     });
 
-    Files.delete(file);
+    //Files.delete(file);
   }
 
   @Test

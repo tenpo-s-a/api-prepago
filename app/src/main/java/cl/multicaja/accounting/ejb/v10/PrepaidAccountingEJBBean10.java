@@ -688,7 +688,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         mov.getType().getValue(), //TIPO_TRX
         mov.getAccountingMovementType().getValue(), //MOV_CONTABLE
         transactionDate, //FECHA_TRX
-        reconciliationDate, //FECHA_CONCILIACION
+        AccountingStatusType.NOT_OK.equals(mov.getAccountingStatus()) ? "" : reconciliationDate, //FECHA_CONCILIACION
         mov.getAmount().getValue().toBigInteger().toString(), //MONTO_TRX_PESOS
         mov.getAmountMastercard().getValue().toBigInteger().toString(), //MONTO_TRX_MCARD_PESOS
         mov.getAmountUsd().getValue().toString(), //MONTO_TRX_USD
