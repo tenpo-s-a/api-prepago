@@ -809,15 +809,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
 
-    //TODO: agregar los in como InParam()
     Object[] params = {
-      idFileOrigin != null ? idFileOrigin : new NullParam(Types.VARCHAR),
-      originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),
-      fileName != null ? fileName : new NullParam(Types.VARCHAR),
-      dateOfTransaction != null ? dateOfTransaction : new NullParam(Types.TIMESTAMP),
-      responsible.name() != null ? responsible.name() : new NullParam(Types.VARCHAR), // TODO: esto debe insertar el getvalue()
-      description.name() != null ? description.name() : new NullParam(Types.VARCHAR),
-      movRef != null ? movRef : new NullParam(Types.BIGINT),
+      new InParam(idFileOrigin, Types.VARCHAR),
+      new InParam(originType.toString(), Types.VARCHAR),
+      new InParam(fileName, Types.VARCHAR),
+      new InParam(dateOfTransaction, Types.TIMESTAMP),
+      new InParam(responsible.getValue(), Types.VARCHAR),
+      new InParam(description.getValue(), Types.VARCHAR),
+      new InParam(movRef, Types.BIGINT),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
