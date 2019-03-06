@@ -104,7 +104,7 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
     ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
-    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), Timestamp.valueOf("1998-02-03 14:23"));
+    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), new Timestamp(System.currentTimeMillis()));
