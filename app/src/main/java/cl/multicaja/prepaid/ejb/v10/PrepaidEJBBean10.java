@@ -605,6 +605,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
+    if(!StringUtils.isNumeric(request.getMerchantCode())) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(request.getMerchantCode().length() > 15) {
+      request.setMerchantCode(request.getMerchantCode().substring(request.getMerchantCode().length() - 15));
+    } else {
+      request.setMerchantCode(StringUtils.leftPad(request.getMerchantCode(), 15, '0'));
+    }
     if(StringUtils.isBlank(request.getMerchantName())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
     }
@@ -965,6 +973,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(!StringUtils.isNumeric(request.getMerchantCode())) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(request.getMerchantCode().length() > 15) {
+      request.setMerchantCode(request.getMerchantCode().substring(request.getMerchantCode().length() - 15));
+    } else {
+      request.setMerchantCode(StringUtils.leftPad(request.getMerchantCode(), 15, '0'));
     }
     if(StringUtils.isBlank(request.getMerchantName())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
