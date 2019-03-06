@@ -44,7 +44,7 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
     ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
     ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-    Assert.assertEquals("Debe tener la misma fecha de transaccion", reconciliationMcRed10.getDateTrx(), Timestamp.from(chileTime.toInstant()));
+    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), Timestamp.from(chileTime.toInstant()));
   }
 
   @Test(expected = BadRequestException.class)
@@ -92,7 +92,7 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
     ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
     ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-    Assert.assertEquals("Debe tener la misma fecha de transaccion", reconciliationMcRed10.getDateTrx(), Timestamp.from(chileTime.toInstant()));
+    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), Timestamp.from(chileTime.toInstant()));
   }
 
   @Test(expected = BadRequestException.class)

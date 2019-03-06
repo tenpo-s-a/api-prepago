@@ -321,6 +321,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
     ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
     Timestamp fechaTrxUTC = Timestamp.valueOf(utcTime.toLocalDateTime());
+    System.out.println(fechaTrxUTC);
 
     Object[] params = {
       new InParam(newSwitchMovement.getFileId(), Types.BIGINT),
@@ -346,12 +347,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     }
   }
 
-  public static void main(String[] args) {
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSX");
-    LocalDateTime dateTime = LocalDateTime.parse("2019-03-06 17:31:59.061493", formatter);
-    System.out.println(dateTime);
-  }
   @Override
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
     Object[] params = {
