@@ -7,10 +7,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.sql.Timestamp;
 
-public class Test_PrepaidMovementEJBBean10_getResearchMovements extends TestBaseUnit {
+public class Test_PrepaidMovementEJBBean10_getResearchMovementsByIdMovRef extends TestBaseUnit {
 
   @Before
   @After
