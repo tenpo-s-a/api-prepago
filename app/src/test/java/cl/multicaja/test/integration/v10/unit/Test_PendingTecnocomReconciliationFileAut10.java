@@ -71,17 +71,17 @@ public class Test_PendingTecnocomReconciliationFileAut10 extends TestBaseUnit {
 
     Assert.assertNull("No debe tener movimientos", movements);
 
+    Long fileId = null;
     final String filename = "PLJ61110.FINT0004";
     try {
       InputStream is = putSuccessFileIntoSftp(filename);
-
-      getTecnocomReconciliationEJBBean10().processFile(is, filename);
+      fileId = getTecnocomReconciliationEJBBean10().processFile(is, filename);
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Should not be here");
     }
-
-    Thread.sleep(1500);
+    // Procesa los datos insertados en la tabla
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
 
     List<PrepaidMovement10> purchase = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null, null, null, PrepaidMovementType.PURCHASE, null,
       null, null, null, null, null, null, null, null, MovementOriginType.OPE,null);

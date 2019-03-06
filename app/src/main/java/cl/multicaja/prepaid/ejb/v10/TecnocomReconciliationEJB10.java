@@ -10,5 +10,5 @@ public interface TecnocomReconciliationEJB10 {
    * @param fileName
    * @throws Exception
    */
-  void processFile(InputStream inputStream, String fileName) throws Exception;
+  Long processFile(InputStream inputStream, String fileName) throws Exception;
 }

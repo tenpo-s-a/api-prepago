@@ -63,11 +63,8 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
   public void pendingSendMailError() throws Exception {
     User user = registerUser();
     Email email = new Email();
-    email.setValue("prueba-error@mail.com");
+    email.setValue("test.prueba-error@mail.com");
     user.setEmail(email);
-
-    System.out.println("User Rut: " +user.getRut() + "-" + user.getRut().getDv());
-    System.out.println("User Mail: "+user.getEmail());
 
     String messageId = sendPendingSendMailError(user,0);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
