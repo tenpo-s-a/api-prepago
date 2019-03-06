@@ -71,7 +71,7 @@ public class Test_PrepaidAccountingEJBBean10_expireIpmMovements extends TestBase
       clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
       allClearings.add(0, clearingData);
 
-      Thread.sleep(10);
+      Thread.sleep(2);
     }
 
     getPrepaidAccountingEJBBean10().expireIpmMovements();

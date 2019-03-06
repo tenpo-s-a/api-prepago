@@ -32,5 +32,6 @@ public class MailTemplates {
   public static final String TEMPLATE_MAIL_PURCHASE_SUCCESS = String.format("%s/ComprobanteCompraOk", APPNAME);
   public static final String TEMPLATE_MAIL_MAIL_CARD_ERROR_USER = String.format("%s/ErrorEnvioTarjetaUsuario", APPNAME);
   public static final String TEMPLATE_MAIL_E06_REPORT = String.format("%s/ReporteE06", APPNAME);
+  public static final String TEMPLATE_MAIL_RESEARCH_REPORT = String.format("%s/ArchivoInvestigacion", APPNAME);
 
 }

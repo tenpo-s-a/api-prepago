@@ -48,6 +48,9 @@ public class WebApp implements ServletContextListener  {
   private ReconciliationSchedulerRoute10 reconciliationSchedulerRoute10;
 
   @Inject
+  private ResearchFileSchedulerRoute10 researchFileSchedulerRoute10;
+
+  @Inject
   private ProductChangeRoute10 productChangeRoute10;
 
   @Inject

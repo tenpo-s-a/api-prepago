@@ -1356,5 +1356,64 @@ public final class TestHelpersResource10 extends BaseResource {
 
   }
 
+  @PUT
+  @Path("/{user_id}/level_0")
+  public Response userLevel0(@PathParam("user_id") Long userId) throws Exception {
+    validate();
+
+    User user = getUserClient().getUserById(null, userId);
+
+    if(user == null) {
+      throw new NotFoundException();
+    }
+
+    user.getRut().setStatus(RutStatus.UNVERIFIED);
+    user.setIdentityStatus(UserIdentityStatus.UNVERIFIED);
+    user.setNameStatus(NameStatus.UNVERIFIED);
+
+    user = getUserClient().updateUser(null, userId, user);
+
+    return Response.ok(user).build();
+  }
+
+  @PUT
+  @Path("/{user_id}/level_1")
+  public Response userLevel1(@PathParam("user_id") Long userId) throws Exception {
+    validate();
+
+    User user = getUserClient().getUserById(null, userId);
+
+    if(user == null) {
+      throw new NotFoundException();
+    }
+
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    user.setNameStatus(NameStatus.UNVERIFIED);
+
+    user = getUserClient().updateUser(null, userId, user);
+
+    return Response.ok(user).build();
+  }
+
+  @PUT
+  @Path("/{user_id}/level_2")
+  public Response userLevel2(@PathParam("user_id") Long userId) throws Exception {
+    validate();
+
+    User user = getUserClient().getUserById(null, userId);
+
+    if(user == null) {
+      throw new NotFoundException();
+    }
+
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    user.setNameStatus(NameStatus.VERIFIED);
+
+    user = getUserClient().updateUser(null, userId, user);
+
+    return Response.ok(user).build();
+  }
 
 }

@@ -13,7 +13,9 @@ public enum RutStatus implements Serializable {
   VERIFIED(601),
   LOCKED(602),
   EXPIRED(603),
-  NOT_MATCH(604);
+  NOT_MATCH(604),
+  LOCKED_BY_RENEWAL(605);
+
   private Integer value;
 
   RutStatus(Integer value) {
