@@ -1664,8 +1664,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
       researchMovement.setDateOfTransaction((Timestamp) row.get("_fecha_de_transaccion"));
-      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.valueOf(String.valueOf(row.get("_responsable"))));
-      researchMovement.setDescription(ResearchMovementDescriptionType.valueOf(String.valueOf(row.get("_descripcion"))));
+      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(row.get("_responsable"))));
+      researchMovement.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(row.get("_descripcion"))));
       researchMovement.setMovRef( (long) row.get("_mov_ref"));
 
       return researchMovement;
