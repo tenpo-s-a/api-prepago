@@ -28,7 +28,8 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
         try {
-          getRoute().getTecnocomReconciliationEJBBean10().processFile(inputStream, fileName);
+          Long fileId = getRoute().getTecnocomReconciliationEJBBean10().processFile(inputStream, fileName);
+          getRoute().getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
         } catch(Exception e) {
           log.info("Error processing file: " + fileName);
           inputStream.close();
