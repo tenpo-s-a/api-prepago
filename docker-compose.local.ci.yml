@@ -21,7 +21,7 @@ services:
         ./integration-test.sh -Denv=ci
 
   api-users-migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-50a2f029d4ae61ad022a031b4f57cf16b319c679
+    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
     entrypoint: "/bin/sh -c"
     command:
       - |
@@ -38,7 +38,7 @@ services:
     image: postgres:9.6.3-alpine
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-50a2f029d4ae61ad022a031b4f57cf16b319c679
+    image: mccontainerregistry.azurecr.io/api-users:ci-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
     depends_on:
       - database
       - api-users-migration
