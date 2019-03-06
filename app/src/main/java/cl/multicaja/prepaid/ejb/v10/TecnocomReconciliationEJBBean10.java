@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -155,6 +156,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     // Insertar movimientos en tecnocom
     this.insertTecnocomMovement(reconciliationFile10.getId(),file.getDetails());
 
+    getReconciliationFilesEJBBean10().updateFileStatus(null, reconciliationFile10.getId(), FileStatus.OK);
     return reconciliationFile10.getId();
   }
 

@@ -56,7 +56,7 @@ BEGIN
       '   mov.tipo_movimiento != ''PURCHASE'' AND '
       '   (SELECT COUNT(f.id) '
       '     FROM ${schema}.prp_archivos_conciliacion f '
-      '     WHERE f.created_at >= mov.fecha_creacion AND f.tipo = ''%s'' AND f.status = ''OK'') >= 2', /* Contar solo los de un tipo */
+      '     WHERE f.created_at >= mov.fecha_creacion AND f.tipo = ''%s'' AND f.status = ''OK'' ) >= 2', /* Contar solo los de un tipo */
       _in_nombre_columna, _in_nombre_columna, _in_tipo_archivo
     )
   USING
