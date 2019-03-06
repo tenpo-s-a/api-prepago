@@ -363,7 +363,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        String msg = cdtTransaction.getMsjError();
+        if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
+          msg = "Transacción recibida previamente";
+        }
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
     }
 
@@ -725,7 +729,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if (lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        String msg = cdtTransaction.getMsjError();
+        if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
+          msg = "Transacción recibida previamente";
+        }
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
     }
 
