@@ -32,6 +32,14 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+  }
+
   @Test
   public void shouldReturn201_OnWebTopupUserBalance() throws Exception {
 
@@ -93,7 +101,7 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(getRandomString(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
 
     HttpResponse resp = topupUserBalance(prepaidTopup);
 
@@ -132,6 +140,61 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
     Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
+  }
+
+  @Test
+  public void shouldReturn201_OnPosTopupUserBalance_merchantCode_5() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
+    String merchantCode = getRandomNumericString(5);
+    prepaidTopup.setMerchantCode(merchantCode);
+
+    HttpResponse resp = topupUserBalance(prepaidTopup);
+
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
+    PrepaidTopup10 topup = resp.toObject(PrepaidTopup10.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidTopup10",topup);
+    Assert.assertNotNull("Deberia tener timestamps", topup.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", topup.getId());
+    Assert.assertNotNull("Deberia tener userId", topup.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(topup.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", topup.getStatus());
+    Assert.assertNull("No deberia tener rut", topup.getRut());
+
+    Assert.assertNotNull("Deberia tener el tipo de voucher", topup.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", topup.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", topup.getMcVoucherData());
+    Assert.assertEquals("Deberia tener el data", 2, topup.getMcVoucherData().size());
+
+    Map<String, String> variableData = topup.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    Map<String, String> rutData = topup.getMcVoucherData().get(1);
+    Assert.assertNotNull("Deberia tener data", rutData);
+
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidTopup.getRut(), null), rutData.get("value"));
+
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(topup.getId());
+    Assert.assertEquals("Debe tener el merchantCode completado con 0 a la izquierda", "0000000000" + merchantCode, dbMovement.getCodcom());
   }
 
   @Test

@@ -148,6 +148,111 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
+  public void shouldReturn201_OnPosWithdraw_merchantCode_5() throws Exception {
+
+    String password = RandomStringUtils.randomNumeric(4);
+    User user = registerUser();
+    user = updateUserPassword(user, password);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    // se hace una carga
+    topupUserBalance(user, BigDecimal.valueOf(10000));
+
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+
+    String merchantCode = getRandomNumericString(5);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, merchantCode);
+
+    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
+    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", withdraw.getId());
+    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+    Assert.assertNull("No deberia tener rut", withdraw.getRut());
+    Assert.assertNull("No deberia tener password", withdraw.getPassword());
+
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertEquals("Deberia tener el data", 2, withdraw.getMcVoucherData().size());
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
+    Assert.assertNotNull("Deberia tener data", rutData);
+
+    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
+    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
+
+    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
+    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
+    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
+    Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
+    Assert.assertEquals("El merchant code debe estar completado con 0", "0000000000" + merchantCode, dbPrepaidMovement.getCodcom());
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(1000);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    if (dataFound) {
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 2 movimientos de account", 2, accounting10s.size());
+
+      AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(withdraw.getId())).findFirst().orElse(null);
+      Assert.assertNotNull("deberia tener un retiro", accounting10);
+      Assert.assertEquals("Debe tener tipo WEB", AccountingTxType.RETIRO_POS, accounting10.getType());
+      Assert.assertEquals("Debe tener acc movement type WEB", AccountingMovementType.RETIRO_POS, accounting10.getAccountingMovementType());
+      Assert.assertEquals("Debe tener el mismo imp fac", withdraw.getAmount().getValue().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+      Assert.assertEquals("Debe tener el mismo id", dbPrepaidMovement.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", dbPrepaidMovement.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+
+      ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+      Assert.assertNotNull("deberia tener un retiro", clearing10);
+      Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+      Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+      Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
+    }
+
+
+  }
+
+  @Test
   public void shouldReturn201_OnWebWithdraw() throws Exception {
 
     String password = RandomStringUtils.randomNumeric(4);
