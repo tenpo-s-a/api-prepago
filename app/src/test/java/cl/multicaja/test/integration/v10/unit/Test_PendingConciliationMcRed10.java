@@ -35,7 +35,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   private int notReconciledExpectedCount;
   private int onlyFileMovements;
 
-  private String fileName = "";
+  private String fileName = "file.test";
 
   @Before
   public void prepareDates() {
@@ -87,11 +87,13 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionCargas() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,false, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
 
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -126,12 +128,12 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionCargasNoConcilada() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL,true, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
-
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -169,12 +171,13 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionCargasReversadas() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,false, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -208,12 +211,14 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionCargasReversadasNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
+   
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -252,13 +257,15 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionRetiros() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,false, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
+     e.printStackTrace();
       Assert.fail("Should not be here");
     }
 
@@ -291,12 +298,13 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionRetirosNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,true, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -334,12 +342,13 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionRetirosReversados() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,false, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -373,12 +382,14 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
   @Test
   public void rendicionRetirosReversadosNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(reconciledExpectedCount, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, onlyFileMovements);
-    Thread.sleep(1500);
+   
 
     try {
       InputStream is = putSuccessFileIntoSftp(this.fileName);
-
-      getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
       Assert.fail("Should not be here");
     }
@@ -467,9 +478,9 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10.setFechaActualizacion(currentTimeStamp1);
         prepaidMovement10.setFechaCreacion(currentTimeStamp1);
 
-        prepaidMovement10.setIdPrepaidUser(new Random().nextLong());
-        prepaidMovement10.setMonto(BigDecimal.valueOf (new Random().nextLong()));
-        prepaidMovement10.setId((long)new Random().nextInt());
+        prepaidMovement10.setIdPrepaidUser(numberUtils.random(1L,9999999L));
+        prepaidMovement10.setMonto(new BigDecimal(numberUtils.random(3000,100000)));
+        prepaidMovement10.setId(numberUtils.random(3000L,100000L));
       }
 
       lstPrepaidMovement10s.add(prepaidMovement10);
@@ -526,9 +537,9 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         System.out.println(mov);
         String[] data;
         if(filename.contains("reversa")) {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFecfac()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue())};
         }else {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFecfac()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()),String.valueOf(mov.getId())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()),String.valueOf(mov.getId())};
         }
         writer.writeNext(data);
       }
@@ -557,9 +568,9 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         System.out.println(mov);
         String[] data;
         if(filename.contains("reversa")) {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFecfac()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100)};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100)};
         }else {
-          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFecfac()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100),String.valueOf(mov.getId())};
+          data = new String[]{mov.getIdTxExterno(),String.valueOf(mov.getFechaCreacion()),String.valueOf(mov.getIdPrepaidUser()),String.valueOf(mov.getMonto().longValue()+100),String.valueOf(mov.getId())};
         }
         writer.writeNext(data);
       }

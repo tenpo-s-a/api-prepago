@@ -4,6 +4,7 @@ import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import org.junit.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,19 +24,19 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
     ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
-    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
+    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), "04-02-1998 16:23");
+    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    McRedReconciliationFileDetail insertedMovement = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), "04-02-1999 18:23");
+    McRedReconciliationFileDetail insertedMovement = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), new Timestamp(System.currentTimeMillis()));
     insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, insertedMovement);
     allInserted.add(insertedMovement);
 
     fileMap = Test_McRedReconciliationEJB10_addFileMovement.insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId2 = numberUtils.toLong(fileMap.get("_r_id"));
-    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId2, "MC26", 52L, 91L, new BigDecimal(1003), "05-02-1999 18:23");
+    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId2, "MC26", 52L, 91L, new BigDecimal(1003), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     // busca por file id
@@ -103,18 +104,18 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
     ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
-    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), "03-02-1998 14:23");
+    McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), Timestamp.valueOf("1998-02-03 14:23"));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), "04-02-1998 16:23");
+    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC24", 50L, 89L, new BigDecimal(1001), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
-    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), "04-02-1999 18:23");
+    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC25", 51L, 90L, new BigDecimal(1002), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     fileMap = Test_McRedReconciliationEJB10_addFileMovement.insertArchivoReconcialicionLog("archivo.txt", "SWITCH", "Retiros", "OK");
     Long fileId2 = numberUtils.toLong(fileMap.get("_r_id"));
-    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId2, "MC26", 52L, 91L, new BigDecimal(1003), "05-02-1999 18:23");
+    reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId2, "MC26", 52L, 91L, new BigDecimal(1003), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
     List<McRedReconciliationFileDetail> foundMovements = getMcRedReconciliationEJBBean10().getFileMovements(null, null, null, null);

@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
+import cl.multicaja.prepaid.model.v10.ReconciliationFile10;
 
 import java.io.InputStream;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface McRedReconciliationEJB10 {
    * @param fileName
    * @throws Exception
    */
-  void processFile(InputStream inputStream, String fileName) throws Exception;
+  ReconciliationFile10 processFile(InputStream inputStream, String fileName) throws Exception;
 
   /**
    * Agrega un movimiento switch
@@ -33,7 +34,7 @@ public interface McRedReconciliationEJB10 {
    * @return
    * @throws Exception
    */
-  List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
+  List getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
 
   /**
    * Borra de la tabla switch_movement todos los registros de cierto archivo

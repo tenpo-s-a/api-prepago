@@ -91,8 +91,6 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-      Thread.sleep(1000);
-
       List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
       Assert.assertEquals("Debe ser 3 ", 3,accountinMovements.size());
@@ -178,7 +176,6 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-      Thread.sleep(1000);
 
       List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
@@ -266,8 +263,6 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-      Thread.sleep(1000);
-
       List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
       Assert.assertEquals("Debe ser 3 ", 3,accountinMovements.size());
@@ -349,8 +344,6 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
 
-      Thread.sleep(1000);
-
       List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
       // Retiros web no se procesan por este metodo
@@ -428,8 +421,6 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
       originalMovementsIds.add(prepaidMovement10.getId());
 
       ZonedDateTime utc = Instant.now().atZone(ZoneId.of("UTC"));
-
-      Thread.sleep(1000);
 
       List<AccountingData10> accountinMovements = getPrepaidAccountingEJBBean10().processMovementForAccounting(getDefaultHeaders(), utc.toLocalDateTime());
 
