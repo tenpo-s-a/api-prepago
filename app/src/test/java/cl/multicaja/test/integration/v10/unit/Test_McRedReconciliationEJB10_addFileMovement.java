@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 
 public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit {
@@ -31,20 +32,17 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     McRedReconciliationFileDetail insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
 
     // Buscar movmiento para chequear que se guardo correctamente
-    Map<String, Object> storedSwitchMovement = getSwitchMovement("prp_movimiento_switch", insertedMovement.getId());
+    List<McRedReconciliationFileDetail> lstMovSwitch = getMcRedReconciliationEJBBean10().getFileMovements(null,fileId,insertedMovement.getId(),null);
+    McRedReconciliationFileDetail storedSwitchMovement = lstMovSwitch.get(0);
     Assert.assertNotNull("Debe existir", storedSwitchMovement);
-    Assert.assertEquals("Debe tener mismo id", insertedMovement.getId(), numberUtils.toLong(storedSwitchMovement.get("id")));
-    Assert.assertEquals("Debe tener mismo archivo_id", insertedMovement.getFileId(), numberUtils.toLong(storedSwitchMovement.get("id_archivo")));
-    Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), storedSwitchMovement.get("id_multicaja").toString());
-    Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), numberUtils.toLong(storedSwitchMovement.get("id_cliente")));
-    Assert.assertEquals("Debe tener mismo id_multicaja_ref", insertedMovement.getExternalId(), numberUtils.toLong(storedSwitchMovement.get("id_multicaja_ref")));
-    Assert.assertEquals("Debe tener mismo monto", insertedMovement.getAmount().stripTrailingZeros(), ((BigDecimal)storedSwitchMovement.get("monto")).stripTrailingZeros());
+    Assert.assertEquals("Debe tener mismo id", insertedMovement.getId(), storedSwitchMovement.getId());
+    Assert.assertEquals("Debe tener mismo archivo_id", insertedMovement.getFileId(), storedSwitchMovement.getFileId());
+    Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), storedSwitchMovement.getMcCode());
+    Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), storedSwitchMovement.getClientId());
+    Assert.assertEquals("Debe tener mismo id_multicaja_ref", insertedMovement.getExternalId(),storedSwitchMovement.getExternalId());
+    Assert.assertEquals("Debe tener mismo monto", insertedMovement.getAmount().stripTrailingZeros(), storedSwitchMovement.getAmount().stripTrailingZeros());
 
-    Timestamp storedTimestamp = (Timestamp)storedSwitchMovement.get("fecha_trx");
-    LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
-    ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
-    ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), Timestamp.from(chileTime.toInstant()));
+    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), storedSwitchMovement.getDateTrx());
   }
 
   @Test(expected = BadRequestException.class)
@@ -79,20 +77,18 @@ public class Test_McRedReconciliationEJB10_addFileMovement extends TestBaseUnit 
     McRedReconciliationFileDetail insertedMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10);
 
     // Buscar movmiento para chequear que se guardo correctamente
-    Map<String, Object> storedSwitchMovement = getSwitchMovement("prp_movimiento_switch", insertedMovement.getId());
-    Assert.assertNotNull("Debe existir", storedSwitchMovement);
-    Assert.assertEquals("Debe tener mismo id", insertedMovement.getId(), numberUtils.toLong(storedSwitchMovement.get("id")));
-    Assert.assertEquals("Debe tener mismo archivo_id", insertedMovement.getFileId(), numberUtils.toLong(storedSwitchMovement.get("id_archivo")));
-    Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), storedSwitchMovement.get("id_multicaja").toString());
-    Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), numberUtils.toLong(storedSwitchMovement.get("id_cliente")));
-    Assert.assertEquals("Debe tener mismo id_multicaja_ref", insertedMovement.getExternalId(), storedSwitchMovement.get("id_multicaja_ref"));
-    Assert.assertEquals("Debe tener mismo monto", insertedMovement.getAmount().stripTrailingZeros(), ((BigDecimal)storedSwitchMovement.get("monto")).stripTrailingZeros());
+    List<McRedReconciliationFileDetail> lstMovSwitch = getMcRedReconciliationEJBBean10().getFileMovements(null,fileId,insertedMovement.getId(),null);
+    McRedReconciliationFileDetail storedSwitchMovement = lstMovSwitch.get(0);
 
-    Timestamp storedTimestamp = (Timestamp)storedSwitchMovement.get("fecha_trx");
-    LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
-    ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
-    ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), Timestamp.from(chileTime.toInstant()));
+    Assert.assertNotNull("Debe existir", storedSwitchMovement);
+    Assert.assertEquals("Debe tener mismo id", insertedMovement.getId(), storedSwitchMovement.getId());
+    Assert.assertEquals("Debe tener mismo archivo_id", insertedMovement.getFileId(), storedSwitchMovement.getFileId());
+    Assert.assertEquals("Debe tener mismo multicaja id", insertedMovement.getMcCode(), storedSwitchMovement.getMcCode());
+    Assert.assertEquals("Debe tener mismo cliente_id", insertedMovement.getClientId(), storedSwitchMovement.getClientId());
+    Assert.assertEquals("Debe tener mismo id_multicaja_ref", Long.valueOf(0) ,storedSwitchMovement.getExternalId());
+    Assert.assertEquals("Debe tener mismo monto", insertedMovement.getAmount().stripTrailingZeros(), storedSwitchMovement.getAmount().stripTrailingZeros());
+
+    Assert.assertEquals("Debe tener la misma fecha de transaccion", insertedMovement.getDateTrx(), storedSwitchMovement.getDateTrx());
   }
 
   @Test(expected = BadRequestException.class)
