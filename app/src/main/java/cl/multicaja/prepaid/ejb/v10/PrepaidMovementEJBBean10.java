@@ -808,7 +808,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
     }
 
-
+    System.out.println("Responsible value: " + responsible.getValue());
     Object[] params = {
       new InParam(idFileOrigin, Types.VARCHAR),
       new InParam(originType.toString(), Types.VARCHAR),
@@ -1699,8 +1699,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
       researchMovement.setDateOfTransaction((Timestamp) row.get("_fecha_de_transaccion"));
-      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.valueOfEnum(String.valueOf(row.get("_responsable"))));
-      researchMovement.setDescription(ResearchMovementDescriptionType.valueOfEnum(String.valueOf(row.get("_descripcion"))));
+      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(row.get("_responsable"))));
+      researchMovement.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(row.get("_descripcion"))));
       researchMovement.setMovRef( (long) row.get("_mov_ref"));
 
       return researchMovement;
