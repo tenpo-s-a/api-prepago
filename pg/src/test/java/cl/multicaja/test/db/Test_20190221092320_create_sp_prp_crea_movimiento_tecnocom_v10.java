@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,6 +144,12 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
   }
 
   public static Map<String, Object>  creaMovimientoTecnocom(Long fileId, String cuenta, String pan, Integer tipoFac, BigDecimal impFac, String numAut)throws Exception{
+    return creaMovimientoTecnocom(fileId, cuenta, pan, tipoFac, impFac, numAut, numberUtils.random(1,9));
+  }
+
+  public static Map<String, Object>  creaMovimientoTecnocom(Long fileId, String cuenta, String pan, Integer tipoFac, BigDecimal impFac, String numAut, Integer indnorcor)throws Exception{
+    Date fecfac = new Date(System.currentTimeMillis());
+
     Object[] params = {
       new InParam(fileId,Types.BIGINT),
       new InParam(cuenta,Types.VARCHAR), // Cuenta
@@ -150,9 +157,9 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
       new InParam(getRandomString(4),Types.VARCHAR),// COD ENT
       new InParam(getRandomString(4),Types.VARCHAR), // CENALTA
       new InParam(numberUtils.random(1,999),Types.NUMERIC),//clamon
-      new InParam(numberUtils.random(1,9),Types.NUMERIC),//indnorcor
+      new InParam(indnorcor,Types.NUMERIC),//indnorcor
       new InParam(tipoFac,Types.NUMERIC),//tipofac
-      new InParam(new Date(System.currentTimeMillis()),Types.DATE),//tipofac
+      new InParam(fecfac,Types.DATE),//tipofac
       new InParam(getRandomString(23),Types.VARCHAR), // numreffac
       new InParam(numberUtils.random(1,999),Types.NUMERIC),//clamondiv
       new InParam(numberUtils.random(3000,9999),Types.NUMERIC),//impdiv
@@ -180,7 +187,21 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    return dbUtils.execute(SCHEMA + ".mc_prp_crea_movimiento_tecnocom_v10", params);
+    Map<String, Object> resp = dbUtils.execute(SCHEMA + ".mc_prp_crea_movimiento_tecnocom_v10", params);
+
+    Map<String, Object> insertedMovement = new HashMap<>();
+    insertedMovement.put("id", resp.get("_r_id"));
+    insertedMovement.put("idArchivo", fileId);
+    insertedMovement.put("cuenta", cuenta);
+    insertedMovement.put("pan", pan);
+    insertedMovement.put("tipofac", new BigDecimal(tipoFac));
+    insertedMovement.put("fecfac", fecfac);
+    insertedMovement.put("impfac", impFac);
+    insertedMovement.put("numaut", numAut);
+    insertedMovement.put("_r_id", resp.get("_r_id"));
+    insertedMovement.put("_error_code", resp.get("_error_code"));
+    insertedMovement.put("_error_msg", resp.get("_error_msg"));
+    return insertedMovement;
   }
 
 }
