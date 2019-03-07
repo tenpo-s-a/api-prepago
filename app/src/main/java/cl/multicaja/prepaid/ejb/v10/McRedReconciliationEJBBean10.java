@@ -223,6 +223,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         McRedReconciliationFileDetail mcRedReconciliationFileDetail = new McRedReconciliationFileDetail();
         mcRedReconciliationFileDetail.setMcCode(record[0]);
         mcRedReconciliationFileDetail.setDateTrx(Timestamp.valueOf(record[1]));
+        log.info("FECHA:::::: "+mcRedReconciliationFileDetail.getDateTrx());
         mcRedReconciliationFileDetail.setClientId(Long.valueOf(record[2]));
         mcRedReconciliationFileDetail.setAmount(getNumberUtils().toBigDecimal(record[3]));
 
@@ -312,7 +313,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.amount"));
     }
 
-    if(newSwitchMovement.getDateTrx() == null){
+    if(newSwitchMovement.getDateTrx() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
     }
 
@@ -321,7 +322,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
     ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
     Timestamp fechaTrxUTC = Timestamp.valueOf(utcTime.toLocalDateTime());
-    System.out.println(fechaTrxUTC);
+    log.info(String.format("[addFileMovement][%s] UTC : %s",newSwitchMovement.getMcCode(),utcTime));
+    log.info(String.format("[addFileMovement][%s] America/Santiago %s: ",newSwitchMovement.getMcCode(),chileTime));
+    log.info(fechaTrxUTC);
 
     Object[] params = {
       new InParam(newSwitchMovement.getFileId(), Types.BIGINT),
@@ -371,6 +374,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
       reconciliationMcRed10.setDateTrx(Timestamp.from(chileTime.toInstant()));
 
+      log.info(String.format("[getFileMovements][%s] UTC : %s",reconciliationMcRed10.getMcCode(),utcTime));
+      log.info(String.format("[getFileMovements][%s] America/Santiago %s: ",reconciliationMcRed10.getMcCode(),chileTime));
+      log.info(storedTimestamp);
       return reconciliationMcRed10;
     };
 
