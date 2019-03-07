@@ -317,22 +317,13 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newSwitchMovement.dateTrx"));
     }
 
-    // La fecha viene en string hora chile, hay que convertirla a timestamp hora utc
-    LocalDateTime dateTime = newSwitchMovement.getDateTrx().toLocalDateTime();
-    ZonedDateTime chileTime = dateTime.atZone(ZoneId.of("America/Santiago"));
-    ZonedDateTime utcTime = chileTime.withZoneSameInstant(ZoneId.of("UTC"));
-    Timestamp fechaTrxUTC = Timestamp.valueOf(utcTime.toLocalDateTime());
-    log.info(String.format("[addFileMovement][%s] UTC : %s",newSwitchMovement.getMcCode(),utcTime));
-    log.info(String.format("[addFileMovement][%s] America/Santiago %s: ",newSwitchMovement.getMcCode(),chileTime));
-    log.info(fechaTrxUTC);
-
     Object[] params = {
       new InParam(newSwitchMovement.getFileId(), Types.BIGINT),
       new InParam(newSwitchMovement.getMcCode(), Types.VARCHAR),
       new InParam(newSwitchMovement.getClientId(), Types.BIGINT),
       newSwitchMovement.getExternalId() != null ? new InParam(newSwitchMovement.getExternalId(), Types.BIGINT) : new NullParam(Types.BIGINT),
       new InParam(newSwitchMovement.getAmount(), Types.NUMERIC),
-      new InParam(fechaTrxUTC, Types.TIMESTAMP),
+      new InParam(newSwitchMovement.getDateTrx(), Types.TIMESTAMP),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_r_id_int", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
@@ -367,16 +358,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       reconciliationMcRed10.setClientId(getNumberUtils().toLong(row.get("_id_cliente")));
       reconciliationMcRed10.setExternalId(getNumberUtils().toLong(row.get("_id_multicaja_ref")));
       reconciliationMcRed10.setAmount(getNumberUtils().toBigDecimal(row.get("_monto")));
+      reconciliationMcRed10.setDateTrx((Timestamp) row.get("_fecha_trx"));
 
-      Timestamp storedTimestamp = (Timestamp) row.get("_fecha_trx");
-      LocalDateTime storedLocalDatetime = storedTimestamp.toLocalDateTime();
-      ZonedDateTime utcTime = storedLocalDatetime.atZone(ZoneId.of("UTC"));
-      ZonedDateTime chileTime = utcTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-      reconciliationMcRed10.setDateTrx(Timestamp.from(chileTime.toInstant()));
 
-      log.info(String.format("[getFileMovements][%s] UTC : %s",reconciliationMcRed10.getMcCode(),utcTime));
-      log.info(String.format("[getFileMovements][%s] America/Santiago %s: ",reconciliationMcRed10.getMcCode(),chileTime));
-      log.info(storedTimestamp);
       return reconciliationMcRed10;
     };
 

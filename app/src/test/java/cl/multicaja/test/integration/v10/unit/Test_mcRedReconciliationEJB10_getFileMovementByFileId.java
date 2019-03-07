@@ -24,6 +24,7 @@ public class Test_mcRedReconciliationEJB10_getFileMovementByFileId extends TestB
     Long fileId = numberUtils.toLong(fileMap.get("_r_id"));
 
     ArrayList<McRedReconciliationFileDetail> allInserted = new ArrayList<>();
+    System.out.println( new Timestamp(System.currentTimeMillis()));
     McRedReconciliationFileDetail reconciliationMcRed10 = Test_McRedReconciliationEJB10_addFileMovement.buildReconciliationMcRed10(fileId, "MC23", 49L, 88L, new BigDecimal(1000), new Timestamp(System.currentTimeMillis()));
     allInserted.add(getMcRedReconciliationEJBBean10().addFileMovement(null, reconciliationMcRed10));
 
