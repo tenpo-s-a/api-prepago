@@ -51,7 +51,7 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
       final EmailBody email = new EmailBody();
       email.setTemplate(TEMPLATE_MAIL_SEND_CARD);
       final HttpResponse httpResponse = sendEmailApi(email,1L);
-      Assert.assertEquals("Error al llamar 404",404, httpResponse.getStatus());
+      Assert.assertEquals("Error al llamar 422",422, httpResponse.getStatus());
       System.out.println("No existe usuario");
     }
 
