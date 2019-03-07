@@ -71,7 +71,7 @@ public class Test_PrepaidAccountingEJBBean10_expireIpmMovements extends TestBase
       clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
       allClearings.add(0, clearingData);
 
-      Thread.sleep(10);
+      Thread.sleep(2);
     }
 
     getPrepaidAccountingEJBBean10().expireIpmMovements();
@@ -247,6 +247,76 @@ public class Test_PrepaidAccountingEJBBean10_expireIpmMovements extends TestBase
       ClearingData10 storedClearing = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, accountingData10.getId());
 
       Assert.assertEquals("Deben tener estado PENDING", PrepaidMovementStatus.PENDING, storedMovement.getEstado());
+      Assert.assertEquals("No debe cambiar status accounting", accountingData10.getStatus(), storedAccounting.getStatus());
+      Assert.assertEquals("No debe cambiar status accounting", accountingData10.getAccountingStatus(), storedAccounting.getAccountingStatus());
+      Assert.assertEquals("No debe cambiar clearing status", clearingData10.getStatus(), storedClearing.getStatus());
+      Assert.assertEquals("No debe cambiar la fecha de conciliacion", 4000, storedAccounting.getConciliationDate().toLocalDateTime().getYear());
+    }
+  }
+
+  @Test
+  public void doNotexpireIpmSuscriptions() throws Exception {
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    // Se crean 10 movimientos, con 0, 1, 2... 9 archivos procesados despues de ellos.
+    ArrayList<PrepaidMovement10> allMovements = new ArrayList<>();
+    ArrayList<AccountingData10> allAccountings = new ArrayList<>();
+    ArrayList<ClearingData10> allClearings = new ArrayList<>();
+    for(int i = 0; i < 10; i++) {
+      // Insertar archivo
+      IpmFile ipmFile = new IpmFile();
+      ipmFile.setFileId(getRandomString(10));
+      ipmFile.setFileName("archivo");
+      ipmFile.setStatus(IpmFileStatus.ERROR); // Status diferente de processsed, ningun archivo cuenta
+      getPrepaidAccountingEJBBean10().saveIpmFileRecord(null, ipmFile);
+
+      // Insertar movimiento
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.SUSCRIPTION);
+      prepaidMovement = createPrepaidMovement10(prepaidMovement);
+      allMovements.add(0, prepaidMovement);
+
+      AccountingData10 accountingData = buildRandomAccouting();
+      accountingData.setIdTransaction(prepaidMovement.getId());
+      if(i % 2 == 0) {
+        accountingData.setStatus(AccountingStatusType.PENDING);
+      } else {
+        accountingData.setStatus(AccountingStatusType.SENT_PENDING_CON);
+      }
+      accountingData.setAccountingStatus(AccountingStatusType.OK);
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+      Date parsedDate = dateFormat.parse("4000-06-20 00:00:00");
+      accountingData.setConciliationDate(new Timestamp(parsedDate.getTime()));
+      accountingData = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData);
+      allAccountings.add(0, accountingData);
+
+      ClearingData10 clearingData = new ClearingData10();
+      clearingData.setStatus(AccountingStatusType.PENDING);
+      clearingData.setUserBankAccount(null);
+      clearingData.setAccountingId(accountingData.getId());
+      clearingData = getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
+      allClearings.add(0, clearingData);
+
+      Thread.sleep(10);
+    }
+
+    getPrepaidAccountingEJBBean10().expireIpmMovements();
+
+    // Ninguno debe cambiar
+    for(int i = 0; i < 10; i++) {
+      PrepaidMovement10 prepaidMovement10 = allMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovement10.getId());
+      Assert.assertEquals("Debe tener el mismo id", prepaidMovement10.getId(), storedMovement.getId());
+
+      AccountingData10 accountingData10 = allAccountings.get(i);
+      AccountingData10 storedAccounting = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, prepaidMovement10.getId());
+
+      ClearingData10 clearingData10 = allClearings.get(i);
+      ClearingData10 storedClearing = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, accountingData10.getId());
+
+      Assert.assertEquals("Las primeras deben tener estado PENDING", PrepaidMovementStatus.PENDING, storedMovement.getEstado());
       Assert.assertEquals("No debe cambiar status accounting", accountingData10.getStatus(), storedAccounting.getStatus());
       Assert.assertEquals("No debe cambiar status accounting", accountingData10.getAccountingStatus(), storedAccounting.getAccountingStatus());
       Assert.assertEquals("No debe cambiar clearing status", clearingData10.getStatus(), storedClearing.getStatus());

@@ -22,17 +22,26 @@ import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
+import com.opencsv.CSVWriter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Base64Utils;
 
 import javax.ejb.*;
 import javax.inject.Inject;
 import javax.persistence.criteria.Order;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -78,6 +87,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @EJB
   private PrepaidAccountingEJBBean10 prepaidAccountingEJB10;
+
+  @EJB
+  private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
   @Override
   public UserClient getUserClient() {
@@ -133,6 +145,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public PrepaidClearingEJBBean10 getPrepaidClearingEJB10() {
     return prepaidClearingEJB10;
+  }
+
+  public MailPrepaidEJBBean10 getMailPrepaidEJBBean10() {
+    return mailPrepaidEJBBean10;
+  }
+
+  public void setMailPrepaidEJBBean10(MailPrepaidEJBBean10 mailPrepaidEJBBean10) {
+    this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
   }
 
   public void setPrepaidClearingEJB10(PrepaidClearingEJBBean10 prepaidClearingEJB10) {
@@ -788,16 +808,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movRef"));
     }
 
-
-    //TODO: agregar los in como InParam()
+    System.out.println("Responsible value: " + responsible.getValue());
     Object[] params = {
-      idFileOrigin != null ? idFileOrigin : new NullParam(Types.VARCHAR),
-      originType.name() != null ? originType.name() : new NullParam(Types.VARCHAR),
-      fileName != null ? fileName : new NullParam(Types.VARCHAR),
-      dateOfTransaction != null ? dateOfTransaction : new NullParam(Types.TIMESTAMP),
-      responsible.name() != null ? responsible.name() : new NullParam(Types.VARCHAR),
-      description.name() != null ? description.name() : new NullParam(Types.VARCHAR),
-      movRef != null ? movRef : new NullParam(Types.BIGINT),
+      new InParam(idFileOrigin, Types.VARCHAR),
+      new InParam(originType.toString(), Types.VARCHAR),
+      new InParam(fileName, Types.VARCHAR),
+      new InParam(dateOfTransaction, Types.TIMESTAMP),
+      new InParam(responsible.getValue(), Types.VARCHAR),
+      new InParam(description.getValue(), Types.VARCHAR),
+      new InParam(movRef, Types.BIGINT),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -1642,15 +1661,31 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     Object[] params = {
-      new InParam(idArchivoOrigen, Types.VARCHAR)
+      new InParam(idArchivoOrigen, Types.VARCHAR),
+      new NullParam(Types.TIMESTAMP),
+      new NullParam(Types.TIMESTAMP)
     };
 
     log.info(String.format("ID IN : %s", idArchivoOrigen));
     RowMapper rm = getResearchMovementRowMapper();
-    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v11", getSchema()), rm, params);
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v12", getSchema()), rm, params);
     List list = (List)resp.get("result");
     log.info("getResearchMovementByIdMovRef: " + list);
     return list != null && !list.isEmpty() ? (ResearchMovement10) list.get(0) : null;
+  }
+
+  public List<ResearchMovement10> getResearchMovementBetweenDates(Timestamp beginTs, Timestamp endTs) throws SQLException {
+    Object[] params = {
+      new NullParam(Types.VARCHAR),
+      new InParam(beginTs, Types.TIMESTAMP),
+      new InParam(endTs, Types.TIMESTAMP)
+    };
+
+    RowMapper rm = getResearchMovementRowMapper();
+    Map<String, Object> resp = getDbUtils().execute(String.format("%s.mc_prp_busca_movimientos_a_investigar_v12", getSchema()), rm, params);
+    List list = (List)resp.get("result");
+    log.info("getResearchMovementByIdMovRef: " + list);
+    return list;
   }
 
   private RowMapper getResearchMovementRowMapper() {
@@ -1664,11 +1699,71 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       researchMovement.setFileName(String.valueOf(row.get("_nombre_archivo")));
       researchMovement.setCreatedAt((Timestamp) row.get("_fecha_registro"));
       researchMovement.setDateOfTransaction((Timestamp) row.get("_fecha_de_transaccion"));
-      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.valueOf(String.valueOf(row.get("_responsable"))));
-      researchMovement.setDescription(ResearchMovementDescriptionType.valueOf(String.valueOf(row.get("_descripcion"))));
+      researchMovement.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(row.get("_responsable"))));
+      researchMovement.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(row.get("_descripcion"))));
       researchMovement.setMovRef( (long) row.get("_mov_ref"));
 
       return researchMovement;
     };
+  }
+
+  public void sendResearchEmail() throws Exception {
+    ZonedDateTime nowChileDateTime = ZonedDateTime.now(ZoneId.of("America/Santiago"));
+    ZonedDateTime yesterdayChileDateTime = nowChileDateTime.minusDays(1);
+    LocalDate yesterdayDate = yesterdayChileDateTime.toLocalDate();
+    LocalDateTime yesterdayBegining = yesterdayDate.atTime(0, 0, 0);
+    ZonedDateTime yesterdayBeginingZonedChile = yesterdayBegining.atZone(ZoneId.of("America/Santiago"));
+    ZonedDateTime startZonedUtc = yesterdayBeginingZonedChile.withZoneSameInstant(ZoneId.of("UTC"));
+    ZonedDateTime endZoneUtc = startZonedUtc.plusDays(1);
+
+    List<ResearchMovement10> yesterdayResearchMovements = getResearchMovementBetweenDates(Timestamp.valueOf(startZonedUtc.toLocalDateTime()), Timestamp.valueOf(endZoneUtc.toLocalDateTime()));
+
+    LocalDateTime todayLocal = LocalDateTime.now();
+    String todayString = todayLocal.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    String fileName = String.format("research_%s.csv", todayString);
+    File file = new File(fileName);
+    try {
+      FileWriter outputfile = new FileWriter(file);
+      CSVWriter writer = new CSVWriter(outputfile,',');
+      String[] header;
+      header = new String[]{"Id Unico", "Id Mov Referencia", "Id Archivo Origen", "Origen", "Tipo de Movimiento", "Nombre Archivo", "Fecha Trx", "Fecha Investigacion", "Responsable", "Descripcion"};
+      writer.writeNext(header);
+
+      for(ResearchMovement10 mov : yesterdayResearchMovements) {
+        ZonedDateTime utcDateTime = mov.getCreatedAt().toLocalDateTime().atZone(ZoneId.of("UTC"));
+        ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
+        String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
+        writer.writeNext(data);
+      }
+      writer.close();
+    } catch (Exception e) {
+      log.error("Exception : " + e);
+      e.printStackTrace();
+    }
+
+    sendResearchFile(fileName, "research_test@gmail.com");
+
+    file.delete();
+  }
+
+  private void sendResearchFile(String fileName, String emailAddress) throws Exception {
+
+    String file = fileName;
+    FileInputStream attachmentFile = new FileInputStream(file);
+    String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
+    attachmentFile.close();
+
+    // Enviamos el archivo al mail de reportes diarios
+    EmailBody emailBodyToSend = new EmailBody();
+
+    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
+    emailBodyToSend.setTemplateData(null);
+    emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
+    //emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
+    emailBodyToSend.setAddress(emailAddress);
+    mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+    Files.delete(Paths.get(file));
   }
 }

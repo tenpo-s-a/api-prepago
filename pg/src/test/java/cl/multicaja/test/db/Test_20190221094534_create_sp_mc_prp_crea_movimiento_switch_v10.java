@@ -24,6 +24,7 @@ public class Test_20190221094534_create_sp_mc_prp_crea_movimiento_switch_v10 ext
   @AfterClass
   public static void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento_switch cascade",SCHEMA));
+    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento_switch_hist cascade",SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_archivos_conciliacion cascade", SCHEMA));
   }
 

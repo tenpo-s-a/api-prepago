@@ -284,10 +284,14 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     }
   }
 
-  @Override
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
+    return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
+  }
+
+  @Override
+  public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, String tableName, Long fileId, Long movementId, String mcId) throws Exception {
     Object[] params = {
-      new InParam("prp_movimiento_switch", Types.VARCHAR),
+      new InParam(tableName, Types.VARCHAR),
       movementId != null ? new InParam(movementId, Types.BIGINT) : new NullParam(Types.BIGINT),
       fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
       mcId != null ? new InParam(mcId, Types.VARCHAR) : new NullParam(Types.VARCHAR)

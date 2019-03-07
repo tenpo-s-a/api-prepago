@@ -28,15 +28,6 @@ public interface McRedReconciliationEJB10 {
   McRedReconciliationFileDetail addFileMovement(Map<String,Object> header, McRedReconciliationFileDetail newSwitchMovement) throws Exception;
 
   /**
-   * Busca la lista de movimientos que pertenecen a este fileId
-   * @param header
-   * @param fileId
-   * @return
-   * @throws Exception
-   */
-  List getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception;
-
-  /**
    * Borra de la tabla switch_movement todos los registros de cierto archivo
    * @param header
    * @param fileId

@@ -190,6 +190,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
       prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
+      prepaidMovementEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }
@@ -668,7 +669,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public PrepaidTopup10 buildPrepaidTopup10(User user) {
 
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
@@ -693,7 +694,7 @@ public class TestBaseUnit extends TestApiBase {
    */
   public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
 
-    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
 
     NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
     prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
@@ -722,7 +723,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) throws Exception {
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getRandomNumericString(15);
     return buildNewPrepaidWithdraw10(user, password, merchantCode);
   }
 
