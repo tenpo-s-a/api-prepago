@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 
 import cl.multicaja.tecnocom.constants.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -251,7 +252,7 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   }
 
   public void setCodcom(String codcom) {
-    this.codcom = codcom;
+    this.codcom = StringUtils.leftPad(codcom, 15, '0');
   }
 
   public Integer getCodact() {

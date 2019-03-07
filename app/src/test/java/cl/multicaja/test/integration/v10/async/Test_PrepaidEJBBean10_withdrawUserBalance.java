@@ -39,7 +39,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, RandomStringUtils.randomAlphanumeric(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
 
     PrepaidWithdraw10 withdraw = null;
 

@@ -178,7 +178,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     {
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(null);
       prepaidTopup.setRut(Integer.MAX_VALUE);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -212,7 +212,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       User user = registerUser(UserIdentityStatus.TERRORIST);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -253,7 +253,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -294,7 +294,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       User user = registerUser(UserStatus.LOCKED);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -329,7 +329,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       User user = registerUser(UserStatus.DELETED);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -364,7 +364,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       User user = registerUser(UserStatus.PREREGISTERED);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -399,7 +399,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       User user = registerUser();
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -440,7 +440,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
       HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -484,7 +484,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidTopup);
@@ -546,7 +546,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
     HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
@@ -603,7 +603,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
     PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
@@ -675,7 +675,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
     PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
