@@ -125,6 +125,10 @@ public final class TecnocomServiceHelper {
     String numreffac = prepaidMovement.getId().toString(); // Se hace internamente en Tecnocomç
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
+    if(nomcomred.length() > 27){
+      nomcomred = nomcomred.substring(nomcomred.length() - 27);
+    }
+
     log.info(String.format("LLamando a inclusion de movimientos para carga de saldo a contrato %s", contrato));
 
     return this.getTecnocomService().inclusionMovimientos(contrato, pan, clamon, indnorcor, tipofac,
