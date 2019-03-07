@@ -556,26 +556,36 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     return result.toLocalDate().format(dbFormatter);
   }
 
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId, OriginOpeType originOpeType) throws Exception {
+    return buscaMovimientosTecnocom(fileId, originOpeType, null, null, null, null, null);
+  }
+
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId, OriginOpeType originOpeType, String encryptedPan, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
+    return buscaMovimientosTecnocom("prp_movimientos_tecnocom", fileId, originOpeType, encryptedPan, indnorcor, tipofac, fecfac, numaut);
+  }
+
   /**
    * Permite buscar movientos en la tabla de tecnocom.
    * @param fileId
    * @return
    * @throws Exception
    */
-  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId,OriginOpeType originOpeType) throws Exception{
-
-    if(fileId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
-    }
-
-    if(originOpeType == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originope"));
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(String tableName, Long fileId, OriginOpeType originOpeType, String encryptedPan, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
+    if(tableName == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tableName"));
     }
 
     Object[] params = {
-      new InParam(fileId, Types.BIGINT),
-      new InParam(originOpeType.getValue(),Types.VARCHAR)
+      new InParam(tableName, Types.VARCHAR),
+      fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
+      originOpeType != null ? new InParam(originOpeType.getValue(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      encryptedPan != null ? new InParam(encryptedPan, Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      indnorcor != null ? new InParam(indnorcor.getValue(), Types.NUMERIC) : new NullParam(Types.NUMERIC),
+      tipofac != null ? new InParam(tipofac.getCode(), Types.NUMERIC) : new NullParam(Types.NUMERIC),
+      fecfac != null ? new InParam(fecfac, Types.DATE) : new NullParam(Types.DATE),
+      numaut != null ? new InParam(numaut, Types.VARCHAR) : new NullParam(Types.VARCHAR)
     };
+
     RowMapper rm = (Map<String, Object> row) -> {
       MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
       movimientoTecnocom10.setId(getNumberUtils().toLong(row.get("_id")));
@@ -625,7 +635,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setContrato(String.valueOf(row.get("_contrato")));
       return movimientoTecnocom10;
     };
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_movimientos_tecnocom_v10", rm,params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_movimientos_tecnocom_v11", rm, params);
 
     return (List)resp.get("result");
   }

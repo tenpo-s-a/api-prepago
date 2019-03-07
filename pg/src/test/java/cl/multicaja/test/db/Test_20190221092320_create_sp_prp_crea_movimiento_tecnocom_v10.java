@@ -194,7 +194,7 @@ public class Test_20190221092320_create_sp_prp_crea_movimiento_tecnocom_v10 exte
     insertedMovement.put("idArchivo", fileId);
     insertedMovement.put("cuenta", cuenta);
     insertedMovement.put("pan", pan);
-    insertedMovement.put("tipofac", new BigDecimal(tipoFac));
+    insertedMovement.put("tipofac", tipoFac != null ? new BigDecimal(tipoFac) : null);
     insertedMovement.put("fecfac", fecfac);
     insertedMovement.put("impfac", impFac);
     insertedMovement.put("numaut", numAut);
