@@ -38,9 +38,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   private static Log log = LogFactory.getLog(McRedReconciliationEJBBean10.class);
 
-  private static final String dateFormat = "yyyyMMdd";
-  private static final ZoneId switchZone = ZoneId.of("America/Santiago");
-
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
@@ -89,6 +86,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           e.printStackTrace();
         }
       }
+      getReconciliationFilesEJBBean10().updateFileStatus(null,reconciliationFile10.getId(),FileStatus.OK);
     }
     log.info("[processFile OUT]");
     return reconciliationFile10;
@@ -123,33 +121,25 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       case SWITCH_TOPUP: {
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
         conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, reconciliationFile10.getFileName());
-        StringDateInterval utcInterval = convertFileNameToUTCInterval(reconciliationFile10.getFileName(), 26, dateFormat);
-        getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
         break;
       }
       case SWITCH_REVERSED_TOPUP:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
         conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, reconciliationFile10.getFileName());
-        StringDateInterval utcInterval = convertFileNameToUTCInterval(reconciliationFile10.getFileName(), 37, dateFormat);
-        getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
         break;
       }
       case SWITCH_WITHDRAW:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
         conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,  reconciliationFile10.getFileName());
-        StringDateInterval utcInterval = convertFileNameToUTCInterval( reconciliationFile10.getFileName(), 27, dateFormat);
-        getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, ReconciliationStatusType.NOT_RECONCILED);
-
         break;
       }
       case SWITCH_REVERSED_WITHDRAW:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
         this.conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,  reconciliationFile10.getFileName());
-        StringDateInterval utcInterval = convertFileNameToUTCInterval( reconciliationFile10.getFileName(), 38, dateFormat);
-        getPrepaidMovementEJBBean10().updatePendingPrepaidMovementsSwitchStatus(null, utcInterval.beginDate, utcInterval.endDate, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA, ReconciliationStatusType.NOT_RECONCILED);
         break;
       }
     }
+    getPrepaidMovementEJBBean10().expireNotReconciledMovements(reconciliationFile10.getType());
     log.info("[processSwitchData OUT]");
   }
 
@@ -242,53 +232,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     }
     log.info("OUT");
     return lstMcRedReconciliationFileDetail;
-  }
-
-  /**
-   * Usa el nombre del archivo para extraer dos timestamps UTC, de comienzo y fin.
-   *
-   * @param fileName el nombre del archivo
-   * @param dateIndex donde comienza la fecha en el nombre de archivo
-   * @param dateFormat en que formato viene la fecha
-   */
-  private StringDateInterval convertFileNameToUTCInterval(String fileName, int dateIndex, String dateFormat) {
-    // Extrae la fecha del nombre de archivo
-    String fileDate = fileName.substring(dateIndex, dateIndex + dateFormat.length());
-
-    // Usar el dia completo para calcular el comienzo y fin del intervalo
-    String beginDate = convertStringDateToYesterdayAtUTC(fileDate, dateFormat, 0, 0, 0, 0);
-    String endDate = convertStringDateToYesterdayAtUTC(fileDate, dateFormat, 23, 59, 59, 999);
-
-    StringDateInterval result = new StringDateInterval();
-    result.beginDate = beginDate;
-    result.endDate = endDate;
-    return result;
-  }
-
-  /**
-   * Recibe una timestamp en string, en cierto horario. La convierte a ayer y en horario UTC.
-   *
-   * @param date
-   * @param format
-   * @param hour
-   * @param minute
-   * @param second
-   * @param nano
-   * @return Una timestamp como string.
-   */
-  private String convertStringDateToYesterdayAtUTC(String date, String format, int hour, int minute, int second, int nano) {
-    LocalDate localDate = DateUtils.getInstance().dateStringToLocalDate(date, format); // De String a local date.
-    localDate = localDate.minusDays(1); // Ir a ayer
-    LocalDateTime localDateTime = localDate.atTime(hour, minute, second, nano); // Agregarle las horas y minutos
-    ZonedDateTime zonedDateTime = localDateTime.atZone(switchZone); // Marcarla como que pertenece al horario del switch
-    zonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")); // Convertir a UTC
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-    return zonedDateTime.format(formatter);
-  }
-
-  class StringDateInterval {
-    private String beginDate;
-    private String endDate;
   }
 
   @Override
