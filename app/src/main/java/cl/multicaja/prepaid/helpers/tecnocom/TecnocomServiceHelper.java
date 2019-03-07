@@ -126,7 +126,7 @@ public final class TecnocomServiceHelper {
     String numaut = TecnocomServiceHelper.getNumautFromIdMov(prepaidMovement.getId().toString());
 
     if(nomcomred.length() > 27){
-      nomcomred = nomcomred.substring(nomcomred.length() - 27);
+      nomcomred = nomcomred.substring(0, 27);
     }
 
     log.info(String.format("LLamando a inclusion de movimientos para carga de saldo a contrato %s", contrato));
