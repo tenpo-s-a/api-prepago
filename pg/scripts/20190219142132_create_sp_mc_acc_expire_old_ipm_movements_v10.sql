@@ -32,7 +32,7 @@ WITH updatedMovements AS (
     (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') AND
     (SELECT COUNT(f.id)
      FROM ${schema.acc}.ipm_file f
-     WHERE f.create_date >= mov.fecha_creacion) >= 7
+     WHERE f.create_date >= mov.fecha_creacion AND f.status = 'PROCESSED') >= 7
   RETURNING
     mov.id
 ),
