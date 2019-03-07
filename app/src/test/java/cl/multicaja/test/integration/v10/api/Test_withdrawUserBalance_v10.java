@@ -23,8 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
-import static cl.multicaja.core.model.Errors.REVERSA_MOVIMIENTO_REVERSADO;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author abarazarte
@@ -40,7 +39,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Before
-  //@After
+  @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
@@ -744,7 +743,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMerchantCodeFormat() throws Exception {
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, null);
+    User user = registerUser();
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
     prepaidWithdraw.setRut(getUniqueRutNumber());
     prepaidWithdraw.setPassword(RandomStringUtils.randomNumeric(4));
     prepaidWithdraw.setMerchantCode(getRandomString(10));
@@ -1105,6 +1106,95 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
       Assert.assertEquals("Debe tener businessStatus REVERSED", BusinessStatusType.REVERSED, prepaidMovement10.getEstadoNegocio());
       Assert.assertEquals("Debe tener conTecnocom RECONCILIED", ReconciliationStatusType.RECONCILED, prepaidMovement10.getConTecnocom());
+    }
+  }
+
+  @Test
+  public void shouldReturn422_OnWithdraw_AlreadyReceived() throws Exception {
+    // POS
+    {
+      String password = RandomStringUtils.randomNumeric(4);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      // se hace una carga
+      topupUserBalance(user, BigDecimal.valueOf(10000));
+
+      PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+      Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+
+      Assert.assertEquals("status 201", 201, resp.getStatus());
+
+      PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+      Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+      Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+      Assert.assertNotNull("Deberia tener id", withdraw.getId());
+      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+      Assert.assertNull("No deberia tener rut", withdraw.getRut());
+      Assert.assertNull("No deberia tener password", withdraw.getPassword());
+
+      // Segunda vez
+      HttpResponse resp1 = withdrawUserBalance(prepaidWithdraw);
+      Assert.assertEquals("status 422", 422, resp1.getStatus());
+      Map<String, Object> errorObj1 = resp1.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj1);
+      Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
+      Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
+
+
+    }
+
+    // WEB
+    {
+      String password = RandomStringUtils.randomNumeric(4);
+      User user = registerUser();
+      user = updateUserPassword(user, password);
+
+      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+      prepaidUser = createPrepaidUser10(prepaidUser);
+
+      // se hace una carga
+      topupUserBalance(user, BigDecimal.valueOf(10000));
+
+      PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+      Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+
+      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+
+      Assert.assertEquals("status 201", 201, resp.getStatus());
+
+      PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+      Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+      Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+      Assert.assertNotNull("Deberia tener id", withdraw.getId());
+      Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+      Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+      Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+      Assert.assertNull("No deberia tener rut", withdraw.getRut());
+      Assert.assertNull("No deberia tener password", withdraw.getPassword());
+
+      // Segunda vez
+      HttpResponse resp1 = withdrawUserBalance(prepaidWithdraw);
+      Assert.assertEquals("status 422", 422, resp1.getStatus());
+      Map<String, Object> errorObj1 = resp1.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj1);
+      Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
+      Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
     }
   }
 

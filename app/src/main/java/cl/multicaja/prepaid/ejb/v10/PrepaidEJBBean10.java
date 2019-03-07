@@ -365,7 +365,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       } else {
         String msg = cdtTransaction.getMsjError();
         if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
-          msg = "Transacción recibida previamente";
+          msg = "Transacción duplicada";
         }
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
@@ -731,7 +731,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       } else {
         String msg = cdtTransaction.getMsjError();
         if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
-          msg = "Transacción recibida previamente";
+          msg = "Transacción duplicada";
         }
         throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
