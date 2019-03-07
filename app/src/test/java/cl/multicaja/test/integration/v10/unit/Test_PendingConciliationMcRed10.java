@@ -64,7 +64,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     wrongMovementInfos.add(new WrongMovementInfo("2018-08-04 04:00:01", false, false)); // Fuera
 
     reconciledExpectedCount = 3;
-    notReconciledExpectedCount = 5;
+    notReconciledExpectedCount = 6;
     onlyFileMovements = 1;
   }
 
@@ -280,11 +280,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           //Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", beforeDate(movTmp.getFechaCreacion()));
           notReconcilidedCount++;
-        } else {
-          boolean outsideDates = !includedInDates(movTmp.getFechaCreacion());
-          boolean wrongType = !movTmp.getTipoMovimiento().equals(PrepaidMovementType.WITHDRAW);
-          boolean wrongIndNorCor = !movTmp.getIndnorcor().equals(IndicadorNormalCorrector.NORMAL);
-          Assert.assertTrue("Los que quedaron PENDING deben estar fuera de las fechas, type incorrecto o indnorcor incorrecto", outsideDates || wrongType || wrongIndNorCor);
         }
       } else {
         List lstResearchList = findResearchMovements();
