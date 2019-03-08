@@ -307,6 +307,7 @@ public class TestBaseUnit extends TestApiBase {
     if(mcRedReconciliationEJBBean10 == null) {
       mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
     }
     return mcRedReconciliationEJBBean10;
   }

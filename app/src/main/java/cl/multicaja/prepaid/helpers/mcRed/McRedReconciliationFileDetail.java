@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.helpers.mcRed;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 public class McRedReconciliationFileDetail {
 
@@ -10,7 +11,7 @@ public class McRedReconciliationFileDetail {
 
   private String mcCode;
 
-  private String dateTrx;
+  private Timestamp dateTrx;
 
   private BigDecimal amount;
 
@@ -42,11 +43,11 @@ public class McRedReconciliationFileDetail {
     this.mcCode = mcCode;
   }
 
-  public String getDateTrx() {
+  public Timestamp getDateTrx() {
     return dateTrx;
   }
 
-  public void setDateTrx(String dateTrx) {
+  public void setDateTrx(Timestamp dateTrx) {
     this.dateTrx = dateTrx;
   }
 
