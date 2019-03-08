@@ -163,7 +163,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     TestData testData = new TestData();
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
-    testData.prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+    testData.prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, null, prepaidTopup.getMovementType());
     testData.switchMovement = createSwitchMovement(reconciliationFile10.getId(), testData.prepaidMovement);
     testData.tecnocomMovement = createMovimientoTecnocom(reconciliationFile10.getId(), testData.prepaidMovement);
     testData.accountingData = createAccountingData(testData.prepaidMovement);
@@ -173,6 +173,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   TestData createTestData(TestData preparedData) throws Exception {
     preparedData.prepaidMovement = createPrepaidMovement10(preparedData.prepaidMovement);
+
+    preparedData.switchMovement.setAmount(preparedData.prepaidMovement.getImpfac());
     preparedData.switchMovement = getMcRedReconciliationEJBBean10().addFileMovement(null, preparedData.switchMovement);
     preparedData.tecnocomMovement = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(preparedData.tecnocomMovement);
 

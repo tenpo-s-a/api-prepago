@@ -105,7 +105,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
       Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
     }
 
-    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, movimientoTecnocom10s.get(0).getFecFac(), null);
+    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, java.sql.Date.valueOf(movimientoTecnocom10s.get(0).getFecFac()), null);
     Assert.assertEquals("Debe existir 4 movimientos", 4, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
       Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));

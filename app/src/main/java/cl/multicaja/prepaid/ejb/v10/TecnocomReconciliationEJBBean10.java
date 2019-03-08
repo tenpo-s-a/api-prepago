@@ -681,10 +681,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     if(movTc.getIdArchivo() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "IdArchivo"));
     }
-    if(movTc.getCuenta() == null){
+    if(movTc.getCuenta() == null || movTc.getCuenta().trim().isEmpty()){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Cuenta"));
     }
-    if(movTc.getPan() == null){
+    if(movTc.getPan() == null || movTc.getPan().trim().isEmpty()){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "Pan"));
     }
     if(movTc.getTipoFac() == null){
