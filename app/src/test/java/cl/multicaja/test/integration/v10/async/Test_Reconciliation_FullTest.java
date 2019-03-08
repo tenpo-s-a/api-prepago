@@ -58,6 +58,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     TestData testData = prepareTestData();
     testData = createTestData(testData);
 
+    getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(reconciliationFile10.getId());
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.CONFIRMED, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
@@ -120,7 +121,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     registroSwitch.setMcCode(prepaidMovement10.getIdTxExterno());
     registroSwitch.setClientId(prepaidMovement10.getIdPrepaidUser());
     registroSwitch.setExternalId(0L);
-    registroSwitch.setDateTrx("");
+    registroSwitch.setDateTrx(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
     registroSwitch.setFileId(fileId);
     return registroSwitch;
   }
