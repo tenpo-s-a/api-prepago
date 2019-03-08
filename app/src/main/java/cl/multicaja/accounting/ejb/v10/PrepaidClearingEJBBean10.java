@@ -438,7 +438,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info(String.format("Registro procesados: %d", clearingData10s.size()));
     processClearingBankResponse(clearingData10s, fileName, fileId);
     log.info("processClearingResponse OUT");
-    getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
   }
 
   private List<ClearingData10> processClearingResponseDataFile(InputStream inputStream) throws IOException, ValidationException {
