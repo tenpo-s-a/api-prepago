@@ -239,11 +239,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.AU){
       movimientoTecnocom10.setFecTrn(Timestamp.valueOf(String.format("%s %s",detail.getFecTrn(),detail.getHorTrn())));
       movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
-      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()));
+      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
       impFac.setValue(BigDecimal.ZERO);
       movimientoTecnocom10.setImpFac(impFac);
-    }else if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.OP) {
-      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecfac()));
+    } else if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.OP) {
+      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecfac()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
     }
 
     return movimientoTecnocom10;
@@ -273,7 +273,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         //Se busca el movimiento
         PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-          trx.getNumAut(), trx.getFecFac(), trx.getTipoFac());
+          trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
         if(originalMovement == null) {
           // Movimiento original no existe.
@@ -358,7 +358,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         if(trx.getOperationType().equals(TecnocomOperationType.OP)) {
           //Se busca el movimiento
           PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-            trx.getNumAut(), trx.getFecFac() , trx.getTipoFac());
+            trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()) , trx.getTipoFac());
 
           if(originalMovement == null) {
             TipoFactura tipofac = trx.getTipoFac();
@@ -602,7 +602,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
       movimientoTecnocom10.setIndNorCor(getNumberUtils().toInteger(row.get("_indnorcor")));
       movimientoTecnocom10.setTipoFac(TipoFactura.fromValue(getNumberUtils().toInteger(row.get("_tipofac"))));
-      movimientoTecnocom10.setFecFac((Date)row.get("_fecfac"));
+      movimientoTecnocom10.setFecFac(((java.sql.Date)row.get("_fecfac")).toLocalDate());
       movimientoTecnocom10.setNumRefFac(String.valueOf(row.get("_numreffac")));
 
       movimientoTecnocom10.setCmbApli(getNumberUtils().toBigDecimal(row.get("_cmbapli")));

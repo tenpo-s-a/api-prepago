@@ -19,6 +19,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -54,9 +55,9 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     Assert.assertEquals("Deben ser iguales getCuenta",movTec.getCuenta(),movTec2.get(0).getCuenta());
     Assert.assertEquals("Deben ser iguales getNumAut",movTec.getNumAut(),movTec2.get(0).getNumAut());
     Assert.assertEquals("Deben ser iguales getImpFac",movTec.getImpFac().getValue().longValue(),movTec2.get(0).getImpFac().getValue().longValue());
-    Assert.assertEquals("Deben ser iguales getFecFac",movTec.getFecFac().toLocalDate(),movTec2.get(0).getFecFac().toLocalDate());
-
+    Assert.assertEquals("Deben ser iguales getFecFac",movTec.getFecFac(),movTec2.get(0).getFecFac());
   }
+
   @Test (expected = BadRequestException.class)
   public void testInsertMovimientoNoOK_f1() throws BadRequestException {
     try{
@@ -166,7 +167,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     movimientoTecnocom10.setCuenta(getRandomNumericString(10));
     movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movimientoTecnocom10.setIndNorCor(TipoFactura.CARGA_TRANSFERENCIA.getCorrector());
-    movimientoTecnocom10.setFecFac(new Date(System.currentTimeMillis()));
+    movimientoTecnocom10.setFecFac(LocalDate.now());
     movimientoTecnocom10.setNomPob(getRandomNumericString(10));
     movimientoTecnocom10.setCodCom("");
     movimientoTecnocom10.setCodEnt("");

@@ -39,7 +39,6 @@ public class ReconciliationScheduler10 extends BaseProcessor10 {
             continue;
           }
         }
-        getRoute().getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
       }
     };
   }
