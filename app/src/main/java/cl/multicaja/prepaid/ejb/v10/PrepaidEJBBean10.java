@@ -363,7 +363,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if(lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        String msg = cdtTransaction.getMsjError();
+        if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
+          msg = "Transacción duplicada";
+        }
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
     }
 
@@ -605,6 +609,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
+    if(!StringUtils.isNumeric(request.getMerchantCode())) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(request.getMerchantCode().length() > 15) {
+      request.setMerchantCode(request.getMerchantCode().substring(request.getMerchantCode().length() - 15));
+    } else {
+      request.setMerchantCode(StringUtils.leftPad(request.getMerchantCode(), 15, '0'));
+    }
     if(StringUtils.isBlank(request.getMerchantName())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
     }
@@ -717,7 +729,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       if (lNumError > TRANSACCION_ERROR_GENERICO_$VALUE.getValue()) {
         throw new ValidationException(lNumError).setData(new KeyValue("value", cdtTransaction.getMsjError()));
       } else {
-        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", cdtTransaction.getMsjError()));
+        String msg = cdtTransaction.getMsjError();
+        if(StringUtils.containsIgnoreCase(msg, "duplicate key value violates unique constraint")) {
+          msg = "Transacción duplicada";
+        }
+        throw new ValidationException(TRANSACCION_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", msg));
       }
     }
 
@@ -965,6 +981,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(!StringUtils.isNumeric(request.getMerchantCode())) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(request.getMerchantCode().length() > 15) {
+      request.setMerchantCode(request.getMerchantCode().substring(request.getMerchantCode().length() - 15));
+    } else {
+      request.setMerchantCode(StringUtils.leftPad(request.getMerchantCode(), 15, '0'));
     }
     if(StringUtils.isBlank(request.getMerchantName())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));

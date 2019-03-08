@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.model.v10.ReconciliationFile10;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -26,7 +27,14 @@ public class PendingConciliationMcRed10 extends BaseProcessor10  {
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
         try {
-          getRoute().getMcRedReconciliationEJBBean10().processFile(inputStream, fileName);
+          // Metodo que procesa el archivo y lo inserta en la tabla de
+          ReconciliationFile10 reconciliationFile10 = getRoute().getMcRedReconciliationEJBBean10().processFile(inputStream, fileName);
+          // Metodo que procesa los movimientos de la tabla Switch
+          if(reconciliationFile10 != null) {
+            getRoute().getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
+            // Se borran los movimientos de la tabla temporal una vez procesados
+            getRoute().getMcRedReconciliationEJBBean10().deleteFileMovementsByFileId(null,reconciliationFile10.getId());
+          }
         } catch(Exception ex) {
           inputStream.close();
           throw ex;

@@ -34,6 +34,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_usuario CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
   private void prepareUsersAndCards() throws Exception {
@@ -128,7 +129,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     Assert.assertNull("No debe tener movimientos", movements);
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -214,7 +215,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -298,7 +299,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -384,7 +385,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -474,7 +475,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -560,7 +561,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -647,7 +648,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 
@@ -731,7 +732,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
     reconciliationFile10.setFileName(getRandomString(10));
-    reconciliationFile10.setStatus(FileStatus.READING);
+    reconciliationFile10.setStatus(FileStatus.OK);
     reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
     reconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
 

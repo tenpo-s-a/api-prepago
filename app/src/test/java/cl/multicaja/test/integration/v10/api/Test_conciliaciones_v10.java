@@ -63,7 +63,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-    prepaidTopup.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(getUniqueInteger()));
 
     PrepaidMovement10 originalTopup = buildPrepaidMovement10(prepaidUser, new PrepaidTopup10(prepaidTopup));
@@ -92,7 +92,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
-    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
     HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
     Assert.assertEquals("status 201", 201, resp.getStatus());
     PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
@@ -109,7 +109,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUser10(prepaidUser);
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+      prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
       prepaidWithdraw.setPassword("1234");
 

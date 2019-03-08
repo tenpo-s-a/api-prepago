@@ -418,6 +418,135 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
   }
 
   @Test
+  public void expire_topup_files_notOK() throws Exception {
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
+    ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
+    ArrayList<PrepaidMovement10> withdrawMovements = new ArrayList<>();
+    ArrayList<PrepaidMovement10> withdrawReversedMovements = new ArrayList<>();
+    ArrayList<PrepaidMovement10> reconciledMovements = new ArrayList<>();
+
+    for(int i = 0; i < 5; i++) {
+      ReconciliationFile10 reconciliationFile10 = new ReconciliationFile10();
+      reconciliationFile10.setStatus(FileStatus.READING); // Archivos no listos
+      reconciliationFile10.setProcess(ReconciliationOriginType.SWITCH);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_1.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_TOPUP);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_2.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_REJECTED_TOPUP);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_3.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_REVERSED_TOPUP);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_4.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_WITHDRAW);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_5.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_REJECTED_WITHDRAW);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_6.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.SWITCH_REVERSED_WITHDRAW);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      reconciliationFile10.setFileName(String.format("archivo%d_7.txt", i));
+      reconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
+      getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
+      prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      topupMovements.add(0, prepaidMovement10);
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
+      prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      topupReversedMovements.add(0, prepaidMovement10);
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
+      prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      withdrawMovements.add(0, prepaidMovement10);
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
+      prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.CORRECTORA);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      withdrawReversedMovements.add(0, prepaidMovement10);
+
+      prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
+      prepaidMovement10.setTipoMovimiento(PrepaidMovementType.TOPUP);
+      prepaidMovement10.setIndnorcor(IndicadorNormalCorrector.NORMAL);
+      prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
+      prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
+      reconciledMovements.add(0, prepaidMovement10);
+
+      Thread.sleep(10);
+    }
+
+    getPrepaidMovementEJBBean10().expireNotReconciledMovements(ReconciliationFileType.SWITCH_TOPUP);
+
+    // Nada cambia debido a que los archivos no estan con status OK
+    for(int i = 0; i < topupMovements.size(); i++) {
+      PrepaidMovement10 originalMovement = topupMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalMovement.getId());
+      Assert.assertEquals("Deben tener mismo id", originalMovement.getId(), storedMovement.getId());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConTecnocom());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConSwitch());
+    }
+
+    // Nada debe cambiar
+    for(int i = 0; i < topupReversedMovements.size(); i++) {
+      PrepaidMovement10 originalMovement = topupReversedMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalMovement.getId());
+      Assert.assertEquals("Deben tener mismo id", originalMovement.getId(), storedMovement.getId());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConTecnocom());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConSwitch());
+    }
+
+    // Nada debe cambiar
+    for(int i = 0; i < withdrawMovements.size(); i++) {
+      PrepaidMovement10 originalMovement = withdrawMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalMovement.getId());
+      Assert.assertEquals("Deben tener mismo id", originalMovement.getId(), storedMovement.getId());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConTecnocom());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConSwitch());
+    }
+
+    // Nada debe cambiar
+    for(int i = 0; i < withdrawReversedMovements.size(); i++) {
+      PrepaidMovement10 originalMovement = withdrawReversedMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalMovement.getId());
+      Assert.assertEquals("Deben tener mismo id", originalMovement.getId(), storedMovement.getId());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConTecnocom());
+      Assert.assertEquals("Deben tener estado PENDING", ReconciliationStatusType.PENDING, storedMovement.getConSwitch());
+    }
+
+    // Nada debe cambiar
+    for(int i = 0; i < reconciledMovements.size(); i++) {
+      PrepaidMovement10 originalMovement = reconciledMovements.get(i);
+      PrepaidMovement10 storedMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalMovement.getId());
+      Assert.assertEquals("Deben tener mismo id", originalMovement.getId(), storedMovement.getId());
+      Assert.assertEquals("Deben tener estado RECONCILED", ReconciliationStatusType.RECONCILED, storedMovement.getConTecnocom());
+      Assert.assertEquals("Deben tener estado RECONCILED", ReconciliationStatusType.RECONCILED, storedMovement.getConSwitch());
+    }
+  }
+
+  @Test
   public void expire_topup_reversed() throws Exception {
     User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
