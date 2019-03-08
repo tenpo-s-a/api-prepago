@@ -245,7 +245,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
     getPrepaidClearingEJBBean10().createClearingCSV(fileName, fileId, clearingData10ToFile);
 
-    runF1(); // F3 es llamado desde F1
+    runF1();
+    runF3();
 
     // 1. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
     {

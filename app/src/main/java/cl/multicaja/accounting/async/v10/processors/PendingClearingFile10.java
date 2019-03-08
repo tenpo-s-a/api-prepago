@@ -24,6 +24,7 @@ public class PendingClearingFile10 extends BaseProcessor10 {
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         getRoute().getPrepaidClearingEJBBean10().processClearingResponse(inputStream,fileName);
+        getRoute().getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
       }
     };
   }
