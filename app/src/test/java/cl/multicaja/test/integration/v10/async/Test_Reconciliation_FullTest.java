@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
@@ -164,6 +165,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
     testData.prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, null, prepaidTopup.getMovementType());
+    testData.prepaidMovement.setNumaut(getRandomNumericString(6));
+    testData.prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
     testData.switchMovement = createSwitchMovement(reconciliationFile10.getId(), testData.prepaidMovement);
     testData.tecnocomMovement = createMovimientoTecnocom(reconciliationFile10.getId(), testData.prepaidMovement);
     testData.accountingData = createAccountingData(testData.prepaidMovement);
