@@ -693,6 +693,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     if(movTc.getImpFac() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "ImpFac"));
     }
+    if(movTc.getNumAut() == null || movTc.getNumAut().trim().isEmpty()){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "NumAut"));
+    }
 
     Object[] params = {
       movTc.getIdArchivo() != null ? new InParam(movTc.getIdArchivo(), Types.BIGINT) : new NullParam(Types.BIGINT),
