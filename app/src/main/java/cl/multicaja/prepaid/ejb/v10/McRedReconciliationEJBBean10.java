@@ -162,11 +162,11 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
           //TODO: Esta OK este Research?
-          DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+          /*DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
           java.util.Date date = formatter.parse(recTmp.getDateTrx());
           java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
 
-          Long movRef = Long.valueOf(0);
+          Long movRef = Long.valueOf(0);*/
           /*getPrepaidMovementEJBBean10().createMovementResearch(
             null,
             researchId,

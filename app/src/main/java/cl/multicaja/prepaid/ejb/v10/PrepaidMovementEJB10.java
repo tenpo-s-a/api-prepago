@@ -263,7 +263,7 @@ public interface PrepaidMovementEJB10 {
     String sentStatus
   )throws Exception;
 
-  
+
 
   /**
    *
