@@ -177,6 +177,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
             movRef);*/
 
+          
           continue;
         }
         else
