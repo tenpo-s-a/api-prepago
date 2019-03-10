@@ -161,8 +161,13 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId += "]-";
           researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
-          Long movRef = 0L;
-          getPrepaidMovementEJBBean10().createMovementResearch(
+          //TODO: Esta OK este Research?
+          DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+          java.util.Date date = formatter.parse(recTmp.getDateTrx());
+          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
+
+          Long movRef = Long.valueOf(0);
+          /*getPrepaidMovementEJBBean10().createMovementResearch(
             null,
             researchId,
             ReconciliationOriginType.SWITCH,
@@ -170,7 +175,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             recTmp.getDateTrx(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            movRef);
+            movRef);*/
+
+          continue;
         }
         else
           {

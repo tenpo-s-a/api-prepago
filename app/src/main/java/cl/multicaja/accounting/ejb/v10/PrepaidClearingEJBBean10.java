@@ -586,8 +586,9 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     String idToResearch = String.format("idMov=%d", movementId);
 
-    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
-      ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);
+    //TODO: Cambiar variables y método de Research
+    /*getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
+      ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);*/
   }
 
   @Override

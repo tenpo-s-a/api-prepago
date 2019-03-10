@@ -32,6 +32,9 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
 
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
 
+    //TODO: Research, Cambio de variables, y metodos Research
+
+    /*
     String movementId = "idMov=3";
     getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     changeResearch(movementId, "2015-01-01 00:00:00.0");
@@ -60,6 +63,8 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
     researchMovement10s.add(insertedMovement);
+
+    */
 
     getPrepaidMovementEJBBean10().sendResearchEmail();
   }
