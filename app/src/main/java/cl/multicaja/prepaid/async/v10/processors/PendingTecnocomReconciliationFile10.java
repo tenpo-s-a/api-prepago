@@ -30,7 +30,7 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
         final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
         String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
         log.info("Proccess file name : " + fileName);
-        try {
+        try{
 
           File tempFile = new File("./" + fileName + "_decrypted");
           String privateKey = System.getenv("TECNOCOM_PGP_PRIVATE_KEY");
