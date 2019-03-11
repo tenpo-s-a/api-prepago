@@ -335,7 +335,8 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
   }
 
   private List<ReconciliedResearch> getResearchMovement(String movId) {
-    RowMapper rowMapper = (rs, rowNum) -> {
+    //TODO: Research, set changes
+    /*RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
       //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
@@ -345,7 +346,8 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       return reconciliedResearch;
     };
     List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = '%s'", getSchema(), movId), rowMapper);
-    return data;
+    return data;*/
+    return null;
   }
 
   private ReconciliedMovement10 getReconciliedMovement(Long idMov) {

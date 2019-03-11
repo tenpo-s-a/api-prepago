@@ -435,7 +435,8 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
   }
   
   private ReconciliedResearch getMovimientoInvestigarMotor(Long idMovRef){
-    RowMapper rowMapper = (rs, rowNum) -> {
+    //TODO: Research, Change about itself
+    /*RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
       //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
@@ -446,10 +447,12 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     };
     //List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
     List<ReconciliedResearch> data =getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = 'idMov=%s'",getSchema(),idMovRef),rowMapper);
-    return data.get(0);
+    return data.get(0);*/
+    return null;
   }
 }
 
+//TODO: Research related, change about itself
 class ReconciliedResearch {
   private Long id;
   //private String idRef;

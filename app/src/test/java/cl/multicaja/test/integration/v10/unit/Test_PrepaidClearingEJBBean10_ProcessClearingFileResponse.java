@@ -526,7 +526,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
   }
 
   private List<ReconciliedResearch> getResearchMovement(Long movId) {
-    RowMapper rowMapper = (rs, rowNum) -> {
+    //TODO: Research, set changes
+    /*RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
       //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
@@ -537,7 +538,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     };
     //List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'", getSchema(), String.valueOf(movId)), rowMapper);
     List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = 'idMov=%s'", getSchema(), String.valueOf(movId)), rowMapper);
-    return data;
+    return data;*/
+    return null;
   }
 
   public InputStream createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
