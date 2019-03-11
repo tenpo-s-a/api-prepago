@@ -3,7 +3,9 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Timestamp;
@@ -12,9 +14,14 @@ import java.time.ZoneId;
 
 public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBaseUnit {
 
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
+  }
 
   @Test
-  public void testCreateReseachMovement(){
+  public void testCreateResearchMovement(){
     try {
       User user = registerUser();
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
@@ -51,7 +58,8 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
   }
 
   @Test
-  public void createReseachMovementError(){
+  public void createResearchMovementError(){
+
     try{
       getPrepaidMovementEJBBean10().createResearchMovement(
         null,null,null,null,
@@ -61,7 +69,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser idFileOrigin","filesInfo",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser filesInfo","filesInfo",e.getData()[0].getValue());
     } catch (Exception e) {
       Assert.fail("No debe caer aca");
     }
@@ -88,7 +96,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser fileName","dateOfTransaction",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser dateOfTransaction","dateOfTransaction",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -102,7 +110,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser dateOfTransaction","responsible",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser responsible","responsible",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -117,7 +125,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser dateOfTransaction","description",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser description","description",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -133,7 +141,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser responsible","movRef",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser movRef","movRef",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -149,7 +157,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser description","movementType",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser movementType","movementType",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -165,7 +173,7 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser movRef","sentStatus",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser sentStatus","sentStatus",e.getData()[0].getValue());
     } catch (Exception e) {
       e.printStackTrace();
     }

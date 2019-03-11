@@ -23,6 +23,7 @@ IN  _in_id                BIGINT,
 IN  _in_fecha_desde       TIMESTAMP,
 IN  _in_fecha_hasta       TIMESTAMP,
 IN  _in_sent_status       VARCHAR,
+IN  _in_mov_ref           NUMERIC,
 OUT _id                   BIGINT,
 OUT _informacion_archivos TEXT,
 OUT _origen               VARCHAR,
@@ -53,7 +54,8 @@ BEGIN
       (_in_id IS NULL OR id = _in_id) AND
       (_in_fecha_desde IS NULL OR _in_fecha_desde <= fecha_registro) AND
       (_in_fecha_hasta IS NULL OR _in_fecha_hasta >= fecha_registro) AND
-      (TRIM(COALESCE(_in_sent_status,'')) = '' OR sent_status = _in_sent_status)
+      (TRIM(COALESCE(_in_sent_status,'')) = '' OR sent_status = _in_sent_status) AND
+      (_in_mov_ref IS NULL OR mov_ref = _in_mov_ref)
     ORDER BY id DESC;
   RETURN;
 END;
@@ -62,4 +64,4 @@ $$ LANGUAGE plpgsql;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v13(BIGINT, TIMESTAMP, TIMESTAMP, VARCHAR);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_busca_movimientos_a_investigar_v13(BIGINT, TIMESTAMP, TIMESTAMP, VARCHAR, NUMERIC);

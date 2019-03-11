@@ -1,5 +1,6 @@
 package cl.multicaja.test.db;
 
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.RowMapper;
@@ -67,13 +68,15 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     return this.getObjectMapper().readValue(json,collectionType);
   }
 
-  public Map<String, Object> searchResearchMovement(Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus) throws SQLException {
+  public Map<String, Object> searchResearchMovement(
+    Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws SQLException {
 
     Object[] params = {
       id != null ? new InParam(id, Types.BIGINT) : new NullParam(Types.BIGINT),
       beginDateTime != null ? new InParam(beginDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       endDateTime != null ? new InParam(endDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       sentStatus != null ? new InParam(sentStatus, Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      movRef != null ? new InParam(movRef, Types.DECIMAL) : new NullParam(Types.DECIMAL)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -96,7 +99,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovement_by_Id_beginDateTime_endDateTime_sentStatus() throws SQLException,IOException {
+  public void testSearchResearchMovementById_BeginDateTime_EndDateTime_SentStatus_MovRef() throws SQLException,IOException {
 
     InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
     informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
@@ -128,7 +131,8 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     Assert.assertEquals("Deben ser iguales","",resp.get("_error_msg"));
 
     Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,numberUtils.toBigDecimal(movRef));
+
     List<Map<String, Object>> results = (List)data.get("result");
 
     Assert.assertEquals("Se debe encontrar un solo registro ",1,results.size());
@@ -148,7 +152,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovement_by_Id() throws SQLException,IOException {
+  public void testSearchResearchMovementById_BeginDateTime_EndDateTime_SentStatus() throws SQLException,IOException {
 
     InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
     informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
@@ -180,7 +184,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     Assert.assertEquals("Deben ser iguales","",resp.get("_error_msg"));
 
     Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),
-      null,null, null);
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
     List<Map<String, Object>> results = (List)data.get("result");
 
     Assert.assertEquals("Se debe encontrar un solo registro ",1,results.size());
@@ -200,7 +204,54 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovement_by_beginDateTime_endDateTime_sentStatus() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_Id() throws SQLException,IOException {
+
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+
+    Timestamp fechaDeTransaccion = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
+    String origen = getRandomString(10);
+    String responsable = getRandomString(10);
+    String descripcion = getRandomString(10);
+    Long movRef = 100L;
+    String tipoMovimiento = getRandomString(10);
+    String sentStatus = "PENDING";
+
+    Map<String, Object> resp = Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
+      fechaDeTransaccion,responsable,descripcion,
+      movRef,tipoMovimiento,sentStatus);
+
+    Assert.assertNotNull("Data no debe ser null", resp);
+    Assert.assertEquals("Debe ser 0","0",resp.get("_error_code"));
+    Assert.assertEquals("Deben ser iguales","",resp.get("_error_msg"));
+
+    Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),
+      null,null, null,null);
+    List<Map<String, Object>> results = (List)data.get("result");
+
+    Assert.assertEquals("Se debe encontrar un solo registro ",1,results.size());
+    ResearchMovement researchMovement = (ResearchMovement) results.get(0);
+
+    Assert.assertNotNull("No esta vacio ",researchMovement.informacionArchivos);
+    Assert.assertEquals("El Json de informacionArchivos es el mismo ",jsonSent,researchMovement.informacionArchivos);
+    Assert.assertEquals("El origen es el mismo ",origen,researchMovement.origen);
+    Assert.assertEquals("El fechaDeTransaccion es el mismo ",fechaDeTransaccion,researchMovement.fechaDeTransaccion);
+    Assert.assertEquals("El responsable es el mismo ",responsable,researchMovement.responsable);
+    Assert.assertEquals("El descripcion es el mismo ",descripcion,researchMovement.descripcion);
+    Long movRefReturn = researchMovement.movRef.longValue();
+    Assert.assertEquals("El movRef es el mismo ",movRef,movRefReturn);
+    Assert.assertEquals("El tipoMovimiento es el mismo ",tipoMovimiento,researchMovement.tipoMovimiento);
+    Assert.assertEquals("El sentStatus es el mismo ",sentStatus,researchMovement.sentStatus);
+
+  }
+
+  @Test
+  public void testSearchResearchMovementBy_BeginDateTime_EndDateTime() throws SQLException,IOException {
 
     ResearchMovement researchMovement = null;
     List<ResearchMovement> researchMovements = new ArrayList<>();
@@ -216,8 +267,6 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
 
-    // Como constante para filtrar por status, así el test tiene mas control y trae los registros indicados,
-    // en caso de no usarse como filtro, el orden de los test que inserten información tiene relevancia y efecto final en este test.
     String sentStatus = "PENDING_TEST_1";
     Long numRecords = 10L;
 
@@ -254,14 +303,15 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     }
 
     Map<String, Object> data = searchResearchMovement( null,
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,null);
+
     List<Map<String, Object>> results = (List)data.get("result");
 
     Long resultRecords = Long.valueOf(results.size());
     Assert.assertEquals("Se debe encontrar "+numRecords+" registros",numRecords,resultRecords);
     System.out.println("testSearchResearchMovement_by_beginDateTime_endDateTime_sentStatus: "+results.size());
 
-    for(int i=0; i<numRecords;i++){
+    for(int i=0; i<resultRecords;i++){
       researchMovements.sort(new IdSorterDesc());
       ResearchMovement rmSent = researchMovements.get(i);
       ResearchMovement rmReturn = (ResearchMovement) results.get(i);
@@ -280,7 +330,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovement_by_sentStatus() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_SentStatus() throws SQLException,IOException {
 
     ResearchMovement researchMovement = null;
     List<ResearchMovement> researchMovements = new ArrayList<>();
@@ -292,8 +342,6 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
 
     String jsonSent = this.toJson(informationFilesModelObjectSent);
-    // Como constante para filtrar por status, así el test tiene mas control y trae los registros indicados,
-    // en caso de no usarse como filtro, el orden de los test que inserten información tiene relevancia y efecto final en este test.
     String sentStatus = "PENDING_TEST_2";
     Long numRecords = 10L;
 
@@ -328,7 +376,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     }
 
     Map<String, Object> data = searchResearchMovement( null,
-      null,null, sentStatus);
+      null,null, sentStatus,null);
     List<Map<String, Object>> results = (List)data.get("result");
 
     Long resultRecords = Long.valueOf(results.size());
@@ -354,45 +402,39 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovementByDatesOffRange() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_DatesOffRange() throws SQLException {
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    String sentStatus = "PENDING_TEST_2";
 
     beginDateTime = beginDateTime.plusMonths(1);
     endDateTime = endDateTime.plusMonths(3);
 
-    Map<String, Object> data = searchResearchMovement(Long.valueOf(-1),
-      Timestamp.valueOf(beginDateTime), Timestamp.valueOf(endDateTime), sentStatus);
+    Map<String, Object> data = searchResearchMovement(null,
+      Timestamp.valueOf(beginDateTime), Timestamp.valueOf(endDateTime), null,null);
     Assert.assertNull("El resultado es nulo ", data.get("result"));
 
   }
 
   @Test
-  public void testSearchResearchMovementByInvalidId() throws SQLException,IOException {
-
-    LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    beginDateTime = beginDateTime.minusHours(1);
-    LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    String sentStatus = "PENDING_TEST_2";
+  public void testSearchResearchMovementBy_InvalidId() throws SQLException {
 
     {
-      Map<String, Object> data = searchResearchMovement(Long.valueOf(-1),
-        Timestamp.valueOf(beginDateTime), Timestamp.valueOf(endDateTime), sentStatus);
+      Map<String, Object> data = searchResearchMovement(
+        Long.valueOf(-1),null,null,null,null);
       Assert.assertNull("El resultado es nulo ", data.get("result"));
     }
     {
-      Map<String, Object> data = searchResearchMovement( Long.valueOf(0),
-        Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+      Map<String, Object> data = searchResearchMovement(
+        Long.valueOf(0),null,null,null,null);
       Assert.assertNull("El resultado es nulo ", data.get("result"));
     }
 
   }
 
   @Test
-  public void testSearchResearchMovementByIdNull() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_IdNull() throws SQLException {
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
@@ -400,15 +442,43 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     String sentStatus = "PENDING_TEST_2";
 
     Map<String, Object> data = searchResearchMovement( null,
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus, NumberUtils.getInstance().toBigDecimal(0L));
     Assert.assertNull("El resultado es nulo ",data.get("result"));
 
   }
 
   @Test
-  public void testSearchResearchMovementByAllNull() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_SentStatusNull() throws SQLException,IOException {
 
-    Map<String, Object> data = searchResearchMovement( null,null,null, null);
+    LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+    beginDateTime = beginDateTime.minusHours(1);
+    LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+    String sentStatus = "PENDING_TEST_2";
+
+    Map<String, Object> data = searchResearchMovement( Long.valueOf(1),
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,numberUtils.toBigDecimal(100));
+    Assert.assertNull("El resultado es nulo ",data.get("result"));
+
+  }
+
+  @Test
+  public void testSearchResearchMovementBy_MovRefNull() throws SQLException,IOException {
+
+    LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+    beginDateTime = beginDateTime.minusHours(1);
+    LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+    String sentStatus = "PENDING_TEST_2";
+
+    Map<String, Object> data = searchResearchMovement(
+      Long.valueOf(1),Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
+    Assert.assertNull("El resultado es nulo ",data.get("result"));
+
+  }
+
+  @Test
+  public void testSearchResearchMovementBy_AllNull() throws SQLException,IOException {
+
+    Map<String, Object> data = searchResearchMovement( null,null,null, null,null);
     Assert.assertNull("El resultado es nulo ",data.get("result"));
 
   }

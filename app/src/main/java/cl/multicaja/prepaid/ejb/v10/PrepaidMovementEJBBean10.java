@@ -1658,7 +1658,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public List<ResearchMovement10> getResearchMovement(
-    Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus) throws Exception {
+    Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception {
 
     String SP_SEARCH_RESEARCH_MOVEMENT_NAME = getSchema() + ".mc_prp_busca_movimientos_a_investigar_v13";
 
@@ -1669,16 +1669,19 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       beginDateTime != null ? new InParam(beginDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       endDateTime != null ? new InParam(endDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       sentStatus != null ? new InParam(sentStatus, Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      movRef != null ? new InParam(movRef, Types.DECIMAL) : new NullParam(Types.DECIMAL)
     };
 
     RowMapper rm = getResearchMovementRowMapper();
     Map<String,Object> resp = getDbUtils().execute(SP_SEARCH_RESEARCH_MOVEMENT_NAME,rm,params);
 
     List<Map<String, Object>> results = (List)resp.get("result");
-    Long numRecords = Long.valueOf(results.size());
-    if(results.size()>0){
-      for(int i=0; i<numRecords;i++) {
-        researchMovements.add((ResearchMovement10) results.get(i));
+
+    if(results != null){
+      if(results.size()>0){
+        for(int i=0; i<Long.valueOf(results.size());i++) {
+          researchMovements.add((ResearchMovement10) results.get(i));
+        }
       }
     }
 
@@ -1688,41 +1691,32 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public ResearchMovement10 getResearchMovementById(Long id) throws Exception {
-
     log.info("[getResearchMovementById In Id] : " + id);
-    if(id == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-
-    List<ResearchMovement10> researchMovements = getResearchMovement(id,null,null,null);
+    List<ResearchMovement10> researchMovements = getResearchMovement(
+      id,null,null,null,null);
     return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
   }
 
   @Override
-  public List<ResearchMovement10> getResearchMovementByDateTimeRange(Timestamp startDateTime, Timestamp endDateTime) throws Exception {
+  public List<ResearchMovement10> getResearchMovementByDateTimeRange(
+    Timestamp startDateTime, Timestamp endDateTime) throws Exception {
     log.info("[getResearchMovementByDateTimeRange In startDateTime and endDataTime] : " + startDateTime+" "+endDateTime);
+    return getResearchMovement(null,startDateTime,endDateTime,null,null);
+  }
 
-    if(startDateTime == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "startDateTime"));
-    }
-    if(endDateTime == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "endDateTime"));
-    }
-
-    return getResearchMovement(null,startDateTime,endDateTime,null);
+  @Override
+  public ResearchMovement10 getResearchMovementByMovRef(BigDecimal movRef) throws Exception {
+    log.info("[getResearchMovementByMovRef In movRef] : " + movRef);
+    List<ResearchMovement10> researchMovements = getResearchMovement(
+      null,null,null,null,movRef);
+    return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
   }
 
   @Override
   public List<ResearchMovement10> getResearchMovementBySentStatus(String sentStatus) throws Exception {
     log.info("[getResearchMovementBySentStatus In sentStatus] : " + sentStatus);
-
-    if(sentStatus == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "sentStatus"));
-    }
-
-    return getResearchMovement(null,null,null,sentStatus);
+    return getResearchMovement(null,null,null,sentStatus,null);
   }
-
 
   private RowMapper getResearchMovementRowMapper(){
 
@@ -1737,8 +1731,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       researchMovement.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(row.get("_responsable"))));
       researchMovement.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(row.get("_descripcion"))));
       researchMovement.setMovRef(BigDecimal.valueOf(NumberUtils.getInstance().toLong(row.get("_mov_ref"))));
-      researchMovement.setMovementType(String.valueOf(row.get("_tipo_movimiento")));
-      researchMovement.setSentStatus(String.valueOf(row.get("_sent_status")));
+      researchMovement.setMovementType(PrepaidMovementType.valueOfEnum(String.valueOf(row.get("_tipo_movimiento"))));
+      researchMovement.setSentStatus(ResearchMovementSentStatusType.fromValue(String.valueOf(row.get("_sent_status"))));
 
       return researchMovement;
     };

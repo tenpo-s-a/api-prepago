@@ -10,6 +10,7 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -264,17 +265,17 @@ public interface PrepaidMovementEJB10 {
   )throws Exception;
 
 
-
   /**
    *
    * @param id
    * @param beginDateTime
    * @param endDateTime
    * @param sentStatus
+   * @param movRef
    * @return
    * @throws Exception
    */
-  List<ResearchMovement10> getResearchMovement(Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus) throws Exception;
+  List<ResearchMovement10> getResearchMovement(Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception;
 
   /**
    *
@@ -292,6 +293,14 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   List<ResearchMovement10> getResearchMovementByDateTimeRange(Timestamp startDateTime,Timestamp endDateTime) throws Exception;
+
+  /**
+   *
+   * @param movRef
+   * @return
+   * @throws Exception
+   */
+  ResearchMovement10 getResearchMovementByMovRef(BigDecimal movRef) throws Exception;
 
   /**
    *

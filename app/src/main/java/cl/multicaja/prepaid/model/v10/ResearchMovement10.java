@@ -15,8 +15,8 @@ public class ResearchMovement10 extends BaseModel {
   private ResearchMovementResponsibleStatusType responsible;
   private ResearchMovementDescriptionType description;
   private BigDecimal movRef;
-  private String movementType;
-  private String sentStatus;
+  private PrepaidMovementType movementType;
+  private ResearchMovementSentStatusType sentStatus;
 
   public Long getId() {
     return id;
@@ -82,21 +82,19 @@ public class ResearchMovement10 extends BaseModel {
     this.movRef = movRef;
   }
 
-  public String getMovementType() {
+  public PrepaidMovementType getMovementType() {
     return movementType;
   }
 
-  public void setMovementType(String movementType) {
+  public void setMovementType(PrepaidMovementType movementType) {
     this.movementType = movementType;
   }
 
-  public String getSentStatus() {
+  public ResearchMovementSentStatusType getSentStatus() {
     return sentStatus;
   }
 
-  public void setSentStatus(String sentStatus) {
+  public void setSentStatus(ResearchMovementSentStatusType sentStatus) {
     this.sentStatus = sentStatus;
   }
-
-
 }

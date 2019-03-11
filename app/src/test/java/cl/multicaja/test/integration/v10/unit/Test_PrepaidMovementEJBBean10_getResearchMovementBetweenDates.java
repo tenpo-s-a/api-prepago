@@ -25,11 +25,8 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
   }
 
   @Test
-  public void findMovement_ok() throws Exception {
+  public void findResearchMovementByDateTimeRangeOk() throws Exception {
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
-
-
-    //TODO: Research: Cambiar variables y metodos de Research
 
     ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
@@ -109,25 +106,41 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
         if(insMovement.getId().equals(foundMovement.getId())) {
-          //Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
+
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          //Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
+          Assert.assertEquals("El Json de informacionArchivos es el mismo ",insMovement.getFilesInfo(),foundMovement.getFilesInfo());
+          Assert.assertEquals("El origen es el mismo ",insMovement.getOriginType(),foundMovement.getOriginType());
+          Assert.assertEquals("El fechaDeTransaccion es el mismo ",insMovement.getDateOfTransaction(),foundMovement.getDateOfTransaction());
+          Assert.assertEquals("El responsable es el mismo ",insMovement.getResponsible(),foundMovement.getResponsible());
+          Assert.assertEquals("El descripcion es el mismo ",insMovement.getDescription(),foundMovement.getDescription());
+          Assert.assertEquals("El movRef es el mismo ",insMovement.getMovRef(),foundMovement.getMovRef());
+          Assert.assertEquals("El tipoMovimiento es el mismo ",insMovement.getMovementType(),foundMovement.getMovementType());
+          Assert.assertEquals("El sentStatus es el mismo ",insMovement.getSentStatus(),foundMovement.getSentStatus());
+
           comparedMovements++;
         }
       }
     }
     Assert.assertEquals("Debe comparar 2 movements", 2, comparedMovements);
 
-    /*foundMovements = getPrepaidMovementEJBBean10().getResearchMovementByDateTimeRange(null, Timestamp.valueOf(endDateTime));
+    foundMovements = getPrepaidMovementEJBBean10().getResearchMovementByDateTimeRange(null, Timestamp.valueOf(endDateTime));
     Assert.assertNotNull("Debe existir", foundMovements);
     Assert.assertEquals("Debe encontrar 3 objetos", 3, foundMovements.size());
     comparedMovements = 0;
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
         if(insMovement.getId().equals(foundMovement.getId())) {
-          //Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
+
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          //Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
+          Assert.assertEquals("El Json de informacionArchivos es el mismo ",insMovement.getFilesInfo(),foundMovement.getFilesInfo());
+          Assert.assertEquals("El origen es el mismo ",insMovement.getOriginType(),foundMovement.getOriginType());
+          Assert.assertEquals("El fechaDeTransaccion es el mismo ",insMovement.getDateOfTransaction(),foundMovement.getDateOfTransaction());
+          Assert.assertEquals("El responsable es el mismo ",insMovement.getResponsible(),foundMovement.getResponsible());
+          Assert.assertEquals("El descripcion es el mismo ",insMovement.getDescription(),foundMovement.getDescription());
+          Assert.assertEquals("El movRef es el mismo ",insMovement.getMovRef(),foundMovement.getMovRef());
+          Assert.assertEquals("El tipoMovimiento es el mismo ",insMovement.getMovementType(),foundMovement.getMovementType());
+          Assert.assertEquals("El sentStatus es el mismo ",insMovement.getSentStatus(),foundMovement.getSentStatus());
+
           comparedMovements++;
         }
       }
@@ -141,9 +154,17 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
         if(insMovement.getId().equals(foundMovement.getId())) {
-          //Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
+
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          //Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
+          Assert.assertEquals("El Json de informacionArchivos es el mismo ",insMovement.getFilesInfo(),foundMovement.getFilesInfo());
+          Assert.assertEquals("El origen es el mismo ",insMovement.getOriginType(),foundMovement.getOriginType());
+          Assert.assertEquals("El fechaDeTransaccion es el mismo ",insMovement.getDateOfTransaction(),foundMovement.getDateOfTransaction());
+          Assert.assertEquals("El responsable es el mismo ",insMovement.getResponsible(),foundMovement.getResponsible());
+          Assert.assertEquals("El descripcion es el mismo ",insMovement.getDescription(),foundMovement.getDescription());
+          Assert.assertEquals("El movRef es el mismo ",insMovement.getMovRef(),foundMovement.getMovRef());
+          Assert.assertEquals("El tipoMovimiento es el mismo ",insMovement.getMovementType(),foundMovement.getMovementType());
+          Assert.assertEquals("El sentStatus es el mismo ",insMovement.getSentStatus(),foundMovement.getSentStatus());
+
           comparedMovements++;
         }
       }
@@ -157,14 +178,22 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
     for(ResearchMovement10 insMovement : researchMovement10s) {
       for(ResearchMovement10 foundMovement : foundMovements) {
         if(insMovement.getId().equals(foundMovement.getId())) {
-          //Assert.assertEquals("Debe tener mismo filename", insMovement.getFileName(), foundMovement.getFileName());
+
           Assert.assertEquals("Debe tener mismo id", insMovement.getId(), foundMovement.getId());
-          //Assert.assertEquals("Debe tener origen", insMovement.getOrigin(), foundMovement.getOrigin());
+          Assert.assertEquals("El Json de informacionArchivos es el mismo ",insMovement.getFilesInfo(),foundMovement.getFilesInfo());
+          Assert.assertEquals("El origen es el mismo ",insMovement.getOriginType(),foundMovement.getOriginType());
+          Assert.assertEquals("El fechaDeTransaccion es el mismo ",insMovement.getDateOfTransaction(),foundMovement.getDateOfTransaction());
+          Assert.assertEquals("El responsable es el mismo ",insMovement.getResponsible(),foundMovement.getResponsible());
+          Assert.assertEquals("El descripcion es el mismo ",insMovement.getDescription(),foundMovement.getDescription());
+          Assert.assertEquals("El movRef es el mismo ",insMovement.getMovRef(),foundMovement.getMovRef());
+          Assert.assertEquals("El tipoMovimiento es el mismo ",insMovement.getMovementType(),foundMovement.getMovementType());
+          Assert.assertEquals("El sentStatus es el mismo ",insMovement.getSentStatus(),foundMovement.getSentStatus());
+
           comparedMovements++;
         }
       }
     }
-    Assert.assertEquals("Debe comparar 4 movements", 4, comparedMovements);*/
+    Assert.assertEquals("Debe comparar 4 movements", 4, comparedMovements);
 
   }
 

@@ -10,13 +10,14 @@ import java.util.stream.Stream;
 public enum ResearchMovementSentStatusType {
 
   SENT_RESEARCH_PENDING("PENDING"),
-  SENT_RESEARCH_OK("OK");
+  SENT_RESEARCH_OK("SENT_OK");
 
   public String getValue() {
     return value;
   }
 
   String value;
+
 
   ResearchMovementSentStatusType(String value) {
     this.value = value;
