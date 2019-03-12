@@ -297,6 +297,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
+    //TODO: Research
     List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
