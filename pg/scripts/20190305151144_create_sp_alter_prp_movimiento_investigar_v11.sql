@@ -20,7 +20,7 @@
 ALTER TABLE ${schema}.prp_movimiento_investigar DROP COLUMN nombre_archivo;
 
 ALTER TABLE ${schema}.prp_movimiento_investigar
-  ALTER COLUMN mov_ref TYPE numeric (8);
+  ALTER COLUMN mov_ref TYPE numeric (100);
 
 ALTER TABLE ${schema}.prp_movimiento_investigar
   RENAME id_archivo_origen TO informacion_archivos;

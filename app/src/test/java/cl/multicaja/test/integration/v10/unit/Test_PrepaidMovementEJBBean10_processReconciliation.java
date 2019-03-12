@@ -276,6 +276,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     //TODO: Research
     ResearchMovement10 researchMovement10 = getMovimientoInvestigarMotor(prepaidMovement10.getId());
 
+
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement10);
     //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
     //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdArchivoOrigen().replace("idMov=",""));

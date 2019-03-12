@@ -34,6 +34,7 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
 
     //TODO: Research, Cambio de variables, y metodos Research
 
+
     /*
     String movementId = "idMov=3";
     getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);

@@ -12,6 +12,8 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +45,14 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  private List<ResearchMovementInformationFiles> researchMovementInformationFilesList;
+
+  private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  protected String toJson(Object obj) throws JsonProcessingException {
+    return new ObjectMapper().writeValueAsString(obj);
+  }
 
   private ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
     return reconciliationFilesEJBBean10;
@@ -177,6 +187,24 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
             movRef);*/
 
+
+          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          //researchMovementInformationFiles.setIdArchivo();
+          //researchMovementInformationFiles.setIdEnArchivo();
+          //researchMovementInformationFiles.setNombreArchivo();
+          //researchMovementInformationFiles.setTipoArchivo();
+          researchMovementInformationFilesList.add(researchMovementInformationFiles);
+          getPrepaidMovementEJBBean10().createResearchMovement(
+            null,
+            toJson(researchMovementInformationFilesList),
+            ReconciliationOriginType.SWITCH.name(),
+            recTmp.getDateTrx(),
+            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
+            Long.valueOf(0),
+            PrepaidMovementType.WITHDRAW.name(),
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+          );
 
           continue;
         }

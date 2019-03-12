@@ -156,6 +156,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
 
       // No debe estar en research
       //TODO: Research
+
       List<ResearchMovement10> researchMovement = getResearchMovement(notWithdraw.prepaidMovement10.getId());
       Assert.assertEquals("No debe estar en research", 0, researchMovement.size());
       researchMovement = getResearchMovement(notWithdraw.prepaidMovement10.getId());
