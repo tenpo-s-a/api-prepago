@@ -27,7 +27,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
     return httpResponse;
   }
 
-
   @Test
   public void testCallNotificationAllParamsWithSuccessProcess() {
 
