@@ -22,12 +22,10 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
   private NotificationTecnocomHeader notificationTecnocomHeader;
   private NotificationTecnocomBody notificationTecnocomBody;
 
-
   private HttpResponse callNotification(NotificationTecnocom notificationTecnocom, HttpHeader[] headers){
     HttpResponse httpResponse = apiPOST(String.format("/1.0/prepaid/processor/notification"), toJson(notificationTecnocom),headers);
     return httpResponse;
   }
-
 
   @Test
   public void testCallNotificationAllParamsWithSuccessProcess() {
