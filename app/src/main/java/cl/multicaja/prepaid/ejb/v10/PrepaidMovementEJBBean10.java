@@ -1605,6 +1605,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Map<String, Object> headers, String filesInfo, String originType, Timestamp dateOfTransaction,
     String responsible, String description, Long movRef, String movementType, String sentStatus) throws Exception {
 
+    
     String SP_INSERT_RESEARCH_MOVEMENT_NAME = getSchema() + ".mc_prp_crea_movimiento_investigar_v12";
 
     if(filesInfo == null){
