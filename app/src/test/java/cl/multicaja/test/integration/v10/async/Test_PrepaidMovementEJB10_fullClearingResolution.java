@@ -298,9 +298,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
       // No debe estar en research
       //TODO: Research, cambiar variables
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId())).get(0);
-      Assert.assertNull("No debe estar en research", researchMovement10);
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId()));
+      Assert.assertNull("No debe estar en research", researchMovements);
     }
 
     // 3. Chequea test: Es RETIRO + >> No es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
