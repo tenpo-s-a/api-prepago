@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_getResearchMovementsByMovRef extends TestBaseUnit {
 
@@ -42,7 +43,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsByMovRef extends 
       PrepaidMovementType.TOPUP.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue());
 
-    ResearchMovement10 researchMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movRef));
+    ResearchMovement10 researchMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movRef)).get(0);
 
     Assert.assertNotNull("No esta vacio ",researchMovement.getFilesInfo());
     Assert.assertEquals("El Json de informacionArchivos es el mismo ",toJson(researchMovementInformationFiles),researchMovement.getFilesInfo());
@@ -59,8 +60,8 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsByMovRef extends 
 
   @Test
   public void findResearchMovementByNullMovRef() throws Exception {
-    ResearchMovement10 researchMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(null);
-    Assert.assertNull("Es nulo",researchMovement);
+    List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(null);
+    Assert.assertEquals("Es nulo",0,researchMovements.size());
   }
 
   @Test
@@ -87,8 +88,8 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsByMovRef extends 
       PrepaidMovementType.TOPUP.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue());
 
-    ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movRefNotFound));
-    Assert.assertNull("No debe existir", researchMovement10);
+    List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movRefNotFound));
+    Assert.assertEquals("No debe existir", 0,researchMovements.size());
   }
 
 }

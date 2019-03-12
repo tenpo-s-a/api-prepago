@@ -299,7 +299,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // No debe estar en research
       //TODO: Research, cambiar variables
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId())).get(0);
       Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
@@ -328,7 +328,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // No debe estar en research
       //TODO: Research, cambiar variables
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWeb.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWeb.prepaidMovement10.getId())).get(0);
       Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
@@ -358,7 +358,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notTecnocom.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notTecnocom.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -388,7 +388,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // No debe estar en research
       //TODO: Research, cambiar variables
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(pendingTecnocom.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(pendingTecnocom.prepaidMovement10.getId())).get(0);
       Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
@@ -417,7 +417,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(reconciledMovement.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(reconciledMovement.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
@@ -448,7 +448,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movementRejected.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movementRejected.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -478,7 +478,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(clearingAlreadyOK.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(clearingAlreadyOK.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
@@ -509,7 +509,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amount.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amount.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -540,7 +540,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountBalance.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountBalance.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -571,7 +571,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountMastercard.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountMastercard.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -602,7 +602,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_accountRut.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_accountRut.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -633,7 +633,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_bankAccount.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_bankAccount.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
@@ -692,7 +692,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // No debe estar en research
       //TODO: Research, cambiar variables
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedClearing.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedClearing.prepaidMovement10.getId())).get(0);
       Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
@@ -750,7 +750,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // No debe estar en research
       //TODO: Research, cambiar variables
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedFormatClearing.prepaidMovement10.getId()));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedFormatClearing.prepaidMovement10.getId())).get(0);
       Assert.assertNull("No debe estar en research", researchMovement10);
     }
 
@@ -759,7 +759,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       // Debe estar en research
       //TODO: Research, change vars and methods
       ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
-        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInBd.getIdTransaction())));
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInBd.getIdTransaction()))).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
@@ -789,7 +789,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
       // Debe estar en research
       //TODO: Research, change vars and methods
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInFile.prepaidMovement10.getId())));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInFile.prepaidMovement10.getId()))).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
       Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
