@@ -107,13 +107,14 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     return dbUtils.execute(SP_INSERT_RESEARCH_MOVEMENT_NAME, params);
   }
 
-  public Map<String, Object> searchResearchMovement(Long id,  Timestamp beginDateTime, Timestamp endDateTime, String sentStatus) throws SQLException {
+  public Map<String, Object> searchResearchMovement(Long id,  Timestamp beginDateTime, Timestamp endDateTime, String sentStatus,BigDecimal movRef) throws SQLException {
 
     Object[] params = {
       id != null ? new InParam(id, Types.BIGINT) : new NullParam(Types.BIGINT),
       beginDateTime != null ? new InParam(beginDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       endDateTime != null ? new InParam(endDateTime, Types.TIMESTAMP) : new NullParam(Types.TIMESTAMP),
       sentStatus != null ? new InParam(sentStatus, Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      movRef != null ? new InParam(movRef, Types.DECIMAL) : new NullParam(Types.DECIMAL)
     };
 
     RowMapper rm = (Map<String, Object> row) -> {
@@ -264,7 +265,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       System.out.println("Movimiento ingresado satisfactoriamente");
 
       Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),
-        Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+        Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
       List<Map<String, Object>> results = (List)data.get("result");
       ResearchMovement researchMovement = (ResearchMovement) results.get(0);
 
@@ -322,7 +323,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
       System.out.println("Movimiento ingresado satisfactoriamente");
 
-      Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus);
+      Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
       List<Map<String, Object>> results = (List)data.get("result");
       ResearchMovement researchMovement = (ResearchMovement) results.get(0);
 
