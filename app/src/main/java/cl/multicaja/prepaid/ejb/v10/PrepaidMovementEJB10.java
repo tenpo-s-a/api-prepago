@@ -300,7 +300,7 @@ public interface PrepaidMovementEJB10 {
    * @return
    * @throws Exception
    */
-  ResearchMovement10 getResearchMovementByMovRef(BigDecimal movRef) throws Exception;
+  List<ResearchMovement10> getResearchMovementByMovRef(BigDecimal movRef) throws Exception;
 
   /**
    *

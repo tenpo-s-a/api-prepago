@@ -1705,11 +1705,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public ResearchMovement10 getResearchMovementByMovRef(BigDecimal movRef) throws Exception {
+  public List<ResearchMovement10> getResearchMovementByMovRef(BigDecimal movRef) throws Exception {
     log.info("[getResearchMovementByMovRef In movRef] : " + movRef);
     List<ResearchMovement10> researchMovements = getResearchMovement(
       null,null,null,null,movRef);
-    return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
+    //return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
+    return researchMovements;
   }
 
   @Override
