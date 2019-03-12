@@ -34,7 +34,6 @@ public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
     String messageResponse;
     String base64String = Base64.getEncoder().encodeToString(("Test").getBytes(StandardCharsets.UTF_8));
-
     HttpHeader[] headers = {
       new HttpHeader("Content-Type","application/json")
     };

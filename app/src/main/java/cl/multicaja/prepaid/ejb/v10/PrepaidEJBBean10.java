@@ -2809,22 +2809,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private Boolean validateBase64(String base64String){
 
     Boolean boolResponse;
-
-    String line = base64String;
-    String pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
-
-    if(base64String != null && base64String.length()!=0) {
-      Pattern r = Pattern.compile(pattern);
-      Matcher m = r.matcher(line);
-      if (m.find( )) {
-        boolResponse = true;
-      }else {
-        boolResponse = false;
-      }
-    }else{
+    Base64.Decoder decoder = Base64.getDecoder();
+    try {
+      decoder.decode(base64String);
+      boolResponse = true;
+    } catch(IllegalArgumentException iae) {
       boolResponse = false;
     }
-
     return boolResponse;
   }
 
