@@ -185,6 +185,7 @@ public class Test_PrepaidClearingEJBBean10 extends TestBaseUnit {
 
   @Test
   public void searchClearingData_status() throws Exception{
+    clearData();
     AccountingData10 accounting10 = buildRandomAccouting();
     List<AccountingData10> accounting10s = new ArrayList<>();
     accounting10s.add(accounting10);
@@ -208,7 +209,7 @@ public class Test_PrepaidClearingEJBBean10 extends TestBaseUnit {
     List<ClearingData10> clearing2 = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.PENDING, null);
     log.info("respuesta desconocida"+ clearing2);
     Assert.assertNotNull("Not Null", clearing2);
-    Assert.assertTrue("Only 2 result",clearing2.size() == 2);
+    Assert.assertEquals("only 2 result", 2, clearing2.size());
 
   }
 
