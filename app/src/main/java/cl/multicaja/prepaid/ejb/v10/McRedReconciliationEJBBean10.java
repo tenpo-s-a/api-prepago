@@ -189,11 +189,12 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
             movRef);*/
 
+          researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
-          //researchMovementInformationFiles.setIdArchivo();
-          //researchMovementInformationFiles.setIdEnArchivo();
-          //researchMovementInformationFiles.setNombreArchivo();
-          //researchMovementInformationFiles.setTipoArchivo();
+          researchMovementInformationFiles.setIdArchivo(0L);
+          researchMovementInformationFiles.setIdEnArchivo("1");
+          researchMovementInformationFiles.setNombreArchivo("test");
+          researchMovementInformationFiles.setTipoArchivo("test");
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
           getPrepaidMovementEJBBean10().createResearchMovement(
             null,
@@ -202,7 +203,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             recTmp.getDateTrx(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
-            Long.valueOf(0),
+            Long.valueOf(1),
             PrepaidMovementType.WITHDRAW.name(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
