@@ -38,7 +38,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
-    
+
     ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = folderDir;
@@ -300,7 +300,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       //TODO: Research, cambiar variables
       List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
         getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovements);
+      Assert.assertEquals("No debe estar en research", 0,researchMovements.size());
     }
 
     // 3. Chequea test: Es RETIRO + >> No es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
