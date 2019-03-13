@@ -17,7 +17,6 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
 
 public class Test_wsNotificationTecnocom extends TestBaseUnitApi {
 
-
   private NotificationTecnocom notificationTecnocom;
   private NotificationTecnocomHeader notificationTecnocomHeader;
   private NotificationTecnocomBody notificationTecnocomBody;
