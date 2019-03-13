@@ -244,7 +244,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ResearchMovement10 researchMovement = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), researchMovement.getOriginType());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
   @Test
@@ -303,7 +303,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ResearchMovement10 researchMovement = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), researchMovement.getOriginType());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
   @Test
@@ -360,7 +360,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     ResearchMovement10 researchMovemen = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), researchMovemen.getOriginType());
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovemen.getOriginType());
   }
 
   private List<ResearchMovement10> getResearchMovement(Long movId) throws Exception{
