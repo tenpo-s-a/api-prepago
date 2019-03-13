@@ -2808,16 +2808,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private Boolean validateBase64(String base64String){
 
-    Boolean boolResponse;
     Base64.Decoder decoder = Base64.getDecoder();
     try {
       decoder.decode(base64String);
-      boolResponse = true;
+      return Boolean.TRUE;
     } catch(IllegalArgumentException iae) {
-      boolResponse = false;
+      return Boolean.FALSE;
     }
-
-    return boolResponse;
   }
 
   public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
