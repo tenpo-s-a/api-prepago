@@ -39,6 +39,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
 
+
     ZonedDateTime date = ZonedDateTime.now(ZoneId.of("America/Santiago"));
     String fileId = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     String fileName = folderDir;
