@@ -2889,7 +2889,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
         emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("notification_tecnocom@multicaja.cl");
+        emailBody.setAddress("test_notification_tecnocom@multicaja.cl");
         mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
       }
 
