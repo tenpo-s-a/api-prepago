@@ -168,7 +168,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return data;
   }
 
-  //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId) throws Exception {
 
@@ -185,7 +184,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_clearing_data_v10",  rm, params);
     List<ClearingData10> res = (List<ClearingData10>)resp.get("result");
     log.info(res);
-    return res != null ? res : Collections.EMPTY_LIST;
+    return res != null ? res : Collections.emptyList();
   }
 
   @Override

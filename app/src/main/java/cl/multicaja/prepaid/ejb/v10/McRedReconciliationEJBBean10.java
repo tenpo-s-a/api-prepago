@@ -160,16 +160,18 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null) {
           log.info("Movimiento no encontrado, no conciliado");
-          //Todo: se puede utilizar un stringbuilder
           // Construyendo un Id.
-          String researchId = "ExtId:[";
+          StringBuilder researchId = new StringBuilder();
+          researchId.append("ExtId:[");
           if (recTmp.getExternalId() != null) {
-            researchId += recTmp.getExternalId().toString();
+            researchId.append(recTmp.getExternalId().toString());
           } else {
-            researchId += "NoExternalId";
+            researchId.append("NoExternalId");
           }
-          researchId += "]-";
-          researchId += "McCode:[" + recTmp.getMcCode() + "]";
+          researchId.append("]-");
+          researchId.append("McCode:[");
+          researchId.append(recTmp.getMcCode());
+          researchId.append("]");
 
           //TODO: Esta OK este Research?
           /*DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -179,7 +181,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           Long movRef = Long.valueOf(0);*/
           /*getPrepaidMovementEJBBean10().createMovementResearch(
             null,
-            researchId,
+            researchId.toString(),
             ReconciliationOriginType.SWITCH,
             fileName,
             recTmp.getDateTrx(),

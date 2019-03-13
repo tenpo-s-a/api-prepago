@@ -245,7 +245,7 @@ public final class PrepaidResource10 extends BaseResource {
     Response returnResponse = null;
 
     String textLogBase = "TestHelperResource-callNotification: ";
-    NotificationTecnocom notificationTecnocomResponse = null;
+    NotificationTecnocom notificationTecnocomResponse;
     try{
 
       notificationTecnocomResponse = this.prepaidEJBBean10.setNotificationCallback(null,notificationTecnocom);
