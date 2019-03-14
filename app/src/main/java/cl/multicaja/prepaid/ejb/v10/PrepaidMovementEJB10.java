@@ -265,6 +265,7 @@ public interface PrepaidMovementEJB10 {
   )throws Exception;
 
 
+
   /**
    *
    * @param id
@@ -277,6 +278,7 @@ public interface PrepaidMovementEJB10 {
    */
   List<ResearchMovement10> getResearchMovement(Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception;
 
+
   /**
    *
    * @param id
@@ -284,6 +286,7 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   ResearchMovement10 getResearchMovementById(Long id) throws Exception;
+
 
   /**
    *
@@ -293,6 +296,7 @@ public interface PrepaidMovementEJB10 {
    * @throws Exception
    */
   List<ResearchMovement10> getResearchMovementByDateTimeRange(Timestamp startDateTime,Timestamp endDateTime) throws Exception;
+
 
   /**
    *

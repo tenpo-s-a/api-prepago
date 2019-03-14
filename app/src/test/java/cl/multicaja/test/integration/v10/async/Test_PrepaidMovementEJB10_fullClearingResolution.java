@@ -297,6 +297,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
       // No debe estar en research
+
       //TODO: Research, cambiar variables
       List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
         getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId()));
@@ -451,7 +452,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
         getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movementRejected.prepaidMovement10.getId()));
       Assert.assertEquals("Debe estar en research",1, researchMovements.size());
       //Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovements.get(0).getOriginType());
-      
+
     }
 
     // 8. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + >> Clearing ya estaba OK

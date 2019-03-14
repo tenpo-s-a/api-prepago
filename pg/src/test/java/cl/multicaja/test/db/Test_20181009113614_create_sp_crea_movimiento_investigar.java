@@ -136,6 +136,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     return dbUtils.execute(SP_SEARCH_RESEARCH_MOVEMENT_NAME, rm, params);
   }
 
+
   @Test
   public void testCreateResearchMovement() throws SQLException,IOException {
 

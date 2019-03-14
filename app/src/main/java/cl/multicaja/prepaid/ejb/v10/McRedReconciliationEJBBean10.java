@@ -196,6 +196,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchMovementInformationFiles.setNombreArchivo("test");
           researchMovementInformationFiles.setTipoArchivo("test");
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+
           getPrepaidMovementEJBBean10().createResearchMovement(
             null,
             toJson(researchMovementInformationFilesList),

@@ -23,6 +23,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsByMovRef extends 
   @Test
   public void findResearchMovementByMovRefOk() throws Exception {
 
+
     Timestamp dateOfTransaction = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
     Long movRef = 100L;
 

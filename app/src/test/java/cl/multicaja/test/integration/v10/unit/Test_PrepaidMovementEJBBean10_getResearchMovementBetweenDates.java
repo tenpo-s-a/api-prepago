@@ -26,6 +26,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
 
   @Test
   public void findResearchMovementByDateTimeRangeOk() throws Exception {
+
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
 
     ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();

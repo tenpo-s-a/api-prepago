@@ -11,6 +11,8 @@ import org.junit.Test;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBaseUnit {
 
@@ -20,9 +22,14 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
   }
 
+
   @Test
   public void testCreateResearchMovement(){
     try {
+
+      List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+      ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+
       User user = registerUser();
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -30,17 +37,17 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
       researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
       researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
       researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
       researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+      researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
       Timestamp dateOfTransaction = new Timestamp(prepaidMovement10.getFechaCreacion().getTime());
 
       getPrepaidMovementEJBBean10().createResearchMovement(
         null,
-        toJson(researchMovementInformationFiles),
+        toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.SWITCH.name(),
         dateOfTransaction,
         ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),

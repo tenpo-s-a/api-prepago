@@ -97,4 +97,20 @@ public class ResearchMovement10 extends BaseModel {
   public void setSentStatus(ResearchMovementSentStatusType sentStatus) {
     this.sentStatus = sentStatus;
   }
+
+  public String[] toCustomString(){
+    return new String[]{
+      //String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
+      getId().toString(),
+      getFilesInfo(),
+      getOriginType().name(),
+      getCreatedAt().toString(),
+      getDateOfTransaction().toString(),
+      getResponsible().getValue(),
+      getDescription().getValue(),
+      getMovRef().toString(),
+      getMovementType().name(),
+      getSentStatus().getValue()};
+  }
+
 }

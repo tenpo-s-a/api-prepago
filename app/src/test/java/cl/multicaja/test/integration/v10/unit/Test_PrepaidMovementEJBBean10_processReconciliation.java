@@ -10,14 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.math.BigDecimal;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBaseUnit {
@@ -271,19 +268,15 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
-    Assert.assertEquals("Estado debe ser Conciliado","NEED_VERIFICATION",movConciliado.getReconciliationStatusType().getValue());
-    Assert.assertEquals("La accion debe ser","INVESTIGACION",movConciliado.getActionType().toString());
+    Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
+    Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
+
     //TODO: Research
     ResearchMovement10 researchMovement10 = getMovimientoInvestigarMotor(prepaidMovement10.getId());
-
-
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement10);
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdArchivoOrigen().replace("idMov=",""));
     Long movRef = researchMovement10.getMovRef().longValue();
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movRef);
     Assert.assertEquals("El Origen debe ser Motot",ReconciliationOriginType.MOTOR,researchMovement10.getOriginType());
-    //Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
   // Movimiento no conciliado por ninguno, procesado ok
   @Test
@@ -303,18 +296,15 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
-    Assert.assertEquals("Estado debe ser Conciliado","NEED_VERIFICATION",movConciliado.getReconciliationStatusType().getValue());
-    Assert.assertEquals("La accion debe ser","INVESTIGACION",movConciliado.getActionType().toString());
+    Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
+    Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
+
     //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
-
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdArchivoOrigen().replace("idMov=",""));
     Long movRef = researchMovement.getMovRef().longValue();
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movRef);
     Assert.assertEquals("El Origen debe ser Motot",ReconciliationOriginType.MOTOR,researchMovement.getOriginType());
-    //Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
   }
   // Conciliado por todos, con error en nuestra tabla
   @Test
@@ -362,19 +352,15 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
-    Assert.assertEquals("Estado debe ser Conciliado","NEED_VERIFICATION",movConciliado.getReconciliationStatusType().getValue());
-    Assert.assertEquals("La accion debe ser","INVESTIGACION",movConciliado.getActionType().toString());
+    Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
+    Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
     //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
-
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdArchivoOrigen().replace("idMov=",""));
     Long movRef = researchMovement.getMovRef().longValue();
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movRef);
     Assert.assertEquals("El Origen debe ser Motot",ReconciliationOriginType.MOTOR,researchMovement.getOriginType());
-    //Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
 
   }
   // Movimientos con status pendiente o en proceso.
@@ -397,19 +383,15 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
 
     Assert.assertNotNull("Debe contener un movimiento conciliado",movConciliado);
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movConciliado.getIdMovRef());
-    Assert.assertEquals("Estado debe ser Conciliado","NEED_VERIFICATION",movConciliado.getReconciliationStatusType().getValue());
-    Assert.assertEquals("La accion debe ser","INVESTIGACION",movConciliado.getActionType().toString());
+    Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
+    Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
     //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
-
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdRef().replace("idMov=",""));
-    //Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId().toString(),reconciliedResearch.getIdArchivoOrigen().replace("idMov=",""));
     Long movRef = researchMovement.getMovRef().longValue();
     Assert.assertEquals("Los id deben coincidir",prepaidMovement10.getId(),movRef);
     Assert.assertEquals("El Origen debe ser Motor",ReconciliationOriginType.MOTOR,researchMovement.getOriginType());
-    //Assert.assertEquals("El Nombre archivo debe ser vacio","",reconciliedResearch.getNombre_archivo());
 
   }
 
@@ -435,6 +417,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
   }
 
   private ReconciliedMovement10 getMovimientoConciliado(Long idMovRef){
+
     RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
       reconciliedMovement10.setId(numberUtils.toLong(rs.getLong("id")));
@@ -449,7 +432,7 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
   }
   
   private ResearchMovement10 getMovimientoInvestigarMotor(Long idMovRef) throws Exception{
-    //TODO: Research, Change about itself
+    //TODO: Research
     List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(idMovRef));
     return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
   }

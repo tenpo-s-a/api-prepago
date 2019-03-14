@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -27,6 +26,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBySentStatus exten
   @Test
   public void findResearchMovementBySentStatusOk() throws Exception {
 
+
     ResearchMovement10 researchMovement;
     List<ResearchMovement10> researchMovementsSent = new ArrayList<>();
 
@@ -50,7 +50,6 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBySentStatus exten
       researchMovement.setMovRef(BigDecimal.valueOf(100));
       researchMovement.setMovementType(PrepaidMovementType.TOPUP);
       researchMovement.setSentStatus(ResearchMovementSentStatusType.SENT_RESEARCH_PENDING);
-
 
       Map<String, Object> resp = getPrepaidMovementEJBBean10().createResearchMovement(
         null,

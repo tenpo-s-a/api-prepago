@@ -900,6 +900,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           //researchMovementInformationFiles.setNombreArchivo();
           //researchMovementInformationFiles.setTipoArchivo();
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
           createResearchMovement(
             null,
             toJson(researchMovementInformationFilesList),
@@ -1950,6 +1951,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public List<ResearchMovement10> getResearchMovement(
+
     Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception {
 
     String SP_SEARCH_RESEARCH_MOVEMENT_NAME = getSchema() + ".mc_prp_busca_movimientos_a_investigar_v13";
@@ -2050,7 +2052,20 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       FileWriter outputfile = new FileWriter(file);
       CSVWriter writer = new CSVWriter(outputfile,',');
       String[] header;
-      header = new String[]{"Id Unico", "Id Mov Referencia", "Id Archivo Origen", "Origen", "Tipo de Movimiento", "Nombre Archivo", "Fecha Trx", "Fecha Investigacion", "Responsable", "Descripcion"};
+
+      /*getId().toString(),
+      getFilesInfo(),
+      getOriginType().name(),
+      getCreatedAt().toString(),
+      getDateOfTransaction().toString(),
+      getResponsible().getValue(),
+      getDescription().getValue(),
+      getMovRef().toString(),
+      getMovementType().name(),
+      getSentStatus().getValue()};*/
+
+      //header = new String[]{"Id Unico", "Id Mov Referencia", "Id Archivo Origen", "Origen", "Tipo de Movimiento", "Nombre Archivo", "Fecha Trx", "Fecha Investigacion", "Responsable", "Descripcion"};
+      header = new String[]{"Id Unico", "Archivos de Inv", "Origen", "Created At", "Fecha Trx", "Responsable", "Descripcion", "Id Mov","Tipo Movimiento","Status Envio"};
       writer.writeNext(header);
 
       for(ResearchMovement10 mov : yesterdayResearchMovements) {
@@ -2058,8 +2073,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
         String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         //TODO: replace research variables
+
+        String[] data = mov.toCustomString();
+        System.out.println("toCustomString: "+data);
         //String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
-        String[] data = null;
+        //String[] data = null;
+
         writer.writeNext(data);
       }
       writer.close();

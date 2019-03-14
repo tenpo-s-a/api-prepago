@@ -643,8 +643,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ResearchMovementSentStatusType researchMovementSentStatusType
   ) throws Exception{
 
-    String jsonSent = this.toJson(researchMovementInformationFilesList);
 
+    String jsonSent = this.toJson(researchMovementInformationFilesList);
     getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       jsonSent,

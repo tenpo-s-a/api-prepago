@@ -24,6 +24,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsById extends Test
   @Test
   public void findResearchMovementByIdOk() throws Exception {
 
+
     Timestamp dateOfTransaction = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
     Long movRef = 100L;
 
@@ -33,11 +34,12 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsById extends Test
     researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
     researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
 
+
     Map<String,Object> rmReturn = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFiles),
       ReconciliationOriginType.CLEARING_RESOLUTION.name(),
-      dateOfTransaction,
+      Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
       ResearchMovementResponsibleStatusType.STATUS_UNDEFINED.getValue(),
       ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
       movRef,
@@ -89,6 +91,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsById extends Test
       movRef,
       PrepaidMovementType.TOPUP.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue());
+
 
     ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementById(idNotFound);
     Assert.assertNull("No debe existir", researchMovement10);
