@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -525,7 +526,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
   }
 
-  private List<ResearchMovement10> getResearchMovement(Long movId) throws Exception{
+  private List<ResearchMovement10> getResearchMovement(Long movId) throws SQLException {
     //TODO: Research, set changes
     return getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movId));
   }

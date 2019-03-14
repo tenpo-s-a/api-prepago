@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
@@ -8,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.swing.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

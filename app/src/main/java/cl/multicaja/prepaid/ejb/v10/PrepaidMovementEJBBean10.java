@@ -1614,10 +1614,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
     if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
-      String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-      /*createMovementResearch(
+      /*
+        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+        createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
         ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
         prepaidMovement10.getFechaCreacion(),ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
@@ -1649,11 +1650,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
     if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
-      String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
       //TODO: Esta OK este Research?
-
-      /*createMovementResearch(
+      /*
+        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+        createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
         ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
         prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
@@ -1685,10 +1686,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
-      String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+
 
       //TODO: Esta OK este Research?
-      /*createMovementResearch(
+      /*
+        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+        createMovementResearch(
         null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
         ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
         prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.OTI_PREPAID,
@@ -1782,11 +1785,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             break;
           default: // Nunca deberia llegar aqui
             {
-              String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
               //TODO: Esta OK este Research?
 
-              /*createMovementResearch(
+              /*
+                String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
+                createMovementResearch(
                 null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
                 ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
                 prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
@@ -1819,9 +1823,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         break;
       case NOT_RECONCILED: // Tecnocom NO conciliado -> todos los casos mandan a INVESTIGAR
         {
-          String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
 
           //TODO: Esta OK este Research?
+          //String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
           /*createMovementResearch(
             null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
             ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
@@ -1951,8 +1955,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public List<ResearchMovement10> getResearchMovement(
-
-    Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws Exception {
+    Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws SQLException {
 
     String SP_SEARCH_RESEARCH_MOVEMENT_NAME = getSchema() + ".mc_prp_busca_movimientos_a_investigar_v13";
 
@@ -1984,7 +1987,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public ResearchMovement10 getResearchMovementById(Long id) throws Exception {
+  public ResearchMovement10 getResearchMovementById(Long id) throws SQLException {
     log.info("[getResearchMovementById In Id] : " + id);
     List<ResearchMovement10> researchMovements = getResearchMovement(
       id,null,null,null,null);
@@ -1993,13 +1996,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public List<ResearchMovement10> getResearchMovementByDateTimeRange(
-    Timestamp startDateTime, Timestamp endDateTime) throws Exception {
+    Timestamp startDateTime, Timestamp endDateTime) throws SQLException {
     log.info("[getResearchMovementByDateTimeRange In startDateTime and endDataTime] : " + startDateTime+" "+endDateTime);
     return getResearchMovement(null,startDateTime,endDateTime,null,null);
   }
 
   @Override
-  public List<ResearchMovement10> getResearchMovementByMovRef(BigDecimal movRef) throws Exception {
+  public List<ResearchMovement10> getResearchMovementByMovRef(BigDecimal movRef) throws SQLException {
     log.info("[getResearchMovementByMovRef In movRef] : " + movRef);
     List<ResearchMovement10> researchMovements = getResearchMovement(
       null,null,null,null,movRef);
@@ -2008,7 +2011,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
-  public List<ResearchMovement10> getResearchMovementBySentStatus(String sentStatus) throws Exception {
+  public List<ResearchMovement10> getResearchMovementBySentStatus(String sentStatus) throws SQLException {
     log.info("[getResearchMovementBySentStatus In sentStatus] : " + sentStatus);
     return getResearchMovement(null,null,null,sentStatus,null);
   }
