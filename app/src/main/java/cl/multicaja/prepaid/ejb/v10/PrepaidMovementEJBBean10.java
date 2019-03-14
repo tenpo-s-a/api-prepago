@@ -11,6 +11,7 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.ZONEID;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
@@ -29,6 +30,8 @@ import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +45,7 @@ import javax.persistence.criteria.Order;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -2037,52 +2041,44 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   public void sendResearchEmail() throws Exception {
-    ZonedDateTime nowChileDateTime = ZonedDateTime.now(ZoneId.of("America/Santiago"));
+    ZonedDateTime nowChileDateTime = ZonedDateTime.now(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
     ZonedDateTime yesterdayChileDateTime = nowChileDateTime.minusDays(1);
     LocalDate yesterdayDate = yesterdayChileDateTime.toLocalDate();
     LocalDateTime yesterdayBegining = yesterdayDate.atTime(0, 0, 0);
-    ZonedDateTime yesterdayBeginingZonedChile = yesterdayBegining.atZone(ZoneId.of("America/Santiago"));
+    ZonedDateTime yesterdayBeginingZonedChile = yesterdayBegining.atZone(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
     ZonedDateTime startZonedUtc = yesterdayBeginingZonedChile.withZoneSameInstant(ZoneId.of("UTC"));
-    ZonedDateTime endZoneUtc = startZonedUtc.plusDays(1);
+    ZonedDateTime endZoneUtc = nowChileDateTime.withZoneSameInstant(ZoneId.of("UTC"));
 
     List<ResearchMovement10> yesterdayResearchMovements = getResearchMovementByDateTimeRange(Timestamp.valueOf(startZonedUtc.toLocalDateTime()), Timestamp.valueOf(endZoneUtc.toLocalDateTime()));
 
     LocalDateTime todayLocal = LocalDateTime.now();
     String todayString = todayLocal.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     String fileName = String.format("research_%s.csv", todayString);
+
     File file = new File(fileName);
+
     try {
+
       FileWriter outputfile = new FileWriter(file);
       CSVWriter writer = new CSVWriter(outputfile,',');
       String[] header;
 
-      /*getId().toString(),
-      getFilesInfo(),
-      getOriginType().name(),
-      getCreatedAt().toString(),
-      getDateOfTransaction().toString(),
-      getResponsible().getValue(),
-      getDescription().getValue(),
-      getMovRef().toString(),
-      getMovementType().name(),
-      getSentStatus().getValue()};*/
+      String[] data;
+      Boolean isSetHeader;
 
-      //header = new String[]{"Id Unico", "Id Mov Referencia", "Id Archivo Origen", "Origen", "Tipo de Movimiento", "Nombre Archivo", "Fecha Trx", "Fecha Investigacion", "Responsable", "Descripcion"};
-      header = new String[]{"Id Unico", "Archivos de Inv", "Origen", "Created At", "Fecha Trx", "Responsable", "Descripcion", "Id Mov","Tipo Movimiento","Status Envio"};
-      writer.writeNext(header);
-
+      isSetHeader = Boolean.TRUE;
       for(ResearchMovement10 mov : yesterdayResearchMovements) {
-        ZonedDateTime utcDateTime = mov.getCreatedAt().toLocalDateTime().atZone(ZoneId.of("UTC"));
-        ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-        String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        //TODO: replace research variables
 
-        String[] data = mov.toCustomString();
-        System.out.println("toCustomString: "+data);
-        //String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
-        //String[] data = null;
+        if(isSetHeader){
+          header = mov.toMailUse(Boolean.TRUE);
+          writer.writeNext(header);
+        }
+
+        //TODO: replace research variables
+        data = mov.toMailUse(Boolean.FALSE);
 
         writer.writeNext(data);
+        isSetHeader = Boolean.FALSE;
       }
       writer.close();
     } catch (Exception e) {

@@ -1,13 +1,16 @@
 package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.BaseModel;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResearchMovementInformationFiles extends BaseModel {
 
-  private Long idArchivo;
-  private String tipoArchivo;
-  private String nombreArchivo;
-  private String idEnArchivo;
+  private @JsonProperty("id_archivo") Long idArchivo;
+  private @JsonProperty("tipo_archivo") String tipoArchivo;
+  private @JsonProperty("nombre_archivo") String nombreArchivo;
+  private @JsonProperty("id_en_archivo") String idEnArchivo;
 
   public ResearchMovementInformationFiles() {
     super();
@@ -51,4 +54,5 @@ public class ResearchMovementInformationFiles extends BaseModel {
   public void setIdEnArchivo(String idEnArchivo) {
     this.idEnArchivo = idEnArchivo;
   }
+
 }
