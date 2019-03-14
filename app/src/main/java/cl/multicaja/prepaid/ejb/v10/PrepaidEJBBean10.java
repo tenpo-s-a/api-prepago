@@ -2883,6 +2883,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
 
+        
         //Send Async Mail
         Map<String, Object> templateData = new HashMap<String, Object>();
         templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
