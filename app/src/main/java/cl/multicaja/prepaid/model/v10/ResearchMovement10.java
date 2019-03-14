@@ -158,7 +158,7 @@ public class ResearchMovement10 extends BaseModel {
           fieldSet.get(rmiflObject).toString());
       }
       toRplce++;
-      
+
     }
 
     ZonedDateTime utcDateTime = getDateOfTransaction().toLocalDateTime().atZone(ZoneId.of("UTC"));

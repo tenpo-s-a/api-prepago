@@ -70,12 +70,12 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovement10s.add(insertedMovement);
 
     movementId = 4L;
-    researchMovementInformationFilesList.clear();
+    /*researchMovementInformationFilesList.clear();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
     researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
     researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
     researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
-    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);*/
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
