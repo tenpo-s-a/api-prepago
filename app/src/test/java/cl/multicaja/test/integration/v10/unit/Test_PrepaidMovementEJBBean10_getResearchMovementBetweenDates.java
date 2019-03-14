@@ -45,7 +45,11 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
     );
 
-    changeResearch(NumberUtils.getInstance().toLong(rmReturn1.get("_r_id")), "2015-01-01 00:00:00.0");
+    changeResearch(
+      NumberUtils.getInstance().toLong(rmReturn1.get("_r_id")),
+      ResearchMovementSentStatusType.SENT_RESEARCH_OK.getValue(),
+      "2015-01-01 00:00:00.0");
+
     ResearchMovement10 insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementById(NumberUtils.getInstance().toLong(rmReturn1.get("_r_id")));
     researchMovement10s.add(insertedMovement);
 
@@ -88,7 +92,12 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
       PrepaidMovementType.TOPUP.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
     );
-    changeResearch(NumberUtils.getInstance().toLong(rmReturn4.get("_r_id")), "3015-01-01 00:00:00.0");
+
+    changeResearch(
+      NumberUtils.getInstance().toLong(rmReturn4.get("_r_id")),
+      ResearchMovementSentStatusType.SENT_RESEARCH_OK.getValue(),
+      "3015-01-01 00:00:00.0");
+
     insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementById(NumberUtils.getInstance().toLong(rmReturn4.get("_r_id")));
     researchMovement10s.add(insertedMovement);
 
@@ -196,10 +205,11 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementBetweenDates exten
 
   }
 
-  static public void changeResearch(Long idMovRes, String newDate)  {
+  static public void changeResearch(Long id, String sentStatus, String newDate)  {
     getDbUtils().getJdbcTemplate().execute(
-      "UPDATE " + getSchema() + ".prp_movimiento_investigar SET fecha_registro = "
-        + "(TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS')::timestamp without time zone) "
-        + "WHERE id = " + idMovRes + "");
+      "UPDATE " + getSchema() + ".prp_movimiento_investigar SET " +
+        "fecha_registro = " + "(TO_TIMESTAMP('" + newDate + "', 'YYYY-MM-DD HH24:MI:SS')::timestamp without time zone) ," +
+        "sent_status = '"+sentStatus+"' "
+        + "WHERE id = " + id);
   }
 }
