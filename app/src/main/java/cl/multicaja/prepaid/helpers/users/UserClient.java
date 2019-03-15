@@ -429,7 +429,7 @@ public class UserClient {
 
   private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-  private TicketsResponse getFreshdeskTicketsByTypeAndCreatedDate(Map<String, Object> headers, Integer page, TicketType type, LocalDateTime from, LocalDateTime to) throws Exception {
+  public TicketsResponse getFreshdeskTicketsByTypeAndCreatedDate(Map<String, Object> headers, Integer page, TicketType type, LocalDateTime from, LocalDateTime to) throws Exception {
     log.info("******** getFreshdeskTicketsByTypeAndCreatedDate IN ********");
     HttpResponse httpResponse = apiGET(String.format("%s/backoffice/tickets?page=%d&type=%s&from=%s&to=%s", getApiUrl(),
       page,

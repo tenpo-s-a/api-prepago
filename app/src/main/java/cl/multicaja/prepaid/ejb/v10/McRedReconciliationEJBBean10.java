@@ -144,6 +144,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   private void conciliation(List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
+    if(lstMcRedReconciliationFileDetails == null) {
+      log.info("No hay movimientos que cociliar.");
+      return;
+    }
     try {
       for (McRedReconciliationFileDetail recTmp : lstMcRedReconciliationFileDetails) {
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);

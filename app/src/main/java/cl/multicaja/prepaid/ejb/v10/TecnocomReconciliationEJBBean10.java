@@ -360,12 +360,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         if(trx.getOperationType().equals(TecnocomOperationType.OP)) {
           //Se busca el movimiento
           PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-            trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()) , trx.getTipoFac());
+            trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
           if(originalMovement == null) {
             TipoFactura tipofac = trx.getTipoFac();
             String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
-              prepaidCard10.getIdUser(), tipofac.getCode(), tipofac.getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
+              prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getIndNorCor(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac().getValue());
             log.error(msg);
             trx.setHasError(Boolean.TRUE);
             trx.setErrorDetails(msg);
@@ -613,7 +613,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setImpLiq(impLiq);
 
       movimientoTecnocom10.setIndNorCor(getNumberUtils().toInteger(row.get("_indnorcor")));
-      movimientoTecnocom10.setTipoFac(TipoFactura.fromValue(getNumberUtils().toInteger(row.get("_tipofac"))));
+      movimientoTecnocom10.setTipoFac(TipoFactura.valueOfEnumByCodeAndCorrector(getNumberUtils().toInteger(row.get("_tipofac")), movimientoTecnocom10.getIndNorCor()));
+
       movimientoTecnocom10.setFecFac(((java.sql.Date)row.get("_fecfac")).toLocalDate());
       movimientoTecnocom10.setNumRefFac(String.valueOf(row.get("_numreffac")));
 
