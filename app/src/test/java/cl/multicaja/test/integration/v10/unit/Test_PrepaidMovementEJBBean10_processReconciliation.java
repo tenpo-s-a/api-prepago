@@ -271,7 +271,6 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
     Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
-    //TODO: Research
     ResearchMovement10 researchMovement10 = getMovimientoInvestigarMotor(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement10);
     Long movRef = researchMovement10.getMovRef().longValue();
@@ -299,7 +298,6 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
     Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
-    //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
     Long movRef = researchMovement.getMovRef().longValue();
@@ -355,7 +353,6 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
     Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
-    //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
     Long movRef = researchMovement.getMovRef().longValue();
@@ -386,7 +383,6 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     Assert.assertEquals("Estado debe ser Conciliado",ReconciliationStatusType.NEED_VERIFICATION,movConciliado.getReconciliationStatusType());
     Assert.assertEquals("La accion debe ser",ReconciliationActionType.INVESTIGACION,movConciliado.getActionType());
 
-    //TODO: Research
     ResearchMovement10 researchMovement = getMovimientoInvestigarMotor(prepaidMovement10.getId());
     Assert.assertNotNull("Debe contener un movimiento a investigar",researchMovement);
     Long movRef = researchMovement.getMovRef().longValue();

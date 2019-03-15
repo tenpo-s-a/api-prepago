@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +35,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
 
   private static final String SP_INSERT_RESEARCH_MOVEMENT_NAME = SCHEMA + ".mc_prp_crea_movimiento_investigar_v12";
   private static final String SP_SEARCH_RESEARCH_MOVEMENT_NAME = SCHEMA + ".mc_prp_busca_movimientos_a_investigar_v13";
+  private Log log = LogFactory.getLog(Test_20181009113614_create_sp_crea_movimiento_investigar.class);
 
   @AfterClass
   public static void afterClass() {
@@ -141,89 +144,89 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
   public void testCreateResearchMovement() throws SQLException,IOException {
 
     {
-      System.out.println("TEST 1 origen obligatorio");
+      log.info("TEST 1 origen obligatorio");
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),null,
         null,null,null,null,null,null);
-      System.out.println(data.get("_error_msg"));
+      log.info(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 2 fecha de transaccio obligatoria");
+      log.info("TEST 2 fecha de transaccio obligatoria");
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         null,null,null,null,null,null);
-      System.out.println(data.get("_error_msg"));
+      log.info(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 3 responsable oblitagorio");
+      log.info("TEST 3 responsable oblitagorio");
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),null,null,
         null,null,null);
-      System.out.println(data.get("_error_msg"));
+      log.info(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 4 descripcion obligatorio");
-      System.out.println(new Timestamp((new Date()).getTime()).toString());
+      log.info("TEST 4 descripcion obligatorio");
+      log.info(new Timestamp((new Date()).getTime()).toString());
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),null,
         null,null,null);
-      System.out.println(data.get("_error_msg"));
+      log.info(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 5 movRef obligatorio");
+      log.info("TEST 5 movRef obligatorio");
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),getRandomString(10),
         null,null,null);
-      System.out.println(data.get("_error_msg"));
+      log.info(data.get("_error_msg"));
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 6 movRef en 0, tipoMovimiento Obligatorio");
+      log.info("TEST 6 movRef en 0, tipoMovimiento Obligatorio");
 
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),getRandomString(10),
         Long.valueOf(0),null,null);
-      System.out.println("Se ingreso satisfactoriamente un valor igual a 0");
+      log.info("Se ingreso satisfactoriamente un valor igual a 0");
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 7 movRef < 0");
+      log.info("TEST 7 movRef < 0");
 
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),getRandomString(10),
         Long.valueOf(-1),null,null);
-      System.out.println("Se ingreso satisfactoriamente un valor igual a 0");
+      log.info("Se ingreso satisfactoriamente un valor igual a 0");
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 8 movRef en 0, sentStatus obligatorio");
+      log.info("TEST 8 movRef en 0, sentStatus obligatorio");
 
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),getRandomString(10),
         Long.valueOf(0),getRandomString(10),null);
-      System.out.println("Se ingreso satisfactoriamente un valor igual a 0");
+      log.info("Se ingreso satisfactoriamente un valor igual a 0");
       Assert.assertNotNull("Data no debe ser null", data);
       Assert.assertEquals("No debe ser 0","101000",data.get("_error_code"));
     }
 
     {
-      System.out.println("TEST 9 Inserción OK, con todos los parámetros");
+      log.info("TEST 9 Inserción OK, con todos los parámetros");
       Map<String, Object> data = setResearchMovement(this.toJson("dato_tipo_json"),getRandomString(10),
         Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),getRandomString(10),getRandomString(10),
         Long.valueOf(100),getRandomString(10),getRandomString(10));
@@ -233,7 +236,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     }
 
     {
-      System.out.println("TEST 10 Inserción OK, InformationFilesModelObject json");
+      log.info("TEST 10 Inserción OK, InformationFilesModelObject json");
 
       InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
       informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
@@ -263,7 +266,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       Assert.assertNotNull("Data no debe ser null", resp);
       Assert.assertEquals("Debe ser 0","0",resp.get("_error_code"));
       Assert.assertEquals("Deben ser iguales","",resp.get("_error_msg"));
-      System.out.println("Movimiento ingresado satisfactoriamente");
+      log.info("Movimiento ingresado satisfactoriamente");
 
       Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),
         Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
@@ -291,7 +294,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
     }
 
     {
-      System.out.println("TEST 11 Inserción OK, InformationFilesModelObject jsonArray");
+      log.info("TEST 11 Inserción OK, InformationFilesModelObject jsonArray");
 
       InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
       informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
@@ -322,7 +325,7 @@ public class Test_20181009113614_create_sp_crea_movimiento_investigar extends Te
       Assert.assertNotNull("Debe retornar respuesta", resp);
       Assert.assertEquals("Codigo de error debe ser 0", "0", resp.get("_error_code"));
       Assert.assertTrue("debe retornar un id", numberUtils.toLong(resp.get("_r_id")) > 0);
-      System.out.println("Movimiento ingresado satisfactoriamente");
+      log.info("Movimiento ingresado satisfactoriamente");
 
       Map<String, Object> data = searchResearchMovement( numberUtils.toLong(resp.get("_r_id")),Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
       List<Map<String, Object>> results = (List)data.get("result");

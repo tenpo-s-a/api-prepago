@@ -115,7 +115,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     String descripcion = getRandomString(10);
     Long movRef = 100L;
     String tipoMovimiento = getRandomString(10);
-    String sentStatus = "PENDING";
+    String sentStatus = "PENDING_TEST_1";
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
@@ -168,7 +168,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     String descripcion = getRandomString(10);
     Long movRef = 100L;
     String tipoMovimiento = getRandomString(10);
-    String sentStatus = "PENDING";
+    String sentStatus = "PENDING_TEST_2";
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
@@ -220,7 +220,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     String descripcion = getRandomString(10);
     Long movRef = 100L;
     String tipoMovimiento = getRandomString(10);
-    String sentStatus = "PENDING";
+    String sentStatus = "PENDING_TEST_3";
 
     Map<String, Object> resp = Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
       fechaDeTransaccion,responsable,descripcion,
@@ -267,12 +267,11 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
 
-    String sentStatus = "PENDING_TEST_1";
+    String sentStatus = "PENDING_TEST_4";
     Long numRecords = 10L;
+    endDateTime = endDateTime.plusHours(1);
 
     for(int i=0;i<numRecords;i++){
-
-      endDateTime = endDateTime.plusHours(1);
 
       researchMovement = new ResearchMovement();
       researchMovement.setFechaDeTransaccion(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
@@ -342,7 +341,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
 
     String jsonSent = this.toJson(informationFilesModelObjectSent);
-    String sentStatus = "PENDING_TEST_2";
+    String sentStatus = "PENDING_TEST_5";
     Long numRecords = 10L;
 
     for(int i=0;i<numRecords;i++){
@@ -402,14 +401,57 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovementBy_DatesOffRange() throws SQLException {
+  public void testSearchResearchMovementBy_DatesOffRange() throws SQLException,IOException {
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
 
-    beginDateTime = beginDateTime.plusMonths(1);
-    endDateTime = endDateTime.plusMonths(3);
+    ResearchMovement researchMovement = null;
+    List<ResearchMovement> researchMovements = new ArrayList<>();
+
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+    String sentStatus = "PENDING_TEST_6";
+    Long numRecords = 10L;
+
+    for(int i=0;i<numRecords;i++){
+
+      researchMovement = new ResearchMovement();
+      researchMovement.setFechaDeTransaccion(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
+      researchMovement.setInformacionArchivos(jsonSent);
+      researchMovement.setOrigen(getRandomString(10));
+      researchMovement.setResponsable(getRandomString(10));
+      researchMovement.setDescripcion(getRandomString(10));
+      researchMovement.setMovRef(BigDecimal.valueOf(100));
+      researchMovement.setTipoMovimiento(getRandomString(10));
+      researchMovement.setSentStatus(sentStatus);
+
+      Map<String, Object> resp = Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(
+        jsonSent,
+        researchMovement.getOrigen(),
+        researchMovement.getFechaDeTransaccion(),
+        researchMovement.getResponsable(),
+        researchMovement.getDescripcion(),
+        researchMovement.getMovRef().longValue(),
+        researchMovement.getTipoMovimiento(),
+        sentStatus);
+
+      researchMovement.setId(numberUtils.toLong(resp.get("_r_id")));
+      researchMovements.add(researchMovement);
+
+      Assert.assertNotNull("Data no debe ser null", resp);
+      Assert.assertEquals("Debe ser 0","0",resp.get("_error_code"));
+      Assert.assertEquals("Deben ser iguales","",resp.get("_error_msg"));
+    }
+
+    beginDateTime = beginDateTime.plusDays(1);
+    endDateTime = endDateTime.plusDays(3);
 
     Map<String, Object> data = searchResearchMovement(null,
       Timestamp.valueOf(beginDateTime), Timestamp.valueOf(endDateTime), null,null);
@@ -418,7 +460,27 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovementBy_InvalidId() throws SQLException {
+  public void testSearchResearchMovementBy_InvalidId() throws SQLException,IOException {
+
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+
+    Timestamp fechaDeTransaccion = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
+    String origen = getRandomString(10);
+    String responsable = getRandomString(10);
+    String descripcion = getRandomString(10);
+    Long movRef = 100L;
+    String tipoMovimiento = getRandomString(10);
+    String sentStatus = "PENDING_TEST_7";
+
+    Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
+      fechaDeTransaccion,responsable,descripcion,
+      movRef,tipoMovimiento,sentStatus);
 
     {
       Map<String, Object> data = searchResearchMovement(
@@ -434,44 +496,115 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
   }
 
   @Test
-  public void testSearchResearchMovementBy_IdNull() throws SQLException {
+  public void testSearchResearchMovementBy_IdNull() throws Exception{
+
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+
+    Timestamp fechaDeTransaccion = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
+    String origen = getRandomString(10);
+    String responsable = getRandomString(10);
+    String descripcion = getRandomString(10);
+    Long movRef = 100L;
+    String tipoMovimiento = getRandomString(10);
+    String sentStatus = "PENDING_TEST_8";
+
+    Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
+      fechaDeTransaccion,responsable,descripcion,
+      movRef,tipoMovimiento,sentStatus);
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    String sentStatus = "PENDING_TEST_2";
 
-    Map<String, Object> data = searchResearchMovement( null,
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus, NumberUtils.getInstance().toBigDecimal(0L));
-    Assert.assertNull("El resultado es nulo ",data.get("result"));
+
+    Map<String,Object> data = searchResearchMovement( null,
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus, NumberUtils.getInstance().toBigDecimal(movRef));
+
+    Assert.assertNotNull("Data no debe ser null", data);
+    List<Map<String, Object>> results = (List)data.get("result");
+    Assert.assertNull("No hay objetos",results);
 
   }
 
   @Test
   public void testSearchResearchMovementBy_SentStatusNull() throws SQLException,IOException {
 
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+
+    Timestamp fechaDeTransaccion = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
+    String origen = getRandomString(10);
+    String responsable = getRandomString(10);
+    String descripcion = getRandomString(10);
+    Long movRef = 100L;
+    String tipoMovimiento = getRandomString(10);
+    String sentStatus = "PENDING_TEST_9";
+
+    Map<String,Object> resp = Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
+      fechaDeTransaccion,responsable,descripcion,
+      movRef,tipoMovimiento,sentStatus);
+
+    Long id = numberUtils.toLong(resp.get("_r_id"));
+
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    String sentStatus = "PENDING_TEST_2";
 
-    Map<String, Object> data = searchResearchMovement( Long.valueOf(1),
-      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,numberUtils.toBigDecimal(100));
-    Assert.assertNull("El resultado es nulo ",data.get("result"));
+    Map<String, Object> data = searchResearchMovement( id,
+      Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), null,numberUtils.toBigDecimal(movRef));
+
+    Assert.assertNotNull("Data no debe ser null", data);
+    List<Map<String, Object>> results = (List)data.get("result");
+    Assert.assertNull("No hay objetos",results);
 
   }
 
   @Test
-  public void testSearchResearchMovementBy_MovRefNull() throws SQLException,IOException {
+  public void testSearchResearchMovementBy_MovRefNull() throws Exception {
+
+    InformationFilesModelObject informationFilesModelObjectSent = new InformationFilesModelObject();
+    informationFilesModelObjectSent.setIdArchivo(Long.valueOf(1));
+    informationFilesModelObjectSent.setIdEnArchivo("idEnArchivi_1");
+    informationFilesModelObjectSent.setNombreArchivo("nombreArchivo_1");
+    informationFilesModelObjectSent.setTipoArchivo("tipoArchivo_1");
+
+    String jsonSent = this.toJson(informationFilesModelObjectSent);
+
+    Timestamp fechaDeTransaccion = Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")));
+    String origen = getRandomString(10);
+    String responsable = getRandomString(10);
+    String descripcion = getRandomString(10);
+    Long movRef = 100L;
+    String tipoMovimiento = getRandomString(10);
+    String sentStatus = "PENDING_TEST_10";
+
+    Map<String,Object> resp = Test_20181009113614_create_sp_crea_movimiento_investigar.setResearchMovement(jsonSent,origen,
+      fechaDeTransaccion,responsable,descripcion,
+      movRef,tipoMovimiento,sentStatus);
+
+    Long id = numberUtils.toLong(resp.get("_r_id"));
 
     LocalDateTime beginDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     beginDateTime = beginDateTime.minusHours(1);
     LocalDateTime endDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-    String sentStatus = "PENDING_TEST_2";
 
     Map<String, Object> data = searchResearchMovement(
-      Long.valueOf(1),Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
-    Assert.assertNull("El resultado es nulo ",data.get("result"));
+      id,Timestamp.valueOf(beginDateTime),Timestamp.valueOf(endDateTime), sentStatus,null);
+
+    Assert.assertNotNull("Data no debe ser null", data);
+    List<Map<String, Object>> results = (List)data.get("result");
+    Assert.assertNull("No hay objetos",results);
 
   }
 
