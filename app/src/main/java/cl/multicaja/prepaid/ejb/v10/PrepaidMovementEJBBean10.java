@@ -1958,6 +1958,38 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   @Override
+  public Map<String, Object> updateResearchMovement(Long id, String sentStatus) throws Exception {
+
+    String SP_UPDATE_RESEARCH_MOVEMENT_NAME = getSchema() + ".mc_prp_actualiza_movimiento_investigar_v10";
+
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    if(sentStatus == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "sentStatus"));
+    }
+
+
+    Object[] params = {
+      id != null ? new InParam(id, Types.BIGINT) : new NullParam(Types.BIGINT),
+      sentStatus != null ? new InParam(sentStatus, Types.VARCHAR) : new NullParam(Types.VARCHAR),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String,Object> resp = getDbUtils().execute(SP_UPDATE_RESEARCH_MOVEMENT_NAME,params);
+
+    if (!"0".equals(resp.get("_error_code"))) {
+      log.error(SP_UPDATE_RESEARCH_MOVEMENT_NAME+" resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+    return resp;
+  }
+
+  @Override
   public List<ResearchMovement10> getResearchMovement(
     Long id, Timestamp beginDateTime, Timestamp endDateTime, String sentStatus, BigDecimal movRef) throws SQLException {
 
@@ -2086,12 +2118,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       e.printStackTrace();
     }
 
-    sendResearchFile(fileName, "research_test@gmail.com");
+    sendResearchFile(fileName, "research_test@gmail.com",yesterdayResearchMovements);
 
     file.delete();
   }
 
-  private void sendResearchFile(String fileName, String emailAddress) throws Exception {
+  private void sendResearchFile(String fileName, String emailAddress,List<ResearchMovement10> researchMovements) throws Exception {
 
     String file = fileName;
     FileInputStream attachmentFile = new FileInputStream(file);
@@ -2109,5 +2141,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
 
     Files.delete(Paths.get(file));
+
+    //change status of movements to send_ok
+    //researchMovements
+
   }
 }
