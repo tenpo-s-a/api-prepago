@@ -1,10 +1,12 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.omg.CORBA.NO_IMPLEMENT;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -123,60 +125,77 @@ public class ResearchMovement10 extends BaseModel {
   }
 
   //TODO: Mas adelante puede ser con automatización del idioma, o valores se una tabla de settings
-  public String[] toMailUse(Boolean isSetFieldNames) throws IllegalAccessException,NoSuchFieldException,IOException{
+  public String[] toMailUse(Boolean isSetFieldNames) throws IOException{
 
-    List<ResearchMovementInformationFiles> rmifl = null;
+    List<ResearchMovementInformationFiles> rmifl;
+    List<String> keys = new ArrayList<>();
+    List<String> values = new ArrayList<>();
 
-    if(!getFilesInfo().isEmpty()) {
-      rmifl = stringJsonArrayToList(getFilesInfo(), new ResearchMovementInformationFiles());
-    }
-
-    Iterator<ResearchMovementInformationFiles> rmiflIterator = rmifl.iterator();
     HashMap<String, String> fieldNames = new HashMap<>();
     fieldNames.put("idArchivo","Id Archivo #");
-    fieldNames.put("idEnArchivo","Tipo Archivo #");
+    fieldNames.put("idEnArchivo","Id en Archivo #");
     fieldNames.put("nombreArchivo","Nombre Archivo #");
-    fieldNames.put("tipoArchivo","Id en Archivo #");
+    fieldNames.put("tipoArchivo","Tipo Archivo #");
 
-    HashMap<String, String> rmifMap = new HashMap<>();
-    rmifMap.put("Id Unico",getId().toString());
+    if(!getFilesInfo().isEmpty()) {
 
-    Field[] fields;
-    Class<?> objClass;
-    Integer toRplce = 1;
-    while (rmiflIterator.hasNext()) {
-      ResearchMovementInformationFiles rmiflObject = rmiflIterator.next();
+      rmifl = stringJsonArrayToList(getFilesInfo(), new ResearchMovementInformationFiles());
+      if (rmifl.size() > 0) {
 
-      objClass = rmiflObject.getClass();
-      fields = objClass.getDeclaredFields();
-      Field fieldSet;
-      for (Field field: fields){
-        fieldSet = objClass.getDeclaredField(field.getName());
-        fieldSet.setAccessible(true);
-        rmifMap.put(
-          fieldNames.get(field.getName()).replace("#", Integer.valueOf(toRplce).toString()),
-          fieldSet.get(rmiflObject).toString());
+        //===== key values
+        keys.add("Id Unico");
+        values.add(getId().toString());
+
+        Integer toRplce = 1;
+        for(Integer i=0;i<rmifl.size(); i++){
+
+          keys.add(fieldNames.get("idArchivo").replace("#", Integer.valueOf(toRplce).toString()));
+          values.add(rmifl.get(i).getIdArchivo().toString());
+          keys.add(fieldNames.get("idEnArchivo").replace("#", Integer.valueOf(toRplce).toString()));
+          values.add(rmifl.get(i).getIdEnArchivo());
+
+          toRplce++;
+        }
+
+        if (rmifl.size() == 1) {
+          keys.add("Id Archivo 2");
+          values.add(" ");
+          keys.add("Id en Archivo 2");
+          values.add(" ");
+        }
+
+        ZonedDateTime utcDateTime = getDateOfTransaction().toLocalDateTime().atZone(ZoneId.of("UTC"));
+        ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
+        String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        keys.add("Origen");
+        values.add(getOriginType().name());
+
+        keys.add("Fecha Transaccion");
+        values.add(stringDate);
+
+        keys.add("Responsable");
+        values.add(getResponsible().toString());
+
+        keys.add("Descripción");
+        values.add(getDescription().getValue());
+
+        keys.add("Id Movimiento");
+        values.add(getMovRef().toString());
+
+        keys.add("Tipo de Movimiento");
+        values.add(getMovementType().name());
+
+        //===== key values end
+
       }
-      toRplce++;
-
     }
-
-    ZonedDateTime utcDateTime = getDateOfTransaction().toLocalDateTime().atZone(ZoneId.of("UTC"));
-    ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
-    String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-    rmifMap.put("Origen",getOriginType().name());
-    rmifMap.put("Fecha Transaccion",stringDate);
-    rmifMap.put("Responsable",getResponsible().toString());
-    rmifMap.put("Descripción",getDescription().getValue());
-    rmifMap.put("Id Movimiento",getMovRef().toString());
-    rmifMap.put("Tipo de Movimiento",getMovementType().name());
 
     String[] dataReturn;
     if(!isSetFieldNames){
-      dataReturn = rmifMap.values().toArray(new String[0]);
+      dataReturn = values.toArray(new String[values.size()]);
     }else{
-      dataReturn = rmifMap.keySet().toArray(new String[0]);
+      dataReturn = keys.toArray(new String[keys.size()]);
     }
 
     return dataReturn;

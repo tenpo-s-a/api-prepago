@@ -31,28 +31,29 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
 
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
     List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
-    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    ResearchMovementInformationFiles researchMovementInformationFiles;
 
     ZonedDateTime nowDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
     ZonedDateTime yesterdayDateTime = nowDateTime.minusDays(1);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String yesterdayString = yesterdayDateTime.format(formatter);
 
-
-    //TODO: Research
     Map<String, Object> resp;
 
-
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+    researchMovementInformationFiles.setIdEnArchivo("1");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(2));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_2");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_2");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_2");
+    researchMovementInformationFiles.setIdEnArchivo("2");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
     Long movementId = 3L;
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
@@ -70,12 +71,15 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovement10s.add(insertedMovement);
 
     movementId = 4L;
-    /*researchMovementInformationFilesList.clear();
-    researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
-    researchMovementInformationFilesList.add(researchMovementInformationFiles);*/
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(3));
+    researchMovementInformationFiles.setIdEnArchivo("3");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
@@ -92,22 +96,21 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovement10s.add(insertedMovement);
 
     movementId = 4L;
-    /*researchMovementInformationFilesList.clear();
-    researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(4));
+    researchMovementInformationFiles.setIdEnArchivo("4");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
-    researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(5));
+    researchMovementInformationFiles.setIdEnArchivo("5");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
-    researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
-    researchMovementInformationFilesList.add(researchMovementInformationFiles);*/
+
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
@@ -124,6 +127,15 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovement10s.add(insertedMovement);
 
     movementId = 6L;
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(6));
+    researchMovementInformationFiles.setIdEnArchivo("6");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
@@ -140,6 +152,22 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovement10s.add(insertedMovement);
 
     movementId = 7L;
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(7));
+    researchMovementInformationFiles.setIdEnArchivo("7");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(8));
+    researchMovementInformationFiles.setIdEnArchivo("8");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
     getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),

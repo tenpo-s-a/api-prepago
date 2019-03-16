@@ -2073,10 +2073,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           header = mov.toMailUse(Boolean.TRUE);
           writer.writeNext(header);
         }
-
-        //TODO: replace research variables
         data = mov.toMailUse(Boolean.FALSE);
-
         writer.writeNext(data);
         isSetHeader = Boolean.FALSE;
       }
@@ -2100,11 +2097,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Enviamos el archivo al mail de reportes diarios
     EmailBody emailBodyToSend = new EmailBody();
-
     emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
     emailBodyToSend.setTemplateData(null);
     emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
-    //emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
+    //---emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
     emailBodyToSend.setAddress(emailAddress);
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
 
