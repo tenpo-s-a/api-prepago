@@ -25,7 +25,7 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
   }
 
-  //@Ignore
+  @Ignore
   @Test
   public void sendResearchEmail() throws Exception {
 
@@ -43,15 +43,15 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
     researchMovementInformationFiles.setIdEnArchivo("1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo1");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo1");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(2));
     researchMovementInformationFiles.setIdEnArchivo("2");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo2");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo2");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     Long movementId = 3L;
@@ -76,8 +76,8 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(3));
     researchMovementInformationFiles.setIdEnArchivo("3");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo3");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo3");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
@@ -100,15 +100,15 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(4));
     researchMovementInformationFiles.setIdEnArchivo("4");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo4");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo4");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(5));
     researchMovementInformationFiles.setIdEnArchivo("5");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo5");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo5");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
@@ -132,8 +132,8 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(6));
     researchMovementInformationFiles.setIdEnArchivo("6");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo6");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo6");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     resp = getPrepaidMovementEJBBean10().createResearchMovement(
@@ -157,15 +157,15 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(7));
     researchMovementInformationFiles.setIdEnArchivo("7");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo7");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo7");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(8));
     researchMovementInformationFiles.setIdEnArchivo("8");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo8");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo8");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     getPrepaidMovementEJBBean10().createResearchMovement(

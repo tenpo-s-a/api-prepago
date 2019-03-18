@@ -124,7 +124,6 @@ public class ResearchMovement10 extends BaseModel {
     this.sentStatus = sentStatus;
   }
 
-  //TODO: Mas adelante puede ser con automatización del idioma, o valores se una tabla de settings
   public String[] toMailUse(Boolean isSetFieldNames) throws IOException{
 
     String FileId="FileId";
@@ -164,8 +163,8 @@ public class ResearchMovement10 extends BaseModel {
         Integer toRplce = 1;
         for(Integer i=0;i<rmifl.size(); i++){
 
-          keys.add(fieldNames.get(FileId).replace("#", Integer.valueOf(toRplce).toString()));
-          values.add(rmifl.get(i).getIdArchivo().toString());
+          keys.add(fieldNames.get(FileName).replace("#", Integer.valueOf(toRplce).toString()));
+          values.add(rmifl.get(i).getNombreArchivo());
           keys.add(fieldNames.get(IdOnFile).replace("#", Integer.valueOf(toRplce).toString()));
           values.add(rmifl.get(i).getIdEnArchivo());
 
@@ -173,7 +172,7 @@ public class ResearchMovement10 extends BaseModel {
         }
 
         if (rmifl.size() == 1) {
-          keys.add(fieldNames.get(FileId).replace("#", String.valueOf(2)));
+          keys.add(fieldNames.get(FileName).replace("#", String.valueOf(2)));
           values.add(" ");
           keys.add(fieldNames.get(IdOnFile).replace("#",  String.valueOf(2)));
           values.add(" ");
