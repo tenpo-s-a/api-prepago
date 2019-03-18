@@ -264,7 +264,14 @@ public interface PrepaidMovementEJB10 {
     String sentStatus
   )throws Exception;
 
-
+  /**
+   *
+   * @param id
+   * @param sentStatus
+   * @return
+   * @throws Exception
+   */
+  Map<String,Object> updateResearchMovement(Long id, String sentStatus)throws Exception;
 
   /**
    *
