@@ -2081,7 +2081,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ZonedDateTime startZonedUtc = yesterdayBeginingZonedChile.withZoneSameInstant(ZoneId.of("UTC"));
     ZonedDateTime endZoneUtc = nowChileDateTime.withZoneSameInstant(ZoneId.of("UTC"));
 
-    List<ResearchMovement10> yesterdayResearchMovements = getResearchMovementByDateTimeRange(Timestamp.valueOf(startZonedUtc.toLocalDateTime()), Timestamp.valueOf(endZoneUtc.toLocalDateTime()));
+    //List<ResearchMovement10> yesterdayResearchMovements = getResearchMovementByDateTimeRange(Timestamp.valueOf(startZonedUtc.toLocalDateTime()), Timestamp.valueOf(endZoneUtc.toLocalDateTime()));
+    List<ResearchMovement10> yesterdayResearchMovements = getResearchMovement(
+      null,
+      Timestamp.valueOf(startZonedUtc.toLocalDateTime()),
+      Timestamp.valueOf(endZoneUtc.toLocalDateTime()),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue(),
+      null
+      );
 
     LocalDateTime todayLocal = LocalDateTime.now();
     String todayString = todayLocal.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -2136,14 +2143,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
     emailBodyToSend.setTemplateData(null);
     emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
-    //emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
     emailBodyToSend.setAddress(emailAddress);
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
 
     Files.delete(Paths.get(file));
 
-    //change status of movements to send_ok
-    //researchMovements
+    //change status of research_movements to send_ok
+    for(ResearchMovement10 researchMovement : researchMovements){
+      updateResearchMovement(researchMovement.getId(),ResearchMovementSentStatusType.SENT_RESEARCH_OK.getValue());
+    }
 
   }
 }
