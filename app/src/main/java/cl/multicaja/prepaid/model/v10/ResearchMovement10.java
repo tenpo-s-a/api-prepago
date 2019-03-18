@@ -127,15 +127,30 @@ public class ResearchMovement10 extends BaseModel {
   //TODO: Mas adelante puede ser con automatización del idioma, o valores se una tabla de settings
   public String[] toMailUse(Boolean isSetFieldNames) throws IOException{
 
+    String FileId="FileId";
+    String IdOnFile="IdOnFile";
+    String  FileName = "FileName";
+    String  TypeOfFile = "TypeOfFile";
+
     List<ResearchMovementInformationFiles> rmifl;
     List<String> keys = new ArrayList<>();
     List<String> values = new ArrayList<>();
 
     HashMap<String, String> fieldNames = new HashMap<>();
-    fieldNames.put("idArchivo","Id Archivo #");
-    fieldNames.put("idEnArchivo","Id en Archivo #");
-    fieldNames.put("nombreArchivo","Nombre Archivo #");
-    fieldNames.put("tipoArchivo","Tipo Archivo #");
+
+    fieldNames.put(id.getClass().getName(),"Id Unico");
+    fieldNames.put(originType.getClass().getName(),"Origen");
+    fieldNames.put(createdAt.getClass().getName(),"Fecha Creación");
+    fieldNames.put(dateOfTransaction.getClass().getName(),"Fecha Transaccion");
+    fieldNames.put(responsible.getClass().getName(),"Responsable");
+    fieldNames.put(description.getClass().getName(),"Descripción");
+    fieldNames.put(movRef.getClass().getName(),"Id Movimiento");
+    fieldNames.put(movementType.getClass().getName(),"Tipo de Movimiento");
+    fieldNames.put(sentStatus.getClass().getName(),"Estado de Envío");
+    fieldNames.put(FileId,"Id Archivo #");
+    fieldNames.put(IdOnFile,"Id en Archivo #");
+    fieldNames.put(FileName,"Nombre Archivo #");
+    fieldNames.put(TypeOfFile,"Tipo Archivo #");
 
     if(!getFilesInfo().isEmpty()) {
 
@@ -143,24 +158,24 @@ public class ResearchMovement10 extends BaseModel {
       if (rmifl.size() > 0) {
 
         //===== key values
-        keys.add("Id Unico");
+        keys.add(fieldNames.get(id.getClass().getName()));
         values.add(getId().toString());
 
         Integer toRplce = 1;
         for(Integer i=0;i<rmifl.size(); i++){
 
-          keys.add(fieldNames.get("idArchivo").replace("#", Integer.valueOf(toRplce).toString()));
+          keys.add(fieldNames.get(FileId).replace("#", Integer.valueOf(toRplce).toString()));
           values.add(rmifl.get(i).getIdArchivo().toString());
-          keys.add(fieldNames.get("idEnArchivo").replace("#", Integer.valueOf(toRplce).toString()));
+          keys.add(fieldNames.get(IdOnFile).replace("#", Integer.valueOf(toRplce).toString()));
           values.add(rmifl.get(i).getIdEnArchivo());
 
           toRplce++;
         }
 
         if (rmifl.size() == 1) {
-          keys.add("Id Archivo 2");
+          keys.add(fieldNames.get(FileId).replace("#", String.valueOf(2)));
           values.add(" ");
-          keys.add("Id en Archivo 2");
+          keys.add(fieldNames.get(IdOnFile).replace("#",  String.valueOf(2)));
           values.add(" ");
         }
 
@@ -168,22 +183,22 @@ public class ResearchMovement10 extends BaseModel {
         ZonedDateTime chileDateTime = utcDateTime.withZoneSameInstant(ZoneId.of("America/Santiago"));
         String stringDate = chileDateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        keys.add("Origen");
+        keys.add(fieldNames.get(originType.getClass().getName()));
         values.add(getOriginType().name());
 
-        keys.add("Fecha Transaccion");
+        keys.add(fieldNames.get(dateOfTransaction.getClass().getName()));
         values.add(stringDate);
 
-        keys.add("Responsable");
+        keys.add(fieldNames.get(responsible.getClass().getName()));
         values.add(getResponsible().toString());
 
-        keys.add("Descripción");
+        keys.add(fieldNames.get(description.getClass().getName()));
         values.add(getDescription().getValue());
 
-        keys.add("Id Movimiento");
+        keys.add(fieldNames.get(movRef.getClass().getName()));
         values.add(getMovRef().toString());
 
-        keys.add("Tipo de Movimiento");
+        keys.add(fieldNames.get(movementType.getClass().getName()));
         values.add(getMovementType().name());
 
         //===== key values end
