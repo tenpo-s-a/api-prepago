@@ -22,7 +22,7 @@ public class Test_20181009100512_create_table_prp_movimiento_investigar extends 
       new ColumnInfo("fecha_de_transaccion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("responsable", SqlType.VARCHAR.getGetJavaType(),100),
       new ColumnInfo("descripcion", SqlType.VARCHAR.getGetJavaType(),100),
-      new ColumnInfo("mov_ref", SqlType.NUMERIC.getGetJavaType(),100),
+      new ColumnInfo("mov_ref", SqlType.NUMERIC.getGetJavaType()),
       new ColumnInfo("tipo_movimiento", SqlType.VARCHAR.getGetJavaType(),100),
       new ColumnInfo("sent_status", SqlType.VARCHAR.getGetJavaType(),100)
     );
