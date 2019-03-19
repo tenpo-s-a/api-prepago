@@ -160,42 +160,21 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null) {
           log.info("Movimiento no encontrado, no conciliado");
-          // Construyendo un Id.
-          StringBuilder researchId = new StringBuilder();
-          researchId.append("ExtId:[");
-          if (recTmp.getExternalId() != null) {
-            researchId.append(recTmp.getExternalId().toString());
-          } else {
-            researchId.append("NoExternalId");
-          }
-          researchId.append("]-");
-          researchId.append("McCode:[");
-          researchId.append(recTmp.getMcCode());
-          researchId.append("]");
-
-          //TODO: Esta OK este Research?
-          /*DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-          java.util.Date date = formatter.parse(recTmp.getDateTrx());
-          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
-
-          Long movRef = Long.valueOf(0);*/
-          /*getPrepaidMovementEJBBean10().createMovementResearch(
-            null,
-            researchId.toString(),
-            ReconciliationOriginType.SWITCH,
-            fileName,
-            recTmp.getDateTrx(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            movRef);*/
 
           researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
-          researchMovementInformationFiles.setIdArchivo(0L);
-          researchMovementInformationFiles.setIdEnArchivo("1");
-          researchMovementInformationFiles.setNombreArchivo("test");
-          researchMovementInformationFiles.setTipoArchivo("test");
+          researchMovementInformationFiles.setIdArchivo(recTmp.getFileId());
+          researchMovementInformationFiles.setIdEnArchivo(recTmp.getExternalId().toString());
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo(movementType.name());
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
+          
+          Long movRef;
+          if(recTmp.getExternalId()!=0){
+            movRef = recTmp.getExternalId();
+          }else{
+            movRef = Long.valueOf(1);
+          }
 
 
           getPrepaidMovementEJBBean10().createResearchMovement(
@@ -205,8 +184,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             recTmp.getDateTrx(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
-            Long.valueOf(1),
-            PrepaidMovementType.WITHDRAW.name(),
+            movRef,
+            movementType.name(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
@@ -325,7 +304,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
-    return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
+    //return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
+    return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, String tableName, Long fileId, Long movementId, String mcId) throws Exception {
