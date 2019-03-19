@@ -130,6 +130,7 @@ public class ResearchMovement10 extends BaseModel {
     String IdOnFile="IdOnFile";
     String  FileName = "FileName";
     String  TypeOfFile = "TypeOfFile";
+    
 
     List<ResearchMovementInformationFiles> rmifl;
     List<String> keys = new ArrayList<>();
