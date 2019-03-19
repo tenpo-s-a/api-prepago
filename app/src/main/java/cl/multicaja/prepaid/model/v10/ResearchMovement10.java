@@ -1,18 +1,22 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.core.model.BaseModel;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-public class ResearchMovement10 {
+public class ResearchMovement10 extends BaseModel {
 
   private Long id;
-  private String idFileOrigin;
-  private ReconciliationOriginType origin;
-  private String fileName;
+  private String filesInfo;
+  private ReconciliationOriginType originType;
   private Timestamp createdAt;
   private Timestamp dateOfTransaction;
   private ResearchMovementResponsibleStatusType responsible;
   private ResearchMovementDescriptionType description;
-  private Long movRef;
+  private BigDecimal movRef;
+  private PrepaidMovementType movementType;
+  private ResearchMovementSentStatusType sentStatus;
 
   public Long getId() {
     return id;
@@ -22,28 +26,20 @@ public class ResearchMovement10 {
     this.id = id;
   }
 
-  public String getIdFileOrigin() {
-    return idFileOrigin;
+  public String getFilesInfo() {
+    return filesInfo;
   }
 
-  public void setIdFileOrigin(String idFileOrigin) {
-    this.idFileOrigin = idFileOrigin;
+  public void setFilesInfo(String filesInfo) {
+    this.filesInfo = filesInfo;
   }
 
-  public ReconciliationOriginType getOrigin() {
-    return origin;
+  public ReconciliationOriginType getOriginType() {
+    return originType;
   }
 
-  public void setOrigin(ReconciliationOriginType origin) {
-    this.origin = origin;
-  }
-
-  public String getFileName() {
-    return fileName;
-  }
-
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
+  public void setOriginType(ReconciliationOriginType originType) {
+    this.originType = originType;
   }
 
   public Timestamp getCreatedAt() {
@@ -78,11 +74,43 @@ public class ResearchMovement10 {
     this.description = description;
   }
 
-  public Long getMovRef() {
+  public BigDecimal getMovRef() {
     return movRef;
   }
 
-  public void setMovRef(Long movRef) {
+  public void setMovRef(BigDecimal movRef) {
     this.movRef = movRef;
   }
+
+  public PrepaidMovementType getMovementType() {
+    return movementType;
+  }
+
+  public void setMovementType(PrepaidMovementType movementType) {
+    this.movementType = movementType;
+  }
+
+  public ResearchMovementSentStatusType getSentStatus() {
+    return sentStatus;
+  }
+
+  public void setSentStatus(ResearchMovementSentStatusType sentStatus) {
+    this.sentStatus = sentStatus;
+  }
+
+  public String[] toCustomString(){
+    return new String[]{
+      //String[] data = new String[]{ mov.getId().toString(), mov.getIdFileOrigin(), mov.getMovRef().toString(), mov.getOrigin().toString(), "tipo mov", mov.getFileName(), mov.getDateOfTransaction().toString(), stringDate, mov.getResponsible().toString(), mov.getDescription().toString()};
+      getId().toString(),
+      getFilesInfo(),
+      getOriginType().name(),
+      getCreatedAt().toString(),
+      getDateOfTransaction().toString(),
+      getResponsible().getValue(),
+      getDescription().getValue(),
+      getMovRef().toString(),
+      getMovementType().name(),
+      getSentStatus().getValue()};
+  }
+
 }

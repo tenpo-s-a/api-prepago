@@ -12,6 +12,8 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +45,14 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  private List<ResearchMovementInformationFiles> researchMovementInformationFilesList;
+
+  private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  protected String toJson(Object obj) throws JsonProcessingException {
+    return new ObjectMapper().writeValueAsString(obj);
+  }
 
   private ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
     return reconciliationFilesEJBBean10;
@@ -163,8 +173,13 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchId.append(recTmp.getMcCode());
           researchId.append("]");
 
-          Long movRef = 0L;
-          getPrepaidMovementEJBBean10().createMovementResearch(
+          //TODO: Esta OK este Research?
+          /*DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+          java.util.Date date = formatter.parse(recTmp.getDateTrx());
+          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
+
+          Long movRef = Long.valueOf(0);*/
+          /*getPrepaidMovementEJBBean10().createMovementResearch(
             null,
             researchId.toString(),
             ReconciliationOriginType.SWITCH,
@@ -172,7 +187,30 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             recTmp.getDateTrx(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            movRef);
+            movRef);*/
+
+          researchMovementInformationFilesList = new ArrayList<>();
+          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          researchMovementInformationFiles.setIdArchivo(0L);
+          researchMovementInformationFiles.setIdEnArchivo("1");
+          researchMovementInformationFiles.setNombreArchivo("test");
+          researchMovementInformationFiles.setTipoArchivo("test");
+          researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+
+          getPrepaidMovementEJBBean10().createResearchMovement(
+            null,
+            toJson(researchMovementInformationFilesList),
+            ReconciliationOriginType.SWITCH.name(),
+            recTmp.getDateTrx(),
+            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
+            Long.valueOf(1),
+            PrepaidMovementType.WITHDRAW.name(),
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+          );
+
+          continue;
         }
         else
           {

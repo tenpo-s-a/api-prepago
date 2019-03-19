@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -279,7 +280,7 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
 
     // Revisar los que venian en el archivo pero no estan en nuestra BD
     for(ClearingData10 originalMovement : notInBDMovements) {
-      List<ReconciliedResearch> researchMovs = getResearchMovement(originalMovement.getIdTransaction());
+      List<ResearchMovement10> researchMovs = getResearchMovement(originalMovement.getIdTransaction());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
@@ -507,37 +508,27 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     getPrepaidClearingEJBBean10().processClearingResponse(is, fileName);
 
     {
-      List<ReconciliedResearch> researchMovs = getResearchMovement(notWebWithdraw.getIdTransaction());
+      List<ResearchMovement10> researchMovs = getResearchMovement(notWebWithdraw.getIdTransaction());
       Assert.assertEquals("No debe estar en reasearch", 0, researchMovs.size());
     }
 
     {
-      List<ReconciliedResearch> researchMovs = getResearchMovement(clearingOK.getIdTransaction());
+      List<ResearchMovement10> researchMovs = getResearchMovement(clearingOK.getIdTransaction());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
 
     {
-      List<ReconciliedResearch> researchMovs = getResearchMovement(alreadyReconciled.getIdTransaction());
+      List<ResearchMovement10> researchMovs = getResearchMovement(alreadyReconciled.getIdTransaction());
       Assert.assertNotNull("Debe haber una respuesta", researchMovs);
       Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
     }
 
   }
 
-  private List<ReconciliedResearch> getResearchMovement(Long movId) {
-    RowMapper rowMapper = (rs, rowNum) -> {
-      ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
-      reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
-      //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
-      reconciliedResearch.setIdArchivoOrigen(String.valueOf(rs.getString("id_archivo_origen")));
-      reconciliedResearch.setNombreArchivo(String.valueOf(rs.getString("nombre_archivo")));
-      reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
-      return reconciliedResearch;
-    };
-    //List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = 'idMov=%s'", getSchema(), String.valueOf(movId)), rowMapper);
-    List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = 'idMov=%s'", getSchema(), String.valueOf(movId)), rowMapper);
-    return data;
+  private List<ResearchMovement10> getResearchMovement(Long movId) throws SQLException {
+    //TODO: Research, set changes
+    return getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movId));
   }
 
   public InputStream createAccountingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {

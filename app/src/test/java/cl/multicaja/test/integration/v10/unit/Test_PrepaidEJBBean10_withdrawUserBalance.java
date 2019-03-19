@@ -776,6 +776,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       Assert.assertEquals("debe ser error de validacion", TARJETA_ERROR_GENERICO_$VALUE.getValue(), vex.getCode());
     }
 
+
     // Verifica la transaccion
     PrepaidMovement10 movement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
       PrepaidMovementStatus.ERROR_POS_WITHDRAW,

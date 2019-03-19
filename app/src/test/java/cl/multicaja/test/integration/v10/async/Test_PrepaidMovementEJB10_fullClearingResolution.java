@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -296,8 +297,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notWithdraw.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovement10);
+
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWithdraw.prepaidMovement10.getId()));
+      Assert.assertEquals("No debe estar en research", 0,researchMovements.size());
     }
 
     // 3. Chequea test: Es RETIRO + >> No es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -323,8 +326,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notWeb.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovement10);
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notWeb.prepaidMovement10.getId()));
+      Assert.assertEquals("No debe estar en research",0, researchMovements.size());
     }
 
     // 4. Chequea test: Es RETIRO + Es WEB + >> Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -351,9 +355,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notTecnocom.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(notTecnocom.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 5. Chequea test: Es RETIRO + Es WEB + >> Tecnocom: PENDING + NO Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -379,8 +384,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", pendingTecnocom.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovement10);
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(pendingTecnocom.prepaidMovement10.getId()));
+      Assert.assertEquals("No debe estar en research", 0,researchMovements.size());
     }
 
     // 6. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + >> Ya Conciliado en BD + MovStatus: process OK + Clearing OK
@@ -406,9 +412,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNotNull("Ya existe conciliado", reconciliedMovement10);
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", reconciledMovement.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(reconciledMovement.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
 
     // 7. Chequea test: Es RETIRO + Es WEB + Tecnocom: RECONCILED + NO Conciliado en BD + >> MovStatus: distinto de OK + Clearing OK
@@ -435,9 +442,11 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", movementRejected.prepaidMovement10.getId()));
-      Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(movementRejected.prepaidMovement10.getId()));
+      Assert.assertEquals("Debe estar en research",1, researchMovements.size());
+      //Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovements.get(0).getOriginType());
+
     }
 
     // 8. Chequea test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process OK + >> Clearing ya estaba OK
@@ -463,9 +472,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertNotNull("Debe existir reconciled", reconciliedMovement10);
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", clearingAlreadyOK.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(clearingAlreadyOK.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
 
     // 9. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid Amount
@@ -492,9 +502,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", invalidInformation_amount.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amount.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 10. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid Amount Balance
@@ -521,9 +532,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", invalidInformation_amountBalance.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountBalance.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 11. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid Amount Mastercard
@@ -550,9 +562,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", invalidInformation_amountMastercard.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_amountMastercard.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 12. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid rut
@@ -579,9 +592,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", invalidInformation_accountRut.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_accountRut.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 13. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid account
@@ -608,9 +622,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", invalidInformation_bankAccount.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(invalidInformation_bankAccount.prepaidMovement10.getId())).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     // 14. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Rejected
@@ -665,8 +680,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement10.getActionType());
 
       // No debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", rejectedClearing.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovement10);
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedClearing.prepaidMovement10.getId()));
+      Assert.assertEquals("No debe estar en research",0, researchMovements.size());
     }
 
     // 15. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Rejected Format
@@ -721,16 +737,18 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion reversa retiro", ReconciliationActionType.REVERSA_RETIRO, reconciliedMovement10.getActionType());
 
       // No debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", rejectedFormatClearing.prepaidMovement10.getId()));
-      Assert.assertNull("No debe estar en research", researchMovement10);
+      List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(rejectedFormatClearing.prepaidMovement10.getId()));
+      Assert.assertEquals("No debe estar en research",0, researchMovements.size());
     }
 
     // 16. In file, but not in DB
     {
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notInBd.getIdTransaction()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInBd.getIdTransaction()))).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING, researchMovement10.getOriginType());
     }
 
     // 17. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing NotInFile
@@ -757,9 +775,10 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(String.format("idMov=%d", notInFile.prepaidMovement10.getId()));
+      ResearchMovement10 researchMovement10 = getPrepaidMovementEJBBean10().
+        getResearchMovementByMovRef(NumberUtils.getInstance().toBigDecimal(NumberUtils.getInstance().toBigDecimal(notInFile.prepaidMovement10.getId()))).get(0);
       Assert.assertNotNull("Debe estar en research", researchMovement10);
-      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOrigin());
+      Assert.assertEquals("Debe venir del clearing", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement10.getOriginType());
     }
 
     File file = new File(fileName);
