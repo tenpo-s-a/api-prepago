@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUnit {
 
@@ -30,23 +31,143 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
 
     ArrayList<ResearchMovement10> researchMovement10s = new ArrayList<>();
     List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
-    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    ResearchMovementInformationFiles researchMovementInformationFiles;
 
     ZonedDateTime nowDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
     ZonedDateTime yesterdayDateTime = nowDateTime.minusDays(1);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String yesterdayString = yesterdayDateTime.format(formatter);
 
+    Map<String, Object> resp;
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
-    researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
-    researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
-    researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+    researchMovementInformationFiles.setIdEnArchivo("1");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo1");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo1");
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
-
-    //TODO: Research
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(2));
+    researchMovementInformationFiles.setIdEnArchivo("2");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo2");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo2");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
 
     Long movementId = 3L;
+    resp = getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      toJson(researchMovementInformationFilesList),
+      ReconciliationOriginType.CLEARING_RESOLUTION.name(),
+      Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+      ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
+      ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
+      movementId,
+      PrepaidMovementType.TOPUP.name(),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+    );
+    changeResearch(numberUtils.toLong(resp.get("_r_id")), ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue(),"2015-01-01 00:00:00.0");
+    ResearchMovement10 insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
+    researchMovement10s.add(insertedMovement);
+
+    movementId = 4L;
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(3));
+    researchMovementInformationFiles.setIdEnArchivo("3");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo3");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo3");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    resp = getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      toJson(researchMovementInformationFilesList),
+      ReconciliationOriginType.CLEARING_RESOLUTION.name(),
+      Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+      ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI.getValue(),
+      ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
+      movementId,
+      PrepaidMovementType.TOPUP.name(),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+    );
+    changeResearch(numberUtils.toLong(resp.get("_r_id")), ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue(), yesterdayString);
+    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
+    researchMovement10s.add(insertedMovement);
+
+    movementId = 4L;
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(4));
+    researchMovementInformationFiles.setIdEnArchivo("4");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo4");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo4");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(5));
+    researchMovementInformationFiles.setIdEnArchivo("5");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo5");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo5");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    resp = getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      toJson(researchMovementInformationFilesList),
+      ReconciliationOriginType.CLEARING_RESOLUTION.name(),
+      Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+      ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+      ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION.getValue(),
+      movementId,
+      PrepaidMovementType.TOPUP.name(),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+    );
+    changeResearch(numberUtils.toLong(resp.get("_r_id")), ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue(), yesterdayString);
+    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
+    researchMovement10s.add(insertedMovement);
+
+    movementId = 6L;
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(6));
+    researchMovementInformationFiles.setIdEnArchivo("6");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo6");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo6");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    resp = getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      toJson(researchMovementInformationFilesList),
+      ReconciliationOriginType.CLEARING_RESOLUTION.name(),
+      Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+      ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
+      ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
+      movementId,
+      PrepaidMovementType.TOPUP.name(),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+    );
+    changeResearch(numberUtils.toLong(resp.get("_r_id")), ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue(), "3015-01-01 00:00:00.0");
+    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
+    researchMovement10s.add(insertedMovement);
+
+    movementId = 7L;
+
+    researchMovementInformationFilesList.clear();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(7));
+    researchMovementInformationFiles.setIdEnArchivo("7");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo7");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo7");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(Long.valueOf(8));
+    researchMovementInformationFiles.setIdEnArchivo("8");
+    researchMovementInformationFiles.setNombreArchivo("nombreArchivo8");
+    researchMovementInformationFiles.setTipoArchivo("tipoArchivo8");
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
     getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
@@ -58,32 +179,8 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
       PrepaidMovementType.TOPUP.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
     );
-    changeResearch(movementId, ResearchMovementSentStatusType.SENT_RESEARCH_OK.getValue(),"2015-01-01 00:00:00.0");
-    ResearchMovement10 insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
+    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movementId)).get(0);
     researchMovement10s.add(insertedMovement);
-
-    /*movementId = "idMov=4";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, 32L);
-    changeResearch(movementId, yesterdayString);
-    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
-    researchMovement10s.add(insertedMovement);
-
-    movementId = "idMov=5";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "sin_archivo", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, 57L);
-    changeResearch(movementId, yesterdayString);
-    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
-    researchMovement10s.add(insertedMovement);
-
-    movementId = "idMov=6";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
-    changeResearch(movementId, "3015-01-01 00:00:00.0");
-    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
-    researchMovement10s.add(insertedMovement);
-
-    movementId = "idMov=7";
-    getPrepaidMovementEJBBean10().createMovementResearch(null, movementId, ReconciliationOriginType.CLEARING_RESOLUTION, "archivo_test.txt", new Timestamp(System.currentTimeMillis()), ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, 0L);
-    insertedMovement = getPrepaidMovementEJBBean10().getResearchMovementByIdMovRef(movementId);
-    researchMovement10s.add(insertedMovement);*/
 
     getPrepaidMovementEJBBean10().sendResearchEmail();
   }
