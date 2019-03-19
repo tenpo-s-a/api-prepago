@@ -2121,7 +2121,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       e.printStackTrace();
     }
 
-    sendResearchFile(fileName, "research_test@gmail.com",yesterdayResearchMovements);
+    if(yesterdayResearchMovements.size() > 0) {
+      sendResearchFile(fileName, "research_test@gmail.com", yesterdayResearchMovements);
+    }else{
+      log.error("[MailResearch] Not Sent. Cause: records found 0");
+    }
 
     file.delete();
   }

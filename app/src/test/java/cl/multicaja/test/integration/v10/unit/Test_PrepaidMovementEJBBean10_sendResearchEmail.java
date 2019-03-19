@@ -25,7 +25,7 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
   }
 
-  @Ignore
+  //@Ignore
   @Test
   public void sendResearchEmail() throws Exception {
 
