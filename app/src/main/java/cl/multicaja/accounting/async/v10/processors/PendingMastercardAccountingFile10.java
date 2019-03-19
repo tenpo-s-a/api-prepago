@@ -5,6 +5,7 @@ import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.prepaid.async.v10.processors.BaseProcessor10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.utils.PgpUtil;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
@@ -61,7 +62,7 @@ public class PendingMastercardAccountingFile10 extends BaseProcessor10 {
             throw new Exception(msg);
           }
 
-          MastercardIpmFileHelper.decryptFile(inputStream, privateKey, publicKey, tempFile, passphrase);
+          PgpUtil.decryptFile(inputStream, privateKey, publicKey, tempFile, passphrase);
 
           IpmFile csvIpmFile = new IpmFile();
 
