@@ -22,7 +22,7 @@ import static cl.multicaja.test.db.Test_20180523092338_create_sp_mc_prp_crea_mov
  */
 public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".mc_prp_buscar_movimientos_v10";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_buscar_movimientos_v11";
 
   @BeforeClass
   @AfterClass
@@ -129,7 +129,8 @@ public class Test_20180601080757_create_sp_mc_prp_buscar_movimientos_v10 extends
       "_tipolin",
       "_linref",
       "_numbencta",
-      "_numplastico"
+      "_numplastico",
+      "_nomcomred"
     };
 
     for (String column : columns) {

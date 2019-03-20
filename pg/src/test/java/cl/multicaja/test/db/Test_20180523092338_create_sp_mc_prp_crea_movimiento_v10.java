@@ -19,7 +19,7 @@ import static cl.multicaja.test.db.Test_20180514105345_create_sp_mc_prp_crear_ta
 
 public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_v10";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_crea_movimiento_v11";
 
   @BeforeClass
   @AfterClass
@@ -112,6 +112,7 @@ public class Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10 extends Te
       setInParam( 2),//_linref NUMERIC,
       setInParam(2),//_numbencta NUMERIC,
       setInParam(2),//_numplastico NUMERIC,
+      getRandomString(10), //_nomcomred
       new InParam(null,Types.TIMESTAMP), // Parametro null para movimiento (Fecha Creacion)
       new OutParam("_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
