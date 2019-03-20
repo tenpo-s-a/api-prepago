@@ -50,6 +50,7 @@ public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 impl
       c.setMidCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_medio"), null));
       c.setSellCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_venta"), null));
       c.setCurrencyExponent(getNumberUtils().toInteger(row.get("_exponente"), null));
+      c.setDayCurrencyConvertion(getNumberUtils().toDouble(row.get("_precio_dia"), null));
       return c;
     };
     Map<String, Object> resp = getDbUtils().execute(sp, rm);
@@ -65,15 +66,16 @@ public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 impl
       new InParam(currencyUsd.getSellCurrencyConvertion(), Types.NUMERIC),
       new InParam(currencyUsd.getMidCurrencyConvertion(), Types.NUMERIC),
       new InParam(currencyUsd.getCurrencyExponent(), Types.NUMERIC),
+      new InParam(currencyUsd.getSellCurrencyConvertion(),Types.NUMERIC),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_valor_usd_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualiza_valor_usd_v11", params);
 
     if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_prp_actualiza_valor_usd_v10 resp: " + resp);
+      log.error("mc_prp_actualiza_valor_usd_v11 resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
@@ -109,6 +111,7 @@ public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 impl
     currencyUsd.setBuyCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion()));
     currencyUsd.setSellCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
     currencyUsd.setMidCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion()));
+    currencyUsd.setDayCurrencyConvertion(currencyUsd.dayCurrencyVariation * currencyUsd.getSellCurrencyConvertion());
     return currencyUsd;
   }
 

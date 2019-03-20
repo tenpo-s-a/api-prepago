@@ -4,9 +4,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class CurrencyUsd implements Serializable {
+
+  public static final Double dayCurrencyVariation = 1.025;
 
   private Long id;
   private String fileName;
@@ -17,6 +20,7 @@ public class CurrencyUsd implements Serializable {
   private Double sellCurrencyConvertion;
   private Double midCurrencyConvertion;
   private Integer currencyExponent;
+  private Double dayCurrencyConvertion;
 
   public Long getId() {
     return id;
@@ -88,6 +92,14 @@ public class CurrencyUsd implements Serializable {
 
   public void setCurrencyExponent(Integer currencyExponent) {
     this.currencyExponent = currencyExponent;
+  }
+
+  public Double getDayCurrencyConvertion() {
+    return dayCurrencyConvertion;
+  }
+
+  public void setDayCurrencyConvertion(Double dayCurrencyConvertion) {
+    this.dayCurrencyConvertion = dayCurrencyConvertion;
   }
 
   @Override
