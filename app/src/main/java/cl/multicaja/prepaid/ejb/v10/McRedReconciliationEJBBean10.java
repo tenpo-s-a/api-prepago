@@ -10,6 +10,8 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.users.UserClient;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.opencsv.CSVReader;
@@ -39,10 +41,21 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   private static Log log = LogFactory.getLog(McRedReconciliationEJBBean10.class);
 
   @EJB
+  private PrepaidEJBBean10 prepaidEJBBean10;
+
+  @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  public PrepaidEJBBean10 getPrepaidEJBBean10() {
+    return prepaidEJBBean10;
+  }
+
+  public void setPrepaidEJBBean10(PrepaidEJBBean10 prepaidEJBBean10) {
+    this.prepaidEJBBean10 = prepaidEJBBean10;
+  }
 
   private ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
     return reconciliationFilesEJBBean10;
@@ -153,28 +166,60 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null) {
-          log.info("Movimiento no encontrado, no conciliado");
-          //Todo: se puede utilizar un stringbuilder
-          // Construyendo un Id.
-          String researchId = "ExtId:[";
-          if (recTmp.getExternalId() != null) {
-            researchId += recTmp.getExternalId().toString();
-          } else {
-            researchId += "NoExternalId";
-          }
-          researchId += "]-";
-          researchId += "McCode:[" + recTmp.getMcCode() + "]";
+          if(IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
+            log.info("Movimiento no encontrado, no conciliado");
+            //Todo: se puede utilizar un stringbuilder
+            // Construyendo un Id.
+            String researchId = "ExtId:[";
+            if (recTmp.getExternalId() != null) {
+              researchId += recTmp.getExternalId().toString();
+            } else {
+              researchId += "NoExternalId";
+            }
+            researchId += "]-";
+            researchId += "McCode:[" + recTmp.getMcCode() + "]";
 
-          Long movRef = 0L;
-          getPrepaidMovementEJBBean10().createMovementResearch(
-            null,
-            researchId,
-            ReconciliationOriginType.SWITCH,
-            fileName,
-            recTmp.getDateTrx(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            movRef);
+            Long movRef = 0L;
+            getPrepaidMovementEJBBean10().createMovementResearch(
+              null,
+              researchId,
+              ReconciliationOriginType.SWITCH,
+              fileName,
+              recTmp.getDateTrx(),
+              ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
+              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
+              movRef);
+          } else {
+            // Buscar el user, sacar el rut
+            User user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
+
+            // Las reversas debe insertarse en la BD de nuevo
+            if(PrepaidMovementType.TOPUP.equals(movementType)) {
+              NewPrepaidTopup10 reverse = new NewPrepaidTopup10();
+
+              reverse.setTransactionId(recTmp.getMcCode());
+              reverse.setAmount(new NewAmountAndCurrency10(recTmp.getAmount()));
+              reverse.setRut(user.getRut().getValue());
+              reverse.setMerchantName("McRedReconciliation");
+              reverse.setMerchantCategory(0);
+              reverse.setMerchantCode("000000000000000");
+              reverse.setMovementType(PrepaidMovementType.TOPUP);
+
+              getPrepaidEJBBean10().reverseTopupUserBalance(null, reverse, false);
+            } else {
+              NewPrepaidWithdraw10 reverse = new NewPrepaidWithdraw10();
+
+              reverse.setTransactionId(recTmp.getMcCode());
+              reverse.setAmount(new NewAmountAndCurrency10(recTmp.getAmount()));
+              reverse.setRut(user.getRut().getValue());
+              reverse.setMerchantName("McRedReconciliation");
+              reverse.setMerchantCategory(0);
+              reverse.setMerchantCode("000000000000000");
+              reverse.setMovementType(PrepaidMovementType.TOPUP);
+
+              getPrepaidEJBBean10().reverseWithdrawUserBalance(null, reverse, false);
+            }
+          }
         }
         else
           {

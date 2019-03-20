@@ -379,9 +379,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
               researchId += "NoExternalId";
             }
 
-            researchId += "]-";
-            // TODO: Verificar lo que va aca y como obtenerlo
-            //getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, "");
+            researchId += "]";
+
+            List<ReconciliationFile10> fileList = getReconciliationFilesEJBBean10().getReconciliationFile(null, fileId, null, null, null, null);
+            ReconciliationFile10 file = fileList.get(0);
+            getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, file.getFileName(), trx.getFecTrn(), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, 0L);
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 

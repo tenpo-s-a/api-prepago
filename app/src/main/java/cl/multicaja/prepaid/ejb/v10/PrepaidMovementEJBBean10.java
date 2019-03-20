@@ -1256,12 +1256,26 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ) {
       log.debug("XLS ID 9");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-      /**
-       * Si es una carga - Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
-       */
 
-      //TODO: reinsertar el movimiento
+      //Se busca usuario prepago para obtener user
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null, movFull.getIdPrepaidUser());
+      if(prepaidUser10 == null) {
+        log.error("prepaidTopup10 null");
+      }
+      //Se busca user para obterner rut
+      User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
+      if(user == null) {
+        log.error("user null");
+      }
 
+      PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+      prepaidTopup.setMerchantName(movFull.get());
+      prepaidTopup.setMerchantCode(movFull.getCodcom());
+
+      CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
+
+      // Reenviar el movimiento a tecnocom
+      getPrepaidEJBBean10().getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, movFull);
     }
     /**
      * ID 10 - Movimiento (Carga o Reversa)

@@ -405,7 +405,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(prepaidCard.getProcessorUserId(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
 
-      // Responde OK || Responde que ya el movimiento existia (cod. 200 + MPE5501)
+      // Responde OK
       if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
         getPrepaidMovementEJB10().updatePrepaidMovement(null,
@@ -421,7 +421,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
 
         CdtTransaction10 cdtTransactionConfirm = new CdtTransaction10();
-        cdtTransactionConfirm.setAmount(cdtTransaction.getAmount().subtract(prepaidTopup.getFee().getValue()));
+        cdtTransactionConfirm.setAmount(cdtTransaction.getAmount());
         cdtTransactionConfirm.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
         cdtTransactionConfirm.setAccountId(cdtTransaction.getAccountId());
         cdtTransactionConfirm.setTransactionReference(cdtTransaction.getTransactionReference());
