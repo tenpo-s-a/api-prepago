@@ -1073,7 +1073,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
     testData = createTestData(testData);
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);

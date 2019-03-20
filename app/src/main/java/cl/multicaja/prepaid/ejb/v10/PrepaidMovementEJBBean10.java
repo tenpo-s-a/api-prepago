@@ -1269,7 +1269,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
 
       PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-      prepaidTopup.setMerchantName(movFull.get());
+      prepaidTopup.setMerchantName(movFull.getNomcomred());
       prepaidTopup.setMerchantCode(movFull.getCodcom());
 
       CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
