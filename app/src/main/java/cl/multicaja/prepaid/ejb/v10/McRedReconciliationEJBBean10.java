@@ -170,7 +170,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
           
           Long movRef;
-          if(recTmp.getExternalId()!=0){
+          if(recTmp.getExternalId() > 0){
             movRef = recTmp.getExternalId();
           }else{
             movRef = Long.valueOf(1);
@@ -303,8 +303,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
-    //return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
-    return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
+    return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
+    //return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, String tableName, Long fileId, Long movementId, String mcId) throws Exception {
