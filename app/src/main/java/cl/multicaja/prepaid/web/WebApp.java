@@ -59,6 +59,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private BackofficeReportRoute10 backofficeReportRoute10;
 
+  @Inject
+  private InvoiceRoute10 invoiceRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -89,7 +92,8 @@ public class WebApp implements ServletContextListener  {
           prepaidTopupRoute10,
           transactionReversalRoute10,
           productChangeRoute10,
-          mailRoute10
+          mailRoute10,
+          invoiceRoute10
           );
         log.info("==== Apache camel iniciado ====");
       }

@@ -4,6 +4,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -19,10 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
@@ -49,6 +52,13 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   private List<ResearchMovementInformationFiles> researchMovementInformationFilesList;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  @Inject
+  private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+
+  public void setPrepaidInvoiceDelegate10(PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10) {
+    this.prepaidInvoiceDelegate10 = prepaidInvoiceDelegate10;
+  }
 
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
@@ -210,7 +220,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
-          continue;
         }
         else
           {
@@ -221,6 +230,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             else {
               log.info("Conciliado");
               getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
+              //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo
+              prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
             }
         }
       }

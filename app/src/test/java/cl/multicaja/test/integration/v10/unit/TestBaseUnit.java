@@ -14,10 +14,7 @@ import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
-import cl.multicaja.prepaid.async.v10.MailDelegate10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
-import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -77,6 +74,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
   private static BackofficeEJBBean10 backofficeEJBBEan10;
   private static MailDelegate10 mailDelegate;
+  private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
@@ -139,7 +137,12 @@ public class TestBaseUnit extends TestApiBase {
     }
     return mailDelegate;
   }
-
+  public static PrepaidInvoiceDelegate10 getInvoiceDelegate10(){
+    if(prepaidInvoiceDelegate10 == null) {
+      prepaidInvoiceDelegate10 = new PrepaidInvoiceDelegate10();
+    }
+    return prepaidInvoiceDelegate10;
+  }
   /**
    *
    * @return
@@ -299,6 +302,7 @@ public class TestBaseUnit extends TestApiBase {
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       tecnocomReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
     }
     return tecnocomReconciliationEJBBean10;
   }
@@ -308,6 +312,7 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      mcRedReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
     }
     return mcRedReconciliationEJBBean10;
   }
