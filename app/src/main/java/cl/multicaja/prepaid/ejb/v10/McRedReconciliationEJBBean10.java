@@ -176,7 +176,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             movRef = Long.valueOf(1);
           }
 
-
           getPrepaidMovementEJBBean10().createResearchMovement(
             null,
             toJson(researchMovementInformationFilesList),
