@@ -28,7 +28,7 @@ OUT _precio_venta         NUMERIC(8,7),
 OUT _precio_compra        NUMERIC(8,7),
 OUT _precio_medio         NUMERIC(8,7),
 OUT _exponente            NUMERIC,
-OUT _precio_dia           NUMERIC(8,7),
+OUT _precio_dia           NUMERIC(8,7)
 )
 RETURNS SETOF RECORD AS $$
 DECLARE
@@ -55,5 +55,6 @@ $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
+
 DROP FUNCTION IF EXISTS ${schema}.mc_prp_buscar_valor_usd_v11();
 
