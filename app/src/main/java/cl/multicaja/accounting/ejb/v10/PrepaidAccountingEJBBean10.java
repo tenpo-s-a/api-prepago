@@ -1167,6 +1167,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     prepaidMovement.setCodent("");
     prepaidMovement.setCodpais(CodigoPais.CHILE);
     prepaidMovement.setCodcom(batchTrx.getCardAcceptorId());
+    prepaidMovement.setNomcomred(batchTrx.getMerchantName());
     prepaidMovement.setOriginType(MovementOriginType.OPE);
 
     //Tecnocom No conciliado

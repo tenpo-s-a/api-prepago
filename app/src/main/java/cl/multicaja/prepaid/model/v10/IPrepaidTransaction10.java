@@ -20,6 +20,8 @@ public interface IPrepaidTransaction10 {
 
   String getMerchantCode();
 
+  String getMerchantName();
+
   Integer getMerchantCategory();
 
   void setFee(NewAmountAndCurrency10 fee);

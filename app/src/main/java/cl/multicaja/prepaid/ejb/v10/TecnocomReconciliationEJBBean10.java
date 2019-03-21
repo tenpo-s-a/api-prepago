@@ -522,6 +522,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     // Switch Conciliado ya que no pasa por switch
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    prepaidMovement.setNomcomred(""); // Todo: MovimientoTecnocom debe traer el merchant name
 
     return prepaidMovement;
   }
