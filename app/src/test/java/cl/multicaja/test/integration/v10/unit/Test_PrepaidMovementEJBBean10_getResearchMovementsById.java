@@ -49,7 +49,7 @@ public class Test_PrepaidMovementEJBBean10_getResearchMovementsById extends Test
     Assert.assertNotNull("No esta vacio ",researchMovement.getFilesInfo());
     Assert.assertEquals("El Json de informacionArchivos es el mismo ",toJson(researchMovementInformationFiles),researchMovement.getFilesInfo());
     Assert.assertEquals("El origen es el mismo ",ReconciliationOriginType.CLEARING_RESOLUTION.name(),researchMovement.getOriginType().name());
-    Assert.assertEquals("El fechaDeTransaccion es el mismo ",dateOfTransaction,researchMovement.getDateOfTransaction());
+    Assert.assertTrue("La fechaDeTransaccion debe ser aproximadamente la misma", Math.abs(dateOfTransaction.getTime() - researchMovement.getDateOfTransaction().getTime()) < 1000);
     Assert.assertEquals("El responsable es el mismo ",ResearchMovementResponsibleStatusType.STATUS_UNDEFINED.getValue(),researchMovement.getResponsible().getValue());
     Assert.assertEquals("El descripcion es el mismo ",ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),researchMovement.getDescription().getValue());
     Long movRefReturn = researchMovement.getMovRef().longValue();
