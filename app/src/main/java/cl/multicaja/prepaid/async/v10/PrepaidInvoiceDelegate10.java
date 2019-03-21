@@ -10,12 +10,14 @@ import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class PrepaidInvoiceDelegate10 {
 
@@ -72,7 +74,7 @@ public class PrepaidInvoiceDelegate10 {
     InvoiceData10 invoiceData10 = new InvoiceData10();
     invoiceData10.setType(prepaidMovement10.getTipoMovimiento());
     invoiceData10.setMovementId(prepaidMovement10.getId());
-    invoiceData10.setRut(prepaidUser10.getRut());
+    invoiceData10.setRut(RandomUtils.nextInt());
     invoiceData10.setDv("");
     invoiceData10.setAmount(prepaidMovement10.getMonto());
     invoiceData10.setAmountPaid(BigDecimal.TEN);

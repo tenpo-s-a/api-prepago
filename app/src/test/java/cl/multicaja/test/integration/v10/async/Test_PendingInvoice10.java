@@ -21,7 +21,6 @@ public class Test_PendingInvoice10  extends TestBaseUnitAsync {
     invoiceData10.setType(PrepaidMovementType.PURCHASE);
     invoiceData10.setClientName(getRandomString(10));
 
-
     String messageId = sendPendingInvoice(invoiceData10,0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
