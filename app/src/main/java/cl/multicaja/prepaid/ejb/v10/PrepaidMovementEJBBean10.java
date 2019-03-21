@@ -1117,12 +1117,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.info("user null");
       }
 
+      updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.OK);
+
       /**
        * Si es una carga -  Se guarda en tabla de movimientos conciliados con status COUNTER_MOVEMENT y se realiza la reversa del movimiento
        */
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
-
-        updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
 
         // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
         createMovementConciliate(null, mov.getId(), ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
@@ -1146,8 +1147,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
        */
       else {
 
-        updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
-
         if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
           createMovementConciliate(null, mov.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
 
@@ -1163,6 +1162,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
           // Se envia movimiento contrario
           getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup10, false);
+
         } else {
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null, mov.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
@@ -1191,6 +1191,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
             PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
+            IndicadorNormalCorrector.NORMAL.equals(mov.getTipoMovimiento()) &&
             isRetryErrorStatus(mov.getEstado())
     ){
       log.debug("XLS ID 7");
@@ -1209,6 +1210,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       // Confirmar el movimiento original
       updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.OK);
 
       // Se agrega a la tabla de movimientos conciliados para que no vuelkva a ser enviado
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);

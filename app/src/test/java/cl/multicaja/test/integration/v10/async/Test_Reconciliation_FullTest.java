@@ -847,7 +847,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     PrepaidMovement10 setupMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(setupData.prepaidMovement.getId());
     Assert.assertEquals("Debe haber cambiado a estado reversado", BusinessStatusType.REVERSED, setupMovement.getEstadoNegocio());
   }
-  */
 
   @Test
   public void case6_topup_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
@@ -1150,14 +1149,143 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     // La reversa original debe quedar confirmada
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
 
     // Data contable debe estar pendiente e inicializada
     assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  /*
+  @Test
+  public void case6_withdraw_reverse_pos_BD_error_timeout_conexion_SW_Expired_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Hay que esperar que exista un nuevo movimiento original
+    PrepaidMovement10 counterMovement = waitForExists(String.format("MC_%s", testData.prepaidMovement.getIdTxExterno()), testData.prepaidMovement.getTipoMovimiento(), testData.prepaidMovement.getIndnorcor() == IndicadorNormalCorrector.NORMAL ? IndicadorNormalCorrector.CORRECTORA : IndicadorNormalCorrector.NORMAL);
+    // Con sus accounting datas
+    AccountingData10 accountingData = waitForAccountingToExist(counterMovement.getId());
+    ClearingData10 clearingData = waitForClearingToExist(accountingData.getId());
+
+    // La reversa original debe quedar confirmada
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+    // Data contable debe estar pendiente e inicializada
+    assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+    assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
+  }
+
+  @Test
+  public void case6_withdraw_reverse_pos_BD_error_timeout_response_SW_Expired_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Hay que esperar que exista un nuevo movimiento original
+    PrepaidMovement10 counterMovement = waitForExists(String.format("MC_%s", testData.prepaidMovement.getIdTxExterno()), testData.prepaidMovement.getTipoMovimiento(), testData.prepaidMovement.getIndnorcor() == IndicadorNormalCorrector.NORMAL ? IndicadorNormalCorrector.CORRECTORA : IndicadorNormalCorrector.NORMAL);
+    // Con sus accounting datas
+    AccountingData10 accountingData = waitForAccountingToExist(counterMovement.getId());
+    ClearingData10 clearingData = waitForClearingToExist(accountingData.getId());
+
+    // La reversa original debe quedar confirmada
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+    // Data contable debe estar pendiente e inicializada
+    assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+    assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
+  }
+
+  @Test
+  public void case6_withdraw_reverse_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Hay que esperar que exista un nuevo movimiento original
+    PrepaidMovement10 counterMovement = waitForExists(String.format("MC_%s", testData.prepaidMovement.getIdTxExterno()), testData.prepaidMovement.getTipoMovimiento(), testData.prepaidMovement.getIndnorcor() == IndicadorNormalCorrector.NORMAL ? IndicadorNormalCorrector.CORRECTORA : IndicadorNormalCorrector.NORMAL);
+    // Con sus accounting datas
+    AccountingData10 accountingData = waitForAccountingToExist(counterMovement.getId());
+    ClearingData10 clearingData = waitForClearingToExist(accountingData.getId());
+
+    // La reversa original debe quedar confirmada
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+    // Data contable debe estar pendiente e inicializada
+    assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+    assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
+  }
+
+  @Test
+  public void case6_withdraw_reverse_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Hay que esperar que exista un nuevo movimiento original
+    PrepaidMovement10 counterMovement = waitForExists(String.format("MC_%s", testData.prepaidMovement.getIdTxExterno()), testData.prepaidMovement.getTipoMovimiento(), testData.prepaidMovement.getIndnorcor() == IndicadorNormalCorrector.NORMAL ? IndicadorNormalCorrector.CORRECTORA : IndicadorNormalCorrector.NORMAL);
+    // Con sus accounting datas
+    AccountingData10 accountingData = waitForAccountingToExist(counterMovement.getId());
+    ClearingData10 clearingData = waitForClearingToExist(accountingData.getId());
+
+    // La reversa original debe quedar confirmada
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+    // Data contable debe estar pendiente e inicializada
+    assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+    assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
+  }
+
+  @Test
+  public void case6_withdraw_reverse_pos_BD_error_timeout_response_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Hay que esperar que exista un nuevo movimiento original
+    PrepaidMovement10 counterMovement = waitForExists(String.format("MC_%s", testData.prepaidMovement.getIdTxExterno()), testData.prepaidMovement.getTipoMovimiento(), testData.prepaidMovement.getIndnorcor() == IndicadorNormalCorrector.NORMAL ? IndicadorNormalCorrector.CORRECTORA : IndicadorNormalCorrector.NORMAL);
+    // Con sus accounting datas
+    AccountingData10 accountingData = waitForAccountingToExist(counterMovement.getId());
+    ClearingData10 clearingData = waitForClearingToExist(accountingData.getId());
+
+    // La reversa original debe quedar confirmada
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+    // Data contable debe estar pendiente e inicializada
+    assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
+    assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
+  }
+  */
   @Test
   public void case7_withdraw_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1220,7 +1348,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
-
+  /*
   @Test
   public void case8_withdraw_pos_BD_error_tc_reintentable_SW_ok_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
