@@ -545,15 +545,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
 
-          //TODO: Esta OK este Research?
-          /*createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
-            data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
-            ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
-            data.getId());*/
-
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList1 = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
           researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
@@ -587,14 +578,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(result == null) {
           //Agregar a Investigar
 
-          //TODO: Esta OK este Research?
-          /*this.createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
-            data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
-            ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
-            new Long(0));*/
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList2 = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
           researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
@@ -619,18 +602,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     }
   }
-
-  // Agrega movimiento a investigar
-  /*public void createClearingResearch(
-    Long movementId, String fileName, Timestamp dateOfTransaction, ResearchMovementResponsibleStatusType responsible,
-    ResearchMovementDescriptionType description, Long movRef) throws Exception {
-
-    String idToResearch = String.format("idMov=%d", movementId);
-
-    //TODO: Cambiar variables y método de Research
-    //getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
-    //  ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);
-  }*/
 
   public void createClearingResearch(
     List<ResearchMovementInformationFiles> researchMovementInformationFilesList,

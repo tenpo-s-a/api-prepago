@@ -4,6 +4,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -19,10 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
@@ -49,6 +52,13 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   private List<ResearchMovementInformationFiles> researchMovementInformationFilesList;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  @Inject
+  private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+
+  public void setPrepaidInvoiceDelegate10(PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10) {
+    this.prepaidInvoiceDelegate10 = prepaidInvoiceDelegate10;
+  }
 
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
@@ -160,43 +170,21 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null) {
           log.info("Movimiento no encontrado, no conciliado");
-          // Construyendo un Id.
-          StringBuilder researchId = new StringBuilder();
-          researchId.append("ExtId:[");
-          if (recTmp.getExternalId() != null) {
-            researchId.append(recTmp.getExternalId().toString());
-          } else {
-            researchId.append("NoExternalId");
-          }
-          researchId.append("]-");
-          researchId.append("McCode:[");
-          researchId.append(recTmp.getMcCode());
-          researchId.append("]");
-
-          //TODO: Esta OK este Research?
-          /*DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-          java.util.Date date = formatter.parse(recTmp.getDateTrx());
-          java.sql.Timestamp fechaDeTransaccion = new Timestamp(date.getTime());
-
-          Long movRef = Long.valueOf(0);*/
-          /*getPrepaidMovementEJBBean10().createMovementResearch(
-            null,
-            researchId.toString(),
-            ReconciliationOriginType.SWITCH,
-            fileName,
-            recTmp.getDateTrx(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,
-            movRef);*/
 
           researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
-          researchMovementInformationFiles.setIdArchivo(0L);
-          researchMovementInformationFiles.setIdEnArchivo("1");
-          researchMovementInformationFiles.setNombreArchivo("test");
-          researchMovementInformationFiles.setTipoArchivo("test");
+          researchMovementInformationFiles.setIdArchivo(recTmp.getFileId());
+          researchMovementInformationFiles.setIdEnArchivo(recTmp.getExternalId().toString());
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo(movementType.name());
           researchMovementInformationFilesList.add(researchMovementInformationFiles);
-
+          
+          Long movRef;
+          if(recTmp.getExternalId() > 0){
+            movRef = recTmp.getExternalId();
+          }else{
+            movRef = Long.valueOf(1);
+          }
 
           getPrepaidMovementEJBBean10().createResearchMovement(
             null,
@@ -205,12 +193,11 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             recTmp.getDateTrx(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
-            Long.valueOf(1),
-            PrepaidMovementType.WITHDRAW.name(),
+            movRef,
+            movementType.name(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
-          continue;
         }
         else
           {
@@ -221,6 +208,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             else {
               log.info("Conciliado");
               getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
+              //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo
+              prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
             }
         }
       }
@@ -326,6 +315,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
     return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
+    //return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, String tableName, Long fileId, Long movementId, String mcId) throws Exception {

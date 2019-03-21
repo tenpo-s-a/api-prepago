@@ -22,6 +22,7 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -99,6 +100,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
+  @EJB
+  private McRedReconciliationEJBBean10 mcRedReconciliationEJBBean;
+
+  @EJB
+  private TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean;
+
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
 
@@ -892,12 +900,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          * Si es una reversa de carga - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
          */
         else {
-          //TODO: Esta OK este Research?
-          /*createMovementResearch(
-            null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-            ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),movFull.getFechaCreacion(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH,movFull.getId());*/
 
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -914,7 +916,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             movFull.getFechaCreacion(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH.getValue(),
-            mov.getId(),PrepaidMovementType.TOPUP.name(),
+            movFull.getId(),movFull.getTipoMovimiento().name(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
@@ -966,12 +968,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          * Si es una reversa de retiro - Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
          */
         else {
-          //TODO: Esta OK este Research?
-          /*createMovementResearch(
-            null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-            ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH,mov.getId());*/
 
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -988,7 +984,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH.getValue(),
             mov.getId(),
-            PrepaidMovementType.WITHDRAW.name(),
+            mov.getTipoMovimiento().toString(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
@@ -1009,11 +1005,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 3");
 
-      /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-        ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1028,7 +1019,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getFechaCreacion(),
         ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
         ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR.getValue(),
-        mov.getId(),PrepaidMovementType.TOPUP.name(),
+        mov.getId(),mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1049,12 +1040,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch())&& PrepaidMovementStatus.PROCESS_OK.equals(mov.getEstado())){
       log.debug("XLS ID 4");
 
-      //TODO: Esta OK este Research
-      /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-        ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1070,7 +1055,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
         ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR.getValue(),
         mov.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1096,11 +1081,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ){
       log.debug("XLS ID 5");
 
-      //TODO: Esta OK este Research?
-      /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1116,7 +1096,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1186,11 +1166,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
        */
       else {
 
-        //TODO: Esta OK este Research?
-        /*createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR,
-          ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-          ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED,mov.getId());*/
-
         List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
         researchMovementInformationFiles = new ResearchMovementInformationFiles();
         //researchMovementInformationFiles.setIdArchivo();
@@ -1206,7 +1181,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
           ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
           mov.getId(),
-          PrepaidMovementType.TOPUP.name(),
+          mov.getTipoMovimiento().toString(),
           ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
         );
 
@@ -1284,11 +1259,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     ) && PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento())){
       log.debug("XLS ID 8");
 
-      //TODO: Esta OK este Research?
-      /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1304,7 +1274,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        PrepaidMovementType.WITHDRAW.name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1354,11 +1324,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
         createMovementConciliate(null,mov.getId(), ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.COUNTER_MOVEMENT);
 
-        //TODO: Esta OK este Research?
-        /*createMovementResearch(null, String.format("idMov=%s", mov.getId()), ReconciliationOriginType.MOTOR,
-          ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-          ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION,mov.getId());*/
-
         List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
         researchMovementInformationFiles = new ResearchMovementInformationFiles();
         //researchMovementInformationFiles.setIdArchivo();
@@ -1374,7 +1339,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
           ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION.getValue(),
           mov.getId(),
-          PrepaidMovementType.TOPUP.name(),
+          mov.getTipoMovimiento().toString(),
           ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
         );
 
@@ -1481,11 +1446,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if (PrepaidMovementStatus.PENDING.equals(mov.getEstado())||PrepaidMovementStatus.IN_PROCESS.equals(mov.getEstado())){
       log.debug("Movimiento Pendiente o En proceso");
 
-      //TODO: Esta OK este Research?
-      /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1501,7 +1461,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1523,11 +1483,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else {
         log.error("No cae en ningun caso: "+mov);
 
-        //TODO: Esta OK este Research?
-        /*createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
-          ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
-          ResearchMovementResponsibleStatusType.STATUS_UNDEFINED,ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED,mov.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1543,7 +1498,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.STATUS_UNDEFINED.getValue(),
         ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
         mov.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1621,15 +1576,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     // Regla: los movimientos que no vinieron en el archivo, se concilian y se mandan a investigar
     if(AccountingStatusType.NOT_IN_FILE.equals(clearingData10.getStatus())) {
 
-      //TODO: Esta OK este Research?
-      /*
-        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-        createMovementResearch(
-        null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
-        prepaidMovement10.getFechaCreacion(),ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
-        ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE,prepaidMovement10.getId());*/
-
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
       //researchMovementInformationFiles.setIdArchivo();
@@ -1645,7 +1591,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
         ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE.getValue(),
         prepaidMovement10.getId(),
-        PrepaidMovementType.PURCHASE.name(),
+        prepaidMovement10.getTipoMovimiento().name(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1656,15 +1602,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que vengan con datos incorrectos, se concilian y se mandan a investigar
     if(AccountingStatusType.INVALID_INFORMATION.equals(clearingData10.getStatus())) {
-
-      //TODO: Esta OK este Research?
-      /*
-        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-        createMovementResearch(
-        null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
-        prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
-        ResearchMovementDescriptionType.ERROR_INFO,prepaidMovement10.getId());*/
 
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -1678,10 +1615,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.CLEARING_RESOLUTION.name(),
         prepaidMovement10.getFechaCreacion(),
-        ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+        ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
         ResearchMovementDescriptionType.ERROR_INFO.getValue(),
         prepaidMovement10.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        prepaidMovement10.getTipoMovimiento().name(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1692,16 +1629,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     // Regla: los movimientos que no esten confirmados en nuestra BD -> Investigar
     if(!PrepaidMovementStatus.PROCESS_OK.equals(prepaidMovement10.getEstado())) {
-
-
-      //TODO: Esta OK este Research?
-      /*
-        String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-        createMovementResearch(
-        null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
-        ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
-        prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.OTI_PREPAID,
-        ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,prepaidMovement10.getId());*/
 
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -1718,7 +1645,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         prepaidMovement10.getId(),
-        PrepaidMovementType.TOPUP.name(),
+        prepaidMovement10.getTipoMovimiento().name(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1792,16 +1719,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           default: // Nunca deberia llegar aqui
             {
 
-              //TODO: Esta OK este Research?
-
-              /*
-                String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-                createMovementResearch(
-                null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
-                ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
-                prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
-                ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE,prepaidMovement10.getId());*/
-
               List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
               researchMovementInformationFiles = new ResearchMovementInformationFiles();
               //researchMovementInformationFiles.setIdArchivo();
@@ -1817,7 +1734,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
                 ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
                 ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_FILE.getValue(),
                 prepaidMovement10.getId(),
-                PrepaidMovementType.TOPUP.name(),
+                prepaidMovement10.getTipoMovimiento().name(),
                 ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
               );
 
@@ -1829,14 +1746,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         break;
       case NOT_RECONCILED: // Tecnocom NO conciliado -> todos los casos mandan a INVESTIGAR
         {
-
-          //TODO: Esta OK este Research?
-          //String idToResearch = String.format("idMov=%d", prepaidMovement10.getId());
-          /*createMovementResearch(
-            null, idToResearch, ReconciliationOriginType.CLEARING_RESOLUTION,
-            ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),
-            prepaidMovement10.getFechaCreacion(), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID,
-            ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR,prepaidMovement10.getId());*/
 
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
           researchMovementInformationFiles = new ResearchMovementInformationFiles();
@@ -1853,7 +1762,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
             prepaidMovement10.getId(),
-            PrepaidMovementType.TOPUP.name(),
+            prepaidMovement10.getTipoMovimiento().name(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 

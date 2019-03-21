@@ -9,6 +9,7 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
+import cl.multicaja.prepaid.async.v10.routes.InvoiceRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
@@ -18,6 +19,8 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -463,4 +466,30 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     return messageId;
   }
+
+
+  public String sendPendingInvoice(InvoiceData10 invoiceData10, Integer retryCount) throws JsonProcessingException {
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = String.format("%s#%s#%d#", invoiceData10.getType(),invoiceData10.getMovementId(),invoiceData10.getRut());
+
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(InvoiceRoute10.INVOICE_ENDPOINT);
+    ObjectMapper Obj = new ObjectMapper();
+    ExchangeData<String> req = new ExchangeData<>(Obj.writeValueAsString(invoiceData10));
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+    if (retryCount != null){
+      req.setRetryCount(retryCount);
+    }
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
 }
