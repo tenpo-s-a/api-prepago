@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.model.v10.CcrFile10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
@@ -111,7 +112,7 @@ public class MastercardCurrencyUpdateEJBBean10 extends PrepaidBaseEJBBean10 impl
     currencyUsd.setBuyCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getBuyCurrencyConversion()));
     currencyUsd.setSellCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getSellCurrencyConversion()));
     currencyUsd.setMidCurrencyConvertion(Double.parseDouble(ccrFile10.getCcrDetailRecord10().getMidCurrencyConversion()));
-    currencyUsd.setDayCurrencyConvertion(currencyUsd.dayCurrencyVariation * currencyUsd.getSellCurrencyConvertion());
+    currencyUsd.setDayCurrencyConvertion(CalculationsHelper.dayCurrencyVariation * currencyUsd.getSellCurrencyConvertion());
     return currencyUsd;
   }
 

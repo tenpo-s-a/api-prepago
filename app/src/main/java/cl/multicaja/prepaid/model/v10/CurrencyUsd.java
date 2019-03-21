@@ -9,8 +9,6 @@ import java.sql.Timestamp;
 
 public class CurrencyUsd implements Serializable {
 
-  public static final Double dayCurrencyVariation = 1.025;
-
   private Long id;
   private String fileName;
   private Timestamp creationDate;

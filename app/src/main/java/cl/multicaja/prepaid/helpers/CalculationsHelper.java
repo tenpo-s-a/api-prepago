@@ -189,6 +189,11 @@ public class CalculationsHelper {
     }
   }
 
+  /**
+   *
+   * @return
+   * @throws Exception
+   */
   public Double getDayUsdValue() throws Exception {
     //TODO: revisar bien esto. Ya que si es null impacta en los tests
     if(ConfigUtils.isEnvTest() || ConfigUtils.isEnvCI()) {
@@ -198,6 +203,11 @@ public class CalculationsHelper {
       return getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd().getDayCurrencyConvertion();
     }
   }
+
+  /**
+   * Para uso en calculo del dolar valor día.
+   */
+  public static final Double dayCurrencyVariation = 1.025;
 
   /**
    *
