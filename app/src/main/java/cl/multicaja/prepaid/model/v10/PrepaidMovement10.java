@@ -53,6 +53,7 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private Integer linref;
   private Integer numbencta;
   private Long numplastico;
+  private String nomcomred; // Nombre de comercio, Mechant name.
 
   private BusinessStatusType estadoNegocio;
   private ReconciliationStatusType conSwitch;
@@ -351,6 +352,14 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
     this.numplastico = numplastico;
   }
 
+  public String getNomcomred() {
+    return nomcomred;
+  }
+
+  public void setNomcomred(String nomcomred) {
+    this.nomcomred = nomcomred;
+  }
+
   public ReconciliationStatusType getConSwitch() {
     return conSwitch;
   }
@@ -431,7 +440,8 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
       eql(getTipolin(), that.getTipolin()) &&
       eql(getLinref(), that.getLinref()) &&
       eql(getNumbencta(), that.getNumbencta()) &&
-      eql(getNumplastico(), that.getNumplastico());
+      eql(getNumplastico(), that.getNumplastico()) &&
+      eql(getNomcomred(), that.getNomcomred());
   }
 
   private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -485,6 +495,6 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getIdMovimientoRef(), getIdTxExterno(), getIdPrepaidUser(), getTipoMovimiento(), getMonto(), getEstado(), getCodent(), getCentalta(), getCuenta(), getClamon(), getIndnorcor(), getTipofac(), getFecfac(), getNumreffac(), getPan(), getClamondiv(), getImpdiv(), getImpfac(), getCmbapli(), getNumaut(), getIndproaje(), getCodcom(), getCodact(), getImpliq(), getClamonliq(), getCodpais(), getNompob(), getNumextcta(), getNummovext(), getClamone(), getTipolin(), getLinref(), getNumbencta(), getNumplastico());
+    return Objects.hash(getId(), getIdMovimientoRef(), getIdTxExterno(), getIdPrepaidUser(), getTipoMovimiento(), getMonto(), getEstado(), getCodent(), getCentalta(), getCuenta(), getClamon(), getIndnorcor(), getTipofac(), getFecfac(), getNumreffac(), getPan(), getClamondiv(), getImpdiv(), getImpfac(), getCmbapli(), getNumaut(), getIndproaje(), getCodcom(), getCodact(), getImpliq(), getClamonliq(), getCodpais(), getNompob(), getNumextcta(), getNummovext(), getClamone(), getTipolin(), getLinref(), getNumbencta(), getNumplastico(), getNomcomred());
   }
 }

@@ -246,13 +246,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       new InParam(data.getLinref(), Types.NUMERIC),//_linref NUMERIC
       new InParam(data.getNumbencta(),Types.NUMERIC),//_numbencta NUMERIC
       new InParam(data.getNumplastico(),Types.NUMERIC),//_numplastico NUMERIC
+      new InParam(data.getNomcomred(), Types.VARCHAR),
       new InParam(data.getFechaCreacion(),Types.TIMESTAMP),// Nuevo dato entrada Fecha para movimiento compra
       new OutParam("_r_id", Types.NUMERIC),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v10", params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_crea_movimiento_v11", params);
 
     if ("0".equals(resp.get("_error_code"))) {
       data.setId(getNumberUtils().toLong(resp.get("_r_id")));
@@ -541,6 +542,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       p.setLinref(getNumberUtils().toInteger(row.get("_linref")));
       p.setNumbencta(getNumberUtils().toInteger(row.get("_numbencta")));
       p.setNumplastico(getNumberUtils().toLong(row.get("_numplastico")));
+      p.setNomcomred(String.valueOf(row.get("_nomcomred")));
 
       return p;
       }catch (Exception e){
@@ -550,7 +552,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_v10", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_buscar_movimientos_v11", rm, params);
     log.info("Respuesta Busca Movimiento: "+resp);
     return (List)resp.get("result");
   }

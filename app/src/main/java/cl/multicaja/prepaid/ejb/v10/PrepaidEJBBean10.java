@@ -1378,6 +1378,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(transaction.getMerchantName());
 
     return prepaidMovement;
   }
