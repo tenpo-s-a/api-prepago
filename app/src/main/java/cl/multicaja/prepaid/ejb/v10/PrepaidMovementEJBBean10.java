@@ -1098,8 +1098,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
      */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
-            PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) &&
-            isRetryErrorStatus(mov.getEstado())
+            isRetryErrorStatus(mov.getEstado()) &&
+            (PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) ||
+            (PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) && IndicadorNormalCorrector.CORRECTORA.equals(mov.getIndnorcor())))
     ) {
       log.debug("XLS ID 6");
       // Se obtiene el movimiento completo.--
@@ -1146,20 +1147,38 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       else {
 
         updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
-        createMovementConciliate(null, mov.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
 
-        NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
-        newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
-        newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
-        newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
-        newPrepaidTopup10.setMerchantName("Conciliacion");
-        newPrepaidTopup10.setRut(user.getRut().getValue());
-        newPrepaidTopup10.setTransactionId(String.format("MC_%s", movFull.getIdTxExterno()));
-        newPrepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
-        newPrepaidTopup10.setFirstTopup(false);
+        if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
+          createMovementConciliate(null, mov.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
 
-        // Se envia movimiento contrario
-        getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup10,false);
+          NewPrepaidTopup10 newPrepaidTopup10 = new NewPrepaidTopup10();
+          newPrepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
+          newPrepaidTopup10.setMerchantCategory(movFull.getCodact());
+          newPrepaidTopup10.setMerchantCode(movFull.getCodcom());
+          newPrepaidTopup10.setMerchantName("Conciliacion");
+          newPrepaidTopup10.setRut(user.getRut().getValue());
+          newPrepaidTopup10.setTransactionId(String.format("MC_%s", movFull.getIdTxExterno()));
+          newPrepaidTopup10.setMovementType(PrepaidMovementType.TOPUP);
+          newPrepaidTopup10.setFirstTopup(false);
+
+          // Se envia movimiento contrario
+          getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup10, false);
+        } else {
+          // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
+          createMovementConciliate(null, mov.getId(), ReconciliationActionType.RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+
+          NewPrepaidWithdraw10 newPrepaidWithdraw = new NewPrepaidWithdraw10();
+          newPrepaidWithdraw.setAmount(new NewAmountAndCurrency10(movFull.getMonto()));
+          newPrepaidWithdraw.setMerchantCategory(movFull.getCodact());
+          newPrepaidWithdraw.setMerchantCode(movFull.getCodcom());
+          newPrepaidWithdraw.setMerchantName("Conciliacion");
+          newPrepaidWithdraw.setRut(user.getRut().getValue());
+          newPrepaidWithdraw.setTransactionId(String.format("MC_%s", movFull.getIdTxExterno()));
+          newPrepaidWithdraw.setMovementType(PrepaidMovementType.TOPUP);
+
+          // Se envia movimiento contrario
+          getPrepaidEJBBean10().withdrawUserBalance(null, newPrepaidWithdraw,false);
+        }
       }
     }
     /**

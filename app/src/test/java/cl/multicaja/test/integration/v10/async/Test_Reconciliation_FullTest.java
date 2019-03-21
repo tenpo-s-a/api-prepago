@@ -849,7 +849,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
   */
 
-  /*
   @Test
   public void case6_topup_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1134,12 +1133,12 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   @Test
   public void case6_withdraw_reverse_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     testData.switchMovement = null;
     testData = createTestData(testData);
 
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
@@ -1157,7 +1156,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
-  */
 
   /*
   @Test
