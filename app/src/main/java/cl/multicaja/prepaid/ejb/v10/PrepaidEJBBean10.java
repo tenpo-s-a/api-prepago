@@ -9,10 +9,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
-import cl.multicaja.prepaid.async.v10.MailDelegate10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
-import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
@@ -2884,8 +2881,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-
-        
         //Send Async Mail
         Map<String, Object> templateData = new HashMap<String, Object>();
         templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
@@ -2895,7 +2890,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         emailBody.setAddress("test.notification_tecnocom@mail.com");
         mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
       }
-
+      //TODO: Cuando se procese el callback y se cree el movimiento se debera agregar la generacion de boleta.
+      //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
     }
 
     return notificationTecnocom;
