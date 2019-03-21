@@ -871,6 +871,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       log.debug("XLS ID 1");
       createMovementConciliate(null,mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.OK);
 
       // Si el moviento es una Carga o Retiro POS, se actualiza informacion en accounting y clearing
       if(TipoFactura.CARGA_TRANSFERENCIA.equals(mov.getTipofac()) ||
@@ -1068,13 +1069,15 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
      */
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) &&
-            PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) &&
-            isRetryErrorStatus(mov.getEstado())
+            isRetryErrorStatus(mov.getEstado()) &&
+            (PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) ||
+             PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) && IndicadorNormalCorrector.CORRECTORA.equals(mov.getIndnorcor()))
     ){
       log.debug("XLS ID 5");
 
       createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
       updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.OK);
 
       if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
         // se actualiza informacion en accounting y clearing
@@ -1082,7 +1085,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       } else {
         // Si el movimiento es una reversa, debe actualizar el status de negocio del movimiento original a REVERSED
         PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
-        PrepaidMovement10 originalMovement = getPrepaidMovementForReverse(movFull.getIdPrepaidUser(), movFull.getIdTxExterno(), PrepaidMovementType.TOPUP, TipoFactura.valueOfEnumByCodeAndCorrector(movFull.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
+        PrepaidMovement10 originalMovement = getPrepaidMovementForReverse(movFull.getIdPrepaidUser(), movFull.getIdTxExterno(), movFull.getTipoMovimiento(), TipoFactura.valueOfEnumByCodeAndCorrector(movFull.getTipofac().getCode(), IndicadorNormalCorrector.NORMAL.getValue()));
         updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
       }
     }
@@ -1269,7 +1272,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
 
       PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-      prepaidTopup.setMerchantName(movFull.getNomcomred());
+      //prepaidTopup.setMerchantName(movFull.getNomcomred()); // Todo: cuando mezcle la otra rama
+      prepaidTopup.setMerchantName("nomcomred");
       prepaidTopup.setMerchantCode(movFull.getCodcom());
 
       CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());

@@ -48,7 +48,9 @@ BEGIN
       pmc.id_mov_ref is null and -- que no este conciliado
       pm.estado_con_switch != 'PENDING' and
       pm.estado_con_tecnocom != 'PENDING' and
-      pm.tipofac != 3003;  -- Se buscan todos menos los retiros web
+      pm.tipofac != 3003 and
+      pm.tipo_movimiento != 'PURCHASE' and
+      pm.tipo_movimiento != 'SUSCRIPTION';  -- Se buscan todos menos los retiros web, compras y subscripciones
   RETURN;
 END;
 $$ LANGUAGE plpgsql;
