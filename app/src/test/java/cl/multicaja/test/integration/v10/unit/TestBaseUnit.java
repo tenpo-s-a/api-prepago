@@ -1057,6 +1057,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
 
     return prepaidMovement;
   }
@@ -1125,6 +1126,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
     return prepaidMovement;
   }
   /*
@@ -1204,6 +1206,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(reverseRequest != null ? reverseRequest.getMerchantName() != null ? reverseRequest.getMerchantName() : getRandomString(10) : getRandomString(10));
 
     return prepaidMovement;
   }

@@ -310,6 +310,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setLinref(NumberUtils.getInstance().toInteger(batchTrx.getLinRef()));
     prepaidMovement.setNumbencta(1);
     prepaidMovement.setNumplastico(0L);
+    prepaidMovement.setNomcomred(""); //Todo: Movimiento tecnocom deberia saber el nomcomred?
 
     return prepaidMovement;
   }
