@@ -982,7 +982,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
             ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
             ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH.getValue(),
             mov.getId(),
-            mov.getTipoMovimiento().name(),
+            mov.getTipoMovimiento().toString(),
             ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
           );
 
@@ -1017,7 +1017,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         mov.getFechaCreacion(),
         ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
         ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR.getValue(),
-        mov.getId(),mov.getTipoMovimiento().name(),
+        mov.getId(),mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1053,7 +1053,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
         ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR.getValue(),
         mov.getId(),
-        mov.getTipoMovimiento().name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1094,7 +1094,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        mov.getTipoMovimiento().name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1179,7 +1179,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
           ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
           mov.getId(),
-          mov.getTipoMovimiento().name(),
+          mov.getTipoMovimiento().toString(),
           ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
         );
 
@@ -1272,7 +1272,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        mov.getTipoMovimiento().name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1337,7 +1337,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
           ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION.getValue(),
           mov.getId(),
-          mov.getTipoMovimiento().name(),
+          mov.getTipoMovimiento().toString(),
           ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
         );
 
@@ -1459,7 +1459,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         mov.getId(),
-        mov.getTipoMovimiento().name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
@@ -1496,7 +1496,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         ResearchMovementResponsibleStatusType.STATUS_UNDEFINED.getValue(),
         ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
         mov.getId(),
-        mov.getTipoMovimiento().name(),
+        mov.getTipoMovimiento().toString(),
         ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
       );
 
