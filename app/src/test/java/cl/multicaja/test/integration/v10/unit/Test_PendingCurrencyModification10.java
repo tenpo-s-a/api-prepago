@@ -38,6 +38,7 @@ public class Test_PendingCurrencyModification10 extends TestBaseUnitAsync {
     Assert.assertTrue("Deberia ser > 0", currencyUsd.getBuyCurrencyConvertion() > 0);
     Assert.assertTrue("Deberia ser > 0", currencyUsd.getMidCurrencyConvertion() > 0);
     Assert.assertTrue("Deberia ser > 0", currencyUsd.getSellCurrencyConvertion() > 0);
+    
     //TODO Assert.assertTrue("Deberia ser > 0", currencyUsd.getDayCurrencyConvertion() > 0);
   }
 
