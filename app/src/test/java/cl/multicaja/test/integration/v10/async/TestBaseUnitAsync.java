@@ -48,12 +48,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
   @After
   public void after() {
-    //Todos los test que involucren procesos asincronos esperaran 1 segundo despues que terminen para
-    //asegurarse que los mensajes de su test fueron procesado
-    try {
-      Thread.sleep(1000);
-    } catch (Exception e) {
-    }
     System.out.println("----------------------------------------------------------------");
     System.out.println("After Test - class: " + this.getClass().getSimpleName() + ", method: " + testName.getMethodName());
     System.out.println("----------------------------------------------------------------");
