@@ -103,5 +103,5 @@ $$ LANGUAGE plpgsql;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_valor_usd_v10(VARCHAR, TIMESTAMP, TIMESTAMP, TIMESTAMP, NUMERIC, NUMERIC, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS ${schema}.mc_prp_actualiza_valor_usd_v10(VARCHAR, TIMESTAMP, NUMERIC, NUMERIC, NUMERIC, NUMERIC);
 

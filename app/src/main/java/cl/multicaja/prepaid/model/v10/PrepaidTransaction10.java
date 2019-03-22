@@ -34,6 +34,7 @@ public class PrepaidTransaction10 extends BaseModel {
     this.date = date;
   }
 
+  //TODO: debe ser el valor de venta o el valor del día?.
   public NewAmountAndCurrency10 getUsdValue() {
     return usdValue;
   }
