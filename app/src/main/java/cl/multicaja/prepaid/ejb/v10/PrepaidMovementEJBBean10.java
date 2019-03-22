@@ -1534,7 +1534,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
       Ticket ticket = getUserClient().createFreshdeskTicket(null, user.getId(), newTicket);
-      if (ticket.getId() != null) {
+      if (ticket != null && ticket.getId() != null) {
         log.info("Ticket Creado Exitosamente");
       } else {
         log.info("Error al crear el ticket de devolucion");

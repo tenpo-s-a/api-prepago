@@ -19,6 +19,7 @@ import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBaseUnit {
 
+  /*
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private DateTimeFormatter conciliationDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:00");
 
@@ -432,4 +433,5 @@ public class Test_PrepaidMovementEJBBean10_processReconciliation extends TestBas
     List<ResearchMovement10> researchMovements = getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(idMovRef));
     return researchMovements != null && !researchMovements.isEmpty() ? researchMovements.get(0) : null;
   }
+  */
 }
