@@ -1503,6 +1503,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setPcaMain(amount);
       balance.setBalance(amount);
       balance.setPcaSecondary(amount);
+      //TODO: debe ser el valor de venta o el valor del día?.
       balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
