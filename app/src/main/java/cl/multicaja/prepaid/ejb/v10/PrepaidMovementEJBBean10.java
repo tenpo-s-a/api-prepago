@@ -908,6 +908,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.info("user null");
       }
 
+      updatePrepaidBusinessStatus(null, movFull.getId(), BusinessStatusType.OK);
+
       /**
        * Carga
        */
@@ -1191,7 +1193,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
             PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
-            IndicadorNormalCorrector.NORMAL.equals(mov.getTipoMovimiento()) &&
+            IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor()) &&
             isRetryErrorStatus(mov.getEstado())
     ){
       log.debug("XLS ID 7");
@@ -1245,12 +1247,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) &&
             PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
+            IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor()) &&
             isRetryErrorStatus(mov.getEstado())
     ) {
       log.debug("XLS ID 8");
 
       // Confirmar el movimiento original
       updatePrepaidMovementStatus(null, mov.getId(), PrepaidMovementStatus.PROCESS_OK);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.OK);
 
       //TODO: Esta OK este Research?
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
@@ -1275,8 +1279,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
      */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) &&
-            PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) &&
-            isRetryErrorStatus(mov.getEstado())
+            isRetryErrorStatus(mov.getEstado()) &&
+            (PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) ||
+            (PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) && IndicadorNormalCorrector.CORRECTORA.equals(mov.getIndnorcor())))
     ) {
       log.debug("XLS ID 9");
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
@@ -1292,15 +1297,33 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         log.error("user null");
       }
 
-      PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-      //prepaidTopup.setMerchantName(movFull.getNomcomred()); // Todo: cuando mezcle la otra rama
-      prepaidTopup.setMerchantName("nomcomred");
-      prepaidTopup.setMerchantCode(movFull.getCodcom());
+      if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
+        PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+        //prepaidTopup.setMerchantName(movFull.getNomcomred()); // Todo: cuando mezcle la otra rama
+        prepaidTopup.setMerchantName("nomcomred");
+        prepaidTopup.setMerchantCode(movFull.getCodcom());
+        CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
 
-      CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
+        // Reenviar el movimiento a tecnocom
+        getPrepaidEJBBean10().getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, movFull);
+      } else {
+        if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
+          PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
+          prepaidTopup10.setMerchantCode(movFull.getCodcom());
+          prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
+          prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
 
-      // Reenviar el movimiento a tecnocom
-      getPrepaidEJBBean10().getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, movFull);
+          PrepaidCard10 card = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
+          getPrepaidEJBBean10().getDelegate().sendPendingTopupReverse(prepaidTopup10, card, prepaidUser10, movFull);
+        } else {
+          PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();
+          prepaidWithdraw10.setMerchantCode(movFull.getCodcom());
+          prepaidWithdraw10.setTransactionId(movFull.getIdTxExterno());
+          prepaidWithdraw10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
+
+          getPrepaidEJBBean10().getDelegate().sendPendingWithdrawReversal(prepaidWithdraw10, prepaidUser10, movFull);
+        }
+      }
     }
     /**
      * ID 10 - Movimiento (Carga o Reversa)
@@ -1311,8 +1334,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
      */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
       ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
-      PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) &&
-      isRetryErrorStatus(mov.getEstado())
+      isRetryErrorStatus(mov.getEstado()) &&
+      (PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento()) ||
+      (PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) && IndicadorNormalCorrector.CORRECTORA.equals(mov.getIndnorcor())))
     ) {
       log.debug("XLS ID 10");
 
@@ -1341,11 +1365,11 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
             ReconciliationStatusType.RECONCILED.equals(mov.getConSwitch()) &&
             PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
+            IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor()) &&
             isRetryErrorStatus(mov.getEstado())
     ) {
       log.debug("XLS ID 11");
 
-      //TODO: Esta OK este Research?
       createMovementResearch(null,String.format("idMov=%s",mov.getId()), ReconciliationOriginType.MOTOR,
         ResearchMovementFileStatusType.NOT_FILE_NAME.getValue(),mov.getFechaCreacion(),
         ResearchMovementResponsibleStatusType.OTI_PREPAID,ResearchMovementDescriptionType.ERROR_STATUS_IN_DB,mov.getId());
@@ -1367,9 +1391,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
      *  Se guarda en tabla de movimientos conciliados con status NEED_VERIFICATION y se agrega en la tabla de movimientos a investigar
      */
     else if(ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConTecnocom()) &&
-      ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
-      PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
-      isRetryErrorStatus(mov.getEstado())
+            ReconciliationStatusType.NOT_RECONCILED.equals(mov.getConSwitch()) &&
+            PrepaidMovementType.WITHDRAW.equals(mov.getTipoMovimiento()) &&
+            IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor()) &&
+            isRetryErrorStatus(mov.getEstado())
     ) {
       log.debug("XLS ID 12");
 
@@ -1521,10 +1546,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.debug("XLS ID 16");
 
       createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-
-      // El excel dice que deben marcarse como conciliados (?)
-      updateStatusMovementConTecnocom(null, mov.getId(), ReconciliationStatusType.RECONCILED);
-      updateStatusMovementConSwitch(null, mov.getId(), ReconciliationStatusType.RECONCILED);
+      updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.REJECTED);
 
       // TODO: esto va? no se hace mencion a los estado clearing/accounting
       if(IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {

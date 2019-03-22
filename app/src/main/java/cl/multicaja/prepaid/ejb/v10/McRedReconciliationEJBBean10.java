@@ -161,8 +161,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       log.info("No hay movimientos que cociliar.");
       return;
     }
-    try {
-      for (McRedReconciliationFileDetail recTmp : lstMcRedReconciliationFileDetails) {
+
+    for (McRedReconciliationFileDetail recTmp : lstMcRedReconciliationFileDetails) {
+      try {
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(recTmp.getMcCode(),movementType,indicadorNormalCorrector);
         log.info(prepaidMovement10);
         if (prepaidMovement10 == null) {
@@ -220,22 +221,20 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
               getPrepaidEJBBean10().reverseWithdrawUserBalance(null, reverse, false);
             }
           }
+        } else {
+          if (recTmp.getAmount().compareTo(prepaidMovement10.getMonto()) != 0) {
+            log.error("No conciliado");
+            getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
+          }
+          else {
+            log.info("Conciliado");
+            getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
+          }
         }
-        else
-          {
-            if (recTmp.getAmount().compareTo(prepaidMovement10.getMonto()) != 0) {
-              log.error("No conciliado");
-              getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
-            }
-            else {
-              log.info("Conciliado");
-              getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
-            }
-        }
+      } catch (Exception e) {
+        log.error("Error procesando archivo switch");
+        e.printStackTrace();
       }
-    }catch (Exception e){
-      e.printStackTrace();
-      throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), e.getMessage());
     }
   }
 

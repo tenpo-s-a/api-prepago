@@ -17,9 +17,7 @@ import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.TicketsResponse;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.TipoFactura;
+import cl.multicaja.tecnocom.constants.*;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -74,8 +72,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       String pan = EncryptUtil.getInstance().decrypt(prepaidCard.getEncryptedPan());
 
       PrepaidTopup10 prepaidTopup = test.buildPrepaidTopup10(user);
-      prepaidTopup.getAmount().setValue(new BigDecimal(25000));
-      prepaidTopup.setMerchantCode("758374665428219");
+      prepaidTopup.getAmount().setValue(new BigDecimal(200000));
+      prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.setFirstTopup(false);
       CdtTransaction10 cdtTransaction = test.buildCdtTransaction10(user, prepaidTopup);
       PrepaidMovement10 prepaidMovement = test.buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
@@ -91,6 +89,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       cdtTransaction = test.createCdtTransaction10(cdtTransaction);
       prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
       prepaidMovement = test.createPrepaidMovement10(prepaidMovement);
+
+      TecnocomServiceHelper.getInstance().getTecnocomService().cambioProducto(contrato, "", TipoDocumento.RUT, TipoAlta.NIVEL2);
 
       TecnocomServiceHelper.getInstance().topup(contrato, pan, nomcomred, prepaidMovement);
 
@@ -168,7 +168,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   }
 
-  /*
   @Test
   public void case1_topup_pos_BD_ok_SW_ok_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1285,7 +1284,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(counterMovement.getId(), true, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
-  */
+
   @Test
   public void case7_withdraw_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1348,7 +1347,70 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
-  /*
+
+  @Test
+  public void case7_withdraw_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Tiene que existir la reversa
+    PrepaidMovement10 foundReverse = waitForReverse(testData.prepaidMovement.getId());
+
+    // Estado de negocio debe cambiar a reversed
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.REVERSED, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
+    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+  }
+
+  @Test
+  public void case7_withdraw_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Tiene que existir la reversa
+    PrepaidMovement10 foundReverse = waitForReverse(testData.prepaidMovement.getId());
+
+    // Estado de negocio debe cambiar a reversed
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.REVERSED, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
+    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+  }
+
+  @Test
+  public void case7_withdraw_pos_BD_error_timeout_response_SW_WrongAmount_TC_ok() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    // Tiene que existir la reversa
+    PrepaidMovement10 foundReverse = waitForReverse(testData.prepaidMovement.getId());
+
+    // Estado de negocio debe cambiar a reversed
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.REVERSED, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
+    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
+  }
+
   @Test
   public void case8_withdraw_pos_BD_error_tc_reintentable_SW_ok_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1447,9 +1509,14 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   @Test
   public void case9_topup_reverse_BD_error_tc_reintentable_SW_ok_TC_Expired() throws Exception {
+    TestData setupData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
     testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
     testData = createTestData(testData);
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
@@ -1461,9 +1528,14 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   @Test
   public void case9_topup_reverse_BD_error_timeout_conexion_SW_ok_TC_Expired() throws Exception {
+    TestData setupData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
     testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
     testData = createTestData(testData);
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
@@ -1475,12 +1547,17 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
   @Test
   public void case9_topup_reverse_BD_error_timeout_response_SW_ok_TC_Expired() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    TestData setupData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
     testData = createTestData(testData);
 
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
@@ -1488,22 +1565,60 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   @Test
-  public void case10_topup_BD_error_tc_reintentable_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+  public void case9_withdraw_reverse_BD_error_tc_reintentable_SW_ok_TC_Expired() throws Exception {
+    TestData setupData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
     testData = createTestData(testData);
 
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+    waitForExists(testData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, PrepaidMovementStatus.PROCESS_OK);
+  }
+
+  @Test
+  public void case9_withdraw_reverse_BD_error_timeout_conexion_SW_ok_TC_Expired() throws Exception {
+    TestData setupData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    waitForExists(testData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, PrepaidMovementStatus.PROCESS_OK);
+  }
+
+  @Test
+  public void case9_withdraw_reverse_BD_error_timeout_response_SW_ok_TC_Expired() throws Exception {
+    TestData setupData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    setupData = createTestData(setupData);
+
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.tecnocomMovement = null;
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.switchMovement.setMcCode(testData.prepaidMovement.getIdTxExterno());
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    waitForExists(testData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL, PrepaidMovementStatus.PROCESS_OK);
   }
 
   @Test
@@ -1518,26 +1633,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case10_topup_BD_error_tc_reintentable_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1556,26 +1652,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case10_topup_BD_error_timeout_conexion_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1594,26 +1671,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case10_topup_BD_error_timeout_conexion_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1632,26 +1690,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case10_topup_BD_error_timeout_response_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1670,26 +1709,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case10_topup_BD_error_timeout_response_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1708,31 +1728,215 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
   }
 
-  // TODO: falta caso 10, topup_reverse
-
   @Test
-  public void case11_withdraw_pos_BD_error_tc_reintentable_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+  public void case10_topup_reverse_BD_error_tc_reintentable_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
     testData = createTestData(testData);
 
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_topup_reverse_BD_error_tc_reintentable_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_topup_reverse_BD_error_timeout_conexion_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_topup_reverse_BD_error_timeout_conexion_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_topup_reverse_BD_error_timeout_response_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_topup_reverse_BD_error_timeout_response_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_tc_reintentable_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_tc_reintentable_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_timeout_conexion_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_timeout_conexion_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_timeout_response_SW_WrongAmount_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+  }
+
+  @Test
+  public void case10_withdraw_reverse_BD_error_timeout_response_SW_Expired_TC_Expired() throws Exception {
+    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
+    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+    testData.tecnocomMovement = null;
+    testData.switchMovement = null;
+    testData = createTestData(testData);
+
+    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().processReconciliationRules();
+
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
   }
 
   @Test
@@ -1746,25 +1950,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case11_withdraw_pos_BD_error_timeout_conexion_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1782,25 +1968,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case11_withdraw_pos_BD_error_timeout_response_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -1818,30 +1986,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
   }
 
   @Test
@@ -1856,26 +2005,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_tc_reintentable_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -1894,26 +2024,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -1932,26 +2043,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_timeout_conexion_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -1970,26 +2062,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_timeout_response_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -2008,26 +2081,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-    assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case12_withdraw_pos_BD_error_timeout_response_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -2046,39 +2100,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.NOT_EXECUTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
     assertResearch(testData.prepaidMovement.getId(), false);
-  }
-
-  @Test
-  public void case13_topup_BD_rejected_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.TO_REFUND, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REFUND, ReconciliationStatusType.TO_REFUND);
-
-    // Debe haberse confirmado el movimiento original en el cdt
-    CdtTransaction10 foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, testData.prepaidMovement.getIdTxExterno(), CdtTransactionType.CARGA_POS_CONF);
-    Assert.assertNotNull("Debe existir la confirmacion de carga", foundCdtTransaction);
-
-    // Debe haberse iniciado una reversa en el cdt
-    foundCdtTransaction = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, testData.prepaidMovement.getIdTxExterno(), CdtTransactionType.REVERSA_CARGA);
-    Assert.assertNotNull("Debe existir la reversa de carga", foundCdtTransaction);
-
-    // Revisar si existse el ticket en freshdesk
-    assertTicket(testData.prepaidMovement.getId(), TicketType.DEVOLUCION);
   }
 
   @Test
@@ -2110,25 +2136,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   @Test
-  public void case14_topup_BD_rejected_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
   public void case14_topup_BD_rejected_SW_WrongAmount_TC_Expired() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
@@ -2140,26 +2147,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case14_topup_BD_rejected_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2178,29 +2166,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
-  }
-
-  @Test
-  public void case15_withdraw_BD_rejected_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
   }
 
   @Test
@@ -2214,29 +2184,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
-  }
-
-  @Test
-  public void case16_withdraw_BD_rejected_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
   }
 
   @Test
@@ -2251,25 +2203,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
-  }
-
-  @Test
-  public void case16_withdraw_BD_rejected_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.REJECTED);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData.switchMovement = null;
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.REJECTED, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -2287,7 +2221,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.REJECTED, BusinessStatusType.REJECTED, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.NOT_OK);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.NOT_SEND);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
@@ -2387,8 +2321,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     setupData = createTestData(setupData);
 
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement = null;
     testData.switchMovement.setMcCode(setupData.prepaidMovement.getIdTxExterno());
+    testData.prepaidMovement.setIdTxExterno(setupData.prepaidMovement.getIdTxExterno());
+    testData.prepaidMovement = null;
     testData = createTestData(testData);
 
     getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
@@ -2407,7 +2342,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2424,7 +2359,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2441,7 +2376,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2456,7 +2391,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2471,7 +2406,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2488,7 +2423,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2505,7 +2440,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2520,26 +2455,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_topup_BD_pending_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2556,26 +2472,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_topup_BD_pending_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2594,26 +2491,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_withdraw_BD_pending_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2632,26 +2510,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_withdraw_BD_pending_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2670,26 +2529,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_topup_reverse_BD_pending_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2706,24 +2548,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_topup_reverse_BD_pending_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2740,24 +2565,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_withdraw_reverse_BD_pending_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2774,24 +2582,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case22_withdraw_reverse_BD_pending_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2808,26 +2599,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_topup_BD_in_process_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2844,26 +2616,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_topup_BD_in_process_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2882,26 +2635,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_withdraw_BD_in_process_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2920,26 +2654,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_withdraw_BD_in_process_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -2958,26 +2673,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_topup_reverse_BD_in_process_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -2994,24 +2692,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_topup_reverse_BD_in_process_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3028,24 +2709,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_withdraw_reverse_BD_in_process_SW_WrongAmount_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement.setAmount(testData.switchMovement.getAmount().add(new BigDecimal(1L)));
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3062,24 +2726,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case23_withdraw_reverse_BD_in_process_SW_Expired_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.switchMovement = null;
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3096,25 +2743,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case24_topup_BD_pending_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3130,25 +2759,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case24_withdraw_BD_pending_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -3166,25 +2777,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case24_topup_reverse_BD_pending_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3200,23 +2795,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case24_withdraw_reverse_BD_pending_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3232,25 +2811,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case25_topup_BD_in_process_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3266,25 +2827,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
-    assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case25_withdraw_BD_in_process_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
@@ -3302,25 +2845,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case25_topup_reverse_BD_in_process_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.CORRECTORA, topupReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(topupReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3336,23 +2863,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
-    assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
-  }
-
-  @Test
-  public void case25_withdraw_reverse_BD_in_process_SW_ok_TC_WrongAmount() throws Exception {
-    TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
-    testData.prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
-    testData.tecnocomMovement.getImpFac().setValue(testData.tecnocomMovement.getImpFac().getValue().add(new BigDecimal(1L)));
-    testData = createTestData(testData);
-
-    getMcRedReconciliationEJBBean10().processSwitchData(withdrawReverseReconciliationFile10);
-    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().processReconciliationRules();
-
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
@@ -3368,11 +2879,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
-    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.OK, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
+    assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
-  */
 
   ClearingData10 waitForClearingToExist(Long accountingId) throws Exception {
     ClearingData10 foundClearing = null;
