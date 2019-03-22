@@ -2944,12 +2944,12 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   PrepaidMovement10 waitForReverse(Long movementId) throws Exception {
     PrepaidMovement10 foundMovement = null;
     for(int i = 0; i < 50; i++) {
+      log.info("Buscando..." + Instant.now());
       // Esperar que el async ejecute la reversa
       foundMovement = getPrepaidMovementEJBBean10().getPrepaidMovementById(movementId);
       if(foundMovement != null && BusinessStatusType.REVERSED.equals(foundMovement.getEstadoNegocio())) {
         break;
       }
-      System.out.println("Buscando...");
       Thread.sleep(100);
     }
     Assert.assertNotNull("Debe estar encontrado", foundMovement);
