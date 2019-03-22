@@ -17,16 +17,19 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -72,6 +75,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
 
+  @Inject
+  private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+
+  public void setPrepaidInvoiceDelegate10(PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10) {
+    this.prepaidInvoiceDelegate10 = prepaidInvoiceDelegate10;
+  }
   public ReconciliationFilesEJBBean10 getReconciliationFilesEJBBean10() {
     return reconciliationFilesEJBBean10;
   }
@@ -383,7 +392,26 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
             List<ReconciliationFile10> fileList = getReconciliationFilesEJBBean10().getReconciliationFile(null, fileId, null, null, null, null);
             ReconciliationFile10 file = fileList.get(0);
-            getPrepaidMovementEJBBean10().createMovementResearch(null, researchId, ReconciliationOriginType.TECNOCOM, file.getFileName(), trx.getFecTrn(), ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, 0L);
+
+            // Todo: insertar los valores correctos de id en archivo y nombreArchivo
+            List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+            ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+            //researchMovementInformationFiles.setIdArchivo();
+            //researchMovementInformationFiles.setIdEnArchivo();
+            //researchMovementInformationFiles.setNombreArchivo();
+            //researchMovementInformationFiles.setTipoArchivo();
+            researchMovementInformationFilesList.add(researchMovementInformationFiles);
+            getPrepaidMovementEJBBean10().createResearchMovement(
+              null,
+              new ObjectMapper().writeValueAsString(researchMovementInformationFilesList),
+              ReconciliationOriginType.TECNOCOM.toString(),
+              trx.getFecTrn(),
+              ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
+              0L,
+              trx.getMovementType().toString(),
+              ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+            );
 
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
@@ -461,6 +489,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().buildClearing(accountingData10.getId(),null);
 
           clearingData10=getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
+
+          // Si la autorizacion no fue creada por el callback se debera generar aca
+          prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
+
           log.debug("INSERT MOV AUT");
         }else {
           log.error(trx.getOperationType());
@@ -524,6 +556,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     // Switch Conciliado ya que no pasa por switch
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    prepaidMovement.setNomcomred(""); // Todo: MovimientoTecnocom debe traer el merchant name
 
     return prepaidMovement;
   }

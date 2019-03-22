@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
@@ -18,6 +19,8 @@ import cl.multicaja.prepaid.helpers.users.model.Rut;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +55,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
+  private ResearchMovementInformationFiles researchMovementInformationFiles;
+
   public PrepaidAccountingFileEJBBean10 getPrepaidAccountingFileEJBBean10() {
     return prepaidAccountingFileEJBBean10;
   }
@@ -74,6 +79,10 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  protected String toJson(Object obj) throws JsonProcessingException {
+    return new ObjectMapper().writeValueAsString(obj);
   }
 
   @Override
@@ -159,7 +168,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return data;
   }
 
-  //TODO: este metodo no tiene test usando el parametro "status"
   @Override
   public List<ClearingData10> searchClearingData(Map<String, Object> header, Long id, AccountingStatusType status, Long accountingId) throws Exception {
 
@@ -176,7 +184,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     Map<String, Object> resp = getDbUtils().execute(getSchemaAccounting() + ".mc_acc_search_clearing_data_v10",  rm, params);
     List<ClearingData10> res = (List<ClearingData10>)resp.get("result");
     log.info(res);
-    return res != null ? res : Collections.EMPTY_LIST;
+    return res != null ? res : Collections.emptyList();
   }
 
   @Override
@@ -438,7 +446,6 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     log.info(String.format("Registro procesados: %d", clearingData10s.size()));
     processClearingBankResponse(clearingData10s, fileName, fileId);
     log.info("processClearingResponse OUT");
-    getPrepaidMovementEJBBean10().clearingResolution(); // llamar a F3
   }
 
   private List<ClearingData10> processClearingResponseDataFile(InputStream inputStream) throws IOException, ValidationException {
@@ -538,14 +545,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // O su estado clearing es distinto de PENDING
           // O ya esta conciliado
 
-          //TODO: Esta OK este Research?
+          List<ResearchMovementInformationFiles> researchMovementInformationFilesList1 = new ArrayList<>();
+          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
+          researchMovementInformationFiles.setIdEnArchivo(String.valueOf(data.getId()));
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo("CLEARING");
+          researchMovementInformationFilesList1.add(researchMovementInformationFiles);
           createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
+            researchMovementInformationFilesList1,
+            ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
             ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
-            data.getId());
+            data.getIdTransaction(),
+            PrepaidMovementType.PURCHASE,
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING);
 
           // Los movimientos con clearing resuelto y no conciliados deben conciliarse (para que no pasen a clearingResolution)
           if(!AccountingStatusType.PENDING.equals(data.getStatus()) && reconciliedMovement10 == null) {
@@ -563,14 +578,22 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         if(result == null) {
           //Agregar a Investigar
 
-          //TODO: Esta OK este Research?
-          this.createClearingResearch(
-            data.getIdTransaction(),
-            fileName,
+          List<ResearchMovementInformationFiles> researchMovementInformationFilesList2 = new ArrayList<>();
+          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
+          researchMovementInformationFiles.setIdEnArchivo(String.valueOf(data.getId()));
+          researchMovementInformationFiles.setNombreArchivo(fileName);
+          researchMovementInformationFiles.setTipoArchivo("CLEARING");
+          researchMovementInformationFilesList2.add(researchMovementInformationFiles);
+          createClearingResearch(
+            researchMovementInformationFilesList2,
+            ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
             ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
-            new Long(0));
+            data.getIdTransaction(),
+            PrepaidMovementType.PURCHASE,
+            ResearchMovementSentStatusType.SENT_RESEARCH_PENDING);
 
         }
       } else {
@@ -580,16 +603,31 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  // Agrega movimiento a investigar
   public void createClearingResearch(
-    Long movementId, String fileName, Timestamp dateOfTransaction, ResearchMovementResponsibleStatusType responsible,
-    ResearchMovementDescriptionType description, Long movRef) throws Exception {
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList,
+    ReconciliationOriginType reconciliationOriginType,
+    Timestamp dateOfTransaction,
+    ResearchMovementResponsibleStatusType researchMovementResponsibleStatusType,
+    ResearchMovementDescriptionType researchMovementDescriptionType,
+    Long movRef,
+    PrepaidMovementType prepaidMovementType,
+    ResearchMovementSentStatusType researchMovementSentStatusType
+  ) throws Exception{
 
-    String idToResearch = String.format("idMov=%d", movementId);
 
-    getPrepaidMovementEJBBean10().createMovementResearch(null, idToResearch,
-      ReconciliationOriginType.CLEARING, fileName,dateOfTransaction,responsible,description,movRef);
+    String jsonSent = this.toJson(researchMovementInformationFilesList);
+    getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      jsonSent,
+      reconciliationOriginType.name(),
+      dateOfTransaction,
+      researchMovementResponsibleStatusType.getValue(),
+      researchMovementDescriptionType.getValue(),
+      movRef,
+      prepaidMovementType.name(),
+      researchMovementSentStatusType.getValue());
   }
+
 
   @Override
   public List<ClearingData10> getWebWithdrawForReconciliation(Map<String, Object> headers) throws Exception {

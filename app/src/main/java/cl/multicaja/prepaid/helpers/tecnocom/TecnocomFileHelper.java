@@ -1,12 +1,14 @@
 package cl.multicaja.prepaid.helpers.tecnocom;
 
 import cl.multicaja.core.utils.NumberUtils;
+import cl.multicaja.core.utils.encryption.PgpHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoPais;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.IndicadorPropiaAjena;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -308,6 +310,7 @@ public class TecnocomFileHelper {
     prepaidMovement.setLinref(NumberUtils.getInstance().toInteger(batchTrx.getLinRef()));
     prepaidMovement.setNumbencta(1);
     prepaidMovement.setNumplastico(0L);
+    prepaidMovement.setNomcomred(""); //Todo: Movimiento tecnocom deberia saber el nomcomred?
 
     return prepaidMovement;
   }

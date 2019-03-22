@@ -14,8 +14,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processClearingResolution extends TestBaseUnit {
+
   @Test
   public void processClearingResolution_allOK() throws Exception {
+
     User user = registerUser();
     UserAccount userAccount = createBankAccount(user);
 
@@ -186,7 +188,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estr en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
+    List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
   }
@@ -240,11 +242,11 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
+    List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
-    ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    ResearchMovement10 researchMovement = researchMovs.get(0);
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
   @Test
@@ -297,11 +299,12 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
+    //TODO: Research
+    List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
-    ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    ResearchMovement10 researchMovement = researchMovs.get(0);
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
   @Test
@@ -354,28 +357,20 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado necesita verificacion", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
-    List<ReconciliedResearch> researchMovs = getResearchMovement(String.format("idMov=%d", prepaidMovement10.getId()));
+    List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
-    ReconciliedResearch reconciliedResearch = researchMovs.get(0);
-    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION.toString(), reconciliedResearch.getOrigen());
+    ResearchMovement10 researchMovemen = researchMovs.get(0);
+    Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovemen.getOriginType());
   }
 
-  private List<ReconciliedResearch> getResearchMovement(String movId) {
-    RowMapper rowMapper = (rs, rowNum) -> {
-      ReconciliedResearch reconciliedResearch = new ReconciliedResearch();
-      reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
-      //reconciliedResearch.setIdRef(String.valueOf(rs.getString("mov_ref")));
-      reconciliedResearch.setIdArchivoOrigen(String.valueOf(rs.getString("id_archivo_origen")));
-      reconciliedResearch.setNombreArchivo(String.valueOf(rs.getString("nombre_archivo")));
-      reconciliedResearch.setOrigen(String.valueOf(rs.getString("origen")));
-      return reconciliedResearch;
-    };
-    List<ReconciliedResearch> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = '%s'", getSchema(), movId), rowMapper);
-    return data;
+  private List<ResearchMovement10> getResearchMovement(Long movId) throws Exception{
+    //TODO: Research
+    return getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movId));
   }
 
   private ReconciliedMovement10 getReconciliedMovement(Long idMov) {
+
     RowMapper rowMapper = (rs, rowNum) -> {
       ReconciliedMovement10 reconciliedMovement10 = new ReconciliedMovement10();
       reconciliedMovement10.setId(numberUtils.toLong(rs.getLong("id")));

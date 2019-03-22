@@ -1,6 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.helpers.mastercard.MastercardIpmFileHelper;
+import cl.multicaja.prepaid.utils.PgpUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -108,7 +108,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
   @Test
   public void decryptFile_inputFile_null() {
     try {
-      MastercardIpmFileHelper.decryptFile(null, null, null, null, null);
+      PgpUtil.decryptFile(null, null, null, null, null);
     } catch (Exception e) {
       Assert.assertEquals("Debe ser error [Input File is null]", "Input File is null", e.getMessage());
     }
@@ -120,7 +120,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
 
     FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
-      MastercardIpmFileHelper.decryptFile(fis, null, null, null, null);
+      PgpUtil.decryptFile(fis, null, null, null, null);
     } catch (Exception e) {
       Assert.assertEquals("Debe ser error [Private Key is null]", "Private Key is null", e.getMessage());
     }
@@ -132,7 +132,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
 
     FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
-      MastercardIpmFileHelper.decryptFile(fis, "", null, null, null);
+      PgpUtil.decryptFile(fis, "", null, null, null);
     } catch (Exception e) {
       Assert.assertEquals("Debe ser error [Public Key is null]", "Public Key is null", e.getMessage());
     }
@@ -143,7 +143,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
   public void decryptFile_output_null() throws Exception {
     FileInputStream fis = new FileInputStream("src/test/resources/mastercard/files/YTFswitch.log.ori");
     try {
-      MastercardIpmFileHelper.decryptFile(fis, "", "", null, null);
+      PgpUtil.decryptFile(fis, "", "", null, null);
     } catch (Exception e) {
       Assert.assertEquals("Debe ser error [Output file is null]", "Output file is null", e.getMessage());
     }
@@ -158,7 +158,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
     FileInputStream fis = new FileInputStream(f);
 
     try {
-      MastercardIpmFileHelper.decryptFile(fis, "", "", f, null);
+      PgpUtil.decryptFile(fis, "", "", f, null);
     } catch (Exception e) {
       Assert.assertEquals("Debe ser error [Password is null or empty]", "Password is null", e.getMessage());
     }
@@ -174,7 +174,7 @@ public class Test_MastercardIpmFileHelper_decryptFile {
     File originalFile =  new File("src/test/resources/mastercard/files/YTFswitch.log.ori");
 
     try {
-      MastercardIpmFileHelper.decryptFile(encryptedFileIs, privateKe, publicKey, decryptedFile, passphrase);
+      PgpUtil.decryptFile(encryptedFileIs, privateKe, publicKey, decryptedFile, passphrase);
 
       String decryptedFileData = FileUtils.readFileToString(decryptedFile, UTF_8);
       String originalFileData = FileUtils.readFileToString(originalFile, UTF_8);

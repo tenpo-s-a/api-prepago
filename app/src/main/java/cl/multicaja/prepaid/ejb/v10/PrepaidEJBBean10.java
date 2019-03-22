@@ -9,10 +9,7 @@ import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.*;
-import cl.multicaja.prepaid.async.v10.MailDelegate10;
-import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.async.v10.ProductChangeDelegate10;
-import cl.multicaja.prepaid.async.v10.ReprocesQueueDelegate10;
+import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
@@ -1384,6 +1381,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement.setNumbencta(1); // se debe actualizar despues
     prepaidMovement.setNumplastico(0L); // se debe actualizar despues
     prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setNomcomred(transaction.getMerchantName());
 
     return prepaidMovement;
   }
@@ -2814,24 +2812,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private Boolean validateBase64(String base64String){
 
-    Boolean boolResponse;
-
-    String line = base64String;
-    String pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
-
-    if(base64String != null && base64String.length()!=0) {
-      Pattern r = Pattern.compile(pattern);
-      Matcher m = r.matcher(line);
-      if (m.find( )) {
-        boolResponse = true;
-      }else {
-        boolResponse = false;
-      }
-    }else{
-      boolResponse = false;
+    Base64.Decoder decoder = Base64.getDecoder();
+    try {
+      decoder.decode(base64String);
+      return Boolean.TRUE;
+    } catch(IllegalArgumentException iae) {
+      return Boolean.FALSE;
     }
-
-    return boolResponse;
   }
 
   public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
@@ -2899,17 +2886,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-
         //Send Async Mail
         Map<String, Object> templateData = new HashMap<String, Object>();
         templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
         EmailBody emailBody = new EmailBody();
         emailBody.setTemplateData(templateData);
         emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("notification_tecnocom@multicaja.cl");
+        emailBody.setAddress("test.notification_tecnocom@mail.com");
         mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
       }
-
+      //TODO: Cuando se procese el callback y se cree el movimiento se debera agregar la generacion de boleta.
+      //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
     }
 
     return notificationTecnocom;

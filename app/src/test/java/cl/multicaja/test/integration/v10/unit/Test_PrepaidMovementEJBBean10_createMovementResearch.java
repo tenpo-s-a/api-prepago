@@ -3,16 +3,33 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBaseUnit {
+
+  @Before
+  @After
+  public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_investigar", getSchema()));
+  }
+
+
   @Test
-  public void createMovementReseach() throws Exception {
+  public void testCreateResearchMovement(){
     try {
+
+      List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+      ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+
       User user = registerUser();
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -20,12 +37,25 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      Timestamp fechaDeTransaccion = new Timestamp(prepaidMovement10.getFechaCreacion().getTime());
-      Long movRef = new Long(0);
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null, String.format("%s",prepaidMovement10.getId()), ReconciliationOriginType.SWITCH,
-        ResearchMovementResponsibleStatusType.IS_TABLE.name(),fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.STATUS_UNDEFINED,ResearchMovementDescriptionType.ERROR_UNDEFINED,movRef);
+      researchMovementInformationFiles.setIdArchivo(Long.valueOf(1));
+      researchMovementInformationFiles.setIdEnArchivo("idEnArchivi_1");
+      researchMovementInformationFiles.setNombreArchivo("nombreArchivo_1");
+      researchMovementInformationFiles.setTipoArchivo("tipoArchivo_1");
+      researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+      Timestamp dateOfTransaction = new Timestamp(prepaidMovement10.getFechaCreacion().getTime());
+
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,
+        toJson(researchMovementInformationFilesList),
+        ReconciliationOriginType.SWITCH.name(),
+        dateOfTransaction,
+        ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
+        ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
+        100L,
+        PrepaidMovementType.TOPUP.name(),
+        ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue());
+
 
     }catch (Exception e){
       e.printStackTrace();
@@ -33,24 +63,28 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
   }
+
   @Test
-  public void createMovementReseachError(){
+  public void createResearchMovementError(){
+
     try{
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,null,
-        null,null, null,null,null,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,null,null,null,
+        null,null,null,null,null);
 
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
       Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser idFileOrigin","idFileOrigin",e.getData()[0].getValue());
+      Assert.assertEquals("Msj Debe ser filesInfo","filesInfo",e.getData()[0].getValue());
     } catch (Exception e) {
       Assert.fail("No debe caer aca");
     }
+
     try{
-      getPrepaidMovementEJBBean10().createMovementResearch(null,getRandomString(10),
-        null,null,null,null,null,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), null,null,
+        null,null,null,null,null);
 
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
@@ -62,22 +96,9 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
     try{
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,getRandomString(10), ReconciliationOriginType.SWITCH,
-        null, null, null, null,null);
-      Assert.fail("No debe caer aca");
-    }catch (BadRequestException e){
-      Assert.assertTrue("Debe caer aca",true);
-      Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
-      Assert.assertEquals("Msj Debe ser fileName","fileName",e.getData()[0].getValue());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    try{
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,getRandomString(10), ReconciliationOriginType.SWITCH,
-        ResearchMovementResponsibleStatusType.IS_TABLE.name(), null, null, null,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        null, null, null, null,null,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
@@ -88,10 +109,10 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
     try{
-      Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,getRandomString(10), ReconciliationOriginType.SWITCH,
-        ResearchMovementResponsibleStatusType.IS_TABLE.name(), fechaDeTransaccion, null, null,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+        null, null, null,null,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
@@ -102,11 +123,11 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
     try{
-      Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,getRandomString(10), ReconciliationOriginType.SWITCH,
-        ResearchMovementResponsibleStatusType.IS_TABLE.name(), fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.STATUS_UNDEFINED, null,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+        ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
+        null, null,null,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
@@ -117,11 +138,12 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
     }
 
     try{
-      Timestamp fechaDeTransaccion = new Timestamp((new Date()).getTime());
-      getPrepaidMovementEJBBean10().createMovementResearch(
-        null,getRandomString(10), ReconciliationOriginType.SWITCH,
-        ResearchMovementResponsibleStatusType.IS_TABLE.name(), fechaDeTransaccion,
-        ResearchMovementResponsibleStatusType.STATUS_UNDEFINED, ResearchMovementDescriptionType.ERROR_UNDEFINED,null);
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+        ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
+        ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
+        null,null,null);
       Assert.fail("No debe caer aca");
     }catch (BadRequestException e){
       Assert.assertTrue("Debe caer aca",true);
@@ -131,6 +153,37 @@ public class Test_PrepaidMovementEJBBean10_createMovementResearch extends TestBa
       e.printStackTrace();
     }
 
+    try{
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+        ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
+        ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
+        100L,null,null);
+      Assert.fail("No debe caer aca");
+    }catch (BadRequestException e){
+      Assert.assertTrue("Debe caer aca",true);
+      Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
+      Assert.assertEquals("Msj Debe ser movementType","movementType",e.getData()[0].getValue());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    try{
+      getPrepaidMovementEJBBean10().createResearchMovement(
+        null,getRandomString(10), ReconciliationOriginType.SWITCH.name(),
+        Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
+        ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
+        ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
+        100L,PrepaidMovementType.TOPUP.name(),null);
+      Assert.fail("No debe caer aca");
+    }catch (BadRequestException e){
+      Assert.assertTrue("Debe caer aca",true);
+      Assert.assertEquals("Codigo debe ser 101004",Integer.valueOf(101004),e.getCode());
+      Assert.assertEquals("Msj Debe ser sentStatus","sentStatus",e.getData()[0].getValue());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
   }
 

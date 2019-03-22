@@ -223,7 +223,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
       // Procesa la tabla y concilia
       getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
     } catch (Exception e) {
-     e.printStackTrace();
       Assert.fail("Should not be here");
     }
 
