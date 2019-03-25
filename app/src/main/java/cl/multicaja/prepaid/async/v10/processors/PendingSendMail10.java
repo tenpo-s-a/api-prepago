@@ -67,6 +67,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
+        //FIXME: Eliminacion de email tarjeta
         /*if(req.getRetryCount() > getMaxRetryCount()) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
@@ -99,6 +100,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
             return req;
 
           } catch(Exception ex) {
+            //FIXME: Eliminacion de email tarjeta
             /*log.error("Error al enviar email cvv", ex);
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
             return redirectRequest(endpoint, exchange, req, false);*/
@@ -106,6 +108,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
           }
 
         } else if (CodigoRetorno._1000.equals(cvv2DTO.getRetorno())) {
+          //FIXME: Eliminacion de email tarjeta
           /* Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
           req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
@@ -113,12 +116,14 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return null;
         }
         else if (CodigoRetorno._1010.equals(cvv2DTO.getRetorno())) {
+          //FIXME: Eliminacion de email tarjeta
           /*Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
           req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
           return redirectRequest(endpoint, exchange, req, true);*/
           return null;
         } else if (CodigoRetorno._1020.equals(cvv2DTO.getRetorno())) {
+          //FIXME: Eliminacion de email tarjeta
           /*Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
           req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
@@ -126,6 +131,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
           return null;
         }
         else {
+          //FIXME: Eliminacion de email tarjeta
           /*Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);*/
           return null;
@@ -166,15 +172,16 @@ public class PendingSendMail10 extends BaseProcessor10 {
           /**
            *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
            */
+          //FIXME: Eliminacion de email tarjeta
           //Map<String, Object> templateData = new HashMap<String, Object>();
           //templateData.put("idUsuario", data.getUser().getId().toString());
           //templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
           //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_CARD_ERROR, templateData);
 
-          EmailBody emailBody = new EmailBody();
-          emailBody.setTemplate(TEMPLATE_MAIL_MAIL_CARD_ERROR_USER);
-          emailBody.setAddress(data.getUser().getEmail().getValue());
-          getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
+          //EmailBody emailBody = new EmailBody();
+          //emailBody.setTemplate(TEMPLATE_MAIL_MAIL_CARD_ERROR_USER);
+          //emailBody.setAddress(data.getUser().getEmail().getValue());
+          //getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
         }
 
         return req;

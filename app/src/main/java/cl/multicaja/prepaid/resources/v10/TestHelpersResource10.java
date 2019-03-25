@@ -394,6 +394,7 @@ public final class TestHelpersResource10 extends BaseResource {
       case CREATE_CARD:
         testReinjectCreateCard();
         break;
+      //FIXME: Eliminacion de email tarjeta
       /*case SEND_MAIL:
         testReinjectSendMailCard();
         break;*/
@@ -764,6 +765,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return messageId;
   }
 
+  //FIXME: Eliminacion de email tarjeta
   /*public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
@@ -1099,6 +1101,7 @@ public final class TestHelpersResource10 extends BaseResource {
     System.out.println("TICKET CREADO");
   }
 
+  //FIXME: Eliminacion de email tarjeta
   /*public void testReinjectSendMailCard() throws Exception {
     TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
 

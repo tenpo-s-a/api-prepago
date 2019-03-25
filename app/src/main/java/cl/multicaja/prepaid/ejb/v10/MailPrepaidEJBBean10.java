@@ -70,6 +70,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     }
 
     if(TEMPLATE_MAIL_SEND_CARD.equalsIgnoreCase(content.getTemplate())) {
+      //FIXME: Eliminacion de email tarjeta
       //log.info("Flujo Envio email con tarjeta en PDF");
       //sendCardAsync(headers,userId);
     }
@@ -93,6 +94,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     getUserClient().sendInternalMail(headers, content);
   }
 
+  //FIXME: Eliminacion de email tarjeta
   /*private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
 
     User user = getUserClient().getUserById(headers, userId);

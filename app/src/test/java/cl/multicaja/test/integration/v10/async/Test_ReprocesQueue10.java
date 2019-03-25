@@ -246,6 +246,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
+  //FIXME: Eliminacion de email tarjeta
   /*@Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -523,6 +524,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
+    //FIXME: Eliminacion de email tarjeta
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_CARD_REQ
     /*ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ;

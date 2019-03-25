@@ -238,6 +238,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param retryCount
    * @return
    */
+  //FIXME: Eliminacion de email tarjeta
   /*public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
@@ -276,6 +277,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param retryCount
    * @return
    */
+  //FIXME: Eliminacion de email tarjeta
   /*public String sendPendingSendMailError(User user, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {

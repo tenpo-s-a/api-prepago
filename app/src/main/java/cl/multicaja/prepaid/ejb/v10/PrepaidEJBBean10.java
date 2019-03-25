@@ -2563,6 +2563,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         break;
       }
 
+      //FIXME: Eliminacion de email tarjeta
       /* case SEND_MAIL: {
         log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
         Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);

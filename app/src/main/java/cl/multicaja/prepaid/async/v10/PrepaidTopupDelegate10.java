@@ -80,6 +80,7 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
+  //FIXME: Eliminacion de email tarjeta
   /*public String sendPdfCardMail(PrepaidCard10 prepaidCard10, User user) {
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
