@@ -70,8 +70,8 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     }
 
     if(TEMPLATE_MAIL_SEND_CARD.equalsIgnoreCase(content.getTemplate())) {
-      log.info("Flujo Envio email con tarjeta en PDF");
-      sendCardAsync(headers,userId);
+      //log.info("Flujo Envio email con tarjeta en PDF");
+      //sendCardAsync(headers,userId);
     }
     else {
       log.info("Envio email flujo normal");
@@ -93,7 +93,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     getUserClient().sendInternalMail(headers, content);
   }
 
-  private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
+  /*private String sendCardAsync( Map<String, Object> headers,Long userId) throws Exception {
 
     User user = getUserClient().getUserById(headers, userId);
     if(user == null) {
@@ -131,7 +131,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
       }
     }
     return prepaidTopupDelegate10.sendPdfCardMail(prepaidCard10, user);
-  }
+  }*/
 
   public void sendInternalEmail(String template, Map<String, Object> templateData) throws Exception {
     EmailBody emailBody = new EmailBody();

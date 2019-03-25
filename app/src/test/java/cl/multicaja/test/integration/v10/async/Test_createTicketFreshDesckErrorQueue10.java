@@ -139,7 +139,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  /*@Ignore
   @Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -173,7 +173,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,2);
     System.out.println("TICKET CREADO");
-  }
+  }*/
+
   //Verificado envia todos los dastos
   @Ignore
   @Test

@@ -246,7 +246,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-  @Test
+  /*@Test
   public void testReinjectSendMailCard() throws Exception {
 
     tc.getTecnocomService().setAutomaticError(false);
@@ -296,7 +296,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Debe retornar una respuesta",remote);
     Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
-  }
+  }*/
 
   @Test
   public void testReinjectTopupReverse() throws Exception{
@@ -524,12 +524,12 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_CARD_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
+    /*ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ;
 
     Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
     Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
-    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
+    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));*/
   }
 
 }

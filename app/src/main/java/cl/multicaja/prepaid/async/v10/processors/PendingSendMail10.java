@@ -67,10 +67,10 @@ public class PendingSendMail10 extends BaseProcessor10 {
 
         PrepaidTopupData10 data = req.getData();
 
-        if(req.getRetryCount() > getMaxRetryCount()) {
+        /*if(req.getRetryCount() > getMaxRetryCount()) {
           Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
-        }
+        }*/
 
         Cvv2DTO cvv2DTO = getRoute().getTecnocomService().consultaCvv2(
                                                     data.getPrepaidCard10().getProcessorUserId(),
@@ -99,31 +99,36 @@ public class PendingSendMail10 extends BaseProcessor10 {
             return req;
 
           } catch(Exception ex) {
-            log.error("Error al enviar email cvv", ex);
+            /*log.error("Error al enviar email cvv", ex);
             Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
-            return redirectRequest(endpoint, exchange, req, false);
+            return redirectRequest(endpoint, exchange, req, false);*/
+            return null;
           }
 
         } else if (CodigoRetorno._1000.equals(cvv2DTO.getRetorno())) {
-          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          /* Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
           req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());
-          return redirectRequest(endpoint, exchange, req, true);
+          return redirectRequest(endpoint, exchange, req, true); */
+          return null;
         }
         else if (CodigoRetorno._1010.equals(cvv2DTO.getRetorno())) {
-          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          /*Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_CONEXION);
           req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_CONEXION.name());
-          return redirectRequest(endpoint, exchange, req, true);
+          return redirectRequest(endpoint, exchange, req, true);*/
+          return null;
         } else if (CodigoRetorno._1020.equals(cvv2DTO.getRetorno())) {
-          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
+          /*Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
           req.getData().setNumError(Errors.TECNOCOM_TIME_OUT_RESPONSE);
           req.getData().setMsjError(Errors.TECNOCOM_TIME_OUT_RESPONSE.name());
-          return redirectRequest(endpoint, exchange, req, true);
+          return redirectRequest(endpoint, exchange, req, true);*/
+          return null;
         }
         else {
-          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          /*Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_CARD_REQ);
+          return redirectRequest(endpoint, exchange, req, false);*/
+          return null;
         }
       }
     };

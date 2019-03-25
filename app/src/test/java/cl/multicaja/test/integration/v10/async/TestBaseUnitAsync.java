@@ -238,7 +238,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param retryCount
    * @return
    */
-  public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
+  /*public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -268,7 +268,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
 
     return messageId;
-  }
+  }*/
 
   /**
    *
@@ -276,7 +276,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @param retryCount
    * @return
    */
-  public String sendPendingSendMailError(User user, int retryCount) {
+  /*public String sendPendingSendMailError(User user, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -301,7 +301,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
     return messageId;
-  }
+  }*/
 
   /**
    *
