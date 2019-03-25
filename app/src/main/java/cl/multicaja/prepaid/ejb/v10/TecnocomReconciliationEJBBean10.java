@@ -394,18 +394,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
 
           } else if(ReconciliationStatusType.PENDING.equals(originalMovement.getConTecnocom())) {
-            if(originalMovement.getMonto().compareTo(trx.getImpFac().getValue()) != 0 ){
-              log.info("Movimiento no conciliado");
-              getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
+            getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
                 originalMovement.getId(),
-                ReconciliationStatusType.NOT_RECONCILED);
-            }
-            else{
-               getPrepaidMovementEJBBean10().updateStatusMovementConTecnocom(null,
-                    originalMovement.getId(),
-                    ReconciliationStatusType.RECONCILED);
-            }
-          } else  {
+                ReconciliationStatusType.RECONCILED);
+          } else {
             log.info(String.format("Transaction already processed  id -> [%s]", originalMovement.getId()));
           }
         }
