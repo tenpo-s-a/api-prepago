@@ -42,8 +42,14 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
 
   @BeforeClass
-  public static void startTecnocom(){
+  public static void getTecnocomInstance(){
     tc = TecnocomServiceHelper.getInstance();
+  }
+
+  @AfterClass
+  public static void disableAutomaticErrorInTecnocom(){
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
   }
 
   @Before
@@ -305,9 +311,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+      Assert.assertTrue("Debe haber al menos 1 movimiento de account", accounting10s.size() >= 1);
 
-      AccountingData10 accounting10 = accounting10s.get(0);
+      AccountingData10 accounting10 = accounting10s.stream().filter(a -> a.getIdTransaction().equals(topup.getId())).findFirst().get();
       Assert.assertEquals(String.format("Debe tener tipo %s", prepaidTopup10.getTransactionOriginType()), txType, accounting10.getType());
       Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
@@ -316,9 +322,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
-      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+      Assert.assertTrue("Debe haber al menos 1 movimiento de clearing", clearing10s.size() >= 1);
 
-      ClearingData10 clearing10 = clearing10s.get(0);
+      ClearingData10 clearing10 = clearing10s.stream().filter(c -> c.getAccountingId().equals(accounting10.getId())).findFirst().get();
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
@@ -612,6 +618,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
+    Thread.sleep(2000);
 
     // Segunda carga debe ser sincrona
     {
@@ -642,7 +649,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNull("No Deberia existir un topup en la cola", remoteTopup2);
     }
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
       Thread.sleep(1000);
@@ -656,21 +663,18 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
-      Assert.assertEquals("Debe haber 2 movimientos de accounting", 2, accounting10s.size());
-
-      accounting10s.forEach(acc -> {
-        PrepaidMovement10 mov = movements.get(acc.getIdTransaction());
-        Assert.assertNotNull("Debe tener el mismo id", mov);
-        Assert.assertEquals("Debe tener el mismo imp fac", mov.getImpfac().stripTrailingZeros(), acc.getAmount().getValue().stripTrailingZeros());
-        Assert.assertEquals("debe tener la misma fecha de transaccion", mov.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), acc.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
-      });
+      Assert.assertTrue("Debe haber al menos 2 movimientos de accounting", accounting10s.size() >= 2);
 
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       Assert.assertNotNull("No debe ser null", clearing10s);
-      Assert.assertEquals("Debe haber 2 movimientos de clearing", 2, clearing10s.size());
+      Assert.assertTrue("Debe haber al menos 2 movimientos de clearing", clearing10s.size() >= 2);
 
-      clearing10s.forEach(cle -> {
-        Assert.assertTrue("Debe tener el id de accounting", accounting10s.stream().anyMatch(a -> a.getId().equals(cle.getAccountingId())));
+      movements.forEach((k,v)->{
+        AccountingData10 acc = accounting10s.stream().filter(a -> a.getIdTransaction().equals(k)).findFirst().get();
+        Assert.assertEquals("Debe tener el mismo imp fac", v.getImpfac().stripTrailingZeros(), acc.getAmount().getValue().stripTrailingZeros());
+        Assert.assertEquals("debe tener la misma fecha de transaccion", v.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), acc.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+
+        ClearingData10 cle = clearing10s.stream().filter(c -> c.getAccountingId().equals(acc.getId())).findFirst().get();
         Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), cle.getUserBankAccount().getId());
         Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, cle.getStatus());
       });
