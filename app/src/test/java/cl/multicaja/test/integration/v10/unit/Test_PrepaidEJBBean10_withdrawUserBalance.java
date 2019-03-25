@@ -557,60 +557,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   }
 
   @Test
-  public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.DELETED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.LOCKED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.DISABLED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 
     User user = registerUser();

@@ -73,22 +73,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Test
-  public void topupUserBalance_not_ok_by_user_blacklisted() throws Exception {
-
-    User user = registerUser(UserIdentityStatus.TERRORIST);
-
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
-
-    try {
-
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
-
-    } catch(ValidationException nfex) {
-      Assert.assertEquals("Cliente en lista negra", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_CARGAR.getValue(), nfex.getCode());
-    }
-  }
-
-  @Test
   public void topupUserBalance_not_ok_by_prepaidUser_not_found() throws Exception {
 
     User user = registerUser();
