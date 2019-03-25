@@ -63,57 +63,6 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
     }
   }
 
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DISABLED);
-    updateUser(user);
-
-    IdentityValidation10 identityValidation10 = new IdentityValidation10();
-
-    try{
-      getPrepaidEJBBean10().processIdentityVerification(null, user.getId(), identityValidation10);
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.LOCKED);
-    updateUser(user);
-
-    IdentityValidation10 identityValidation10 = new IdentityValidation10();
-
-    try{
-      getPrepaidEJBBean10().processIdentityVerification(null, user.getId(), identityValidation10);
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DELETED);
-    updateUser(user);
-
-    IdentityValidation10 identityValidation10 = new IdentityValidation10();
-
-    try{
-      getPrepaidEJBBean10().processIdentityVerification(null, user.getId(), identityValidation10);
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 

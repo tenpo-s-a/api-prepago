@@ -54,78 +54,6 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void uploadIdentityVerificationFiles_not_ok_by_user_disabled() throws Exception {
-
-    User user = registerUser(UserStatus.DISABLED);
-
-    Map<String, UserFile> files = new HashMap<>();
-    files.put("USER_ID_BACK", f);
-    files.put("USER_ID_FRONT", f);
-    files.put("USER_SELFIE", f);
-
-    HttpResponse respHttp = uploadFiles(user.getId(), files);
-
-    Assert.assertEquals("status 422", 422, respHttp.getStatus());
-    ValidationException vex = respHttp.toObject(ValidationException.class);
-
-    Assert.assertEquals("debe ser error de supera saldo", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-  }
-
-  @Test
-  public void uploadIdentityVerificationFiles_not_ok_by_user_deleted() throws Exception {
-
-    User user = registerUser(UserStatus.DELETED);
-
-    Map<String, UserFile> files = new HashMap<>();
-    files.put("USER_ID_BACK", f);
-    files.put("USER_ID_FRONT", f);
-    files.put("USER_SELFIE", f);
-
-    HttpResponse respHttp = uploadFiles(user.getId(), files);
-
-    Assert.assertEquals("status 422", 422, respHttp.getStatus());
-    ValidationException vex = respHttp.toObject(ValidationException.class);
-
-    Assert.assertEquals("debe ser error de supera saldo", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-  }
-
-  @Test
-  public void uploadIdentityVerificationFiles_not_ok_by_user_locked() throws Exception {
-
-    User user = registerUser(UserStatus.LOCKED);
-
-    Map<String, UserFile> files = new HashMap<>();
-    files.put("USER_ID_BACK", f);
-    files.put("USER_ID_FRONT", f);
-    files.put("USER_SELFIE", f);
-
-    HttpResponse respHttp = uploadFiles(user.getId(), files);
-
-    Assert.assertEquals("status 422", 422, respHttp.getStatus());
-    ValidationException vex = respHttp.toObject(ValidationException.class);
-
-    Assert.assertEquals("debe ser error de supera saldo", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-  }
-
-  @Test
-  public void uploadIdentityVerificationFiles_not_ok_by_user_preregistered() throws Exception {
-
-    User user = registerUser(UserStatus.PREREGISTERED);
-
-    Map<String, UserFile> files = new HashMap<>();
-    files.put("USER_ID_BACK", f);
-    files.put("USER_ID_FRONT", f);
-    files.put("USER_SELFIE", f);
-
-    HttpResponse respHttp = uploadFiles(user.getId(), files);
-
-    Assert.assertEquals("status 422", 422, respHttp.getStatus());
-    ValidationException vex = respHttp.toObject(ValidationException.class);
-
-    Assert.assertEquals("debe ser error de supera saldo", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-  }
-
-  @Test
   public void uploadIdentityVerificationFiles_not_ok_by_prepaid_user_not_found() throws Exception {
 
     User user = registerUser();
@@ -197,7 +125,6 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe tener nameStatus IN_REVIEW", NameStatus.IN_REVIEW, NameStatus.valueOf(u.get("name_status").toString()));
   }
 
-
   @Test
   public void uploadIdentityVerificationFiles_attempts() throws Exception {
     User user = registerUser();
@@ -243,7 +170,5 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe tener intento de validacion = 2", Integer.valueOf(2), prepaidUser.getIdentityVerificationAttempts());
 
   }
-
-
 
 }

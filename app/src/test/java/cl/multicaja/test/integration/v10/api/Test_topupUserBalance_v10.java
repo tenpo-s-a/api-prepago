@@ -396,53 +396,6 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_OnTopup_UserBlacklisted() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserIdentityStatus.TERRORIST);
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(getRandomNumericString(15));
-      prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = topupUserBalance(prepaidTopup);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", 102015, errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser(UserIdentityStatus.TERRORIST);
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
-      prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = topupUserBalance(prepaidTopup);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", 102015, errorObj.get("code"));
-    }
-  }
-
-  @Test
   public void shouldReturn422_OnTopup_MinAmount() throws Exception {
     // POS
     {

@@ -46,51 +46,6 @@ public class Test_PrepaidEJBBean10_unlockPrepaidCard extends TestBaseUnit {
     }
   }
 
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DISABLED);
-    updateUser(user);
-
-    try{
-      getPrepaidEJBBean10().unlockPrepaidCard(null, user.getId());
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.LOCKED);
-    updateUser(user);
-
-    try{
-      getPrepaidEJBBean10().unlockPrepaidCard(null, user.getId());
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
-  @Test(expected = ValidationException.class)
-  public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DELETED);
-    updateUser(user);
-
-    try{
-      getPrepaidEJBBean10().unlockPrepaidCard(null, user.getId());
-    } catch(ValidationException ex) {
-      Assert.assertEquals("user deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-      throw ex;
-    }
-  }
-
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 
