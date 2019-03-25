@@ -18,7 +18,6 @@
 -- Migration SQL that makes the change goes here.
 
 ALTER TABLE ${schema}.prp_usuario
-  ADD COLUMN uuid             UUID DEFAULT uuid_generate_v4(),
   ADD COLUMN nombre           VARCHAR(30) NOT NULL DEFAULT '',
   ADD COLUMN apellido         VARCHAR(30) NOT NULL DEFAULT '',
   ADD COLUMN numero_documento VARCHAR(30) NOT NULL DEFAULT '',
@@ -34,7 +33,6 @@ ALTER TABLE ${schema}.prp_tarjeta
 -- SQL to undo the change goes here.
 
 ALTER TABLE ${schema}.prp_usuario
-  DROP COLUMN uuid,
   DROP COLUMN nombre,
   DROP COLUMN apellido,
   DROP COLUMN numero_documento,
