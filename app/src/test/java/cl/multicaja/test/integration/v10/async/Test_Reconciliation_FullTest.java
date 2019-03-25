@@ -120,7 +120,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       tecnocomReconciliationFile10 = getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
 
-      Thread.sleep(10);
+      Thread.sleep(100);
 
       // Insertar un archivo extra de cada tipo para expirar movimientos
       newReconciliationFile10.setFileName("archivo_topup_2.txt");
