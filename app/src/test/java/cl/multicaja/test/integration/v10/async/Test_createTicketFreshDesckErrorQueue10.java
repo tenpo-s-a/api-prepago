@@ -138,8 +138,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     Thread.sleep(2000);
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
-  /*@Ignore
   @Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -171,9 +171,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,2);
     System.out.println("TICKET CREADO");
-  }*/
+  }
 
   //Verificado envia todos los dastos
   @Ignore
@@ -252,7 +251,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("TICKET CREADO");
   }
   //Verificado envia todos los dastos
-  @Ignore
+  //@Ignore
   @Test
   public void testReinjectIssuanFee() throws Exception {
 

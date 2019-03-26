@@ -35,14 +35,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
   public static final String ERROR_CARD_ISSUANCE_FEE_REQ = "PrepaidTopupRoute10.errorCardIssuanceFee.req";
   public static final String ERROR_CARD_ISSUANCE_FEE_RESP = "PrepaidTopupRoute10.errorCardIssuanceFee.resp";
 
-  //FIXME: Eliminacion de email tarjeta
-  //public static final String PENDING_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.pendingSendMailCard.req";
-  //public static final String PENDING_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.pendingSendMailCard.resp";
-
-  //FIXME: Eliminacion de email tarjeta
-  //public static final String ERROR_SEND_MAIL_CARD_REQ = "PrepaidTopupRoute10.errorSendMailCard.req";
-  //public static final String ERROR_SEND_MAIL_CARD_RESP = "PrepaidTopupRoute10.errorSendMailCard.resp";
-
   public static final String SEDA_SEND_MOVEMENT_TO_ACCOUNTING_REQ = "seda:PrepaidTopupRoute10.pendingSendMovementToAccounting";
   public static final String PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ = "PrepaidTopupRoute10.pendingSendMovementToAccounting.req";
   public static final String PENDING_SEND_MOVEMENT_TO_ACCOUNTING_RESP = "PrepaidTopupRoute10.pendingSendMovementToAccounting.resp";
@@ -117,20 +109,6 @@ public final class PrepaidTopupRoute10 extends BaseRoute10 {
     from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_CARD_ISSUANCE_FEE_REQ, concurrentConsumers)))
       .process(new PendingCardIssuanceFee10(this).processErrorPendingIssuanceFee())
       .to(createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_RESP)).end();
-
-    /**
-     * Envio Mail Tarjeta
-     */
-    //FIXME: Eliminacion de email tarjeta
-    /*from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_CARD_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processPendingSendMailCard())
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_CARD_RESP + confResp)).end();*/
-
-    // Errores
-    //FIXME: Eliminacion de email tarjeta
-    /*from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_CARD_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processErrorPendingSendMailCard())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_CARD_RESP + confResp)).end();*/
 
     /**
      * Envio de movement a accounting
