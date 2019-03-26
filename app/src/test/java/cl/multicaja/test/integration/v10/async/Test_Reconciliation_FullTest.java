@@ -25,10 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +53,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_switch_hist CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom CASCADE", getSchema()));
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
 
     try {
       Test_Reconciliation_FullTest test = new Test_Reconciliation_FullTest();
@@ -79,7 +77,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       PrepaidMovement10 prepaidMovement = test.buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
       prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL);
       prepaidMovement.setNumaut(getRandomNumericString(6));
-      prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
+      prepaidMovement.setFechaCreacion(null);
       prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
       prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
       prepaidMovement.setEstadoNegocio(BusinessStatusType.CONFIRMED);
@@ -143,7 +141,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
 
-      Thread.sleep(100);
+      Thread.sleep(1100);
 
     } catch (Exception e) {
       Assert.fail("Error al crear el usuario y su tarjeta");
@@ -317,7 +315,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
-    getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, testData.prepaidMovement.getId(), ReconciliationStatusType.NOT_RECONCILED);
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
     // Tiene que existir la reversa
@@ -3161,7 +3158,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     testData.prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, testData.cdtTransaction, movementType);
     testData.prepaidMovement.setIndnorcor(indnorcor);
     testData.prepaidMovement.setNumaut(getRandomNumericString(6));
-    testData.prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
+    ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.systemDefault());
+    zonedDateTime = zonedDateTime.minusHours(1); // Crear un movimiento viejo, asi si no vienen en los archivos, expirara.
+    ZonedDateTime utcDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
+    testData.prepaidMovement.setFechaCreacion(Timestamp.valueOf(utcDateTime.toLocalDateTime())); //Timestamp.from(Instant.now()));
+    //testData.prepaidMovement.setFechaCreacion(null);
     testData.prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
     testData.prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
@@ -3180,6 +3181,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     if(testData.prepaidMovement != null) {
       testData.accountingData = IndicadorNormalCorrector.NORMAL.equals(indnorcor) ? createAccountingData(testData.prepaidMovement) : null;
+      //testData.accountingData.setTransactionDate(Timestamp.from(Instant.now()));
     } else {
       testData.accountingData = null;
     }
