@@ -126,7 +126,8 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
 
-          return req;
+          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
         }
 
         String contrato = prepaidCard.getProcessorUserId();
@@ -223,8 +224,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
           issuanceFeeMovement.setEstadoNegocio(businessStatus);
-          
-          return req;
+
+          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
+          return redirectRequest(endpoint, exchange, req, false);
         }
       }
     };

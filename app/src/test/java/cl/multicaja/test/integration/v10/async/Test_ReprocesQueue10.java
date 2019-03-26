@@ -380,7 +380,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     }
   }
 
-  @Ignore  //TODO: Arreglar este test que falla
   @Test
   public void testReinjectIssuanFee() throws Exception {
 
