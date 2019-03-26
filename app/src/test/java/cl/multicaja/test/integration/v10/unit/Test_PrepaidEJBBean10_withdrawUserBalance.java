@@ -30,7 +30,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void PosWithdraw() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
+    String password = "1235";
     User user = registerUser(password);
     user = updateUserPassword(user, password);
 
