@@ -394,10 +394,6 @@ public final class TestHelpersResource10 extends BaseResource {
       case CREATE_CARD:
         testReinjectCreateCard();
         break;
-      //FIXME: Eliminacion de email tarjeta
-      /*case SEND_MAIL:
-        testReinjectSendMailCard();
-        break;*/
       case REVERSE_TOPUP:
         testReinjectTopupReverse();
         break;
@@ -765,39 +761,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return messageId;
   }
 
-  //FIXME: Eliminacion de email tarjeta
-  /*public String sendPendingSendMail(User user,PrepaidUser10 prepaidUser10,PrepaidCard10 prepaidCard10, PrepaidTopup10 topup, int retryCount) {
-
-    if (!CamelFactory.getInstance().isCamelRunning()) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
-      return null;
-    }
-    //se crea un messageId unico
-    String messageId = getRandomString(20);
-
-    //se crea la cola de requerimiento
-    Queue qReq = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
-    // Realiza alta en tecnocom para que el usuario exista
-    if(topup != null) {
-      topup.setMessageId(messageId);
-    }
-    //se crea la el objeto con los datos del proceso
-    PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
-
-    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
-    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
-    req.getData().setPrepaidCard10(prepaidCard10);
-    req.getData().setPrepaidUser10(prepaidUser10);
-    req.getData().setUser(user);
-    req.getData().setPrepaidTopup10(topup);
-
-    //se envia el mensaje a la cola
-    CamelFactory.getInstance().createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
-
-    return messageId;
-  }*/
-
   public PrepaidMovement10 buildReversePrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 reverseRequest, PrepaidCard10 prepaidCard, PrepaidMovementType type) {
 
     String codent = null;
@@ -1100,42 +1063,6 @@ public final class TestHelpersResource10 extends BaseResource {
     String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
     System.out.println("TICKET CREADO");
   }
-
-  //FIXME: Eliminacion de email tarjeta
-  /*public void testReinjectSendMailCard() throws Exception {
-    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
-
-    tc.getTecnocomService().setAutomaticError(false);
-    tc.getTecnocomService().setRetorno(null);
-
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
-
-    System.out.println("User Rut: "+prepaidUser.getRut());
-    System.out.println("User Mail: "+user.getEmail());
-
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
-    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-
-    DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
-    prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
-    prepaidCard10 = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard10);
-
-    PrepaidTopup10 topup = buildPrepaidTopup10(user);
-    topup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-
-    tc.getTecnocomService().setAutomaticError(true);
-    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-
-    //String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,2);
-    //System.out.println("TICKET CREADO");
-  }*/
 
   public void testReinjectTopupReverse() throws Exception{
     TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
