@@ -364,7 +364,7 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     //FIXME: Eliminacion de email tarjeta
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_CARD_REQ
-    
+
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
     String endpoint = PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_REQ;
 

@@ -31,6 +31,7 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
     Assert.assertEquals("status 201", 201, httpResponse.getStatus());
   }
 
+  /*//FIXME: Eliminacion de email tarjeta
   @Test
   public void sendMailWithCard() throws Exception {
     User user = registerUser();
@@ -43,7 +44,9 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
     final EmailBody email = getEmailBody(user, TEMPLATE_MAIL_SEND_CARD);
     final HttpResponse httpResponse = sendEmailApi(email, user.getId());
     Assert.assertEquals("status 201", 201, httpResponse.getStatus());
-  }
+  }*/
+
+  /*//FIXME: Eliminacion de email tarjeta
   @Test
   public void sendMailWithCardErrors() throws Exception {
 
@@ -92,7 +95,7 @@ public class Test_sendEmail_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Error al llamar 422",422,httpResponse.getStatus());
       System.out.println("Tarjeta no existe");
     }
-  }
+  }*/
 
   private EmailBody getEmailBody(User user, String template) {
     EmailBody mail = new EmailBody();
