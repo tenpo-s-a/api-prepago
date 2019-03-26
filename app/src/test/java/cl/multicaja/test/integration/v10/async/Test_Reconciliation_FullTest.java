@@ -143,6 +143,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
 
+      Thread.sleep(1000);
+
     } catch (Exception e) {
       Assert.fail("Error al crear el usuario y su tarjeta");
     }
