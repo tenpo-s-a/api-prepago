@@ -21,6 +21,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.utils.CamelCaseToSnakeCaseNamingStrategy;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -30,8 +31,12 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -1655,5 +1660,13 @@ public class TestBaseUnit extends TestApiBase {
       accounting10s.add(accounting10);
     }
     return accounting10s;
+  }
+  public static EntityManager createEntityManager() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("payaraHibernate");
+    Configuration configuration = new Configuration();
+    configuration.setPhysicalNamingStrategy(new CamelCaseToSnakeCaseNamingStrategy());
+    EntityManager em = emf.createEntityManager();
+    System.out.println(em);
+    return em;
   }
 }

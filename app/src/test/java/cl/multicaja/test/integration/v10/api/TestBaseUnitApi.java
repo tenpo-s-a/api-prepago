@@ -13,7 +13,11 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
+import java.util.Properties;
 
 /**
  * @autor vutreras
@@ -65,5 +69,10 @@ public class TestBaseUnitApi extends TestContextHelper {
     System.out.println("respHttp: " + respHttp);
     Assert.assertEquals("Debe cargar ok", 201, respHttp.getStatus());
   }
-
+  public static EntityManager createEntityManager() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("payaraHibernate");
+    EntityManager em = emf.createEntityManager();
+    System.out.println(em);
+    return em;
+  }
 }
