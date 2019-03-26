@@ -1662,7 +1662,7 @@ public class TestBaseUnit extends TestApiBase {
     return accounting10s;
   }
   public static EntityManager createEntityManager() {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("payaraHibernate");
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
     Configuration configuration = new Configuration();
     configuration.setPhysicalNamingStrategy(new CamelCaseToSnakeCaseNamingStrategy());
     EntityManager em = emf.createEntityManager();
