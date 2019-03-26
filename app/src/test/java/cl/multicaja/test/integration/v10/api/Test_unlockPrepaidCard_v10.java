@@ -157,51 +157,6 @@ public class Test_unlockPrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DISABLED);
-    updateUser(user);
-
-    HttpResponse resp = unlockPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-  }
-
-  @Test
-  public void shouldReturn422_McUserLocked() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.LOCKED);
-    updateUser(user);
-
-    HttpResponse resp = unlockPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-  }
-
-  @Test
-  public void shouldReturn422_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DELETED);
-    updateUser(user);
-
-    HttpResponse resp = unlockPrepaidCard(user.getId());
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-  }
-
-  @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
     User user = registerUser();

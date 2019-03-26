@@ -102,8 +102,8 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
 
    private void reverseWithdraw() throws Exception {
 
-      User user = registerUser("1234");
-      user = updateUserPassword(user, "1234");
+      User user = registerUser("1235");
+      user = updateUserPassword(user, "1235");
 
       PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
       prepaidUser = createPrepaidUser10(prepaidUser);
@@ -111,7 +111,7 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
       prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidWithdraw.setPassword("1234");
+      prepaidWithdraw.setPassword("1235");
 
       PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
       originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());

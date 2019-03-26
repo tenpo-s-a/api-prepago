@@ -23,6 +23,8 @@ public class Test_PendingInvoice10  extends TestBaseUnitAsync {
 
     String messageId = sendPendingInvoice(invoiceData10,0);
 
+    Thread.sleep(3000);
+
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(InvoiceRoute10.INVOICE_ENDPOINT);
 

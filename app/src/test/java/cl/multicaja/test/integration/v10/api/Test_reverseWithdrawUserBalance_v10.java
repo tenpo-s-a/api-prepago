@@ -136,8 +136,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
     prepaidWithdraw.setAmount(amount);
     prepaidWithdraw.setRut(0);
-    prepaidWithdraw.setTransactionId("1234");
-    prepaidWithdraw.setMerchantCode("1234");
+    prepaidWithdraw.setTransactionId("1235");
+    prepaidWithdraw.setMerchantCode("1235");
     prepaidWithdraw.setMerchantName("asdasdasd");
     prepaidWithdraw.setMerchantCategory(1);
 
@@ -161,7 +161,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -182,8 +182,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setMerchantCode("1234");
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setMerchantCode("1235");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -204,9 +204,9 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setMerchantCode("1234");
+    prepaidWithdraw.setMerchantCode("1235");
     prepaidWithdraw.setMerchantName("asdasdasd");
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -227,10 +227,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setMerchantCode("1234");
+    prepaidWithdraw.setMerchantCode("1235");
     prepaidWithdraw.setMerchantName("asdasdasd");
     prepaidWithdraw.setMerchantCategory(1);
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -246,7 +246,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn404_UserNull() throws Exception {
     // POS
     {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1234", getRandomNumericString(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1235", getRandomNumericString(15));
       prepaidWithdraw.setRut(Integer.MAX_VALUE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
@@ -264,7 +264,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       prepaidWithdraw.setRut(Integer.MAX_VALUE);
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidWithdraw.setPassword("1234");
+      prepaidWithdraw.setPassword("1235");
 
       HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -309,158 +309,6 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Map<String, Object> errorObj = resp.toMap();
       Assert.assertNotNull("Deberia tener error", errorObj);
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR.getValue(), errorObj.get("code"));
-    }
-  }
-
-  @Test
-  public void shouldReturn422_UserDisabled() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserStatus.DISABLED);
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser();
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      user.setGlobalStatus(UserStatus.DISABLED);
-      updateUser(user);
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-  }
-
-  @Test
-  public void shouldReturn422_UserLocked() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserStatus.LOCKED);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser();
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      user.setGlobalStatus(UserStatus.LOCKED);
-      updateUser(user);
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-  }
-
-  @Test
-  public void shouldReturn422_UserDeleted() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserStatus.DELETED);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1239", getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser();
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1298", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      user.setGlobalStatus(UserStatus.DELETED);
-      user = updateUser(user);
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-  }
-
-  @Test
-  public void shouldReturn422_UserPreregistered() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserStatus.PREREGISTERED);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser();
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      user.setGlobalStatus(UserStatus.PREREGISTERED);
-      updateUser(user);
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
     }
   }
 
@@ -544,8 +392,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_POS() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -554,7 +402,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     createPrepaidMovement10(prepaidMovement);
@@ -576,17 +424,17 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_WEB() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     createPrepaidMovement10(prepaidMovement);
@@ -608,8 +456,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn202_OriginalWithdrawNull_POS() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -618,7 +466,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -638,8 +486,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn202_OriginalWithdrawNull_WEB() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
@@ -648,7 +496,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
 
@@ -668,15 +516,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn422_differentAmount_POS() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
@@ -705,15 +553,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn422_differentAmount_WEB() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
@@ -742,15 +590,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
@@ -780,15 +628,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired_WEB() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
@@ -817,15 +665,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn201_ReverseAccepted_POS() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());
@@ -850,15 +698,15 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn201_ReverseAccepted_WEB() throws Exception {
-    User user = registerUser("1234");
-    user = updateUserPassword(user, "1234");
+    User user = registerUser("1235");
+    user = updateUserPassword(user, "1235");
 
     PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1234", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-    prepaidWithdraw.setPassword("1234");
+    prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
     originalWithdraw.setMonto(prepaidWithdraw.getAmount().getValue());
