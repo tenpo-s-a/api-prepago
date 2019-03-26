@@ -4,6 +4,7 @@ import cl.multicaja.prepaid.dao.CuentaDao;
 import cl.multicaja.prepaid.model.v11.Cuenta;
 import cl.multicaja.test.integration.v10.api.TestBaseUnitApi;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,10 @@ public class TestHibernate extends TestBaseUnit {
 
   private CuentaDao cuentaDao = new CuentaDao();
 
+  @Before
+  public void clearData(){
+    getDbUtils().getJdbcTemplate().execute(String.format("delete * from %s.%s",getSchema(),"prp_cuenta"));
+  }
   @Test
   public void testInsert() {
 
