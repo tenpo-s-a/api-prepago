@@ -776,60 +776,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DELETED);
-    user = updateUser(user);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-
-    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
-  }
-
-  @Test
-  public void shouldReturn422_McUserLocked() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.LOCKED);
-    user = updateUser(user);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-
-    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
-  }
-
-  @Test
-  public void shouldReturn422_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-    user.setGlobalStatus(UserStatus.DISABLED);
-    user = updateUser(user);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
-
-    HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102002", 102002, errorObj.get("code"));
-  }
-
-  @Test
   public void shouldReturn422_McUserListaNegra() throws Exception {
 
     User user = registerUserBlackListed();

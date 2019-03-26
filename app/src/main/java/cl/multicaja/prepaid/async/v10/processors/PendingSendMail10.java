@@ -486,13 +486,14 @@ public class PendingSendMail10 extends BaseProcessor10 {
     writer.createXmpMetadata();
     document.addCreationDate();
 
-    document.open();
-    PdfContentByte cb = writer.getDirectContentUnder();
-    Image img = Image.getInstance("https://mcprepaid.blob.core.windows.net/tarjetaprepago/tarjeta.png");
-    img.scaleToFit(500, 600);
-    img.setAlignment(Image.MIDDLE);
-    document.add(getWatermarkedImage(cb, img, numTarjeta,fecha,cvc,name));
-    document.close();
+    //FIXME: falla ya que la imagen no existe
+    //document.open();
+    //PdfContentByte cb = writer.getDirectContentUnder();
+    //Image img = Image.getInstance("https://mcprepaid.blob.core.windows.net/tarjetaprepago/tarjeta.png");
+    //img.scaleToFit(500, 600);
+    //img.setAlignment(Image.MIDDLE);
+    //document.add(getWatermarkedImage(cb, img, numTarjeta,fecha,cvc,name));
+    //document.close();
     return Base64Utils.encodeToString(baos.toByteArray());
   }
 

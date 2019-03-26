@@ -79,66 +79,6 @@ public class Test_PrepaidEJBBean10_getTransactions {
   }
 
   @Test
-  public void userMcDisabled() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.DISABLED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-      prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc disabled", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcLocked() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.LOCKED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-      prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc locked", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcDeleted() throws Exception {
-    User user = Mockito.mock(User.class);
-    user.setGlobalStatus(UserStatus.DELETED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc deleted", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void userMcPreregistered() throws Exception {
-    User user = new User();
-    user.setGlobalStatus(UserStatus.PREREGISTERED);
-
-    Mockito.doReturn(user).when(userClient).getUserById(null, Long.MAX_VALUE);
-
-    try{
-     prepaidEJBBean10.getTransactions(null, Long.MAX_VALUE,"","",Integer.MAX_VALUE);
-      Assert.fail("should not be here");
-    } catch (ValidationException ex) {
-      Assert.assertEquals("Debe retornar error userMc preregistered", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
-    }
-  }
-
-  @Test
   public void prepaidUserNull() throws Exception {
     User user = new User();
     Rut rut = new Rut();
