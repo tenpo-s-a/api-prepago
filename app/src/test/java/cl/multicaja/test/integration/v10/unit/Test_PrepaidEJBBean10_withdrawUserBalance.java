@@ -30,7 +30,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void PosWithdraw() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
+    String password = "1235";
     User user = registerUser(password);
     user = updateUserPassword(user, password);
 
@@ -553,60 +553,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(NotFoundException vex) {
       Assert.assertEquals("Debe ser error de validacion", CUENTA_NO_ASOCIADA_A_USUARIO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.DELETED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.LOCKED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-
-    user.setGlobalStatus(UserStatus.DISABLED);
-    user = updateUser(user);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
     }
   }
 
