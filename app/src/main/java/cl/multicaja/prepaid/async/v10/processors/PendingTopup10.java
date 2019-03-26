@@ -191,10 +191,6 @@ public class PendingTopup10 extends BaseProcessor10 {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
 
-              log.info("Enviando comprobante de carga por mail");
-              Endpoint mailEndpoint = createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REQ);
-              redirectRequest(mailEndpoint, exchange, req, Boolean.FALSE);
-
               //segun la historia: https://www.pivotaltracker.com/story/show/158044562
               if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
                 Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
