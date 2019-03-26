@@ -126,9 +126,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
 
-          //Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          //return redirectRequest(endpoint, exchange, req, false);
-          
           return req;
         }
 
@@ -226,9 +223,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
           issuanceFeeMovement.setEstadoNegocio(businessStatus);
-
-          //Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          //return redirectRequest(endpoint, exchange, req, false);
+          
           return req;
         }
       }
