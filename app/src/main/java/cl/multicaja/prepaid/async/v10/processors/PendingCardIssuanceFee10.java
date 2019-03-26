@@ -61,21 +61,21 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         if (prepaidTopup == null) {
           log.error("Error req.getData().getPrepaidTopup10() es null");
-          return null;
+          return req;
         }
 
         if (prepaidCard == null) {
           log.error("Error req.getData().getPrepaidCard10() es null");
-          return null;
+          return req;
         }
 
         if(!PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
           log.error("Error req.getData().getPrepaidCard10().getStatus() es " + prepaidCard.getStatus().toString());
-          return null;
+          return req;
         }
         if (prepaidMovement == null) {
           log.error("Error req.getData().getPrepaidMovement10() es null");
-          return null;
+          return req;
         }
 
         req.retryCountNext();
