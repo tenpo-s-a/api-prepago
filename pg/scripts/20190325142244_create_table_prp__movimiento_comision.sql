@@ -14,12 +14,21 @@
 --    limitations under the License.
 --
 
--- // create_sp_alter_table_valor_usd_v10
+-- // create_table_prp_ movimiento_comision
 -- Migration SQL that makes the change goes here.
 
-ALTER TABLE ${schema}.prp_valor_usd ADD COLUMN precio_dia numeric(15, 7) NOT NULL DEFAULT 0;
+CREATE TABLE ${schema}.prp_movimiento_comision (
+  id                BIGSERIAL NOT NULL,
+  id_movimiento     BIGINT REFERENCES ${schema}.prp_movimiento(id),
+  tipo_comision     VARCHAR(20) NOT NULL,
+  monto             NUMERIC(17,2) NOT NULL,
+  iva               NUMERIC(17,2) NOT NULL,
+  creacion          TIMESTAMP NOT NULL,
+  actualizacion     TIMESTAMP NOT NULL,
+  CONSTRAINT prp_movimiento_comision_pk PRIMARY KEY(id),
+  CONSTRAINT prp_movimiento_comision_u1 UNIQUE(id_movimiento,tipo_comision)
+);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-
-ALTER TABLE ${schema}.prp_valor_usd DROP COLUMN precio_dia;
+DROP TABLE IF EXISTS ${schema}.prp_movimiento_comision CASCADE;
