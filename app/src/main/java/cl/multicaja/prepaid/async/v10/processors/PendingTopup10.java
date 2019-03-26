@@ -88,14 +88,6 @@ public class PendingTopup10 extends BaseProcessor10 {
             return null;
           }
 
-          if(user.getIsBlacklisted()) {
-            log.error(String.format("Error usuario %s en lista negra", user.getId()));
-            PrepaidMovementStatus status = PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP;
-            getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), status);
-            prepaidMovement.setEstado(status);
-            return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, false);
-          }
-
           Integer rut = user.getRut().getValue();
 
           if (rut == null){
