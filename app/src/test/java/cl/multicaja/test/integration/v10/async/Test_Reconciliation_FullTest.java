@@ -143,7 +143,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
       getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
 
-      Thread.sleep(1000);
+      Thread.sleep(100);
 
     } catch (Exception e) {
       Assert.fail("Error al crear el usuario y su tarjeta");
@@ -317,6 +317,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+    getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, testData.prepaidMovement.getId(), ReconciliationStatusType.NOT_RECONCILED);
     getPrepaidMovementEJBBean10().processReconciliationRules();
 
     // Tiene que existir la reversa
@@ -2954,8 +2955,8 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       }
       Thread.sleep(100);
     }
-    Assert.assertNotNull("Debe estar encontrado", foundMovement);
-    Assert.assertEquals("Debe estar en estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
+    Assert.assertNotNull("wfr: Debe estar encontrado", foundMovement);
+    Assert.assertEquals("wfr: El movimiento debe estar en estado reversado", BusinessStatusType.REVERSED, foundMovement.getEstadoNegocio());
     return foundMovement;
   }
 
