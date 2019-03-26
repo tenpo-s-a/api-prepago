@@ -17,7 +17,7 @@
 -- // create_sp_alter_table_valor_usd_v10
 -- Migration SQL that makes the change goes here.
 
-ALTER TABLE ${schema}.prp_valor_usd ADD COLUMN precio_dia numeric(15, 7) NOT NULL;
+ALTER TABLE ${schema}.prp_valor_usd ADD COLUMN precio_dia numeric(15, 7) NOT NULL DEFAULT 0;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
