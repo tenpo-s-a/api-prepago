@@ -1662,10 +1662,7 @@ public class TestBaseUnit extends TestApiBase {
   }
   public static EntityManager createEntityManager() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
-    Configuration configuration = new Configuration();
-    configuration.setPhysicalNamingStrategy(new CamelCaseToSnakeCaseNamingStrategy());
     EntityManager em = emf.createEntityManager();
-    System.out.println(em);
     return em;
   }
 }

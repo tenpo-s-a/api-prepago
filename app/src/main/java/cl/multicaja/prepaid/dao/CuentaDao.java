@@ -12,7 +12,7 @@ public class CuentaDao extends PrepaidCrud<Cuenta,Long>{
     super(Cuenta.class);
   }
 
-  @PersistenceContext(unitName = "payaraHibernate")
+  @PersistenceContext
   private EntityManager em;
 
   @Override

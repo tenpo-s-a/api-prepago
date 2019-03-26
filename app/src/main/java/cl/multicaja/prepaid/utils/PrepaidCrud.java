@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.utils;
 
+import cl.multicaja.core.utils.ConfigUtils;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.io.Serializable;
@@ -8,6 +10,7 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
 
   private final transient Class<E> entityClass;
   protected abstract EntityManager getEntityManager();
+  protected ConfigUtils configUtils;
 
   protected PrepaidCrud(Class<E> entityClass) {
     this.entityClass = entityClass;
@@ -31,5 +34,8 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
     entityManager.remove(entity);
   }
 
+  public String getEnv() {
+    return ConfigUtils.getEnv();
+  }
 
 }
