@@ -61,21 +61,21 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
         if (prepaidTopup == null) {
           log.error("Error req.getData().getPrepaidTopup10() es null");
-          return req;
+          return null;
         }
 
         if (prepaidCard == null) {
           log.error("Error req.getData().getPrepaidCard10() es null");
-          return req;
+          return null;
         }
 
         if(!PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())){
           log.error("Error req.getData().getPrepaidCard10().getStatus() es " + prepaidCard.getStatus().toString());
-          return req;
+          return null;
         }
         if (prepaidMovement == null) {
           log.error("Error req.getData().getPrepaidMovement10() es null");
-          return req;
+          return null;
         }
 
         req.retryCountNext();
@@ -126,8 +126,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setClamone(clamone);
           issuanceFeeMovement.setEstado(status);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          //Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
+          //return redirectRequest(endpoint, exchange, req, false);
+          
+          return req;
         }
 
         String contrato = prepaidCard.getProcessorUserId();
@@ -181,7 +183,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             PrepaidCardStatus.PENDING,
             prepaidCard);
 
-          return null;
+          return req;
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);
@@ -225,8 +227,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setEstado(status);
           issuanceFeeMovement.setEstadoNegocio(businessStatus);
 
-          Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          //Endpoint endpoint = createJMSEndpoint(ERROR_CARD_ISSUANCE_FEE_REQ);
+          //return redirectRequest(endpoint, exchange, req, false);
+          return req;
         }
       }
     };
