@@ -327,7 +327,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
-    int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
@@ -341,7 +340,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         List lstResearchList = findResearchMovements();
         Assert.assertEquals("Debe haber 1 movimiento en research.", 1, lstResearchList.size());
       }
-      movementIndex++;
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber 6 no conciliados.", 6, notReconcilidedCount);

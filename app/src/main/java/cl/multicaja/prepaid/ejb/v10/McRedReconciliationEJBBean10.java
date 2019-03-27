@@ -189,67 +189,16 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         if (prepaidMovement10 == null) {
           if(IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
             log.info("Movimiento no encontrado, no conciliado");
-
-            researchMovementInformationFilesList = new ArrayList<>();
-            researchMovementInformationFiles = new ResearchMovementInformationFiles();
-            researchMovementInformationFiles.setIdArchivo(recTmp.getFileId());
-            researchMovementInformationFiles.setIdEnArchivo(recTmp.getExternalId().toString());
-            researchMovementInformationFiles.setNombreArchivo(fileName);
-            researchMovementInformationFiles.setTipoArchivo(movementType.name());
-            researchMovementInformationFilesList.add(researchMovementInformationFiles);
-            
-            Long movRef;
-            if(recTmp.getExternalId() > 0){
-              movRef = recTmp.getExternalId();
-            }else{
-              movRef = Long.valueOf(1);
-            }
-
-            getPrepaidMovementEJBBean10().createResearchMovement(
-              null,
-              toJson(researchMovementInformationFilesList),
-              ReconciliationOriginType.SWITCH.name(),
-              recTmp.getDateTrx(),
-              ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
-              ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_BANC_AND_PROCESOR.getValue(),
-              movRef,
-              movementType.name(),
-              ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
-            );
-
-            //Todo: se puede utilizar un stringbuilder
-            // Construyendo un Id.
-            String researchId = "ExtId:[";
-            if (recTmp.getExternalId() != null) {
-              researchId += recTmp.getExternalId().toString();
-            } else {
-              researchId += "NoExternalId";
-            }
-            researchId += "]-";
-            researchId += "McCode:[" + recTmp.getMcCode() + "]";
-
-            // Todo: insertar los valores correctos de id en archivo y nombreArchivo
-            List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
-            ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
-            //researchMovementInformationFiles.setIdArchivo();
-            //researchMovementInformationFiles.setIdEnArchivo();
-            //researchMovementInformationFiles.setNombreArchivo();
-            //researchMovementInformationFiles.setTipoArchivo();
-            researchMovementInformationFilesList.add(researchMovementInformationFiles);
-            getPrepaidMovementEJBBean10().createResearchMovement(
-              null,
-              new ObjectMapper().writeValueAsString(researchMovementInformationFilesList),
-              ReconciliationOriginType.SWITCH.toString(),
-              recTmp.getDateTrx(),
-              ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
-              ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
-              0L,
-              movementType.toString(),
-              ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
-            );
+            sendToResearch(recTmp, movementType, fileName);
           } else {
             // Buscar el user, sacar el rut
-            User user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
+            User user;
+            try {
+              user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
+            } catch (Exception e) {
+              sendToResearch(recTmp, movementType, fileName);
+              throw e;
+            }
 
             // Las reversas debe insertarse en la BD de nuevo
             if(PrepaidMovementType.TOPUP.equals(movementType)) {
@@ -295,6 +244,36 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         e.printStackTrace();
       }
     }
+  }
+
+  private void sendToResearch(McRedReconciliationFileDetail switchMovement, PrepaidMovementType movementType, String fileName) throws Exception {
+
+    researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(switchMovement.getFileId());
+    researchMovementInformationFiles.setIdEnArchivo(switchMovement.getExternalId().toString());
+    researchMovementInformationFiles.setNombreArchivo(fileName);
+    researchMovementInformationFiles.setTipoArchivo(movementType.name());
+    researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
+    Long movRef;
+    if(switchMovement.getExternalId() > 0){
+      movRef = switchMovement.getExternalId();
+    }else{
+      movRef = Long.valueOf(1);
+    }
+
+    getPrepaidMovementEJBBean10().createResearchMovement(
+      null,
+      toJson(researchMovementInformationFilesList),
+      ReconciliationOriginType.SWITCH.name(),
+      switchMovement.getDateTrx(),
+      ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+      ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
+      movRef,
+      movementType.name(),
+      ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
+    );
   }
 
 
