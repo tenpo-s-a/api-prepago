@@ -3,11 +3,6 @@ package cl.multicaja.prepaid.async.v10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
-import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
-import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.commons.logging.Log;
@@ -16,8 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_USER_CREATED_EVENT;
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.SEDA_PENDING_SEND_MAIL_TOPUP;
+import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_ACCOUNT_CREATED_EVENT;
 
 public final class KafkaEventDelegate10 {
 
@@ -39,10 +33,10 @@ public final class KafkaEventDelegate10 {
   }
 
   /**
-   * Envia un evento de usuario creado
+   * Envia un evento de cuenta creada
    *
    */
-  public void sendUserCreatedEvent(String body) {
+  public void sendAccountCreatedEvent(String body) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -52,9 +46,9 @@ public final class KafkaEventDelegate10 {
       headers.put(KafkaConstants.KEY, "1");
 
       ExchangeData<String> req = new ExchangeData<>(body);
-      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_USER_CREATED_EVENT));
+      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_ACCOUNT_CREATED_EVENT));
 
-      this.getProducerTemplate().sendBodyAndHeaders(SEDA_USER_CREATED_EVENT, req, headers);
+      this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);
     }
   }
 }

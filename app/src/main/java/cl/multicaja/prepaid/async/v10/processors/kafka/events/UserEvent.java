@@ -23,4 +23,14 @@ public class UserEvent extends BaseProcessor10 {
       }
     };
   }
+
+  public Processor processUserUpdatedEvent() throws Exception {
+    return new Processor() {
+      @Override
+      public void process(Exchange exchange) throws Exception {
+        log.info("[processUserUpdatedEvent] Processing USER_UPDATED event");
+        log.info(String.format("[processUserUpdatedEvent] %s", exchange.getMessage().getBody()));
+      }
+    };
+  }
 }

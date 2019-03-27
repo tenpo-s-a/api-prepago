@@ -19,7 +19,6 @@ import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
-import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
@@ -1420,11 +1419,11 @@ public final class TestHelpersResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/kafka/user_created")
+  @Path("/kafka/account_created")
   public Response userCreated(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
     validate();
 
-    kafkaEventDelegate10.sendUserCreatedEvent(body.get("message").toString());
+    kafkaEventDelegate10.sendAccountCreatedEvent(body.get("message").toString());
 
     return Response.accepted().build();
   }
