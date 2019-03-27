@@ -10,7 +10,6 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
 
   private final transient Class<E> entityClass;
   protected abstract EntityManager getEntityManager();
-  protected ConfigUtils configUtils;
 
   protected PrepaidCrud(Class<E> entityClass) {
     this.entityClass = entityClass;
@@ -32,10 +31,6 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
   public final void delete(final E entity) {
     final EntityManager entityManager = getEntityManager();
     entityManager.remove(entity);
-  }
-
-  public String getEnv() {
-    return ConfigUtils.getEnv();
   }
 
 }

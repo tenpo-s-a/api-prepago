@@ -1660,7 +1660,7 @@ public class TestBaseUnit extends TestApiBase {
     }
     return accounting10s;
   }
-  public static EntityManager createEntityManager() {
+  protected static EntityManager createEntityManager() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
     EntityManager em = emf.createEntityManager();
     return em;

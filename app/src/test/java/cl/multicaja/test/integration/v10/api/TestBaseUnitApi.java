@@ -69,10 +69,5 @@ public class TestBaseUnitApi extends TestContextHelper {
     System.out.println("respHttp: " + respHttp);
     Assert.assertEquals("Debe cargar ok", 201, respHttp.getStatus());
   }
-  public static EntityManager createEntityManager() {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("payaraHibernate");
-    EntityManager em = emf.createEntityManager();
-    System.out.println(em);
-    return em;
-  }
+
 }
