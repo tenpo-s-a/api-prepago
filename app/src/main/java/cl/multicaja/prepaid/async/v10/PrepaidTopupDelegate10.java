@@ -80,24 +80,6 @@ public final class PrepaidTopupDelegate10 {
     return messageId;
   }
 
-  public String sendPdfCardMail(PrepaidCard10 prepaidCard10, User user) {
-    if (!CamelFactory.getInstance().isCamelRunning()) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
-      return null;
-    }
-
-    String messageId = String.format("%s#%s", prepaidCard10.getProcessorUserId(), Utils.uniqueCurrentTimeNano());
-    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ);
-    PrepaidTopupData10 data = new PrepaidTopupData10(null, user, null, null);
-    data.setPrepaidCard10(prepaidCard10);
-    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
-    req.setRetryCount(0);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, qReq.toString()));
-    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
-
-    return messageId;
-  }
-
   public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 prepaidUser10, PrepaidMovement10 reverse) {
 
     if (!camelFactory.isCamelRunning()) {
