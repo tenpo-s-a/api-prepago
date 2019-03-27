@@ -19,7 +19,7 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
 
   private static final String USER_CREATED_TOPIC = "USER_CREATED";
   private static final String USER_UPDATED_TOPIC = "USER_UPDATED";
-  private static final String ACCOUNT_CREATED_TOPIC = "ACCOUNT_CREATED";
+  public static final String ACCOUNT_CREATED_TOPIC = "ACCOUNT_CREATED";
   public static final String CARD_CREATED_TOPIC = "CARD_CREATED";
   private static final String CARD_LOCKED_TOPIC = "CARD_LOCKED";
   private static final String CARD_UNLOCKED_TOPIC = "CARD_UNLOCKED";

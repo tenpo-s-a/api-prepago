@@ -5,10 +5,13 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.core.utils.json.JsonParser;
 import cl.multicaja.core.utils.json.JsonUtils;
+import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
+import cl.multicaja.prepaid.kafka.events.model.Account;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.commons.logging.Log;
@@ -57,16 +60,40 @@ public final class KafkaEventDelegate10 {
    * Envia un evento de cuenta creada
    *
    */
-  public void sendAccountCreatedEvent(String body) {
+  //FIXME: debe recibir la informacion de la cuenta
+  public void publishAccountCreatedEvent(PrepaidCard10 prepaidCard10) {
+
+    if(prepaidCard10 == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, prepaidCard -> null =======");
+      throw new IllegalArgumentException();
+    }
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
     } else {
+
       Map<String, Object> headers = new HashMap<>();
+      headers.put("JMSCorrelationID", prepaidCard10.getProcessorUserId());
       headers.put(KafkaConstants.PARTITION_KEY, 0);
       headers.put(KafkaConstants.KEY, "1");
 
-      ExchangeData<String> req = new ExchangeData<>(body);
+      Account account = new Account();
+      //FIXME: debe ser el UUID de la cuenta/contrato
+      account.setId(prepaidCard10.getProcessorUserId());
+      //FIXME: debe ser el status de la cuenta/contrato
+      account.setStatus(PrepaidCardStatus.ACTIVE.toString());
+
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
+      timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt().toLocalDateTime());
+      account.setTimestamps(timestamps);
+
+      AccountEvent accountEvent = new AccountEvent();
+      //FIXME: deberia ser el ID de usuario externo
+      accountEvent.setUserId(prepaidCard10.getIdUser().toString());
+      accountEvent.setAccount(account);
+
+      ExchangeData<String> req = new ExchangeData<>(toJson(accountEvent));
       req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_ACCOUNT_CREATED_EVENT));
 
       this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);

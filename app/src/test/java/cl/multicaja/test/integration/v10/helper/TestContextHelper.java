@@ -47,6 +47,7 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setUserClient(getUserClient());
       prepaidTopupRoute10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       prepaidTopupRoute10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
+      prepaidTopupRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
       TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
       transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
@@ -75,7 +76,6 @@ public class TestContextHelper extends TestBaseUnit {
       InvoiceRoute10 invoiceRoute10 = new InvoiceRoute10();
 
       KafkaEventsRoute10 kafkaEventsRoute10 = new KafkaEventsRoute10();
-      kafkaEventsRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
 
      /*
       camelFactory.startCamelContextWithRoutes(true,
