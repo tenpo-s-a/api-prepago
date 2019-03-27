@@ -22,6 +22,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.inject.Inject;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -43,6 +44,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean10.class);
 
+  @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {

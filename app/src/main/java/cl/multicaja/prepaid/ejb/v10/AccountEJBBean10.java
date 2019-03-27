@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 import static cl.multicaja.core.model.Errors.TARJETA_NO_EXISTE;
@@ -20,6 +21,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
 
   private static Log log = LogFactory.getLog(AccountEJBBean10.class);
 
+  @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
   @EJB
