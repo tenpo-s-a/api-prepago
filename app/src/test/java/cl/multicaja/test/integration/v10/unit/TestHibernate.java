@@ -15,7 +15,7 @@ public class TestHibernate extends TestBaseUnit {
 
   @Before
   public void clearData(){
-    getDbUtils().getJdbcTemplate().execute(String.format("delete * from %s.%s",getSchema(),"prp_cuenta"));
+    getDbUtils().getJdbcTemplate().execute(String.format("delete  from %s.%s",getSchema(),"prp_cuenta"));
   }
   @Test
   public void testInsert() {
