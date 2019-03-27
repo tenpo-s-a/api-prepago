@@ -2546,18 +2546,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         break;
       }
 
-      case SEND_MAIL: {
-        log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
-        Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_SEND_MAIL_CARD_RESP);
-        ExchangeData<PrepaidTopupData10> data = (ExchangeData<PrepaidTopupData10>)  CamelFactory.getInstance().createJMSMessenger().getMessage(qResp, reprocesQueue.getIdQueue());
-        if(data == null) {
-          throw new ValidationException(ERROR_DATA_NOT_FOUND);
-        }
-        data.setRetryCount(0);
-        data.reprocesQueueNext();
-        messageId = this.getDelegateReprocesQueue().redirectRequest(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ, data);
-        break;
-      }
       case CREATE_CARD: {
         log.info(String.format("Reinject %s ",reprocesQueue.getIdQueue()));
         Queue qResp = CamelFactory.getInstance().createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);

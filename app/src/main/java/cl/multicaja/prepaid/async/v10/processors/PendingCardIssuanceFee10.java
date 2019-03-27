@@ -181,9 +181,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             PrepaidCardStatus.PENDING,
             prepaidCard);
 
-          // Envia a la cola de envio de email con la informacion de la tarjeta
-          Endpoint endpoint = createJMSEndpoint(PENDING_SEND_MAIL_CARD_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
+          return req;
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
           Endpoint endpoint = createJMSEndpoint(PENDING_CARD_ISSUANCE_FEE_REQ);

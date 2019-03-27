@@ -34,6 +34,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   @AfterClass
   public static void disableAutomaticErrorTC(){
+
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
   }
@@ -65,7 +66,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
-    Thread.sleep(3000);
+    Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
 
@@ -243,58 +244,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
-  }
-
-  @Test
-  public void testReinjectSendMailCard() throws Exception {
-
-    tc.getTecnocomService().setAutomaticError(false);
-    tc.getTecnocomService().setRetorno(null);
-
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    System.out.println("User Rut: "+prepaidUser.getRut());
-    System.out.println("User Mail: "+user.getEmail());
-
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
-    PrepaidCard10 prepaidCard10 = new PrepaidCard10();
-    prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard10.setIdUser(prepaidUser.getId());
-    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard10.getProcessorUserId());
-    prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard10.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    PrepaidTopup10 topup = buildPrepaidTopup10(user);
-    topup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-
-    tc.getTecnocomService().setAutomaticError(true);
-    tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-
-    String messageId = sendPendingSendMail(user,prepaidUser ,prepaidCard10, topup,2);
-    Thread.sleep(3000);
-
-    // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
-    //Se setea para que de error de conexion!
-    tc.getTecnocomService().setAutomaticError(false);
-    tc.getTecnocomService().setRetorno(null);
-
-    ReprocesQueue reprocesQueue = new ReprocesQueue();
-    reprocesQueue.setIdQueue(messageId);
-    reprocesQueue.setLastQueue(QueuesNameType.SEND_MAIL);
-    messageId = getPrepaidEJBBean10().reprocessQueue(null,reprocesQueue);
-    Thread.sleep(2000);
-
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_RESP);
-    ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-
-    Assert.assertNotNull("Debe retornar una respuesta",remote);
-    Assert.assertNotNull("Debe contener una tarjeta",remote.getData().getPrepaidCard10());
   }
 
   @Test
@@ -522,13 +471,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
-    //verifica que la ultima cola por la cual paso el mensaje sea PENDING_SEND_MAIL_CARD_REQ
-    ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
-    String endpoint = PrepaidTopupRoute10.PENDING_SEND_MAIL_CARD_REQ;
-
-    Assert.assertEquals("debe ser primer intento procesado", 1, lastProcessorMetadata.getRetry());
-    Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
-    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 
 }
