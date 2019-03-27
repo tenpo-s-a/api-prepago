@@ -33,4 +33,12 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
     entityManager.remove(entity);
   }
 
+  public E update(E entity){
+    final EntityManager entityManager = getEntityManager();
+    EntityTransaction tx = entityManager.getTransaction();
+    tx.begin();
+    entity = entityManager.merge(entity);
+    tx.commit();
+    return entity;
+  }
 }
