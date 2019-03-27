@@ -51,7 +51,7 @@ pipeline:
     commands:
       - ./drone-mvn-cache.sh
       - cd app
-      - ./integration-test.sh -Denv=ci &> integration-test.log
+      - ./integration-test.sh -Denv=ci #&> integration-test.log
       - mkdir -p integration-tests && cp ./target/jacoco.exec ./integration-tests
     when:
       event: [ push ]
@@ -69,13 +69,13 @@ pipeline:
   #    branch:
   #      exclude: master
 
-  print_log:
-    image: maven:3.6.0-jdk-8-alpine
-    commands:
-      - touch ./app/integration-test.log
-      - tail -n 500 ./app/integration-test.log
-    when:
-      status: [ success, failure ]
+  #print_log:
+  #  image: maven:3.6.0-jdk-8-alpine
+  #  commands:
+  #    - touch ./app/integration-test.log
+  #    - tail -n 500 ./app/integration-test.log
+  #  when:
+  #    status: [ success, failure ]
 
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
