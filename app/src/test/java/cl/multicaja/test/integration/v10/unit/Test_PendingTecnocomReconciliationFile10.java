@@ -5,13 +5,14 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
-import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.math.BigDecimal;

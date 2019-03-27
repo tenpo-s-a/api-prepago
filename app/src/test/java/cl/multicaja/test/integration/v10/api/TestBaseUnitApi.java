@@ -13,7 +13,11 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
+import java.util.Properties;
 
 /**
  * @autor vutreras

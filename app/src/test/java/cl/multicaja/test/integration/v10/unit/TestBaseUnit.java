@@ -30,8 +30,12 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -1664,5 +1668,10 @@ public class TestBaseUnit extends TestApiBase {
       accounting10s.add(accounting10);
     }
     return accounting10s;
+  }
+  protected static EntityManager createEntityManager() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
+    EntityManager em = emf.createEntityManager();
+    return em;
   }
 }
