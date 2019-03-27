@@ -26,7 +26,7 @@ public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBasePg {
       new ColumnInfo("numero_unico", SqlType.VARCHAR.getGetJavaType(), 8),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion",  SqlType.TIMESTAMP.getGetJavaType()),
-      new ColumnInfo("uuid","uuid",2147483647),
+      new ColumnInfo("uuid",SqlType.VARCHAR.getGetJavaType(),50),
       new ColumnInfo("pan_hash", SqlType.VARCHAR.getGetJavaType(),200),
       new ColumnInfo("id_cuenta",SqlType.BIGINT.getGetJavaType())
     );

@@ -25,7 +25,7 @@ ALTER TABLE ${schema}.prp_usuario
   ADD COLUMN nivel            NUMERIC(1) NOT NULL DEFAULT 0;
 
 ALTER TABLE ${schema}.prp_tarjeta
-  ADD COLUMN uuid       UUID NOT NULL DEFAULT uuid_generate_v4(),
+  ADD COLUMN uuid       VARCHAR(50) NOT NULL DEFAULT uuid_generate_v4()::VARCHAR,
   ADD COLUMN pan_hash   VARCHAR(200) NOT NULL DEFAULT '',
   ADD COLUMN id_cuenta  BIGINT NOT NULL DEFAULT 0;
 
