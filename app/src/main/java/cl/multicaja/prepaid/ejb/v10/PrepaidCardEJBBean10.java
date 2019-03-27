@@ -8,6 +8,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.CcrFile10;
@@ -41,6 +42,16 @@ import static cl.multicaja.core.model.Errors.FILE_ALREADY_PROCESSED;
 public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidCardEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean10.class);
+
+  private KafkaEventDelegate10 kafkaEventDelegate10;
+
+  public KafkaEventDelegate10 getKafkaEventDelegate10() {
+    return kafkaEventDelegate10;
+  }
+
+  public void setKafkaEventDelegate10(KafkaEventDelegate10 kafkaEventDelegate10) {
+    this.kafkaEventDelegate10 = kafkaEventDelegate10;
+  }
 
   @Override
   public PrepaidCard10 createPrepaidCard(Map<String, Object> headers, PrepaidCard10 prepaidCard) throws Exception {
@@ -282,4 +293,22 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return null;
   }
 
+  /**
+   *  Busca una tarjeta por id y publica evento de tarjeta creada
+   * @param cardId id interno de la tarjeta
+   * @throws Exception
+   */
+  public void publishCardCreatedEvent(Long cardId) throws Exception {
+    if(cardId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    PrepaidCard10 prepaidCard10 = this.getPrepaidCardById(null, cardId);
+
+    if(prepaidCard10 == null){
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    }
+
+    getKafkaEventDelegate10().publishCardCreatedEvent(prepaidCard10);
+  }
 }
