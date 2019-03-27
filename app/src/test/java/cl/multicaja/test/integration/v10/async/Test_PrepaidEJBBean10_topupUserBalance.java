@@ -207,6 +207,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
       Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
 
+      waitForAccountingToExist(prepaidTopup.getId());
+
     } else {
       Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
     }
@@ -245,6 +247,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
       Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
+
+      waitForAccountingToExist(prepaidTopup.getId());
 
     } else {
       Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
@@ -1079,5 +1083,16 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), cardEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard10.getPan(), cardEvent.getCard().getPan());
+  }
+
+  void waitForAccountingToExist(Long trxId) throws Exception {
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(500);
+      AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, trxId);
+      if(accountingData10 != null) {
+        break;
+      }
+    }
   }
 }

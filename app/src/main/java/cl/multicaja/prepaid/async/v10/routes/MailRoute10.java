@@ -5,15 +5,6 @@ import cl.multicaja.prepaid.async.v10.processors.PendingSendMail10;
 public class MailRoute10 extends BaseRoute10 {
 
   /*
-    Comprobante de Carga
-   */
-  public static final String SEDA_PENDING_SEND_MAIL_TOPUP = "seda:MailRoute10.pendingSendMailTopup";
-  public static final String PENDING_SEND_MAIL_TOPUP_REQ = "MailRoute10.pendingSendMailTopup.req";
-  public static final String PENDING_SEND_MAIL_TOPUP_RESP = "MailRoute10.pendingSendMailTopup.resp";
-  public static final String ERROR_SEND_MAIL_TOPUP_REQ = "MailRoute10.errorSendMailTopup.req";
-  public static final String ERROR_SEND_MAIL_TOPUP_RESP = "MailRoute10.errorSendMailTopup.resp";
-
-  /*
     Comprobante de retiro
    */
   public static final String SEDA_PENDING_SEND_MAIL_WITHDRAW = "seda:MailRoute10.pendingSendMailWithdraw";
@@ -71,23 +62,6 @@ public class MailRoute10 extends BaseRoute10 {
     //los mensajes de las colas de respuesta se usan para verificaciones en los test, en la practica no se usan realmente
     //dado eso se establece un tiempo de vida de esos mensajes de solo 10 minutos
     String confResp = "?timeToLive=" + 600000;
-
-    /**
-     * Envio recibo de carga
-     */
-
-    from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_PENDING_SEND_MAIL_TOPUP, concurrentConsumers, sedaSize))
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REQ));
-
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", PENDING_SEND_MAIL_TOPUP_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processPendingTopupMail())
-      .to(createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_RESP + confResp)).end();
-
-    //Errores
-    from(createJMSEndpoint(String.format("%s?concurrentConsumers=%s", ERROR_SEND_MAIL_TOPUP_REQ, concurrentConsumers)))
-      .process(new PendingSendMail10(this).processErrorPendingTopupMail())
-      .to(createJMSEndpoint(ERROR_SEND_MAIL_TOPUP_RESP)).end();
-
 
     /**
      * Envio recibo de retiro

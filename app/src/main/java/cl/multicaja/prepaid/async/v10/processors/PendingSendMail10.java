@@ -100,55 +100,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
   }
 
   /**
-   * Envio recibo carga
-   */
-  public ProcessorRoute processPendingTopupMail() {
-
-    return new ProcessorRoute<ExchangeData<PrepaidTopupData10>, ExchangeData<PrepaidTopupData10>>() {
-      @Override
-      public ExchangeData<PrepaidTopupData10> processExchange(long idTrx, ExchangeData<PrepaidTopupData10> req, Exchange exchange) throws Exception {
-
-        log.info("processPendingTopupMail - REQ: " + req);
-
-        req.retryCountNext();
-
-        PrepaidTopupData10 data = req.getData();
-
-        if(req.getRetryCount() > getMaxRetryCount()) {
-          Endpoint endpoint = createJMSEndpoint(ERROR_SEND_MAIL_TOPUP_REQ);
-          return redirectRequest(endpoint, exchange, req, false);
-        }
-
-        PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-        PrepaidTopup10 topup = data.getPrepaidTopup10();
-
-        Map<String, Object> templateData = new HashMap<>();
-
-        templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
-        templateData.put("user_rut", RutUtils.getInstance().format(data.getUser().getRut().getValue(), data.getUser().getRut().getDv()));
-        templateData.put("transaction_amount", String.valueOf(NumberUtils.getInstance().toClp(topup.getTotal().getValue())));
-        templateData.put("transaction_total_paid", NumberUtils.getInstance().toClp(topup.getAmount().getValue()));
-        templateData.put("transaction_fee", NumberUtils.getInstance().toClp(topup.getFee().getValue()));
-        templateData.put("description", topup.getMerchantCode().equals(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE) ? "Carga web" : "Carga en comercio");
-
-        LocalDateTime topupDateTime = prepaidMovement.getFechaCreacion().toLocalDateTime();
-
-        ZonedDateTime local = ZonedDateTime.ofInstant(topupDateTime.toInstant(ZoneOffset.UTC), ZoneId.of("America/Santiago"));
-
-        templateData.put("transaction_date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(TEMPLATE_MAIL_TOPUP);
-        emailBody.setAddress(data.getUser().getEmail().getValue());
-        getRoute().getUserClient().sendMail(null, data.getUser().getId(), emailBody);
-
-        return req;
-      }
-    };
-  }
-
-  /**
    * Envio solcitud retiro TEF
    */
   public ProcessorRoute processPendingWebWithdrawRequestMail() {
