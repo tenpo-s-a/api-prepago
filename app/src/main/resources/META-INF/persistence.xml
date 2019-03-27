@@ -36,7 +36,7 @@
     <class>cl.multicaja.prepaid.model.v11.Cuenta</class>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
-      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/prepago_ci" /> <!-- BD Mane -->
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://database:5432/prepago_ci" /> <!-- BD Mane -->
       <property name="javax.persistence.jdbc.user" value="postgres" /> <!-- DB User -->
       <property name="javax.persistence.jdbc.password" value="postgres" /> <!-- DB Password -->
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/> <!-- DB Dialect -->
