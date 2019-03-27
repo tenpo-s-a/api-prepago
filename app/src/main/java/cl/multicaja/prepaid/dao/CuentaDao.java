@@ -14,7 +14,7 @@ public class CuentaDao extends PrepaidCrud<Cuenta,Long>{
     super(Cuenta.class);
   }
 
-  @PersistenceContext(name = ENV)
+  @PersistenceContext(unitName = ENV)
   private EntityManager em;
 
   @Override
