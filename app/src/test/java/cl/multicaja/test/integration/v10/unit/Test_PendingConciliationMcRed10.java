@@ -167,7 +167,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         }
       } else {
         List lstResearchList = findResearchMovements();
-        Assert.assertEquals("Debe haber " + 1 + " movimiento en research.", 1, lstResearchList.size());
+        Assert.assertEquals("Debe haber 1 movimiento en research.", 1, lstResearchList.size());
       }
     }
     Assert.assertEquals("Debe haber 6 conciliados.", 6, reconciledCount);
@@ -311,40 +311,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber XX conciliados.", 6, reconciledCount);
     Assert.assertEquals("Debe haber XX no conciliados.", 0, notReconcilidedCount);
   }
-
-  @Test
-  public void rendicionRetirosReversadosNoConciliado() throws Exception {
-    ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(6, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, 1);
-    try {
-      InputStream is = putSuccessFileIntoSftp(this.fileName);
-      // Procesa el archivo y lo guarda en la tabla.
-      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
-      // Procesa la tabla y concilia
-      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
-    } catch (Exception e) {
-      Assert.fail("Should not be here");
-    }
-
-    int reconciledCount = 0;
-    int notReconcilidedCount = 0;
-    for(PrepaidMovement10 mov : movimientos){
-      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
-      if (movTmp != null) {
-        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
-          Assert.fail("Nada debe estar conciliado");
-          reconciledCount++;
-        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
-          notReconcilidedCount++;
-        }
-      } else {
-        List lstResearchList = findResearchMovements();
-        Assert.assertEquals("Debe haber 1 movimiento en research.", 1, lstResearchList.size());
-      }
-    }
-    Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
-    Assert.assertEquals("Debe haber 6 no conciliados.", 6, notReconcilidedCount);
-  }
-
+  
   private ArrayList<PrepaidMovement10> createMovementAndFile(int cantidad, PrepaidMovementType type, IndicadorNormalCorrector indicadorNormalCorrector, Boolean withError, ArrayList<WrongMovementInfo> movementsInfo, int onlyFileMovementCount) throws Exception {
 
 
@@ -353,12 +320,12 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     String fileName = null;
     String sDate = fileDate;
 
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
     int totalNumberOfMovements = cantidad + movementsInfo.size() + onlyFileMovementCount;
     for (int i = 0; i < totalNumberOfMovements; i++) {
-
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
 
       PrepaidMovement10 prepaidMovement10 = null;
       if(PrepaidMovementType.TOPUP.equals(type) && IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
@@ -401,7 +368,7 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10.setFechaActualizacion(currentTimeStamp1);
         prepaidMovement10.setFechaCreacion(currentTimeStamp1);
 
-        prepaidMovement10.setIdPrepaidUser(numberUtils.random(1L,9999999L));
+        prepaidMovement10.setIdPrepaidUser(prepaidUser.getUserIdMc());
         prepaidMovement10.setMonto(new BigDecimal(numberUtils.random(3000,100000)));
         prepaidMovement10.setId(numberUtils.random(3000L,100000L));
       }
