@@ -26,4 +26,5 @@ public class AccountDao extends PrepaidCrud<Account,Long>{
     this.em = em;
   }
 
+
 }

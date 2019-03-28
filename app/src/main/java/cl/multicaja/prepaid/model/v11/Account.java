@@ -13,24 +13,31 @@ public class Account implements Serializable {
   private Long id;
 
   @Column(name = "id_usuario")
-  private Long idUsuario;
+  private Long userId;
 
   @Transient
   private String uuid;
 
-  private String cuenta;
-  private String procesador;
+  @Column(name = "cuenta")
+  private String account;
+
+  @Column(name = "procesador")
+  private String processor;
 
   @Column(name = "saldo_info")
-  private String saldoInfo;
+  private String balanceInfo;
 
   @Column(name = "saldo_expiracion")
-  private Long saldoExpiracion;
+  private Long expireBalance;
 
-  private String estado;
-  private LocalDateTime creacion;
-  private LocalDateTime actualizacion;
+  @Column(name = "estado")
+  private String status;
 
+  @Column(name = "creacion")
+  private LocalDateTime createdAt;
+
+  @Column(name = "actualizacion")
+  private LocalDateTime updatedAt;
 
   public Long getId() {
     return id;
@@ -38,6 +45,14 @@ public class Account implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
   public String getUuid() {
@@ -48,67 +63,59 @@ public class Account implements Serializable {
     this.uuid = uuid;
   }
 
-  public String getCuenta() {
-    return cuenta;
+  public String getAccount() {
+    return account;
   }
 
-  public void setCuenta(String cuenta) {
-    this.cuenta = cuenta;
+  public void setAccount(String account) {
+    this.account = account;
   }
 
-  public String getProcesador() {
-    return procesador;
+  public String getProcessor() {
+    return processor;
   }
 
-  public void setProcesador(String procesador) {
-    this.procesador = procesador;
+  public void setProcessor(String processor) {
+    this.processor = processor;
   }
 
-  public String getSaldoInfo() {
-    return saldoInfo;
+  public String getBalanceInfo() {
+    return balanceInfo;
   }
 
-  public void setSaldoInfo(String saldoInfo) {
-    this.saldoInfo = saldoInfo;
+  public void setBalanceInfo(String balanceInfo) {
+    this.balanceInfo = balanceInfo;
   }
 
-  public Long getSaldoExpiracion() {
-    return saldoExpiracion;
+  public Long getExpireBalance() {
+    return expireBalance;
   }
 
-  public void setSaldoExpiracion(Long saldoExpiracion) {
-    this.saldoExpiracion = saldoExpiracion;
+  public void setExpireBalance(Long expireBalance) {
+    this.expireBalance = expireBalance;
   }
 
-  public String getEstado() {
-    return estado;
+  public String getStatus() {
+    return status;
   }
 
-  public void setEstado(String estado) {
-    this.estado = estado;
+  public void setStatus(String status) {
+    this.status = status;
   }
 
-  public LocalDateTime getCreacion() {
-    return creacion;
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
   }
 
-  public void setCreacion(LocalDateTime creacion) {
-    this.creacion = creacion;
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
   }
 
-  public LocalDateTime getActualizacion() {
-    return actualizacion;
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
   }
 
-  public void setActualizacion(LocalDateTime actualizacion) {
-    this.actualizacion = actualizacion;
-  }
-
-  public Long getIdUsuario() {
-    return idUsuario;
-  }
-
-  public void setIdUsuario(Long idUsuario) {
-    this.idUsuario = idUsuario;
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
   }
 }

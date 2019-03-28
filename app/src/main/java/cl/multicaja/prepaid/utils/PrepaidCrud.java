@@ -1,7 +1,5 @@
 package cl.multicaja.prepaid.utils;
 
-import cl.multicaja.core.utils.ConfigUtils;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.io.Serializable;

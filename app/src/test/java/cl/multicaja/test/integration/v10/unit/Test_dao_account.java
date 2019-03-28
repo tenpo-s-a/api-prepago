@@ -22,13 +22,13 @@ public class Test_dao_account extends TestBaseUnit {
     cuentaDao.setEm(createEntityManager());
 
     Account cuenta = new Account();
-    cuenta.setCuenta(getRandomString(10));
-    cuenta.setEstado("ACTIVA");
-    cuenta.setSaldoInfo("");
-    cuenta.setSaldoExpiracion(0L);
-    cuenta.setCreacion(LocalDateTime.now());
-    cuenta.setActualizacion(LocalDateTime.now());
-    cuenta.setProcesador("TECNOCOM");
+    cuenta.setAccount(getRandomString(10));
+    cuenta.setStatus("ACTIVA");
+    cuenta.setBalanceInfo("");
+    cuenta.setExpireBalance(0L);
+    cuenta.setCreatedAt(LocalDateTime.now());
+    cuenta.setUpdatedAt(LocalDateTime.now());
+    cuenta.setProcessor("TECNOCOM");
 
 
     cuenta = cuentaDao.insert(cuenta);
@@ -42,13 +42,13 @@ public class Test_dao_account extends TestBaseUnit {
     cuentaDao.setEm(createEntityManager());
 
     Account cuenta = new Account();
-    cuenta.setCuenta(getRandomString(10));
-    cuenta.setEstado("ACTIVA");
-    cuenta.setSaldoInfo("");
-    cuenta.setSaldoExpiracion(0L);
-    cuenta.setCreacion(LocalDateTime.now());
-    cuenta.setActualizacion(LocalDateTime.now());
-    cuenta.setProcesador("TECNOCOM");
+    cuenta.setAccount(getRandomString(10));
+    cuenta.setStatus("ACTIVA");
+    cuenta.setBalanceInfo("");
+    cuenta.setExpireBalance(0L);
+    cuenta.setCreatedAt(LocalDateTime.now());
+    cuenta.setUpdatedAt(LocalDateTime.now());
+    cuenta.setProcessor("TECNOCOM");
 
     cuenta = cuentaDao.insert(cuenta);
     Assert.assertNotNull("No debe ser null",cuenta);
@@ -58,21 +58,21 @@ public class Test_dao_account extends TestBaseUnit {
     Account cuenta2 = cuentaDao.find(cuenta.getId());
     Assert.assertEquals("Id Deben ser igules",cuenta.getId(),cuenta2.getId());
     Assert.assertEquals("UUID Deben ser igules",cuenta.getUuid(),cuenta2.getUuid());
-    Assert.assertEquals("Actualizacion Deben ser igules",cuenta.getActualizacion(),cuenta2.getActualizacion());
-    Assert.assertEquals("Account Deben ser igules",cuenta.getCuenta(),cuenta2.getCuenta());
+    Assert.assertEquals("Actualizacion Deben ser igules",cuenta.getUpdatedAt(),cuenta2.getUpdatedAt());
+    Assert.assertEquals("Account Deben ser igules",cuenta.getAccount(),cuenta2.getAccount());
 
   }
   @Test
   public void testUpdate() {
     cuentaDao.setEm(createEntityManager());
     Account cuenta = new Account();
-    cuenta.setCuenta(getRandomString(10));
-    cuenta.setEstado("ACTIVA");
-    cuenta.setSaldoInfo("");
-    cuenta.setSaldoExpiracion(0L);
-    cuenta.setCreacion(LocalDateTime.now());
-    cuenta.setActualizacion(LocalDateTime.now());
-    cuenta.setProcesador("TECNOCOM");
+    cuenta.setAccount(getRandomString(10));
+    cuenta.setStatus("ACTIVA");
+    cuenta.setBalanceInfo("");
+    cuenta.setExpireBalance(0L);
+    cuenta.setCreatedAt(LocalDateTime.now());
+    cuenta.setUpdatedAt(LocalDateTime.now());
+    cuenta.setProcessor("TECNOCOM");
 
     cuenta = cuentaDao.insert(cuenta);
     Assert.assertNotNull("No debe ser null",cuenta);
@@ -82,22 +82,22 @@ public class Test_dao_account extends TestBaseUnit {
     Account cuenta2 = cuentaDao.find(cuenta.getId());
     Assert.assertEquals("Id Deben ser igules",cuenta.getId(),cuenta2.getId());
     Assert.assertEquals("UUID Deben ser igules",cuenta.getUuid(),cuenta2.getUuid());
-    Assert.assertEquals("Actualizacion Deben ser igules",cuenta.getActualizacion(),cuenta2.getActualizacion());
-    Assert.assertEquals("Account Deben ser igules",cuenta.getCuenta(),cuenta2.getCuenta());
+    Assert.assertEquals("Actualizacion Deben ser igules",cuenta.getUpdatedAt(),cuenta2.getUpdatedAt());
+    Assert.assertEquals("Account Deben ser igules",cuenta.getAccount(),cuenta2.getAccount());
 
 
     // PRUEBA UPDATE
-    cuenta2.setProcesador("OTRO");
+    cuenta2.setProcessor("OTRO");
     LocalDateTime localDateTime = LocalDateTime.now();
-    cuenta2.setActualizacion(localDateTime);
+    cuenta2.setUpdatedAt(localDateTime);
     cuentaDao.update(cuenta2);
 
     Account cuenta3 = cuentaDao.find(cuenta.getId());
     Assert.assertEquals("Id Deben ser igules",cuenta.getId(),cuenta3.getId());
     Assert.assertEquals("UUID Deben ser igules",cuenta.getUuid(),cuenta3.getUuid());
-    Assert.assertEquals("Actualizacion Deben ser igules",localDateTime,cuenta3.getActualizacion());
-    Assert.assertEquals("Account Deben ser igules",cuenta.getCuenta(),cuenta3.getCuenta());
-    Assert.assertNotEquals("Procesadora debe ser igual a OTRO","OTRO",cuenta3.getCuenta());
+    Assert.assertEquals("Actualizacion Deben ser igules",localDateTime,cuenta3.getUpdatedAt());
+    Assert.assertEquals("Account Deben ser igules",cuenta.getAccount(),cuenta3.getAccount());
+    Assert.assertNotEquals("Procesadora debe ser igual a OTRO","OTRO",cuenta3.getAccount());
 
 
   }
