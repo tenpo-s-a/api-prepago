@@ -62,6 +62,9 @@ public class WebApp implements ServletContextListener  {
   @Inject
   private InvoiceRoute10 invoiceRoute10;
 
+  @Inject
+  private KafkaEventsRoute10 kafkaEventsRoute10;
+
   private BrokerService brokerService;
 
   public WebApp() {
@@ -93,7 +96,8 @@ public class WebApp implements ServletContextListener  {
           transactionReversalRoute10,
           productChangeRoute10,
           mailRoute10,
-          invoiceRoute10
+          invoiceRoute10,
+          kafkaEventsRoute10
           );
         log.info("==== Apache camel iniciado ====");
       }

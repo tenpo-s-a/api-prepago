@@ -47,6 +47,7 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setUserClient(getUserClient());
       prepaidTopupRoute10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       prepaidTopupRoute10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
+      prepaidTopupRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
       TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
       transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
@@ -66,7 +67,6 @@ public class TestContextHelper extends TestBaseUnit {
       tecnocomReconciliationRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
       tecnocomReconciliationRoute10.setTecnocomReconciliationEJBBean10(getTecnocomReconciliationEJBBean10());
 
-
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
 
@@ -74,6 +74,9 @@ public class TestContextHelper extends TestBaseUnit {
       mailRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
 
       InvoiceRoute10 invoiceRoute10 = new InvoiceRoute10();
+
+      KafkaEventsRoute10 kafkaEventsRoute10 = new KafkaEventsRoute10();
+
      /*
       camelFactory.startCamelContextWithRoutes(true,
         prepaidTopupRoute10 ,transactionReversalRoute10,
@@ -81,7 +84,7 @@ public class TestContextHelper extends TestBaseUnit {
         tecnocomReconciliationRoute10);
         */
       camelFactory.startCamelContextWithRoutes(true,
-        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10,invoiceRoute10);
+        prepaidTopupRoute10, transactionReversalRoute10, productChangeRoute10, mailRoute10,invoiceRoute10, kafkaEventsRoute10);
     }
     simpleNamingContextBuilder.deactivate();
   }

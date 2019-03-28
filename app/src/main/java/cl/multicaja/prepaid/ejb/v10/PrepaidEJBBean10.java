@@ -428,9 +428,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
         }
 
-        String messageId = this.getMailDelegate().sendTopupMail(prepaidTopup, user, prepaidMovement);
-        prepaidTopup.setMessageId(messageId);
-
         // Se envia informacion a accounting/clearing
         this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
       }

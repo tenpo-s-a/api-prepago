@@ -30,8 +30,12 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -75,6 +79,9 @@ public class TestBaseUnit extends TestApiBase {
   private static BackofficeEJBBean10 backofficeEJBBEan10;
   private static MailDelegate10 mailDelegate;
   private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+  private static KafkaEventDelegate10 kafkaEventDelegate10;
+  private static AccountEJBBean10 accountEJBBean10;
+
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
@@ -143,6 +150,13 @@ public class TestBaseUnit extends TestApiBase {
     }
     return prepaidInvoiceDelegate10;
   }
+
+  public static KafkaEventDelegate10 getKafkaEventDelegate10() {
+    if(kafkaEventDelegate10 == null) {
+      kafkaEventDelegate10 = new KafkaEventDelegate10();
+    }
+    return kafkaEventDelegate10;
+  }
   /**
    *
    * @return
@@ -198,6 +212,15 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovementEJBBean10;
   }
 
+  public static AccountEJBBean10 getAccountEJBBean10(){
+    if (accountEJBBean10 == null) {
+      accountEJBBean10 = new AccountEJBBean10();
+      accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      accountEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
+    }
+    return accountEJBBean10;
+  }
+
   /**
    *
    * @return
@@ -218,6 +241,7 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
     if (prepaidCardEJBBean10 == null) {
       prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
+      prepaidCardEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
     }
     return prepaidCardEJBBean10;
   }
@@ -1656,5 +1680,10 @@ public class TestBaseUnit extends TestApiBase {
       accounting10s.add(accounting10);
     }
     return accounting10s;
+  }
+  protected static EntityManager createEntityManager() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
+    EntityManager em = emf.createEntityManager();
+    return em;
   }
 }

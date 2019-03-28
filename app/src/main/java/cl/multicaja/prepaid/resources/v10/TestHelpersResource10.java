@@ -15,6 +15,7 @@ import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
+import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
@@ -104,6 +105,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @Inject
   private BackofficeDelegate10 backofficeDelegate10;
+
+  @Inject
+  private KafkaEventDelegate10 kafkaEventDelegate10;
 
   private UserClient userClient;
 
@@ -365,7 +369,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(impTrn).status(200).build();
   }
 
-
   @POST
   @Path("/simulateTecnocomError")
   public Response simulateTecnocomError(ReprocesQueue reprocesQueue, @Context HttpHeaders headers) throws Exception {
@@ -416,7 +419,6 @@ public final class TestHelpersResource10 extends BaseResource {
 
     return Response.ok("OK").status(201).build();
   }
-
 
   @POST
   @Path("/generate_clearing_file")

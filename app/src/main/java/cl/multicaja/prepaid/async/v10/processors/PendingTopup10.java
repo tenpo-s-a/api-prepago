@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_TOPUP_REQ;
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
 
@@ -182,10 +181,6 @@ public class PendingTopup10 extends BaseProcessor10 {
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
-
-              log.info("Enviando comprobante de carga por mail");
-              Endpoint mailEndpoint = createJMSEndpoint(PENDING_SEND_MAIL_TOPUP_REQ);
-              redirectRequest(mailEndpoint, exchange, req, Boolean.FALSE);
 
               //segun la historia: https://www.pivotaltracker.com/story/show/158044562
               if (PrepaidCardStatus.PENDING.equals(prepaidCard.getStatus())) {
