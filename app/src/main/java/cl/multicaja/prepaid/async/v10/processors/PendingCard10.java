@@ -91,6 +91,8 @@ public class PendingCard10 extends BaseProcessor10 {
           // publica evento de contrato/cuenta creada
           getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUserIdMc(), account);
 
+          data.setAccount(account);
+
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
 
@@ -177,11 +179,16 @@ public class PendingCard10 extends BaseProcessor10 {
 
           try {
 
-            getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
-              data.getPrepaidCard10().getId(),
-              data.getPrepaidCard10().getIdUser(),
-              data.getPrepaidCard10().getStatus(),
-              prepaidCard10);
+            /*
+              getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
+                data.getPrepaidCard10().getId(),
+                data.getPrepaidCard10().getIdUser(),
+                data.getPrepaidCard10().getStatus(),
+                prepaidCard10);
+            */
+
+            // Actualiza la tarjeta
+            getRoute().getPrepaidCardEJBBean11().updatePrepaidCard(null, data.getPrepaidCard10().getId(), data.getAccount().getId(), prepaidCard10);
 
             data.setPrepaidCard10(prepaidCard10);
             req.setData(data);
