@@ -20,6 +20,8 @@ import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.AccountStatus;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.apache.camel.Exchange;
@@ -61,6 +63,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Before
   @After
   public void clearData() {
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.%s cascade", getSchema(), "prp_cuenta"));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
@@ -1170,17 +1173,26 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
 
+    List<Account> accounts = getAccountDao().findAll();
+
+    Assert.assertEquals("Debe tener 1 cuenta", 1, accounts.size());
+
+    Account account = accounts.get(0);
+
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, prepaidCard10.getProcessorUserId());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, account.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event.getData());
 
     AccountEvent accountEvent = getJsonParser().fromJson(event.getData(), AccountEvent.class);
 
-    Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), accountEvent.getAccount().getId());
+    Assert.assertNotNull("Debe tener id", accountEvent.getAccount().getId());
+    Assert.assertEquals("Debe tener el mismo id", account.getUuid(), accountEvent.getAccount().getId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), accountEvent.getUserId());
-    Assert.assertEquals("Debe tener status ACTIVE", PrepaidCardStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());
+    Assert.assertEquals("Debe tener la misma fecha creacion", account.getCreatedAt(), accountEvent.getAccount().getTimestamps().getCreatedAt());
+    Assert.assertEquals("Debe tener la misma fecha actualizacion", account.getUpdatedAt(), accountEvent.getAccount().getTimestamps().getUpdatedAt());
+    Assert.assertEquals("Debe tener status ACTIVE", AccountStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());
   }
 
   void waitForAccountingToExist(Long trxId) throws Exception {

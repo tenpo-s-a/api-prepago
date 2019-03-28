@@ -1,10 +1,13 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.dao.AccountDao;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.AccountProcessor;
+import cl.multicaja.prepaid.model.v11.AccountStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -12,7 +15,6 @@ import javax.ejb.*;
 import javax.inject.Inject;
 
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
-import static cl.multicaja.core.model.Errors.TARJETA_NO_EXISTE;
 
 @Stateless
 @LocalBean
@@ -24,8 +26,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
-  @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  @Inject
+  private AccountDao accountDao;
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
     return kafkaEventDelegate10;
@@ -35,27 +37,39 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
     this.kafkaEventDelegate10 = kafkaEventDelegate10;
   }
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    return prepaidCardEJBBean10;
+  public AccountDao getAccountDao() {
+    return accountDao;
   }
 
-  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setAccountDao(AccountDao accountDao) {
+    this.accountDao = accountDao;
+  }
+
+  public Account insertAccount(String accountNumber, Long userId) throws Exception {
+    if(StringUtils.isAllBlank(accountNumber)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
+    }
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    Account account = new Account();
+    account.setUserId(userId);
+    account.setAccount(accountNumber);
+    account.setStatus(AccountStatus.ACTIVE.toString());
+    account.setBalanceInfo("");
+    account.setExpireBalance(0L);
+    account.setProcessor(AccountProcessor.TECNOCOM_CL.toString());
+    account = accountDao.insert(account);
+    return  accountDao.find(account.getId());
   }
 
   @Override
-  public void publishAccountCreatedEvent(Long id) throws Exception {
-    if(id == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+  public void publishAccountCreatedEvent(Account account) throws Exception {
+    if(account == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account"));
     }
 
-    //FIXME: debe buscar en la tabla cuenta/contrato
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardById(null, id);
-
-    if(prepaidCard10 == null){
-      throw new ValidationException(TARJETA_NO_EXISTE);
-    }
-
-    getKafkaEventDelegate10().publishAccountCreatedEvent(prepaidCard10);
+    getKafkaEventDelegate10().publishAccountCreatedEvent(account);
   }
 }

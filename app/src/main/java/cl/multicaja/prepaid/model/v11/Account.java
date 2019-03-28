@@ -2,7 +2,10 @@ package cl.multicaja.prepaid.model.v11;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
 
 @Entity
 @Table(name = "prp_cuenta", schema ="prepago")
@@ -15,7 +18,6 @@ public class Account implements Serializable {
   @Column(name = "id_usuario")
   private Long userId;
 
-  @Transient
   private String uuid;
 
   @Column(name = "cuenta")
@@ -117,5 +119,17 @@ public class Account implements Serializable {
 
   public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+  @PrePersist
+  public void beforePersist() {
+    this.setUuid(UUID.randomUUID().toString());
+    this.setCreatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+    this.setUpdatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+  }
+
+  @PreUpdate
+  public void beforeUpdate() {
+    this.setUpdatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
   }
 }
