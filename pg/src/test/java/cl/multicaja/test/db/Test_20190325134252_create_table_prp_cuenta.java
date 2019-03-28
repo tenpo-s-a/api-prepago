@@ -12,7 +12,7 @@ public class Test_20190325134252_create_table_prp_cuenta extends TestDbBasePg {
   public void checkIfExistsTable() {
     boolean exists = dbUtils.tableExists(SCHEMA, "prp_cuenta", true,
       new ColumnInfo("id", SqlType.BIGSERIAL.getGetJavaType()),
-      new ColumnInfo("uuid","uuid",2147483647),
+      new ColumnInfo("uuid",SqlType.VARCHAR.getGetJavaType(),50),
       new ColumnInfo("id_usuario", SqlType.BIGINT.getGetJavaType()),
       new ColumnInfo("cuenta", SqlType.VARCHAR.getGetJavaType(),100),
       new ColumnInfo("procesador", SqlType.VARCHAR.getGetJavaType(), 30),
