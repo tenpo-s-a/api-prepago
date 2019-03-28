@@ -83,7 +83,7 @@
       <property name="ReWriteBatchedInserts" value="false"></property>
       <property name="SocketTimeout" value="0"></property>
       <property name="HostRecheckSeconds" value="10"></property>
-      <property name="Password" value="GcpeWsJ3EWGBrwYY"></property>
+      <property name="Password" value="papalapa.,"></property>
       <property name="ConnectTimeout" value="10"></property>
       <property name="ApplicationName" value="PostgreSQL JDBC Driver"></property>
       <property name="PreparedStatementCacheQueries" value="256"></property>
