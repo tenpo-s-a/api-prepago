@@ -1,8 +1,8 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.dao.CardDao;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v11.Card;
+import cl.multicaja.prepaid.model.v11.CardStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class Test_dao_card extends TestBaseUnit{
     Card card = new Card();
     card.setCreatedAt(LocalDateTime.now());
     card.setUpdatedAt(LocalDateTime.now());
-    card.setStatus(PrepaidCardStatus.ACTIVE);
+    card.setStatus(CardStatus.ACTIVE);
     card.setAccountId(0l);
     card.setCardName(getRandomString(10));
     card.setPan(getRandomNumericString(10));

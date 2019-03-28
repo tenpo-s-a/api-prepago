@@ -21,7 +21,7 @@ public class Card implements Serializable {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "estado")
-  private PrepaidCardStatus status;
+  private CardStatus status;
 
   @Column(name = "nombre_tarjeta")
   private String cardName;
@@ -80,11 +80,11 @@ public class Card implements Serializable {
     this.cryptedPan = cryptedPan;
   }
 
-  public PrepaidCardStatus getStatus() {
+  public CardStatus getStatus() {
     return status;
   }
 
-  public void setStatus(PrepaidCardStatus status) {
+  public void setStatus(CardStatus status) {
     this.status = status;
   }
 
