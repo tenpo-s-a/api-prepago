@@ -10,7 +10,8 @@ public enum State implements Serializable {
   VALIDATED,
   UNCONFIRMED,
   ACTIVE,
-  BLOCKED;
+  BLOCKED,
+  CONFIRMED;
 
   public static State valueOfEnum(String name) {
     try {

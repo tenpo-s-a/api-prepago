@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.helpers.tenpo;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpError;
@@ -65,7 +66,7 @@ public class ApiCall {
 
 
   public User getUserById(UUID userId) throws TimeoutException, BaseException {
-    final String URI = "user";
+    final String URI = "users";
     final String URL = String.format("%s/%s/%s", getApiUrl(), URI, userId);
     LOG.info("request route: " + URL);
     LOG.info("******** getUserById IN ********");
@@ -88,12 +89,12 @@ public class ApiCall {
         LOG.error(brex);
         throw  brex;
       case 404:
-        return null;
+        NotFoundException nfe = httpResponse.toObject(NotFoundException.class);
+        nfe.setStatus(404);
+        LOG.error(nfe);
+        throw  nfe;
       case 422:
-        ValidationException vex = httpResponse.toObject(ValidationException.class);
-        vex.setStatus(422);
-        LOG.error(vex);
-        throw  vex;
+        return null;
       case 500:
         BaseException bex = httpResponse.toObject(BaseException.class);
         bex.setStatus(500);

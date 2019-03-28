@@ -36,6 +36,52 @@ public class User extends BaseModel {
   private State state;
   private Level level;
   private Plan plan;
+  @JsonProperty("regionCode")
+  private String regionCode;
+  private String nationality;
+  private String profession;
+  @JsonProperty("documentSeries")
+  private String documentSeries;
+
+  public String getNationality() {
+    return nationality;
+  }
+
+  public void setNationality(String nationality) {
+    this.nationality = nationality;
+  }
+
+
+
+  public String getProfession() {
+    return profession;
+  }
+
+  public void setProfession(String profession) {
+    this.profession = profession;
+  }
+
+
+
+  public String getDocumentSeries() {
+    return documentSeries;
+  }
+
+  public void setDocumentSeries(String documentSeries) {
+    this.documentSeries = documentSeries;
+  }
+
+
+
+  public String getRegionCode() {
+    return regionCode;
+  }
+
+  public void setRegionCode(String regionCode) {
+    this.regionCode = regionCode;
+  }
+
+
 
   public State getState() {
     return state;
