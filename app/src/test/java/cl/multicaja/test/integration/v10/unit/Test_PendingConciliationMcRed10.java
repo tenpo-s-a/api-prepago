@@ -149,7 +149,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     }
 
     int reconciledCount = 0;
-    int notReconcilidedCount = 0;
     for (PrepaidMovement10 mov : movimientos) {
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
@@ -158,7 +157,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
           reconciledCount++;
         } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           //Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", beforeDate(movTmp.getFechaCreacion()));
-          notReconcilidedCount++;
         } else {
           boolean outsideDates = !includedInDates(movTmp.getFechaCreacion());
           boolean wrongType = !movTmp.getTipoMovimiento().equals(PrepaidMovementType.TOPUP);
@@ -166,8 +164,16 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
           Assert.assertTrue("Los que quedaron PENDING deben estar fuera de las fechas, type incorrecto o indnorcor incorrecto", outsideDates || wrongType || wrongIndNorCor);
         }
       } else {
-        List lstResearchList = findResearchMovements();
-        Assert.assertEquals("Debe haber 1 movimiento en research.", 1, lstResearchList.size());
+        // No existe el movimiento con es id, la conciliacion deberia haberlo insertado
+        PrepaidMovement10 restoredMovement = null;
+        for(int i = 0; i < 20; i++) {
+          restoredMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
+          if(restoredMovement != null) {
+            break;
+          }
+          Thread.sleep(500);
+        }
+        Assert.assertNotNull("Debe haber sido reinsertado", restoredMovement);
       }
     }
     Assert.assertEquals("Debe haber 6 conciliados.", 6, reconciledCount);
@@ -311,7 +317,48 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber XX conciliados.", 6, reconciledCount);
     Assert.assertEquals("Debe haber XX no conciliados.", 0, notReconcilidedCount);
   }
-  
+
+  @Test
+  public void rendicionRetirosReversadosNoConciliado() throws Exception {
+    ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(6, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, 1);
+    try {
+      InputStream is = putSuccessFileIntoSftp(this.fileName);
+      // Procesa el archivo y lo guarda en la tabla.
+      ReconciliationFile10 reconciliationFile10 = getMcRedReconciliationEJBBean10().processFile(is, this.fileName);
+      // Procesa la tabla y concilia
+      getMcRedReconciliationEJBBean10().processSwitchData(reconciliationFile10);
+    } catch (Exception e) {
+      Assert.fail("Should not be here");
+    }
+
+    int reconciledCount = 0;
+    int notReconcilidedCount = 0;
+    for(PrepaidMovement10 mov : movimientos){
+      PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
+      if (movTmp != null) {
+        if (movTmp.getConSwitch().equals(ReconciliationStatusType.RECONCILED)) {
+          Assert.fail("Nada debe estar conciliado");
+          reconciledCount++;
+        } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
+          notReconcilidedCount++;
+        }
+      } else {
+        // No existe el movimiento con es id, la conciliacion deberia haberlo insertado
+        PrepaidMovement10 restoredMovement = null;
+        for(int i = 0; i < 20; i++) {
+          restoredMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
+          if(restoredMovement != null) {
+            break;
+          }
+          Thread.sleep(500);
+        }
+        Assert.assertNotNull("Debe haber sido reinsertado", restoredMovement);
+      }
+    }
+    Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
+    Assert.assertEquals("Debe haber 6 no conciliados.", 6, notReconcilidedCount);
+  }
+
   private ArrayList<PrepaidMovement10> createMovementAndFile(int cantidad, PrepaidMovementType type, IndicadorNormalCorrector indicadorNormalCorrector, Boolean withError, ArrayList<WrongMovementInfo> movementsInfo, int onlyFileMovementCount) throws Exception {
 
 
@@ -371,6 +418,8 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10.setIdPrepaidUser(prepaidUser.getUserIdMc());
         prepaidMovement10.setMonto(new BigDecimal(numberUtils.random(3000,100000)));
         prepaidMovement10.setId(numberUtils.random(3000L,100000L));
+        prepaidMovement10.setTipoMovimiento(type);
+        prepaidMovement10.setIndnorcor(indicadorNormalCorrector);
       }
 
       lstPrepaidMovement10s.add(prepaidMovement10);
