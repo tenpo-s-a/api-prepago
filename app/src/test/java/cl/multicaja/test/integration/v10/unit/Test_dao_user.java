@@ -1,9 +1,9 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.dao.UserDao;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.model.v11.User;
+import cl.multicaja.prepaid.model.v11.UserStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class Test_dao_user extends TestBaseUnit {
     user.setUserId(0L);
     user.setLastName(getRandomString(10));
     user.setName(getRandomString(10));
-    user.setStatus(PrepaidUserStatus.ACTIVE);
+    user.setStatus(UserStatus.ACTIVE);
     user.setLevel(0);
     user.setDocumentNumber(getRandomNumericString(10));
     user.setDocumentType(DocumentType.DNI_CL);

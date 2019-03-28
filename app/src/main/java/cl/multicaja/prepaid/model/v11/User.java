@@ -18,7 +18,7 @@ public class User implements Serializable {
   private Long userId;
 
   @Column(name = "estado")
-  private PrepaidUserStatus status;
+  private UserStatus status;
 
   @Column(name = "nombre")
   private String name;
@@ -70,11 +70,11 @@ public class User implements Serializable {
     this.userId = userId;
   }
 
-  public PrepaidUserStatus getStatus() {
+  public UserStatus getStatus() {
     return status;
   }
 
-  public void setStatus(PrepaidUserStatus status) {
+  public void setStatus(UserStatus status) {
     this.status = status;
   }
 
