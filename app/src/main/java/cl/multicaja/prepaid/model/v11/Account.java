@@ -6,20 +6,27 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "prp_cuenta", schema ="prepago")
-public class Cuenta implements Serializable {
+public class Account implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "id_usuario")
+  private Long idUsuario;
+
   @Transient
   private String uuid;
+
   private String cuenta;
   private String procesador;
+
   @Column(name = "saldo_info")
   private String saldoInfo;
+
   @Column(name = "saldo_expiracion")
   private Long saldoExpiracion;
+
   private String estado;
   private LocalDateTime creacion;
   private LocalDateTime actualizacion;
@@ -95,5 +102,13 @@ public class Cuenta implements Serializable {
 
   public void setActualizacion(LocalDateTime actualizacion) {
     this.actualizacion = actualizacion;
+  }
+
+  public Long getIdUsuario() {
+    return idUsuario;
+  }
+
+  public void setIdUsuario(Long idUsuario) {
+    this.idUsuario = idUsuario;
   }
 }
