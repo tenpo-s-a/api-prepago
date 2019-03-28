@@ -1348,14 +1348,4 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(user).build();
   }
 
-  @POST
-  @Path("/kafka/account_created")
-  public Response userCreated(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
-    validate();
-
-    kafkaEventDelegate10.sendAccountCreatedEvent(body.get("message").toString());
-
-    return Response.accepted().build();
-  }
-
 }

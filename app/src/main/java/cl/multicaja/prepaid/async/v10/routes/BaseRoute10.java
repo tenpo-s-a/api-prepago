@@ -58,6 +58,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
   @EJB
   private BackofficeEJBBean10 backofficeEJBBEan10;
 
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
 
   private ParametersUtil parametersUtil;
   private ConfigUtils configUtils;
@@ -231,5 +234,13 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setBackofficeEJBBEan10(BackofficeEJBBean10 backofficeEJBBEan10) {
     this.backofficeEJBBEan10 = backofficeEJBBEan10;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
   }
 }

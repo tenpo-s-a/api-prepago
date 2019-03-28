@@ -17,6 +17,7 @@ import cl.multicaja.prepaid.helpers.users.model.NameStatus;
 import cl.multicaja.prepaid.helpers.users.model.RutStatus;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
+import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
@@ -1083,6 +1084,103 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), cardEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard10.getPan(), cardEvent.getCard().getPan());
+  }
+
+  @Test
+  public void topupUserBalance_accountCreated_event() throws Exception {
+
+    User user = registerUser();
+    user.setNameStatus(NameStatus.VERIFIED);
+    user.getRut().setStatus(RutStatus.VERIFIED);
+    user = updateUser(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+
+    //primera carga
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
+
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+
+    Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
+
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+
+    switch (prepaidTopup10.getTransactionOriginType()){
+      case POS:
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        break;
+      case WEB:
+        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        break;
+    }
+
+    PrepaidMovement10 topup = getPrepaidMovementEJBBean10().getPrepaidMovementById(resp.getId());
+    Assert.assertNotNull("debe tener un movimiento", topup);
+    Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
+    Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
+
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    Boolean dataFound = false;
+    for(int j = 0; j < 10; j++) {
+      Thread.sleep(1000);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        dataFound = true;
+        break;
+      }
+    }
+
+    AccountingTxType txType = AccountingTxType.CARGA_POS;
+    AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
+    if(TransactionOriginType.WEB.equals(prepaidTopup10.getTransactionOriginType())) {
+      txType = AccountingTxType.CARGA_WEB;
+      movementType = AccountingMovementType.CARGA_WEB;
+    }
+
+    if (dataFound) {
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      Assert.assertNotNull("No debe ser null", accounting10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
+
+      AccountingData10 accounting10 = accounting10s.get(0);
+      Assert.assertEquals(String.format("Debe tener tipo %s", prepaidTopup10.getTransactionOriginType()), txType, accounting10.getType());
+      Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
+      Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+      Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
+      Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
+
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      Assert.assertNotNull("No debe ser null", clearing10s);
+      Assert.assertEquals("Debe haber 1 solo movimiento de clearing", 1, clearing10s.size());
+
+      ClearingData10 clearing10 = clearing10s.get(0);
+      Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+      Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+      Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+    } else {
+      Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
+    }
+
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, prepaidCard10.getProcessorUserId());
+
+    Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event);
+    Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event.getData());
+
+    AccountEvent accountEvent = getJsonParser().fromJson(event.getData(), AccountEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), accountEvent.getAccount().getId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), accountEvent.getUserId());
+    Assert.assertEquals("Debe tener status ACTIVE", PrepaidCardStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());
   }
 
   void waitForAccountingToExist(Long trxId) throws Exception {
