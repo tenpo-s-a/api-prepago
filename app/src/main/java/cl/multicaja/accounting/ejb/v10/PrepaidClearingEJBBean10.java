@@ -5,13 +5,11 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.ZONEID;
-import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
@@ -546,17 +544,17 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           // O ya esta conciliado
 
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList1 = new ArrayList<>();
-          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
           researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
-          researchMovementInformationFiles.setIdEnArchivo(String.valueOf(data.getId()));
+          researchMovementInformationFiles.setIdEnArchivo(data.getResearchId());
           researchMovementInformationFiles.setNombreArchivo(fileName);
-          researchMovementInformationFiles.setTipoArchivo("CLEARING");
+          researchMovementInformationFiles.setTipoArchivo(AccountingFileType.CLEARING.toString());
           researchMovementInformationFilesList1.add(researchMovementInformationFiles);
           createClearingResearch(
             researchMovementInformationFilesList1,
             ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA,
+            ResearchMovementResponsibleStatusType.OTI_PREPAID,
             ResearchMovementDescriptionType.MOVEMENT_WAS_PROCESSED,
             data.getIdTransaction(),
             PrepaidMovementType.PURCHASE,
@@ -579,17 +577,17 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           //Agregar a Investigar
 
           List<ResearchMovementInformationFiles> researchMovementInformationFilesList2 = new ArrayList<>();
-          researchMovementInformationFiles = new ResearchMovementInformationFiles();
+          ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
           researchMovementInformationFiles.setIdArchivo((Long.valueOf(fileId)));
-          researchMovementInformationFiles.setIdEnArchivo(String.valueOf(data.getId()));
+          researchMovementInformationFiles.setIdEnArchivo(data.getResearchId());
           researchMovementInformationFiles.setNombreArchivo(fileName);
-          researchMovementInformationFiles.setTipoArchivo("CLEARING");
+          researchMovementInformationFiles.setTipoArchivo(AccountingFileType.CLEARING.toString());
           researchMovementInformationFilesList2.add(researchMovementInformationFiles);
           createClearingResearch(
             researchMovementInformationFilesList2,
             ReconciliationOriginType.CLEARING,
             data.getTimestamps().getCreatedAt(),
-            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI,
+            ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI_PREPAGO,
             ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB,
             data.getIdTransaction(),
             PrepaidMovementType.PURCHASE,

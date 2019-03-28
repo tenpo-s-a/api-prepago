@@ -380,33 +380,24 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
             trx.setErrorDetails(msg);
 
             log.info("Movimiento no encontrado, no conciliado");
-            // Construyendo un Id.
-            String researchId = "ExtId:[";
-            if (trx.getNumAut() != null) {
-              researchId += trx.getNumAut();
-            } else {
-              researchId += "NoExternalId";
-            }
-
-            researchId += "]";
 
             List<ReconciliationFile10> fileList = getReconciliationFilesEJBBean10().getReconciliationFile(null, fileId, null, null, null, null);
             ReconciliationFile10 file = fileList.get(0);
 
-            // Todo: insertar los valores correctos de id en archivo y nombreArchivo
             List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
             ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
-            //researchMovementInformationFiles.setIdArchivo();
-            //researchMovementInformationFiles.setIdEnArchivo();
-            //researchMovementInformationFiles.setNombreArchivo();
-            //researchMovementInformationFiles.setTipoArchivo();
+            researchMovementInformationFiles.setIdArchivo(fileId);
+            researchMovementInformationFiles.setIdEnArchivo(trx.getIdForResearch());
+            researchMovementInformationFiles.setNombreArchivo(file.getFileName());
+            researchMovementInformationFiles.setTipoArchivo(file.getType().toString());
             researchMovementInformationFilesList.add(researchMovementInformationFiles);
+
             getPrepaidMovementEJBBean10().createResearchMovement(
               null,
               new ObjectMapper().writeValueAsString(researchMovementInformationFilesList),
               ReconciliationOriginType.TECNOCOM.toString(),
               trx.getFecTrn(),
-              ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+              ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
               ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
               0L,
               trx.getMovementType().toString(),
@@ -591,6 +582,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId, OriginOpeType originOpeType, String encryptedPan, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
     return buscaMovimientosTecnocom("prp_movimientos_tecnocom", fileId, originOpeType, encryptedPan, indnorcor, tipofac, fecfac, numaut);
+  }
+
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocomHist(Long fileId, OriginOpeType originOpeType, String encryptedPan, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut) throws Exception {
+    return buscaMovimientosTecnocom("prp_movimientos_tecnocom_hist", fileId, originOpeType, encryptedPan, indnorcor, tipofac, fecfac, numaut);
   }
 
   /**

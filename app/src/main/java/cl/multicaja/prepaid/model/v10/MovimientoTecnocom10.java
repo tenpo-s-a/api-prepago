@@ -358,4 +358,8 @@ public class MovimientoTecnocom10 implements Serializable{
     return type;
   }
 
+  public String getIdForResearch() {
+    return String.format("[Numaut:%s.Date:%s]", getNumAut(), getFecFac().toString());
+  }
+
 }

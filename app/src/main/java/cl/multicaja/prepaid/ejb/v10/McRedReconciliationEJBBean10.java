@@ -54,10 +54,6 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
 
-  private List<ResearchMovementInformationFiles> researchMovementInformationFilesList;
-
-  private ResearchMovementInformationFiles researchMovementInformationFiles;
-
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
 
@@ -153,22 +149,22 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     switch (reconciliationFile10.getType()){
       case SWITCH_TOPUP: {
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
-        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, reconciliationFile10.getFileName());
+        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, reconciliationFile10);
         break;
       }
       case SWITCH_REVERSED_TOPUP:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
-        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, reconciliationFile10.getFileName());
+        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA, reconciliationFile10);
         break;
       }
       case SWITCH_WITHDRAW:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
-        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,  reconciliationFile10.getFileName());
+        conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.NORMAL,  reconciliationFile10);
         break;
       }
       case SWITCH_REVERSED_WITHDRAW:{
         lstMcRedReconciliationFileDetails = this.getFileMovements(null,reconciliationFile10.getId(),null,null);
-        this.conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,  reconciliationFile10.getFileName());
+        this.conciliation(lstMcRedReconciliationFileDetails, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,  reconciliationFile10);
         break;
       }
     }
@@ -176,7 +172,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     log.info("[processSwitchData OUT]");
   }
 
-  private void conciliation(List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, String fileName) throws Exception{
+  private void conciliation(List<McRedReconciliationFileDetail> lstMcRedReconciliationFileDetails, PrepaidMovementType movementType, IndicadorNormalCorrector indicadorNormalCorrector, ReconciliationFile10 file) throws Exception{
     if(lstMcRedReconciliationFileDetails == null) {
       log.info("No hay movimientos que cociliar.");
       return;
@@ -189,16 +185,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
         if (prepaidMovement10 == null) {
           if(IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
             log.info("Movimiento no encontrado, no conciliado");
-            sendToResearch(recTmp, movementType, fileName);
+            sendToResearch(recTmp, movementType, file, 0L);
           } else {
             // Buscar el user, sacar el rut
-            User user;
-            try {
-              user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
-            } catch (Exception e) {
-              sendToResearch(recTmp, movementType, fileName);
-              throw e;
-            }
+            User user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
 
             // Las reversas debe insertarse en la BD de nuevo
             if(PrepaidMovementType.TOPUP.equals(movementType)) {
@@ -236,7 +226,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             log.info("Conciliado");
             getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
             //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo
-              prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
+            prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
           }
         }
       } catch (Exception e) {
@@ -246,31 +236,24 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
     }
   }
 
-  private void sendToResearch(McRedReconciliationFileDetail switchMovement, PrepaidMovementType movementType, String fileName) throws Exception {
+  private void sendToResearch(McRedReconciliationFileDetail switchMovement, PrepaidMovementType movementType, ReconciliationFile10 file, Long prepaidMovementId) throws Exception {
 
-    researchMovementInformationFilesList = new ArrayList<>();
-    researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    ArrayList<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
     researchMovementInformationFiles.setIdArchivo(switchMovement.getFileId());
-    researchMovementInformationFiles.setIdEnArchivo(switchMovement.getExternalId().toString());
-    researchMovementInformationFiles.setNombreArchivo(fileName);
-    researchMovementInformationFiles.setTipoArchivo(movementType.name());
+    researchMovementInformationFiles.setIdEnArchivo(switchMovement.getIdForResearch());
+    researchMovementInformationFiles.setNombreArchivo(file.getFileName());
+    researchMovementInformationFiles.setTipoArchivo(file.getType().toString());
     researchMovementInformationFilesList.add(researchMovementInformationFiles);
-
-    Long movRef;
-    if(switchMovement.getExternalId() > 0){
-      movRef = switchMovement.getExternalId();
-    }else{
-      movRef = Long.valueOf(1);
-    }
 
     getPrepaidMovementEJBBean10().createResearchMovement(
       null,
       toJson(researchMovementInformationFilesList),
       ReconciliationOriginType.SWITCH.name(),
       switchMovement.getDateTrx(),
-      ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID.getValue(),
+      ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
       ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
-      movRef,
+      prepaidMovementId,
       movementType.name(),
       ResearchMovementSentStatusType.SENT_RESEARCH_PENDING.getValue()
     );
@@ -373,6 +356,10 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
     return getFileMovements(header, "prp_movimiento_switch", fileId, movementId, mcId);
     //return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
+  }
+
+  public List<McRedReconciliationFileDetail> getFileMovementsHist(Map<String,Object> header, Long fileId, Long movementId, String mcId) throws Exception {
+    return getFileMovements(header, "prp_movimiento_switch_hist", fileId, movementId, mcId);
   }
 
   public List<McRedReconciliationFileDetail> getFileMovements(Map<String,Object> header, String tableName, Long fileId, Long movementId, String mcId) throws Exception {

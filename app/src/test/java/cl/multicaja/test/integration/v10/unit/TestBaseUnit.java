@@ -208,6 +208,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
       prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
       prepaidMovementEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean10.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }

@@ -21,11 +21,13 @@ import cl.multicaja.tecnocom.constants.*;
 import org.junit.*;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   static ReconciliationFile10 withdrawReconciliationFile10;
   static ReconciliationFile10 withdrawReverseReconciliationFile10;
   static ReconciliationFile10 tecnocomReconciliationFile10;
+
+  static String switchNotFoundId = "[No_Encontrado_En_Switch]";
+  static String tecnocomNotFoundId = "[No_Encontrado_En_Tecnocom]";
 
   @BeforeClass
   public static void prepareDB() {
@@ -481,7 +486,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -498,7 +506,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -513,7 +524,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -528,7 +542,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -546,7 +563,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -564,7 +585,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -582,7 +607,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -600,7 +629,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -616,7 +649,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -632,7 +669,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -648,7 +689,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -664,7 +709,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1637,7 +1686,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1656,7 +1709,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1675,7 +1732,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1694,7 +1755,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1713,7 +1778,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1732,7 +1801,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1749,7 +1822,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1766,7 +1843,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1783,7 +1864,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1800,7 +1885,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1817,7 +1906,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1834,7 +1927,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1851,7 +1948,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1868,7 +1969,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1885,7 +1990,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1902,7 +2011,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1919,7 +2032,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1936,7 +2053,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PROCESS_OK, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1954,7 +2075,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1972,7 +2096,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, researchMovementInformationFilesList);
   }
 
   @Test
@@ -1990,7 +2117,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2151,7 +2281,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2170,7 +2304,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_SWITCH_AND_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2188,7 +2326,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.NOT_RECONCILIATION_TO_PROCESOR);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.MOVEMENT_REJECTED_IN_AUTHORIZATION, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2235,9 +2376,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    String researchId = String.format("ExtId:[%s]", testData.tecnocomMovement.getNumAut());
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.tecnocomMovement, tecnocomReconciliationFile10));
+    assertResearch(testData.tecnocomMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2248,9 +2389,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
-    String researchId = String.format("ExtId:[%s]", testData.tecnocomMovement.getNumAut());
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.tecnocomMovement, tecnocomReconciliationFile10));
+    assertResearch(testData.tecnocomMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2261,9 +2402,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getMcRedReconciliationEJBBean10().processSwitchData(topupReconciliationFile10);
 
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    String researchId = String.format("ExtId:[%s]-McCode:[%s]", testData.switchMovement.getExternalId().toString(), testData.switchMovement.getMcCode());
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    assertResearch(testData.switchMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2274,9 +2415,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getMcRedReconciliationEJBBean10().processSwitchData(withdrawReconciliationFile10);
 
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    String researchId = String.format("ExtId:[%s]-McCode:[%s]", testData.switchMovement.getExternalId().toString(), testData.switchMovement.getMcCode());
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReconciliationFile10));
+    assertResearch(testData.switchMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2287,9 +2428,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    String researchId = String.format("ExtId:[%s]", testData.tecnocomMovement.getNumAut());
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.tecnocomMovement, tecnocomReconciliationFile10));
+    assertResearch(testData.tecnocomMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2300,9 +2441,9 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
-    // Todo: validar que se haya registrado con el nombre del archivo y id correcto
-    String researchId = String.format("ExtId:[%s]", testData.tecnocomMovement.getNumAut());
-    //assertResearch(researchId, true, ResearchMovementResponsibleStatusType.RECONCILIATION_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB);
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.tecnocomMovement, tecnocomReconciliationFile10));
+    assertResearch(testData.tecnocomMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2482,7 +2623,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2501,7 +2646,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2520,7 +2669,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2539,7 +2692,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2556,7 +2713,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2573,7 +2734,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2590,7 +2755,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2607,7 +2776,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2626,7 +2799,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2645,7 +2822,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2664,7 +2845,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2683,7 +2868,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2700,7 +2889,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, topupReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2717,7 +2910,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2734,7 +2931,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createResearchMovementInformationFile(testData.switchMovement, withdrawReverseReconciliationFile10));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2751,7 +2952,11 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.NOT_RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(switchNotFoundId));
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2769,7 +2974,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2787,7 +2995,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2803,7 +3014,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2819,7 +3033,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.PENDING, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2837,7 +3054,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2855,7 +3075,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertAccountingMovement(testData.prepaidMovement.getId(), true, AccountingStatusType.NOT_SEND, AccountingStatusType.RESEARCH);
     assertClearingMovement(testData.clearingData.getId(), true, AccountingStatusType.RESEARCH);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2871,7 +3094,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   @Test
@@ -2887,7 +3113,10 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     assertPrepaidMovement(testData.prepaidMovement.getId(), true, PrepaidMovementStatus.IN_PROCESS, BusinessStatusType.IN_PROCESS, ReconciliationStatusType.RECONCILED, ReconciliationStatusType.NOT_RECONCILED);
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.INVESTIGACION, ReconciliationStatusType.NEED_VERIFICATION);
-    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+
+    List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
+    researchMovementInformationFilesList.add(createNotFoundResearchMovementInformationFile(tecnocomNotFoundId));
+    assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, researchMovementInformationFilesList);
   }
 
   ClearingData10 waitForClearingToExist(Long accountingId) throws Exception {
@@ -2981,20 +3210,28 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
   }
 
   private void assertResearch(Long movementId, Boolean exists) {
-    assertResearch(movementId, exists, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
+    assertResearch(movementId, exists, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB, null);
   }
 
   private void assertResearch(Long movementId, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description) {
+    assertResearch(movementId, exists, responsible, description, null);
+  }
+
+  private void assertResearch(Long movementId, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description, List<ResearchMovementInformationFiles> fileList) {
     ResearchMovement10 researchMovement = getResearchMovement(movementId);
-    assertResearch(researchMovement, exists, responsible, description);
+    assertResearch(researchMovement, exists, responsible, description, fileList);
   }
 
   private void assertResearch(String idArchivoOrigen, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description) {
-    ResearchMovement10 researchMovement = getResearchMovement(idArchivoOrigen);
-    assertResearch(researchMovement, exists, responsible, description);
+    assertResearch(idArchivoOrigen, exists, responsible, description, null);
   }
 
-  private void assertResearch(ResearchMovement10 researchMovement, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description) {
+  private void assertResearch(String idArchivoOrigen, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description, List<ResearchMovementInformationFiles> fileList) {
+    ResearchMovement10 researchMovement = getNoBDResearchMovement(idArchivoOrigen);
+    assertResearch(researchMovement, exists, responsible, description, fileList);
+  }
+
+  private void assertResearch(ResearchMovement10 researchMovement, Boolean exists, ResearchMovementResponsibleStatusType responsible, ResearchMovementDescriptionType description, List<ResearchMovementInformationFiles> expectedFileList) {
     if(!exists) {
       Assert.assertNull("No debe existir", researchMovement);
       return;
@@ -3002,6 +3239,28 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertNotNull("Debe existir", researchMovement);
     Assert.assertEquals("Su responsable debe ser " + responsible.toString(), responsible, researchMovement.getResponsible());
     Assert.assertEquals("Su descripcion debe ser " + description.toString(), description, researchMovement.getDescription());
+
+    try {
+      if(expectedFileList == null) {
+        expectedFileList = new ArrayList<>();
+      }
+
+      List<ResearchMovementInformationFiles> foundList = researchMovement.stringJsonArrayToList(researchMovement.getFilesInfo(), new ResearchMovementInformationFiles());
+      Assert.assertEquals("Las listas de file info deben ser del mismo tamaño", expectedFileList.size(), foundList.size());
+      for(ResearchMovementInformationFiles expectedFile : expectedFileList) {
+        ResearchMovementInformationFiles foundFile = foundList.stream()
+          .filter(c -> expectedFile.getIdEnArchivo().equals(c.getIdEnArchivo()))
+          .findAny()
+          .orElse(null);
+
+        Assert.assertNotNull("Debe existir un archivo igual", foundFile);
+        Assert.assertEquals("Deben tener mismo id en archivo", expectedFile.getIdEnArchivo(), foundFile.getIdEnArchivo());
+        Assert.assertEquals("Debe tener mismo tipo de archivo", expectedFile.getTipoArchivo(), foundFile.getTipoArchivo());
+        Assert.assertEquals("Debe tener el mismo nombre de archivo", expectedFile.getNombreArchivo(), foundFile.getNombreArchivo());
+      }
+    } catch (Exception e) {
+      log.error(String.format("Error al convertir json a arraylist: %s", researchMovement.getFilesInfo()));
+    }
   }
 
   ResearchMovement10 getResearchMovement(Long movementId) {
@@ -3011,23 +3270,43 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       reconciliedResearch.setMovRef(numberUtils.toBigDecimal(rs.getBigDecimal("mov_ref")));
       reconciliedResearch.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(rs.getString("responsable"))));
       reconciliedResearch.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(rs.getString("descripcion"))));
+      reconciliedResearch.setFilesInfo(rs.getString("informacion_archivos"));
       return reconciliedResearch;
     };
     List<ResearchMovement10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = %d", getSchema(), movementId), rowMapper);
     return data.isEmpty() ? null : data.get(0);
   }
 
-  ResearchMovement10 getResearchMovement(String idArchivoOrigen) {
+  ResearchMovement10 getNoBDResearchMovement(String idArchivoOrigen) {
     RowMapper rowMapper = (rs, rowNum) -> {
       ResearchMovement10 reconciliedResearch = new ResearchMovement10();
       reconciliedResearch.setId(numberUtils.toLong(rs.getLong("id")));
       reconciliedResearch.setMovRef(rs.getBigDecimal("mov_ref"));
       reconciliedResearch.setResponsible(ResearchMovementResponsibleStatusType.fromValue(String.valueOf(rs.getString("responsable"))));
       reconciliedResearch.setDescription(ResearchMovementDescriptionType.fromValue(String.valueOf(rs.getString("descripcion"))));
+      reconciliedResearch.setFilesInfo(rs.getString("informacion_archivos"));
       return reconciliedResearch;
     };
-    List<ResearchMovement10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where id_archivo_origen = '%s'", getSchema(), idArchivoOrigen), rowMapper);
-    return data.isEmpty() ? null : data.get(0);
+
+    // Buscar aquellos con mov_ref = 0, que son los que no tienen movimiento asociado en la BD
+    List<ResearchMovement10> data = getDbUtils().getJdbcTemplate().query(String.format("SELECT * FROM %s.prp_movimiento_investigar where mov_ref = %d", getSchema(), 0), rowMapper);
+    for(ResearchMovement10 researchMovement : data) {
+      try {
+        List<ResearchMovementInformationFiles> foundList = researchMovement.stringJsonArrayToList(researchMovement.getFilesInfo(), new ResearchMovementInformationFiles());
+
+        ResearchMovementInformationFiles foundFile = foundList.stream()
+          .filter(c -> idArchivoOrigen.equals(c.getIdEnArchivo()))
+          .findAny()
+          .orElse(null);
+
+        if(foundFile != null) {
+          return researchMovement;
+        }
+      } catch (Exception e) {
+        log.error(String.format("Error al convertir json a arraylist: %s", researchMovement.getFilesInfo()));
+      }
+    }
+    return null;
   }
 
   void assertReconciled(Long movementId, Boolean exists) throws BaseException, SQLException {
@@ -3139,6 +3418,33 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     return registroTecnocom;
   }
 
+  public ResearchMovementInformationFiles createNotFoundResearchMovementInformationFile(String notFoundId) {
+    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(0L);
+    researchMovementInformationFiles.setIdEnArchivo(notFoundId);
+    researchMovementInformationFiles.setNombreArchivo("");
+    researchMovementInformationFiles.setTipoArchivo("");
+    return researchMovementInformationFiles;
+  }
+
+  private ResearchMovementInformationFiles createResearchMovementInformationFile(McRedReconciliationFileDetail mcRedReconciliationFileDetail, ReconciliationFile10 reconciliationFile) {
+    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(mcRedReconciliationFileDetail.getFileId());
+    researchMovementInformationFiles.setIdEnArchivo(mcRedReconciliationFileDetail.getIdForResearch());
+    researchMovementInformationFiles.setNombreArchivo(reconciliationFile.getFileName());
+    researchMovementInformationFiles.setTipoArchivo(reconciliationFile.getType().toString());
+    return researchMovementInformationFiles;
+  }
+
+  private ResearchMovementInformationFiles createResearchMovementInformationFile(MovimientoTecnocom10 movimientoTecnocom, ReconciliationFile10 reconciliationFile) {
+    ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
+    researchMovementInformationFiles.setIdArchivo(movimientoTecnocom.getIdArchivo());
+    researchMovementInformationFiles.setIdEnArchivo(movimientoTecnocom.getIdForResearch());
+    researchMovementInformationFiles.setNombreArchivo(reconciliationFile.getFileName());
+    researchMovementInformationFiles.setTipoArchivo(reconciliationFile.getType().toString());
+    return researchMovementInformationFiles;
+  }
+
   TestData prepareTestData(PrepaidMovementType movementType, String merchantCode, IndicadorNormalCorrector indnorcor, Long switchFileId, Long tecnocomFileId) throws Exception {
     TestData testData = new TestData();
 
@@ -3162,7 +3468,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     zonedDateTime = zonedDateTime.minusHours(1); // Crear un movimiento viejo, asi si no vienen en los archivos, expirara.
     ZonedDateTime utcDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
     testData.prepaidMovement.setFechaCreacion(Timestamp.valueOf(utcDateTime.toLocalDateTime())); //Timestamp.from(Instant.now()));
-    //testData.prepaidMovement.setFechaCreacion(null);
     testData.prepaidMovement.setMonto(prepaidTopup.getAmount().getValue());
     testData.prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
     testData.prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
