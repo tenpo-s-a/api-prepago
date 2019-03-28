@@ -23,7 +23,7 @@ ALTER TABLE  ${schema}.prp_tarjeta
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-ALTER TABLE prepago.prp_tarjeta
-  ADD CONSTRAINT prp_tarjeta_id_usuario_fkey FOREIGN KEY (id_usuario)
-      REFERENCES prepago.prp_usuario (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION;
+--ALTER TABLE prepago.prp_tarjeta
+  --ADD CONSTRAINT prp_tarjeta_id_usuario_fkey FOREIGN KEY (id_usuario)
+    --  REFERENCES prepago.prp_usuario (id) MATCH SIMPLE
+      --ON UPDATE NO ACTION ON DELETE NO ACTION;
