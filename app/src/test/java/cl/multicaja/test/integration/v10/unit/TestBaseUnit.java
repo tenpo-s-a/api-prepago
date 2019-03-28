@@ -219,7 +219,6 @@ public class TestBaseUnit extends TestApiBase {
       accountEJBBean10 = new AccountEJBBean10();
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
       accountEJBBean10.setAccountDao(getAccountDao());
-      accountEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
     }
     return accountEJBBean10;
   }
