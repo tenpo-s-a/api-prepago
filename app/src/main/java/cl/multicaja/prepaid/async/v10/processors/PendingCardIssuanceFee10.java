@@ -7,12 +7,9 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
-import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
-import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Endpoint;
@@ -180,6 +177,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             prepaidCard.getIdUser(),
             PrepaidCardStatus.PENDING,
             prepaidCard);
+
+          // publica evento de tarjeta creada
+          getRoute().getPrepaidCardEJBBean10().publishCardCreatedEvent(prepaidCard.getId());
 
           return req;
 

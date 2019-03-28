@@ -79,6 +79,7 @@ public class TestBaseUnit extends TestApiBase {
   private static BackofficeEJBBean10 backofficeEJBBEan10;
   private static MailDelegate10 mailDelegate;
   private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
+  private static KafkaEventDelegate10 kafkaEventDelegate10;
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
     calculationsHelper.setMastercardCurrencyUpdateEJBBean10(getMastercardCurrencyUpdateEJBBean10());
@@ -146,6 +147,13 @@ public class TestBaseUnit extends TestApiBase {
       prepaidInvoiceDelegate10 = new PrepaidInvoiceDelegate10();
     }
     return prepaidInvoiceDelegate10;
+  }
+
+  public static KafkaEventDelegate10 getKafkaEventDelegate10() {
+    if(kafkaEventDelegate10 == null) {
+      kafkaEventDelegate10 = new KafkaEventDelegate10();
+    }
+    return kafkaEventDelegate10;
   }
   /**
    *
@@ -222,6 +230,7 @@ public class TestBaseUnit extends TestApiBase {
   public static PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
     if (prepaidCardEJBBean10 == null) {
       prepaidCardEJBBean10 = new PrepaidCardEJBBean10();
+      prepaidCardEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
     }
     return prepaidCardEJBBean10;
   }
