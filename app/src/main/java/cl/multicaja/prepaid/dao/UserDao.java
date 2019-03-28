@@ -1,17 +1,18 @@
 package cl.multicaja.prepaid.dao;
 
-import cl.multicaja.prepaid.model.v11.Cuenta;
+import cl.multicaja.prepaid.model.v11.User;
 import cl.multicaja.prepaid.utils.PrepaidCrud;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-public class CuentaDao extends PrepaidCrud<Cuenta,Long>{
+public class UserDao extends PrepaidCrud<User,Long> {
 
-  private static final String ENV = "dev";
+private static final String ENV = "dev";
 
-  public CuentaDao() {
-    super(Cuenta.class);
+public UserDao() {
+
+  super(User.class);
   }
 
   @PersistenceContext(unitName = ENV)
