@@ -61,10 +61,10 @@ public final class KafkaEventDelegate10 {
    *
    */
   //FIXME: debe recibir la informacion de la cuenta
-  public void publishAccountCreatedEvent(cl.multicaja.prepaid.model.v11.Account acc) {
+  public void publishAccountCreatedEvent(AccountEvent accountEvent) {
 
-    if(acc == null) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, prepaidCard -> account =======");
+    if(accountEvent == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, accountEvent -> null =======");
       throw new IllegalArgumentException();
     }
 
@@ -73,23 +73,9 @@ public final class KafkaEventDelegate10 {
     } else {
 
       Map<String, Object> headers = new HashMap<>();
-      headers.put("JMSCorrelationID", acc.getUuid());
+      headers.put("JMSCorrelationID", accountEvent.getAccount().getId());
       headers.put(KafkaConstants.PARTITION_KEY, 0);
       headers.put(KafkaConstants.KEY, "1");
-
-      Account account = new Account();
-      account.setId(acc.getUuid());
-      account.setStatus(acc.getStatus());
-
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(acc.getCreatedAt());
-      timestamps.setUpdatedAt(acc.getUpdatedAt());
-      account.setTimestamps(timestamps);
-
-      AccountEvent accountEvent = new AccountEvent();
-      //FIXME: deberia ser el ID de usuario externo
-      accountEvent.setUserId(acc.getUserId().toString());
-      accountEvent.setAccount(account);
 
       ExchangeData<String> req = new ExchangeData<>(toJson(accountEvent));
       req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_ACCOUNT_CREATED_EVENT));
