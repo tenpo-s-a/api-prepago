@@ -48,7 +48,7 @@ public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
   @Override
   public String toString() {
-    return "NewPrepaidBaseTransaction10{" +
+    return "NewPrepaidBaseTransaction11{" +
       "amount=" + this.getAmount() +
       ", transactionId='" + this.getTransactionId() + '\'' +
       ", rut=" + this.getRut() +

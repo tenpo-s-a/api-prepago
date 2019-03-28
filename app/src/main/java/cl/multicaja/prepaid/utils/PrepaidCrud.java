@@ -2,6 +2,10 @@ package cl.multicaja.prepaid.utils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
 
 public abstract class PrepaidCrud<E extends Serializable, ID extends Serializable> {
@@ -22,12 +26,14 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
     return entity;
   }
 
+
   public final E find(final ID id) {
     return getEntityManager().find(entityClass, id);
   }
 
-  public final void delete(final E entity) {
+  public final void delete(final ID id) {
     final EntityManager entityManager = getEntityManager();
+    E entity = entityManager.find(entityClass, id);
     entityManager.remove(entity);
   }
 
@@ -39,4 +45,6 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
     tx.commit();
     return entity;
   }
+
+
 }

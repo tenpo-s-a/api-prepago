@@ -1,24 +1,25 @@
 package cl.multicaja.prepaid.resources.v10;
 
-import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
-import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cl.multicaja.prepaid.model.v11.NewPrepaidTopup11;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.EJB;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.persistence.PostUpdate;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import java.util.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
 /**
  * @author vutreras
@@ -51,6 +52,14 @@ public final class PrepaidResource10 extends BaseResource {
     PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest,true);
     return Response.ok(prepaidTopup).status(201).build();
   }
+
+  @POST
+  @Path("/prepaid/{userId}/cashin")
+  public Response topupUserBalancev2(NewPrepaidTopup11 topupRequest, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
+    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalanceV2(headersToMap(headers),userId, topupRequest,true);
+    return Response.ok(prepaidTopup).status(201).build();
+  }
+
 
   @POST
   @Path("/topup/reverse")

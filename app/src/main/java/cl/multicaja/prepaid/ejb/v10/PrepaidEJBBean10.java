@@ -14,12 +14,18 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
+import cl.multicaja.prepaid.dao.AccountDao;
+import cl.multicaja.prepaid.dao.CardDao;
+import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.Card;
+import cl.multicaja.prepaid.model.v11.NewPrepaidTopup11;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -105,6 +111,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
+
+
   private TecnocomService tecnocomService;
 
   private TecnocomServiceHelper tecnocomServiceHelper;
@@ -120,6 +128,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private static CalculatorParameter10 calculatorParameter10;
 
   private NotificationTecnocom notificationTecnocom;
+
+  @Inject
+  private UserDao userDao;
+
+  @Inject
+  private AccountDao accountDao;
+
+  @Inject
+  private CardDao cardDao;
 
 
   public PrepaidTopupDelegate10 getDelegate() {
@@ -257,6 +274,31 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return calculatorParameter10;
   }
 
+  public PrepaidTopup10 topupUserBalanceV2(Map<String, Object> headers,Long userId , NewPrepaidTopup11 topupRequest, Boolean fromEndPoint) throws Exception {
+
+    if(fromEndPoint == null){
+      fromEndPoint = Boolean.FALSE;
+    }
+    this.validateTopupRequestV2(topupRequest);
+
+    //Verificar si existe user
+    cl.multicaja.prepaid.model.v11.User user = userDao.find(userId);
+    if(user == null){
+      //TODO: Buscar user en api-user Tempo
+    }
+    Account account = accountDao.findByUserId(user.getUserId());
+    if(account == null){
+      //TODO: Si no tiene account Crear seria primera carga ?
+    }
+
+    Card card = cardDao.findByAccountId(account.getId());
+    if(card == null){
+      //TODO: Si no tiene Tarjeta ERROR ?
+    }
+
+
+    return null;
+  }
 
   @Override
   public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
@@ -611,6 +653,42 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
   }
+
+  private void validateTopupRequestV2(NewPrepaidTopup11 request) throws Exception {
+    if(request == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "topupRequest"));
+    }
+    if(request.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(request.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
+    }
+    if(request.getAmount().getCurrencyCode() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
+    }
+    if(StringUtils.isBlank(request.getMerchantCode())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(!StringUtils.isNumeric(request.getMerchantCode())) {
+      throw new BadRequestException(PARAMETRO_NO_CUMPLE_FORMATO_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+    if(request.getMerchantCode().length() > 15) {
+      request.setMerchantCode(request.getMerchantCode().substring(request.getMerchantCode().length() - 15));
+    } else {
+      request.setMerchantCode(StringUtils.leftPad(request.getMerchantCode(), 15, '0'));
+    }
+    if(StringUtils.isBlank(request.getMerchantName())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_name"));
+    }
+    if(request.getMerchantCategory() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_category"));
+    }
+    if(StringUtils.isBlank(request.getTransactionId())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
+    }
+  }
+
 
   @Override
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {

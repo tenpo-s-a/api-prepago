@@ -5,6 +5,7 @@ import cl.multicaja.prepaid.utils.PrepaidCrud;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 public class CardDao extends PrepaidCrud<Card,Long> {
 
@@ -26,4 +27,8 @@ public class CardDao extends PrepaidCrud<Card,Long> {
     this.em = em;
   }
 
+  public Card findByAccountId(Long accountId) {
+    TypedQuery<Card> query = em.createQuery("SELECT c FROM Card c WHERE c.accountId = :accountId", Card.class);
+    return query.setParameter("accountId", accountId).getSingleResult();
+  }
 }
