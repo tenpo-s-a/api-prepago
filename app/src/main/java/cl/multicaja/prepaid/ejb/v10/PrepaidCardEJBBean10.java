@@ -4,15 +4,11 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
-import cl.multicaja.prepaid.helpers.mastercard.MastercardFileHelper;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.CcrFile10;
-import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import org.apache.commons.logging.Log;
@@ -23,16 +19,12 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
-import java.io.InputStream;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.model.Errors.FILE_ALREADY_PROCESSED;
 
 /**
  * @author vutreras
