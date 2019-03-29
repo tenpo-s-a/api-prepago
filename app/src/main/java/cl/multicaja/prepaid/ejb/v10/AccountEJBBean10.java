@@ -36,6 +36,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
   private static final String INSERT_ACCOUNT_SQL
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
+  private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
@@ -53,8 +55,6 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
-    String sql = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
-
     RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
       Account a = new Account();
       a.setId(rs.getLong("id"));
@@ -70,10 +70,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       return a;
     };
 
-    Account account = getDbUtils().getJdbcTemplate()
-      .queryForObject(sql, rm, id);
-
-    return account;
+    return getDbUtils().getJdbcTemplate()
+      .queryForObject(FIND_ACCOUNT_BY_ID_SQL, rm, id);
   }
 
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
@@ -85,8 +83,6 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     }
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
-
-    //INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);
 
     getDbUtils().getJdbcTemplate().update(connection -> {
       PreparedStatement ps = connection
