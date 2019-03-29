@@ -27,6 +27,32 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
   }
 
   @Test
+  public void getReconciliationFile_byFileId() throws Exception {
+    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    int currentDay = ldt.getDayOfYear();
+
+    ReconciliationFile10 reconciliationFile10 = Test_ReconciliationFilesEJBBean10_createReconciliationFile10.buildReconciliationFile();
+    getReconciliationFilesEJBBean10().createReconciliationFile(null, reconciliationFile10);
+
+    ReconciliationFile10 anotherFile = Test_ReconciliationFilesEJBBean10_createReconciliationFile10.buildReconciliationFile();
+    anotherFile.setFileName("otro_nombre.txt");
+    getReconciliationFilesEJBBean10().createReconciliationFile(null, anotherFile);
+
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, reconciliationFile10.getId(), null, null, null, null);
+    Assert.assertNotNull("Debe existir", reconciliationFile10List);
+    Assert.assertEquals("Debe tener 1 elemento", 1, reconciliationFile10List.size());
+
+    ReconciliationFile10 foundFile = reconciliationFile10List.get(0);
+    Assert.assertEquals("Deben tener mismo id", reconciliationFile10.getId(), foundFile.getId());
+    Assert.assertEquals("Nombre de Archivo Encontrado igual a Nombre de Archivo registrado?", reconciliationFile10.getFileName(), foundFile.getFileName());
+    Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", reconciliationFile10.getProcess(), foundFile.getProcess());
+    Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", reconciliationFile10.getType(), foundFile.getType());
+    Assert.assertEquals("Status igual a Status registrado?", reconciliationFile10.getStatus(), foundFile.getStatus());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+  }
+
+  @Test
   public void getReconciliationFile_byName() throws Exception {
     LocalDateTime ldt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     int currentDay = ldt.getDayOfYear();
@@ -38,7 +64,7 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     anotherFile.setFileName("otro_nombre.txt");
     getReconciliationFilesEJBBean10().createReconciliationFile(null, anotherFile);
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, reconciliationFile10.getFileName(), null, null, null);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, reconciliationFile10.getFileName(), null, null, null);
     Assert.assertNotNull("Debe existir", reconciliationFile10List);
     Assert.assertEquals("Debe tener 1 elemento", 1, reconciliationFile10List.size());
 
@@ -65,7 +91,7 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     anotherFile.setProcess(ReconciliationOriginType.TECNOCOM);
     getReconciliationFilesEJBBean10().createReconciliationFile(null, anotherFile);
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, ReconciliationOriginType.SWITCH, null, null);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, ReconciliationOriginType.SWITCH, null, null);
     Assert.assertNotNull("Debe existir", reconciliationFile10List);
     Assert.assertEquals("Debe tener 1 elemento", 1, reconciliationFile10List.size());
 
@@ -96,7 +122,7 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     thirdFile.setType(ReconciliationFileType.TECNOCOM_FILE);
     getReconciliationFilesEJBBean10().createReconciliationFile(null, thirdFile);
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, ReconciliationFileType.SWITCH_TOPUP, null);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, null, ReconciliationFileType.SWITCH_TOPUP, null);
     Assert.assertNotNull("Debe existir", reconciliationFile10List);
     Assert.assertEquals("Debe tener 2 elementos", 2, reconciliationFile10List.size());
 
@@ -140,7 +166,7 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     thirdFile.setStatus(FileStatus.READING);
     getReconciliationFilesEJBBean10().createReconciliationFile(null, thirdFile);
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, null, FileStatus.READING);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, null, null, FileStatus.READING);
     Assert.assertNotNull("Debe existir", reconciliationFile10List);
     Assert.assertEquals("Debe tener 1 elemento", 1, reconciliationFile10List.size());
 
@@ -173,7 +199,7 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     thirdFile.setStatus(FileStatus.READING);
     allInsertedFiles.add(getReconciliationFilesEJBBean10().createReconciliationFile(null, thirdFile));
 
-    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, null, null);
+    List<ReconciliationFile10> reconciliationFile10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, null, null, null, null, null);
     Assert.assertNotNull("Debe existir", reconciliationFile10List);
     Assert.assertEquals("Debe tener 3 elemento", 3, reconciliationFile10List.size());
 

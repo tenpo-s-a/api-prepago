@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public class MovimientoTecnocom10 implements Serializable{
 
@@ -19,7 +20,7 @@ public class MovimientoTecnocom10 implements Serializable{
   private NewAmountAndCurrency10 impFac;
   private Integer indNorCor;
   private TipoFactura tipoFac;
-  private Date  fecFac;
+  private LocalDate fecFac;
   private String numRefFac;
   private NewAmountAndCurrency10 impDiv;
   private BigDecimal cmbApli;
@@ -119,11 +120,11 @@ public class MovimientoTecnocom10 implements Serializable{
     this.tipoFac = tipoFac;
   }
 
-  public Date getFecFac() {
+  public LocalDate getFecFac() {
     return fecFac;
   }
 
-  public void setFecFac(Date fecFac) {
+  public void setFecFac(LocalDate fecFac) {
     this.fecFac = fecFac;
   }
 
@@ -355,6 +356,10 @@ public class MovimientoTecnocom10 implements Serializable{
         break;
     }
     return type;
+  }
+
+  public String getIdForResearch() {
+    return String.format("[Numaut:%s.Date:%s]", getNumAut(), getFecFac().toString());
   }
 
 }

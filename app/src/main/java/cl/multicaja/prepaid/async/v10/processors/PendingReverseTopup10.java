@@ -96,37 +96,37 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
 
               // Se verifica la respuesta de tecnocom
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
-                log.debug("********** Movimiento original no existia previamente **********");
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+              log.debug("********** Movimiento original no existia previamente **********");
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
               getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.CONFIRMED);
+              // Incluir datos en CDT.
+              CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
+              callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
+            } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
+              // La inclusion devuelve error, se evalua el error.
+              if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
+                log.debug("********** Movimiento original ya existia **********");
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.CONFIRMED);
                 // Incluir datos en CDT.
                 CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
                 callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
-              } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
-                // La inclusion devuelve error, se evalua el error.
-                if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
-                  log.debug("********** Movimiento original ya existia **********");
-                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.PROCESS_OK);
-                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.CONFIRMED);
-                  // Incluir datos en CDT.
-                  CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
-                  callCDT(prepaidTopup,prepaidUser10,originalMovement.getIdMovimientoRef(),movRef.getCdtTransactionTypeConfirm());
-                } else {
-                  log.debug("********** Movimiento original rechazado **********");
-                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
-                  getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REJECTED);
-                }
-              } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
-              } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
-              } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
-              } else { // Ningun error tipico
-                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP);
+              } else {
+                log.debug("********** Movimiento original rechazado **********");
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.REJECTED);
+                getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REJECTED);
               }
-              // Se envia el mensaje para ser procesado nuevamente
-              return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
+            } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1000)) {
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE);
+            } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1010)) {
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_CONEXION);
+            } else if (inclusionMovimientosDTO.getRetorno().equals(CodigoRetorno._1020)) {
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
+            } else { // Ningun error tipico
+              getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, originalMovement.getId(), PrepaidMovementStatus.ERROR_IN_PROCESS_PENDING_TOPUP);
+            }
+            // Se envia el mensaje para ser procesado nuevamente
+            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
             log.debug("********** Realizando reversa de retiro **********");

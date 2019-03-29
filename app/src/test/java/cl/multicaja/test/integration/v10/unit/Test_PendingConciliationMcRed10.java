@@ -149,7 +149,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     }
 
     int reconciledCount = 0;
-    int notReconcilidedCount = 0;
     for (PrepaidMovement10 mov : movimientos) {
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
@@ -158,7 +157,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
           reconciledCount++;
         } else if (movTmp.getConSwitch().equals(ReconciliationStatusType.NOT_RECONCILED)) {
           //Assert.assertTrue("Los no conciliados deben estar entre las fechas indicadas", beforeDate(movTmp.getFechaCreacion()));
-          notReconcilidedCount++;
         } else {
           boolean outsideDates = !includedInDates(movTmp.getFechaCreacion());
           boolean wrongType = !movTmp.getTipoMovimiento().equals(PrepaidMovementType.TOPUP);
@@ -166,8 +164,16 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
           Assert.assertTrue("Los que quedaron PENDING deben estar fuera de las fechas, type incorrecto o indnorcor incorrecto", outsideDates || wrongType || wrongIndNorCor);
         }
       } else {
-        List lstResearchList = findResearchMovements();
-        Assert.assertEquals("Debe haber " + 1 + " movimiento en research.", 1, lstResearchList.size());
+        // No existe el movimiento con es id, la conciliacion deberia haberlo insertado
+        PrepaidMovement10 restoredMovement = null;
+        for(int i = 0; i < 20; i++) {
+          restoredMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
+          if(restoredMovement != null) {
+            break;
+          }
+          Thread.sleep(500);
+        }
+        Assert.assertNotNull("Debe haber sido reinsertado", restoredMovement);
       }
     }
     Assert.assertEquals("Debe haber 6 conciliados.", 6, reconciledCount);
@@ -327,7 +333,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
     int reconciledCount = 0;
     int notReconcilidedCount = 0;
-    int movementIndex = 0;
     for(PrepaidMovement10 mov : movimientos){
       PrepaidMovement10 movTmp = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getId());
       if (movTmp != null) {
@@ -338,10 +343,17 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
           notReconcilidedCount++;
         }
       } else {
-        List lstResearchList = findResearchMovements();
-        Assert.assertEquals("Debe haber 1 movimiento en research.", 1, lstResearchList.size());
+        // No existe el movimiento con es id, la conciliacion deberia haberlo insertado
+        PrepaidMovement10 restoredMovement = null;
+        for(int i = 0; i < 20; i++) {
+          restoredMovement = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(mov.getIdTxExterno(), mov.getTipoMovimiento(), mov.getIndnorcor());
+          if(restoredMovement != null) {
+            break;
+          }
+          Thread.sleep(500);
+        }
+        Assert.assertNotNull("Debe haber sido reinsertado", restoredMovement);
       }
-      movementIndex++;
     }
     Assert.assertEquals("Debe haber 0 conciliados.", 0, reconciledCount);
     Assert.assertEquals("Debe haber 6 no conciliados.", 6, notReconcilidedCount);
@@ -355,12 +367,12 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     String fileName = null;
     String sDate = fileDate;
 
+    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
     int totalNumberOfMovements = cantidad + movementsInfo.size() + onlyFileMovementCount;
     for (int i = 0; i < totalNumberOfMovements; i++) {
-
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
 
       PrepaidMovement10 prepaidMovement10 = null;
       if(PrepaidMovementType.TOPUP.equals(type) && IndicadorNormalCorrector.NORMAL.equals(indicadorNormalCorrector)) {
@@ -403,9 +415,11 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
         prepaidMovement10.setFechaActualizacion(currentTimeStamp1);
         prepaidMovement10.setFechaCreacion(currentTimeStamp1);
 
-        prepaidMovement10.setIdPrepaidUser(numberUtils.random(1L,9999999L));
+        prepaidMovement10.setIdPrepaidUser(prepaidUser.getUserIdMc());
         prepaidMovement10.setMonto(new BigDecimal(numberUtils.random(3000,100000)));
         prepaidMovement10.setId(numberUtils.random(3000L,100000L));
+        prepaidMovement10.setTipoMovimiento(type);
+        prepaidMovement10.setIndnorcor(indicadorNormalCorrector);
       }
 
       lstPrepaidMovement10s.add(prepaidMovement10);

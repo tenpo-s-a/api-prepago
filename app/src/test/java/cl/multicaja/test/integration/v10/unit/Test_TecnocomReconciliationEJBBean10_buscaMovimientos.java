@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.xml.bind.SchemaOutputResolver;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.buildRandomTcMov(fileId);
     movTec.setPan("2389739345");
     movTec.setIndNorCor(1);
-    movTec.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+    movTec.setTipoFac(TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("756345");
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
@@ -105,7 +106,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
       Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
     }
 
-    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, movimientoTecnocom10s.get(0).getFecFac(), null);
+    movimientoTecnocom10s2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, null, null, null, null, java.sql.Date.valueOf(movimientoTecnocom10s.get(0).getFecFac()), null);
     Assert.assertEquals("Debe existir 4 movimientos", 4, movimientoTecnocom10s2.size());
     for (int i = 0; i < movimientoTecnocom10s2.size(); i++) {
       Assert.assertTrue("Deben ser iguales", compareMovs(movimientoTecnocom10s.get(0), movimientoTecnocom10s2.get(0)));
@@ -126,6 +127,8 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     Assert.assertEquals("Deben tener mismo fileId", insertedMov.getIdArchivo(), foundMov.getIdArchivo());
     Assert.assertEquals("Deben tener mismo cuenta", insertedMov.getCuenta(), foundMov.getCuenta());
     Assert.assertEquals("Deben tener mismo pan", insertedMov.getPan(), foundMov.getPan());
+    System.out.println("Tipo fac inserted: " + insertedMov.getTipoFac().getCode() + " : " + insertedMov.getTipoFac().getCorrector());
+    System.out.println("Tipo fac found: " + foundMov.getTipoFac().getCode() + " : " + foundMov.getTipoFac().getCorrector());
     Assert.assertEquals("Deben tener mismo tipofac", insertedMov.getTipoFac(), foundMov.getTipoFac());
     Assert.assertEquals("Deben tener mismo numaut", insertedMov.getNumAut(), foundMov.getNumAut());
     Assert.assertEquals("Deben tener mismo impfac", insertedMov.getImpFac().getValue().stripTrailingZeros(), foundMov.getImpFac().getValue().stripTrailingZeros());
