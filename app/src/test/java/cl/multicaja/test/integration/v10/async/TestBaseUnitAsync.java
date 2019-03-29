@@ -51,11 +51,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
   @After
   public void after() {
-    try {
-      Thread.sleep(1000);
-    } catch (Exception e) {
-
-    }
     System.out.println("----------------------------------------------------------------");
     System.out.println("After Test - class: " + this.getClass().getSimpleName() + ", method: " + testName.getMethodName());
     System.out.println("----------------------------------------------------------------");
