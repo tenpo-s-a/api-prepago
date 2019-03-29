@@ -17,11 +17,13 @@ import java.util.stream.Stream;
  *    - SENT_PENDING_CON
  *    - NOT_SEND
  *  - accountingStatus:
+ *    - PENDING
  *    - OK
  *    - NOT_OK
  * -------------------------------
  * Clearing:
- *  - INITIAL
+ *  - INITIAL (todos empiezan aqui, excepto retiros web)
+ *  - PENDING (los retiros web empiezan directamente en PENDING)
  *  - NOT_SEND
  *  - OK
  *  - REVERSED

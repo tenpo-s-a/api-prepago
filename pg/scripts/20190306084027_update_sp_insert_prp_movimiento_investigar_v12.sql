@@ -65,7 +65,7 @@ _error_msg := '[mc_prp_crea_movimiento_investigar_v12] La descripcion es obligat
 RETURN;
 END IF;
 
-IF COALESCE(_in_mov_ref,0) = 0 THEN
+IF COALESCE(_in_mov_ref,-1) = -1 THEN
 _error_code := '101000';
 _error_msg := '[mc_prp_crea_movimiento_investigar_v12] El mov_ref es obligatorio y debe ser superior a 0';
 RETURN;

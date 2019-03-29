@@ -26,7 +26,7 @@ public class ResearchMovement10 extends BaseModel {
     }
     return this.objectMapper;
   }
-  private List<ResearchMovementInformationFiles> stringJsonArrayToList(String json, Object object ) throws IOException {
+  public List<ResearchMovementInformationFiles> stringJsonArrayToList(String json, Object object ) throws IOException {
     TypeFactory typeFactory = this.getObjectMapper().getTypeFactory();
     CollectionType collectionType = typeFactory.constructCollectionType(
       List.class, object.getClass());

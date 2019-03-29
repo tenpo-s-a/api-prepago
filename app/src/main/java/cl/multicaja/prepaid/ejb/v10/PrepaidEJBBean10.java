@@ -259,7 +259,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
 
   @Override
-  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception {
 
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
@@ -330,21 +330,26 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
-    // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
-      tipoFacReverse);
+    //TODO: Revisar si esta decision esta correcta...
+    // Si viene desde un endpoint, se debe verificar si ya se tiene una reversa con los mismos datos
+    // Si viene internamente no se verifica, puesto que podria ser el movimiento contrario de una reversa
+    if(fromEndPoint) {
+      PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
+        topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
+        tipoFacReverse);
 
-    if(previousReverse != null && previousReverse.getImpfac().stripTrailingZeros().equals(topupRequest.getAmount().getValue().stripTrailingZeros())) {
-      cdtTransaction.setTransactionReference(0L);
-      PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
-      prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
-      prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
-      prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
-      //TODO: deberia tambien ser conciliada con swtich asi se responda error?
-      prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
+      if(previousReverse != null &&
+        previousReverse.getImpfac().stripTrailingZeros().equals(topupRequest.getAmount().getValue().stripTrailingZeros())) {
+        cdtTransaction.setTransactionReference(0L);
+        PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidTopup, prepaidUser, prepaidCard, cdtTransaction);
+        prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
+        prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
+        prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+        //TODO: deberia tambien ser conciliada con swtich asi se responda error?
+        prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
 
-      throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
+        throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
+      }
     }
 
     cdtTransaction = this.getCdtEJB10().addCdtTransaction(null, cdtTransaction);
@@ -615,10 +620,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @Override
   public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
-    this.validateWithdrawRequest(withdrawRequest, false);
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
+    this.validateWithdrawRequest(withdrawRequest, false, fromEndPoint);
 
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
@@ -848,10 +853,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
-    this.validateWithdrawRequest(withdrawRequest, true);
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
+    this.validateWithdrawRequest(withdrawRequest, true, fromEndPoint);
+
     // Obtener usuario Multicaja
     User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
     if(user.getIsBlacklisted()){
@@ -947,7 +953,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
-  private void validateWithdrawRequest(NewPrepaidWithdraw10 request, Boolean isReverse) throws Exception {
+  private void validateWithdrawRequest(NewPrepaidWithdraw10 request, Boolean isReverse, Boolean fromEndPoint) throws Exception {
     if(request == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "withdrawRequest"));
     }
@@ -989,7 +995,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
       }
     }
-    if(TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
+    if(fromEndPoint && TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
     }
   }

@@ -33,4 +33,8 @@ public class ClearingData10 extends AccountingData10 {
     userBankAccount.setId(userAccountId);
   }
 
+  public String getResearchId() {
+    return String.format("[ClearingId:%d]", getId());
+  }
+
 }

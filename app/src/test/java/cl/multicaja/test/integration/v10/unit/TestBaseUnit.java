@@ -210,6 +210,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
       prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
       prepaidMovementEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean10.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }
@@ -345,6 +348,7 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      mcRedReconciliationEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       mcRedReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
     }
     return mcRedReconciliationEJBBean10;
