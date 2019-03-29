@@ -3,7 +3,6 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
-import cl.multicaja.prepaid.dao.AccountDao;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -12,24 +11,34 @@ import cl.multicaja.prepaid.model.v11.AccountStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 @Stateless
 @LocalBean
 @TransactionManagement(value= TransactionManagementType.CONTAINER)
-public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB10 {
+public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static Log log = LogFactory.getLog(AccountEJBBean10.class);
+
+  private static final String INSERT_ACCOUNT_SQL
+    = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
-  @Inject
-  private AccountDao accountDao;
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
     return kafkaEventDelegate10;
@@ -39,15 +48,34 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
     this.kafkaEventDelegate10 = kafkaEventDelegate10;
   }
 
-  public AccountDao getAccountDao() {
-    return accountDao;
+  private Account findById(Long id) throws Exception {
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    String sql = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
+
+    RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
+      Account a = new Account();
+      a.setId(rs.getLong("id"));
+      a.setUuid(rs.getString("uuid"));
+      a.setUserId(rs.getLong("id_usuario"));
+      a.setAccount(rs.getString("cuenta"));
+      a.setStatus(rs.getString("estado"));
+      a.setBalanceInfo(rs.getString("saldo_info"));
+      a.setExpireBalance(rs.getLong("saldo_expiracion"));
+      a.setProcessor(rs.getString("procesador"));
+      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
+      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
+      return a;
+    };
+
+    Account account = getDbUtils().getJdbcTemplate()
+      .queryForObject(sql, rm, id);
+
+    return account;
   }
 
-  public void setAccountDao(AccountDao accountDao) {
-    this.accountDao = accountDao;
-  }
-
-  @Override
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
     if(StringUtils.isAllBlank(accountNumber)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
@@ -56,18 +84,28 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
-    Account account = new Account();
-    account.setUserId(userId);
-    account.setAccount(accountNumber);
-    account.setStatus(AccountStatus.ACTIVE.toString());
-    account.setBalanceInfo("");
-    account.setExpireBalance(0L);
-    account.setProcessor(AccountProcessor.TECNOCOM_CL.toString());
-    account = accountDao.insert(account);
-    return  accountDao.find(account.getId());
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    //INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(INSERT_ACCOUNT_SQL, new String[] {"id"});
+      ps.setLong(1, userId);
+      ps.setString(2, accountNumber);
+      ps.setString(3, AccountProcessor.TECNOCOM_CL.toString());
+      ps.setString(4, "");
+      ps.setLong(5, 0L);
+      ps.setString(6, AccountStatus.ACTIVE.toString());
+      ps.setObject(7, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setObject(8, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+
+      return ps;
+    }, keyHolder);
+
+    return  this.findById((long) keyHolder.getKey());
   }
 
-  @Override
   public void publishAccountCreatedEvent(Long externalUserId, Account acc) throws Exception {
     if(externalUserId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
