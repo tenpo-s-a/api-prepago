@@ -4,9 +4,12 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -14,6 +17,17 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class Test_PrepaidMovementEJBBean10_processClearingResolution extends TestBaseUnit {
+
+  @Before
+  @After
+  public void after() {
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_investigar CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
+  }
 
   @Test
   public void processClearingResolution_allOK() throws Exception {
@@ -175,8 +189,17 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     prepaidMovement10.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
+    AccountingFiles10 clearingFile = new AccountingFiles10();
+    clearingFile.setName("accountingFile1");
+    clearingFile.setFileId("some_id2");
+    clearingFile.setFileType(AccountingFileType.CLEARING);
+    clearingFile.setStatus(AccountingStatusType.OK);
+    clearingFile.setFileFormatType(AccountingFileFormatType.CSV);
+    clearingFile = getPrepaidAccountingFileEJBBean10().insertAccountingFile(null, clearingFile);
+
     ClearingData10 clearingData10 = new ClearingData10();
     clearingData10.setIdTransaction(prepaidMovement10.getId());
+    clearingData10.setFileId(clearingFile.getId());
 
     // Testeamos, deberia rechazar por movimiento no process_ok
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
@@ -340,8 +363,17 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     accountingData10.setStatus(AccountingStatusType.PENDING);
     getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
 
+    AccountingFiles10 clearingFile = new AccountingFiles10();
+    clearingFile.setName("accountingFile1");
+    clearingFile.setFileId("some_id");
+    clearingFile.setFileType(AccountingFileType.CLEARING);
+    clearingFile.setStatus(AccountingStatusType.OK);
+    clearingFile.setFileFormatType(AccountingFileFormatType.CSV);
+    clearingFile = getPrepaidAccountingFileEJBBean10().insertAccountingFile(null, clearingFile);
+
     ClearingData10 clearingData10 = new ClearingData10();
     clearingData10.setId(getUniqueLong());
+    clearingData10.setFileId(clearingFile.getId());
     clearingData10.setAccountingId(accountingData10.getId());
     clearingData10.setStatus(AccountingStatusType.INVALID_INFORMATION); // Los montos no concuerdan
     clearingData10.setUserBankAccount(userAccount);
