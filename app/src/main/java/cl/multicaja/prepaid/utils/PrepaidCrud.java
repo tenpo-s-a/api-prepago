@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.utils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -20,10 +21,11 @@ public abstract class PrepaidCrud<E extends Serializable, ID extends Serializabl
 
   public E insert(final E entity) {
     final EntityManager entityManager = getEntityManager();
-    EntityTransaction tx = entityManager.getTransaction();
-    tx.begin();
+    //EntityTransaction tx = entityManager.getTransaction();
+    getEntityManager().setFlushMode(FlushModeType.AUTO);
+    //tx.begin();
     entityManager.persist(entity);
-    tx.commit();
+    //tx.commit();
     return entity;
   }
 

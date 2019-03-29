@@ -47,6 +47,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 implements AccountEJB
     this.accountDao = accountDao;
   }
 
+  @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
     if(StringUtils.isAllBlank(accountNumber)){

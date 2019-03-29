@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -100,6 +101,9 @@ public final class TestHelpersResource10 extends BaseResource {
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
 
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
   @Inject
   private ClearingFileDelegate10 clearingFileDelegate;
 
@@ -129,6 +133,12 @@ public final class TestHelpersResource10 extends BaseResource {
     jdbcTemplate.execute(sql);
   }
 
+  @POST
+  @Path("/insertRandomAccount")
+  public Response insertAccount(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
+    Account account = accountEJBBean10.insertAccount(getUniqueLong(),getRandomNumericString(10));
+    return Response.ok(account).status(200).build();
+  }
   @POST
   @Path("/prepaiduser/reset")
   public Response usersReset(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
