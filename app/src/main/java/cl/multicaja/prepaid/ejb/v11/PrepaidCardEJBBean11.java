@@ -174,7 +174,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     Card card = new Card();
     card.setId(prepaidCard10.getUuid());
     card.setPan(prepaidCard10.getPan());
-    card.setStatus(PrepaidCardStatus.ACTIVE.toString());
+    card.setStatus(prepaidCard10.getStatus().toString());
 
     cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
     timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
