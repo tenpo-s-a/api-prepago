@@ -1189,7 +1189,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Debe tener id", accountEvent.getAccount().getId());
     Assert.assertEquals("Debe tener el mismo id", account.getUuid(), accountEvent.getAccount().getId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), accountEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), accountEvent.getUserId());
     Assert.assertEquals("Debe tener la misma fecha creacion", account.getCreatedAt(), accountEvent.getAccount().getTimestamps().getCreatedAt());
     Assert.assertEquals("Debe tener la misma fecha actualizacion", account.getUpdatedAt(), accountEvent.getAccount().getTimestamps().getUpdatedAt());
     Assert.assertEquals("Debe tener status ACTIVE", AccountStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());

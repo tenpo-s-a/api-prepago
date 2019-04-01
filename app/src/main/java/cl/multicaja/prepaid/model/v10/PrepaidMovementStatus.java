@@ -17,7 +17,8 @@ public enum PrepaidMovementStatus {
   ERROR_TIMEOUT_CONEXION,
   ERROR_TIMEOUT_RESPONSE,
   ERROR_TECNOCOM_REINTENTABLE,
-  EXPIRED;
+  EXPIRED,
+  NOT_EXECUTED;
 
 
   public static PrepaidMovementStatus valueOfEnum(String name) {

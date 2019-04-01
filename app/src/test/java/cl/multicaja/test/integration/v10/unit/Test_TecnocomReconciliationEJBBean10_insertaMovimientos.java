@@ -19,6 +19,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +28,9 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
   @BeforeClass
   @AfterClass
   public static void beforeClass(){
-    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom_hist", getSchema()));
-    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_movimientos_tecnocom_hist CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("delete from %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
   @Test
@@ -54,9 +55,9 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     Assert.assertEquals("Deben ser iguales getCuenta",movTec.getCuenta(),movTec2.get(0).getCuenta());
     Assert.assertEquals("Deben ser iguales getNumAut",movTec.getNumAut(),movTec2.get(0).getNumAut());
     Assert.assertEquals("Deben ser iguales getImpFac",movTec.getImpFac().getValue().longValue(),movTec2.get(0).getImpFac().getValue().longValue());
-    Assert.assertEquals("Deben ser iguales getFecFac",movTec.getFecFac().toLocalDate(),movTec2.get(0).getFecFac().toLocalDate());
-
+    Assert.assertEquals("Deben ser iguales getFecFac",movTec.getFecFac(),movTec2.get(0).getFecFac());
   }
+
   @Test (expected = BadRequestException.class)
   public void testInsertMovimientoNoOK_f1() throws BadRequestException {
     try{
@@ -89,6 +90,21 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
       MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
       movimientoTecnocom10.setIdArchivo(1L);
       movimientoTecnocom10.setCuenta(null);
+      inserTcMov(movimientoTecnocom10);
+    }catch (BadRequestException e){
+      Assert.assertEquals("Debe ser: ",e.getData()[0].getValue(),"Cuenta");
+      throw new BadRequestException();
+    } catch (Exception e) {
+      Assert.fail("No debe caer aca");
+    }
+  }
+
+  @Test (expected = BadRequestException.class)
+  public void testInsertMovimientoNoOK_f3_cuenta_empty() throws Exception {
+    try{
+      MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
+      movimientoTecnocom10.setIdArchivo(1L);
+      movimientoTecnocom10.setCuenta("   ");
       inserTcMov(movimientoTecnocom10);
     }catch (BadRequestException e){
       Assert.assertEquals("Debe ser: ",e.getData()[0].getValue(),"Cuenta");
@@ -150,6 +166,66 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     }
   }
 
+  @Test (expected = BadRequestException.class)
+  public void testInsertMovimientoNoOK_f7() throws Exception {
+    try{
+      MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
+      movimientoTecnocom10.setIdArchivo(1L);
+      movimientoTecnocom10.setCuenta("AA");
+      movimientoTecnocom10.setPan("asfaojsfjasof");
+      movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+      movimientoTecnocom10.setImpFac(null);
+      inserTcMov(movimientoTecnocom10);
+    }catch (BadRequestException e){
+      Assert.assertEquals("Debe ser: ", "ImpFac", e.getData()[0].getValue());
+      throw new BadRequestException();
+    } catch (Exception e) {
+      Assert.fail("No debe caer aca");
+    }
+  }
+
+
+
+  @Test (expected = BadRequestException.class)
+  public void testInsertMovimientoNoOK_f8() throws Exception {
+    try{
+      MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
+      movimientoTecnocom10.setIdArchivo(1L);
+      movimientoTecnocom10.setCuenta("AA");
+      movimientoTecnocom10.setPan("asfaojsfjasof");
+      movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+      NewAmountAndCurrency10 impfac = new NewAmountAndCurrency10(new BigDecimal(10000L));
+      movimientoTecnocom10.setImpFac(impfac);
+      movimientoTecnocom10.setNumAut(null);
+      inserTcMov(movimientoTecnocom10);
+    }catch (BadRequestException e){
+      Assert.assertEquals("Debe ser: ", "NumAut", e.getData()[0].getValue());
+      throw new BadRequestException();
+    } catch (Exception e) {
+      Assert.fail("No debe caer aca");
+    }
+  }
+
+  @Test (expected = BadRequestException.class)
+  public void testInsertMovimientoNoOK_f8_numaut_empty() throws Exception {
+    try{
+      MovimientoTecnocom10 movimientoTecnocom10= new MovimientoTecnocom10();
+      movimientoTecnocom10.setIdArchivo(1L);
+      movimientoTecnocom10.setCuenta("AA");
+      movimientoTecnocom10.setPan("asfaojsfjasof");
+      movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
+      NewAmountAndCurrency10 impfac = new NewAmountAndCurrency10(new BigDecimal(10000L));
+      movimientoTecnocom10.setImpFac(impfac);
+      movimientoTecnocom10.setNumAut("   ");
+      inserTcMov(movimientoTecnocom10);
+    }catch (BadRequestException e){
+      Assert.assertEquals("Debe ser: ", "NumAut", e.getData()[0].getValue());
+      throw new BadRequestException();
+    } catch (Exception e) {
+      Assert.fail("No debe caer aca");
+    }
+  }
+
   public static MovimientoTecnocom10 inserTcMov(MovimientoTecnocom10 data)throws Exception{
     return getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(data);
   }
@@ -166,7 +242,7 @@ public class Test_TecnocomReconciliationEJBBean10_insertaMovimientos extends Tes
     movimientoTecnocom10.setCuenta(getRandomNumericString(10));
     movimientoTecnocom10.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movimientoTecnocom10.setIndNorCor(TipoFactura.CARGA_TRANSFERENCIA.getCorrector());
-    movimientoTecnocom10.setFecFac(new Date(System.currentTimeMillis()));
+    movimientoTecnocom10.setFecFac(LocalDate.now());
     movimientoTecnocom10.setNomPob(getRandomNumericString(10));
     movimientoTecnocom10.setCodCom("");
     movimientoTecnocom10.setCodEnt("");

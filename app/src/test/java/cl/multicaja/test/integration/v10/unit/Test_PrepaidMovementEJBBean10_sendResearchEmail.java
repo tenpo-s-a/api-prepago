@@ -3,11 +3,8 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -85,7 +82,7 @@ public class Test_PrepaidMovementEJBBean10_sendResearchEmail extends TestBaseUni
       toJson(researchMovementInformationFilesList),
       ReconciliationOriginType.CLEARING_RESOLUTION.name(),
       Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))),
-      ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI.getValue(),
+      ResearchMovementResponsibleStatusType.RECONCIALITION_MULTICAJA_OTI_PREPAGO.getValue(),
       ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
       movementId,
       PrepaidMovementType.TOPUP.name(),
