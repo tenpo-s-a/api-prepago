@@ -159,7 +159,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
    * @throws Exception
    */
   public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
-    if(StringUtils.isAllLowerCase(externalUserId)){
+    if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
     if(StringUtils.isAllBlank(accountUuid)){
