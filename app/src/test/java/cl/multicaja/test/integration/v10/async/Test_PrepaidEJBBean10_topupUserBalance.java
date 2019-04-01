@@ -1085,9 +1085,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     CardEvent cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 
-    Assert.assertEquals("Debe tener el mismo id", prepaidCard10.getId().toString(), cardEvent.getCard().getId());
-    Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), cardEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo id", prepaidCard10.getUuid(), cardEvent.getCard().getId());
+    Assert.assertFalse("Debe tener accountId", StringUtils.isBlank(cardEvent.getAccountId()));
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard10.getPan(), cardEvent.getCard().getPan());
   }
 
