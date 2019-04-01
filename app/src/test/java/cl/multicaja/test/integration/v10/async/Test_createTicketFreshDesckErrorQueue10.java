@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 
+//FIXME: estos test no tienen ningun assert
 public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
 
@@ -74,8 +75,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     System.out.println("TICKET CREADO");
   }
-  //Verificado envia todos los dastos
 
+  //Verificado envia todos los dastos
   @Ignore
   @Test
   public void testReinjectAltaCliente() throws Exception {
@@ -102,6 +103,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     Thread.sleep(2000);
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
   @Ignore
   @Test
@@ -142,6 +144,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   }
 
   //Verificado envia todos los dastos
+  @Ignore
   @Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -216,6 +219,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
   @Ignore
   @Test
@@ -252,8 +256,9 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
-  //@Ignore
+  @Ignore
   @Test
   public void testReinjectIssuanFee() throws Exception {
 
