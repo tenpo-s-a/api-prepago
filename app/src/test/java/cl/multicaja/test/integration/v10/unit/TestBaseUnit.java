@@ -274,7 +274,6 @@ public class TestBaseUnit extends TestApiBase {
     if (prepaidCardEJBBean11 == null) {
       prepaidCardEJBBean11 = new PrepaidCardEJBBean11();
       prepaidCardEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
-      prepaidCardEJBBean11.setCardDao(getCardDao());
     }
     return prepaidCardEJBBean11;
   }

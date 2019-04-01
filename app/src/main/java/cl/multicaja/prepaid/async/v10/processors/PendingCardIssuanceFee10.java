@@ -179,7 +179,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             prepaidCard);
 
           // publica evento de tarjeta creada
-          getRoute().getPrepaidCardEJBBean10().publishCardCreatedEvent(prepaidCard.getId());
+          getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(
+            data.getPrepaidUser10().getUserIdMc().toString(),
+            data.getAccount().getUuid(),
+            prepaidCard.getId()
+          );
 
           return req;
 

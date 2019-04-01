@@ -176,6 +176,7 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+          //TODO: generar hash del pan de la tarjeta
 
           try {
 
@@ -188,7 +189,9 @@ public class PendingCard10 extends BaseProcessor10 {
             */
 
             // Actualiza la tarjeta
-            getRoute().getPrepaidCardEJBBean11().updatePrepaidCard(null, data.getPrepaidCard10().getId(), data.getAccount().getId(), prepaidCard10);
+            getRoute().getPrepaidCardEJBBean11().updatePrepaidCard(null, data.getPrepaidCard10().getId(),
+              data.getAccount().getId(),
+              prepaidCard10);
 
             data.setPrepaidCard10(prepaidCard10);
             req.setData(data);
