@@ -15,11 +15,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import java.sql.ResultSet;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
 
+@Stateless
+@LocalBean
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
 public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean11.class);
