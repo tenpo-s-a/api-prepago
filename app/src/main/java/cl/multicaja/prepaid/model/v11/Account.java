@@ -21,7 +21,7 @@ public class Account implements Serializable {
   private String uuid;
 
   @Column(name = "cuenta")
-  private String account;
+  private String accountNumber; // Numero de contrato en procesadora
 
   @Column(name = "procesador")
   private String processor;
@@ -65,12 +65,12 @@ public class Account implements Serializable {
     this.uuid = uuid;
   }
 
-  public String getAccount() {
-    return account;
+  public String getAccountNumber() {
+    return accountNumber;
   }
 
-  public void setAccount(String account) {
-    this.account = account;
+  public void setAccountNumber(String accountNumber) {
+    this.accountNumber = accountNumber;
   }
 
   public String getProcessor() {
