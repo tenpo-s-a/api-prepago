@@ -15,6 +15,7 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
+import cl.multicaja.prepaid.dao.AccountDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -81,6 +82,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
   private static KafkaEventDelegate10 kafkaEventDelegate10;
   private static AccountEJBBean10 accountEJBBean10;
+  private static AccountDao accountDao;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -219,9 +221,16 @@ public class TestBaseUnit extends TestApiBase {
     if (accountEJBBean10 == null) {
       accountEJBBean10 = new AccountEJBBean10();
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
-      accountEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
     }
     return accountEJBBean10;
+  }
+
+  public static AccountDao getAccountDao(){
+    if (accountDao == null) {
+      accountDao = new AccountDao();
+      accountDao.setEm(createEntityManager());
+    }
+    return accountDao;
   }
 
   /**
