@@ -152,9 +152,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
     if(account != null) {
       data.setAccount(account);
     }
-    PrepaidUser10 prepaidUser10 = new PrepaidUser10();
-    prepaidUser10.setUserIdMc(user.getId());
-    data.setPrepaidUser10(prepaidUser10);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));

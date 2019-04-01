@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.async.v10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.json.JsonParser;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
@@ -73,7 +74,9 @@ public final class KafkaEventDelegate10 {
     } else {
 
       Map<String, Object> headers = new HashMap<>();
-      headers.put("JMSCorrelationID", accountEvent.getAccount().getId());
+      if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
+        headers.put("JMSCorrelationID", accountEvent.getAccount().getId());
+      }
       headers.put(KafkaConstants.PARTITION_KEY, 0);
       headers.put(KafkaConstants.KEY, "1");
 
@@ -100,7 +103,9 @@ public final class KafkaEventDelegate10 {
     } else {
 
       Map<String, Object> headers = new HashMap<>();
-      headers.put("JMSCorrelationID", cardEvent.getCard().getId());
+      if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
+        headers.put("JMSCorrelationID", cardEvent.getCard().getId());
+      }
       headers.put(KafkaConstants.PARTITION_KEY, 0);
       headers.put(KafkaConstants.KEY, "1");
 

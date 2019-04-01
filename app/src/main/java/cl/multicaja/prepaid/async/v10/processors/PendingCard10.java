@@ -179,15 +179,6 @@ public class PendingCard10 extends BaseProcessor10 {
           //TODO: generar hash del pan de la tarjeta
 
           try {
-
-            /*
-              getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
-                data.getPrepaidCard10().getId(),
-                data.getPrepaidCard10().getIdUser(),
-                data.getPrepaidCard10().getStatus(),
-                prepaidCard10);
-            */
-
             // Actualiza la tarjeta
             getRoute().getPrepaidCardEJBBean11().updatePrepaidCard(null, data.getPrepaidCard10().getId(),
               data.getAccount().getId(),
