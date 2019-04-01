@@ -69,7 +69,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup.getData());

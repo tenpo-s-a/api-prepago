@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -1078,7 +1079,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, prepaidCard10.getUuid());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, prepaidCard10.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
@@ -1182,7 +1184,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Account account = accounts.get(0);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, account.getUuid());
+
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, account.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event.getData());

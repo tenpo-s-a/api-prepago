@@ -44,7 +44,8 @@ public class Test_AccountEJBBean10_publishAccountCreatedEvent extends TestBaseUn
     getAccountEJBBean10().publishAccountCreatedEvent(prepaidUser10.getUserIdMc(), account);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, account.getUuid());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, account.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
