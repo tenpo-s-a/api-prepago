@@ -32,7 +32,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    String messageId = sendPendingProductChange(user, prepaidCard, tipoAlta,4);
+    String messageId = sendPendingProductChange(prepaidUser, prepaidCard, tipoAlta,4);
 
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.ERROR_PRODUCT_CHANGE_RESP);
@@ -62,7 +62,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    String messageId = sendPendingProductChange(user, prepaidCard, tipoAlta,0);
+    String messageId = sendPendingProductChange(prepaidUser, prepaidCard, tipoAlta,0);
 
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_RESP);

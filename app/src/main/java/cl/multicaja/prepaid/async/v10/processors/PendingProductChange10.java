@@ -8,9 +8,9 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.CambioProductoDTO;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -45,7 +45,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
           req.retryCountNext();
           PrepaidProductChangeData10 data = req.getData();
 
-          User user = data.getUser();
+          PrepaidUser10 user = data.getPrepaidUser();
           PrepaidCard10 prepaidCard = data.getPrepaidCard();
           TipoAlta tipoAlta = data.getTipoAlta();
 
@@ -55,16 +55,14 @@ public class PendingProductChange10 extends BaseProcessor10 {
 
           if(prepaidCard == null) {
             log.debug("No se debe realizar cambio de producto ya que el cliente todavia no tiene tarjeta prepago");
-
-            //Envio de mail -> validacion de identidad ok
-            sendSuccessMail(user, Boolean.FALSE);
           } else {
             log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
             log.info(String.format("LLamando cambio de producto %s", prepaidCard.getProcessorUserId()));
 
             // se hace el cambio de producto
-            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+            //Fixme: eventualmente se debe usar getDocument() y no getRut()
+            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().toString(), user.getDocumentType(), tipoAlta);
 
             log.info("Respuesta cambio de producto");
             log.info(dto.getRetorno());
@@ -73,16 +71,10 @@ public class PendingProductChange10 extends BaseProcessor10 {
             if(dto.isRetornoExitoso()) {
               log.debug("********** Cambio de producto realizado **********");
 
-              //Envio de mail -> validacion de identidad ok
-              sendSuccessMail(user, Boolean.TRUE);
-
             } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
               if(dto.getDescRetorno().contains("MPA0928")) {
                 log.debug("********** Cambio de producto realizado anteriormente **********");
                 req.getData().setMsjError(dto.getDescRetorno());
-
-                //Envio de mail -> validacion de identidad ok
-                sendSuccessMail(user, Boolean.TRUE);
               } else {
                 log.debug("********** Cambio de producto rechazado rechazado **********");
                 req.getData().setNumError(Errors.ERROR_INDETERMINADO);
@@ -138,8 +130,8 @@ public class PendingProductChange10 extends BaseProcessor10 {
         log.info("processErrorProductChange - REQ: " + req);
         req.retryCountNext();
         Map<String, Object> templateData = new HashMap<>();
-        templateData.put("idUsuario", req.getData().getUser().getId().toString());
-        templateData.put("rutCliente", req.getData().getUser().getRut().getValue().toString() + "-" + req.getData().getUser().getRut().getDv());
+        templateData.put("idUsuario", req.getData().getPrepaidUser().getId().toString());
+        templateData.put("rutCliente", req.getData().getPrepaidUser().getDocument());
         getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
         return req;
       }

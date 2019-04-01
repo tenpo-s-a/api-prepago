@@ -2298,6 +2298,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
+  @Override
+  public void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, Long accountId) throws Exception {
+    PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(null, userIdMc);
+
+    if(!PrepaidUserLevel.LEVEL_1.equals(prepaidUser.getUserLevel())) {
+      throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
+    }
+
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+
+    getProductChangeDelegate().sendProductChange(prepaidUser, prepaidCard10, TipoAlta.NIVEL2);
+  }
+
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null)  {
@@ -2732,7 +2745,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-    getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
+    //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
+    // Por ahora se setean para que pueda realizarse el cambio de producto.
+    prepaidUser.setRut(user.getRut().getValue());
+    prepaidUser.setDocument(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+    prepaidUser.setDocumentType(TipoDocumento.RUT);
+
+    getProductChangeDelegate().sendProductChange(prepaidUser, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
   }

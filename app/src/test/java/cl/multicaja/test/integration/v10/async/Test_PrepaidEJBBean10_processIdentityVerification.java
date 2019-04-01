@@ -136,7 +136,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -146,7 +147,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -195,7 +196,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -205,7 +207,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -256,7 +258,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -266,7 +269,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -317,7 +320,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -327,7 +331,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -380,7 +384,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -390,7 +395,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -539,7 +544,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -549,7 +555,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertNull("PrepaidCard deberia ser null", remoteTopup.getData().getPrepaidCard());
 
       } else {
@@ -595,7 +601,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -605,7 +612,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertNull("PrepaidCard deberia ser null", remoteTopup.getData().getPrepaidCard());
 
       } else {
@@ -654,7 +661,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -664,7 +672,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertNull("PrepaidCard deberia ser null", remoteTopup.getData().getPrepaidCard());
 
       } else {
@@ -714,7 +722,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -724,7 +733,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertNull("PrepaidCard deberia ser null", remoteTopup.getData().getPrepaidCard());
 
       } else {
@@ -775,7 +784,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
     Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-    String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+    prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
     if (CamelFactory.getInstance().isCamelRunning()) {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -785,7 +795,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
       Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
       Assert.assertNull("PrepaidCard deberia ser null", remoteTopup.getData().getPrepaidCard());
 
     } else {
@@ -849,7 +859,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -859,7 +870,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
         Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+        Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
         Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
       } else {
@@ -1021,7 +1032,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
     Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-    String messageId = String.format("%s#%s#%s", user.getId(), user.getRut().getValue(), user.getRut().getValue());
+    prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
 
     if (CamelFactory.getInstance().isCamelRunning()) {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -1031,7 +1043,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertNotNull("Deberia existir el mensaje", remoteTopup);
       Assert.assertNotNull("Deberia existir el mensaje", remoteTopup.getData());
-      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", user.getId(), remoteTopup.getData().getUser().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser().getId());
       Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidCard10.getId(), remoteTopup.getData().getPrepaidCard().getId());
 
     } else {

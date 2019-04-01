@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,6 +17,8 @@ public class PrepaidUser10 extends BaseModel {
   @JsonProperty("user_id")
   private Long userIdMc;
   private Integer rut;
+  private String document;
+  private TipoDocumento documentType;
   private PrepaidUserStatus status;
   private Timestamps timestamps;
   private PrepaidUserLevel userLevel;
@@ -118,6 +121,22 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setIdentityVerificationAttempts(Integer identityVerificationAttempts) {
     this.identityVerificationAttempts = identityVerificationAttempts;
+  }
+
+  public String getDocument() {
+    return document;
+  }
+
+  public void setDocument(String document) {
+    this.document = document;
+  }
+
+  public TipoDocumento getDocumentType() {
+    return documentType;
+  }
+
+  public void setDocumentType(TipoDocumento documentType) {
+    this.documentType = documentType;
   }
 
   @Override
