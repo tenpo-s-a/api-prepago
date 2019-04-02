@@ -15,6 +15,7 @@ import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
@@ -126,6 +127,9 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @return
    */
   public String sendPendingCardIssuanceFee(User user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+    return this.sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, null, retryCount);
+  }
+  public String sendPendingCardIssuanceFee(User user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Account account, Integer retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -145,6 +149,9 @@ public class TestBaseUnitAsync extends TestContextHelper {
     //se crea la el objeto con los datos del proceso
     PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, null, prepaidMovement);
     data.setPrepaidCard10(prepaidCard);
+    if(account != null) {
+      data.setAccount(account);
+    }
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
@@ -204,6 +211,10 @@ public class TestBaseUnitAsync extends TestContextHelper {
    * @return
    */
   public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+    return this.sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard, cdtTransaction, prepaidMovement, null, retryCount);
+  }
+
+  public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, Account account, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -228,6 +239,10 @@ public class TestBaseUnitAsync extends TestContextHelper {
     req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
     req.getData().setPrepaidCard10(prepaidCard);
     req.getData().setPrepaidUser10(prepaidUser);
+
+    if(account != null) {
+      req.getData().setAccount(account);
+    }
 
     //se envia el mensaje a la cola
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));

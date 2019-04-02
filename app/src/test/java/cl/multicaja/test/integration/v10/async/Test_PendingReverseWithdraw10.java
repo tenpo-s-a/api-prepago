@@ -76,7 +76,8 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     {
       //mensaje procesado por processPendingWithdrawReversal pero que falla y deja en cola de error
       Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.ERROR_REVERSAL_WITHDRAW_RESP);
-      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger(30000, 60000)
+        .getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un reverse", remoteReverse);
       Assert.assertNotNull("Deberia existir un reverse", remoteReverse.getData());

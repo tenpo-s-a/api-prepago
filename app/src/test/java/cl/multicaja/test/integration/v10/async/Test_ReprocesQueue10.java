@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -68,7 +69,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(15000, 60000).getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup en la cola de error topup", remoteTopup.getData());
@@ -211,7 +212,10 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
+
     Thread.sleep(3000);
 
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
@@ -426,7 +430,10 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     System.out.println("prepaidMovement: " + prepaidMovement);
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 2);
     Thread.sleep(2000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!

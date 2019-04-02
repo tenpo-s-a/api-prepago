@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -218,7 +219,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 0);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -324,7 +327,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 4);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 4);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_CREATE_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);

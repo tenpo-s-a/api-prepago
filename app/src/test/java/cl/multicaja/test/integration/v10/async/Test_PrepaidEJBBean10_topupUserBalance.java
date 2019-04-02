@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -1017,6 +1018,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
+    prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
+
     PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
@@ -1076,16 +1079,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, prepaidCard10.getProcessorUserId());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, prepaidCard10.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
 
     CardEvent cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 
-    Assert.assertEquals("Debe tener el mismo id", prepaidCard10.getId().toString(), cardEvent.getCard().getId());
-    Assert.assertEquals("Debe tener el mismo accountId", prepaidCard10.getProcessorUserId(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidCard10.getIdUser().toString(), cardEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo id", prepaidCard10.getUuid(), cardEvent.getCard().getId());
+    Assert.assertFalse("Debe tener accountId", StringUtils.isBlank(cardEvent.getAccountId()));
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard10.getPan(), cardEvent.getCard().getPan());
   }
 
@@ -1180,7 +1184,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Account account = accounts.get(0);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger().getMessage(qResp, account.getUuid());
+
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, account.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de cuenta creada event", event.getData());
