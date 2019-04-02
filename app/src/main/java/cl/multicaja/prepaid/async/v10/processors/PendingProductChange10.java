@@ -71,6 +71,13 @@ public class PendingProductChange10 extends BaseProcessor10 {
             if(dto.isRetornoExitoso()) {
               log.debug("********** Cambio de producto realizado **********");
 
+              getRoute().getAccountEJBBean10().
+              getRoute().getPrepaidCardEJBBean10().publishCardClosedEvent(user.getUserIdMc().toString(), , prepaidCard.getId());
+
+              PrepaidCard10 newPrepaidCard = new PrepaidCard10();
+              //TODO: rellenar los datos de la nueva tarjeta
+              getRoute().getPrepaidCardEJBBean10().publishCardCreatedEvent(newPrepaidCard.getId());
+
             } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
               if(dto.getDescRetorno().contains("MPA0928")) {
                 log.debug("********** Cambio de producto realizado anteriormente **********");

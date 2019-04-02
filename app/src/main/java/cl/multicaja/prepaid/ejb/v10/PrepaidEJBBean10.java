@@ -2300,14 +2300,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, Long accountId) throws Exception {
-    PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(null, userIdMc);
 
-    if(!PrepaidUserLevel.LEVEL_1.equals(prepaidUser.getUserLevel())) {
+    PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(null, userIdMc);
+    if(PrepaidUserLevel.LEVEL_2.equals(prepaidUser.getUserLevel())) {
       throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
     }
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-
     getProductChangeDelegate().sendProductChange(prepaidUser, prepaidCard10, TipoAlta.NIVEL2);
   }
 

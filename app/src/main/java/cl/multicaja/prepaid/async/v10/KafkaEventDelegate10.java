@@ -3,6 +3,7 @@ package cl.multicaja.prepaid.async.v10;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.json.JsonParser;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
@@ -20,8 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_ACCOUNT_CREATED_EVENT;
-import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT;
+import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.*;
 
 public final class KafkaEventDelegate10 {
 
@@ -127,6 +127,30 @@ public final class KafkaEventDelegate10 {
       req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_CARD_CREATED_EVENT));
 
       this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CREATED_EVENT, req, headers);
+    }
+  }
+
+  public void publishCardClosedEvent(CardEvent cardEvent) {
+    if(cardEvent == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, cardEvent -> null =======");
+      throw new IllegalArgumentException();
+    }
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+    } else {
+
+      Map<String, Object> headers = new HashMap<>();
+      if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
+        headers.put("JMSCorrelationID", cardEvent.getCard().getId());
+      }
+      headers.put(KafkaConstants.PARTITION_KEY, 0);
+      headers.put(KafkaConstants.KEY, "1");
+
+      ExchangeData<String> req = new ExchangeData<>(toJson(cardEvent));
+      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_CARD_CLOSED_EVENT));
+
+      this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CLOSED_EVENT, req, headers);
     }
   }
 }
