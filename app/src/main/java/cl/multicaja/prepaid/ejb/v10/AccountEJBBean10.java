@@ -100,6 +100,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
   }
 
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
+
     if(StringUtils.isAllBlank(accountNumber)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
     }

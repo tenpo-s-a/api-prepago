@@ -117,6 +117,36 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
+  public String sendPendingTopup(PrepaidTopup10 prepaidTopup, PrepaidUser10 user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
+    }
+
+    //se crea un messageId unico
+    String messageId = getRandomString(20);
+
+    //se crea la cola de requerimiento
+    Queue qReq = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_REQ);
+
+    if(prepaidTopup != null) {
+      prepaidTopup.setMessageId(messageId);
+    }
+
+    //se crea la el objeto con los datos del proceso
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+
+
+    //se envia el mensaje a la cola
+    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
+    req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+    req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+    camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
 
   /**
    * Envia un mensaje directo al proceso PENDING_CARD_ISSUANCE_FEE_REQ

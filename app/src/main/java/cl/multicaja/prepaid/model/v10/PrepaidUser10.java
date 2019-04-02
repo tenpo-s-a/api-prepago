@@ -34,15 +34,10 @@ public class PrepaidUser10 extends BaseModel {
 
   // Campos nuevos
   private String name;
-
   private String lastName;
-
   private String documentNumber;
-
   private DocumentType documentType;
-
-
-  private Integer level;
+  private String uuid;
 
 
   public PrepaidUser10() {
@@ -169,12 +164,13 @@ public class PrepaidUser10 extends BaseModel {
     this.documentType = documentType;
   }
 
-  public Integer getLevel() {
-    return level;
+
+  public String getUuid() {
+    return uuid;
   }
 
-  public void setLevel(Integer level) {
-    this.level = level;
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   @Override

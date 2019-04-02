@@ -24,6 +24,8 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -613,6 +615,22 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidUser;
   }
 
+  public PrepaidUser10 buildPrepaidUserv2() {
+
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(getUniqueLong());
+    prepaidUser.setRut(getUniqueRutNumber());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+    prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setName(getRandomString(10));
+    prepaidUser.setLastName(getRandomString(10));
+    prepaidUser.setUuid(UUID.randomUUID().toString());
+    prepaidUser.setDocumentType(DocumentType.DNI_CL);
+
+    return prepaidUser;
+  }
+
   /**
    *
    * @param prepaidUser
@@ -725,6 +743,29 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard;
   }
 
+
+  public PrepaidCard10 buildAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
+
+    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
+
+    Account account = new Account();
+    account.setUserId(prepaidUser.getId());
+    account.setAccount(altaClienteDTO.getContrato());
+    account.setProcessor();
+    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
+    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
+    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
+    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+
+    return prepaidCard;
+  }
+
+
   /**
    *
    * @param user
@@ -746,6 +787,26 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTotal(newAmountAndCurrency);
     prepaidTopup.setMerchantCategory(1);
     prepaidTopup.setMerchantName(getRandomString(6));
+
+    return prepaidTopup;
+  }
+
+  public PrepaidTopup10 buildPrepaidTopup10() {
+
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setMerchantCode(merchantCode);
+    prepaidTopup.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidTopup.setAmount(newAmountAndCurrency);
+    prepaidTopup.setTotal(newAmountAndCurrency);
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(getRandomString(6));
+
 
     return prepaidTopup;
   }
@@ -913,6 +974,7 @@ public class TestBaseUnit extends TestApiBase {
     return cdtTransaction;
   }
 
+
   /**
    *
    * @param prepaidUser
@@ -932,12 +994,35 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidUser;
   }
 
-  /**
-   *
-   * @param prepaidCard
-   * @return
-   * @throws Exception
-   */
+  public PrepaidUser10 createPrepaidUserV2(PrepaidUser10 prepaidUser) throws Exception {
+
+    prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
+
+    Assert.assertNotNull("debe retornar un usuario", prepaidUser);
+    Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
+    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getUserIdMc() > 0);
+    Assert.assertEquals("debe tener rut", true, prepaidUser.getRut() > 0);
+    Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
+    Assert.assertNotNull("debe tener uuid", prepaidUser.getUuid());
+
+    return prepaidUser;
+  }
+
+  public Account createAccount(Long userId, String accountNum) throws Exception {
+    Account account = getAccountEJBBean10().insertAccount(userId,accountNum);
+
+    Assert.assertNotNull("debe retornar un account", account);
+    Assert.assertNotEquals("debe tener id", 0L, account.getId().longValue());
+
+    return account;
+  }
+
+    /**
+     *
+     * @param prepaidCard
+     * @return
+     * @throws Exception
+     */
   public PrepaidCard10 createPrepaidCard10(PrepaidCard10 prepaidCard) throws Exception {
 
     prepaidCard = getPrepaidCardEJBBean10().createPrepaidCard(null, prepaidCard);

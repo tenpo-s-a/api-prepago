@@ -15,6 +15,8 @@ import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v10.Timestamps;
+import cl.multicaja.prepaid.model.v11.AccountProcessor;
+import cl.multicaja.prepaid.model.v11.AccountStatus;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -22,14 +24,15 @@ import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +61,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private UserClient userClient;
 
-  private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id_usuario_mc = ?", getSchema());
+  private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
+    "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
+    "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
+    "            apellido, numero_documento, tipo_documento, nivel, uuid)\n" +
+    "    VALUES (?, ?, ?, ?, ?, ?, \n" +
+    "            ?, ?, ?, ?, \n" +
+    "            ?, ?, ?, ?, ?);\n", getSchema());
 
+  private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
+  private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -94,16 +105,64 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   public PrepaidUser10 createUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
+
     if(user == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
     }
-    if(user.getId() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-    return null;
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(INSERT_USER, new String[] {"id"});
+      ps.setLong(1, user.getUserIdMc());
+      ps.setLong(2, user.getRut());
+      ps.setString(3, user.getStatus().name());
+      ps.setString(4, "");
+      ps.setLong(5, 0L);
+      ps.setLong(6, 0L);
+      ps.setObject(7, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setObject(8, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setString(9,user.getName());
+      ps.setString(10,user.getLastName());
+      ps.setString(11,user.getDocumentNumber());
+      ps.setString(12,user.getDocumentType().name());
+      ps.setString(13,user.getUserLevel().name());
+      ps.setString(14,user.getUuid());
+
+      return ps;
+    }, keyHolder);
+
+    return  this.findById(null,(long) keyHolder.getKey());
   }
 
-  public PrepaidUser10 findUserByExtId(Map<String, Object> headers, Long userId) throws Exception {
+  public PrepaidUser10 findById(Map<String, Object> headers, Long id) throws Exception {
+
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    org.springframework.jdbc.core.RowMapper<PrepaidUser10> rm = (ResultSet rs, int rowNum) -> {
+      PrepaidUser10 u = new PrepaidUser10();
+      u.setId(rs.getLong("id"));
+      u.setUserIdMc(rs.getLong("id_usuario_mc"));
+      u.setStatus(PrepaidUserStatus.valueOfEnum(rs.getString("estado")));
+      u.setName(rs.getString("nombre"));
+      u.setLastName(rs.getString("apellido"));
+      u.setDocumentNumber(rs.getString("numero_documento"));
+      u.setDocumentType(DocumentType.valueOfEnum(rs.getString("tipo_documento")));
+      u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString(rs.getInt("nivel"))));
+      u.setUuid(rs.getString("uuid"));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt(rs.getObject("fecha_creacion",LocalDateTime.class));
+      timestamps.setUpdatedAt(rs.getObject("fecha_actualizacion",LocalDateTime.class));
+      u.setTimestamps(timestamps);
+      return u;
+    };
+    return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, rm, id);
+  }
+
+  public PrepaidUser10 findByExtId(Map<String, Object> headers, String userId) throws Exception {
 
     if(userId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -118,14 +177,16 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setLastName(rs.getString("apellido"));
       u.setDocumentNumber(rs.getString("numero_documento"));
       u.setDocumentType(DocumentType.valueOfEnum(rs.getString("tipo_documento")));
-      u.setLevel(rs.getInt(rs.getInt("nivel")));
+      u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString(rs.getInt("nivel"))));
+      u.setUuid(rs.getString("uuid"));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt(rs.getObject("fecha_creacion",LocalDateTime.class));
       timestamps.setUpdatedAt(rs.getObject("fecha_actualizacion",LocalDateTime.class));
       u.setTimestamps(timestamps);
       return u;
     };
-    return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, rm, userId);
+
+    return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID_EXT, rm, userId);
   }
 
   @Override

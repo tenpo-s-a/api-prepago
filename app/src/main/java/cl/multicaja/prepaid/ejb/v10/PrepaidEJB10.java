@@ -39,7 +39,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidTopup10 topupUserBalance(Map<String, Object> headers,Long userId, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception;
+  PrepaidTopup10 topupUserBalance(Map<String, Object> headers,String userId, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception;
 
   /**
    *

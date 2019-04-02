@@ -504,7 +504,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   @Override
-  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers,Long userId, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception {
+  public PrepaidTopup10 topupUserBalance(Map<String, Object> headers,String userId, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception {
 
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
@@ -514,7 +514,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener usuario prepago (V2)
     PrepaidUser10 user = getPrepaidUserEJB10().findUserByExtId(headers,userId);
     if(user == null){
+      //TODO: LLamar al ws usuario tempo.
       // Verificar si existe en Tempo. Si no existe "retorna error", si existe agregar.
+      throw new ValidationException(CLIENTE_NO_EXISTE);
     }
     //Obtiene Cuenta Usuario
     Account account = getAccountEJBBean10().findByUserId(user.getId());

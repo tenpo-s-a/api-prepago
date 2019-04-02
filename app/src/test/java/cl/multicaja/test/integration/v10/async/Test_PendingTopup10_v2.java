@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -26,11 +27,12 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_prepaidUser_is_null() throws Exception {
 
-    User user = registerUser();
 
-    PrepaidTopup10 topup = buildPrepaidTopup10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10v2();
 
-    String messageId = sendPendingTopup(topup, user, null, null, 0);
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    String messageId = sendPendingTopup(topup,prepaidUser10 , null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -42,13 +44,13 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_with_card_lockedhard() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10v2();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account =
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser10);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
