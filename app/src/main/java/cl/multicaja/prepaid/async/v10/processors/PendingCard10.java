@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
@@ -84,8 +85,13 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
           data.setPrepaidCard10(prepaidCard);
 
+          // guarda la informacion de la cuenta
+          Account account = getRoute().getAccountEJBBean10().insertAccount(data.getPrepaidUser10().getId(), altaClienteDTO.getContrato());
+
           // publica evento de contrato/cuenta creada
-          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(prepaidCard.getId());
+          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUserIdMc(), account);
+
+          data.setAccount(account);
 
           Endpoint endpoint = createJMSEndpoint(PENDING_CREATE_CARD_REQ);
           return redirectRequest(endpoint, exchange, req, false);
@@ -170,13 +176,12 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+          //TODO: generar hash del pan de la tarjeta
 
           try {
-
-            getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
-              data.getPrepaidCard10().getId(),
-              data.getPrepaidCard10().getIdUser(),
-              data.getPrepaidCard10().getStatus(),
+            // Actualiza la tarjeta
+            getRoute().getPrepaidCardEJBBean11().updatePrepaidCard(null, data.getPrepaidCard10().getId(),
+              data.getAccount().getId(),
               prepaidCard10);
 
             data.setPrepaidCard10(prepaidCard10);

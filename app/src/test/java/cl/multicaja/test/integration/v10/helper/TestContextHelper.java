@@ -48,6 +48,7 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       prepaidTopupRoute10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       prepaidTopupRoute10.setAccountEJBBean10(getAccountEJBBean10());
+      prepaidTopupRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
 
       TransactionReversalRoute10 transactionReversalRoute10 = new TransactionReversalRoute10();
       transactionReversalRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());

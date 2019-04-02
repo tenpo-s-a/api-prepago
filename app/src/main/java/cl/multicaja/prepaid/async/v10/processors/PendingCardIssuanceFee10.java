@@ -7,13 +7,16 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
+import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,8 +56,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         PrepaidTopupData10 data = req.getData();
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-        PrepaidTopup10 prepaidTopup = req.getData().getPrepaidTopup10();
-        PrepaidCard10 prepaidCard = req.getData().getPrepaidCard10();
+        PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
+        PrepaidCard10 prepaidCard = data.getPrepaidCard10();
+        User user = data.getUser();
+        Account account = data.getAccount();
 
         if (prepaidTopup == null) {
           log.error("Error req.getData().getPrepaidTopup10() es null");
@@ -72,6 +77,25 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         }
         if (prepaidMovement == null) {
           log.error("Error req.getData().getPrepaidMovement10() es null");
+          return null;
+        }
+
+        if (user == null) {
+          log.error("Error req.getData().getUser() es null");
+          return null;
+        }
+
+        if (user.getId() == null || user.getId() == 0L) {
+          log.error("Error req.getData().getUser().getId() es null");
+          return null;
+        }
+
+        if (account == null) {
+          log.error("Error req.getData().getAccount() es null");
+          return null;
+        }
+        if (StringUtils.isAllBlank(account.getUuid())) {
+          log.error("Error req.getData().getAccount().getUuid() es null o empty");
           return null;
         }
 
@@ -179,7 +203,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             prepaidCard);
 
           // publica evento de tarjeta creada
-          getRoute().getPrepaidCardEJBBean10().publishCardCreatedEvent(prepaidCard.getId());
+          getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(
+            data.getUser().getId().toString(),
+            data.getAccount().getUuid(),
+            prepaidCard.getId()
+          );
 
           return req;
 

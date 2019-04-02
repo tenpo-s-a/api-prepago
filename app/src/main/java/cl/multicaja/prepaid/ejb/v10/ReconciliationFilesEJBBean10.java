@@ -66,7 +66,7 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
 
     if ("0".equals(resp.get("_error_code"))) {
       reconciliationFile10.setId(getNumberUtils().toLong(resp.get("_r_id")));
-      List<ReconciliationFile10> reconciliationFile10List = this.getReconciliationFile(null, reconciliationFile10.getFileName(), null, null, null);
+      List<ReconciliationFile10> reconciliationFile10List = this.getReconciliationFile(null, reconciliationFile10.getId(), reconciliationFile10.getFileName(), null, null, null);
       return reconciliationFile10List.get(0);
     } else {
       log.error("addReconciliationFile resp: " + resp);
@@ -75,8 +75,9 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
   }
 
   @Override
-  public List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception {
+  public List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, Long fileId, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception {
     Object[] params = {
+      fileId != null ? new InParam(fileId, Types.BIGINT) : new NullParam(Types.BIGINT),
       fileName != null ? new InParam(fileName, Types.VARCHAR) : new NullParam(Types.VARCHAR),
       process != null ? new InParam(process.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
       fileType != null ? new InParam(fileType.toString(), Types.VARCHAR) : new NullParam(Types.VARCHAR),
@@ -103,7 +104,7 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
       }
     };
 
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_archivo_conciliacion", rm, params);
+    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_archivo_conciliacion_v11", rm, params);
     log.info("Respuesta Busca archivo conciliacion: "+resp);
     return (List)resp.get("result");
   }

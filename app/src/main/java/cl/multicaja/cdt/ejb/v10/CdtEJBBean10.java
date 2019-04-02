@@ -138,7 +138,7 @@ public class CdtEJBBean10 implements CdtEJB10 {
 
     if("0".equals(numError)){
       cdtTransaction10.setTransactionReference(numberUtils.toLong(outputData.get("IdMovimiento")));
-      cdtTransaction10.setId(numberUtils.toLong(outputData.get("Id")));
+      cdtTransaction10.setId(numberUtils.toLong(outputData.get("IdMovimiento")));
     } else {
       log.error("addCdtTransaction resp: " + outputData + " - " + cdtTransaction10);
       cdtTransaction10.setNumError(numError);

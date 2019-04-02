@@ -15,7 +15,10 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
+import cl.multicaja.prepaid.dao.AccountDao;
+import cl.multicaja.prepaid.dao.CardDao;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -82,6 +85,9 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
   private static KafkaEventDelegate10 kafkaEventDelegate10;
   private static AccountEJBBean10 accountEJBBean10;
+  private static AccountDao accountDao;
+  private static CardDao cardDao;
+  private static PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -209,6 +215,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
       prepaidMovementEJBBean10.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
       prepaidMovementEJBBean10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean10.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
     }
     return prepaidMovementEJBBean10;
   }
@@ -217,9 +226,24 @@ public class TestBaseUnit extends TestApiBase {
     if (accountEJBBean10 == null) {
       accountEJBBean10 = new AccountEJBBean10();
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
-      accountEJBBean10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
     }
     return accountEJBBean10;
+  }
+
+  public static AccountDao getAccountDao(){
+    if (accountDao == null) {
+      accountDao = new AccountDao();
+      accountDao.setEm(createEntityManager());
+    }
+    return accountDao;
+  }
+
+  public static CardDao getCardDao(){
+    if (cardDao == null) {
+      cardDao = new CardDao();
+      cardDao.setEm(createEntityManager());
+    }
+    return cardDao;
   }
 
   /**
@@ -246,6 +270,15 @@ public class TestBaseUnit extends TestApiBase {
     }
     return prepaidCardEJBBean10;
   }
+
+  public static PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    if (prepaidCardEJBBean11 == null) {
+      prepaidCardEJBBean11 = new PrepaidCardEJBBean11();
+      prepaidCardEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+    }
+    return prepaidCardEJBBean11;
+  }
+
   public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10(){
 
     if (mailPrepaidEJBBean10 == null) {
@@ -338,6 +371,7 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10 = new McRedReconciliationEJBBean10();
       mcRedReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      mcRedReconciliationEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       mcRedReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
     }
     return mcRedReconciliationEJBBean10;

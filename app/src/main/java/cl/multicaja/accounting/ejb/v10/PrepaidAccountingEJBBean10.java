@@ -579,7 +579,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
     accounting.setAmountBalance(amountToBalance);
 
-
     accounting.setConciliationDate(accountingMovement.getReconciliationDate());
 
     return accounting;
@@ -1067,6 +1066,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           //TODO: Si la tarjeta no existe se debe investigar.
         }
         transactions.add(acc);
+
+        //TODO: verificar si estos movimientos que solo vinieron en el IPM se deben agregar a investigar
       }
       else {
         // Si El movimiento ya existe, se actualiza la data y los status.
@@ -1080,7 +1081,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         // Movimiento actualizado a procesado OK
         getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
 
-        //TODO: verificar si estos movimientos que solo vinieron en el IPM se deben agregar a investigar
+        //FIXME: no faltaria cambiar el estado conciliado con tecnocom a RECONCILED? ahora que ya llego en el IPM.
       }
     }
     // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.

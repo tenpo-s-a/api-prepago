@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Test_20181010114032_create_sp_busca_movimientos_conciliar extends TestDbBasePg {
 
-  private static final String SP_NAME = SCHEMA + ".mc_prp_busca_movimientos_conciliar_v10";
+  private static final String SP_NAME = SCHEMA + ".mc_prp_busca_movimientos_conciliar_v11";
 
   @Before
   public void beforeClass() {

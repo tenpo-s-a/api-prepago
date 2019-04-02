@@ -31,7 +31,7 @@ public interface ReconciliationFilesEJB10 {
    * @return
    * @throws Exception
    */
-  List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception;
+  List<ReconciliationFile10> getReconciliationFile(Map<String, Object> headers, Long fileId, String fileName, ReconciliationOriginType process, ReconciliationFileType fileType, FileStatus fileStatus) throws Exception;
 
   /**
    * Actualiza el estado del archivo
