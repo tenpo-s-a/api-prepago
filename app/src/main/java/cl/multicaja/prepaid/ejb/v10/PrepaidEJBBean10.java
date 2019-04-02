@@ -20,6 +20,7 @@ import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -104,6 +105,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
 
   private TecnocomService tecnocomService;
 
@@ -2306,8 +2310,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
     }
 
+    Account account = accountEJBBean10.findById(accountId);
+
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-    getProductChangeDelegate().sendProductChange(prepaidUser, prepaidCard10, TipoAlta.NIVEL2);
+    getProductChangeDelegate().sendProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2);
   }
 
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
@@ -2746,11 +2752,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
     // Por ahora se setean para que pueda realizarse el cambio de producto.
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setDocument(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
-    prepaidUser.setDocumentType(TipoDocumento.RUT);
+    if(prepaidUser.getRut() == null) {
+      prepaidUser.setRut(user.getRut().getValue());
+      prepaidUser.setDocument(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+      prepaidUser.setDocumentType(TipoDocumento.RUT);
+    }
 
-    getProductChangeDelegate().sendProductChange(prepaidUser, prepaidCard10, TipoAlta.NIVEL2);
+    getProductChangeDelegate().sendProductChange(prepaidUser, null, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
   }

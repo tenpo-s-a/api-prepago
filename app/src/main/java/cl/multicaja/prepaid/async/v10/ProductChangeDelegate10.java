@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
@@ -53,7 +54,7 @@ public class ProductChangeDelegate10 {
    * @param prepaidCard10
    * @return
    */
-  public String sendProductChange(PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard10, TipoAlta tipoAlta) {
+  public String sendProductChange(PrepaidUser10 prepaidUser, Account account, PrepaidCard10 prepaidCard10, TipoAlta tipoAlta) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -62,7 +63,7 @@ public class ProductChangeDelegate10 {
 
     String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
     Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
-    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, prepaidCard10, tipoAlta);
+    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, account, prepaidCard10, tipoAlta);
 
     ExchangeData<PrepaidProductChangeData10> req = new ExchangeData<>(data);
     req.setRetryCount(0);

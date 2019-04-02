@@ -361,7 +361,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
-  public String sendPendingProductChange(PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, TipoAlta tipoAlta, int retryCount) {
+  public String sendPendingProductChange(PrepaidUser10 prepaidUser, Account account, PrepaidCard10 prepaidCard, TipoAlta tipoAlta, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -375,7 +375,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, prepaidCard, tipoAlta);
+    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, account, prepaidCard, tipoAlta);
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidProductChangeData10> req = new ExchangeData<>(data);

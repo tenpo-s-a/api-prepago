@@ -318,38 +318,4 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
     throw new IllegalStateException();
   }
-
-  public void publishCardClosedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
-    if(StringUtils.isAllBlank(externalUserId)){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
-    }
-
-    if(StringUtils.isAllBlank(accountUuid)){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
-    }
-
-    if(cardId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-
-    PrepaidCard10 prepaidCard10 = this.getPrepaidCardById(null, cardId);
-
-    Card card = new Card();
-    //todo: card.setId(prepaidCard10.getUuid());
-    card.setPan(prepaidCard10.getPan());
-    card.setStatus(prepaidCard10.getStatus().toString());
-
-    cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
-
-    timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
-
-    timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt().toLocalDateTime());
-    card.setTimestamps(timestamps);
-
-    CardEvent cardEvent = new CardEvent();
-    cardEvent.setCard(card);
-    cardEvent.setAccountId(accountUuid);
-    cardEvent.setUserId(externalUserId);
-    getKafkaEventDelegate10().publishCardClosedEvent(cardEvent);
-  }
 }

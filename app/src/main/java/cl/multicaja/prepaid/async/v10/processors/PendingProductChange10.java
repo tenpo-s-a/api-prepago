@@ -8,7 +8,9 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.dto.CambioProductoDTO;
@@ -48,6 +50,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
           PrepaidUser10 user = data.getPrepaidUser();
           PrepaidCard10 prepaidCard = data.getPrepaidCard();
           TipoAlta tipoAlta = data.getTipoAlta();
+          Account account = data.getAccount();
 
           if(req.getRetryCount() > getMaxRetryCount()) {
             return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
@@ -68,26 +71,44 @@ public class PendingProductChange10 extends BaseProcessor10 {
             log.info(dto.getRetorno());
             log.info(dto.getDescRetorno());
 
-            if(dto.isRetornoExitoso()) {
+            // Responde OK, o retorna que ya existe el cambio de producto
+            if(dto.isRetornoExitoso() ||
+              (dto.getRetorno().equals(CodigoRetorno._200) && dto.getDescRetorno().contains("MPA0928"))) {
               log.debug("********** Cambio de producto realizado **********");
+              String accountUuid = account != null ? account.getUuid() : "[noUuid]";
 
-              getRoute().getAccountEJBBean10().
-              getRoute().getPrepaidCardEJBBean10().publishCardClosedEvent(user.getUserIdMc().toString(), , prepaidCard.getId());
+              // Cerrar la tarjeta antigua
+              getRoute().getPrepaidCardEJBBean11().updatePrepaidCardStatus(null, prepaidCard.getId(), PrepaidCardStatus.LOCKED_HARD);
 
+              // Notificar el cierre de la tarjeta antigua
+              getRoute().getPrepaidCardEJBBean11().publishCardClosedEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId());
+
+              // Rellenar los datos de la nueva tarjeta
               PrepaidCard10 newPrepaidCard = new PrepaidCard10();
-              //TODO: rellenar los datos de la nueva tarjeta
-              getRoute().getPrepaidCardEJBBean10().publishCardCreatedEvent(newPrepaidCard.getId());
+              //FIXME: se debe rellenar con los datos de la nueva tarjeta (si existe una nueva)
+              newPrepaidCard.setIdUser(user.getId());
+              newPrepaidCard.setPan(prepaidCard.getPan());
+              newPrepaidCard.setEncryptedPan(prepaidCard.getEncryptedPan());
+              newPrepaidCard.setProcessorUserId(prepaidCard.getProcessorUserId());
+              newPrepaidCard.setExpiration(prepaidCard.getExpiration());
+              newPrepaidCard.setNameOnCard(prepaidCard.getNameOnCard());
+              newPrepaidCard.setProducto(prepaidCard.getProducto());
+              newPrepaidCard.setNumeroUnico(prepaidCard.getNumeroUnico());
+              newPrepaidCard.setHashedPan(prepaidCard.getHashedPan());
+              newPrepaidCard.setAccountId(prepaidCard.getAccountId());
+              newPrepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+
+              // Guardar los datos de la nueva tarjeta
+              getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null, newPrepaidCard);
+
+              // Notificar que se ha creado una tarjeta nueva
+              getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(user.getUserIdMc().toString(), accountUuid, newPrepaidCard.getId());
 
             } else if (dto.getRetorno().equals(CodigoRetorno._200)) {
-              if(dto.getDescRetorno().contains("MPA0928")) {
-                log.debug("********** Cambio de producto realizado anteriormente **********");
-                req.getData().setMsjError(dto.getDescRetorno());
-              } else {
-                log.debug("********** Cambio de producto rechazado rechazado **********");
-                req.getData().setNumError(Errors.ERROR_INDETERMINADO);
-                req.getData().setMsjError(dto.getDescRetorno());
-                return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
-              }
+              log.debug("********** Cambio de producto rechazado rechazado **********");
+              req.getData().setNumError(Errors.ERROR_INDETERMINADO);
+              req.getData().setMsjError(dto.getDescRetorno());
+              return redirectRequestProductChange(createJMSEndpoint(ERROR_PRODUCT_CHANGE_REQ), exchange, req, false);
             } else if (CodigoRetorno._1000.equals(dto.getRetorno())) {
               req.getData().setNumError(Errors.TECNOCOM_ERROR_REINTENTABLE);
               req.getData().setMsjError(Errors.TECNOCOM_ERROR_REINTENTABLE.name());

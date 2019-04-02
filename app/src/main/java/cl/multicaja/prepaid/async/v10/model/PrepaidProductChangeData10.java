@@ -4,6 +4,7 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -16,6 +17,7 @@ import java.io.Serializable;
 public class PrepaidProductChangeData10 implements Serializable {
 
   private PrepaidUser10 prepaidUser;
+  private Account account;
   private PrepaidCard10 prepaidCard;
   private TipoAlta tipoAlta;
 
@@ -26,10 +28,11 @@ public class PrepaidProductChangeData10 implements Serializable {
     super();
   }
 
-  public PrepaidProductChangeData10(PrepaidUser10 user, PrepaidCard10 prepaidCard, TipoAlta tipoAlta) {
+  public PrepaidProductChangeData10(PrepaidUser10 user, Account account, PrepaidCard10 prepaidCard, TipoAlta tipoAlta) {
     this.prepaidUser = user;
     this.prepaidCard = prepaidCard;
     this.tipoAlta = tipoAlta;
+    this.account = account;
   }
 
   public PrepaidUser10 getPrepaidUser() {
@@ -39,6 +42,10 @@ public class PrepaidProductChangeData10 implements Serializable {
   public void setPrepaidUser(PrepaidUser10 user) {
     this.prepaidUser = user;
   }
+
+  public Account getAccount() { return account; }
+
+  public void setAccount(Account account) { this.account = account; }
 
   public PrepaidCard10 getPrepaidCard() {
     return prepaidCard;

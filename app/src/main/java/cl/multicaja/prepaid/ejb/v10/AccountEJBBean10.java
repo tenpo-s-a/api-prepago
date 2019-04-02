@@ -50,7 +50,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     this.kafkaEventDelegate10 = kafkaEventDelegate10;
   }
 
-  private Account findById(Long id) throws Exception {
+  public Account findById(Long id) throws Exception {
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
