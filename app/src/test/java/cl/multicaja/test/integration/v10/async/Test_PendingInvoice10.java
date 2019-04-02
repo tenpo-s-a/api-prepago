@@ -28,7 +28,8 @@ public class Test_PendingInvoice10  extends TestBaseUnitAsync {
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(InvoiceRoute10.INVOICE_ENDPOINT);
 
-    ExchangeData<String> remoteInvoice = (ExchangeData<String>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<String> remoteInvoice = (ExchangeData<String>)camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp, messageId);
     Assert.assertNotNull("Deberia existir un mensaje en la cola de Invoice", remoteInvoice);
     Assert.assertNotNull("Deberia existir un mensaje en la cola de Invoice", remoteInvoice.getData());
     System.out.println(remoteInvoice.getData());

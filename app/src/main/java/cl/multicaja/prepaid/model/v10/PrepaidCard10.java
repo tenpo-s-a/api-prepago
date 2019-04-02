@@ -14,20 +14,31 @@ public class PrepaidCard10 extends BaseModel {
   private Long id;
   //Id Interno de prepago
   @JsonIgnore
-  private Long idUser;
+  private Long idUser; //TODO: Eliminar campo, ya que la relacion es por accountId
   //Contrato - Tecnocom
-  private String processorUserId;
-  private String pan;
+  private String processorUserId; //TODO: Eliminar campo
+  private String pan; // Este es el pan truncado
   @JsonIgnore
   private String encryptedPan;
-  private Integer expiration;
-  private String nameOnCard;
+  private Integer expiration; //TODO: Eliminar campo
+  private String nameOnCard; //TODO: verificar si se va a eliminar campo
   private PrepaidCardStatus status;
   private Timestamps timestamps;
   @JsonIgnore
   private String producto;
   @JsonIgnore
   private String numeroUnico;
+
+  // Nuevos campos
+  @JsonIgnore
+  private String uuid;
+
+  @JsonIgnore
+  private String hashedPan;
+
+  @JsonIgnore
+  private Long accountId;
+
 
   public PrepaidCard10() {
     super();
@@ -121,6 +132,30 @@ public class PrepaidCard10 extends BaseModel {
     this.numeroUnico = numeroUnico;
   }
 
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
+
+  public String getHashedPan() {
+    return hashedPan;
+  }
+
+  public void setHashedPan(String hashedPan) {
+    this.hashedPan = hashedPan;
+  }
+
+  public Long getAccountId() {
+    return accountId;
+  }
+
+  public void setAccountId(Long accountId) {
+    this.accountId = accountId;
+  }
+
   @JsonIgnore
   public String getFormattedExpiration() {
     String exp = this.getExpiration() != null ? this.getExpiration().toString() : null;
@@ -149,6 +184,9 @@ public class PrepaidCard10 extends BaseModel {
       Objects.equals(getNameOnCard(), that.getNameOnCard()) &&
       Objects.equals(getProducto(), that.getProducto()) &&
       Objects.equals(getNumeroUnico(), that.getNumeroUnico()) &&
+      Objects.equals(getUuid(), that.getUuid()) &&
+      Objects.equals(getHashedPan(), that.getHashedPan()) &&
+      Objects.equals(getAccountId(), that.getAccountId()) &&
       getStatus() == that.getStatus();
   }
 

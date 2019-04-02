@@ -1,10 +1,11 @@
 package cl.multicaja.prepaid.model.v11;
 
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
 
 @Entity
 @Table(name = "prp_tarjeta", schema ="prepago")
@@ -17,7 +18,7 @@ public class Card implements Serializable {
   private String pan;
 
   @Column(name = "pan_encriptado")
-  private String cryptedPan;
+  private String encryptedPan;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "estado")
@@ -26,14 +27,12 @@ public class Card implements Serializable {
   @Column(name = "nombre_tarjeta")
   private String cardName;
 
-
   @Column(name = "fecha_creacion")
   private LocalDateTime createdAt;
 
   @Column(name = "fecha_actualizacion")
   private LocalDateTime updatedAt;
 
-  @Transient
   private String uuid;
 
   @Column(name = "pan_hash")
@@ -72,12 +71,12 @@ public class Card implements Serializable {
     this.pan = pan;
   }
 
-  public String getCryptedPan() {
-    return cryptedPan;
+  public String getEncryptedPan() {
+    return encryptedPan;
   }
 
-  public void setCryptedPan(String cryptedPan) {
-    this.cryptedPan = cryptedPan;
+  public void setEncryptedPan(String encryptedPan) {
+    this.encryptedPan = encryptedPan;
   }
 
   public CardStatus getStatus() {
@@ -174,5 +173,17 @@ public class Card implements Serializable {
 
   public void setContrato(String contrato) {
     this.contrato = contrato;
+  }
+
+  @PrePersist
+  public void beforePersist() {
+    this.setUuid(UUID.randomUUID().toString());
+    this.setCreatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+    this.setUpdatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+  }
+
+  @PreUpdate
+  public void beforeUpdate() {
+    this.setUpdatedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
   }
 }

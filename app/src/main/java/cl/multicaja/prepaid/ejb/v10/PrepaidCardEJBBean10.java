@@ -314,18 +314,9 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
    * @param cardId id interno de la tarjeta
    * @throws Exception
    */
-  public void publishCardCreatedEvent(Long cardId) throws Exception {
-    if(cardId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-
-    PrepaidCard10 prepaidCard10 = this.getPrepaidCardById(null, cardId);
-
-    if(prepaidCard10 == null){
-      throw new ValidationException(TARJETA_NO_EXISTE);
-    }
-
-    getKafkaEventDelegate10().publishCardCreatedEvent(prepaidCard10);
+  @Override
+  public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
+    throw new IllegalStateException();
   }
 
   public void publishCardClosedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {

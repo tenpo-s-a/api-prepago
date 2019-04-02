@@ -78,7 +78,8 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
       Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.ERROR_REVERSAL_TOPUP_RESP);
-      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+      ExchangeData<PrepaidReverseData10> remoteTopup = (ExchangeData<PrepaidReverseData10>) camelFactory.createJMSMessenger(30000, 60000)
+        .getMessage(qResp, messageId);
 
       Assert.assertNotNull("Deberia existir un reverse", remoteTopup);
       Assert.assertNotNull("Deberia existir un reverse", remoteTopup.getData());

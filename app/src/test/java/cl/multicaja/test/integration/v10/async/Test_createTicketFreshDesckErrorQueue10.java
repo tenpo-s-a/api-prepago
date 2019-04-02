@@ -6,6 +6,7 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 
+//FIXME: estos test no tienen ningun assert
 public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
 
@@ -73,8 +75,8 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     System.out.println("TICKET CREADO");
   }
-  //Verificado envia todos los dastos
 
+  //Verificado envia todos los dastos
   @Ignore
   @Test
   public void testReinjectAltaCliente() throws Exception {
@@ -101,6 +103,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     Thread.sleep(2000);
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
   @Ignore
   @Test
@@ -130,16 +133,18 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
+    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
     Thread.sleep(2000);
     System.out.println("TICKET CREADO");
   }
 
   //Verificado envia todos los dastos
+  @Ignore
   @Test
   public void testReinjectSendMailCard() throws Exception {
 
@@ -214,6 +219,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
   @Ignore
   @Test
@@ -250,8 +256,9 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
     System.out.println("TICKET CREADO");
   }
+
   //Verificado envia todos los dastos
-  //@Ignore
+  @Ignore
   @Test
   public void testReinjectIssuanFee() throws Exception {
 
@@ -298,7 +305,10 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     System.out.println("prepaidMovement: " + prepaidMovement);
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 2);
     Thread.sleep(2000);
     System.out.println("TICKET CREADO");
   }

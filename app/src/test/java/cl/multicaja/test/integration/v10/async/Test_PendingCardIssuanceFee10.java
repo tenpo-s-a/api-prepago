@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -36,7 +37,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
 
-    String messageId = sendPendingCardIssuanceFee(user,null, prepaidMovement, prepaidCard, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user,null, prepaidMovement, prepaidCard, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -66,7 +69,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -99,7 +104,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
     prepaidTopup.setFirstTopup(Boolean.TRUE);
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, null, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -129,7 +136,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
 
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -143,6 +152,169 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
     Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
     Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_AccountNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, null, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_AccountUuidNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = new Account();
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, account, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+
+    // Busca el movimiento en la BD
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_AccountUuidEmpty() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = new Account();
+    account.setUuid("");
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, account, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_UserNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(null, prepaidTopup, null, prepaidCard, account, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_UserIdNull() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    user.setId(null);
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, account, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
+
+    // Busca el movimiento en la BD
+    List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
+
+    Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
+    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
+  }
+
+  @Test
+  public void pendingCardIssuanceFee_UserId0() throws Exception {
+
+    User user = registerUser();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    prepaidUser = createPrepaidUser10(prepaidUser);
+
+    PrepaidCard10 prepaidCard = new PrepaidCard10();
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    user.setId(0L);
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, null, prepaidCard, account, 0);
+
+    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
+    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
+
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
   }
 
   /**
@@ -186,7 +358,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
       null,
       PrepaidMovementStatus.PROCESS_OK);
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -244,7 +418,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 0);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
@@ -313,7 +489,9 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 3);
+    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
+
+    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 3);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);

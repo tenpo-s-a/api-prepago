@@ -9,6 +9,7 @@ import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -27,6 +28,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
   private PrepaidEJBBean10 prepaidEJBBean10;
@@ -145,6 +149,14 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
     this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  }
+
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
+  }
+
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   public PrepaidEJBBean10 getPrepaidEJBBean10() {
