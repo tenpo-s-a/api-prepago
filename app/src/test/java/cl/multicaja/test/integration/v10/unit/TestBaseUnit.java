@@ -21,6 +21,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Movement;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -287,6 +288,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
       prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());
       prepaidEJBBean10.setMailDelegate(getMailDelegate());
+      prepaidEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
     }
     return prepaidEJBBean10;
   }
@@ -1013,6 +1015,84 @@ public class TestBaseUnit extends TestApiBase {
    * @param cdtTransaction
    * @return
    */
+  public Movement buildMovement11(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
+
+    String codent = null;
+    try {
+      codent = parametersUtil.getString("api-prepaid", "cod_entidad", "v10");
+    } catch (SQLException e) {
+      codent = getConfigUtils().getProperty("tecnocom.codEntity");
+    }
+
+    TipoFactura tipoFactura;
+    if(PrepaidMovementType.TOPUP.equals(type)) {
+      tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
+    } else {
+      tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
+    }
+
+    if (prepaidTopup != null) {
+      if (TransactionOriginType.POS.equals(prepaidTopup.getTransactionOriginType())) {
+        if (PrepaidMovementType.TOPUP.equals(type)) {
+          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
+        } else {
+          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
+        }
+      }
+    }
+
+    String centalta = "";
+    String cuenta = "";
+    if(prepaidCard != null && !StringUtils.isBlank(prepaidCard.getProcessorUserId())) {
+      centalta = prepaidCard.getProcessorUserId().substring(4, 8);
+      cuenta = prepaidCard.getProcessorUserId().substring(12);
+    }
+
+    Movement prepaidMovement = new Movement();
+    prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
+    prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+    prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
+    prepaidMovement.setTipoMovimiento(type);
+    prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
+    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCodent(codent);
+    prepaidMovement.setCentalta(centalta); //contrato (Numeros del 5 al 8) - se debe actualizar despues
+    prepaidMovement.setCuenta(cuenta); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
+    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
+    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.NORMAL); //0-Normal
+    prepaidMovement.setTipofac(tipoFactura);
+    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
+    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
+    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
+    prepaidMovement.setClamondiv(0);
+    prepaidMovement.setImpdiv(BigDecimal.ZERO);
+    prepaidMovement.setImpfac(prepaidTopup != null ? prepaidTopup.getAmount().getValue() : null);
+    prepaidMovement.setCmbapli(0); // se debe actualizar despues
+    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
+    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
+    prepaidMovement.setCodcom(prepaidTopup != null ? prepaidTopup.getMerchantCode() : null);
+    prepaidMovement.setCodact(prepaidTopup != null ? prepaidTopup.getMerchantCategory() : null);
+    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
+    prepaidMovement.setClamonliq(0); // se debe actualizar despues
+    prepaidMovement.setCodpais(CodigoPais.CHILE);
+    prepaidMovement.setNompob(""); // se debe actualizar despues
+    prepaidMovement.setNumextcta(0); // se debe actualizar despues
+    prepaidMovement.setNummovext(0); // se debe actualizar despues
+    prepaidMovement.setClamone(0); // se debe actualizar despues
+    prepaidMovement.setTipolin(""); // se debe actualizar despues
+    prepaidMovement.setLinref(0); // se debe actualizar despues
+    prepaidMovement.setNumbencta(1); // se debe actualizar despues
+    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
+    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
+    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
+    prepaidMovement.setOriginType(MovementOriginType.API);
+    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
+
+    return prepaidMovement;
+  }
+
   public PrepaidMovement10 buildPrepaidMovement10(PrepaidUser10 prepaidUser, NewPrepaidBaseTransaction10 prepaidTopup, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovementType type) {
 
     String codent = null;

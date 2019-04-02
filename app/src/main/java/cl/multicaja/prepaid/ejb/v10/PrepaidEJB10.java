@@ -243,5 +243,7 @@ public interface PrepaidEJB10 {
    */
   User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
 
+  void sendTransactionEvent(PrepaidTopup10 prepaidTopup10, PrepaidMovement10 prepaidMovement10, String type, String status) throws Exception;
+
 
 }

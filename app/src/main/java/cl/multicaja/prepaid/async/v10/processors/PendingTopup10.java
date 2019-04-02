@@ -178,6 +178,8 @@ public class PendingTopup10 extends BaseProcessor10 {
               Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
               redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
 
+              getRoute().getPrepaidEJBBean10().sendTransactionEvent(prepaidTopup, prepaidMovement,"CASH_IN_MULTICAJA","AUTHORIZED");
+
               if (!cdtTransaction.isNumErrorOk()) {
                 log.error(String.format("Error en CDT %s", cdtTransaction.getMsjError()));
               }
@@ -235,7 +237,6 @@ public class PendingTopup10 extends BaseProcessor10 {
             }
           }
         }catch (Exception e){
-          e.printStackTrace();
           log.error(String.format("Error desconocido al realizar carga %s",e));
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());

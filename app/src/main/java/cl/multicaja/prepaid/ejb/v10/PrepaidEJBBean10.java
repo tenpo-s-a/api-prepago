@@ -45,8 +45,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION;
+
 
 /**
  * @author vutreras
@@ -57,7 +59,7 @@ import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_RETRY_I
 public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
-  private static BigDecimal NEGATIVE = new BigDecimal(-1);
+  private static final BigDecimal NEGATIVE = new BigDecimal(-1);
   private static String APP_NAME = "prepaid.appname";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
   /**
@@ -74,6 +76,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * Selfie del usuario con CI
    */
   private static final String USER_SELFIE= "USER_SELFIE";
+
+  @Inject
+  private KafkaEventDelegate10 kafkaEventDelegate10;
+
+  public KafkaEventDelegate10 getKafkaEventDelegate10() {
+    return kafkaEventDelegate10;
+  }
+
+  public void setKafkaEventDelegate10(KafkaEventDelegate10 kafkaEventDelegate10) {
+    this.kafkaEventDelegate10 = kafkaEventDelegate10;
+  }
 
   @Inject
   private PrepaidTopupDelegate10 delegate;
@@ -117,7 +130,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private CalculationsHelper calculationsHelper;
 
-  private static CalculatorParameter10 calculatorParameter10;
+  private  CalculatorParameter10 calculatorParameter10;
 
   private NotificationTecnocom notificationTecnocom;
 
@@ -250,6 +263,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return parametersUtil;
   }
 
+  @Override
   public CalculatorParameter10 getPercentage(){
     if (calculatorParameter10 == null) {
       calculatorParameter10 = super.getPercentage();
@@ -378,6 +392,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
     prepaidTopup.setId(prepaidMovement.getId());
+    getKafkaEventDelegate10().publishTransactionEvent(prepaidTopup.getFee(), prepaidMovement,"CASH_IN_MULTICAJA","AUTHORIZED");
 
 
     if(getPrepaidMovementEJB10().isFirstTopup(prepaidUser.getId())) { // Si es primera carga
@@ -386,6 +401,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       */
       String messageId = this.getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, prepaidMovement);
       prepaidTopup.setMessageId(messageId);
+
+
     }
     else { // Si es N carga se hace de manera sincrona
       String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
@@ -2863,6 +2880,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     return notificationTecnocom;
+  }
+
+  public void sendTransactionEvent(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement10, String type, String status){
+    getKafkaEventDelegate10().publishTransactionEvent(prepaidTopup.getFee(), prepaidMovement10,type,status);
   }
 
 }
