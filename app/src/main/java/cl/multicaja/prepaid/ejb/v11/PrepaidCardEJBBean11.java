@@ -14,11 +14,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
 import java.sql.ResultSet;
 import java.util.Map;
 
@@ -189,4 +192,17 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
     getKafkaEventDelegate10().publishCardCreatedEvent(cardEvent);
   }
+
+  public String hashPan(String accountUuid, String pan) throws Exception {
+    if(StringUtils.isAllBlank(accountUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
+    }
+    if(StringUtils.isAllBlank(pan)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "pan"));
+    }
+
+    BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(4, new SecureRandom(String.valueOf(accountUuid).getBytes()));
+    return bCryptPasswordEncoder.encode(pan);
+  }
+
 }
