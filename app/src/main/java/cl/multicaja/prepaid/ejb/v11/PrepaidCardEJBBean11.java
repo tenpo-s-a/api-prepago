@@ -46,6 +46,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
+    log.info(String.format("[getPrepaidCardById] Buscando tarjeta [id: %d]", id));
 
     RowMapper<PrepaidCard10> rm = (ResultSet rs, int rowNum) -> {
       PrepaidCard10 c = new PrepaidCard10();
@@ -74,6 +75,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       return getDbUtils().getJdbcTemplate()
         .queryForObject(FIND_CARD_BY_ID_SQL, rm, id);
     } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidCardById] Tarjeta [id: %d] no existe", id));
       throw new ValidationException(TARJETA_NO_EXISTE);
     }
   }
@@ -95,6 +97,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     if(prepaidCard.getId() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard.id"));
     }
+
+    log.info(String.format("[updatePrepaidCard] Actualizando tarjeta [id: %d]", cardId));
 
     StringBuilder sb = new StringBuilder();
     if(!StringUtils.isAllBlank(prepaidCard.getPan())) {
@@ -152,6 +156,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     int resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString()), prepaidCard.getId());
 
     if(resp == 0) {
+      log.error(String.format("[updatePrepaidCard] Tarjeta [id: %d] no existe", cardId));
       throw new ValidationException(TARJETA_NO_EXISTE);
     }
   }

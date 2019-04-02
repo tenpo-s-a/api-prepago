@@ -169,23 +169,20 @@ public class PendingCard10 extends BaseProcessor10 {
 
           Account account = data.getAccount();
           PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
-          prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());//TODO: verificar si se seguira guardando
+          prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());//TODO: verificar si se seguira guardando en claro
           prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar()); //TODO: verificar si se seguira guardando
+          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar()); //TODO: verificar si se seguira guardando en claro
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
 
           // se trunca el pan
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
 
-          // se encripta el Pan + Nombre en tarjeta + Fecha de expiracion
-          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(String.format("%s|%s|%s",
-            datosTarjetaDTO.getPan(),
-            data.getUser().getName() + " " + data.getUser().getLastname_1(),
-            datosTarjetaDTO.getFeccadtar())));
+          // se encripta el Pan TODO: verificar si se guardara junto al nombre y fecha expiracion
+          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
 
-          // se guarda un hash del pan + accountNumber (contrato) utilizando como secret el Uuid de la cuenta/contrato
-          prepaidCard10.setHashedPan(getRoute().getPrepaidCardEJBBean11().hashPan(account.getUuid(), String.format("%s|%s", datosTarjetaDTO.getPan(), account.getUuid())));
+          // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
+          prepaidCard10.setHashedPan(getRoute().getPrepaidCardEJBBean11().hashPan(account.getAccountNumber(), datosTarjetaDTO.getPan()));
 
           try {
             // Actualiza la tarjeta
