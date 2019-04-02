@@ -29,7 +29,7 @@ public class Test_dao_card extends TestBaseUnit{
     card.setAccountId(0l);
     card.setCardName(getRandomString(10));
     card.setPan(getRandomNumericString(10));
-    card.setCryptedPan(getRandomString(20));
+    card.setEncryptedPan(getRandomString(20));
     card.setPanHash(getRandomString(20));
 
     card = cuentaDao.insert(card);

@@ -16,7 +16,9 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.dao.AccountDao;
+import cl.multicaja.prepaid.dao.CardDao;
 import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -83,6 +85,8 @@ public class TestBaseUnit extends TestApiBase {
   private static KafkaEventDelegate10 kafkaEventDelegate10;
   private static AccountEJBBean10 accountEJBBean10;
   private static AccountDao accountDao;
+  private static CardDao cardDao;
+  private static PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
   {
@@ -233,6 +237,14 @@ public class TestBaseUnit extends TestApiBase {
     return accountDao;
   }
 
+  public static CardDao getCardDao(){
+    if (cardDao == null) {
+      cardDao = new CardDao();
+      cardDao.setEm(createEntityManager());
+    }
+    return cardDao;
+  }
+
   /**
    *
    * @return
@@ -257,6 +269,15 @@ public class TestBaseUnit extends TestApiBase {
     }
     return prepaidCardEJBBean10;
   }
+
+  public static PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    if (prepaidCardEJBBean11 == null) {
+      prepaidCardEJBBean11 = new PrepaidCardEJBBean11();
+      prepaidCardEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+    }
+    return prepaidCardEJBBean11;
+  }
+
   public static MailPrepaidEJBBean10 getMailPrepaidEJBBean10(){
 
     if (mailPrepaidEJBBean10 == null) {

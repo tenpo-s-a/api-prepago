@@ -513,7 +513,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago (V2)
     PrepaidUser10 user = getPrepaidUserEJB10().findUserByExtId(headers,userId);
-
+    if(user == null){
+      // Verificar si existe en Tempo. Si no existe "retorna error", si existe agregar.
+    }
     //Obtiene Cuenta Usuario
     Account account = getAccountEJBBean10().findByUserId(user.getId());
 

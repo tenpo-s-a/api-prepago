@@ -5,6 +5,7 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -29,8 +30,7 @@ public class PrepaidTopupData10 implements Serializable {
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
   private UserAccount userAccount;
-
-  private cl.multicaja.prepaid.model.v11.User prepaidUser;
+  private Account account;
 
   private Errors numError;
   private String msjError;
@@ -135,12 +135,12 @@ public class PrepaidTopupData10 implements Serializable {
     this.cdtTransactionConfirm10 = cdtTransactionConfirm10;
   }
 
-  public cl.multicaja.prepaid.model.v11.User getPrepaidUser() {
-    return prepaidUser;
+  public Account getAccount() {
+    return account;
   }
 
-  public void setPrepaidUser(cl.multicaja.prepaid.model.v11.User prepaidUser) {
-    this.prepaidUser = prepaidUser;
+  public void setAccount(Account account) {
+    this.account = account;
   }
 
   public Errors getNumError() {
