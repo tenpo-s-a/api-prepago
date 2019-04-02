@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
@@ -11,6 +12,7 @@ import cl.multicaja.prepaid.model.v11.AccountStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -24,6 +26,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import static cl.multicaja.core.model.Errors.CUENTA_NO_EXISTE;
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 @Stateless
@@ -37,8 +40,10 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
+  
   private static final String FIND_ACCOUNT_BY_USERID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? ORDER BY creacion DESC LIMIT 1", getSchema());
 
+  private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -57,23 +62,14 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
 
-    RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
-      Account a = new Account();
-      a.setId(rs.getLong("id"));
-      a.setUuid(rs.getString("uuid"));
-      a.setUserId(rs.getLong("id_usuario"));
-      a.setAccount(rs.getString("cuenta"));
-      a.setStatus(rs.getString("estado"));
-      a.setBalanceInfo(rs.getString("saldo_info"));
-      a.setExpireBalance(rs.getLong("saldo_expiracion"));
-      a.setProcessor(rs.getString("procesador"));
-      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
-      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
-      return a;
-    };
-
-    return getDbUtils().getJdbcTemplate()
-      .queryForObject(FIND_ACCOUNT_BY_ID_SQL, rm, id);
+    log.info(String.format("[findById] Buscando cuenta/contrato por id [%d]", id));
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_ACCOUNT_BY_ID_SQL, this.getAccountMapper(), id);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[findById]  Cuenta/contrato con id [%d] no existe", id));
+      throw new ValidationException(CUENTA_NO_EXISTE);
+    }
   }
 
   public Account findByUserId(Long userId) throws Exception {
@@ -86,7 +82,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       a.setId(rs.getLong("id"));
       a.setUuid(rs.getString("uuid"));
       a.setUserId(rs.getLong("id_usuario"));
-      a.setAccount(rs.getString("cuenta"));
+      a.setAccountNumber(rs.getString("cuenta"));
       a.setStatus(rs.getString("estado"));
       a.setBalanceInfo(rs.getString("saldo_info"));
       a.setExpireBalance(rs.getLong("saldo_expiracion"));
@@ -99,13 +95,44 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, rm, userId);
   }
 
-  public Account insertAccount(Long userId, String accountNumber) throws Exception {
+  public Account findByUserIdAndAccountNumber(Long userId, String accountNumber) throws Exception {
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
 
+    RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
+      Account a = new Account();
+      a.setId(rs.getLong("id"));
+      a.setUuid(rs.getString("uuid"));
+      a.setUserId(rs.getLong("id_usuario"));
+      a.setAccountNumber(rs.getString("cuenta"));
+      a.setStatus(rs.getString("estado"));
+      a.setBalanceInfo(rs.getString("saldo_info"));
+      a.setExpireBalance(rs.getLong("saldo_expiracion"));
+      a.setProcessor(rs.getString("procesador"));
+      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
+      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
+      return a;
+    };
+
+    return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL, rm, userId);
+  }
+
+  public Account insertAccount(Long userId, String accountNumber) throws Exception {
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
     if(StringUtils.isAllBlank(accountNumber)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
     }
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+
+    log.info(String.format("[insertAccount] Guardando cuenta/contrato con -> userId [%d], accountNumber [%s]", userId, accountNumber));
+
+    // Se valida si existe la cuenta anteriormente
+    Account acc = this.findByUserIdAndAccountNumber(userId, accountNumber);
+    if(acc != null) {
+      log.info(String.format("[insertAccount] Cuenta/contrato con -> userId [%d], accountNumber [%s] ya existe [id: %d]", userId, accountNumber, acc.getId()));
+      return acc;
     }
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -137,6 +164,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account"));
     }
 
+    log.info(String.format("[publishAccountCreatedEvent] Publicando evento ACCOUNT_CREATED -> account [userId: %d, id: %d, uuid: %s]", externalUserId, acc.getId(), acc.getUuid()));
+
     cl.multicaja.prepaid.kafka.events.model.Account account = new cl.multicaja.prepaid.kafka.events.model.Account();
     account.setId(acc.getUuid());
     account.setStatus(acc.getStatus());
@@ -151,5 +180,22 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     accountEvent.setAccount(account);
 
     getKafkaEventDelegate10().publishAccountCreatedEvent(accountEvent);
+  }
+
+  private RowMapper<Account> getAccountMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      Account a = new Account();
+      a.setId(rs.getLong("id"));
+      a.setUuid(rs.getString("uuid"));
+      a.setUserId(rs.getLong("id_usuario"));
+      a.setAccountNumber(rs.getString("cuenta"));
+      a.setStatus(rs.getString("estado"));
+      a.setBalanceInfo(rs.getString("saldo_info"));
+      a.setExpireBalance(rs.getLong("saldo_expiracion"));
+      a.setProcessor(rs.getString("procesador"));
+      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
+      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
+      return a;
+    };
   }
 }
