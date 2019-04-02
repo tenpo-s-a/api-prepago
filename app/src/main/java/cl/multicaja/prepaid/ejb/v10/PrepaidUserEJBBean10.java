@@ -26,9 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -192,8 +194,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
         log.error("Error al convertir el saldo del usuario", ex);
       }
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((LocalDateTime) row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((LocalDateTime)row.get("_fecha_actualizacion"));
+      timestamps.setCreatedAt(LocalDateTime.ofInstant(((Timestamp) row.get("_fecha_creacion")).toInstant(), ZoneOffset.ofHours(0)));
+      timestamps.setUpdatedAt(LocalDateTime.ofInstant(((Timestamp) row.get("_fecha_actualizacion")).toInstant(), ZoneOffset.ofHours(0)));
       u.setTimestamps(timestamps);
       u.setIdentityVerificationAttempts(getNumberUtils().toInteger(row.get("_intentos_validacion")));
       return u;
