@@ -2752,8 +2752,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
     // Por ahora se setean para que pueda realizarse el cambio de producto.
-    if(prepaidUser.getRut() == null) {
-      prepaidUser.setRut(user.getRut().getValue());
+    if(prepaidUser.getDocument() == null) {
       prepaidUser.setDocument(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
       prepaidUser.setDocumentType(TipoDocumento.RUT);
     }

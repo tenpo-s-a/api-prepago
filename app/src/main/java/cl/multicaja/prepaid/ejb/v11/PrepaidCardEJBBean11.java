@@ -190,6 +190,11 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     getKafkaEventDelegate10().publishCardCreatedEvent(cardEvent);
   }
 
+  /**
+   *  Busca una tarjeta por id y publica evento de tarjeta cerrada
+   * @param cardId id interno de la tarjeta
+   * @throws Exception
+   */
   public void publishCardClosedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
@@ -206,7 +211,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     PrepaidCard10 prepaidCard10 = this.getPrepaidCardById(null, cardId);
 
     Card card = new Card();
-    //todo: card.setId(prepaidCard10.getUuid());
+    card.setId(prepaidCard10.getUuid());
     card.setPan(prepaidCard10.getPan());
     card.setStatus(prepaidCard10.getStatus().toString());
 

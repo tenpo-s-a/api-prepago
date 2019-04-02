@@ -367,6 +367,29 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
+    if(userId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(level == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "level"));
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("nivel = '")
+      .append(level.toString())
+      .append("', ");
+
+    sb.append("fecha_actualizacion = timezone('utc', now())");
+
+    int resp = getDbUtils().getJdbcTemplate().update(String.format("UPDATE %s.prp_usuario SET %s WHERE id = ?", getSchema(), sb.toString()), userId);
+
+    if(resp == 0) {
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    }
+  }
+
   @Override
   public PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
     if(prepaidUser == null){
