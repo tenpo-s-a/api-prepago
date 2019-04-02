@@ -19,7 +19,9 @@ public class PrepaidTopupData10 implements Serializable {
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
 
+  @Deprecated
   private User user;
+
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
   private CdtTransaction10 cdtTransaction10;
@@ -27,6 +29,8 @@ public class PrepaidTopupData10 implements Serializable {
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
   private UserAccount userAccount;
+
+  private cl.multicaja.prepaid.model.v11.User prepaidUser;
 
   private Errors numError;
   private String msjError;
@@ -40,6 +44,15 @@ public class PrepaidTopupData10 implements Serializable {
     this.user = user;
     this.cdtTransaction10 = cdtTransaction;
     this.prepaidMovement10 = prepaidMovement;
+  }
+
+  public PrepaidTopupData10(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser10, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+
+    this.prepaidTopup10 = prepaidTopup;
+    this.prepaidUser10 = prepaidUser10;
+    this.cdtTransaction10 = cdtTransaction;
+    this.prepaidMovement10 = prepaidMovement;
+
   }
 
   public PrepaidTopup10 getPrepaidTopup10() {
@@ -120,6 +133,14 @@ public class PrepaidTopupData10 implements Serializable {
 
   public void setCdtTransactionConfirm10(CdtTransaction10 cdtTransactionConfirm10) {
     this.cdtTransactionConfirm10 = cdtTransactionConfirm10;
+  }
+
+  public cl.multicaja.prepaid.model.v11.User getPrepaidUser() {
+    return prepaidUser;
+  }
+
+  public void setPrepaidUser(cl.multicaja.prepaid.model.v11.User prepaidUser) {
+    this.prepaidUser = prepaidUser;
   }
 
   public Errors getNumError() {

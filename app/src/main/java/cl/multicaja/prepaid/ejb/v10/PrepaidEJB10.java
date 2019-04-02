@@ -31,6 +31,17 @@ public interface PrepaidEJB10 {
   PrepaidTopup10 topupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception;
 
   /**
+   * V2 Usuario tempo
+   * @param headers
+   * @param userId
+   * @param topupRequest
+   * @param fromEndPoint
+   * @return
+   * @throws Exception
+   */
+  PrepaidTopup10 topupUserBalance(Map<String, Object> headers,Long userId, NewPrepaidTopup10 topupRequest, Boolean fromEndPoint) throws Exception;
+
+  /**
    *
    * @param headers
    * @param topupRequest

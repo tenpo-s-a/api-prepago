@@ -15,9 +15,12 @@ public class PrepaidReverseData10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
+  @Deprecated
   private User user;
+
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
+
   private PrepaidMovement10 prepaidMovementReverse;
 
   private Errors numError;
@@ -40,6 +43,7 @@ public class PrepaidReverseData10 implements Serializable {
     this.prepaidUser10 = user;
     this.prepaidMovementReverse = prepaidMovementReverse;
   }
+
 
   public PrepaidTopup10 getPrepaidTopup10() {
     return prepaidTopup10;

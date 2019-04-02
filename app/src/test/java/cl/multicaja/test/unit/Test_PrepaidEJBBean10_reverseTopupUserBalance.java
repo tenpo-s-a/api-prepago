@@ -592,7 +592,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     Mockito.doReturn("0987").when(parametersUtil).getString("api-prepaid", "cod_entidad", "v10");
 
     Mockito.doReturn("123456789")
-      .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
@@ -603,6 +603,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
   }
 }

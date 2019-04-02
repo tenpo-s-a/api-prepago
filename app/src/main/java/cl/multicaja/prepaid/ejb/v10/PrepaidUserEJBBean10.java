@@ -14,6 +14,8 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.Timestamps;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
@@ -23,8 +25,10 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +55,9 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private TecnocomService tecnocomService;
 
   private UserClient userClient;
+
+  private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id_usuario_mc = ?", getSchema());
+
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -82,6 +89,41 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
     }
     return tecnocomService;
+  }
+
+  public PrepaidUser10 createUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
+    }
+    if(user.getId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+    return null;
+  }
+
+  public PrepaidUser10 findUserByExtId(Map<String, Object> headers, Long userId) throws Exception {
+
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    org.springframework.jdbc.core.RowMapper<PrepaidUser10> rm = (ResultSet rs, int rowNum) -> {
+      PrepaidUser10 u = new PrepaidUser10();
+      u.setId(rs.getLong("id"));
+      u.setUserIdMc(rs.getLong("id_usuario_mc"));
+      u.setStatus(PrepaidUserStatus.valueOfEnum(rs.getString("estado")));
+      u.setName(rs.getString("nombre"));
+      u.setLastName(rs.getString("apellido"));
+      u.setDocumentNumber(rs.getString("numero_documento"));
+      u.setDocumentType(DocumentType.valueOfEnum(rs.getString("tipo_documento")));
+      u.setLevel(rs.getInt(rs.getInt("nivel")));
+      Timestamps timestamps = new Timestamps();
+      timestamps.setCreatedAt(rs.getObject("fecha_creacion",LocalDateTime.class));
+      timestamps.setUpdatedAt(rs.getObject("fecha_actualizacion",LocalDateTime.class));
+      u.setTimestamps(timestamps);
+      return u;
+    };
+    return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, rm, userId);
   }
 
   @Override
@@ -150,8 +192,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
         log.error("Error al convertir el saldo del usuario", ex);
       }
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
+      timestamps.setCreatedAt((LocalDateTime) row.get("_fecha_creacion"));
+      timestamps.setUpdatedAt((LocalDateTime)row.get("_fecha_actualizacion"));
       u.setTimestamps(timestamps);
       u.setIdentityVerificationAttempts(getNumberUtils().toInteger(row.get("_intentos_validacion")));
       return u;
