@@ -1130,6 +1130,19 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard;
   }
 
+
+  public PrepaidCard10 createPrepaidCardV2(PrepaidCard10 prepaidCard) throws Exception {
+
+    prepaidCard = getPrepaidCardEJBBean11().createPrepaidCard(null, prepaidCard);
+
+    Assert.assertNotNull("debe retornar un usuario", prepaidCard);
+    Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
+    Assert.assertEquals("debe tener idUser", true, prepaidCard.getIdUser() > 0);
+    Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
+
+    return prepaidCard;
+  }
+
   /*
     TOPUP
    */
