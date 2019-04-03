@@ -48,39 +48,7 @@ public final class PrepaidTopupDelegate10 {
     return producerTemplate;
   }
 
-  /**
-   * Envia un registro de topup al proceso asincrono
-   *
-   * @param prepaidTopup
-   * @param user
-   * @return
-   */
-  public String sendTopUp(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
-
-    if (!camelFactory.isCamelRunning()) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
-      return null;
-    }
-
-    String messageId = String.format("%s#%s#%s#%s", prepaidTopup.getMerchantCode(), prepaidTopup.getTransactionId(), prepaidTopup.getId(), Utils.uniqueCurrentTimeNano());
-
-    Map<String, Object> headers = new HashMap<>();
-    headers.put("JMSCorrelationID", messageId);
-    prepaidTopup.setMessageId(messageId);
-
-    String endpoint = "seda:PrepaidTopupRoute10.pendingTopup";
-
-    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
-
-    ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
-    req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
-
-    this.getProducerTemplate().sendBodyAndHeaders(endpoint, req, headers);
-
-    return messageId;
-  }
-
-  /**
+   /**
    * V2
    * @param prepaidTopup
    * @param prepaidUser10

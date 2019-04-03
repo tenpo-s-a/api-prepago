@@ -539,7 +539,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
-    doTopup(user, 3000, merchantCodeWEB);
+    doTopup(prepaidUser10, 3000, merchantCodeWEB);
 
     PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
 
@@ -563,7 +563,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
         System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
 
         Integer amount = j == 5 ? 97000 : 100000;
-        doTopup(user, amount, merchantCodeWEB);
+        doTopup(prepaidUser10, amount, merchantCodeWEB);
 
         Thread.sleep(1000);
 
@@ -590,7 +590,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
         System.out.println("------------------------------------ Carga " + j +" ---------------------------------------------");
 
         Integer amount = 100000;
-        doTopup(user, amount, merchantCodeWEB);
+        doTopup(prepaidUser10, amount, merchantCodeWEB);
 
         Thread.sleep(1000);
 
@@ -664,12 +664,12 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  private void doTopup(User user, Integer amount, String merchantCode) throws Exception {
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+  private void doTopup(PrepaidUser10 user, Integer amount, String merchantCode) throws Exception {
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
     prepaidTopup10.setMerchantCode(merchantCode); //carga WEB
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(amount));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,user.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
   }

@@ -58,7 +58,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
         PrepaidTopup10 prepaidTopup = data.getPrepaidTopup10();
         PrepaidCard10 prepaidCard = data.getPrepaidCard10();
-        User user = data.getUser();
+        PrepaidUser10 user = data.getPrepaidUser10();
         Account account = data.getAccount();
 
         if (prepaidTopup == null) {
@@ -204,7 +204,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           // publica evento de tarjeta creada
           getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(
-            data.getUser().getId().toString(),
+            user.getUuid(),
             data.getAccount().getUuid(),
             prepaidCard.getId()
           );
@@ -268,18 +268,22 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
       log.info("processErrorPendingIssuanceFee - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
+      PrepaidUser10 user = data.getPrepaidUser10();
         if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
           Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
+
+          if(user == null){
+            return req;
+          }
           String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al cobrar comisión Apertura",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId());
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al cobrar comisión Apertura",String.format("%s %s",user.getName(),user.getLastName()),user.getDocumentNumber(),user.getId());
 
           NewTicket newTicket = new NewTicket();
           newTicket.setDescription(template);
           newTicket.setGroupId(GroupId.OPERACIONES);
-          newTicket.setUniqueExternalId(String.valueOf(data.getUser().getRut().getValue()));
+          newTicket.setUniqueExternalId(user.getDocumentNumber());
           newTicket.setType(TicketType.COLAS_NEGATIVAS);
           newTicket.setStatus(StatusType.OPEN);
           newTicket.setPriority(PriorityType.URGENT);
@@ -289,15 +293,15 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.ISSUANCE_FEE.getValue());
           newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
-
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          //TODO: Se debe verificar si este id seria el uuid de Tempo
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
           if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
           }
         } else {
           Map<String, Object> templateData = new HashMap<String, Object>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          templateData.put("idUsuario", user.getId());
+          templateData.put("rutCliente", user.getDocumentNumber());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_ISSUANCE_FEE, templateData);
         }
       return req;

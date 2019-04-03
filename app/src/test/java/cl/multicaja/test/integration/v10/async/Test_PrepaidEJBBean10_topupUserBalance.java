@@ -70,56 +70,32 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
   }
 
-  @Test
-  public void topupUserBalance_not_ok_by_user_not_found() throws Exception {
-
-    User user = registerUser();
-
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
-
-    newPrepaidTopup.setRut(1);
-
-    try {
-
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
-
-    } catch(NotFoundException nfex) {
-      Assert.assertEquals("No debe existir el usuario", CLIENTE_NO_EXISTE.getValue(), nfex.getCode());
-    }
-  }
 
   @Test
   public void topupUserBalance_not_ok_by_prepaidUser_not_found() throws Exception {
 
-    User user = registerUser();
-
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
-
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
-
+      getPrepaidEJBBean10().topupUserBalance(null,getRandomString(10), newPrepaidTopup,true);
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), nfex.getCode());
     }
+
   }
 
   @Test
   public void topupUserBalance_not_ok_by_prepaidUser_disabled() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
+      getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(),newPrepaidTopup,true);
 
     } catch(ValidationException nfex) {
       Assert.assertEquals("el usuario prepago esta bloqueado", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), nfex.getCode());
@@ -129,24 +105,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_not_ok_by_prepaidCard_locked_hard() throws Exception {
 
-    User user = registerUser();
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
-
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     try {
-
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
-
+      getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
     }
@@ -155,23 +124,18 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_not_ok_by_prepaidCard_expired() throws Exception {
 
-    User user = registerUser();
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
-
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
+      getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
     } catch(ValidationException vex) {
       Assert.assertEquals("Debe lanzar excepcion con error de Tarjeta invalida", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -181,18 +145,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_validate_cdt() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3119, 10000)));
 
-    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
@@ -222,18 +183,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_validate_prepaidMovement() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
     newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(4000, 10000)));
 
-    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup,true);
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
     Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
 
@@ -263,22 +221,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_ok_first_topup_true_by_level_1() throws Exception {
 
-    User user = registerUser();
-
-    user.setNameStatus(NameStatus.UNVERIFIED);
-
-    updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertTrue("debe ser primera carga", resp.isFirstTopup());
@@ -288,7 +239,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -350,32 +301,27 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_ok_first_topup_false_by_level_2() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(3119));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
 
-    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
 
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser.getUserIdMc());
 
-    switch (prepaidTopup10.getTransactionOriginType()){
+    switch (newPrepaidTopup.getTransactionOriginType()){
       case POS:
         Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
         break;
@@ -402,7 +348,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     AccountingTxType txType = AccountingTxType.CARGA_POS;
     AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
-    if(TransactionOriginType.WEB.equals(prepaidTopup10.getTransactionOriginType())) {
+    if(TransactionOriginType.WEB.equals(newPrepaidTopup.getTransactionOriginType())) {
       txType = AccountingTxType.CARGA_WEB;
       movementType = AccountingMovementType.CARGA_WEB;
     }
@@ -413,8 +359,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
       AccountingData10 accounting10 = accounting10s.get(0);
-      Assert.assertEquals(String.format("Debe tener tipo %s", prepaidTopup10.getTransactionOriginType()), txType, accounting10.getType());
-      Assert.assertEquals(String.format("Debe tener acc movement type %s", prepaidTopup10.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
+      Assert.assertEquals(String.format("Debe tener tipo %s", newPrepaidTopup.getTransactionOriginType()), txType, accounting10.getType());
+      Assert.assertEquals(String.format("Debe tener acc movement type %s", newPrepaidTopup.getTransactionOriginType()), movementType, accounting10.getAccountingMovementType());
       Assert.assertEquals("Debe tener el mismo imp fac", topup.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
       Assert.assertEquals("Debe tener el mismo id", topup.getId(), accounting10.getIdTransaction());
       Assert.assertEquals("debe tener la misma fecha de transaccion", topup.getFechaCreacion().toLocalDateTime().format(dateTimeFormatter), accounting10.getTransactionDate().toLocalDateTime().format(dateTimeFormatter));
@@ -435,24 +381,17 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_not_ok_by_topup_min() throws Exception {
 
-    User user = registerUser();
-
-    user.setNameStatus(NameStatus.UNVERIFIED);
-
-    updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(1000));
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser10.getUuid(),prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -461,18 +400,14 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       }
     }
 
-    user.setNameStatus(NameStatus.VERIFIED);
-
-    updateUser(user);
-
     //enesima carga
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(1000));
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser10.getUuid(),prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -485,25 +420,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_not_ok_by_topup_max_level_1() throws Exception {
 
-    User user = registerUser();
 
-    user.setNameStatus(NameStatus.UNVERIFIED);
-
-    updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga WEB
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.setMerchantCode(NewPrepaidTopup10.WEB_MERCHANT_CODE); //carga WEB
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(51000));
 
       try {
 
-        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -514,13 +443,13 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     //primera carga POS
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.setMerchantCode(getUniqueLong().toString()); //carga POS
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(51000));
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -533,21 +462,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_not_ok_by_topup_max_level_2() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     //primera carga WEB
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.setMerchantCode(NewPrepaidTopup10.WEB_MERCHANT_CODE); //carga WEB
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(500001));
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -558,13 +485,13 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     //primera carga POS
     {
-      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
       prepaidTopup10.setMerchantCode(getUniqueLong().toString()); //carga POS
       prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(100600));
 
       try {
 
-        getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -580,20 +507,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Map<Long, PrepaidMovement10> movements = new HashMap<>();
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -603,7 +525,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -636,9 +558,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     // Segunda carga debe ser sincrona
     {
-      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
 
-      PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null, secondTopup,true);
+      PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
       Assert.assertNotNull("debe tener un id", resp2.getId());
       Assert.assertFalse("debe ser enesima carga", resp2.isFirstTopup());
@@ -646,7 +568,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -700,20 +622,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_sync_rejected() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(50000));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -723,7 +640,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -746,11 +663,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     // Segunda carga debe ser sincrona
     {
-      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
       secondTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       secondTopup.getAmount().setValue(BigDecimal.valueOf(400000));
 
-      PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null, secondTopup,true);
+      PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
       Assert.assertNotNull("debe tener un id", resp2.getId());
       Assert.assertFalse("debe ser enesima carga", resp2.isFirstTopup());
@@ -758,7 +675,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -775,12 +692,12 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     // Tercera carga
     {
-      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
       secondTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       secondTopup.getAmount().setValue(BigDecimal.valueOf(400000));
 
       try {
-        getPrepaidEJBBean10().topupUserBalance(null, secondTopup,true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
         Assert.fail("Should not be here");
       } catch (RunTimeValidationException rvex) {
         Assert.assertEquals("Debe ser error de tecnocom", TARJETA_ERROR_GENERICO_$VALUE.getValue(), rvex.getCode());
@@ -798,15 +715,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_sync_timeoutResponse() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(50000));
@@ -814,7 +726,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10, true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10, true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -824,7 +736,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance10.getBalance().getValue().longValue() > 0);
 
@@ -848,12 +760,12 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1020);
     // Segunda carga debe ser sincrona
     {
-      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
       secondTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       secondTopup.getAmount().setValue(BigDecimal.valueOf(400000));
 
       try {
-        getPrepaidEJBBean10().topupUserBalance(null, secondTopup, true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup, true);
         Assert.fail("Should not be here");
       } catch (RunTimeValidationException rvex) {
         tc.getTecnocomService().setAutomaticError(false);
@@ -924,20 +836,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_sync_timeoutRequest() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(50000));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -947,7 +854,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null,prepaidUser10.getUserIdMc());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -968,14 +875,14 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
     {
-      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10(user);
+      NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
       secondTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       secondTopup.getAmount().setValue(BigDecimal.valueOf(400000));
 
       try {
         tc.getTecnocomService().setAutomaticError(true);
         tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-        getPrepaidEJBBean10().topupUserBalance(null, secondTopup,true);
+        getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
         Assert.fail("Should not be here");
       } catch (RunTimeValidationException rvex) {
         tc.getTecnocomService().setAutomaticError(true);
@@ -995,20 +902,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_cardCreated_event() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -1020,7 +922,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -1096,20 +998,15 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_accountCreated_event() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
     prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
 
-    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidTopup10,true);
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
     Assert.assertNotNull("debe tener un id", resp.getId());
     Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
@@ -1119,7 +1016,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, user.getId());
+    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getUserIdMc());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:

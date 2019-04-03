@@ -1011,7 +1011,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
          * Si es una reversa de carga - Se crea el movimiento contrario
          */
         else {
-
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
           createMovementConciliate(null, mov.getId(), ReconciliationActionType.CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
 
@@ -1026,7 +1025,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           newPrepaidTopup10.setFirstTopup(false);
 
           // Se envia movimiento contrario
-          getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup10,false);
+          getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid() ,newPrepaidTopup10,false);
         }
       }
       /**
@@ -1226,7 +1225,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           newPrepaidTopup10.setFirstTopup(false);
 
           // Se envia movimiento contrario
-          getPrepaidEJBBean10().topupUserBalance(null, newPrepaidTopup10, false);
+          getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), newPrepaidTopup10, false);
 
         } else {
           // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
@@ -1365,7 +1364,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
 
         // Reenviar el movimiento a tecnocom
-        getPrepaidEJBBean10().getDelegate().sendTopUp(prepaidTopup, user, cdtTransaction, movFull);
+        getPrepaidEJBBean10().getDelegate().sendTopUp(prepaidTopup, prepaidUser10, cdtTransaction, movFull);
       } else {
         if(PrepaidMovementType.TOPUP.equals(mov.getTipoMovimiento())) {
           PrepaidTopup10 prepaidTopup10 = new PrepaidTopup10();
@@ -1853,7 +1852,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               PrepaidUser10 prepaidUser = getPrepaidUserEJB10().getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User mcUser = getUserClient().getUserById(null, prepaidUser.getUserIdMc());
               UserAccount userAccount = getUserClient().getUserBankAccountById(null, mcUser.getId(), clearingData10.getUserBankAccount().getId());
-              getMailDelegate().sendWithdrawSuccessMail(mcUser, prepaidMovement10, userAccount);
+
+              //TODO: Prepago ya no envia emails, verificar si es necesario publicar evento
+              //getMailDelegate().sendWithdrawSuccessMail(mcUser, prepaidMovement10, userAccount);
             }
             break;
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
@@ -1883,7 +1884,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               //Enviar correo al usuario
               PrepaidUser10 prepaidUser = prepaidUserEJB10.getPrepaidUserById(null, prepaidMovement10.getIdPrepaidUser());
               User mcUser = getUserClient().getUserById(null, prepaidUser.getUserIdMc());
-              getMailDelegate().sendWithdrawFailedMail(mcUser, prepaidMovement10);
+              //TODO: Se comenta por que no se enviaran emails, revisar si es necesario publicar evento
+              //getMailDelegate().sendWithdrawFailedMail(mcUser, prepaidMovement10);
             }
             break;
           default: // Nunca deberia llegar aqui

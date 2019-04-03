@@ -66,7 +66,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(2000);
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.ERROR_TOPUP_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, messageId);
@@ -102,7 +102,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, 2);
     Thread.sleep(3000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     // Se setea para que no de error de conexion!
@@ -154,7 +154,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,2);
+    String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,2);
     Thread.sleep(3000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!
@@ -214,7 +214,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
+    String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
 
     Thread.sleep(3000);
 
@@ -433,7 +433,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, account, 2);
+    String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, account, 2);
     Thread.sleep(2000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!

@@ -42,19 +42,11 @@ public final class PrepaidResource10 extends BaseResource {
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
-  /*
-    Prepaid topup
-   */
-  @POST
-  @Path("/topup")
-  public Response topupUserBalance(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers), topupRequest,true);
-    return Response.ok(prepaidTopup).status(201).build();
-  }
+
 
   /**
    * CashIn Tempo
-   * @param userId
+   * @param extUserId
    * @param topupRequest
    * @param headers
    * @return
@@ -62,8 +54,8 @@ public final class PrepaidResource10 extends BaseResource {
    */
   @POST
   @Path("/{user_id}/cash_in")
-  public Response topupUserBalance(@PathParam("userId") Long userId, NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers),userId, topupRequest,true);
+  public Response topupUserBalance(@PathParam("userId") String extUserId, NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
+    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers),extUserId, topupRequest,true);
     return Response.ok(prepaidTopup).status(201).build();
   }
 

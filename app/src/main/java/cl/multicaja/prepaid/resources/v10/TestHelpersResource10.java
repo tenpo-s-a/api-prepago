@@ -27,6 +27,8 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -99,6 +101,9 @@ public final class TestHelpersResource10 extends BaseResource {
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
 
   @Inject
   private ClearingFileDelegate10 clearingFileDelegate;
@@ -502,6 +507,8 @@ public final class TestHelpersResource10 extends BaseResource {
     return user;
   }
 
+  //TODO: Verificar y luego eliminar
+  @Deprecated
   public PrepaidUser10 buildPrepaidUser10(User user) {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(user != null ? user.getId() : null);
@@ -511,26 +518,69 @@ public final class TestHelpersResource10 extends BaseResource {
     return prepaidUser;
   }
 
-  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) throws Exception {
+  public PrepaidUser10 buildPrepaidUser10() {
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(getUniqueLong());
+    prepaidUser.setRut(getUniqueRutNumber());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+    prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    prepaidUser.setName(getRandomString(10));
+    prepaidUser.setLastName(getRandomString(10));
+    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_1);
+    return prepaidUser;
+  }
 
+
+
+  public Account buildPrepaidAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = TecnocomServiceHelper.getInstance().getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
-    DatosTarjetaDTO datosTarjetaDTO = TecnocomServiceHelper.getInstance().getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
+    AltaClienteDTO altaClienteDTO = TecnocomServiceHelper.getInstance().getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "",prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
+    Account account = new Account();
+    account.setUserId(prepaidUser.getId());
+    account.setProcessor(altaClienteDTO.getContrato());
+    return account;
+  }
+
+  public PrepaidCard10 buildPrepaidCard10FromTecnocom(PrepaidUser10 prepaidUser,String contrato) throws Exception {
+
+    DatosTarjetaDTO datosTarjetaDTO = TecnocomServiceHelper.getInstance().getTecnocomService().datosTarjeta(contrato);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(prepaidUser.getId());
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+    prepaidCard.setProcessorUserId(contrato);
     prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
     prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
     prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
+    prepaidCard.setNameOnCard(prepaidUser.getName() + " " + prepaidUser.getLastName());
     prepaidCard.setProducto(datosTarjetaDTO.getProducto());
     prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
 
     return prepaidCard;
   }
+  public PrepaidTopup10 buildPrepaidTopup10() {
 
+    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
+
+    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
+    prepaidTopup.setRut(getUniqueRutNumber());
+    prepaidTopup.setMerchantCode(merchantCode);
+    prepaidTopup.setTransactionId(getUniqueInteger().toString());
+
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(3000));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidTopup.setAmount(newAmountAndCurrency);
+    prepaidTopup.setTotal(newAmountAndCurrency);
+    prepaidTopup.setMerchantCategory(1);
+    prepaidTopup.setMerchantName(getRandomString(6));
+
+    return prepaidTopup;
+  }
+
+  @Deprecated
   public PrepaidTopup10 buildPrepaidTopup10(User user) {
 
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
@@ -549,6 +599,18 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidTopup.setMerchantName(getRandomString(6));
 
     return prepaidTopup;
+  }
+
+  public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidTopup10 prepaidTopup) throws BaseException {
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
+    cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getDocumentNumber());
+    cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
+    cdtTransaction.setIndSimulacion(false);
+    return cdtTransaction;
   }
 
   public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
@@ -666,7 +728,7 @@ public final class TestHelpersResource10 extends BaseResource {
    * @param retryCount
    * @return
    */
-  public String sendPendingTopup(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+  public String sendPendingTopup(PrepaidTopup10 prepaidTopup, PrepaidUser10 user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -702,7 +764,7 @@ public final class TestHelpersResource10 extends BaseResource {
    * @param user
    * @return
    */
-  public String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+  public String sendPendingEmissionCard(PrepaidTopup10 prepaidTopup, PrepaidUser10 user, PrepaidUser10 prepaidUser, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -732,7 +794,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return messageId;
   }
 
-  public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, User user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
+  public String sendPendingCreateCard(PrepaidTopup10 prepaidTopup, PrepaidUser10 user, PrepaidUser10 prepaidUser, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -918,7 +980,11 @@ public final class TestHelpersResource10 extends BaseResource {
     return messageId;
   }
 
-  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser) throws Exception {
+  public Account createRandomAccount(PrepaidUser10 prepaidUser) throws Exception {
+    return accountEJBBean10.insertAccount(prepaidUser.getId(),getRandomNumericString(20));
+  }
+
+  public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser,Account account) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
     int expiryMonth = numberUtils.random(1, 99);
     int expiryDate = numberUtils.toInt(expiryYear + "" + StringUtils.leftPad(String.valueOf(expiryMonth), 2, "0"));
@@ -934,6 +1000,8 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidCard.setNameOnCard("Tarjeta de: " + getRandomString(5));
     prepaidCard.setProducto(getRandomNumericString(2));
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
+    prepaidCard.setAccountId(account.getId());
+
     return prepaidCard;
   }
 
@@ -945,7 +1013,7 @@ public final class TestHelpersResource10 extends BaseResource {
    * @param prepaidCard
    * @return
    */
-  public String sendPendingCardIssuanceFee(User user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
+  public String sendPendingCardIssuanceFee(PrepaidUser10 user, PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement, PrepaidCard10 prepaidCard, Integer retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -983,17 +1051,23 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+
+    // Crea cuenta
+    Account account = buildPrepaidAccountFromTecnocom(prepaidUser);
+    account = accountEJBBean10.insertAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(prepaidUser,account.getAccountNumber());
+
     prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
@@ -1003,7 +1077,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    sendPendingTopup(prepaidTopup, user, cdtTransaction, prepaidMovement, 2);
+    sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, 2);
     System.out.println("TICKET CREADO");
   }
 
@@ -1013,13 +1087,12 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
@@ -1028,7 +1101,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingEmissionCard(prepaidTopup, user, prepaidUser, cdtTransaction, prepaidMovement,2);
+    String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, prepaidUser, cdtTransaction, prepaidMovement,2);
     System.out.println("TICKET CREADO");
   }
 
@@ -1040,12 +1113,12 @@ public final class TestHelpersResource10 extends BaseResource {
 
     User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, cdtTransaction, PrepaidMovementType.TOPUP);
@@ -1062,7 +1135,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingCreateCard(prepaidTopup, user, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
+    String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, 2);
     System.out.println("TICKET CREADO");
   }
 
@@ -1072,17 +1145,19 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+    // Crea cuenta
+    Account account = buildPrepaidAccountFromTecnocom(prepaidUser);
+    account = accountEJBBean10.insertAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(prepaidUser,account.getAccountNumber());
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -1098,22 +1173,26 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,2);
+    //TODO: REVISAR ESTO
+    //String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,2);
     System.out.println("TICKET CREADO");
   }
 
+  //TODO: Revisar esto.
   public void testReinjectWithdrawReversal() throws Exception {
-    TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
+    /*TecnocomServiceHelper tc = TecnocomServiceHelper.getInstance();
 
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
+    // Crea cuenta
+    Account account = buildPrepaidAccountFromTecnocom(prepaidUser);
+    account = accountEJBBean10.insertAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(prepaidUser,account.getAccountNumber());
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
@@ -1134,8 +1213,10 @@ public final class TestHelpersResource10 extends BaseResource {
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
+    //TODO: Revisar
+    //String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
     System.out.println("TICKET CREADO");
+     */
   }
 
   public void testReinjectIssuanceFee() throws Exception {
@@ -1144,16 +1225,17 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUser10();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
     log.info("prepaidUser: " + prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    Account account = createRandomAccount(prepaidUser);
+
+    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account);
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
 
     DatosTarjetaDTO datosTarjetaDTO = tc.getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
@@ -1165,7 +1247,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
     log.info("prepaidCard: " + prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, null, null, PrepaidMovementType.WITHDRAW);
     prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
@@ -1184,7 +1266,7 @@ public final class TestHelpersResource10 extends BaseResource {
     log.info("prepaidMovement: " + prepaidMovement);
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingCardIssuanceFee(user, prepaidTopup, prepaidMovement, prepaidCard, 2);
+    String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, 2);
     log.info("TICKET CREADO");
   }
 
@@ -1211,19 +1293,20 @@ public final class TestHelpersResource10 extends BaseResource {
 
     try{
 
-      User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUser10();
       prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
-      PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+      Account account = createRandomAccount(prepaidUser);
+
+      PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser,account);
+
       prepaidCard = prepaidCardEJBBean10.createPrepaidCard(null, prepaidCard);
 
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
       cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
@@ -1256,25 +1339,23 @@ public final class TestHelpersResource10 extends BaseResource {
       cdtTransaction = cdtEJBBean10.addCdtTransaction(null, cdtTransaction);
 
       String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
-      template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", user.getName(), user.getLastname_1()), String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()), user.getId(), "8888", 200000L, user.getEmail().getValue(), user.getCellphone().getValue());
+      template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", prepaidUser.getName(), prepaidUser.getLastName()), prepaidUser.getDocumentNumber(), prepaidUser.getId(), "8888", 200000L, getUniqueEmail(), getUniqueLong());
 
-
-      user = getUserClient().finishSignup(headersToMap(headers),user.getId(),"Prepago");
 
       NewTicket newTicket = new NewTicket();
       //newTicket.setRequesterId(prepaidUser.getId().longValue());
       newTicket.setGroupId(GroupId.OPERACIONES);
-      newTicket.setUniqueExternalId(user.getRut().getValue().toString());
+      newTicket.setUniqueExternalId(prepaidUser.getDocumentNumber());
       newTicket.setType(TicketType.DEVOLUCION);
       newTicket.setSubject(String.format("%s - %s %s",
-        TicketType.DEVOLUCION.getValue(), user.getName(), user.getLastname_1()));
+        TicketType.DEVOLUCION.getValue(), prepaidUser.getName(), prepaidUser.getLastName()));
       newTicket.setDescription(template);
       newTicket.setStatus(StatusType.OPEN);
       newTicket.setPriority(PriorityType.URGENT);
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
-      Ticket ticket = getUserClient().createFreshdeskTicket(headersToMap(headers), user.getId(), newTicket);
+      Ticket ticket = getUserClient().createFreshdeskTicket(headersToMap(headers), prepaidUser.getId(), newTicket);
 
       returnResponse = Response.ok(newTicket).status(201).build();
 

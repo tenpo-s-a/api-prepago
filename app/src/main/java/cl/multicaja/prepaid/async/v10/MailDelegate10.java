@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.logging.Log;
@@ -55,7 +56,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendWithdrawRequestMail(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidMovement10 prepaidMovement, UserAccount userBankAccount) {
+  public String sendWithdrawRequestMail(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 user, PrepaidMovement10 prepaidMovement, UserAccount userBankAccount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -70,7 +71,7 @@ public final class MailDelegate10 {
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setPrepaidWithdraw10(prepaidWithdraw);
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
     data.setUserAccount(userBankAccount);
 
@@ -89,7 +90,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendWithdrawMail(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidMovement10 prepaidMovement) {
+  public String sendWithdrawMail(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 user, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -104,7 +105,7 @@ public final class MailDelegate10 {
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
     data.setPrepaidWithdraw10(prepaidWithdraw);
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
@@ -121,7 +122,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendWithdrawSuccessMail(User user, PrepaidMovement10 prepaidMovement, UserAccount userAccount) {
+  public String sendWithdrawSuccessMail(PrepaidUser10 user, PrepaidMovement10 prepaidMovement, UserAccount userAccount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -134,7 +135,7 @@ public final class MailDelegate10 {
     headers.put("JMSCorrelationID", messageId);
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
     data.setUserAccount(userAccount);
 
@@ -152,7 +153,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendWithdrawFailedMail(User user, PrepaidMovement10 prepaidMovement) {
+  public String sendWithdrawFailedMail(PrepaidUser10 user, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -165,7 +166,7 @@ public final class MailDelegate10 {
     headers.put("JMSCorrelationID", messageId);
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
@@ -182,7 +183,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendTopupRefundCompleteMail(User user, PrepaidMovement10 prepaidMovement) {
+  public String sendTopupRefundCompleteMail(PrepaidUser10 user, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -195,7 +196,7 @@ public final class MailDelegate10 {
     headers.put("JMSCorrelationID", messageId);
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
@@ -212,7 +213,7 @@ public final class MailDelegate10 {
    * @param user
    * @return
    */
-  public String sendPurchaseSuccessMail(User user, PrepaidMovement10 prepaidMovement) {
+  public String sendPurchaseSuccessMail(PrepaidUser10 user, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -225,7 +226,7 @@ public final class MailDelegate10 {
     headers.put("JMSCorrelationID", messageId);
 
     PrepaidTopupData10 data = new PrepaidTopupData10();
-    data.setUser(user);
+    data.setPrepaidUser10(user);
     data.setPrepaidMovement10(prepaidMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);

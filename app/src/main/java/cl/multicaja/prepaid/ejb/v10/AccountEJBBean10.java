@@ -40,7 +40,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
-  
+
   private static final String FIND_ACCOUNT_BY_USERID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? ORDER BY creacion DESC LIMIT 1", getSchema());
 
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
@@ -100,22 +100,18 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
 
-    RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
-      Account a = new Account();
-      a.setId(rs.getLong("id"));
-      a.setUuid(rs.getString("uuid"));
-      a.setUserId(rs.getLong("id_usuario"));
-      a.setAccountNumber(rs.getString("cuenta"));
-      a.setStatus(rs.getString("estado"));
-      a.setBalanceInfo(rs.getString("saldo_info"));
-      a.setExpireBalance(rs.getLong("saldo_expiracion"));
-      a.setProcessor(rs.getString("procesador"));
-      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
-      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
-      return a;
-    };
+    if(StringUtils.isAllBlank(accountNumber)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
+    }
 
-    return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL, rm, userId);
+    log.info(String.format("[findByUserIdAndAccountNumber] Buscando cuenta/contrato por -> userId [%d], accountNumber [%s]", userId, accountNumber));
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL, this.getAccountMapper(), userId, accountNumber);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[findByUserIdAndAccountNumber] Cuenta/contrato con userId [%d] y accountNumber [%s] no existe", userId, accountNumber));
+      return null;
+    }
   }
 
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
