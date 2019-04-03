@@ -11,6 +11,7 @@ import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -127,9 +128,11 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
+    Assert.assertNotNull("Deberia tener hash del pan", dbPrepaidCard.getHashedPan());
+    Assert.assertFalse("Deberia tener hash del pan", StringUtils.isAllBlank(dbPrepaidCard.getHashedPan()));
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();
@@ -238,9 +241,11 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status PENDING", PrepaidCardStatus.PENDING, dbPrepaidCard.getStatus());
+    Assert.assertNotNull("Deberia tener hash del pan", dbPrepaidCard.getHashedPan());
+    Assert.assertFalse("Deberia tener hash del pan", StringUtils.isAllBlank(dbPrepaidCard.getHashedPan()));
 
     //verifica que la ultima cola por la cual paso el mensaje sea PENDING_TOPUP_REQ
     ProcessorMetadata lastProcessorMetadata = remoteTopup.getLastProcessorMetadata();

@@ -167,16 +167,22 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (datosTarjetaDTO.isRetornoExitoso()) {
 
+          Account account = data.getAccount();
           PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
-
-          prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());
-          prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
+          prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());//TODO: verificar si se seguira guardando en claro
           prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
+          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar()); //TODO: verificar si se seguira guardando en claro
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
-          //TODO: generar hash del pan de la tarjeta
+
+          // se trunca el pan
+          prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+
+          // se encripta el Pan TODO: verificar si se guardara junto al nombre y fecha expiracion
+          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
+
+          // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
+          prepaidCard10.setHashedPan(getRoute().getPrepaidCardEJBBean11().hashPan(account.getAccountNumber(), datosTarjetaDTO.getPan()));
 
           try {
             // Actualiza la tarjeta
