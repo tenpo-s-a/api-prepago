@@ -20,6 +20,10 @@ import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.AccountProcessor;
+import cl.multicaja.prepaid.model.v11.AccountStatus;
+import cl.multicaja.prepaid.model.v11.Movement;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -28,16 +32,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.type.descriptor.sql.VarcharTypeDescriptor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import javax.inject.Inject;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -62,6 +77,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private static final BigDecimal NEGATIVE = new BigDecimal(-1);
   private static String APP_NAME = "prepaid.appname";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
+  private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
+  private static final String INSERT_MOVEMENT_SQL
+    = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
+    "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
+    "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
+    "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred) " +
+    "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", getSchema());
+
   /**
    * Foto frontal de la CI del usuario
    */
@@ -478,6 +501,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         //Colocar el movimiento en error
         getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.REJECTED);
+
+        getKafkaEventDelegate10().publishTransactionEvent(prepaidTopup.getFee(), prepaidMovement,"CASH_IN_MULTICAJA","REJECTED");
 
         //Confirmar el retiro en CDT
         cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionTypeConfirm());
@@ -2890,6 +2915,141 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   public void sendTransactionEvent(PrepaidTopup10 prepaidTopup, PrepaidMovement10 prepaidMovement10, String type, String status){
     getKafkaEventDelegate10().publishTransactionEvent(prepaidTopup.getFee(), prepaidMovement10,type,status);
+  }
+
+  public Movement insertMovement(Long userId, String accountNumber, Movement movement) throws  BaseException{
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+    if(StringUtils.isAllBlank(accountNumber)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
+    }
+
+    log.info(String.format("[insertMovement] Guardando Movimiento con -> userId [%d], accountNumber [%s]", userId, accountNumber));
+
+    // Se valida si existe la cuenta anteriormente
+    /*Account acc = this.findByUserIdAndAccountNumber(userId, accountNumber);
+    if(acc != null) {
+      log.info(String.format("[insertAccount] Cuenta/contrato con -> userId [%d], accountNumber [%s] ya existe [id: %d]", userId, accountNumber, acc.getId()));
+      return acc;
+    }*/
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(INSERT_MOVEMENT_SQL, new String[] {"id"});
+      ps.setLong(1, movement.getIdMovimientoRef());
+      ps.setLong(2, movement.getIdPrepaidUser());
+      ps.setString(3, movement.getIdTxExterno());
+      ps.setString(4, movement.getTipoMovimiento().toString());
+      ps.setBigDecimal(5, movement.getMonto());
+      ps.setObject(6, movement.getEstado().toString());
+      ps.setObject(7, movement.getEstadoNegocio().toString());
+      ps.setObject(8, movement.getConSwitch().toString());
+      ps.setObject(9, movement.getConTecnocom().toString());
+      ps.setObject(10, movement.getOriginType().toString());
+      ps.setObject(11, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setObject(12, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setString(13, movement.getCodent());
+      ps.setString(14, movement.getCentalta());
+      ps.setString(15, movement.getCuenta());
+      ps.setObject(16, movement.getClamon().getValue());
+      ps.setObject(17, movement.getIndnorcor().getValue());
+      ps.setObject(18, movement.getTipofac().getCode());
+      ps.setObject(19, java.sql.Date.valueOf(movement.getFecfac().toInstant().atZone(ZoneId.of("UTC")).toLocalDate()));
+      ps.setString(20, movement.getNumreffac());
+      ps.setString(21, movement.getPan());
+      ps.setLong(22, movement.getClamondiv());
+      ps.setBigDecimal(23, movement.getImpdiv());
+      ps.setBigDecimal(24, movement.getImpfac());
+      ps.setLong(25, movement.getCmbapli());
+      ps.setString(26, movement.getNumaut());
+      ps.setObject(27, movement.getIndproaje().toString());
+      ps.setString(28, movement.getCodcom());
+      ps.setLong(29, movement.getCodact());
+      ps.setBigDecimal(30, movement.getImpliq());
+      ps.setLong(31, movement.getClamonliq());
+      ps.setObject(32, movement.getCodpais().getValue());
+      ps.setString(33, movement.getNompob());
+      ps.setLong(34, movement.getNumextcta());
+      ps.setLong(35, movement.getNummovext());
+      ps.setLong(36, movement.getClamone());
+      ps.setString(37, movement.getTipolin());
+      ps.setLong(38, movement.getLinref());
+      ps.setLong(39, movement.getNumbencta());
+      ps.setLong(40, movement.getNumplastico());
+      ps.setString(41, movement.getNomcomred());
+
+      return ps;
+    }, keyHolder);
+
+    return  this.findById((long) keyHolder.getKey());
+  }
+
+  public Movement findById(Long id) throws  BaseException{
+    if(id == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    log.info(String.format("[findById] Buscando movimiento por id [%d]", id));
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_MOVEMENT_BY_ID_SQL, this.getMovementMapper(), id);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[findById]  Movimiento con id [%d] no existe", id));
+      throw new ValidationException(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO);
+    }
+  }
+
+  private RowMapper<Movement> getMovementMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      Movement movement = new Movement();
+      movement.setId(rs.getLong("id"));
+      movement.setIdMovimientoRef(rs.getLong("id_movimiento_ref"));
+      movement.setIdPrepaidUser(rs.getLong("id_usuario"));
+      movement.setIdTxExterno(rs.getString("id_tx_externo"));
+      movement.setTipoMovimiento(PrepaidMovementType.valueOfEnum(rs.getString("tipo_movimiento")));
+      movement.setMonto(rs.getBigDecimal("monto"));
+      movement.setEstado(PrepaidMovementStatus.valueOfEnum(rs.getString("estado")));
+      movement.setEstadoNegocio(BusinessStatusType.valueOfEnum(rs.getString("estado_de_negocio")));
+      movement.setConSwitch(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_switch")));
+      movement.setConTecnocom(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_tecnocom")));
+      movement.setOriginType(MovementOriginType.valueOf(rs.getString("origen_movimiento")));
+      movement.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+      movement.setFechaActualizacion(rs.getTimestamp("fecha_actualizacion"));
+      movement.setCodent(rs.getString("codent"));
+      movement.setCentalta(rs.getString("centalta"));
+      movement.setCuenta(rs.getString("cuenta"));
+      movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
+      movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
+      movement.setTipofac(TipoFactura.valueOfEnum(rs.getString("tipofac")));
+      movement.setFecfac(rs.getDate("fecfac"));
+      movement.setNumreffac(rs.getString("numreffac"));
+      movement.setPan(rs.getString("pan"));
+      movement.setClamondiv(rs.getInt("clamondiv"));
+      movement.setImpdiv(rs.getBigDecimal("impdiv"));
+      movement.setImpfac(rs.getBigDecimal("impfac"));
+      movement.setCmbapli(rs.getInt("cmbapli"));
+      movement.setNumaut(rs.getString("numaut"));
+      movement.setIndproaje(IndicadorPropiaAjena.fromValue(rs.getString("indproaje")));
+      movement.setCodcom(rs.getString("codcom"));
+      movement.setCodact(rs.getInt("codact"));
+      movement.setImpliq(rs.getBigDecimal("impliq"));
+      movement.setClamonliq(rs.getInt("clamonliq"));
+      movement.setCodpais(CodigoPais.fromValue(rs.getInt("codpais")));
+      movement.setNompob(rs.getString("nompob"));
+      movement.setNumextcta(rs.getInt("numextcta"));
+      movement.setNummovext(rs.getInt("nummovext"));
+      movement.setClamone(rs.getInt("clamone"));
+      movement.setTipolin(rs.getString("tipolin"));
+      movement.setLinref(rs.getInt("linref"));
+      movement.setNumbencta(rs.getInt("numbencta"));
+      movement.setNumplastico(rs.getLong("numplastico"));
+      movement.setNomcomred(rs.getString("nomcomred"));
+
+      return movement;
+    };
   }
 
 }

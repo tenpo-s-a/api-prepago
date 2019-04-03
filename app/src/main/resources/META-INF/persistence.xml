@@ -8,6 +8,7 @@
     <class>cl.multicaja.prepaid.model.v11.User</class>
     <class>cl.multicaja.prepaid.model.v11.Account</class>
     <class>cl.multicaja.prepaid.model.v11.Card</class>
+    <class>cl.multicaja.prepaid.model.v11.Movement</class>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/prepago_api_test" /> <!-- BD Mane -->
@@ -24,6 +25,7 @@
     <class>cl.multicaja.prepaid.model.v11.User</class>
     <class>cl.multicaja.prepaid.model.v11.Account</class>
     <class>cl.multicaja.prepaid.model.v11.Card</class>
+    <class>cl.multicaja.prepaid.model.v11.Movement</class>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/prepago_api_dev" /> <!-- BD Mane -->
@@ -40,6 +42,7 @@
     <class>cl.multicaja.prepaid.model.v11.User</class>
     <class>cl.multicaja.prepaid.model.v11.Account</class>
     <class>cl.multicaja.prepaid.model.v11.Card</class>
+    <class>cl.multicaja.prepaid.model.v11.Movement</class>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://database:5432/prepago_ci" /> <!-- BD Mane -->

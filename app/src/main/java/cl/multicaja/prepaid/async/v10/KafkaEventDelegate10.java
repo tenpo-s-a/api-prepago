@@ -174,6 +174,9 @@ public final class KafkaEventDelegate10 {
       if(status.equals("AUTHORIZED")){
         req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_TRANSACTION_AUTHORIZED_EVENT));
         this.getProducerTemplate().sendBodyAndHeaders(SEDA_TRANSACTION_AUTHORIZED_EVENT, req, headers);
+      }else if(status.equals("REJECTED")){
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_TRANSACTION_REJECTED_EVENT));
+        this.getProducerTemplate().sendBodyAndHeaders(SEDA_TRANSACTION_REJECTED_EVENT, req, headers);
       }
 
     }
