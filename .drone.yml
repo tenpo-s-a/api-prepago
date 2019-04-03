@@ -88,6 +88,17 @@ pipeline:
       event: [ push ]
       branch: master
 
+  db_migration_sandbox:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=sandbox
+      - ./migrate-up.sh -Denv=sandbox
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
   build:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -160,6 +171,24 @@ pipeline:
       event: [ push ]
       branch: [ master ]
 
+  kong_sandbox:
+    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
+    root_dir: terraform
+    init_options:
+      backend-config:
+        - "path=apps/api-prepaid/sandbox/terraform-state"
+    vars:
+      kong_admin_uri: https://kong.sandbox.multicajadigital.cloud/admin
+      cluster_environment: sandbox
+    secrets:
+      - source: consul_http_addr
+        target: CONSUL_HTTP_ADDR
+      - source: consul_http_token
+        target: CONSUL_HTTP_TOKEN
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
   kong_production:
     image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
     root_dir: terraform
@@ -176,7 +205,7 @@ pipeline:
         target: CONSUL_HTTP_TOKEN
     when:
       event: [ tag ]
-      branch: [ master ]
+      ref: refs/tags/release*
 
   deploy_to_staging:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
@@ -187,6 +216,18 @@ pipeline:
       event: [ push ]
       branch: master
 
+  deploy_to_sandbox:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    cluster: sandbox
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api
+      - API_ENVIRONMENT=sandbox
+    consul_kv: env/sandbox.env
+    when:
+      when:
+      ref: refs/tags/snapshot*
+
   deploy_to_production:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
     cluster: production
@@ -194,6 +235,7 @@ pipeline:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
     when:
       event: [ tag ]
+      ref: refs/tags/release*
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
