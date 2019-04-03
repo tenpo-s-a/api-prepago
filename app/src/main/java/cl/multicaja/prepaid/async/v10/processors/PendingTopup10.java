@@ -78,15 +78,14 @@ public class PendingTopup10 extends BaseProcessor10 {
           PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
 
           if (prepaidUser10 == null) {
-            log.error("Error user es null");
+            log.error("Error prepaidUser10 es null");
             return null;
           }
 
           if (prepaidUser10.getDocumentNumber() == null) {
-            log.error("Error user.getRut() es null");
+            log.error("Error DocumentNumber es null");
             return null;
           }
-
 
           //TODO: Verificar si se enviara el contrato a cargar a futuro, por el momento sirve para obtener el ultimo contrato del usuario
 

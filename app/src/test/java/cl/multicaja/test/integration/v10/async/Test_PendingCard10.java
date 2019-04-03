@@ -33,12 +33,14 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
 
     //CREA USUARIO
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
+
+    Account account = createRandomAccount(prepaidUser);
+
 
     //
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
-
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
@@ -85,8 +87,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   public void pendingCreateCard() throws Exception {
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = createRandomAccount(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -143,7 +146,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   @Test
   public void pendingEmissionCardUnit() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -186,8 +189,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   @Test
   public void pendingCreateCardUnit() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = createRandomAccount(prepaidUser);
+
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -206,7 +211,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
     String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 0);
 
@@ -245,15 +249,13 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   @Test
   public void pendingEmissionCardUnitTimeOut() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -290,15 +292,13 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   @Test
   public void pendingCreateCardUnitTimeOut() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser =  buildPrepaidUserv2();
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -307,7 +307,8 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
+
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());

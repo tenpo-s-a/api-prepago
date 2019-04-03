@@ -27,10 +27,9 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_prepaidUser_is_null() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    String messageId = sendPendingTopup(topup,prepaidUser10 , null, null, 0);
+    String messageId = sendPendingTopup(topup,null , null, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
@@ -217,9 +216,9 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
-    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -235,7 +234,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, 0);
-
+    Thread.sleep(2000);
     //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas cargas pendientes
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
