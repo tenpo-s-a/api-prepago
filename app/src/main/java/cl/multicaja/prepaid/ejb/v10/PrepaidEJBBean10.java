@@ -292,7 +292,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(user == null){
       //TODO: LLamar al ws usuario tempo.
       // Verificar si existe en Tempo. Si no existe "retorna error", si existe agregar.
-      throw new ValidationException(CLIENTE_NO_EXISTE);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
     //Obtiene Cuenta Usuario
     Account account = getAccountEJBBean10().findByUserId(user.getId());
@@ -611,9 +611,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(request.getAmount().getCurrencyCode() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
     }
-    if(request.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
+
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
@@ -983,9 +981,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(request.getAmount().getCurrencyCode() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.currency_code"));
     }
-    if(request.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
+
     if(StringUtils.isBlank(request.getMerchantCode())){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
@@ -1500,21 +1496,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
+  public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userId, SimulationNew10 simulationNew) throws Exception {
 
-    if(userIdMc == null){
-      userIdMc = this.verifiUserAutentication(headers);
+    if(userId == null){
+      userId = this.verifiUserAutentication(headers);
     }
 
     this.validateSimulationNew10(simulationNew);
 
-    // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
-
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
-
-    prepaidUser10 = getPrepaidUserEJB10().getUserLevel(user,prepaidUser10);
+    PrepaidUser10 prepaidUser10 =null;
+    try{
+      prepaidUser10 = getPrepaidUserEJB10().findById(headers, userId);
+    }catch (Exception e){
+        log.info("Error: "+e);
+    }
+    if(prepaidUser10 == null){
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
 
     SimulationTopupGroup10 simulationTopupGroup10 = new SimulationTopupGroup10();
 
@@ -1602,7 +1601,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
-      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getUserIdMc());
+      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getId());
     }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());

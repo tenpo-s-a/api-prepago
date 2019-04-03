@@ -255,7 +255,7 @@ public abstract class BaseProcessor10 {
     // Incluir datos en CDT.
     CdtTransaction10 cdtTx = new CdtTransaction10();
     cdtTx.setAmount(prepaidTopup10.getAmount().getValue());
-    cdtTx.setAccountId(String.format("PREPAGO_%d",user.getRut().longValue()));
+    cdtTx.setAccountId(String.format("PREPAGO_%s",user.getDocumentNumber()));
     cdtTx.setTransactionReference(txRef);
     cdtTx.setIndSimulacion(false);
     cdtTx.setExternalTransactionId(prepaidTopup10.getTransactionId());

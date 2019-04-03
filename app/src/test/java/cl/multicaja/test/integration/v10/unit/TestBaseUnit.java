@@ -89,8 +89,6 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
   private static KafkaEventDelegate10 kafkaEventDelegate10;
   private static AccountEJBBean10 accountEJBBean10;
-  private static AccountDao accountDao;
-  private static CardDao cardDao;
   private static PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   protected static CalculationsHelper calculationsHelper = CalculationsHelper.getInstance();
@@ -222,6 +220,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
       prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
       prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+
     }
     return prepaidMovementEJBBean10;
   }
@@ -232,22 +231,6 @@ public class TestBaseUnit extends TestApiBase {
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
     }
     return accountEJBBean10;
-  }
-
-  public static AccountDao getAccountDao(){
-    if (accountDao == null) {
-      accountDao = new AccountDao();
-      accountDao.setEm(createEntityManager());
-    }
-    return accountDao;
-  }
-
-  public static CardDao getCardDao(){
-    if (cardDao == null) {
-      cardDao = new CardDao();
-      cardDao.setEm(createEntityManager());
-    }
-    return cardDao;
   }
 
   /**
@@ -325,6 +308,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
       prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());
       prepaidEJBBean10.setMailDelegate(getMailDelegate());
+      prepaidEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
     }
     return prepaidEJBBean10;
   }
@@ -620,19 +604,23 @@ public class TestBaseUnit extends TestApiBase {
     prepaidUser.setBalanceExpiration(0L);
     return prepaidUser;
   }
-
   public PrepaidUser10 buildPrepaidUserv2() {
+    return buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
+  }
+
+  public PrepaidUser10 buildPrepaidUserv2(PrepaidUserLevel userLevel) {
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(getUniqueLong());
-    prepaidUser.setRut(getUniqueRutNumber());
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setBalanceExpiration(0L);
     prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
     prepaidUser.setName(getRandomString(10));
     prepaidUser.setLastName(getRandomString(10));
     prepaidUser.setUuid(UUID.randomUUID().toString());
     prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    prepaidUser.setUserLevel(userLevel);
 
     return prepaidUser;
   }
@@ -1487,6 +1475,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param user
    * @return
    */
+  @Deprecated
   public AltaClienteDTO registerInTecnocom(User user) throws BaseException {
 
     if (user == null) {
@@ -1514,6 +1503,31 @@ public class TestBaseUnit extends TestApiBase {
     }
 
     return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
+  }
+
+  public AltaClienteDTO registerInTecnocomV2(PrepaidUser10 user) throws BaseException {
+
+    if (user == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
+    }
+
+    if (user.getName() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.name"));
+    }
+
+    if (user.getLastName() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_1"));
+    }
+
+    if (user.getRut() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
+    }
+
+    if (user.getDocumentNumber() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
+    }
+    TipoAlta tipoAlta =  user.getUserLevel() == PrepaidUserLevel.LEVEL_1 ? TipoAlta.NIVEL1: TipoAlta.NIVEL2;
+    return getTecnocomService().altaClientes(user.getName(), user.getLastName(), "", user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
   }
 
   /**

@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_EMISSION_ERROR;
@@ -78,18 +79,21 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (altaClienteDTO.isRetornoExitoso()) {
 
-          PrepaidCard10 prepaidCard = new PrepaidCard10();
-          prepaidCard.setIdUser(data.getPrepaidUser10().getId());
-          prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
-          data.setPrepaidCard10(prepaidCard);
-
           // guarda la informacion de la cuenta
           Account account = getRoute().getAccountEJBBean10().insertAccount(data.getPrepaidUser10().getId(), altaClienteDTO.getContrato());
 
           // publica evento de contrato/cuenta creada
-          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUserIdMc(), account);
+          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getId(), account);
+
+          PrepaidCard10 prepaidCard = new PrepaidCard10();
+          prepaidCard.setAccountId(account.getId());
+          prepaidCard.setIdUser(data.getPrepaidUser10().getId());
+          prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+          prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+          prepaidCard.setUuid(UUID.randomUUID().toString());
+
+          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
+          data.setPrepaidCard10(prepaidCard);
 
           data.setAccount(account);
 
@@ -167,7 +171,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (datosTarjetaDTO.isRetornoExitoso()) {
 
-          PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
+          PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, data.getPrepaidCard10().getId());
           PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
 
           prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());

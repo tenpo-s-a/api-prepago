@@ -91,8 +91,12 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
       return a;
     };
+    try{
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, rm, userId);
+    }catch (Exception e){
+      return null;
+    }
 
-    return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, rm, userId);
   }
 
   public Account findByUserIdAndAccountNumber(Long userId, String accountNumber) throws Exception {
@@ -147,8 +151,11 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
       return ps;
     }, keyHolder);
-
+    try{
     return  this.findById((long) keyHolder.getKey());
+    }catch (Exception e){
+      return null;
+    }
   }
 
   public void publishAccountCreatedEvent(Long externalUserId, Account acc) throws Exception {
