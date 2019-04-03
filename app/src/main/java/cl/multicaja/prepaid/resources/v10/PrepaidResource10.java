@@ -54,7 +54,7 @@ public final class PrepaidResource10 extends BaseResource {
    */
   @POST
   @Path("/{user_id}/cash_in")
-  public Response topupUserBalance(@PathParam("userId") String extUserId, NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
+  public Response topupUserBalance(@PathParam("user_id") String extUserId, NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
     PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalance(headersToMap(headers),extUserId, topupRequest,true);
     return Response.ok(prepaidTopup).status(201).build();
   }

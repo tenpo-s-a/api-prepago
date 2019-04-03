@@ -37,7 +37,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_params_null() throws Exception {
 
@@ -109,18 +110,16 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_ok_WEB() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // Se hace la primera carga
-    topupUserBalance(user, BigDecimal.valueOf(3000));
+    topupUserBalance(prepaidUser10.getUuid(), BigDecimal.valueOf(3000));
     PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
 
@@ -132,7 +131,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga WEB: " + simulationNew);
 
-    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
+    HttpResponse respHttp = topupSimulation(prepaidUser10.getUserIdMc(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -154,7 +153,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_WEB() throws Exception {
 
@@ -208,18 +208,16 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupWeb().getEed());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_ok_POS() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // Se hace la primera carga
-    topupUserBalance(user, BigDecimal.valueOf(3000));
+    topupUserBalance(prepaidUser10.getUuid(), BigDecimal.valueOf(3000));
     PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
 
@@ -231,7 +229,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     System.out.println("Calcular carga POS: " + simulationNew);
 
-    HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
+    HttpResponse respHttp = topupSimulation(prepaidUser10.getUserIdMc(), simulationNew);
 
     Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -242,7 +240,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(getCalculationsHelper().calculateFee(simulationNew.getAmount().getValue(), BigDecimal.valueOf(0.5)));
 
     NewAmountAndCurrency10 calculatedAmount = new NewAmountAndCurrency10(amount.getValue().add(calculatedFee.getValue()));
-    prepaidUser10 = getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser10);
+    //prepaidUser10 = getPrepaidUserEJBBean10().getUserLevel(user,prepaidUser10);
     System.out.println(calculatedFee.getValue()+"  "+resp.getSimulationTopupPOS().getFee());
     Assert.assertEquals("debe ser comision para carga web", calculatedFee, resp.getSimulationTopupPOS().getFee());
     Assert.assertEquals("debe ser monto a pagar + comision", calculatedAmount, resp.getSimulationTopupPOS().getAmountToPay());
@@ -254,7 +252,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_POS() throws Exception {
 
@@ -296,23 +295,18 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser el eed calculado", calculatedEee, resp.getSimulationTopupPOS().getEed());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupWeb().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_exceeds_balance() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     System.out.println(prepaidUser10.getUserLevel());
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(450000)); //se agrega saldo de 450.000 en tecnocom
+    topupUserBalance(prepaidUser10.getUuid(), BigDecimal.valueOf(450000)); //se agrega saldo de 450.000 en tecnocom
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -330,7 +324,7 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      HttpResponse respHttp = topupSimulation(user.getId(), simulationNew);
+      HttpResponse respHttp = topupSimulation(prepaidUser10.getUserIdMc(), simulationNew);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 
@@ -346,7 +340,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de supera saldo", Integer.valueOf(109000), vex.getCode());
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_ok_POS_USERLevel1()  throws Exception {
 
@@ -398,7 +393,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser monto a pagar + comision + 990 Monto Apertura", calculatedAmount.getValue(), resp.getSimulationTopupPOS().getAmountToPay().getValue());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no", resp.getSimulationTopupPOS().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_first_topup_max_amount() throws Exception {
 
@@ -435,7 +431,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_PRIMERA_CARGA.getValue(), vex.getCode());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_min_amount() throws Exception {
     //WEB
@@ -511,7 +508,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_ES_MENOR_AL_MINIMO_DE_CARGA.getValue(), vex.getCode());
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_web() throws Exception {
     User user = registerUser();
@@ -549,7 +547,8 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue(), group.getSimulationTopupWeb().getCode());
     Assert.assertNotNull("debe tener indicador de si es primera carga o no",group.getSimulationTopupWeb().getFirstTopup());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_pos() throws Exception {
     User user = registerUser();
