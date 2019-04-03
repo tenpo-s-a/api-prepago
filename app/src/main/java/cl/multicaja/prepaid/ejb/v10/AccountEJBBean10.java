@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -116,8 +117,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       ps.setString(4, "");
       ps.setLong(5, 0L);
       ps.setString(6, AccountStatus.ACTIVE.toString());
-      ps.setObject(7, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
-      ps.setObject(8, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setTimestamp(7, Timestamp.from(Instant.now()));
+      ps.setTimestamp(8, Timestamp.from(Instant.now()));
 
       return ps;
     }, keyHolder);
@@ -163,8 +164,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       a.setBalanceInfo(rs.getString("saldo_info"));
       a.setExpireBalance(rs.getLong("saldo_expiracion"));
       a.setProcessor(rs.getString("procesador"));
-      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
-      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
+      a.setCreatedAt(rs.getTimestamp("creacion").toLocalDateTime());
+      a.setUpdatedAt(rs.getTimestamp("actualizacion").toLocalDateTime());
       return a;
     };
   }
