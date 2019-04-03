@@ -253,7 +253,13 @@ services:
         exclude: master
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:ci-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
+    image: mccontainerregistry.azurecr.io/api-users:acb7a72a3c6652b867225fab0fe7def233724d4f
+    environment:
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=api_users_ci
+      - DB_HOST_FQDN=database
+      - API_ENVIRONMENT=ci
     log-driver: none
     when:
       event: [ push ]
