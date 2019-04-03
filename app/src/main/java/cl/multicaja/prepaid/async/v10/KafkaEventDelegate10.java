@@ -115,7 +115,7 @@ public final class KafkaEventDelegate10 {
     }
   }
 
-  public void publishCardClosedEvent(CardEvent cardEvent) {
+  public void publishCardEvent(CardEvent cardEvent, String endPoint) {
     if(cardEvent == null) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, cardEvent -> null =======");
       throw new IllegalArgumentException();
@@ -128,14 +128,17 @@ public final class KafkaEventDelegate10 {
       Map<String, Object> headers = new HashMap<>();
       if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
         headers.put("JMSCorrelationID", cardEvent.getCard().getId());
+
+        ExchangeData<String> req = new ExchangeData<>(toJson(cardEvent));
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, endPoint));
+
+        this.getProducerTemplate().sendBodyAndHeaders(endPoint, req, headers);
+      } else {
+        headers.put(KafkaConstants.PARTITION_KEY, 0);
+        headers.put(KafkaConstants.KEY, "1");
+
+        this.getProducerTemplate().sendBodyAndHeaders(endPoint, toJson(cardEvent), headers);
       }
-      headers.put(KafkaConstants.PARTITION_KEY, 0);
-      headers.put(KafkaConstants.KEY, "1");
-
-      ExchangeData<String> req = new ExchangeData<>(toJson(cardEvent));
-      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_CARD_CLOSED_EVENT));
-
-      this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CLOSED_EVENT, req, headers);
     }
   }
 }

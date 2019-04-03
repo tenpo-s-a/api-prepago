@@ -6,6 +6,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
@@ -131,7 +132,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     getRoute().getPrepaidCardEJBBean11().updatePrepaidCardStatus(null, prepaidCard.getId(), PrepaidCardStatus.LOCKED_HARD);
 
     // Notificar el cierre de la tarjeta antigua
-    getRoute().getPrepaidCardEJBBean11().publishCardClosedEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId());
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
 
     // Rellenar los datos de la nueva tarjeta
     PrepaidCard10 newPrepaidCard = new PrepaidCard10();
@@ -152,7 +153,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null, newPrepaidCard);
 
     // Notificar que se ha creado una tarjeta nueva
-    getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(user.getUserIdMc().toString(), accountUuid, newPrepaidCard.getId());
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, newPrepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
 
   private void sendSuccessMail(User user, Boolean hasCard) throws Exception {

@@ -5,6 +5,7 @@ import cl.multicaja.camel.ProcessorRoute;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.User;
@@ -203,10 +204,11 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             prepaidCard);
 
           // publica evento de tarjeta creada
-          getRoute().getPrepaidCardEJBBean11().publishCardCreatedEvent(
+          getRoute().getPrepaidCardEJBBean11().publishCardEvent(
             data.getUser().getId().toString(),
             data.getAccount().getUuid(),
-            prepaidCard.getId()
+            prepaidCard.getId(),
+            KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT
           );
 
           return req;

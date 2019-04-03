@@ -195,7 +195,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
    * @param cardId id interno de la tarjeta
    * @throws Exception
    */
-  public void publishCardClosedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
+  public void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endPoint) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
@@ -226,6 +226,6 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     cardEvent.setCard(card);
     cardEvent.setAccountId(accountUuid);
     cardEvent.setUserId(externalUserId);
-    getKafkaEventDelegate10().publishCardClosedEvent(cardEvent);
+    getKafkaEventDelegate10().publishCardEvent(cardEvent, endPoint);
   }
 }
