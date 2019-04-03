@@ -215,6 +215,9 @@ public class PendingTopup10 extends BaseProcessor10 {
               data.getPrepaidMovement10().setEstado(status);
               data.getPrepaidMovement10().setEstadoNegocio(businessStatus);
 
+              getRoute().getPrepaidEJBBean10().sendTransactionEvent(prepaidTopup, prepaidMovement,"CASH_IN_MULTICAJA","REJECTED");
+
+
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             }
