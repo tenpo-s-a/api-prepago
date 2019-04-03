@@ -4,11 +4,9 @@ import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.NameStatus;
-import cl.multicaja.prepaid.helpers.users.model.RutStatus;
+
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.Movement;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -30,7 +28,7 @@ public class TestPrepaidEJBBean10FindById extends TestBaseUnit {
   @Test(expected = BadRequestException.class)
   public void findById_movementId_null() throws Exception {
     try {
-      getPrepaidEJBBean10().findById(null);
+      getPrepaidMovementEJBBean10().findById(null);
     } catch(BadRequestException vex) {
       Assert.assertEquals(PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
       throw vex;
@@ -40,7 +38,7 @@ public class TestPrepaidEJBBean10FindById extends TestBaseUnit {
   @Test(expected = ValidationException.class)
   public void findById_movement_null() throws Exception {
     try {
-      getPrepaidEJBBean10().findById(Long.MAX_VALUE);
+      getPrepaidMovementEJBBean10().findById(Long.MAX_VALUE);
     } catch(ValidationException vex) {
       Assert.assertEquals(TRANSACCION_ERROR_EN_CONSULTA_DE_MOVIMIENTO.getValue(), vex.getCode());
       throw vex;
@@ -69,25 +67,25 @@ public class TestPrepaidEJBBean10FindById extends TestBaseUnit {
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    Movement movement11 = buildMovement11(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
-    movement11.setConSwitch(ReconciliationStatusType.RECONCILED);
-    movement11.setConTecnocom(ReconciliationStatusType.RECONCILED);
-    movement11.setEstado(PrepaidMovementStatus.PROCESS_OK);
-    movement11.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    PrepaidMovement10 movement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+    movement.setConSwitch(ReconciliationStatusType.RECONCILED);
+    movement.setConTecnocom(ReconciliationStatusType.RECONCILED);
+    movement.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    movement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
 
 
-    Movement movement = getPrepaidEJBBean10().insertMovement(123L, "nadas", movement11);
+    PrepaidMovement10 movement10 = getPrepaidMovementEJBBean10().insertMovement(123L, "nadas", movement);
 
 
-    Movement dbMovement = getPrepaidEJBBean10().findById(movement.getId());
+    PrepaidMovement10 dbMovement = getPrepaidMovementEJBBean10().findById(movement.getId());
 
 
 
-    Assert.assertEquals("Debe ser la misma tarjeta", movement.getId(), dbMovement.getId());
-    Assert.assertEquals("Debe ser la misma tarjeta", movement.getCentalta(), dbMovement.getCentalta());
-    Assert.assertEquals("Debe ser la misma tarjeta", movement.getIdTxExterno(), dbMovement.getIdTxExterno());
-    Assert.assertEquals("Debe ser la misma tarjeta", movement.getNumaut(), dbMovement.getNumaut());
-    Assert.assertEquals("Debe ser la misma tarjeta", movement.getPan(), dbMovement.getPan());
+    Assert.assertEquals("Debe ser el mismo movimiento", movement10.getId(), dbMovement.getId());
+    Assert.assertEquals("Debe ser el mismo movimiento", movement10.getCentalta(), dbMovement.getCentalta());
+    Assert.assertEquals("Debe ser el mismo movimiento", movement10.getIdTxExterno(), dbMovement.getIdTxExterno());
+    Assert.assertEquals("Debe ser el mismo movimiento", movement10.getNumaut(), dbMovement.getNumaut());
+    Assert.assertEquals("Debe ser el mismo movimiento", movement10.getPan(), dbMovement.getPan());
 
   }
 }
