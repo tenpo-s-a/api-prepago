@@ -209,6 +209,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(),account.getAccountNumber());
+
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
@@ -231,7 +234,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
 
     String messageId = sendPendingCreateCard(prepaidTopup, prepaidUser, prepaidCard10, cdtTransaction, prepaidMovement, account, 2);
 
