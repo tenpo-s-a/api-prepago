@@ -75,6 +75,7 @@ pipeline:
       - touch ./app/integration-test.log
       - tail -n 500 ./app/integration-test.log
     when:
+      event: [ push ]
       status: [ success, failure ]
 
   db_migration_staging:
@@ -130,17 +131,17 @@ pipeline:
       event: [ push ]
       branch: master
 
-  publish_ci_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
-    tags:
-      - ci-${DRONE_COMMIT_SHA}
-    dockerfile: Dockerfile.ci
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
+  #publish_ci_image:
+  #  registry: mccontainerregistry.azurecr.io
+  #  image: plugins/docker
+  #  repo: mccontainerregistry.azurecr.io/api-prepago
+  #  tags:
+  #    - ci-${DRONE_COMMIT_SHA}
+  #  dockerfile: Dockerfile.ci
+  #  secrets: [ docker_username, docker_password ]
+  #  when:
+  #    event: [ push ]
+  #    branch: master
 
   publish_image:
     registry: mccontainerregistry.azurecr.io
