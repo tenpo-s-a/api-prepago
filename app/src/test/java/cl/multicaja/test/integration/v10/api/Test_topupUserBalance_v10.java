@@ -23,7 +23,6 @@ import static cl.multicaja.core.model.Errors.*;
 /**
  * @author abarazarte
  */
-//TODO: Hacer test withdrawUserBalance fromEndPoint False
 public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
 
   private HttpResponse topupUserBalance(NewPrepaidTopup10 newPrepaidTopup10) {
@@ -34,9 +33,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
   }
 
   @Test
