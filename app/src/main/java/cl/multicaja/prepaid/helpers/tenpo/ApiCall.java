@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 public class ApiCall {
 
   private static ApiCall instance;
-  private static final Log LOG = LogFactory.getLog(cl.multicaja.prepaid.helpers.users.UserClient.class);
+  private static final Log LOG = LogFactory.getLog(ApiCall.class);
   private HttpUtils httpUtils = HttpUtils.getInstance();
   private JsonMapper jsonMapper;
   private ConfigUtils configUtils;

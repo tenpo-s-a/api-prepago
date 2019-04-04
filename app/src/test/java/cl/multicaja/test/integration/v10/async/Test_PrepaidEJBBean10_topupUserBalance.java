@@ -35,10 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP;
@@ -77,7 +74,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
     try {
 
-      getPrepaidEJBBean10().topupUserBalance(null,getRandomString(10), newPrepaidTopup,true);
+      getPrepaidEJBBean10().topupUserBalance(null, UUID.randomUUID().toString(), newPrepaidTopup,true);
     } catch(NotFoundException nfex) {
       Assert.assertEquals("No debe existir el usuario prepago", CLIENTE_NO_TIENE_PREPAGO.getValue(), nfex.getCode());
     }

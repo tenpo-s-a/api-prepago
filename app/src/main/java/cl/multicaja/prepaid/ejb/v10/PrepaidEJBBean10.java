@@ -27,7 +27,6 @@ import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -50,7 +49,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -528,7 +526,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser10 = null;
     try {
 
-      cl.multicaja.prepaid.helpers.tenpo.model.User userTenpo = apiCall.getUserById(UUID.fromString(userId));
+      cl.multicaja.prepaid.helpers.tenpo.model.User userTenpo = getApiCall().getUserById(UUID.fromString(userId));
       if(userTenpo != null){
         prepaidUser10 = new PrepaidUser10();
         prepaidUser10.setDocumentNumber(userTenpo.getDocumentNumber());
@@ -547,8 +545,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     } catch (NotFoundException e){
       log.error(e);
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }catch (Exception e){
-      throw new BadRequestException(CLIENTE_ERROR_GENERICO_$VALUE);
+    }catch (Exception e) {//TODO: Por mientras si no funcioa se enviara Usuario no encontrado.
+      e.printStackTrace();
+      log.error(e);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
     return prepaidUser10;
   }
