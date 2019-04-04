@@ -39,15 +39,13 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
     user.getRut().setStatus(RutStatus.VERIFIED);
     user = updateUser(user);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
-    card = createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // Crea cuenta/contrato
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
+    Account account = createRandomAccount(prepaidUser10);
+
+    PrepaidCard10 card = buildPrepaidCardByAccountNumber(prepaidUser10,account.getAccountNumber());
 
     // Actualiza la tarjeta
     String pan = getRandomNumericString(16);
@@ -69,7 +67,7 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
     card.setNumeroUnico(numeroUnico);
     card.setAccountId(account.getId());
 
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, card.getId(), Long.MAX_VALUE, card);
+    getPrepaidCardEJBBean11().updatePrepaidCard(null, card.getId(), account.getId(), card);
 
     card = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
