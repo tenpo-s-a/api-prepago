@@ -225,7 +225,7 @@ pipeline:
       - API_ENVIRONMENT=sandbox
     consul_kv: env/sandbox.env
     when:
-      when:
+      event: [ tag ]
       ref: refs/tags/snapshot*
 
   deploy_to_production:
