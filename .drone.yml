@@ -75,6 +75,7 @@ pipeline:
       - touch ./app/integration-test.log
       - tail -n 500 ./app/integration-test.log
     when:
+      event: [ push ]
       status: [ success, failure ]
 
   db_migration_staging:
@@ -130,17 +131,17 @@ pipeline:
       event: [ push ]
       branch: master
 
-  publish_ci_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
-    tags:
-      - ci-${DRONE_COMMIT_SHA}
-    dockerfile: Dockerfile.ci
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
+  #publish_ci_image:
+  #  registry: mccontainerregistry.azurecr.io
+  #  image: plugins/docker
+  #  repo: mccontainerregistry.azurecr.io/api-prepago
+  #  tags:
+  #    - ci-${DRONE_COMMIT_SHA}
+  #  dockerfile: Dockerfile.ci
+  #  secrets: [ docker_username, docker_password ]
+  #  when:
+  #    event: [ push ]
+  #    branch: master
 
   publish_image:
     registry: mccontainerregistry.azurecr.io
@@ -208,16 +209,19 @@ pipeline:
       ref: refs/tags/release*
 
   deploy_to_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: staging
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_dev
+      - API_ENVIRONMENT=development
+    consul_kv: env/staging.env
     when:
       event: [ push ]
       branch: master
 
   deploy_to_sandbox:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: sandbox
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
@@ -229,7 +233,7 @@ pipeline:
       ref: refs/tags/snapshot*
 
   deploy_to_production:
-    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:0.1.4
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: production
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
@@ -253,7 +257,7 @@ services:
         exclude: master
 
   api-users:
-    image: mccontainerregistry.azurecr.io/api-users:acb7a72a3c6652b867225fab0fe7def233724d4f
+    image: mccontainerregistry.azurecr.io/api-users:1978397996a8eb6e153ab69f949ac2d22dc80063
     environment:
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
