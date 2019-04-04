@@ -2,11 +2,11 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.users.model.NameStatus;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.Timestamps;
 import org.junit.Assert;
 import org.junit.Test;
 

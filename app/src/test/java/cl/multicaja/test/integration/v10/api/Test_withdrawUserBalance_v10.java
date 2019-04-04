@@ -12,10 +12,7 @@ import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,7 +42,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnPosWithdraw() throws Exception {
 
@@ -58,7 +56,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -146,7 +144,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnPosWithdraw_merchantCode_5() throws Exception {
 
@@ -159,7 +158,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -251,7 +250,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
 
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnPosWithdraw_merchantCode_18() throws Exception {
 
@@ -264,7 +264,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -356,7 +356,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
 
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnWebWithdraw() throws Exception {
 
@@ -369,7 +370,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -457,7 +458,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_OnWithdraw_MinAmount() throws Exception {
     // POS
@@ -506,7 +508,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 108303", 108303, errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_OnWithdraw_MaxAmount() throws Exception {
     // POS
@@ -555,7 +558,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 108301", 108301, errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_OnWithdraw_InsufficientFounds() throws Exception {
 
@@ -594,7 +598,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingBody() {
 
@@ -605,7 +610,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingRut() {
 
@@ -625,7 +631,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingTransactionId() {
 
@@ -645,7 +652,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingMerchantCode() {
 
@@ -665,7 +673,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmount() {
 
@@ -682,7 +691,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
@@ -702,7 +712,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmountValue() {
 
@@ -722,7 +733,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingPassword() throws Exception {
 
@@ -739,7 +751,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMerchantCodeFormat() throws Exception {
 
@@ -758,7 +771,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102001", PARAMETRO_NO_CUMPLE_FORMATO_$VALUE.getValue(), errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn404_McUserNull() throws Exception {
 
@@ -774,7 +788,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102001", 102001, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_McUserListaNegra() throws Exception {
 
@@ -789,7 +804,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102016", 102016, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
@@ -804,7 +820,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
 
@@ -824,7 +841,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102004", 102004, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_InvalidPassword() throws Exception {
 
@@ -847,7 +865,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102053", 102053, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidCardNull() throws Exception {
 
@@ -868,7 +887,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidCardPending() throws Exception {
 
@@ -893,7 +913,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidCardExpired() throws Exception {
 
@@ -918,7 +939,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidCardHardLocked() throws Exception {
 
@@ -943,7 +965,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 106000", 106000, errorObj.get("code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_TecnocomError_UserDoesntExists() throws Exception {
 
@@ -977,7 +1000,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_OnWithdraw_Reversed() throws Exception {
     // POS
@@ -1054,7 +1078,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener conTecnocom RECONCILIED", ReconciliationStatusType.RECONCILED, prepaidMovement10.getConTecnocom());
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_OnWithdraw_AlreadyReceived() throws Exception {
     // POS
@@ -1068,7 +1093,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUser10(prepaidUser);
 
       // se hace una carga
-      topupUserBalance(user, BigDecimal.valueOf(10000));
+      topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
       PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
       Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -1112,7 +1137,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUser10(prepaidUser);
 
       // se hace una carga
-      topupUserBalance(user, BigDecimal.valueOf(10000));
+      topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
       PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
       Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -1143,7 +1168,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_POS() throws Exception {
     String password = RandomStringUtils.randomNumeric(4);
@@ -1155,7 +1181,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -1247,7 +1273,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_OnWithdraw_Reversed_DifferentAmount_WEB() throws Exception {
     String password = RandomStringUtils.randomNumeric(4);
@@ -1259,7 +1286,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUser10(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(user, BigDecimal.valueOf(10000));
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);

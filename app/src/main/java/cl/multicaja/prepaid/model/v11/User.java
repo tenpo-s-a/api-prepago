@@ -1,14 +1,12 @@
 package cl.multicaja.prepaid.model.v11;
 
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "prp_usuario", schema ="prepago")
-public class User implements Serializable {
+public class User  implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

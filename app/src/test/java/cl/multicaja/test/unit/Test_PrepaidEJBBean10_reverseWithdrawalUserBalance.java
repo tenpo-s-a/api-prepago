@@ -122,20 +122,6 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     }
   }
 
-  @Test
-  public void reverseRequestRutNull() throws Exception {
-    NewPrepaidWithdraw10 reverseRequest = new NewPrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
-    reverseRequest.setAmount(amount);
-    try{
-      prepaidEJBBean10.reverseWithdrawUserBalance(headers, reverseRequest,true);
-      Assert.fail("should not be here");
-    } catch (BadRequestException ex) {
-      Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
-      Assert.assertEquals("Debe tener detalle de error: request", 1, ex.getData().length);
-      Assert.assertEquals("Debe tener detalle de error: request", "rut", String.valueOf(ex.getData()[0].getValue()));
-    }
-  }
 
   @Test
   public void reverseRequestPasswordNull() throws Exception {
