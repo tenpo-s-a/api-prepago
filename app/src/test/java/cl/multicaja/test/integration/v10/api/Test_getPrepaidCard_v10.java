@@ -42,7 +42,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     HttpResponse resp = getPrepaidCard(user.getId());
-    
+
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 

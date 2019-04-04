@@ -14,6 +14,11 @@ public class Timestamps extends BaseModel {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
+  public Timestamps(LocalDateTime createdAt, LocalDateTime updatedAt) {
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }

@@ -20,11 +20,14 @@ import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
+import cl.multicaja.prepaid.helpers.tenpo.model.State;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -43,8 +46,11 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -108,6 +114,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   @EJB
   private AccountEJBBean10 accountEJBBean10;
 
+  private ApiCall apiCall;
 
   private TecnocomService tecnocomService;
 
@@ -269,6 +276,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return calculatorParameter10;
   }
 
+  public ApiCall getApiCall(){
+    if(apiCall == null){
+      apiCall =  ApiCall.getInstance();
+    }
+    return apiCall;
+  }
 
   /**
    * V2 Con id de usuario Tempo
@@ -289,10 +302,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     // Obtener usuario prepago (V2)
     PrepaidUser10 user = getPrepaidUserEJB10().findByExtId(headers,userId);
-    if(user == null){
-      //TODO: LLamar al ws usuario tempo.
-      // Verificar si existe en Tempo. Si no existe "retorna error", si existe agregar.
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    if(user == null) {
+      // Busca si el usuario existe en Tenpo.
+      user = validateTempoUser(userId);
+      if(user != null){
+        throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+      }
     }
     //Obtiene Cuenta Usuario
     Account account = getAccountEJBBean10().findByUserId(user.getId());
@@ -502,6 +517,48 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidTopup;
   }
 
+  /**
+   * Permite buscar un usaurio en tenpo por ID. Y Actualiza el usuario en Prepago.
+   * @param userId
+   * @return
+   * @throws Exception
+   */
+  private PrepaidUser10 validateTempoUser(String userId) throws Exception {
+
+    PrepaidUser10 prepaidUser10 = null;
+    try {
+
+      cl.multicaja.prepaid.helpers.tenpo.model.User userTenpo = apiCall.getUserById(UUID.fromString(userId));
+      if(userTenpo != null){
+        prepaidUser10 = new PrepaidUser10();
+        prepaidUser10.setDocumentNumber(userTenpo.getDocumentNumber());
+        //TODO: prepaidUser10.setDocumentType(DocumentType.valueOfEnum(userTenpo.getDocumentType())); // REVISAR QUE VALORES VENDRAN ACA Y AGREGAR AL ENUM
+        prepaidUser10.setName(userTenpo.getFirstName());
+        prepaidUser10.setLastName(userTenpo.getLastName());
+        prepaidUser10.setUuid(userTenpo.getUserId().toString());
+        prepaidUser10.setTimestamps(new Timestamps(LocalDateTime.now(ZoneOffset.UTC),LocalDateTime.now(ZoneOffset.UTC)));
+        prepaidUser10.setUserLevel(PrepaidUserLevel.valueOfEnum(userTenpo.getLevel().name()));
+        prepaidUser10.setStatus(getUserStatusFromTenpoStatus(userTenpo.getState()));
+        prepaidUser10.setRut(Integer.parseInt(userTenpo.getDocumentNumber()));//TODO: Eliminar  cuando se deje de depender.
+        prepaidUser10.setBalanceExpiration(0L);
+        prepaidUser10.setUserIdMc(prepaidUser10.getRut().longValue());
+        prepaidUser10 = getPrepaidUserEJB10().createUser(null,prepaidUser10);
+      }
+    } catch (NotFoundException e){
+      log.error(e);
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }catch (Exception e){
+      throw new BadRequestException(CLIENTE_ERROR_GENERICO_$VALUE);
+    }
+    return prepaidUser10;
+  }
+  public PrepaidUserStatus getUserStatusFromTenpoStatus(State state){
+    switch (state){
+      case ACTIVE: return PrepaidUserStatus.ACTIVE;
+      case BLOCKED: return PrepaidUserStatus.BLOCKED;
+      default: return PrepaidUserStatus.DISABLED;
+    }
+  }
   @Override
   public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
     this.validateTopupRequest(topupRequest);

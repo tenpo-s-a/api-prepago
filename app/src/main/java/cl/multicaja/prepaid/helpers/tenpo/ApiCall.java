@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 public class ApiCall {
 
-  private static cl.multicaja.prepaid.helpers.users.UserClient instance;
+  private static ApiCall instance;
   private static final Log LOG = LogFactory.getLog(cl.multicaja.prepaid.helpers.users.UserClient.class);
   private HttpUtils httpUtils = HttpUtils.getInstance();
   private JsonMapper jsonMapper;
@@ -40,9 +40,9 @@ public class ApiCall {
     return jsonMapper;
   }
 
-  public static cl.multicaja.prepaid.helpers.users.UserClient getInstance() {
+  public static ApiCall getInstance() {
     if(instance == null) {
-      instance = new cl.multicaja.prepaid.helpers.users.UserClient();
+      instance = new ApiCall();
     }
     return instance;
   }
