@@ -21,8 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_ACCOUNT_CREATED_EVENT;
-import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT;
+import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.*;
 
 public final class KafkaEventDelegate10 {
 
@@ -76,14 +75,15 @@ public final class KafkaEventDelegate10 {
       Map<String, Object> headers = new HashMap<>();
       if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
         headers.put("JMSCorrelationID", accountEvent.getAccount().getId());
+        ExchangeData<String> req = new ExchangeData<>(toJson(accountEvent));
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_ACCOUNT_CREATED_EVENT));
+
+        this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);
+      } else {
+        headers.put(KafkaConstants.PARTITION_KEY, 0);
+        headers.put(KafkaConstants.KEY, "1");
+        this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, toJson(accountEvent), headers);
       }
-      headers.put(KafkaConstants.PARTITION_KEY, 0);
-      headers.put(KafkaConstants.KEY, "1");
-
-      ExchangeData<String> req = new ExchangeData<>(toJson(accountEvent));
-      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_ACCOUNT_CREATED_EVENT));
-
-      this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);
     }
   }
 
@@ -105,14 +105,16 @@ public final class KafkaEventDelegate10 {
       Map<String, Object> headers = new HashMap<>();
       if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
         headers.put("JMSCorrelationID", cardEvent.getCard().getId());
+        ExchangeData<String> req = new ExchangeData<>(toJson(cardEvent));
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_CARD_CREATED_EVENT));
+
+        this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CREATED_EVENT, req, headers);
+      } else {
+        headers.put(KafkaConstants.PARTITION_KEY, 0);
+        headers.put(KafkaConstants.KEY, "1");
+
+        this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CREATED_EVENT, toJson(cardEvent), headers);
       }
-      headers.put(KafkaConstants.PARTITION_KEY, 0);
-      headers.put(KafkaConstants.KEY, "1");
-
-      ExchangeData<String> req = new ExchangeData<>(toJson(cardEvent));
-      req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_CARD_CREATED_EVENT));
-
-      this.getProducerTemplate().sendBodyAndHeaders(SEDA_CARD_CREATED_EVENT, req, headers);
     }
   }
 }

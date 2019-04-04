@@ -14,11 +14,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
 import java.sql.ResultSet;
 import java.util.Map;
 
@@ -43,6 +46,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
+    log.info(String.format("[getPrepaidCardById] Buscando tarjeta [id: %d]", id));
 
     RowMapper<PrepaidCard10> rm = (ResultSet rs, int rowNum) -> {
       PrepaidCard10 c = new PrepaidCard10();
@@ -71,6 +75,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       return getDbUtils().getJdbcTemplate()
         .queryForObject(FIND_CARD_BY_ID_SQL, rm, id);
     } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidCardById] Tarjeta [id: %d] no existe", id));
       throw new ValidationException(TARJETA_NO_EXISTE);
     }
   }
@@ -92,6 +97,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     if(prepaidCard.getId() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard.id"));
     }
+
+    log.info(String.format("[updatePrepaidCard] Actualizando tarjeta [id: %d]", cardId));
 
     StringBuilder sb = new StringBuilder();
     if(!StringUtils.isAllBlank(prepaidCard.getPan())) {
@@ -149,6 +156,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     int resp = getDbUtils().getJdbcTemplate().update(String.format(UPDATE_CARD_BY_ID_SQL, getSchema(), sb.toString()), prepaidCard.getId());
 
     if(resp == 0) {
+      log.error(String.format("[updatePrepaidCard] Tarjeta [id: %d] no existe", cardId));
       throw new ValidationException(TARJETA_NO_EXISTE);
     }
   }
@@ -189,4 +197,17 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
     getKafkaEventDelegate10().publishCardCreatedEvent(cardEvent);
   }
+
+  public String hashPan(String accountUuid, String pan) throws Exception {
+    if(StringUtils.isAllBlank(accountUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
+    }
+    if(StringUtils.isAllBlank(pan)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "pan"));
+    }
+
+    BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(4, new SecureRandom(String.valueOf(accountUuid).getBytes()));
+    return bCryptPasswordEncoder.encode(pan);
+  }
+
 }
