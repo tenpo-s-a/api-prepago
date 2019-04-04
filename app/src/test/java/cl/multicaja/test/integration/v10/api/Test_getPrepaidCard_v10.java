@@ -5,7 +5,6 @@ import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,15 +31,18 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidCardActive() throws Exception {
 
+    User user = registerUser();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
-    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
-    Account account = createRandomAccount(prepaidUser10);
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10,account.getAccountNumber());
+    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
+
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
+    HttpResponse resp = getPrepaidCard(user.getId());
+    
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
