@@ -73,6 +73,7 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
 
     getPrepaidCardEJBBean11().publishCardCreatedEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId());
 
+
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, card.getUuid());
