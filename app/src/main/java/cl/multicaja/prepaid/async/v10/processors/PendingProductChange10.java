@@ -150,7 +150,8 @@ public class PendingProductChange10 extends BaseProcessor10 {
     newPrepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
 
     // Guardar los datos de la nueva tarjeta
-    getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null, newPrepaidCard);
+    newPrepaidCard = getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null, newPrepaidCard);
+    newPrepaidCard = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, newPrepaidCard.getId());
 
     // Notificar que se ha creado una tarjeta nueva
     getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, newPrepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
