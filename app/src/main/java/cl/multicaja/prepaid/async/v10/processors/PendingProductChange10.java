@@ -83,7 +83,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
               // Si tecnocom responde que el nivel ya fue cambiado
               if(dto.getDescRetorno().contains("MPA0928")) {
                 // Revisamos si tenemos cambiado el nivel en nuestra DB
-                PrepaidUser10 storedUser10 = getRoute().getPrepaidUserEJBBean10().getPrepaidUserById(null, user.getId());
+                PrepaidUser10 storedUser10 = getRoute().getPrepaidUserEJBBean10().findById(null, user.getId());
                 if(PrepaidUserLevel.LEVEL_2.equals(storedUser10.getUserLevel())) {
                   req.getData().setNumError(Errors.CLIENTE_YA_TIENE_NIVEL_2);
                   req.getData().setMsjError("MPA0928 - EL NUEVO PRODUCTO DEBE SER DIFERENTE AL ANTERIOR");

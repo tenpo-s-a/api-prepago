@@ -117,5 +117,5 @@ public interface PrepaidCardEJB10 {
    * @param cardId id interno de la tarjeta
    * @throws Exception
    */
-  void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception;
+  void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception;
 }

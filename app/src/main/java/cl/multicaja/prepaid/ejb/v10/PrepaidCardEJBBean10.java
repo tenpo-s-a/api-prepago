@@ -315,7 +315,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
    * @throws Exception
    */
   @Override
-  public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
+  public void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception {
     throw new IllegalStateException();
   }
 }
