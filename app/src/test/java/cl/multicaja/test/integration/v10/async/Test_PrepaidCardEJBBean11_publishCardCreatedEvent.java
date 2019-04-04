@@ -45,8 +45,8 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
     // Crea cuenta/contrato
     Account account = createRandomAccount(prepaidUser10);
 
-    PrepaidCard10 card = buildPrepaidCardByAccountNumber(prepaidUser10,account.getAccountNumber());
-
+    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
+    card = createPrepaidCardV2(card);
     // Actualiza la tarjeta
     String pan = getRandomNumericString(16);
     String encryptedPan = getRandomString(20);

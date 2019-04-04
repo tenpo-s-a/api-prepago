@@ -33,6 +33,7 @@ import org.junit.*;
 import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,7 +63,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Before
-  @After
   public void clearData() {
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.%s cascade", getSchema(), "prp_cuenta"));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
@@ -301,7 +301,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_ok_first_topup_false_by_level_2() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
@@ -338,7 +338,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
     Boolean dataFound = false;
     for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
+      Thread.sleep(2000);
       List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
       if (clearing10s.size() > 0) {
         dataFound = true;
@@ -354,7 +354,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneOffset.UTC));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
@@ -508,7 +508,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Map<Long, PrepaidMovement10> movements = new HashMap<>();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
@@ -902,7 +902,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_cardCreated_event() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
 
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
@@ -999,7 +999,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   @Test
   public void topupUserBalance_accountCreated_event() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
 
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
