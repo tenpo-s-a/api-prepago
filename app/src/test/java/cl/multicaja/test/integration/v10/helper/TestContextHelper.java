@@ -77,6 +77,7 @@ public class TestContextHelper extends TestBaseUnit {
       InvoiceRoute10 invoiceRoute10 = new InvoiceRoute10();
 
       KafkaEventsRoute10 kafkaEventsRoute10 = new KafkaEventsRoute10();
+      kafkaEventsRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
 
      /*
       camelFactory.startCamelContextWithRoutes(true,

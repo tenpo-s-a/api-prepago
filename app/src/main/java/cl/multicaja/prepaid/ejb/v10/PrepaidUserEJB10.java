@@ -3,10 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
-import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -118,5 +115,34 @@ public interface PrepaidUserEJB10 {
    * @throws Exception
    */
   PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser11 createPrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 user) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser11 updatePrepaidUserForTenpoSync(Map<String,Object> headers, PrepaidUser11 user)throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param id
+   * @param uiid
+   * @param rut
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser11 findPrepaidUserForTenpoSync(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception;
 
 }

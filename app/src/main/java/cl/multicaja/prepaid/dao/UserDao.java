@@ -5,6 +5,9 @@ import cl.multicaja.prepaid.utils.PrepaidCrud;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 public class UserDao extends PrepaidCrud<User,Long> {
 
@@ -27,4 +30,15 @@ public UserDao() {
     this.em = em;
   }
 
+  public User findByUserId(Long userId) {
+    User user = null;
+    Query query = getEntityManager().createQuery("SELECT u FROM User u WHERE u.userId=:userIdValue");
+    query.setParameter("userIdValue", userId);
+    try {
+      user = (User) query.getSingleResult();
+    } catch (Exception e) {
+      // Handle exception
+    }
+    return user;
+  }
 }

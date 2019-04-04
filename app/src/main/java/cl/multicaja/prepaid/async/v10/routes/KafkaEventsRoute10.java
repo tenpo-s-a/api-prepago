@@ -17,8 +17,8 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   public static final String SEDA_INVOICE_REVERSED_EVENT = "seda:KafkaEventsRoute10.invoiceReversed";
 
 
-  private static final String USER_CREATED_TOPIC = "USER_CREATED";
-  private static final String USER_UPDATED_TOPIC = "USER_UPDATED";
+  public static final String USER_CREATED_TOPIC = "USER_CREATED";
+  public static final String USER_UPDATED_TOPIC = "USER_UPDATED";
   public static final String ACCOUNT_CREATED_TOPIC = "ACCOUNT_CREATED";
   public static final String CARD_CREATED_TOPIC = "CARD_CREATED";
   private static final String CARD_LOCKED_TOPIC = "CARD_LOCKED";

@@ -9,15 +9,14 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
-import cl.multicaja.prepaid.async.v10.routes.InvoiceRoute10;
-import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
-import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
+import cl.multicaja.prepaid.async.v10.routes.*;
 import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.kafka.events.UserEvent;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoAlta;
+import cl.multicaja.tecnocom.util.json.JsonUtils;
 import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -436,6 +435,32 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public String sendUserCreatedOrUpdated(String topicName, cl.multicaja.prepaid.kafka.events.model.User user, Integer retryCount){
+    String messageId = null;
+
+    if(user == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, UserEventCreated -> null =======");
+      throw new IllegalArgumentException();
+    }
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+    } else {
+
+      messageId = user.getId();
+      String jsonData = JsonUtils.getJsonParser().toJson(user);
+      Queue qReq = camelFactory.createJMSQueue(topicName);
+
+      ExchangeData<String> req = new ExchangeData<>(jsonData);
+      req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+      req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+      camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+    }
 
     return messageId;
   }

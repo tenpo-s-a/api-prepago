@@ -13,10 +13,12 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.dao.AccountDao;
 import cl.multicaja.prepaid.dao.CardDao;
+import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
@@ -24,6 +26,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -35,6 +38,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
+import org.postgresql.util.PSQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,10 +46,11 @@ import javax.persistence.Persistence;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @autor vutreras
@@ -615,6 +620,27 @@ public class TestBaseUnit extends TestApiBase {
 
   /**
    *
+   * @return
+   */
+  public PrepaidUser11 buildPrepaidUser11(){
+
+    PrepaidUser11 user = new PrepaidUser11();
+
+    Integer rutOrDocumentNumber = getUniqueRutNumber();
+
+    user.setRut(rutOrDocumentNumber);
+    user.setStatus(cl.multicaja.prepaid.model.v11.UserStatus.ACTIVE);
+    user.setName(getRandomString(10));
+    user.setLastName(getRandomString(10));
+    user.setDocumentNumber(rutOrDocumentNumber.toString());
+    user.setLevel(getRandomString(10));
+    user.setUiid(getRandomString(10));
+
+    return user;
+  }
+
+  /**
+   *
    * @param prepaidUser
    * @return
    * @throws Exception
@@ -930,6 +956,65 @@ public class TestBaseUnit extends TestApiBase {
     Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
 
     return prepaidUser;
+  }
+
+  /**
+   *
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  public cl.multicaja.prepaid.model.v10.PrepaidUser11 createPrepaidUserForTenpoSync(cl.multicaja.prepaid.model.v10.PrepaidUser11 user) throws BaseException,SQLException,Exception{
+
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    PrepaidUser11 userResponse = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null, user);
+
+    /**
+     * TODO: Descomentar en caso que la implementación de hibernate funcione a nivel de dev y borrar todo el código anterior.
+     */
+    /*UserDao userDao = new UserDao();
+    userDao.setEm(createEntityManager());
+    user = userDao.insert(user);*/
+
+    Assert.assertNotNull("No debe ser null",userResponse);
+    Assert.assertNotNull("No debe ser null",userResponse.getId());
+    Assert.assertNotEquals("El Id no debe ser 0",0,userResponse.getId().longValue());
+
+    if(userResponse!=null){
+      return userResponse;
+    }else{
+      //log.error("createUserWithHibernate resp: " + user);
+      throw new BaseException(ERROR_INTERNO_BBDD);
+    }
+  }
+
+  /**
+   *
+   * @param user
+   * @throws BaseException
+   */
+  public PrepaidUser11 updatePrepaidUserForTenpoSync(PrepaidUser11 user) throws Exception{
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    return getPrepaidUserEJBBean10().updatePrepaidUserForTenpoSync(null, user);
+  }
+
+  /**
+   *
+   * @param id
+   * @param uiid
+   * @param rut
+   * @return
+   * @throws Exception
+   */
+  public PrepaidUser11 findPrepaidUserForTenpoSync(Long id, String uiid, Integer rut) throws Exception{
+
+    return getPrepaidUserEJBBean10().findPrepaidUserForTenpoSync(null,null,uiid,null);
   }
 
   /**

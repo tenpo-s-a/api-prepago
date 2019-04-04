@@ -4,16 +4,20 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.json.JsonUtils;
+import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
@@ -22,11 +26,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -393,4 +400,123 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BaseException(ERROR_INTERNO_BBDD);
     }
   }
+
+  @Override
+  public PrepaidUser11 createPrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 user) throws Exception {
+
+    final String SP_NAME = getSchema() + ".mc_prp_crear_usuario_v11";
+
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    if(user.getRut() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+
+    if(user.getUiid() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uiid"));
+    }
+
+    Object[] params = {
+      user.getRut(),
+      user.getStatus().toString(),
+      user.getName(),
+      user.getLastName(),
+      user.getDocumentNumber(),
+      user.getLevel(),
+      user.getUiid(),
+      new OutParam("_r_id", Types.BIGINT),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
+
+    if ("0".equals(resp.get("_error_code"))) {
+      return findPrepaidUserForTenpoSync(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
+    } else {
+      log.error("createUserWithHibernate resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+  }
+
+  @Override
+  public PrepaidUser11 updatePrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 userToUpdate) throws Exception {
+
+    final String SP_NAME = getSchema() + ".mc_prp_actualizar_estado_usuario_v11";
+
+    if(userToUpdate == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    if(userToUpdate.getId() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    Object[] params = {
+      userToUpdate.getId(),
+      userToUpdate.getDocumentNumber(),
+      userToUpdate.getName(),
+      userToUpdate.getLastName(),
+      userToUpdate.getStatus().toString(),
+      userToUpdate.getLevel(),
+      userToUpdate.getUiid(),
+      new OutParam("_error_code", Types.VARCHAR),
+      new OutParam("_error_msg", Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
+
+    if ("0".equals(resp.get("_error_code"))) {
+      return findPrepaidUserForTenpoSync(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
+    } else {
+      log.error("updateUserWithHibernate resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+  }
+
+  @Override
+  public PrepaidUser11 findPrepaidUserForTenpoSync(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception {
+
+    final String SP_NAME = getSchema() + ".mc_prp_buscar_usuarios_v11";
+    PrepaidUser11 userResult = new PrepaidUser11();
+
+    Object[] params = {
+      id != null ? id : new NullParam(Types.BIGINT),
+      rut != null ? rut : new NullParam(Types.INTEGER),
+      uiid != null ? uiid : new NullParam(Types.VARCHAR)
+    };
+
+    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
+
+    if (resp!=null) {
+
+      List result = (List)resp.get("result");
+      if(result != null){
+        Map<String, Object> userResponse = (Map)result.get(0);
+        Set<String> keys = userResponse.keySet();
+
+        for (String k : keys) {
+          if(k != "_error_msg" && k != "_r_id" && k!= "_error_code"){
+            Field field = PrepaidUser11.class.getDeclaredField(userResult.snakeCaseToCamelCase(k.substring(1)));
+            field.setAccessible(true);
+            field.set(userResult,userResult.castData(k.substring(1),userResponse.get(k).toString()));
+          }
+        }
+        return userResult;
+      }else{
+        return null;
+      }
+
+    } else {
+      log.error("findUserWithHibernate resp: " + resp);
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+
+  }
+
+
 }
