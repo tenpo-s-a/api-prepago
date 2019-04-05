@@ -986,7 +986,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
       ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-        .getMessage(qResp3, prepaidTopup10.getTransactionId());
+        .getMessage(qResp3, topup2.getIdTxExterno());
 
       Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
       Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
@@ -1101,19 +1101,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       ExchangeData<PrepaidTopupData10> remoteTopup2 = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(1000l, 1000l).getMessage(qResp2, resp2.getMessageId());
 
       Assert.assertNull("No Deberia existir un topup en la cola", remoteTopup2);
-
-      Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
-      ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-        .getMessage(qResp3, prepaidTopup10.getTransactionId());
-
-      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-      TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-      Assert.assertEquals("Debe tener el mismo monto", prepaidTopup10.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
-      Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
-      Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
     }
 
     // Tercera carga
@@ -1135,6 +1122,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.REJECTED, topup2.getEstado());
         Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.REJECTED, topup2.getEstadoNegocio());
       }
+
+      Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
+      ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+        .getMessage(qResp3, secondTopup.getTransactionId());
+
+      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+      TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+      Assert.assertEquals("Debe tener el mismo monto", secondTopup.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
+      Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
+      Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
     }
   }
 
@@ -1247,6 +1247,19 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup2.getEstado());
         Assert.assertEquals("debe tener estado negocio -> IN_PROCESS", BusinessStatusType.REVERSED, topup2.getEstadoNegocio());
 
+        Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
+        ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+          .getMessage(qResp3, topup2.getIdTxExterno());
+
+        Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+        Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+        TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+        Assert.assertEquals("Debe tener el mismo monto", secondTopup.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
+        Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
+        Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+
 
         PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
 
@@ -1261,18 +1274,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp3, prepaidTopup10.getTransactionId());
 
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo monto", prepaidTopup10.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
-    Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
   }
 
   @Test
@@ -1337,22 +1339,22 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.REJECTED, topup2.getEstado());
         Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.REJECTED, topup2.getEstadoNegocio());
       }
+
+      Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
+      ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(45000, 60000)
+        .getMessage(qResp3, secondTopup.getTransactionId());
+
+      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
+      Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+      TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+      Assert.assertEquals("Debe tener el mismo monto", secondTopup.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
+      Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
+      Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
     }
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
-
-    Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(45000, 60000)
-      .getMessage(qResp3, prepaidTopup10.getTransactionId());
-
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event);
-    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
-
-    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo monto", prepaidTopup10.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
-    Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
   }
 
   @Test
