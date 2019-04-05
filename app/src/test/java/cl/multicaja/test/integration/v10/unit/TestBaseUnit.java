@@ -1118,13 +1118,13 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public cl.multicaja.prepaid.model.v10.PrepaidUser11 createPrepaidUserForTenpoSync(cl.multicaja.prepaid.model.v10.PrepaidUser11 user) throws BaseException,SQLException,Exception{
+  public cl.multicaja.prepaid.model.v10.PrepaidUser11 createPrepaidUserV11(cl.multicaja.prepaid.model.v10.PrepaidUser11 user) throws BaseException,SQLException,Exception{
 
     if(user == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
     }
 
-    PrepaidUser11 userResponse = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null, user);
+    PrepaidUser11 userResponse = getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
 
     /**
      * TODO: Descomentar en caso que la implementación de hibernate funcione a nivel de dev y borrar todo el código anterior.
@@ -1150,12 +1150,12 @@ public class TestBaseUnit extends TestApiBase {
    * @param user
    * @throws BaseException
    */
-  public PrepaidUser11 updatePrepaidUserForTenpoSync(PrepaidUser11 user) throws Exception{
+  public PrepaidUser11 updatePrepaidUserV11(PrepaidUser11 user) throws Exception{
     if(user == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
     }
 
-    return getPrepaidUserEJBBean10().updatePrepaidUserForTenpoSync(null, user);
+    return getPrepaidUserEJBBean10().updatePrepaidUserV11(null, user);
   }
 
   /**
@@ -1166,9 +1166,9 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidUser11 findPrepaidUserForTenpoSync(Long id, String uiid, Integer rut) throws Exception{
+  public PrepaidUser11 findPrepaidUserV11(Long id, String uiid, Integer rut) throws Exception{
 
-    return getPrepaidUserEJBBean10().findPrepaidUserForTenpoSync(null,null,uiid,null);
+    return getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,uiid,null);
   }
 
   /**

@@ -123,7 +123,7 @@ public interface PrepaidUserEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidUser11 createPrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 user) throws Exception;
+  PrepaidUser11 createPrepaidUserV11(Map<String, Object> headers, PrepaidUser11 user) throws Exception;
 
   /**
    *
@@ -132,7 +132,7 @@ public interface PrepaidUserEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidUser11 updatePrepaidUserForTenpoSync(Map<String,Object> headers, PrepaidUser11 user)throws Exception;
+  PrepaidUser11 updatePrepaidUserV11(Map<String,Object> headers, PrepaidUser11 user)throws Exception;
 
   /**
    *
@@ -143,6 +143,6 @@ public interface PrepaidUserEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidUser11 findPrepaidUserForTenpoSync(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception;
+  PrepaidUser11 findPrepaidUserV11(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception;
 
 }

@@ -19,19 +19,19 @@ public class Test_PrepaidUserEJBBean11_createUserFromTenpo extends TestBaseUnit 
   @Test
   public void createUserOk() throws Exception{
     PrepaidUser11 user = buildPrepaidUser11();
-    getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null, user);
+    getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
   }
 
   @Test
   public void createUserNotOk() throws Exception{
 
     PrepaidUser11 user = buildPrepaidUser11();
-    getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null, user);
+    getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
 
     //se intenta registrar exactamente el mismo usuario
     try {
 
-      getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null, user);
+      getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(BaseException bex){

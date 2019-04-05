@@ -62,13 +62,13 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
     Assert.assertEquals("Igual", userSent.getState(), userResponse.getState());
 
     //Save data on DataBase
-    PrepaidUser11 userToCreated = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null,userToCreate);
+    PrepaidUser11 userToCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null,userToCreate);
     Assert.assertNotNull("No debe ser null",userToCreated);
     Assert.assertNotNull("No debe ser null",userToCreated.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userToCreated.getId().longValue());
 
     //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserForTenpoSync(null,userToCreated.getUiid(),null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userToCreated.getUiid(),null);
     Assert.assertEquals("Igual",userToCreated.getId(),userFound.getId());
     Assert.assertEquals("Igual",userToCreated.getUiid(),userFound.getUiid());
     Assert.assertEquals("Igual",userToCreated.getStatus(),userFound.getStatus());
@@ -105,7 +105,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
     Thread.sleep(1000);
 
     //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserForTenpoSync(null,userEventSend.getId(), null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userEventSend.getId(), null);
 
     Assert.assertNotNull("No es nulo", userFound);
 

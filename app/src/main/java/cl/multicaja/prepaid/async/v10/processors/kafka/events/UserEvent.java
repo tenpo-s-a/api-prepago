@@ -53,8 +53,8 @@ public class UserEvent extends BaseProcessor10 {
 
           PrepaidUser11 userToCreate = buildPrepaidUserToSave(userResponse);
 
-          if(getRoute().getPrepaidUserEJBBean10().findPrepaidUserForTenpoSync(null,null,userResponse.getId(),null) == null){
-            getRoute().getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null,userToCreate);
+          if(getRoute().getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,userResponse.getId(),null) == null){
+            getRoute().getPrepaidUserEJBBean10().createPrepaidUserV11(null,userToCreate);
           }
         }catch (Exception ex){
           log.error("[processUserCreatedEvent] Processing USER_CREATED event error: "+ex);
@@ -78,7 +78,7 @@ public class UserEvent extends BaseProcessor10 {
 
           cl.multicaja.prepaid.kafka.events.model.User userResponse = jsonUtils.fromJson(data, cl.multicaja.prepaid.kafka.events.model.User.class);
 
-          PrepaidUser11 userToUpdate = getRoute().getPrepaidUserEJBBean10().findPrepaidUserForTenpoSync(null,null,userResponse.getId(),null);
+          PrepaidUser11 userToUpdate = getRoute().getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,userResponse.getId(),null);
 
           if(userToUpdate != null){
 
@@ -89,7 +89,7 @@ public class UserEvent extends BaseProcessor10 {
             userToUpdate.setStatus(UserStatus.valueOfEnum(userResponse.getState()));
             userToUpdate.setLevel(userResponse.getLevel());
 
-            getRoute().getPrepaidUserEJBBean10().updatePrepaidUserForTenpoSync(null,userToUpdate);
+            getRoute().getPrepaidUserEJBBean10().updatePrepaidUserV11(null,userToUpdate);
           }
         }catch(Exception ex){
           log.error("[processUserCreatedEvent] Processing USER_UPDATED event error: "+ex);

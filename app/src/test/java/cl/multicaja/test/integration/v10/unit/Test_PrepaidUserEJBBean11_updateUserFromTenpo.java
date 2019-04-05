@@ -17,16 +17,16 @@ public class Test_PrepaidUserEJBBean11_updateUserFromTenpo extends TestBaseUnit 
   public void updateUserOk() throws Exception{
     PrepaidUser11 user = buildPrepaidUser11();
 
-    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null,user);
+    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null,user);
     Assert.assertNotNull("No debe ser null",userCreated);
     Assert.assertNotNull("No debe ser null",userCreated.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userCreated.getId().longValue());
 
     Integer newRut = getUniqueRutNumber();
     userCreated.setRut(newRut);
-    PrepaidUser11 userUpdated = getPrepaidUserEJBBean10().updatePrepaidUserForTenpoSync(null,userCreated);
+    PrepaidUser11 userUpdated = getPrepaidUserEJBBean10().updatePrepaidUserV11(null,userCreated);
 
-    PrepaidUser11 userResult = getPrepaidUserEJBBean10().findPrepaidUserForTenpoSync(null,null,userUpdated.getUiid(), null);
+    PrepaidUser11 userResult = getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,userUpdated.getUiid(), null);
     Assert.assertEquals("Id Deben ser iguales",userUpdated.getId(),userResult.getId());
     Assert.assertEquals("UserId Deben ser iguales",userUpdated.getIdUserMc(),userResult.getIdUserMc());
     Assert.assertEquals("Actualizacion Deben ser iguales",userUpdated.getRut(),userResult.getRut());

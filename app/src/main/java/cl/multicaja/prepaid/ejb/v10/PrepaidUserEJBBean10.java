@@ -509,7 +509,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidUser11 createPrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 user) throws Exception {
+  public PrepaidUser11 createPrepaidUserV11(Map<String, Object> headers, PrepaidUser11 user) throws Exception {
 
     final String SP_NAME = getSchema() + ".mc_prp_crear_usuario_v11";
 
@@ -541,7 +541,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      return findPrepaidUserForTenpoSync(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
+      return findPrepaidUserV11(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
     } else {
       log.error("createUserWithHibernate resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
@@ -550,7 +550,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidUser11 updatePrepaidUserForTenpoSync(Map<String, Object> headers, PrepaidUser11 userToUpdate) throws Exception {
+  public PrepaidUser11 updatePrepaidUserV11(Map<String, Object> headers, PrepaidUser11 userToUpdate) throws Exception {
 
     final String SP_NAME = getSchema() + ".mc_prp_actualizar_estado_usuario_v11";
 
@@ -577,7 +577,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
 
     if ("0".equals(resp.get("_error_code"))) {
-      return findPrepaidUserForTenpoSync(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
+      return findPrepaidUserV11(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
     } else {
       log.error("updateUserWithHibernate resp: " + resp);
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
@@ -586,7 +586,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidUser11 findPrepaidUserForTenpoSync(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception {
+  public PrepaidUser11 findPrepaidUserV11(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception {
 
     final String SP_NAME = getSchema() + ".mc_prp_buscar_usuarios_v11";
     PrepaidUser11 userResult = new PrepaidUser11();

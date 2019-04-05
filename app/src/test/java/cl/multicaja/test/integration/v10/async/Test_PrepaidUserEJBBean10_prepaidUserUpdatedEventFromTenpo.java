@@ -36,7 +36,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     userDao.setEm(createEntityManager());
 
     PrepaidUser11 userToCreate = buildPrepaidUser11();
-    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null,userToCreate);
+    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null,userToCreate);
     Assert.assertNotNull("No debe ser null",userCreated);
     Assert.assertNotNull("No debe ser null",userCreated.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userCreated.getId().longValue());
@@ -86,10 +86,10 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     userCreated.setLevel(userResponse.getLevel());
     userCreated.setUiid(userResponse.getId());
 
-    PrepaidUser11 userUpdated = updatePrepaidUserForTenpoSync(userCreated);
+    PrepaidUser11 userUpdated = updatePrepaidUserV11(userCreated);
 
     //find on Database for validate changes
-    PrepaidUser11 userFound = findPrepaidUserForTenpoSync(null,userCreated.getUiid(),null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userCreated.getUiid(),null);
 
     Assert.assertEquals("Igual",userUpdated.getId(),userFound.getId());
     Assert.assertEquals("Igual",userUpdated.getUiid(),userFound.getUiid());
@@ -109,7 +109,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     userDao.setEm(createEntityManager());
 
     PrepaidUser11 userToCreate = buildPrepaidUser11();
-    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserForTenpoSync(null,userToCreate);
+    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null,userToCreate);
     Assert.assertNotNull("No debe ser null",userCreated);
     Assert.assertNotNull("No debe ser null",userCreated.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userCreated.getId().longValue());
@@ -131,7 +131,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     Thread.sleep(1000);
 
     //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserForTenpoSync(null,userEventSend.getId(), null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userEventSend.getId(), null);
 
     Assert.assertNotNull("No es nulo", userFound);
 
