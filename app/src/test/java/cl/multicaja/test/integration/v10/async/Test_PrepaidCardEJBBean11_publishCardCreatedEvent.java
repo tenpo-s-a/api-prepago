@@ -39,16 +39,14 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
     user.getRut().setStatus(RutStatus.VERIFIED);
     user = updateUser(user);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
-    card = createPrepaidCard10(card);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // Crea cuenta/contrato
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
+    Account account = createRandomAccount(prepaidUser10);
 
+    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
+    card = createPrepaidCardV2(card);
     // Actualiza la tarjeta
     String pan = getRandomNumericString(16);
     String encryptedPan = getRandomString(20);
@@ -69,11 +67,12 @@ public class Test_PrepaidCardEJBBean11_publishCardCreatedEvent extends TestBaseU
     card.setNumeroUnico(numeroUnico);
     card.setAccountId(account.getId());
 
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, card.getId(), Long.MAX_VALUE, card);
+    getPrepaidCardEJBBean11().updatePrepaidCard(null, card.getId(), account.getId(), card);
 
     card = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
     getPrepaidCardEJBBean11().publishCardCreatedEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId());
+
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)

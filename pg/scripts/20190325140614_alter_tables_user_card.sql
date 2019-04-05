@@ -22,7 +22,8 @@ ALTER TABLE ${schema}.prp_usuario
   ADD COLUMN apellido         VARCHAR(30) NOT NULL DEFAULT '',
   ADD COLUMN numero_documento VARCHAR(30) NOT NULL DEFAULT '',
   ADD COLUMN tipo_documento   VARCHAR(20) NOT NULL DEFAULT '',
-  ADD COLUMN nivel            VARCHAR(20) NOT NULL DEFAULT '';
+  ADD COLUMN nivel            VARCHAR(20) NOT NULL DEFAULT '',
+  ADD COLUMN uuid             VARCHAR(100) NOT NULL DEFAULT '';
 
 ALTER TABLE ${schema}.prp_tarjeta
   ADD COLUMN uuid       VARCHAR(50) NOT NULL DEFAULT uuid_generate_v4()::VARCHAR,

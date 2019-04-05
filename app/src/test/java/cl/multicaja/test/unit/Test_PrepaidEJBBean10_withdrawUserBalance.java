@@ -182,7 +182,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)
-      .when(prepaidEJBBean10).buildPrepaidMovement(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      .when(prepaidEJBBean10).buildPrepaidMovement(Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any(), Mockito.any());
 
     Mockito.doReturn(withdrawMovement)
       .doReturn(withdrawReverseMovement)

@@ -20,7 +20,6 @@ public class PrepaidTopupData10 implements Serializable {
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
 
-  private User user;
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
   private CdtTransaction10 cdtTransaction10;
@@ -28,7 +27,6 @@ public class PrepaidTopupData10 implements Serializable {
   private PrepaidMovement10 prepaidMovement10;
   private PrepaidMovement10 issuanceFeeMovement10;
   private UserAccount userAccount;
-
   private Account account;
 
   private Errors numError;
@@ -38,11 +36,14 @@ public class PrepaidTopupData10 implements Serializable {
     super();
   }
 
-  public PrepaidTopupData10(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+
+  public PrepaidTopupData10(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser10, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+
     this.prepaidTopup10 = prepaidTopup;
-    this.user = user;
+    this.prepaidUser10 = prepaidUser10;
     this.cdtTransaction10 = cdtTransaction;
     this.prepaidMovement10 = prepaidMovement;
+
   }
 
   public PrepaidTopup10 getPrepaidTopup10() {
@@ -61,13 +62,6 @@ public class PrepaidTopupData10 implements Serializable {
     this.prepaidWithdraw10 = prepaidWithdraw10;
   }
 
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
 
   public PrepaidUser10 getPrepaidUser10() {
     return prepaidUser10;

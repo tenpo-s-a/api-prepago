@@ -24,17 +24,17 @@ public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
   @Test
   public void pendingSendWithdrawMailOk() throws Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUser10();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    PrepaidWithdraw10 withdraw = buildPrepaidWithdraw10(user);
+    PrepaidWithdraw10 withdraw = buildPrepaidWithdraw10();
     withdraw.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, withdraw);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    String messageId = sendPendingWithdrawMail(user, withdraw,prepaidMovement10,0);
+    String messageId = sendPendingWithdrawMail(prepaidUser10, withdraw,prepaidMovement10,0);
 
     Queue qResp = camelFactory.createJMSQueue(PENDING_SEND_MAIL_WITHDRAW_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
@@ -43,19 +43,20 @@ public class Test_PendingSendWithdrawMail10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Debe contener un withdraw",remote.getData().getPrepaidWithdraw10());
   }
 
+  //TODO: Ya no se enviaran mails
+  @Ignore
   @Test
   public void pendingSendWithdrawMailNotOk() throws Exception {
 
-    User user = registerUser();
 
-    PrepaidWithdraw10 withdraw = buildPrepaidWithdraw10(user);
+    PrepaidWithdraw10 withdraw = buildPrepaidWithdraw10();
     withdraw.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
 
     PrepaidMovement10 prepaidMovement10 = new PrepaidMovement10();
     prepaidMovement10.setFecfac(new Date());
 
 
-    String messageId = sendPendingWithdrawMail(user, withdraw,prepaidMovement10,3);
+    String messageId = sendPendingWithdrawMail(new PrepaidUser10(), withdraw,prepaidMovement10,3);
 
     Queue qResp = camelFactory.createJMSQueue(ERROR_SEND_MAIL_WITHDRAW_RESP);
     ExchangeData<PrepaidTopupData10> remote = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
