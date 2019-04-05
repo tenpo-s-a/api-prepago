@@ -194,8 +194,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
       u.setUuid(rs.getString("uuid"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(rs.getObject("fecha_creacion",LocalDateTime.class));
-      timestamps.setUpdatedAt(rs.getObject("fecha_actualizacion",LocalDateTime.class));
+      timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());
       u.setTimestamps(timestamps);
       return u;
     };
