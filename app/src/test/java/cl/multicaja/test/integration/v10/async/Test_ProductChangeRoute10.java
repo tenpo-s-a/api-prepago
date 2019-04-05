@@ -113,10 +113,6 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     PrepaidUser10 storedPrepaidUser = getPrepaidUserEJBBean10().findById(null, prepaidUser.getId());
     Assert.assertEquals("Debe tener nivel 2", PrepaidUserLevel.LEVEL_2, storedPrepaidUser.getUserLevel());
 
-    // Revisar que la tarjeta este cerrada
-    PrepaidCard10 storedCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
-    Assert.assertEquals("La tarjeta original debe estar cerrada", PrepaidCardStatus.LOCKED_HARD, storedCard.getStatus());
-
     // Revisar que existan el evento de tarjeta cerrada en kafka
     qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -132,25 +128,19 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
 
-    // Revisar que exista una nueva tarjeta con estado activo para este usuario
-    PrepaidCard10 newStoredCard = getPrepaidCardEJBBean11().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-    Assert.assertNotNull("Debe existir una nueva tarjeta con estado ACTIVE", newStoredCard);
-
-    newStoredCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, newStoredCard.getId());
-
     // Revisar que existan el evento de tarjeta creada en kafka
     qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, newStoredCard.getUuid());
+      .getMessage(qResp, prepaidCard.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event.getData());
 
     cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 
-    Assert.assertEquals("Debe tener el mismo card id", newStoredCard.getUuid(), cardEvent.getCard().getId());
+    Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUserIdMc().toString(), cardEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo pan", newStoredCard.getPan(), cardEvent.getCard().getPan());
+    Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
   }
 }

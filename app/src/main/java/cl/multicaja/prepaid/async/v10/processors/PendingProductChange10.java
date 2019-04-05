@@ -128,33 +128,11 @@ public class PendingProductChange10 extends BaseProcessor10 {
     // Subir el nivel del usuario
     getRoute().getPrepaidUserEJBBean10().updatePrepaidUserLevel(user.getId(), PrepaidUserLevel.LEVEL_2);
 
-    // Cerrar la tarjeta antigua
-    getRoute().getPrepaidCardEJBBean11().updatePrepaidCardStatus(null, prepaidCard.getId(), PrepaidCardStatus.LOCKED_HARD);
-
     // Notificar el cierre de la tarjeta antigua
     getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
 
-    // Rellenar los datos de la nueva tarjeta
-    PrepaidCard10 newPrepaidCard = new PrepaidCard10();
-    //FIXME: se debe rellenar con los datos de la nueva tarjeta (si existe una nueva)
-    newPrepaidCard.setIdUser(user.getId());
-    newPrepaidCard.setPan(prepaidCard.getPan());
-    newPrepaidCard.setEncryptedPan(prepaidCard.getEncryptedPan());
-    newPrepaidCard.setProcessorUserId(prepaidCard.getProcessorUserId());
-    newPrepaidCard.setExpiration(prepaidCard.getExpiration());
-    newPrepaidCard.setNameOnCard(prepaidCard.getNameOnCard());
-    newPrepaidCard.setProducto(prepaidCard.getProducto());
-    newPrepaidCard.setNumeroUnico(prepaidCard.getNumeroUnico());
-    newPrepaidCard.setHashedPan(prepaidCard.getHashedPan());
-    newPrepaidCard.setAccountId(prepaidCard.getAccountId());
-    newPrepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-
-    // Guardar los datos de la nueva tarjeta
-    newPrepaidCard = getRoute().getPrepaidCardEJBBean11().createPrepaidCard(null, newPrepaidCard);
-    newPrepaidCard = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, newPrepaidCard.getId());
-
     // Notificar que se ha creado una tarjeta nueva
-    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, newPrepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+    getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
 
   private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
