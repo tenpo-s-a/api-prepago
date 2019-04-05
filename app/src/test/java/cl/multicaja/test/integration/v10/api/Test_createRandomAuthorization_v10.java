@@ -1,12 +1,12 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.math.BigDecimal;
 
 public class Test_createRandomAuthorization_v10 extends TestBaseUnitApi {
@@ -26,30 +26,26 @@ public class Test_createRandomAuthorization_v10 extends TestBaseUnitApi {
   @Test
   public void shouldCreateRandomAuthorization() throws  Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // Preparar una carga inicial de 5000
     BigDecimal topupValue = new BigDecimal(5000);
-    topupUserBalance(user, topupValue);
+    topupUserBalance(prepaidUser.getUuid(), topupValue);
     PrepaidCard10 card = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tenener una tarjeta activa", card);
 
-    System.out.println("user.getId(): "+user.getId());
     System.out.println("prepaidUser.getRut(): "+prepaidUser.getRut());
 
-    HttpResponse resp = createRandomAuthorization(user.getId());
+    HttpResponse resp = createRandomAuthorization(prepaidUser.getUserIdMc());
     Assert.assertEquals("status 200", 200, resp.getStatus());
     BigDecimal randomAmountIn = resp.toObject(BigDecimal.class);
-    System.out.println("Valor Guardado de autorización para el usuario : "
-      +user.getId().longValue()+" por "+randomAmountIn);
+    System.out.println("Valor Guardado de autorización para el usuario : " +prepaidUser.getUserIdMc()+" por "+randomAmountIn);
 
-    HttpResponse respRead = getAuthorizations(user.getId().longValue());
+    HttpResponse respRead = getAuthorizations(prepaidUser.getUserIdMc());
     Assert.assertEquals("status 200", 200, resp.getStatus());
     BigDecimal randomAmountOut = respRead.toObject(BigDecimal.class);
-    System.out.println("Valor Encontrado de autorización para el usuario : "
-      +user.getId().longValue()+" por "+randomAmountOut);
+    System.out.println("Valor Encontrado de autorización para el usuario : "+prepaidUser.getUserIdMc()+" por "+randomAmountOut);
 
     Assert.assertEquals("El valor de "+randomAmountIn+" coincide ",randomAmountIn,randomAmountOut);
 

@@ -44,7 +44,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   private void updateCreationDate(Long id) {
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimiento set fecha_creacion = ((fecha_creacion - INTERVAL '1 DAY')) WHERE id = %s", getSchema(), id));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingBody() {
 
@@ -56,7 +57,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: request", bex.getMessage().contains("withdrawRequest"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmount() {
 
@@ -71,7 +73,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount", bex.getMessage().contains("amount"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmountValue() {
 
@@ -88,7 +91,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount.value", bex.getMessage().contains("amount.value"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
@@ -106,7 +110,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount.currency_code", bex.getMessage().contains("amount.currency_code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingRut() {
 
@@ -125,7 +130,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: rut", bex.getMessage().contains("rut"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingPassword() {
 
@@ -151,7 +157,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     System.out.println(bex.getMessage());
     Assert.assertTrue("Debe tener error: password", bex.getMessage().contains("password"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingMerchantCode() {
 
@@ -172,7 +179,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_code", bex.getMessage().contains("merchant_code"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingMerchantName() {
 
@@ -194,7 +202,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_name", bex.getMessage().contains("merchant_name"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingMerchantCategory() {
 
@@ -217,7 +226,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_category", bex.getMessage().contains("merchant_category"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn400_OnMissingTransactionId() {
 
@@ -241,7 +251,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: transaction_id", bex.getMessage().contains("transaction_id"));
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn404_UserNull() throws Exception {
     // POS
@@ -274,7 +285,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_NO_EXISTE.getValue(), errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_UserBlacklisted() throws Exception {
     // POS
@@ -311,7 +323,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR.getValue(), errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
     // POS
@@ -344,7 +357,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_NO_TIENE_PREPAGO.getValue(), errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
     // POS
@@ -389,7 +403,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
     }
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_POS() throws Exception {
     User user = registerUser("1235");
@@ -421,7 +436,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_WEB() throws Exception {
     User user = registerUser("1235");
@@ -453,7 +469,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn202_OriginalWithdrawNull_POS() throws Exception {
     User user = registerUser("1235");
@@ -483,7 +500,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn202_OriginalWithdrawNull_WEB() throws Exception {
     User user = registerUser("1235");
@@ -513,7 +531,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_differentAmount_POS() throws Exception {
     User user = registerUser("1235");
@@ -550,7 +569,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn422_differentAmount_WEB() throws Exception {
     User user = registerUser("1235");
@@ -587,7 +607,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired() throws Exception {
     User user = registerUser("1235");
@@ -625,7 +646,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNull("No debe tener movimientos de reversa", movement);
 
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired_WEB() throws Exception {
     User user = registerUser("1235");
@@ -662,7 +684,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimientos de reversa", movement);
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_ReverseAccepted_POS() throws Exception {
     User user = registerUser("1235");
@@ -695,7 +718,8 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
   }
-
+  //TODO: Verificar si esto se seguira usando
+  @Ignore
   @Test
   public void shouldReturn201_ReverseAccepted_WEB() throws Exception {
     User user = registerUser("1235");

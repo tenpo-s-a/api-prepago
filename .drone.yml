@@ -215,7 +215,10 @@ pipeline:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev
       - API_ENVIRONMENT=development
-    consul_kv: env/staging.env
+      - DB_USERNAME=prepago
+      - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
+      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
+      - DB_HOST_NAME=prepaid-postgresql-staging
     when:
       event: [ push ]
       branch: master

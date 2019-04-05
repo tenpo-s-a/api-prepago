@@ -41,7 +41,11 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
+  
   private static final String FIND_ACCOUNT_BY_UUID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE uuid = ?", getSchema());
+
+  private static final String FIND_ACCOUNT_BY_USERID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? ORDER BY creacion DESC LIMIT 1", getSchema());
+
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
   @Inject
@@ -83,6 +87,19 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[findById]  Cuenta/contrato con id [%s] no existe", uuid));
       throw new ValidationException(CUENTA_NO_EXISTE);
+    }
+  }
+  
+  public Account findByUserId(Long userId) throws Exception {
+    if(userId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+    log.info(String.format("[findByUserId] Buscando cuenta/contrato por -> userId [%d]", userId));
+    try{
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, this.getAccountMapper(), userId);
+    }catch (Exception e){
+      log.error(String.format("[findByUserId] Buscando cuenta/contrato por -> userId [%d] no existe", userId));
+      return null;
     }
   }
 
@@ -138,8 +155,11 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
       return ps;
     }, keyHolder);
-
+    try{
     return  this.findById((long) keyHolder.getKey());
+    }catch (Exception e){
+      return null;
+    }
   }
 
   public void publishAccountCreatedEvent(Long externalUserId, Account acc) throws Exception {

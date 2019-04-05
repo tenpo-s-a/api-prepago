@@ -48,14 +48,15 @@ public final class PrepaidTopupDelegate10 {
     return producerTemplate;
   }
 
-  /**
-   * Envia un registro de topup al proceso asincrono
-   *
+   /**
+   * V2
    * @param prepaidTopup
-   * @param user
+   * @param prepaidUser10
+   * @param cdtTransaction
+   * @param prepaidMovement
    * @return
    */
-  public String sendTopUp(PrepaidTopup10 prepaidTopup, User user, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
+  public String sendTopUp(PrepaidTopup10 prepaidTopup, PrepaidUser10 prepaidUser10, CdtTransaction10 cdtTransaction, PrepaidMovement10 prepaidMovement) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -70,7 +71,7 @@ public final class PrepaidTopupDelegate10 {
 
     String endpoint = "seda:PrepaidTopupRoute10.pendingTopup";
 
-    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, user, cdtTransaction, prepaidMovement);
+    PrepaidTopupData10 data = new PrepaidTopupData10(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement);
 
     ExchangeData<PrepaidTopupData10> req = new ExchangeData<>(data);
     req.getProcessorMetadata().add(new ProcessorMetadata(0, endpoint));
@@ -79,6 +80,7 @@ public final class PrepaidTopupDelegate10 {
 
     return messageId;
   }
+
 
   public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 prepaidUser10, PrepaidMovement10 reverse) {
 
@@ -137,6 +139,7 @@ public final class PrepaidTopupDelegate10 {
 
     return messageId;
   }
+
 
   public String sendMovementToAccounting(PrepaidMovement10 prepaidWithdraw, UserAccount userAccount) {
     if (!CamelFactory.getInstance().isCamelRunning()) {

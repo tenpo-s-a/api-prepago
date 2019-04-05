@@ -27,7 +27,8 @@ public class Test_20180510114230_create_table_prp_usuario extends TestDbBasePg {
       new ColumnInfo("apellido",SqlType.VARCHAR.getGetJavaType(),30),
       new ColumnInfo("numero_documento",SqlType.VARCHAR.getGetJavaType(),30),
       new ColumnInfo("tipo_documento",SqlType.VARCHAR.getGetJavaType(),20),
-      new ColumnInfo("nivel",SqlType.VARCHAR.getGetJavaType(),20)
+      new ColumnInfo("nivel",SqlType.VARCHAR.getGetJavaType(),20),
+      new ColumnInfo("uuid",SqlType.VARCHAR.getGetJavaType(),100)
     );
     Assert.assertEquals("Existe tabla prp_usuario", true, exists);
   }
