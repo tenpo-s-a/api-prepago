@@ -281,3 +281,4 @@ services:
       event: [ push ]
       branch:
         exclude: master
+
