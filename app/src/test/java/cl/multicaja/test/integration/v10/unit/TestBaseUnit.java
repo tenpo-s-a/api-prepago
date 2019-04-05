@@ -647,7 +647,7 @@ public class TestBaseUnit extends TestApiBase {
     user.setLastName(getRandomString(10));
     user.setDocumentNumber(rutOrDocumentNumber.toString());
     user.setLevel(getRandomString(10));
-    user.setUiid(getRandomString(10));
+    user.setUuid(getRandomString(10));
 
     return user;
   }
@@ -1173,7 +1173,7 @@ public class TestBaseUnit extends TestApiBase {
 
   /**
    *
-   * @param prepaidCard
+   * @param prepaidUser
    * @return
    * @throws Exception
    */

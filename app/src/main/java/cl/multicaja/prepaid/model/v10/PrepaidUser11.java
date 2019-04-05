@@ -16,7 +16,7 @@ import java.util.TimeZone;
 public class PrepaidUser11 {
 
   private Long id;
-  private String uiid;
+  private String uuid;
   private Long idUserMc;
   private UserStatus status;
   private String name;
@@ -39,12 +39,12 @@ public class PrepaidUser11 {
     this.id = id;
   }
 
-  public String getUiid() {
-    return uiid;
+  public String getUuid() {
+    return uuid;
   }
 
-  public void setUiid(String uiid) {
-    this.uiid = uiid;
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   public Long getIdUserMc() {
@@ -149,83 +149,6 @@ public class PrepaidUser11 {
 
   public void setAttemptsValidation(Long attemptsValidation) {
     this.attemptsValidation = attemptsValidation;
-  }
-
-  public String snakeCaseToCamelCase(String fieldToSearch){ //Al usar hibernate o un orm similar sería innecesario.
-    Map<String,String> originalTableNames = new HashMap<>();
-    originalTableNames.put("id","id");
-    originalTableNames.put("id_usuario_mc","idUserMc");
-    originalTableNames.put("estado","status");
-    originalTableNames.put("nombre","name");
-    originalTableNames.put("apellido","lastName");
-    originalTableNames.put("numero_documento","documentNumber");
-    originalTableNames.put("tipo_documento","documentType");
-    originalTableNames.put("nivel","level");
-    originalTableNames.put("fecha_creacion","createdAt");
-    originalTableNames.put("fecha_actualizacion","updatedAt");
-    originalTableNames.put("rut","rut");
-    originalTableNames.put("saldo_info","infoBalance");
-    originalTableNames.put("saldo_expiracion","expirationBalance");
-    originalTableNames.put("intentos_validacion","attemptsValidation");
-    originalTableNames.put("uiid","uiid");
-
-    return originalTableNames.get(fieldToSearch);
-  }
-
-  public Object castData(String fieldName, String data){
-
-    Object object = null;
-
-    switch (snakeCaseToCamelCase(fieldName)){
-      case "id":
-        object = Long.valueOf(data);
-        break;
-      case "idUserMc":
-        object = Long.valueOf(data);
-        break;
-      case "status":
-        object = UserStatus.valueOfEnum(data);
-        break;
-      case "name":
-        object = data;
-        break;
-      case "lastName":
-        object = data;
-        break;
-      case "documentNumber":
-        object = data;
-        break;
-      case "documentType":
-        object = DocumentType.valueOfEnum(data);
-        break;
-      case "level":
-        object = data;
-        break;
-      case "createdAt":
-        Timestamp timestamp1 = Timestamp.valueOf(data);
-        object = timestamp1.toLocalDateTime();
-        break;
-      case "updatedAt":
-        Timestamp timestamp2 = Timestamp.valueOf(data);
-        object = timestamp2.toLocalDateTime();
-        break;
-      case "rut":
-        object = Integer.valueOf(data);
-        break;
-      case "infoBalance":
-        object = data;
-        break;
-      case "expirationBalance":
-        object = Long.valueOf(data);
-        break;
-      case "attemptsValidation":
-        object = Long.valueOf(data);
-        break;
-      case "uiid":
-        object = data;
-        break;
-    }
-    return object;
   }
 
 }

@@ -31,7 +31,7 @@ public class UserEvent extends BaseProcessor10 {
     userToCreate.setLastName(userIn.getLastName());
     userToCreate.setDocumentNumber(userIn.getDocumentNumber());
     userToCreate.setLevel(userIn.getLevel());
-    userToCreate.setUiid(userIn.getId());
+    userToCreate.setUuid(userIn.getId());
 
     return userToCreate;
   }

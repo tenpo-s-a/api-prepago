@@ -24,7 +24,7 @@ IN _nombre         VARCHAR,
 IN _apellido       VARCHAR,
 IN _estado         VARCHAR,
 IN _nivel          VARCHAR,
-IN _uiid           VARCHAR,
+IN _uuid           VARCHAR,
 OUT _error_code    VARCHAR,
 OUT _error_msg     VARCHAR
 ) AS $$
@@ -46,7 +46,7 @@ SET
   apellido = ( CASE WHEN _apellido IS NOT NULL THEN _apellido ELSE apellido END ),
   estado = ( CASE WHEN _estado IS NOT NULL THEN _estado ELSE estado END ),
   nivel = ( CASE WHEN _nivel IS NOT NULL THEN _nivel ELSE nivel END ),
-  uiid = ( CASE WHEN _uiid IS NOT NULL THEN _uiid ELSE uiid END ),
+  uuid = ( CASE WHEN _uuid IS NOT NULL THEN _uuid ELSE uuid END ),
   fecha_actualizacion = timezone('utc', now())
 WHERE
   id = _id;

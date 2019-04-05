@@ -35,7 +35,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
     userSent.setDocumentNumber(userToCreate.getRut().toString());
     userSent.setFirstName(userToCreate.getName());
-    userSent.setId(userToCreate.getUiid());
+    userSent.setId(userToCreate.getUuid());
     userSent.setLastName(userToCreate.getLastName());
     userSent.setLevel(userToCreate.getLevel());
     userSent.setState(userToCreate.getStatus().toString());
@@ -68,9 +68,9 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
     Assert.assertNotEquals("El Id no debe ser 0",0,userToCreated.getId().longValue());
 
     //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserV11(null,userToCreated.getUiid(),null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userToCreated.getUuid(),null);
     Assert.assertEquals("Igual",userToCreated.getId(),userFound.getId());
-    Assert.assertEquals("Igual",userToCreated.getUiid(),userFound.getUiid());
+    Assert.assertEquals("Igual",userToCreated.getUuid(),userFound.getUuid());
     Assert.assertEquals("Igual",userToCreated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userToCreated.getName(),userFound.getName());
     Assert.assertEquals("Igual",userToCreated.getLastName(),userFound.getLastName());
@@ -93,7 +93,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
     userEventSend.setDocumentNumber(userToCreate.getRut().toString());
     userEventSend.setFirstName(userToCreate.getName());
-    userEventSend.setId(userToCreate.getUiid());
+    userEventSend.setId(userToCreate.getUuid());
     userEventSend.setLastName(userToCreate.getLastName());
     userEventSend.setLevel(userToCreate.getLevel());
     userEventSend.setState(userToCreate.getStatus().toString());
@@ -109,7 +109,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
     Assert.assertNotNull("No es nulo", userFound);
 
-    Assert.assertEquals("Igual",userToCreate.getUiid(),userFound.getUiid());
+    Assert.assertEquals("Igual",userToCreate.getUuid(),userFound.getUuid());
     Assert.assertEquals("Igual",userToCreate.getRut(),userFound.getRut());
     Assert.assertEquals("Igual",userToCreate.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userToCreate.getName(),userFound.getName());

@@ -25,7 +25,7 @@ IN _nombre character varying(30),
 IN _apellido character varying(30),
 IN _numero_documento character varying(30),
 IN _nivel character varying(20),
-IN _uiid character varying(100),
+IN _uuid character varying(100),
 OUT _r_id           BIGINT,
 OUT _error_code     VARCHAR,
 OUT _error_msg      VARCHAR
@@ -47,7 +47,7 @@ _error_msg := 'El _estado es obligatorio';
 RETURN;
 END IF;
 
-IF TRIM(COALESCE(_uiid, '')) = '' THEN
+IF TRIM(COALESCE(_uuid, '')) = '' THEN
 _error_code := 'MC003';
 _error_msg := 'El _uiid es obligatorio';
 RETURN;
@@ -63,7 +63,7 @@ INSERT INTO ${schema}.prp_usuario
   apellido,
   numero_documento,
   nivel,
-  uiid,
+  uuid,
   id_usuario_mc,
   saldo_info,
   saldo_expiracion,
@@ -80,7 +80,7 @@ VALUES
   _apellido,
   _numero_documento,
   _nivel,
-  _uiid,
+  _uuid,
   random() * 1000000 + 1,
   '',
   0,

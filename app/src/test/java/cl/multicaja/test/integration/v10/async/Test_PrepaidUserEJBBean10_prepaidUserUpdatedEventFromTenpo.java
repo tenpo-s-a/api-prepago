@@ -46,7 +46,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     userSent.setDocumentNumber(userCreated.getDocumentNumber());
     userSent.setFirstName(userCreated.getName());
-    userSent.setId(userCreated.getUiid());
+    userSent.setId(userCreated.getUuid());
     userSent.setLastName(userCreated.getLastName());
     userSent.setLevel(userCreated.getLevel());
     userSent.setState(userCreated.getStatus().toString());
@@ -79,20 +79,20 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     //Update on DataBase.
     userCreated.setDocumentNumber(userResponse.getDocumentNumber());
-    userCreated.setUiid(userResponse.getId());
+    userCreated.setUuid(userResponse.getId());
     userCreated.setName(userResponse.getFirstName());
     userCreated.setLastName(userResponse.getLastName());
     userCreated.setStatus(UserStatus.valueOfEnum(userResponse.getState()));
     userCreated.setLevel(userResponse.getLevel());
-    userCreated.setUiid(userResponse.getId());
+    userCreated.setUuid(userResponse.getId());
 
     PrepaidUser11 userUpdated = updatePrepaidUserV11(userCreated);
 
     //find on Database for validate changes
-    PrepaidUser11 userFound = findPrepaidUserV11(null,userCreated.getUiid(),null);
+    PrepaidUser11 userFound = findPrepaidUserV11(null,userCreated.getUuid(),null);
 
     Assert.assertEquals("Igual",userUpdated.getId(),userFound.getId());
-    Assert.assertEquals("Igual",userUpdated.getUiid(),userFound.getUiid());
+    Assert.assertEquals("Igual",userUpdated.getUuid(),userFound.getUuid());
     Assert.assertEquals("Igual",userUpdated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userUpdated.getName(),userFound.getName());
     Assert.assertEquals("Igual",userUpdated.getLastName(),userFound.getLastName());
@@ -118,7 +118,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     userEventSend.setDocumentNumber(userCreated.getDocumentNumber());
     userEventSend.setFirstName(userCreated.getName());
-    userEventSend.setId(userCreated.getUiid());
+    userEventSend.setId(userCreated.getUuid());
     userEventSend.setLastName(userCreated.getLastName());
     userEventSend.setLevel(userCreated.getLevel());
     userEventSend.setState(userCreated.getStatus().toString());
@@ -147,7 +147,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userEventSend.getLevel(),userFound.getLevel());
-    Assert.assertEquals("Igual",userCreated.getUiid(),userFound.getUiid());
+    Assert.assertEquals("Igual",userCreated.getUuid(),userFound.getUuid());
 
 
   }

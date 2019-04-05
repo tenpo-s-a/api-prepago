@@ -521,8 +521,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
 
-    if(user.getUiid() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uiid"));
+    if(user.getUuid() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uuid"));
     }
 
     Object[] params = {
@@ -532,7 +532,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       user.getLastName(),
       user.getDocumentNumber(),
       user.getLevel(),
-      user.getUiid(),
+      user.getUuid(),
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -569,7 +569,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       userToUpdate.getLastName(),
       userToUpdate.getStatus().toString(),
       userToUpdate.getLevel(),
-      userToUpdate.getUiid(),
+      userToUpdate.getUuid(),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -586,15 +586,14 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidUser11 findPrepaidUserV11(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception {
+  public PrepaidUser11 findPrepaidUserV11(Map<String, Object> headers, Long id, String uuid, Integer rut) throws Exception {
 
     final String SP_NAME = getSchema() + ".mc_prp_buscar_usuarios_v11";
-    PrepaidUser11 userResult = new PrepaidUser11();
 
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       rut != null ? rut : new NullParam(Types.INTEGER),
-      uiid != null ? uiid : new NullParam(Types.VARCHAR)
+      uuid != null ? uuid : new NullParam(Types.VARCHAR)
     };
 
     Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
@@ -604,16 +603,21 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       List result = (List)resp.get("result");
       if(result != null){
         Map<String, Object> userResponse = (Map)result.get(0);
-        Set<String> keys = userResponse.keySet();
 
-        for (String k : keys) {
-          if(k != "_error_msg" && k != "_r_id" && k!= "_error_code"){
-            Field field = PrepaidUser11.class.getDeclaredField(userResult.snakeCaseToCamelCase(k.substring(1)));
-            field.setAccessible(true);
-            field.set(userResult,userResult.castData(k.substring(1),userResponse.get(k).toString()));
-          }
-        }
-        return userResult;
+        PrepaidUser11 prepaidUser = new PrepaidUser11();
+        prepaidUser.setId(Long.valueOf(userResponse.get("_id").toString()));
+        prepaidUser.setUuid(userResponse.get("_uuid").toString());
+        prepaidUser.setStatus(cl.multicaja.prepaid.model.v11.UserStatus.valueOfEnum(userResponse.get("_estado").toString()));
+        prepaidUser.setName(userResponse.get("_nombre").toString());
+        prepaidUser.setLastName(userResponse.get("_apellido").toString());
+        prepaidUser.setDocumentNumber(userResponse.get("_numero_documento").toString());
+        prepaidUser.setLevel(userResponse.get("_nivel").toString());
+        prepaidUser.setCreatedAt(Timestamp.valueOf(userResponse.get("_fecha_creacion").toString()).toLocalDateTime());
+        prepaidUser.setUpdatedAt(Timestamp.valueOf(userResponse.get("_fecha_actualizacion").toString()).toLocalDateTime());
+        prepaidUser.setRut(Integer.valueOf(userResponse.get("_rut").toString()));
+
+        return prepaidUser;
+
       }else{
         return null;
       }

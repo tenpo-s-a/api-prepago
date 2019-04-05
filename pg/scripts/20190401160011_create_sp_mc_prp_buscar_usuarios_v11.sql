@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION ${schema}.mc_prp_buscar_usuarios_v11
 (
 IN _in_id              BIGINT,
 IN _in_rut             INTEGER,
-IN _in_uiid            VARCHAR,
+IN _in_uuid            VARCHAR,
 OUT _id BIGINT,
 OUT _rut INTEGER,
 OUT _estado VARCHAR,
@@ -31,7 +31,7 @@ OUT _nombre VARCHAR,
 OUT _apellido VARCHAR,
 OUT _numero_documento VARCHAR,
 OUT _nivel VARCHAR,
-OUT _uiid VARCHAR
+OUT _uuid VARCHAR
 )
 RETURNS SETOF RECORD AS $$
 BEGIN
@@ -46,13 +46,13 @@ SELECT
   apellido,
   numero_documento,
   nivel,
-  uiid
+  uuid
 FROM
   ${schema}.prp_usuario
 WHERE
 (COALESCE(_in_id, 0) = 0 OR id = _in_id) AND
 (COALESCE(_in_rut, 0) = 0 OR rut = _in_rut) AND
-(TRIM(COALESCE(_in_uiid,'')) = '' OR uiid = _in_uiid);
+(TRIM(COALESCE(_in_uuid,'')) = '' OR uuid = _in_uuid);
 RETURN;
 END;
 $$ LANGUAGE plpgsql;
