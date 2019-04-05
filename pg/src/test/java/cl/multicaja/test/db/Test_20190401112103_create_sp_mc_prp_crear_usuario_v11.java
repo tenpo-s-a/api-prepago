@@ -38,7 +38,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
       getRandomString(10), //apellido
       getRandomString(10), //numero_documento
       getRandomString(10), //nivel
-      getRandomString(10), //uiid
+      getRandomString(10), //uuid
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -60,7 +60,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
       getRandomString(10), //apellido
       getRandomString(10), //numero_documento
       getRandomString(10), //nivel
-      getRandomString(10), //uiid
+      getRandomString(10), //uuid
       new OutParam("_r_id", Types.BIGINT),
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
@@ -86,7 +86,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
     map.put("apellido", String.valueOf(params[3]));
     map.put("numero_documento", String.valueOf(params[4]));
     map.put("nivel", String.valueOf(params[5]));
-    map.put("uiid", String.valueOf(params[6]));
+    map.put("uuid", String.valueOf(params[6]));
     map.put("_r_id", resp.get("_r_id"));
     map.put("_error_code", resp.get("_error_code"));
     map.put("_error_msg", resp.get("_error_msg"));

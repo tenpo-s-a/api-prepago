@@ -48,7 +48,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
       "_apellido",
       "_numero_documento",
       "_nivel",
-      "_uiid"
+      "_uuid"
     };
 
     for (String column : columns) {
@@ -61,16 +61,16 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
   /**
    *
    * @param id
-   * @param uiid
+   * @param uuid
    * @param rut
    * @return
    * @throws SQLException
    */
-  public static Map<String, Object> searchUsers(Long id, String uiid, Integer rut) throws SQLException {
+  public static Map<String, Object> searchUsers(Long id, String uuid, Integer rut) throws SQLException {
     Object[] params = {
       id != null ? id : new NullParam(Types.BIGINT),
       rut != null ? rut : new NullParam(Types.INTEGER),
-      uiid != null ? uiid : new NullParam(Types.VARCHAR)
+      uuid != null ? uuid : new NullParam(Types.VARCHAR)
     };
     return dbUtils.execute(SP_NAME, params);
   }
@@ -82,7 +82,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
 
     Map<String, Object> obj1 = insertUser(buildUser());
 
-    Map<String, Object> resp = searchUsers((long) obj1.get("id"), (String)obj1.get("uiid"), (int)obj1.get("rut"));
+    Map<String, Object> resp = searchUsers((long) obj1.get("id"), (String)obj1.get("uuid"), (int)obj1.get("rut"));
     List result = (List)resp.get("result");
 
     Assert.assertNotNull("debe retornar una lista", result);
@@ -142,13 +142,13 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
 
 
   @Test
-  public void searchUserBy_uiid() throws SQLException {
+  public void searchUserBy_uuid() throws SQLException {
 
     resetTables();
 
     Map<String, Object> obj1 = insertUser(buildUser());
 
-    Map<String, Object> resp = searchUsers(null, ((String)obj1.get("uiid")),null);
+    Map<String, Object> resp = searchUsers(null, ((String)obj1.get("uuid")),null);
 
     List result = (List)resp.get("result");
 
@@ -172,7 +172,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
 
     //Caso en donde no deberia encontrar un registro
 
-    Map<String, Object> resp2 = searchUsers(null, ((String)obj1.get("uiid")) + 1 ,null);
+    Map<String, Object> resp2 = searchUsers(null, ((String)obj1.get("uuid")) + 1 ,null);
 
     Assert.assertNull("no debe retornar una lista", resp2.get("result"));
   }

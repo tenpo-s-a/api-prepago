@@ -46,7 +46,7 @@ public class Test_20190401112412_create_sp_mc_prp_actualizar_usuario_v10 extends
       getRandomString(10), //_apellido
       getRandomString(10), //_estado
       getRandomString(10), //_nivel
-      getRandomString(10), //_uiid
+      getRandomString(10), //_uuid
       new OutParam("_error_code", Types.VARCHAR),
       new OutParam("_error_msg", Types.VARCHAR)
     };
@@ -64,7 +64,7 @@ public class Test_20190401112412_create_sp_mc_prp_actualizar_usuario_v10 extends
     response.put("_apellido",params[3]);
     response.put("_estado",params[4]);
     response.put("_nivel",params[5]);
-    response.put("_uiid",params[6]);
+    response.put("_uuid",params[6]);
 
     return response;
   }
