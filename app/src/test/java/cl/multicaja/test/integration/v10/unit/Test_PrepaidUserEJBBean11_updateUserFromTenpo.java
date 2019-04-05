@@ -26,11 +26,20 @@ public class Test_PrepaidUserEJBBean11_updateUserFromTenpo extends TestBaseUnit 
     userCreated.setRut(newRut);
     PrepaidUser11 userUpdated = getPrepaidUserEJBBean10().updatePrepaidUserV11(null,userCreated);
 
-    PrepaidUser11 userResult = getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,userUpdated.getUuid(), null);
-    Assert.assertEquals("Id Deben ser iguales",userUpdated.getId(),userResult.getId());
-    Assert.assertEquals("UserId Deben ser iguales",userUpdated.getIdUserMc(),userResult.getIdUserMc());
-    Assert.assertEquals("Actualizacion Deben ser iguales",userUpdated.getRut(),userResult.getRut());
+    PrepaidUser11 userFound = getPrepaidUserEJBBean10().findPrepaidUserV11(null,null,userUpdated.getUuid(), null);
 
+    Assert.assertNotNull("No es nulo", userFound);
+
+    Assert.assertEquals("Igual",userUpdated.getRut(),userFound.getRut());
+    Assert.assertEquals("Igual",userUpdated.getStatus(),userFound.getStatus());
+    Assert.assertEquals("Igual",userUpdated.getName(),userFound.getName());
+    Assert.assertEquals("Igual",userUpdated.getLastName(),userFound.getLastName());
+
+    Assert.assertEquals("Igual",userUpdated.getDocumentNumber(),userFound.getDocumentNumber());
+
+    Assert.assertEquals("Igual",userUpdated.getStatus(),userFound.getStatus());
+    Assert.assertEquals("Igual",userUpdated.getLevel(),userFound.getLevel());
+    Assert.assertEquals("Igual",userUpdated.getUuid(),userFound.getUuid());
 
   }
 

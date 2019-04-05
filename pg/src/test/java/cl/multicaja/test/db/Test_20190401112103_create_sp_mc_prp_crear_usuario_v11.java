@@ -3,10 +3,7 @@ package cl.multicaja.test.db;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -17,14 +14,8 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_crear_usuario_v11";
 
-  @BeforeClass
-  @AfterClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
-  }
-
-  public void resetTables(){
+  @Before
+  public void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
@@ -97,7 +88,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
   @Test
   public void insertUserOk() throws SQLException {
 
-    resetTables();
+    
 
     /**
      * Caso de prueba para registrar un usuario nuevo, debe ser exitoso
@@ -113,7 +104,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
   @Test
   public void insertUserNotOk() throws SQLException {
 
-    resetTables();
+    
 
     /**
      * Caso de prueba donde se registra un usuario nuevo y luego se intenta registrar exactamente el mismo usuario
@@ -140,7 +131,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
   @Test
   public void insertUserNotOkByParamsNull() throws SQLException {
 
-    resetTables();
+    
 
     /**
      * Caso de prueba donde se registra un usuario nuevo pero pasando parametros en null
@@ -184,7 +175,7 @@ public class Test_20190401112103_create_sp_mc_prp_crear_usuario_v11 extends Test
   @Test
   public void insertUserNotOkBy_rut_exists() throws SQLException {
 
-    resetTables();
+    
 
     /**
      * Caso de prueba donde se registra un usuario nuevo y luego se intenta registar otro diferente pero con

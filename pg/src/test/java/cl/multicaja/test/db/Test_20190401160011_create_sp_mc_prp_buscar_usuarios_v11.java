@@ -2,10 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.test.TestDbBasePg;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -19,15 +16,9 @@ import static cl.multicaja.test.db.Test_20190401112103_create_sp_mc_prp_crear_us
 public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends TestDbBasePg {
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_buscar_usuarios_v11";
-
-  @BeforeClass
-  @AfterClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
-  }
-
-  public void resetTables(){
+  
+  @Before
+  public void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
@@ -78,7 +69,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
   @Test
   public void searchUserByAllFields() throws SQLException {
 
-    resetTables();
+    
 
     Map<String, Object> obj1 = insertUser(buildUser());
 
@@ -107,7 +98,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
   @Test
   public void searchUserBy_id() throws SQLException {
 
-    resetTables();
+    
 
     Map<String, Object> obj1 = insertUser(buildUser());
 
@@ -144,7 +135,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
   @Test
   public void searchUserBy_uuid() throws SQLException {
 
-    resetTables();
+    
 
     Map<String, Object> obj1 = insertUser(buildUser());
 
@@ -180,7 +171,7 @@ public class Test_20190401160011_create_sp_mc_prp_buscar_usuarios_v11  extends T
   @Test
   public void searchUserBy_rut() throws SQLException {
 
-    resetTables();
+    
 
     Map<String, Object> obj1 = insertUser(buildUser());
 

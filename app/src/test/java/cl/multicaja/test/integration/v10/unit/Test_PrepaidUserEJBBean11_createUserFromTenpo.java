@@ -19,7 +19,22 @@ public class Test_PrepaidUserEJBBean11_createUserFromTenpo extends TestBaseUnit 
   @Test
   public void createUserOk() throws Exception{
     PrepaidUser11 user = buildPrepaidUser11();
-    getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
+    PrepaidUser11 userCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
+    PrepaidUser11 userFound = getPrepaidUserEJBBean10().findPrepaidUserV11(null, null,userCreated.getUuid(), null);
+
+    Assert.assertNotNull("No es nulo", userFound);
+
+    Assert.assertEquals("Igual",userCreated.getUuid(),userFound.getUuid());
+    Assert.assertEquals("Igual",userCreated.getRut(),userFound.getRut());
+    Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
+    Assert.assertEquals("Igual",userCreated.getName(),userFound.getName());
+    Assert.assertEquals("Igual",userCreated.getLastName(),userFound.getLastName());
+
+    Assert.assertEquals("Igual",userCreated.getDocumentNumber(),userFound.getDocumentNumber());
+
+    Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
+    Assert.assertEquals("Igual",userCreated.getLevel(),userFound.getLevel());
+
   }
 
   @Test

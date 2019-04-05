@@ -25,65 +25,6 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
 
   @Test
-  public void listenPrepaidUserCreateEvent() throws Exception{
-
-    final String topicName = "USER_CREATED_TEST";
-
-    PrepaidUser11 userToCreate = buildPrepaidUser11();
-
-    cl.multicaja.prepaid.kafka.events.model.User userSent = new cl.multicaja.prepaid.kafka.events.model.User();
-
-    userSent.setDocumentNumber(userToCreate.getRut().toString());
-    userSent.setFirstName(userToCreate.getName());
-    userSent.setId(userToCreate.getUuid());
-    userSent.setLastName(userToCreate.getLastName());
-    userSent.setLevel(userToCreate.getLevel());
-    userSent.setState(userToCreate.getStatus().toString());
-
-    String messageId = sendUserCreatedOrUpdated(topicName,userSent,0);
-
-    Queue qResp = camelFactory.createJMSQueue(topicName);
-    ExchangeData<String> userEventExchangeData = (ExchangeData<String>)camelFactory.createJMSMessenger().
-      getMessage(qResp, messageId);
-
-    Assert.assertNotNull("Deberia existir un evento de usuario creado", userEventExchangeData);
-    Assert.assertNotNull("Deberia existir un evento de usuario creado data", userEventExchangeData.getData());
-
-    cl.multicaja.prepaid.kafka.events.model.User userResponse = getJsonParser().
-      fromJson(userEventExchangeData.getData(),cl.multicaja.prepaid.kafka.events.model.User.class);
-
-    Assert.assertNotNull("No debe ser nulo", userResponse);
-    Assert.assertEquals("Debe tener el mismo id", userSent.getId(), userResponse.getId());
-
-    Assert.assertEquals("Igual", userSent.getDocumentNumber(), userResponse.getDocumentNumber());
-    Assert.assertEquals("Igual", userSent.getFirstName(), userResponse.getFirstName());
-    Assert.assertEquals("Igual", userSent.getLastName(), userResponse.getLastName());
-    Assert.assertEquals("Igual", userSent.getLevel(), userResponse.getLevel());
-    Assert.assertEquals("Igual", userSent.getState(), userResponse.getState());
-
-    //Save data on DataBase
-    PrepaidUser11 userToCreated = getPrepaidUserEJBBean10().createPrepaidUserV11(null,userToCreate);
-    Assert.assertNotNull("No debe ser null",userToCreated);
-    Assert.assertNotNull("No debe ser null",userToCreated.getId());
-    Assert.assertNotEquals("El Id no debe ser 0",0,userToCreated.getId().longValue());
-
-    //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserV11(null,userToCreated.getUuid(),null);
-    Assert.assertEquals("Igual",userToCreated.getId(),userFound.getId());
-    Assert.assertEquals("Igual",userToCreated.getUuid(),userFound.getUuid());
-    Assert.assertEquals("Igual",userToCreated.getStatus(),userFound.getStatus());
-    Assert.assertEquals("Igual",userToCreated.getName(),userFound.getName());
-    Assert.assertEquals("Igual",userToCreated.getLastName(),userFound.getLastName());
-    Assert.assertEquals("Igual",userToCreated.getDocumentNumber(),userFound.getDocumentNumber());
-    Assert.assertEquals("Igual",userToCreated.getLevel(),userFound.getLevel());
-    Assert.assertEquals("Igual",userToCreated.getCreatedAt(),userFound.getCreatedAt());
-    Assert.assertEquals("Igual",userToCreated.getUpdatedAt(),userFound.getUpdatedAt());
-    Assert.assertEquals("Igual",userToCreated.getRut(),userFound.getRut());
-
-  }
-
-
-  @Test
   public void listenPrepaidUserCreateEventWithProcessor() throws Exception{
     userDao.setEm(createEntityManager());
 

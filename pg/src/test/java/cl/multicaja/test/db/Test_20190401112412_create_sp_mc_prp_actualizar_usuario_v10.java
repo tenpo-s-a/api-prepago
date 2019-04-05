@@ -2,10 +2,7 @@ package cl.multicaja.test.db;
 
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -21,14 +18,9 @@ public class Test_20190401112412_create_sp_mc_prp_actualizar_usuario_v10 extends
 
   private static final String SP_NAME = SCHEMA + ".mc_prp_actualizar_estado_usuario_v11";
 
-  @BeforeClass
-  @AfterClass
-  public static void beforeClass() {
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
-    dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
-  }
 
-  public void resetTables(){
+  @Before
+  public void beforeClass() {
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_movimiento cascade",SCHEMA));
     dbUtils.getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", SCHEMA));
   }
@@ -73,7 +65,6 @@ public class Test_20190401112412_create_sp_mc_prp_actualizar_usuario_v10 extends
   @Test
   public void updateStatusOk() throws SQLException {
 
-    resetTables();
 
     Object[] paramsToCreate = buildUser();
     Map<String, Object> respCreated = insertUser(paramsToCreate);
