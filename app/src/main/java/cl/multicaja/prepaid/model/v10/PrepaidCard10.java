@@ -15,7 +15,7 @@ public class PrepaidCard10 extends BaseModel {
   //Id Interno de prepago
   @JsonIgnore
   private Long idUser; //TODO: Eliminar campo, ya que la relacion es por accountId
-  //Contrato - Tecnocom
+  @Deprecated
   private String processorUserId; //TODO: Eliminar campo
   private String pan; // Este es el pan truncado
   @JsonIgnore

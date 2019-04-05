@@ -85,8 +85,9 @@ public class Test_PendingSendMail10 extends TestBaseUnitAsync {
     prepaidMovement10.setCodcom("CodigoComercio");
     prepaidMovement10.setId(38L);
 
+    //TODO: SE comenta por que no se deben enviar mails.
     // Testeando que los mails lleguen correctamente
-    getMailDelegate().sendWithdrawSuccessMail(user, prepaidMovement10, userAccount);
+   // getMailDelegate().sendWithdrawSuccessMail(user, prepaidMovement10, userAccount);
     //getMailDelegate().sendWithdrawFailedMail(user, prepaidMovement10);
     //getMailDelegate().sendTopupMail(prepaidTopup10, user, prepaidMovement10);
 

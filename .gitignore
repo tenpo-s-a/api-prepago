@@ -1,5 +1,6 @@
 # Local development
 *.env
+!env/*.env
 *.dev
 .DS_Store
 .classpath

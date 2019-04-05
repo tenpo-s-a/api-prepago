@@ -126,21 +126,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   }
 
   @Test
-  public void reverseRequestRutNull() throws Exception {
-    NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
-    reverseRequest.setAmount(amount);
-    try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
-      Assert.fail("should not be here");
-    } catch (BadRequestException ex) {
-      Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
-      Assert.assertEquals("Debe tener detalle de error: request", 1, ex.getData().length);
-      Assert.assertEquals("Debe tener detalle de error: request", "rut", String.valueOf(ex.getData()[0].getValue()));
-    }
-  }
-
-  @Test
   public void reverseRequestMerchantCodeNull() throws Exception {
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -592,7 +577,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     Mockito.doReturn("0987").when(parametersUtil).getString("api-prepaid", "cod_entidad", "v10");
 
     Mockito.doReturn("123456789")
-      .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
 
     prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
 
@@ -603,6 +588,6 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(1)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));
-    Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(delegate, Mockito.times(1)).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
   }
 }

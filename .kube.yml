@@ -28,6 +28,17 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        env:
+          - name: DB_USERNAME
+            value: ${DB_USERNAME}@${DB_HOST_NAME}
+          - name: DB_PASSWORD
+            value: ${DB_PASSWORD}
+          - name: DB_NAME
+            value: ${DB_NAME}
+          - name: DB_HOST_FQDN
+            value: ${DB_HOST_FQDN}
+          - name: API_ENVIRONMENT
+            value: ${API_ENVIRONMENT}
       imagePullSecrets:
         - name: container-reg-credentials
 ---

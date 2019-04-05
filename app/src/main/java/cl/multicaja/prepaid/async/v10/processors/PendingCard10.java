@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_EMISSION_ERROR;
@@ -65,12 +66,12 @@ public class PendingCard10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
-        User user = data.getUser();
+        PrepaidUser10 user = data.getPrepaidUser10();
 
-        log.info(String.format("Realizando alta de cliente %s-%s", user.getRut().getValue(), user.getRut().getDv()));
+        log.info(String.format("Realizando alta de cliente %s", user.getDocumentNumber()));
         
         final TipoAlta tipoAlta = data.getPrepaidUser10().getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-        AltaClienteDTO altaClienteDTO = getRoute().getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+        AltaClienteDTO altaClienteDTO = getRoute().getTecnocomService().altaClientes(user.getName(), user.getLastName(), "", user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
         log.info("Respuesta alta de cliente");
         log.info(altaClienteDTO.getRetorno());
@@ -78,18 +79,21 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (altaClienteDTO.isRetornoExitoso()) {
 
-          PrepaidCard10 prepaidCard = new PrepaidCard10();
-          prepaidCard.setIdUser(data.getPrepaidUser10().getId());
-          prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
-          data.setPrepaidCard10(prepaidCard);
-
           // guarda la informacion de la cuenta
           Account account = getRoute().getAccountEJBBean10().insertAccount(data.getPrepaidUser10().getId(), altaClienteDTO.getContrato());
 
           // publica evento de contrato/cuenta creada
-          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUserIdMc(), account);
+          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getId(), account);
+
+          PrepaidCard10 prepaidCard = new PrepaidCard10();
+          prepaidCard.setAccountId(account.getId());
+          prepaidCard.setIdUser(data.getPrepaidUser10().getId());
+          prepaidCard.setStatus(PrepaidCardStatus.PENDING);
+          prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
+          prepaidCard.setUuid(UUID.randomUUID().toString());
+
+          prepaidCard = getRoute().getPrepaidCardEJBBean10().createPrepaidCard(null,prepaidCard);
+          data.setPrepaidCard10(prepaidCard);
 
           data.setAccount(account);
 
@@ -167,16 +171,26 @@ public class PendingCard10 extends BaseProcessor10 {
 
         if (datosTarjetaDTO.isRetornoExitoso()) {
 
-          PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean10().getPrepaidCardById(null, data.getPrepaidCard10().getId());
+          PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, data.getPrepaidCard10().getId());
+          PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
+          Account account = data.getAccount();
 
-          prepaidCard10.setNameOnCard(data.getUser().getName() + " " + data.getUser().getLastname_1());
+          prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
           prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
           prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
+          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar()); //TODO: verificar si se seguira guardando en claro
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
-          //TODO: generar hash del pan de la tarjeta
+
+          // se trunca el pan
+          prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
+
+          // se encripta el Pan TODO: verificar si se guardara junto al nombre y fecha expiracion
+          prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
+
+          // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
+          prepaidCard10.setHashedPan(getRoute().getPrepaidCardEJBBean11().hashPan(account.getAccountNumber(), datosTarjetaDTO.getPan()));
 
           try {
             // Actualiza la tarjeta
@@ -239,17 +253,17 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorEmission - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
-
+      PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
       if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
         Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
         Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
         String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
-        template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-        .getUser().getRut().getDv()),data.getUser().getId());
+        template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",prepaidUser10.getName(),prepaidUser10.getLastName()),prepaidUser10.getDocumentNumber(),prepaidUser10.getId());
 
-        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,String.valueOf(data.getUser().getRut().getValue()),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
-        Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+        NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
+        //TODO: Verificar que ID tiene que ir aca
+        Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
         if(ticket.getId() != null){
           log.info("Ticket Creado Exitosamente");
         }
@@ -258,8 +272,8 @@ public class PendingCard10 extends BaseProcessor10 {
          *  ENVIO DE MAIL ERROR ENVIO DE TARJETA
          */
         Map<String, Object> templateData = new HashMap<>();
-        templateData.put("idUsuario", data.getUser().getId().toString());
-        templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+        templateData.put("idUsuario",prepaidUser10.getId());
+        templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
         getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
       }
       return req;
@@ -274,31 +288,32 @@ public class PendingCard10 extends BaseProcessor10 {
       log.info("processErrorCreateCard - REQ: " + req);
       req.retryCountNext();
       PrepaidTopupData10 data = req.getData();
+      PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
         if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
           Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
           String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_2","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al obtener datos tarjeta",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId());
+          template = TemplateUtils.freshDeskTemplateColas2(template,"Error al obtener datos tarjeta",String.format("%s %s",prepaidUser10.getName(),prepaidUser10.getLastName()),prepaidUser10.getDocumentNumber(),prepaidUser10.getId());
 
 
           NewTicket newTicket = createTicket("Error al obtener datos tarjeta",
             template,
-            String.valueOf(data.getUser().getRut().getValue()),
+            prepaidUser10.getDocumentNumber(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.CREATE_CARD,
             req.getReprocesQueue()
           );
 
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          //TODO: Verificar si aca deber ir el UUID Tempo
+          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
           if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
           }
         } else {
           Map<String, Object> templateData = new HashMap<>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          templateData.put("idUsuario", prepaidUser10.getId());
+          templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
         }
         return req;
