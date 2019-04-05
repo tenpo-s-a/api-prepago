@@ -19,8 +19,7 @@ public class UserEvent extends BaseProcessor10 {
   public UserEvent(BaseRoute10 route) {
     super(route);
   }
-
-
+  
   public PrepaidUser11 buildPrepaidUserToSave(cl.multicaja.prepaid.kafka.events.model.User userIn){
 
     PrepaidUser11 userToCreate = new PrepaidUser11();
