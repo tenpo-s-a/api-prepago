@@ -21,12 +21,12 @@ import java.util.UUID;
 
 import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
-public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent extends TestBaseUnitAsync {
+public class Test_PrepaidMovementEJBBean11_publishTransactionReversedEvent extends TestBaseUnitAsync {
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_externalUserId_null() throws Exception {
+  public void publishTransactionReversedEvent_externalUserId_null() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(null, null, null, null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(null, null, null, null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -35,9 +35,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_externalUserId_empty() throws Exception {
+  public void publishTransactionReversedEvent_externalUserId_empty() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent("", null, null, null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent("", null, null, null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -46,9 +46,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_accountUuid_null() throws Exception {
+  public void publishTransactionReversedEvent_accountUuid_null() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), null, null, null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), null, null, null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -57,9 +57,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_accountUuid_empty() throws Exception {
+  public void publishTransactionReversedEvent_accountUuid_empty() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), "", null, null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), "", null, null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -68,9 +68,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_cardUuid_null() throws Exception {
+  public void publishTransactionReversedEvent_cardUuid_null() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -79,9 +79,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_cardUuid_empty() throws Exception {
+  public void publishTransactionReversedEvent_cardUuid_empty() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "", null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "", null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -90,9 +90,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_movement_null() throws Exception {
+  public void publishTransactionReversedEvent_movement_null() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -101,9 +101,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_type_null() throws Exception {
+  public void publishTransactionReversedEvent_type_null() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), new PrepaidMovement10(), null,null);
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), new PrepaidMovement10(), null,null);
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -112,9 +112,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_type_empty() throws Exception {
+  public void publishTransactionReversedEvent_type_empty() throws Exception {
     try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), new PrepaidMovement10(), null,"");
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), new PrepaidMovement10(), null,"");
       Assert.fail("Should not be here");
     } catch (BadRequestException brex) {
       Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
@@ -123,7 +123,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test
-  public void publishTransactionRejectedEvent() throws Exception {
+  public void publishTransactionReversedEvent() throws Exception {
 
     String userUuid = UUID.randomUUID().toString();
     String accountUuid = UUID.randomUUID().toString();
@@ -139,9 +139,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
 
     NewAmountAndCurrency10 fee = new NewAmountAndCurrency10(BigDecimal.TEN);
 
-    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, fee, type);
+    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(userUuid, accountUuid, cardUuid, movement, fee, type);
 
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, movement.getIdTxExterno());
 
@@ -157,7 +157,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
     Assert.assertEquals("Debe tener el mismo tipo", type, transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+    Assert.assertEquals("Debe tener el status REVERSED", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     List<Fee> fees = transactionEvent.getTransaction().getFees();
     Assert.assertEquals("Debe tener 1 fee", 1, fees.size());
@@ -166,7 +166,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
   }
 
   @Test
-  public void publishTransactionRejectedEvent_fee_null() throws Exception {
+  public void publishTransactionReversedEvent_fee_null() throws Exception {
 
     String userUuid = UUID.randomUUID().toString();
     String accountUuid = UUID.randomUUID().toString();
@@ -180,9 +180,9 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
-    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, null, type);
+    getPrepaidMovementEJBBean11().publishTransactionReversedEvent(userUuid, accountUuid, cardUuid, movement, null, type);
 
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, movement.getIdTxExterno());
 
@@ -198,7 +198,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
     Assert.assertEquals("Debe tener el mismo tipo", type, transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+    Assert.assertEquals("Debe tener el status REVERSED", "REVERSED", transactionEvent.getTransaction().getStatus());
 
     Assert.assertEquals("No debe tener fees", 0, transactionEvent.getTransaction().getFees().size());
 

@@ -25,7 +25,7 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   private static final String CARD_UNLOCKED_TOPIC = "CARD_UNLOCKED";
   private static final String CARD_CLOSED_TOPIC = "CARD_CLOSED";
   public static final String TRANSACTION_AUTHORIZED_TOPIC = "TRANSACTION_AUTHORIZED";
-  private static final String TRANSACTION_REVERSED_TOPIC = "TRANSACTION_REVERSED";
+  public static final String TRANSACTION_REVERSED_TOPIC = "TRANSACTION_REVERSED";
   public static final String TRANSACTION_REJECTED_TOPIC = "TRANSACTION_REJECTED";
   private static final String TRANSACTION_PAID_TOPIC = "TRANSACTION_PAID";
   private static final String TRANSACTION_INVOICE_ISSUED_TOPIC = "TRANSACTION_INVOICE_ISSUED";
