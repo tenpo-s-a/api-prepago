@@ -128,8 +128,8 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, prepaidCard.getUuid());
 
-    Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event);
-    Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event.getData());
+    Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
+    Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
 
     cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 

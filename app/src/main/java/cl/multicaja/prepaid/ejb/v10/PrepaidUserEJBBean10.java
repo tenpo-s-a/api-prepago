@@ -59,10 +59,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
     "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
     "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
-    "            apellido, numero_documento, tipo_documento, nivel)\n" +
+    "            apellido, numero_documento, tipo_documento, nivel, uuid)\n" +
     "    VALUES (?, ?, ?, ?, ?, \n" +
     "            ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?);\n", getSchema());
+    "            ?, ?, ?, ?, ?);\n", getSchema());
 
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJB10;
