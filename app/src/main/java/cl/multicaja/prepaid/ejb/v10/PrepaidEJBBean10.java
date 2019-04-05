@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -113,9 +114,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   private AccountEJBBean10 accountEJBBean10;
 
   private ApiCall apiCall;
-
-  @EJB
-  private AccountEJBBean10 accountEJBBean10;
 
   private TecnocomService tecnocomService;
 
@@ -2911,9 +2909,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
     // Por ahora se setean para que pueda realizarse el cambio de producto.
-    if(prepaidUser.getDocument() == null) {
-      prepaidUser.setDocument(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
-      prepaidUser.setDocumentType(TipoDocumento.RUT);
+    if(prepaidUser.getDocumentNumber() == null) {
+      prepaidUser.setDocumentNumber(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+      prepaidUser.setDocumentType(DocumentType.DNI_CL);
     }
 
     getProductChangeDelegate().sendProductChange(prepaidUser, null, prepaidCard10, TipoAlta.NIVEL2);

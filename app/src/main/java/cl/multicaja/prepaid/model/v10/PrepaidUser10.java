@@ -16,8 +16,6 @@ public class PrepaidUser10 extends BaseModel {
   private Long userIdMc;
   @Deprecated
   private Integer rut;
-  private String document;
-  private TipoDocumento documentType;
   private PrepaidUserStatus status;
   private cl.multicaja.prepaid.model.v10.Timestamps timestamps;
   private PrepaidUserLevel userLevel;

@@ -74,17 +74,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private UserClient userClient;
 
-  private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
-    "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
-    "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
-    "            apellido, numero_documento, tipo_documento, nivel, uuid)\n" +
-    "    VALUES (?, ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?, ?);\n", getSchema());
-
-  private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
-  private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
-
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
   }
@@ -534,86 +523,5 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       log.error("incrementIdentityVerificationAttempt resp: " + resp);
       throw new BaseException(ERROR_INTERNO_BBDD);
     }
-  }
-
-  public PrepaidUser10 createUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
-
-    if(user == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
-    }
-
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    log.error(user);
-    getDbUtils().getJdbcTemplate().update(connection -> {
-      PreparedStatement ps = connection
-        .prepareStatement(INSERT_USER, new String[] {"id"});
-      ps.setLong(1, user.getUserIdMc());
-      ps.setLong(2, user.getRut());
-      ps.setString(3, user.getStatus().name());
-      ps.setString(4, "");
-      ps.setLong(5, 0L);
-      ps.setLong(6, 0L);
-      ps.setObject(7, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
-      ps.setObject(8, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
-      ps.setString(9,"hola");
-      ps.setString(10,"hola");
-      ps.setString(11,"123");
-      ps.setString(12,user.getDocumentType().name());
-      ps.setString(13,user.getUserLevel().name());
-      //ps.setString(14, UUID.randomUUID().toString());
-
-      return ps;
-    }, keyHolder);
-
-    return  this.findById(null,(long) keyHolder.getKey());
-  }
-
-  public PrepaidUser10 findById(Map<String, Object> headers, Long id) throws Exception {
-
-    if(id == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-    log.error("findById IN ID: "+id);
-    org.springframework.jdbc.core.RowMapper<PrepaidUser10> rm = (ResultSet rs, int rowNum) -> {
-      PrepaidUser10 u = new PrepaidUser10();
-      u.setId(rs.getLong("id"));
-      u.setRut(rs.getInt("rut"));
-      u.setUserIdMc(rs.getLong("id_usuario_mc"));
-      u.setStatus(PrepaidUserStatus.valueOfEnum(rs.getString("estado")));
-      u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
-      Timestamps timestamps = new Timestamps();
-      u.setTimestamps(timestamps);
-      return u;
-    };
-    try{
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, rm, id);
-    }catch (Exception e){
-      return null;
-    }
-
-  }
-
-  public PrepaidUser10 findByExtId(Map<String, Object> headers, String userId) throws Exception {
-
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
-    }
-
-    org.springframework.jdbc.core.RowMapper<PrepaidUser10> rm = (ResultSet rs, int rowNum) -> {
-      PrepaidUser10 u = new PrepaidUser10();
-      u.setId(rs.getLong("id"));
-      u.setUserIdMc(rs.getLong("id_usuario_mc"));
-      u.setStatus(PrepaidUserStatus.valueOfEnum(rs.getString("estado")));
-      u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
-      Timestamps timestamps = new Timestamps();
-      u.setTimestamps(timestamps);
-      return u;
-    };
-    try{
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID_EXT, rm, userId);
-    }catch (Exception e){
-      return null;
-    }
-
   }
 }

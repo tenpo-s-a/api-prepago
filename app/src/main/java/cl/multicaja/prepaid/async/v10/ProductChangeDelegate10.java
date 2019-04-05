@@ -61,7 +61,7 @@ public class ProductChangeDelegate10 {
       return null;
     }
 
-    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
     Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
     PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, account, prepaidCard10, tipoAlta);
 

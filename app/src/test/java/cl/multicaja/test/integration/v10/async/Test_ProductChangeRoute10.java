@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import org.junit.Assert;
@@ -28,7 +29,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
   public void productChangeRetryCount4() throws Exception {
     User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
 
     prepaidUser = createPrepaidUser10(prepaidUser);
 
@@ -57,11 +58,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
   @Test
   public void productChange_AlreadyChanged() throws Exception {
     User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_2);
-    prepaidUser.setDocumentType(TipoDocumento.RUT);
-
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
 
     PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
@@ -82,9 +79,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
   @Test
   public void productChange_ChangeOk() throws Exception {
     User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_1);
-    prepaidUser.setDocumentType(TipoDocumento.RUT);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
     prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
 
     // Crea cuenta/contrato

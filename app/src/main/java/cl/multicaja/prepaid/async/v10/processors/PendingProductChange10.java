@@ -16,6 +16,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.TipoAlta;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.CambioProductoDTO;
 import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
@@ -68,7 +69,8 @@ public class PendingProductChange10 extends BaseProcessor10 {
 
             // se hace el cambio de producto
             //Fixme: eventualmente se debe usar getDocument() y no getRut()
-            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().toString(), user.getDocumentType(), tipoAlta);
+            //FixMe: debe usar getDocumentType en vez de tipoDocumento.RUT
+            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().toString(), TipoDocumento.RUT, tipoAlta);
 
             log.info("Respuesta cambio de producto");
             log.info(dto.getRetorno());
@@ -159,7 +161,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
         req.retryCountNext();
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario", req.getData().getPrepaidUser().getId().toString());
-        templateData.put("rutCliente", req.getData().getPrepaidUser().getDocument());
+        templateData.put("rutCliente", req.getData().getPrepaidUser().getDocumentNumber());
         getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
         return req;
       }

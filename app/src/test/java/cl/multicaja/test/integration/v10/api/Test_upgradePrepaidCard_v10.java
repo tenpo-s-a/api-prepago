@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,9 +31,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn201_PrepaidCardUpgraded_Ok() throws Exception {
     User user = registerUser();
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-    prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_1);
-    prepaidUser10.setDocumentType(TipoDocumento.RUT);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
     prepaidUser10 = getPrepaidUserEJBBean10().createUser(null, prepaidUser10);
 
     // Crea cuenta/contrato
@@ -129,9 +128,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn422_PrepaidUserAlreadyLevel2() throws Exception {
     User user = registerUser();
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-    prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_2);
-    prepaidUser10.setDocumentType(TipoDocumento.RUT);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = getPrepaidUserEJBBean10().createUser(null, prepaidUser10);
 
     // Crea cuenta/contrato

@@ -136,8 +136,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -196,8 +196,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -258,8 +258,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -320,8 +320,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -384,8 +384,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -544,8 +544,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -601,8 +601,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -661,8 +661,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -722,8 +722,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -784,8 +784,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
     Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-    prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+    prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
     if (CamelFactory.getInstance().isCamelRunning()) {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -859,8 +859,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
       Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-      prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+      prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+      String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
       if (CamelFactory.getInstance().isCamelRunning()) {
         Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
@@ -1032,8 +1032,8 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
 
     Assert.assertEquals("Debe tener intento de validacion = 1", Integer.valueOf(1), prepaidUser.getIdentityVerificationAttempts());
 
-    prepaidUser.setDocument(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
-    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocument());
+    prepaidUser.setDocumentNumber(String.format("%s-%s", verifiedUser.getRut().getValue(), verifiedUser.getRut().getDv()));
+    String messageId = String.format("%s#%s", prepaidUser.getId(), prepaidUser.getDocumentNumber());
 
     if (CamelFactory.getInstance().isCamelRunning()) {
       Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
