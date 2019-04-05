@@ -206,7 +206,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
-  void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, Long accountId) throws Exception;
+  void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, String accountId) throws Exception;
 
   /**
    * Obtiene los terminos y condiciones vigentes para preago

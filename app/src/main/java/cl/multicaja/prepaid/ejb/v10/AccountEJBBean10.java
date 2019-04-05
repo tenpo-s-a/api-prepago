@@ -41,6 +41,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
 
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
+  private static final String FIND_ACCOUNT_BY_UUID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE uuid = ?", getSchema());
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
   @Inject
@@ -66,6 +67,21 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
         .queryForObject(FIND_ACCOUNT_BY_ID_SQL, this.getAccountMapper(), id);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[findById]  Cuenta/contrato con id [%d] no existe", id));
+      throw new ValidationException(CUENTA_NO_EXISTE);
+    }
+  }
+
+  public Account findByUuid(String uuid) throws Exception {
+    if(uuid == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uuid"));
+    }
+
+    log.info(String.format("[findById] Buscando cuenta/contrato por uuid [%s]", uuid));
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_ACCOUNT_BY_UUID_SQL, this.getAccountMapper(), uuid);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[findById]  Cuenta/contrato con id [%s] no existe", uuid));
       throw new ValidationException(CUENTA_NO_EXISTE);
     }
   }
