@@ -14,30 +14,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-@Entity
-@Table(name = "prp_movimiento", schema ="prepago")
 public class PrepaidMovement10 implements Serializable, Cloneable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @Column(name = "id_movimiento_ref")
   private Long idMovimientoRef;
-  @Column(name = "id_tx_externo")
   private String idTxExterno;
-  @Column(name = "id_usuario")
   private Long idPrepaidUser;
-  @Column(name = "tipo_movimiento")
   private PrepaidMovementType tipoMovimiento;
-  @Column(name = "monto")
   private BigDecimal monto;
-  @Column(name = "estado")
   private PrepaidMovementStatus estado;
-  @Column(name = "fecha_creacion")
   private Timestamp fechaCreacion;
-  @Column(name = "fecha_actualizacion")
   private Timestamp fechaActualizacion;
-
 
   private String codent;
   private String centalta;
@@ -69,15 +56,11 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private Long numplastico;
   private String nomcomred; // Nombre de comercio, Mechant name.
 
-  @Column(name = "estado_de_negocio")
   private BusinessStatusType estadoNegocio;
-  @Column(name = "estado_con_switch")
   private ReconciliationStatusType conSwitch;
-  @Column(name = "estado_con_tecnocom")
   private ReconciliationStatusType conTecnocom;
-  @Column(name = "origen_movimiento")
   private MovementOriginType originType;
-  @Column(name = "id_tarjeta")
+
   private Long cardId;
 
   public Long getCardId() {

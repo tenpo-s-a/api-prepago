@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.kafka.events.model.*;
+import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.kafka.KafkaConstants;
@@ -63,7 +64,6 @@ public final class KafkaEventDelegate10 {
    * Envia un evento de cuenta creada
    *
    */
-  //FIXME: debe recibir la informacion de la cuenta
   public void publishAccountCreatedEvent(AccountEvent accountEvent) {
 
     if(accountEvent == null) {
@@ -125,10 +125,10 @@ public final class KafkaEventDelegate10 {
    * Envia un evento de transaccion
    *
    */
-  public void publishTransactionEvent(NewAmountAndCurrency10 newFee, PrepaidMovement10 prepaidMovement10, String type, String status) {
+  public void publishTransactionEvent(TransactionEvent transactionEvent) {
 
-    if(prepaidMovement10 == null) {
-      log.error("====== No fue posible enviar mensaje al proceso asincrono, PrepaidTopup10 -> null =======");
+    if(transactionEvent == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, transactionEvent -> null =======");
       throw new IllegalArgumentException();
     }
 
@@ -136,52 +136,31 @@ public final class KafkaEventDelegate10 {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
     } else {
 
-      Map<String, Object> headers = new HashMap<>();
-      headers.put("JMSCorrelationID", prepaidMovement10.getId());
-      headers.put(KafkaConstants.PARTITION_KEY, 0);
-      headers.put(KafkaConstants.KEY, "1");
-
-      Transaction transaction = new Transaction();
-      //transaction.setId(prepaidTopup10.getId().toString());
-      transaction.setRemoteTransactionId(prepaidMovement10.getIdTxExterno());
-      transaction.setAuthCode(prepaidMovement10.getCodact().toString());
-      transaction.setCountryCode(prepaidMovement10.getCodpais().getValue());
-      Merchant merchant = new Merchant();
-      merchant.setCategory(prepaidMovement10.getCodact());
-      merchant.setCode(prepaidMovement10.getCodcom());
-      merchant.setName(prepaidMovement10.getNomcomred());
-      transaction.setMerchant(merchant);
-      NewAmountAndCurrency10 newAmountAndCurrency10 = new NewAmountAndCurrency10();
-      newAmountAndCurrency10.setValue(prepaidMovement10.getMonto());
-      newAmountAndCurrency10.setCurrencyCode(prepaidMovement10.getClamon());
-      transaction.setPrimaryAmount(newAmountAndCurrency10);
-      transaction.setType(type);
-      transaction.setStatus(status);
-      List<Fee> fees = new ArrayList<>();
-      Fee fee = new Fee();
-      fee.setAmount(newFee);
-      fees.add(fee);
-      transaction.setFees(fees);
-
-      Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(prepaidMovement10.getFechaCreacion().toLocalDateTime());
-      timestamps.setUpdatedAt(prepaidMovement10.getFechaActualizacion().toLocalDateTime());
-
-      transaction.setTimestamps(timestamps);
-      log.error("prueba de estructura" + transaction);
-
-      TransactionEvent transactionEvent = new TransactionEvent();
-      transactionEvent.setTransaction(transaction);
-
-      ExchangeData<String> req = new ExchangeData<>(toJson(transactionEvent));
-      if(status.equals("AUTHORIZED")){
-        req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_TRANSACTION_AUTHORIZED_EVENT));
-        this.getProducerTemplate().sendBodyAndHeaders(SEDA_TRANSACTION_AUTHORIZED_EVENT, req, headers);
-      }else if(status.equals("REJECTED")){
-        req.getProcessorMetadata().add(new ProcessorMetadata(0, SEDA_TRANSACTION_REJECTED_EVENT));
-        this.getProducerTemplate().sendBodyAndHeaders(SEDA_TRANSACTION_REJECTED_EVENT, req, headers);
+      String route;
+      log.info(String.format("TRANSACTION STATUS ++++ %s ++++", transactionEvent.getTransaction().getStatus()));
+      if(transactionEvent.getTransaction().getStatus().equals("AUTHORIZED")){
+        route = SEDA_TRANSACTION_AUTHORIZED_EVENT;
+      }else if(transactionEvent.getTransaction().getStatus().equals("REJECTED")){
+        route = SEDA_TRANSACTION_REJECTED_EVENT;
+      } else if(transactionEvent.getTransaction().getStatus().equals("REVERSED")) {
+        route = SEDA_TRANSACTION_REVERSED_EVENT;
+      } else {
+        route = SEDA_TRANSACTION_PAID_EVENT;
       }
 
+      Map<String, Object> headers = new HashMap<>();
+      if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
+        headers.put("JMSCorrelationID", transactionEvent.getTransaction().getRemoteTransactionId());
+        ExchangeData<String> req = new ExchangeData<>(toJson(transactionEvent));
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, route));
+
+        this.getProducerTemplate().sendBodyAndHeaders(route, req, headers);
+      } else {
+        headers.put(KafkaConstants.PARTITION_KEY, 0);
+        headers.put(KafkaConstants.KEY, "1");
+
+        this.getProducerTemplate().sendBodyAndHeaders(route, toJson(transactionEvent), headers);
+      }
     }
   }
 }

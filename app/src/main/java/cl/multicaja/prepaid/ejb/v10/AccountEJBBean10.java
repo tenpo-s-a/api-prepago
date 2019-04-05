@@ -114,7 +114,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       return getDbUtils().getJdbcTemplate()
         .queryForObject(FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL, this.getAccountMapper(), userId, accountNumber);
     } catch (EmptyResultDataAccessException ex) {
-      log.error(String.format("[findByUserIdAndAccountNumber] Cuenta/contrato con userId [%d] y accountNumber [%s] no existe", userId, accountNumber));
+      //log.error(String.format("[findByUserIdAndAccountNumber] Cuenta/contrato con userId [%d] y accountNumber [%s] no existe", userId, accountNumber));
       return null;
     }
   }

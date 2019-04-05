@@ -19,6 +19,7 @@ import cl.multicaja.prepaid.dao.AccountDao;
 import cl.multicaja.prepaid.dao.CardDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -73,6 +74,7 @@ public class TestBaseUnit extends TestApiBase {
   private static PrepaidCardEJBBean10 prepaidCardEJBBean10;
   private static PrepaidEJBBean10 prepaidEJBBean10;
   private static PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+  private static PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static FilesEJBBean10 filesEJBBean10;
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
@@ -226,6 +228,14 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovementEJBBean10;
   }
 
+  public static PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11(){
+    if (prepaidMovementEJBBean11 == null) {
+      prepaidMovementEJBBean11 = new PrepaidMovementEJBBean11();
+      prepaidMovementEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+    }
+    return prepaidMovementEJBBean11;
+  }
+
   public static AccountEJBBean10 getAccountEJBBean10(){
     if (accountEJBBean10 == null) {
       accountEJBBean10 = new AccountEJBBean10();
@@ -303,8 +313,9 @@ public class TestBaseUnit extends TestApiBase {
       prepaidEJBBean10.setDelegate(getPrepaidTopupDelegate10());
       prepaidEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
+      prepaidEJBBean10.setPrepaidMovementEJB11(getPrepaidMovementEJBBean11());
       prepaidEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
-      prepaidEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
+      prepaidEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
       prepaidEJBBean10.setFilesEJBBean10(getFilesEJBBean10());
       prepaidEJBBean10.setDelegateReprocesQueue(getReprocesQueueDelegate10());
       prepaidEJBBean10.setProductChangeDelegate(getProductChangeDelegate10());

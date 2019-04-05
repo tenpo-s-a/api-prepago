@@ -2,7 +2,7 @@ package cl.multicaja.prepaid.kafka.events;
 
 import cl.multicaja.prepaid.kafka.events.model.Transaction;
 
-public class TransactionEvent {
+public class TransactionEvent extends BaseEvent {
 
   private String accountId;
   private String cardId;

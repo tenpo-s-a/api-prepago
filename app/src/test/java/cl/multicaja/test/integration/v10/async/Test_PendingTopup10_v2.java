@@ -238,7 +238,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas cargas pendientes
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>) camelFactory.createJMSMessenger(30000, 35000).getMessage(qResp, messageId);
 
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
@@ -295,6 +295,5 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     Assert.assertEquals("debe ser primer intento procesado", 0, lastProcessorMetadata.getRetry());
     Assert.assertTrue("debe ser redirect", lastProcessorMetadata.isRedirect());
-    Assert.assertTrue("debe ser endpoint " + endpoint, lastProcessorMetadata.getEndpoint().contains(endpoint));
   }
 }
