@@ -77,24 +77,11 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     if(userId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
-
-    RowMapper<Account> rm = (ResultSet rs, int rowNum) -> {
-      Account a = new Account();
-      a.setId(rs.getLong("id"));
-      a.setUuid(rs.getString("uuid"));
-      a.setUserId(rs.getLong("id_usuario"));
-      a.setAccountNumber(rs.getString("cuenta"));
-      a.setStatus(rs.getString("estado"));
-      a.setBalanceInfo(rs.getString("saldo_info"));
-      a.setExpireBalance(rs.getLong("saldo_expiracion"));
-      a.setProcessor(rs.getString("procesador"));
-      a.setCreatedAt(rs.getObject("creacion", LocalDateTime.class));
-      a.setUpdatedAt(rs.getObject("actualizacion", LocalDateTime.class));
-      return a;
-    };
+    log.info(String.format("[findByUserId] Buscando cuenta/contrato por -> userId [%d]", userId));
     try{
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, rm, userId);
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACCOUNT_BY_USERID_SQL, this.getAccountMapper(), userId);
     }catch (Exception e){
+      log.error(String.format("[findByUserId] Buscando cuenta/contrato por -> userId [%d] no existe", userId));
       return null;
     }
 
