@@ -13,8 +13,6 @@ import javax.jms.Queue;
 
 public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends TestBaseUnitAsync {
 
-  private UserDao userDao = new UserDao();
-
   @After
   @Before
   public void clearDataBefore(){
@@ -26,7 +24,6 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
   @Test
   public void listenPrepaidUserCreateEventWithProcessor() throws Exception{
-    userDao.setEm(createEntityManager());
 
     PrepaidUser11 userToCreate = buildPrepaidUser11();
 

@@ -1126,13 +1126,6 @@ public class TestBaseUnit extends TestApiBase {
 
     PrepaidUser11 userResponse = getPrepaidUserEJBBean10().createPrepaidUserV11(null, user);
 
-    /**
-     * TODO: Descomentar en caso que la implementación de hibernate funcione a nivel de dev y borrar todo el código anterior.
-     */
-    /*UserDao userDao = new UserDao();
-    userDao.setEm(createEntityManager());
-    user = userDao.insert(user);*/
-
     Assert.assertNotNull("No debe ser null",userResponse);
     Assert.assertNotNull("No debe ser null",userResponse.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userResponse.getId().longValue());
