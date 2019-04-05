@@ -204,8 +204,8 @@ public final class PrepaidResource10 extends BaseResource {
 
   @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
-  public Response upgradeCard(@PathParam("userId") Long userIdMc, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.upgradePrepaidCard(headersToMap(headers), userIdMc, accountUuid);
+  public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
     return Response.ok().build();
   }
 

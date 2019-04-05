@@ -2458,11 +2458,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, String accountUuid) throws Exception {
+  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
 
-    //FIXME: getPrepaidUserByUserIDMc debe devolver el nivel del user
-    PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(null, userIdMc);
-    prepaidUser = getPrepaidUserEJB10().findById(null, prepaidUser.getId()); // Esto deberia borrarse eventualmente
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(null, userUuid);
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
     if(PrepaidUserLevel.LEVEL_2.equals(prepaidUser.getUserLevel())) {
       throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
     }

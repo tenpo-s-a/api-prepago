@@ -12,7 +12,9 @@ import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -22,7 +24,15 @@ import static cl.multicaja.core.model.Errors.*;
 
 public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
-  private HttpResponse upgradePrepaidCard(Long userIdMc, String accountId) {
+  @BeforeClass
+  @AfterClass
+  public static void beforeClass() {
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));
+  }
+
+  private HttpResponse upgradePrepaidCard(String userIdMc, String accountId) {
     HttpResponse respHttp = apiPUT(String.format("/1.0/prepaid/%s/account/%s/upgrade_card", userIdMc, accountId), null);
     System.out.println("respHttp: " + respHttp);
     return respHttp;
@@ -30,21 +40,21 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn201_PrepaidCardUpgraded_Ok() throws Exception {
-    User user = registerUser();
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
     prepaidUser10 = getPrepaidUserEJBBean10().createUser(null, prepaidUser10);
 
     // Crea cuenta/contrato
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser10);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
     prepaidCard.setHashedPan(getRandomString(20));
     prepaidCard.setAccountId(account.getId());
     getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard.getId(), Long.MAX_VALUE, prepaidCard);
     prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
 
-    HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUserIdMc(), account.getUuid());
+    HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
 
     // Revisar que existan el evento de tarjeta cerrada en kafka
@@ -84,7 +94,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn404_UserNoExiste() {
-    HttpResponse resp = upgradePrepaidCard(Long.MAX_VALUE, getRandomNumericString(10));
+    HttpResponse resp = upgradePrepaidCard(getRandomNumericString(10), getRandomNumericString(10));
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -94,13 +104,12 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn422_AccountNoExiste() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = upgradePrepaidCard(user.getId(), getRandomNumericString(10));
+    HttpResponse resp = upgradePrepaidCard(prepaidUser10.getUuid(), getRandomNumericString(10));
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -109,39 +118,14 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
   }
 
   @Test
-  public void shouldReturn422_PrepaidUserDisabled() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-    prepaidUser10.setStatus(PrepaidUserStatus.DISABLED);
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    HttpResponse resp = upgradePrepaidCard(user.getId(), getRandomNumericString(10));
-
-    Assert.assertEquals("status 422", 422, resp.getStatus());
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102004", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
-  }
-
-  @Test
   public void shouldReturn422_PrepaidUserAlreadyLevel2() throws Exception {
-    User user = registerUser();
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = getPrepaidUserEJBBean10().createUser(null, prepaidUser10);
 
     // Crea cuenta/contrato
     Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser10);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    prepaidCard.setHashedPan(getRandomString(20));
-    prepaidCard.setAccountId(account.getId());
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard.getId(), Long.MAX_VALUE, prepaidCard);
-    prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
-
-    HttpResponse resp = upgradePrepaidCard(user.getId(), account.getUuid());
+    HttpResponse resp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();

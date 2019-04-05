@@ -15,7 +15,9 @@ import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -25,20 +27,28 @@ import javax.jms.Queue;
  **/
 public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
+  @BeforeClass
+  @AfterClass
+  public static void beforeClass() {
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_tarjeta cascade", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));
+  }
+
   @Test
   public void productChangeRetryCount4() throws Exception {
-    User user = registerUser();
-
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-
     prepaidUser = createPrepaidUser10(prepaidUser);
-
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    // Crea cuenta/contrato
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    String messageId = sendPendingProductChange(prepaidUser, null, prepaidCard, tipoAlta,4);
+    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, tipoAlta,4);
 
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.ERROR_PRODUCT_CHANGE_RESP);
@@ -57,14 +67,17 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
   @Test
   public void productChange_AlreadyChanged() throws Exception {
-    User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    // Crea cuenta/contrato
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
-    String messageId = sendPendingProductChange(prepaidUser, null, prepaidCard, TipoAlta.NIVEL2,0);
+    String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
 
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_RESP);
@@ -78,15 +91,15 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
   @Test
   public void productChange_ChangeOk() throws Exception {
-    User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
     prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);
 
     // Crea cuenta/contrato
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomNumericString(15));
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
     prepaidCard.setHashedPan(getRandomString(20));
     prepaidCard.setAccountId(account.getId());
     getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard.getId(), Long.MAX_VALUE, prepaidCard);

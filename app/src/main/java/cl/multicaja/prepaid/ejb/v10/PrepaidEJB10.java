@@ -203,12 +203,12 @@ public interface PrepaidEJB10 {
    * Activa la tarjeta mastercard para algunos usuarios (level 1 a level 2)
    *
    * @param headers
-   * @param userIdMc
-   * @param accountId
+   * @param userUuid
+   * @param accountUuid
    * @return
    * @throws Exception
    */
-  void upgradePrepaidCard(Map<String, Object> headers, Long userIdMc, String accountId) throws Exception;
+  void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
 
   /**
    * Obtiene los terminos y condiciones vigentes para preago

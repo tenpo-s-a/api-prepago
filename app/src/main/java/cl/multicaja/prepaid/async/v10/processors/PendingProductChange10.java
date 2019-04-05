@@ -65,12 +65,11 @@ public class PendingProductChange10 extends BaseProcessor10 {
           } else {
             log.debug(String.format("Realizando el cambio de producto al usuario: %d", user.getId()));
 
-            log.info(String.format("LLamando cambio de producto %s", prepaidCard.getProcessorUserId()));
+            log.info(String.format("LLamando cambio de producto %s", account.getAccountNumber()));
 
             // se hace el cambio de producto
-            //Fixme: eventualmente se debe usar getDocument() y no getRut()
             //FixMe: debe usar getDocumentType en vez de tipoDocumento.RUT
-            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(prepaidCard.getProcessorUserId(), user.getRut().toString(), TipoDocumento.RUT, tipoAlta);
+            CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(account.getAccountNumber(), user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
             log.info("Respuesta cambio de producto");
             log.info(dto.getRetorno());
