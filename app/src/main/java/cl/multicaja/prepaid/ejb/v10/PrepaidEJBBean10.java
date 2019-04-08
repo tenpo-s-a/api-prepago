@@ -560,6 +560,21 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
+
+  public void reverseTopupUserBalanceTmp(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception{
+    this.validateTopupRequest(topupRequest);
+    if(topupRequest.getRut() != null) {
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findByNumDoc(null,topupRequest.getRut().toString());
+      if(prepaidUser10 == null){
+        throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+      }
+      reverseTopupUserBalance(headers,prepaidUser10.getUuid(),topupRequest,fromEndPoint);
+    }else {
+      throw new NotFoundException(CLIENTE_NO_EXISTE);
+    }
+
+  }
+
   public void reverseTopupUserBalance(Map<String, Object> headers,String userId,  NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
 
     this.validateTopupRequest(topupRequest);
