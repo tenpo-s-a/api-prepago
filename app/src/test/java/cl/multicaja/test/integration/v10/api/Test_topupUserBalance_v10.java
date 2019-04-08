@@ -30,9 +30,9 @@ public class Test_topupUserBalance_v10 extends TestBaseUnitApi {
   @Before
   @After
   public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE FROM %s.clearing CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE FROM %s.accounting CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE FROM %s.prp_movimiento CASCADE", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.accounting CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.prp_movimiento CASCADE", getSchema()));
   }
 
   @Test
