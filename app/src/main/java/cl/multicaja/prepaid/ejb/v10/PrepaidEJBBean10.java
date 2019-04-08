@@ -445,7 +445,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidTopup.setId(prepaidMovement.getId());
 
 
-    if(getPrepaidMovementEJB10().isFirstTopup(user.getId())) { // Si es primera carga
+    if(account == null && prepaidTopup.isFirstTopup()) { // Si es primera carga
       /*
         Enviar mensaje al proceso asincrono
       */
