@@ -59,6 +59,13 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidTopup).status(201).build();
   }
 
+  @POST
+  @Path("/topup")
+  public Response topupUserBalanceV1(NewPrepaidTopup10 topupRequest, @Context HttpHeaders headers) throws Exception {
+    PrepaidTopup10 prepaidTopup = this.prepaidEJBBean10.topupUserBalanceV1(headersToMap(headers), topupRequest);
+    return Response.ok(prepaidTopup).status(201).build();
+  }
+
 
   @POST
   @Path("/topup/reverse")
