@@ -255,5 +255,4 @@ public interface PrepaidEJB10 {
    */
   User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
 
-
 }

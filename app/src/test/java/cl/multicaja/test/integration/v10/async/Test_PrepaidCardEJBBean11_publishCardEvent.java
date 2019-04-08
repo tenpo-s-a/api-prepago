@@ -34,11 +34,6 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
   @Test
   public void publishCardEvent() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
@@ -73,7 +68,6 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
 
     // Revisar que envia a tarjeta creada
     getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
-
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)

@@ -8,17 +8,21 @@ import cl.multicaja.core.utils.json.JsonParser;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
-import cl.multicaja.prepaid.kafka.events.model.Account;
-import cl.multicaja.prepaid.kafka.events.model.Card;
+import cl.multicaja.prepaid.kafka.events.TransactionEvent;
+import cl.multicaja.prepaid.kafka.events.model.*;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.*;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.security.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.*;
@@ -60,7 +64,6 @@ public final class KafkaEventDelegate10 {
    * Envia un evento de cuenta creada
    *
    */
-  //FIXME: debe recibir la informacion de la cuenta
   public void publishAccountCreatedEvent(AccountEvent accountEvent) {
 
     if(accountEvent == null) {
@@ -110,6 +113,49 @@ public final class KafkaEventDelegate10 {
         headers.put(KafkaConstants.KEY, "1");
 
         this.getProducerTemplate().sendBodyAndHeaders(endPoint, toJson(cardEvent), headers);
+      }
+    }
+  }
+
+  /**
+   * Envia un evento de transaccion
+   *
+   */
+  public void publishTransactionEvent(TransactionEvent transactionEvent) {
+
+    if(transactionEvent == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, transactionEvent -> null =======");
+      throw new IllegalArgumentException();
+    }
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+    } else {
+
+      String route;
+      log.info(String.format("TRANSACTION STATUS ++++ %s ++++", transactionEvent.getTransaction().getStatus()));
+      if(transactionEvent.getTransaction().getStatus().equals("AUTHORIZED")){
+        route = SEDA_TRANSACTION_AUTHORIZED_EVENT;
+      }else if(transactionEvent.getTransaction().getStatus().equals("REJECTED")){
+        route = SEDA_TRANSACTION_REJECTED_EVENT;
+      } else if(transactionEvent.getTransaction().getStatus().equals("REVERSED")) {
+        route = SEDA_TRANSACTION_REVERSED_EVENT;
+      } else {
+        route = SEDA_TRANSACTION_PAID_EVENT;
+      }
+
+      Map<String, Object> headers = new HashMap<>();
+      if(!ConfigUtils.getInstance().getPropertyBoolean("kafka.enabled")) {
+        headers.put("JMSCorrelationID", transactionEvent.getTransaction().getRemoteTransactionId());
+        ExchangeData<String> req = new ExchangeData<>(toJson(transactionEvent));
+        req.getProcessorMetadata().add(new ProcessorMetadata(0, route));
+
+        this.getProducerTemplate().sendBodyAndHeaders(route, req, headers);
+      } else {
+        headers.put(KafkaConstants.PARTITION_KEY, 0);
+        headers.put(KafkaConstants.KEY, "1");
+
+        this.getProducerTemplate().sendBodyAndHeaders(route, toJson(transactionEvent), headers);
       }
     }
   }

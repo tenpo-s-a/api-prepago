@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.jms.Queue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -173,6 +174,9 @@ public abstract class BaseProcessor10 {
     long[] array = getArrayDelayTimeoutToRedirect();
     if (retryCount < 0 || array == null || array.length == 0 || retryCount > array.length) {
       return 0L;
+    }
+    if(retryCount == 0) {
+      return array[retryCount];
     }
     return array[retryCount-1];
   }

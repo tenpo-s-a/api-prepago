@@ -88,9 +88,7 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
 
           //TODO: Verificar si se enviara el contrato a cargar a futuro, por el momento sirve para obtener el ultimo contrato del usuario
-
           Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
-          log.info(account);
 
           //TODO: Esto se cambiara ya que la tarjeta tiene que venir seleccionada o se usara la principal.
           PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
@@ -98,7 +96,7 @@ public class PendingTopup10 extends BaseProcessor10 {
                                                                                                       PrepaidCardStatus.LOCKED,
                                                                                                       PrepaidCardStatus.PENDING);
           if (prepaidCard != null) {
-
+            prepaidCard = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
             data.setPrepaidCard10(prepaidCard);
             String nomcomred = prepaidTopup.getMerchantName();
             String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
@@ -156,7 +154,8 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
-              //TODO: Se debe guardar el movimiento en accounting -> PENDING y clearing -> INITIAL
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+
               Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
               redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
 
@@ -195,6 +194,8 @@ public class PendingTopup10 extends BaseProcessor10 {
               data.getPrepaidMovement10().setEstado(status);
               data.getPrepaidMovement10().setEstadoNegocio(businessStatus);
 
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
             }
@@ -217,8 +218,8 @@ public class PendingTopup10 extends BaseProcessor10 {
             }
           }
         }catch (Exception e){
-          e.printStackTrace();
-          log.error(String.format("Error desconocido al realizar carga %s",e));
+          log.error("Error desconocido al realizar carga");
+          log.error(e);
           req.getData().setNumError(Errors.ERROR_INDETERMINADO);
           req.getData().setMsjError(e.getLocalizedMessage());
           return redirectRequest(createJMSEndpoint(ERROR_TOPUP_REQ), exchange, req, true);
