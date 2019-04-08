@@ -559,18 +559,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       default: return PrepaidUserStatus.DISABLED;
     }
   }
-  @Override
-  public void reverseTopupUserBalance(Map<String, Object> headers, NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
+
+  public void reverseTopupUserBalance(Map<String, Object> headers,String userId,  NewPrepaidTopup10 topupRequest,Boolean fromEndPoint) throws Exception {
+
     this.validateTopupRequest(topupRequest);
+
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
-    // Obtener usuario Multicaja
-    User user = this.getUserMcByRut(headers, topupRequest.getRut());
 
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
 
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(headers, userId);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    if(prepaidUser.getStatus().equals(PrepaidUserStatus.DISABLED)){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
     // Obtiene la tarjeta
     PrepaidCard10 prepaidCard = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,

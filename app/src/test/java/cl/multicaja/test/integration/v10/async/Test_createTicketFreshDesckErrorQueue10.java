@@ -191,18 +191,20 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -218,7 +220,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,2);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,2);
     Thread.sleep(2000);
 
     System.out.println("TICKET CREADO");
@@ -257,7 +259,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
+    String messageId = sendPendingWithdrawReversal(withdraw10,prepaidUser, reverse, 2);
     System.out.println("TICKET CREADO");
   }
 

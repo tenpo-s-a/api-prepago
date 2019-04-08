@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -39,8 +40,6 @@ import static cl.multicaja.core.model.Errors.*;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
-  @Spy
-  private UserClient userClient;
 
   @Spy
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
@@ -72,7 +71,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   @Test
   public void reverseRequestNull() throws Exception {
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, null,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, null,null,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error request null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -85,7 +84,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
   public void reverseRequestAmountNull() throws Exception {
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, UUID.randomUUID().toString(), reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -100,7 +99,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     reverseRequest.setAmount(amount);
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,UUID.randomUUID().toString(), reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -116,7 +115,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     amount.setValue(BigDecimal.ZERO);
     reverseRequest.setAmount(amount);
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, UUID.randomUUID().toString(),reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -133,7 +132,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setRut(0);
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,UUID.randomUUID().toString(), reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -151,7 +150,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantCode("1234567890");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, UUID.randomUUID().toString(),reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -170,7 +169,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantName("Test");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,UUID.randomUUID().toString(), reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -190,7 +189,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setMerchantCategory(1);
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,UUID.randomUUID().toString(), reverseRequest,true);
       Assert.fail("should not be here");
     } catch (BadRequestException ex) {
       Assert.assertEquals("Debe retornar error amount.value null", PARAMETRO_FALTANTE_$VALUE.getValue(), ex.getCode());
@@ -199,40 +198,12 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     }
   }
 
-  @Test
-  public void userMcNull() throws Exception {
-
-    Mockito.doReturn(null).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
-    NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
-    reverseRequest.setAmount(amount);
-    reverseRequest.setRut(Integer.MAX_VALUE);
-    reverseRequest.setMerchantCode("1234567890");
-    reverseRequest.setMerchantName("Test");
-    reverseRequest.setMerchantCategory(1);
-    reverseRequest.setTransactionId("0987654321");
-
-    try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
-      Assert.fail("should not be here");
-    } catch (NotFoundException ex) {
-      Assert.assertEquals("Debe retornar error user null", CLIENTE_NO_EXISTE.getValue(), ex.getCode());
-    }
-  }
 
   @Test
   public void prepaidUserNull() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
 
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-    Mockito.doReturn(null).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    String uuid = UUID.randomUUID().toString();
+    Mockito.doReturn(null).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -244,7 +215,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,uuid, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (NotFoundException ex) {
       Assert.assertEquals("Debe retornar error prepaidUser null", CLIENTE_NO_TIENE_PREPAGO.getValue(), ex.getCode());
@@ -253,19 +224,14 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void prepaidUserDisabled() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
 
+    String uuid = UUID.randomUUID().toString();
     PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setId(Long.MAX_VALUE);
+    prepaidUser.setUuid(uuid);
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
 
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.ZERO);
@@ -277,7 +243,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try{
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,uuid, reverseRequest,true);
       Assert.fail("should not be here");
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error prepaidUser disabled", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), ex.getCode());
@@ -286,16 +252,10 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void originalTopupAlreadyReversed() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
-
+    String uuid = UUID.randomUUID().toString();
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
+    prepaidUser.setUuid(uuid);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
 
     PrepaidMovement10 originalTopup = new PrepaidMovement10();
@@ -304,11 +264,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
 
-    // UserMc
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
     // PrepaidUser
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -317,7 +274,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     // Reverse
     Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
-      Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
+    Mockito.any(PrepaidMovementType.class), Mockito.any(TipoFactura.class));
 
     NewPrepaidTopup10 reverseRequest = new NewPrepaidTopup10();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.TEN);
@@ -329,7 +286,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try {
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers,uuid, reverseRequest,true);
     } catch(ReverseAlreadyReceivedException ex) {
       Assert.assertEquals("Debe retornar error de reversa ya recibida", REVERSA_RECIBIDA_PREVIAMENTE.getValue(), ex.getCode());
     }
@@ -341,26 +298,18 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void originalTopupNull() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    String uuid = UUID.randomUUID().toString();
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setUuid(uuid);
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
     reverse.setId(Long.MAX_VALUE);
 
-    // UserMc
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
     // PrepaidUser
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -390,7 +339,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try {
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, uuid,reverseRequest,true);
     } catch (ReverseOriginalMovementNotFoundException ex) {
       Assert.assertEquals("Debe retornar error de movimiento original no recibido", REVERSA_MOVIMIENTO_ORIGINAL_NO_RECIBIDO.getValue(), ex.getCode());
     }
@@ -403,17 +352,12 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void originalTopupAmountMismatch() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
+    String uuid = UUID.randomUUID().toString();
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setUuid(uuid);
 
     PrepaidMovement10 originalTopup = new PrepaidMovement10();
     originalTopup.setMonto(BigDecimal.TEN);
@@ -421,8 +365,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverse = new PrepaidMovement10();
     reverse.setId(Long.MAX_VALUE);
 
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+   Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -447,7 +390,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try {
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, uuid, reverseRequest,true);
     } catch (ValidationException ex) {
       Assert.assertEquals("Debe retornar error de monto no concuerda", REVERSA_INFORMACION_NO_CONCUERDA.getValue(), ex.getCode());
     }
@@ -461,17 +404,13 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void originalTopupReverseTimeExpired() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
+
+    String uuid = UUID.randomUUID().toString();
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setUuid(uuid);
 
     PrepaidMovement10 originalTopup = new PrepaidMovement10();
     originalTopup.setMonto(BigDecimal.TEN);
@@ -479,11 +418,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     // fecha creacion
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().minusHours(24).minusSeconds(1).toInstant()));
 
-    // UserMc
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
     // PrepaidUser
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -505,7 +441,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     reverseRequest.setTransactionId("0987654321");
 
     try {
-      prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+      prepaidEJBBean10.reverseTopupUserBalance(headers, uuid, reverseRequest,true);
       Assert.fail("Sould not be here");
     } catch (ReverseTimeExpiredException ex) {
       Assert.assertEquals("Deberia tener error de transaccion", REVERSA_TIEMPO_EXPIRADO.getValue(), ex.getCode());
@@ -517,18 +453,11 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
   @Test
   public void reverseTopup() throws Exception {
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
-
+    String uuid = UUID.randomUUID().toString();
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-
+    prepaidUser.setUuid(uuid);
     PrepaidMovement10 originalTopup = new PrepaidMovement10();
     originalTopup.setMonto(BigDecimal.TEN);
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().toInstant()));
@@ -550,11 +479,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverseMovement = new PrepaidMovement10();
     reverseMovement.setId(Long.MAX_VALUE);
 
-    // UserMc
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
     // PrepaidUser
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     // PrepaidCard
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -579,7 +505,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     Mockito.doReturn("123456789")
       .when(delegate).sendPendingTopupReverse(Mockito.any(), Mockito.any(), Mockito.any(PrepaidUser10.class), Mockito.any());
 
-    prepaidEJBBean10.reverseTopupUserBalance(headers, reverseRequest,true);
+    prepaidEJBBean10.reverseTopupUserBalance(headers,uuid, reverseRequest,true);
 
     // Se verifica que se llamaron los metodos
     Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
