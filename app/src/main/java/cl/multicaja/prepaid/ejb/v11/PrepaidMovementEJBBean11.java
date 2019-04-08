@@ -5,10 +5,8 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
-import cl.multicaja.prepaid.kafka.events.model.Fee;
-import cl.multicaja.prepaid.kafka.events.model.Merchant;
+import cl.multicaja.prepaid.kafka.events.model.*;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
-import cl.multicaja.prepaid.kafka.events.model.Transaction;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
@@ -188,20 +186,20 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     };
   }
 
-  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, String type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, "AUTHORIZED");
+  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.AUTHORIZED);
   }
 
-  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, String type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, "REJECTED");
+  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REJECTED);
   }
 
-  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, String type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, "REVERSED");
+  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REVERSED);
   }
 
-  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, String type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, "PAID");
+  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.PAID);
   }
 
   /**
@@ -209,7 +207,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
    *
    * @throws Exception
    */
-  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, String type, String status) throws Exception {
+  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type, TransactionStatus status) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
@@ -222,10 +220,10 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     if(movement == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movement"));
     }
-    if(StringUtils.isAllBlank(type)){
+    if(type == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "type"));
     }
-    if(StringUtils.isAllBlank(status)){
+    if(status == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
     }
 
@@ -250,8 +248,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     newAmountAndCurrency10.setCurrencyCode(movement.getClamon());
 
     transaction.setPrimaryAmount(newAmountAndCurrency10);
-    transaction.setType(type);
-    transaction.setStatus(status);
+    transaction.setType(type.toString());
+    transaction.setStatus(status.toString());
 
     List<Fee> fees;
     if(fee == null) {
