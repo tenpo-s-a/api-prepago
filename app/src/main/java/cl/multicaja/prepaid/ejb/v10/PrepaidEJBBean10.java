@@ -2509,7 +2509,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     Account account = accountEJBBean10.findByUuid(accountUuid);
 
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
     getProductChangeDelegate().sendProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2);
   }
 
