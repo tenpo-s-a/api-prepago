@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.prepaid.model.v10.PrepaidTac10;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -10,6 +11,8 @@ import org.junit.Test;
  **/
 public class Test_PrepaidEJBBean10_getTermsAndConditions extends TestBaseUnit {
 
+  //TODO: Esto se eliminara
+  @Ignore
   @Test
   public void shouldAcceptTermsAndConditions() throws Exception {
     PrepaidTac10 tac = getPrepaidEJBBean10().getTermsAndConditions(null);

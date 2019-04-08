@@ -55,25 +55,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
   }
 
-  @Test
-  public void shouldReturn400_OnMissingRut() {
-
-    NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
-    prepaidTopup.setTransactionId("123456789");
-    prepaidTopup.setMerchantCode("987654321");
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal("9999.90"));
-    prepaidTopup.setAmount(amount);
-
-    HttpResponse resp = reverseTopupUserBalance(prepaidTopup);
-
-    Assert.assertEquals("status 400", 400, resp.getStatus());
-
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 101004", 101004, errorObj.get("code"));
-  }
 
   @Test
   public void shouldReturn400_OnMissingTransactionId() {

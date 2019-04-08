@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.NewTermsAndConditions10;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,6 +20,8 @@ import static cl.multicaja.core.model.Errors.*;
  **/
 public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit {
 
+  //TODO: Todo esto se eliminara
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_McUserIdNull() throws Exception {
     try{
@@ -37,7 +40,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TermsAndConditionsNull() throws Exception {
     try{
@@ -61,7 +64,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_TermsAndConditions_Version_Empty() throws Exception {
 
@@ -76,7 +79,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_McUserNull() throws Exception{
     NewTermsAndConditions10 tac = new NewTermsAndConditions10();
@@ -91,7 +94,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserDisabled() throws Exception {
 
@@ -111,7 +114,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserLocked() throws Exception {
 
@@ -131,7 +134,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_McUserDeleted() throws Exception {
 
@@ -151,7 +154,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
       throw ex;
     }
   }
-
+  @Ignore
   @Test
   public void shouldAcceptTermsAndConditions() throws Exception {
     NewTermsAndConditions10 tac = new NewTermsAndConditions10();
@@ -171,7 +174,7 @@ public class Test_PrepaidEJBBean10_acceptTermsAndConditions extends TestBaseUnit
     Assert.assertEquals("Debe ser TERMS_AND_CONDITIONS", "TERMS_AND_CONDITIONS", userFile.getName());
     Assert.assertEquals("Debe tener version v1.0", "v1.0", userFile.getVersion());
   }
-
+  @Ignore
   @Test
   public void shouldDoNothingWhen_TermsAndConditionsAlreadyAccepted() throws Exception {
     NewTermsAndConditions10 tac = new NewTermsAndConditions10();
