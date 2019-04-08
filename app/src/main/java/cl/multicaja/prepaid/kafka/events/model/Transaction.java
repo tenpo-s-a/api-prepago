@@ -82,4 +82,18 @@ public class Transaction extends BaseModel {
   public void setFees(List<Fee> fees) {
     this.fees = fees;
   }
+
+  @Override
+  public String toString() {
+    return "Transaction{" +
+      "remoteTransactionId='" + remoteTransactionId + '\'' +
+      ", authCode='" + authCode + '\'' +
+      ", primaryAmount=" + primaryAmount +
+      ", secondaryAmount=" + secondaryAmount +
+      ", merchant=" + merchant +
+      ", type='" + type + '\'' +
+      ", countryCode=" + countryCode +
+      ", fees=" + fees +
+      '}';
+  }
 }

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -59,6 +60,16 @@ public class PrepaidMovement10 implements Serializable, Cloneable {
   private ReconciliationStatusType conSwitch;
   private ReconciliationStatusType conTecnocom;
   private MovementOriginType originType;
+
+  private Long cardId;
+
+  public Long getCardId() {
+    return cardId;
+  }
+
+  public void setCardId(Long cardId) {
+    this.cardId = cardId;
+  }
 
   public Long getId() {
     return id;

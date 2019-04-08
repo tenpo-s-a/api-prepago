@@ -119,7 +119,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
-    log.error(user);
+    log.info(user);
     getDbUtils().getJdbcTemplate().update(connection -> {
       PreparedStatement ps = connection
         .prepareStatement(INSERT_USER, new String[] {"id"});
@@ -149,7 +149,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    log.error("findById IN ID: "+id);
+    log.info("findById IN ID: "+id);
     org.springframework.jdbc.core.RowMapper<PrepaidUser10> rm = (ResultSet rs, int rowNum) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(rs.getLong("id"));
