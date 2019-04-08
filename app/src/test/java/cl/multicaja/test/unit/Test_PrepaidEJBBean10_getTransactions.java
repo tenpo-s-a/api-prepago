@@ -23,6 +23,7 @@ import cl.multicaja.tecnocom.dto.MovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,7 @@ import static cl.multicaja.core.model.Errors.*;
 import static cl.multicaja.core.test.TestBase.getRandomNumericString;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 public class Test_PrepaidEJBBean10_getTransactions {
 
   @Spy

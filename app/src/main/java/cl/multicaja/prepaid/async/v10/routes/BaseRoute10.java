@@ -10,6 +10,7 @@ import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.PdfUtils;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -37,6 +38,9 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @EJB
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @EJB
   private CdtEJBBean10 cdtEJBBean10;
@@ -167,13 +171,20 @@ public abstract class BaseRoute10 extends CamelRouteBuilder {
     this.prepaidEJBBean10 = prepaidEJBBean10;
   }
 
-
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
   }
 
   public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
     this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
+    return prepaidMovementEJBBean11;
+  }
+
+  public void setPrepaidMovementEJBBean11(PrepaidMovementEJBBean11 prepaidMovementEJBBean11) {
+    this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
   }
 
   public CdtEJBBean10 getCdtEJBBean10() {

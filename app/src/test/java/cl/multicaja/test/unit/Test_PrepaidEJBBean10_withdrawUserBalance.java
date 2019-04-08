@@ -23,6 +23,7 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,6 +43,7 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
  * @author abarazarte
  **/
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Spy
