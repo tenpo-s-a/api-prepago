@@ -23,6 +23,7 @@ import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -492,7 +493,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
 
         // Evento de transaccion autorizada
-        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");
@@ -518,14 +519,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         String messageId = this.getDelegate().sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidMovementReverse);
 
         // Evento de transaccion rechazada
-        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
 
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()), new KeyValue("messageId", messageId));
       }
       else {
         log.info("Error no reintentable");
         // Evento de transaccion rechazada
-        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
 
         //Colocar el movimiento en error
         getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
@@ -657,7 +658,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
             // Se publica evento de transaccion reversada
             //TODO: descomentar cuando se modifique la reversa
-            //getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), "CASH_IN_MULTICAJA");
+            //getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
 
           } else {
             log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));

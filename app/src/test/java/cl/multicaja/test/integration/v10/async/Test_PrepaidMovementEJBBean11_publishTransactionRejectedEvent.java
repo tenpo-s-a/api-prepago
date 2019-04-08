@@ -5,6 +5,8 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.kafka.events.model.Fee;
+import cl.multicaja.prepaid.kafka.events.model.TransactionStatus;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
@@ -111,24 +113,12 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     }
   }
 
-  @Test(expected = BadRequestException.class)
-  public void publishTransactionRejectedEvent_type_empty() throws Exception {
-    try {
-      getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), new PrepaidMovement10(), null,"");
-      Assert.fail("Should not be here");
-    } catch (BadRequestException brex) {
-      Assert.assertEquals("Error de parametro faltante",PARAMETRO_FALTANTE_$VALUE.getValue(), brex.getCode());
-      throw brex;
-    }
-  }
-
   @Test
   public void publishTransactionRejectedEvent() throws Exception {
 
     String userUuid = UUID.randomUUID().toString();
     String accountUuid = UUID.randomUUID().toString();
     String cardUuid = UUID.randomUUID().toString();
-    String type = getRandomString(10);
 
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
@@ -139,7 +129,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
 
     NewAmountAndCurrency10 fee = new NewAmountAndCurrency10(BigDecimal.TEN);
 
-    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, fee, type);
+    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, fee, TransactionType.CASH_IN_MULTICAJA);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -156,8 +146,8 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
 
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
-    Assert.assertEquals("Debe tener el mismo tipo", type, transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+    Assert.assertEquals("Debe tener el mismo tipo", TransactionType.CASH_IN_MULTICAJA.toString(), transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el status REJECTED", TransactionStatus.REJECTED.toString(), transactionEvent.getTransaction().getStatus());
 
     List<Fee> fees = transactionEvent.getTransaction().getFees();
     Assert.assertEquals("Debe tener 1 fee", 1, fees.size());
@@ -171,7 +161,6 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     String userUuid = UUID.randomUUID().toString();
     String accountUuid = UUID.randomUUID().toString();
     String cardUuid = UUID.randomUUID().toString();
-    String type = getRandomString(10);
 
     PrepaidUser10 user = buildPrepaidUserv2();
     PrepaidTopup10 topup = buildPrepaidTopup10();
@@ -180,7 +169,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
-    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, null, type);
+    getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, null, TransactionType.CASH_IN_MULTICAJA);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REJECTED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -197,8 +186,8 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
 
     Assert.assertEquals("Debe tener el mismo numaut", movement.getNumaut(), transactionEvent.getTransaction().getAuthCode());
     Assert.assertEquals("Debe tener el mismo monto", movement.getMonto(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
-    Assert.assertEquals("Debe tener el mismo tipo", type, transactionEvent.getTransaction().getType());
-    Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+    Assert.assertEquals("Debe tener el mismo tipo", TransactionType.CASH_IN_MULTICAJA.toString(), transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el status REJECTED", TransactionStatus.REJECTED.toString(), transactionEvent.getTransaction().getStatus());
 
     Assert.assertEquals("No debe tener fees", 0, transactionEvent.getTransaction().getFees().size());
 
