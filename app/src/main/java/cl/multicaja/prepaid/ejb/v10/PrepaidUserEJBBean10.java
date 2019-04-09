@@ -77,14 +77,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
   private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
 
-  @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJB10;
-
-  @EJB
-  private PrepaidMovementEJBBean10 prepaidMovementEJB10;
-
-  private TecnocomService tecnocomService;
-
   private UserClient userClient;
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
