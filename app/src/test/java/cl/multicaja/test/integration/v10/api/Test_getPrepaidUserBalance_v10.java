@@ -19,39 +19,26 @@ import static cl.multicaja.core.model.Errors.*;
 public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
 
   @Before
-  public void  before() {
+  public void  before1() {
     getTecnocomService().setAutomaticError(Boolean.FALSE);
     getTecnocomService().setRetorno(null);
   }
 
-  /**
-   *
-   * @param userIdMc
-   * @param forceRefreshBalance
-   * @return
-   */
   private HttpResponse getPrepaidUserBalance(Long userIdMc, boolean forceRefreshBalance) {
     HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/balance", userIdMc), new HttpHeader("forceRefreshBalance", String.valueOf(forceRefreshBalance)));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
-  //TODO: REvisar despues.
-  @Ignore
   @Test
   public void getPrepaidUserBalance_ok() throws Exception {
 
-
-
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // se hace una carga
     BigDecimal impfac = BigDecimal.valueOf(3000);
-    //topupUserBalance(user, impfac);
+    topupUserBalance(prepaidUser10.getUuid(), impfac);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -61,7 +48,7 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
       NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
       NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
-      HttpResponse respHttp = getPrepaidUserBalance(user.getId(), true);
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUserIdMc(), true);
 
       Assert.assertEquals("status 200", 200, respHttp.getStatus());
 
@@ -98,34 +85,10 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    //ahora tiene prepago pero aun no se ha creado tarjeta, debe dar error de tarjeta primera carga pendiente
-    try {
-
-      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getId(), false);
-
-      Assert.assertEquals("status 422", 422, respHttp.getStatus());
-
-      ValidationException vex = respHttp.toObject(ValidationException.class);
-
-      if (vex != null) {
-        throw vex;
-      }
-
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", TARJETA_PRIMERA_CARGA_PENDIENTE.getValue(), vex.getCode());
-    }
-
-    //ahora se crea la tarjeta para que pase la validacion anterior
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
     //dado que no se dio de alta el cliente, al intentar buscar el saldo en tecnocom debe dar error
     try {
 
-      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getId(), false);
+      HttpResponse respHttp = getPrepaidUserBalance(prepaidUser10.getUserIdMc(), false);
 
       Assert.assertEquals("status 422", 422, respHttp.getStatus());
 

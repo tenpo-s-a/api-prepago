@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
@@ -17,6 +19,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
 
 /**
  * @author vutreras
@@ -160,7 +165,14 @@ public final class PrepaidResource10 extends BaseResource {
   @Path("/{userId}/balance")
   @Deprecated
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    Account account = this.accountEJBBean10.findByUserId(userIdMc);
+    PrepaidUser10 prepaidUser10 = this.prepaidUserEJBBean10.getPrepaidUserByUserIdMc(headersToMap(headers), userIdMc);
+    if(prepaidUser10 == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    Account account = this.accountEJBBean10.findByUserId(prepaidUser10.getId());
+    if(account == null) {
+      throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE);
+    }
     PrepaidBalance10 prepaidBalance10 =  this.accountEJBBean10.getBalance(headersToMap(headers), account.getId());
     return Response.ok(prepaidBalance10).build();
   }
