@@ -263,29 +263,31 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         log.info("processErrorWithdrawReversal - REQ: " + req);
         req.retryCountNext();
         PrepaidReverseData10 data = req.getData();
+        PrepaidUser10 user = data.getPrepaidUser10();
         if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
           Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
           String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_1","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas1(template,"Error al realizar reversa de Retiro",String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId(),data.getPrepaidMovementReverse().getNumaut(),data.getPrepaidMovementReverse().getMonto().longValue());
+          template = TemplateUtils.freshDeskTemplateColas1(template,"Error al realizar reversa de Retiro",String.format("%s %s",user.getName(),user.getLastName()),user.getDocumentNumber(),
+            user.getId() , data.getPrepaidMovementReverse().getNumaut(),data.getPrepaidMovementReverse().getMonto().longValue());
 
           NewTicket newTicket = createTicket("Error al realizar reversa de Retiro",
             template,
-            String.valueOf(data.getUser().getRut().getValue()),
+            user.getDocumentNumber(),
             data.getPrepaidWithdraw10().getMessageId(),
             QueuesNameType.REVERSE_WITHDRAWAL,
             req.getReprocesQueue());
 
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
+          /*Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
           if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
           }
+           */
         } else {
           Map<String, Object> templateData = new HashMap<>();
-          templateData.put("idUsuario", data.getUser().getId().toString());
-          templateData.put("rutCliente", data.getUser().getRut().getValue().toString() + "-" + data.getUser().getRut().getDv());
+          templateData.put("idUsuario", user.getId());
+          templateData.put("rutCliente", user.getDocumentNumber());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         }
         return req;

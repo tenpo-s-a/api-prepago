@@ -252,6 +252,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidUserEJBBean10 = new PrepaidUserEJBBean10();
       prepaidUserEJBBean10.setPrepaidCardEJB10(getPrepaidCardEJBBean10());
       prepaidUserEJBBean10.setPrepaidMovementEJB10(getPrepaidMovementEJBBean10());
+      prepaidUserEJBBean10.setAccountEJBBean10(getAccountEJBBean10());
     }
     return prepaidUserEJBBean10;
   }
@@ -372,6 +373,7 @@ public class TestBaseUnit extends TestApiBase {
       mcRedReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
       mcRedReconciliationEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       mcRedReconciliationEJBBean10.setPrepaidInvoiceDelegate10(getInvoiceDelegate10());
+      mcRedReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
     }
     return mcRedReconciliationEJBBean10;
   }
@@ -665,6 +667,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNumeroUnico(getRandomNumericString(8));
     return prepaidCard;
   }
+
+
 
   public PrepaidCard10 buildPrepaidCard10(PrepaidUser10 prepaidUser,Long accountId) throws Exception {
     int expiryYear = numberUtils.random(1000, 9999);
@@ -1106,8 +1110,6 @@ public class TestBaseUnit extends TestApiBase {
 
     Assert.assertNotNull("debe retornar un usuario", prepaidUser);
     Assert.assertEquals("debe tener id", true, prepaidUser.getId() > 0);
-    Assert.assertEquals("debe tener idUserMc", true, prepaidUser.getUserIdMc() > 0);
-    Assert.assertEquals("debe tener rut", true, prepaidUser.getRut() > 0);
     Assert.assertNotNull("debe tener status", prepaidUser.getStatus());
     Assert.assertNotNull("debe tener uuid", prepaidUser.getUuid());
 
@@ -1279,6 +1281,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -1349,6 +1352,7 @@ public class TestBaseUnit extends TestApiBase {
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setIdMovimientoRef(cdtTransaction != null ? cdtTransaction.getTransactionReference() : getUniqueLong());
     prepaidMovement.setIdPrepaidUser(prepaidUser.getId());
+
     prepaidMovement.setIdTxExterno(cdtTransaction != null ? cdtTransaction.getExternalTransactionId() : getUniqueLong().toString());
     prepaidMovement.setTipoMovimiento(type);
     prepaidMovement.setMonto(BigDecimal.valueOf(getUniqueInteger()));
@@ -1587,7 +1591,7 @@ public class TestBaseUnit extends TestApiBase {
 
     return inclusionMovimientosDTO;
   }
-
+  @Deprecated
   public InclusionMovimientosDTO inclusionMovimientosTecnocom(PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
 
     if (prepaidCard10 == null) {
@@ -1596,10 +1600,6 @@ public class TestBaseUnit extends TestApiBase {
 
     if (movement10 == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
-    }
-
-    if (StringUtils.isBlank(prepaidCard10.getProcessorUserId())) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.processorUserId"));
     }
 
     if (StringUtils.isBlank(prepaidCard10.getPan())) {
@@ -1613,6 +1613,29 @@ public class TestBaseUnit extends TestApiBase {
       movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
     return inclusionMovimientosDTO;
   }
+
+  public InclusionMovimientosDTO inclusionMovimientosTecnocom(Account account, PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
+
+    if (prepaidCard10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (movement10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(movement10.getId().toString());
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(account.getAccountNumber(), EncryptUtil.getInstance().decrypt(prepaidCard10.getEncryptedPan()),
+      movement10.getClamon(),movement10.getIndnorcor(), movement10.getTipofac(), movement10.getNumreffac(), movement10.getImpfac(), numaut, movement10.getCodcom(),
+      movement10.getCodcom(), movement10.getCodact(), CodigoMoneda.fromValue(movement10.getClamondiv()),movement10.getImpfac());
+    return inclusionMovimientosDTO;
+  }
+
   /**
    * Espera por 10 intentos cada 1 segundo la existencia de una tarjeta del cliente prepago
    *

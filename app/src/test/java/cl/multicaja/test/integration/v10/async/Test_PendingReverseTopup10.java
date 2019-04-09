@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
 
 import javax.jms.Queue;
@@ -34,20 +35,21 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void reverseRetryCount4() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
 
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
@@ -57,7 +59,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,4);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,4);
     // Primera vez
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
@@ -112,20 +114,20 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void testPendingTopupReverseOk_pos() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(getRandomString(15));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -139,7 +141,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
 
     //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
     Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
@@ -191,20 +193,20 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void testPendingTopupReverseOk_web() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -218,7 +220,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidReverseMovement = createPrepaidMovement10(prepaidReverseMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
 
     //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
     Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_RESP);
@@ -270,21 +272,20 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void testPendingTopupReverseOkMovementTimeOutResponseError1_pos() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(getRandomString(15));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -298,7 +299,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
@@ -374,21 +375,20 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void testPendingTopupReverseOkMovementTimeOutResponseError1_web() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
@@ -402,7 +402,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
@@ -477,28 +477,27 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
 
   @Test
   public void testPendingTopupReverseOkMovementTimeOutResponseError2_pos() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    User user = registerUser();
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(getRandomString(15));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    inclusionMovimientosTecnocom(prepaidCard,prepaidMovement);
+    inclusionMovimientosTecnocom(account,prepaidCard,prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
@@ -507,7 +506,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes
@@ -583,27 +582,27 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
   @Test
   public void testPendingTopupReverseOkMovementTimeOutResponseError2_web() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    inclusionMovimientosTecnocom(prepaidCard,prepaidMovement);
+    inclusionMovimientosTecnocom(account,prepaidCard,prepaidMovement);
 
     PrepaidMovement10 prepaidReverseMovement = buildReversePrepaidMovement10(prepaidUser,prepaidTopup);
     prepaidReverseMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
@@ -612,7 +611,7 @@ public class Test_PendingReverseTopup10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(prepaidMovement);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidUser, prepaidReverseMovement,0);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,0);
     // Primera vez
     {
       //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas Reversa de cargas pendientes

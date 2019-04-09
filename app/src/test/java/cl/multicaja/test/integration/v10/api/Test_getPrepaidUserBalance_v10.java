@@ -7,6 +7,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
 
 import java.math.BigDecimal;
@@ -118,8 +119,8 @@ public class Test_getPrepaidUserBalance_v10 extends TestBaseUnitApi {
     }
 
     //ahora se crea la tarjeta para que pase la validacion anterior
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
-
+    Account account = createRandomAccount(prepaidUser10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10,account.getId());
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     //dado que no se dio de alta el cliente, al intentar buscar el saldo en tecnocom debe dar error
