@@ -55,7 +55,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, prepaidMovement, 4);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, prepaidMovement, 4);
 
     {
       //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
@@ -258,7 +258,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {
@@ -383,7 +383,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {
@@ -509,7 +509,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {
@@ -729,7 +729,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {
@@ -854,7 +854,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {
@@ -980,7 +980,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
     reverse = createPrepaidMovement10(reverse);
 
-    String messageId = sendPendingWithdrawReversal(withdraw10, user, prepaidUser, reverse, 0);
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
 
     // primer intento
     {

@@ -296,9 +296,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
     prepaidWithdraw.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso
     PrepaidReverseData10 data = new PrepaidReverseData10(prepaidWithdraw, prepaidUser, reverse);
-    if(user != null) {
-      data.setUser(user);
-    }
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidReverseData10> req = new ExchangeData<>(data);
@@ -310,7 +307,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
-  public String sendPendingTopupReverse(PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10, User user, PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovement, int retryCount) {
+  public String sendPendingTopupReverse(PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10, PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovement, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -324,7 +321,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     Queue qReq = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_TOPUP_REQ);
     prepaidTopup.setMessageId(messageId);
     //se crea la el objeto con los datos del proceso PrepaidTopup10 , User , PrepaidMovement10 prepaidMovementReverse
-    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10, user,prepaidUser10, prepaidMovement);
+    PrepaidReverseData10 data = new PrepaidReverseData10(prepaidTopup,prepaidCard10,prepaidUser10, prepaidMovement);
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(100), CodigoMoneda.CHILE_CLP));
 
     //se envia el mensaje a la cola

@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -22,6 +23,8 @@ import static cl.multicaja.core.model.Errors.CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO
  **/
 public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseUnitAsync {
 
+  //TODO: Se comentan todos ya que esto no se realizara aca
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_userId_null() throws Exception {
     try{
@@ -31,7 +34,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_userId_0() throws Exception {
     try{
@@ -41,7 +44,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = BadRequestException.class)
   public void shouldReturnExceptionWhen_identityVerification_null() throws Exception {
     try{
@@ -51,7 +54,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_McUserNull() throws Exception {
     IdentityValidation10 identityValidation10 = new IdentityValidation10();
@@ -62,7 +65,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = NotFoundException.class)
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 
@@ -78,7 +81,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test(expected = ValidationException.class)
   public void shouldReturnExceptionWhen_PrepaidUserDisabled() throws Exception {
 
@@ -97,7 +100,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       throw ex;
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_nameStatus() throws Exception {
     User user = registerUser();
@@ -158,7 +161,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_nameStatusAndRutStatus() throws Exception {
     User user = registerUser();
@@ -218,7 +221,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_nameStatusAndRutStatusAndIdentityStatus() throws Exception {
     User user = registerUser();
@@ -280,7 +283,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeName() throws Exception {
     User user = registerUser();
@@ -342,7 +345,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeLastname() throws Exception {
 
@@ -406,7 +409,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_blockUser() throws Exception {
     User user = registerUser();
@@ -459,7 +462,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_blacklisted() throws Exception {
     User user = registerUser();
@@ -508,7 +511,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_nameStatus_withoutPrepaidCard() throws Exception {
     User user = registerUser();
@@ -566,7 +569,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_nameStatusAndRutStatus_withoutPrepaidCard() throws Exception {
     User user = registerUser();
@@ -623,7 +626,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeName_withoutPrepaidCard() throws Exception {
     User user = registerUser();
@@ -683,7 +686,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeLastname_withoutPrepaidCard() throws Exception {
 
@@ -744,7 +747,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
       Assert.fail("Should not be here");
     }
   }
-
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeNameAndLastname_withoutPrepaidCard() throws Exception {
     User user = registerUser();
@@ -820,6 +823,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
    *    - identity status: a validado
    *    - Además se deberá enviar un correo positivo al usuario
    */
+  @Ignore
   @Test
   public void allYes() throws Exception {
     User user = registerUser();
@@ -890,6 +894,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
    *    - el usuario se deberá bloquear de prepago
    *    - Además se le deberá amndar un correo al usuario con el texto `Lo sentimos, no podemos otorgarte una tarjeta de prepago con tu situación actual.  Para más información llama al xxxxxxxxxx`
    */
+  @Ignore
   @Test
   public void gsintelNo() throws Exception {
     User user = registerUser();
@@ -941,6 +946,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
    * En caso de que marca todos sí, menos registro civil
    *  Se deberá enviar al usuario un correo al usuario mencionando que debe subir las fotos nuevamente.
    */
+  @Ignore
   @Test
   public void retryValidation() throws Exception {
     User user = registerUser();
@@ -990,6 +996,7 @@ public class Test_PrepaidEJBBean10_processIdentityVerification extends TestBaseU
    * En caso de que el punto de equivalencia del nombre sea respondido con un NO,
    *  - Se deberá sobrescribir el nombre en la base de datos (Esto sólo pasará en caso de que el resto sean si)
    */
+  @Ignore
   @Test
   public void shouldProcessIdentityValidation_changeNameAndLastname() throws Exception {
     User user = registerUser();

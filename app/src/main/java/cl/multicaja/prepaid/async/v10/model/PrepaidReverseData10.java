@@ -15,8 +15,6 @@ public class PrepaidReverseData10 implements Serializable {
 
   private PrepaidTopup10 prepaidTopup10;
   private PrepaidWithdraw10 prepaidWithdraw10;
-  @Deprecated
-  private User user;
 
   private PrepaidUser10 prepaidUser10;
   private PrepaidCard10 prepaidCard10;
@@ -30,9 +28,8 @@ public class PrepaidReverseData10 implements Serializable {
     super();
   }
 
-  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard10,User user,PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovementReverse) {
+  public PrepaidReverseData10(PrepaidTopup10 prepaidTopup, PrepaidCard10 prepaidCard10,PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovementReverse) {
     this.prepaidTopup10 = prepaidTopup;
-    this.user = user;
     this.prepaidUser10 = prepaidUser10;
     this.prepaidCard10 = prepaidCard10;
     this.prepaidMovementReverse = prepaidMovementReverse;
@@ -59,14 +56,6 @@ public class PrepaidReverseData10 implements Serializable {
 
   public void setPrepaidWithdraw10(PrepaidWithdraw10 prepaidWithdraw10) {
     this.prepaidWithdraw10 = prepaidWithdraw10;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
   }
 
   public PrepaidUser10 getPrepaidUser10() {
