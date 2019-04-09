@@ -12,7 +12,6 @@ public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
   private NewAmountAndCurrency10 amount;
   private String transactionId;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private Integer rut;
   private String merchantCode;
   private String merchantName;

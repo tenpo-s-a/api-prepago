@@ -307,6 +307,24 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return apiCall;
   }
 
+  public PrepaidTopup10 topupUserBalanceV1(Map<String, Object> headers, NewPrepaidTopup10 topupRequest) throws Exception {
+
+    this.validateTopupRequest(topupRequest);
+
+    if(topupRequest.getRut() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
+    }
+
+    // Obtener usuario prepago (V2)
+    PrepaidUser10 user = getPrepaidUserEJB10().getPrepaidUserByRut(headers, topupRequest.getRut());
+    if(user == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    return this.topupUserBalance(headers, user.getUuid(), topupRequest, Boolean.FALSE);
+  }
+
+
   /**
    * V2 Con id de usuario Tempo
    * @param headers
