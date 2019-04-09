@@ -12,6 +12,7 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -24,6 +25,8 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
  **/
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync {
 
+  //Todo: verificar cuando se toque la funcionalidad.
+  @Ignore
   @Test
   public void withdrawFail_timeoutResponse() throws Exception {
     String password = RandomStringUtils.randomNumeric(4);

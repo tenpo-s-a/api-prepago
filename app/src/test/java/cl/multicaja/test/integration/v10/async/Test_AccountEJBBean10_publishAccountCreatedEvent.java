@@ -30,22 +30,16 @@ public class Test_AccountEJBBean10_publishAccountCreatedEvent extends TestBaseUn
   @Test
   public void publishAccountCreatedEvent() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user = updateUser(user);
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
 
     getAccountEJBBean10().publishAccountCreatedEvent(prepaidUser10.getUserIdMc(), account);
+    Thread.sleep(2000);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.ACCOUNT_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, account.getUuid());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, account.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
@@ -57,6 +51,7 @@ public class Test_AccountEJBBean10_publishAccountCreatedEvent extends TestBaseUn
     Assert.assertEquals("Debe tener mimsia fecha de creacion", account.getCreatedAt(), accountEvent.getAccount().getTimestamps().getCreatedAt());
     Assert.assertEquals("Debe tener mimsia fecha de actualizacion", account.getUpdatedAt(), accountEvent.getAccount().getTimestamps().getUpdatedAt());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc(), numberUtils.toLong(accountEvent.getUserId()));
+
   }
 
   @Test(expected = BadRequestException.class)

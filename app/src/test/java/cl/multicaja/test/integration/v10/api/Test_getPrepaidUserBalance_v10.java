@@ -7,6 +7,7 @@ import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
 
 import java.math.BigDecimal;

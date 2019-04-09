@@ -5,6 +5,7 @@ import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cl.multicaja.core.model.Errors.ERROR_INTERNO_BBDD;
@@ -15,6 +16,8 @@ import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
  **/
 public class Test_PrepaidUserEJBBean10_incrementIdentityVerificationAttempt extends TestBaseUnit {
 
+  //TODO: Esto se eliminara
+  @Ignore
   @Test
   public void incrementIdentityVerificationAttempt_ok() throws Exception {
 
@@ -35,7 +38,7 @@ public class Test_PrepaidUserEJBBean10_incrementIdentityVerificationAttempt exte
     Assert.assertEquals("Intento de validacion debe ser 1", Integer.valueOf(1), prepaidUser10.getIdentityVerificationAttempts());
 
   }
-
+  @Ignore
   @Test
   public void incrementIdentityVerificationAttempt_not_ok() throws Exception {
 
