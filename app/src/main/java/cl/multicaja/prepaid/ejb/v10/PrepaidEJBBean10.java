@@ -2497,23 +2497,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
-  @Override
-  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
-
-    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(null, userUuid);
-    if(prepaidUser == null) {
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-    if(PrepaidUserLevel.LEVEL_2.equals(prepaidUser.getUserLevel())) {
-      throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
-    }
-
-    Account account = accountEJBBean10.findByUuid(accountUuid);
-
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-    getProductChangeDelegate().sendProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2);
-  }
-
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null)  {

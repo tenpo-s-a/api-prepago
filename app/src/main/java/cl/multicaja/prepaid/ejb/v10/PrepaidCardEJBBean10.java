@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -14,14 +15,15 @@ import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -318,4 +320,10 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception {
     throw new IllegalStateException();
   }
+
+  @Override
+  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+    throw new IllegalStateException();
+  }
+
 }

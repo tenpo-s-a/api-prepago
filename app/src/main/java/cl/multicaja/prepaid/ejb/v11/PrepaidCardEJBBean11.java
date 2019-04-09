@@ -1,6 +1,7 @@
 package cl.multicaja.prepaid.ejb.v11;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
@@ -9,6 +10,10 @@ import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -161,7 +166,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     }
   }
 
-  /**
+  /**@aqu
    *  Busca una tarjeta por id y publica evento de tarjeta cerrada
    * @param cardId id interno de la tarjeta
    * @throws Exception
@@ -211,5 +216,25 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(4, new SecureRandom(String.valueOf(accountUuid).getBytes()));
     return bCryptPasswordEncoder.encode(pan);
   }
+
+  @Override
+  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+    /*
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB11().findByExtId(null, userUuid);
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    if(PrepaidUserLevel.LEVEL_2.equals(prepaidUser.getUserLevel())) {
+      throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
+    }
+
+    Account account = accountEJBBean10.findByUuid(accountUuid);
+
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    getProductChangeDelegate().sendProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2);
+    */
+  }
+
+
 
 }

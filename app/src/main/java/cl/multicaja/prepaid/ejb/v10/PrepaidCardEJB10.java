@@ -103,6 +103,17 @@ public interface PrepaidCardEJB10 {
   void updatePrepaidCard(Map<String, Object> headers, Long cardId, Long userId, PrepaidCardStatus oldStatus, PrepaidCard10 prepaidCard) throws Exception;
 
   /**
+   * Activa la tarjeta mastercard (level 1 a level 2)
+   *
+   * @param headers
+   * @param userUuid
+   * @param accountUuid
+   * @return
+   * @throws Exception
+   */
+  void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
+
+  /**
    *  busca una tarjeta por pan y numero de contrato
    * @param headers
    * @param pan pan encriptado
