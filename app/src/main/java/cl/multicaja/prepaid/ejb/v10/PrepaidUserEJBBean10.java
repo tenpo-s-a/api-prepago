@@ -466,7 +466,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     int resp = getDbUtils().getJdbcTemplate().update(String.format("UPDATE %s.prp_usuario SET %s WHERE id = ?", getSchema(), sb.toString()), userId);
 
     if(resp == 0) {
-      throw new ValidationException(TARJETA_NO_EXISTE);
+      throw new ValidationException(ERROR_INTERNO_BBDD);
     }
   }
 

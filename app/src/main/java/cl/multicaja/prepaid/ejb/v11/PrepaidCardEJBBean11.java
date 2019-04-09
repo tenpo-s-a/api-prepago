@@ -229,9 +229,13 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
     }
 
-    // Buscar que la cuenta exista
+    // Validar que la cuenta exista
     getAccountEJBBean10().findByUuid(accountUuid);
+
     PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    if(prepaidCard == null) {
+      throw new NotFoundException(TARJETA_NO_EXISTE);
+    }
 
     // Subir el nivel del usuario
     getPrepaidUserEJBBean10().updatePrepaidUserLevel(prepaidUser.getId(), PrepaidUserLevel.LEVEL_2);
