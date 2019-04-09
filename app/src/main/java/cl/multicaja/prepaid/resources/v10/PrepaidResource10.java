@@ -157,11 +157,11 @@ public final class PrepaidResource10 extends BaseResource {
 
   @GET
   @Path("/{userId}/balance")
+  @Deprecated
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userIdMc);
     return Response.ok(prepaidBalance10).build();
   }
-
 
   @POST
   @Path("/{userId}/identity/files")
@@ -186,7 +186,6 @@ public final class PrepaidResource10 extends BaseResource {
     SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationWithdrawal10).build();
   }
-
 
   @GET
   @Path("/{userId}/transactions")

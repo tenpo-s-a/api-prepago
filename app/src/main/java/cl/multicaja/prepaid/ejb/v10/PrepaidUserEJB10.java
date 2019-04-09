@@ -98,6 +98,7 @@ public interface PrepaidUserEJB10 {
    * @param userIdMc id de usuario multicaja
    * @return
    */
+  @Deprecated
   PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
