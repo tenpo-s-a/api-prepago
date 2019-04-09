@@ -356,7 +356,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
     // Obtener Usuario MC
     //User user = getUserClient().getUserById(headers, userIdMc);
-    PrepaidUser10 prepaidUser = this.findById(null,userId);
+    PrepaidUser10 prepaidUser = findById(null,userId);
 
 
     if(prepaidUser == null){
