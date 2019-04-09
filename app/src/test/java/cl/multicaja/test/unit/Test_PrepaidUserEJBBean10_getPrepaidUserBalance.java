@@ -3,14 +3,12 @@ package cl.multicaja.test.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.prepaid.ejb.v10.AccountEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
@@ -34,8 +32,6 @@ import static cl.multicaja.core.model.Errors.*;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
 
-  @Spy
-  UserClient userClient;
 
   @Spy
   PrepaidCardEJBBean10 prepaidCardEJBBean10;
@@ -46,9 +42,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
   @Spy
   TecnocomService tecnocomService;
 
-  @InjectMocks
   @Spy
-  private PrepaidUserEJBBean10 prepaidUserEJB10;
+  @InjectMocks
+  PrepaidUserEJBBean10 prepaidUserEJB10;
+
+  @Spy
+  AccountEJBBean10 accountEJBBean10;
 
   @Test(expected = BadRequestException.class)
   public void userIdMcNull() throws Exception {
@@ -102,10 +101,15 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
 
     try{
@@ -123,7 +127,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
 
@@ -142,10 +151,15 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setEstado(PrepaidMovementStatus.IN_PROCESS);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(null).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(prepaidMovement).when(prepaidMovementEJBBean10).getLastPrepaidMovementByIdPrepaidUserAndOneStatus(Long.MAX_VALUE, PrepaidMovementStatus.PENDING, PrepaidMovementStatus.IN_PROCESS);
 
@@ -165,11 +179,16 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setRut(11111111);
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard10.setProcessorUserId("1");
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(null).when(tecnocomService).consultaSaldo("1", "111111111", TipoDocumento.RUT);
 
@@ -193,6 +212,10 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
     prepaidCard10.setProcessorUserId("1");
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(prepaidUser.getId());
+
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("200");
     response.getRunServiceResponse().getReturn().setDescRetorno("");
@@ -200,6 +223,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
 
@@ -217,7 +241,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
-    prepaidUser.setRut(11111111);
+    prepaidUser.setDocumentNumber("11111111");
+
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+    account.setAccountNumber("1");
 
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setStatus(PrepaidCardStatus.ACTIVE);
@@ -238,6 +267,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
     Mockito.doNothing().when(prepaidUserEJB10).updatePrepaidUserBalance(Mockito.any(), Mockito.isA(Long.class), Mockito.isA(PrepaidBalanceInfo10.class));
@@ -269,7 +299,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
-    prepaidUser.setRut(11111111);
+    prepaidUser.setDocumentNumber("11111111");
+
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+    account.setAccountNumber("1");
 
     PrepaidBalanceInfo10 balanceInfo10 = new PrepaidBalanceInfo10();
     balanceInfo10.setClamonp(0);
@@ -300,6 +335,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
     Mockito.doNothing().when(prepaidUserEJB10).updatePrepaidUserBalance(Mockito.any(), Mockito.isA(Long.class), Mockito.isA(PrepaidBalanceInfo10.class));
@@ -317,6 +353,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
       Assert.assertEquals("Debe ser saldo 0", BigDecimal.valueOf(0).setScale(2, RoundingMode.HALF_UP), balance.getPcaSecondary().getValue());
 
     } catch (Exception ex) {
+      ex.printStackTrace();
       Assert.fail("should not be here");
     }
   }
@@ -331,7 +368,12 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
     prepaidUser.setId(Long.MAX_VALUE);
-    prepaidUser.setRut(11111111);
+    prepaidUser.setDocumentNumber("11111111");
+
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+    account.setAccountNumber("1");
 
     PrepaidBalanceInfo10 balanceInfo10 = new PrepaidBalanceInfo10();
     balanceInfo10.setClamonp(0);
@@ -362,6 +404,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
     Mockito.doNothing().when(prepaidUserEJB10).updatePrepaidUserBalance(Mockito.any(), Mockito.isA(Long.class), Mockito.isA(PrepaidBalanceInfo10.class));
@@ -394,6 +437,10 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setRut(11111111);
 
+    Account account = new Account();
+    account.setId(Long.MAX_VALUE);
+    account.setUserId(Long.MAX_VALUE);
+
     PrepaidBalanceInfo10 balanceInfo10 = new PrepaidBalanceInfo10();
     balanceInfo10.setClamonp(0);
     balanceInfo10.setClamons(0);
@@ -423,6 +470,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance {
     ConsultaSaldoDTO dto = new ConsultaSaldoDTO(response);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJB10).findById(null, Long.MAX_VALUE);
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserId(null, Long.MAX_VALUE);
     Mockito.doReturn(dto).when(tecnocomService).consultaSaldo("1", "11111111", TipoDocumento.RUT);
     Mockito.doNothing().when(prepaidUserEJB10).updatePrepaidUserBalance(Mockito.any(), Mockito.isA(Long.class), Mockito.isA(PrepaidBalanceInfo10.class));

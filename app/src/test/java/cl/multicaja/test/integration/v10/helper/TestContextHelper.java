@@ -59,6 +59,7 @@ public class TestContextHelper extends TestBaseUnit {
       transactionReversalRoute10.setCdtEJBBean10(getCdtEJBBean10());
       transactionReversalRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
       transactionReversalRoute10.setUserClient(getUserClient());
+      transactionReversalRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
       currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());

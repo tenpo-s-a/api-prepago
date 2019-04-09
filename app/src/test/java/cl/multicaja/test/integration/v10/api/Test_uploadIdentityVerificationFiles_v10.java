@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import static cl.multicaja.core.model.Errors.*;
  **/
 public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
 
+  //TODO: Esto se eliminara
   /**
    *
    * @param userIdMc
@@ -37,6 +39,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
 
   private UserFile f = new UserFile();
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles_not_ok_by_user_not_found() throws Exception {
 
@@ -53,6 +56,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser error de userMc null", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
   }
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles_not_ok_by_prepaid_user_not_found() throws Exception {
 
@@ -71,6 +75,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser error de supera saldo", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
   }
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles_not_ok_by_prepaid_user_disabled() throws Exception {
 
@@ -92,6 +97,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("debe ser error de supera saldo", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
   }
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles() throws Exception {
     User user = registerUser();
@@ -125,6 +131,7 @@ public class Test_uploadIdentityVerificationFiles_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe tener nameStatus IN_REVIEW", NameStatus.IN_REVIEW, NameStatus.valueOf(u.get("name_status").toString()));
   }
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles_attempts() throws Exception {
     User user = registerUser();

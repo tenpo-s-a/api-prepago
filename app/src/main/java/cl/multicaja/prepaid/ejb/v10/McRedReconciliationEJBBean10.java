@@ -2,17 +2,15 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.DateUtils;
-import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
-import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
+import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,14 +25,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -53,6 +49,9 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
@@ -88,6 +87,14 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
 
   public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
     this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
   }
 
   @Override
@@ -188,32 +195,31 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             sendToResearch(recTmp, movementType, file, 0L);
           } else {
             // Buscar el user, sacar el rut
-            User user = UserClient.getInstance().getUserById(null, recTmp.getClientId());
-
+            PrepaidUser10 user = getPrepaidUserEJBBean10().findById(null,recTmp.getClientId());
+            if(user == null){
+              throw new NotFoundException(CLIENTE_NO_EXISTE);
+            }
             // Las reversas debe insertarse en la BD de nuevo
             if(PrepaidMovementType.TOPUP.equals(movementType)) {
               NewPrepaidTopup10 reverse = new NewPrepaidTopup10();
 
               reverse.setTransactionId(recTmp.getMcCode());
               reverse.setAmount(new NewAmountAndCurrency10(recTmp.getAmount()));
-              reverse.setRut(user.getRut().getValue());
               reverse.setMerchantName("McRedReconciliation");
               reverse.setMerchantCategory(0);
               reverse.setMerchantCode("000000000000000");
               reverse.setMovementType(PrepaidMovementType.TOPUP);
-
-              getPrepaidEJBBean10().reverseTopupUserBalance(null, reverse, false);
+              getPrepaidEJBBean10().reverseTopupUserBalance(null, user.getUuid(), reverse, false);
             } else {
               NewPrepaidWithdraw10 reverse = new NewPrepaidWithdraw10();
 
               reverse.setTransactionId(recTmp.getMcCode());
               reverse.setAmount(new NewAmountAndCurrency10(recTmp.getAmount()));
-              reverse.setRut(user.getRut().getValue());
+              reverse.setRut(Integer.parseInt(user.getDocumentNumber())); //Todo: Esto se eliminara al corregir retiro
               reverse.setMerchantName("McRedReconciliation");
               reverse.setMerchantCategory(0);
               reverse.setMerchantCode("000000000000000");
               reverse.setMovementType(PrepaidMovementType.TOPUP);
-
               getPrepaidEJBBean10().reverseWithdrawUserBalance(null, reverse, false);
             }
           }
@@ -223,10 +229,12 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.NOT_RECONCILED);
           }
           else {
+
+            PrepaidUser10 user = getPrepaidUserEJBBean10().findById(null,prepaidMovement10.getIdPrepaidUser());
             log.info("Conciliado");
             getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
             //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo
-            prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
+            prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,user));
           }
         }
       } catch (Exception e) {
@@ -278,7 +286,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       lstMcRedReconciliationFileDetail = new ArrayList<>();
 
       while ((record = csvReader.readNext()) != null) {
-        log.debug(Arrays.toString(record));
+        log.info(Arrays.toString(record));
         McRedReconciliationFileDetail mcRedReconciliationFileDetail = new McRedReconciliationFileDetail();
         mcRedReconciliationFileDetail.setMcCode(record[0]);
         mcRedReconciliationFileDetail.setDateTrx(Timestamp.valueOf(record[1]));

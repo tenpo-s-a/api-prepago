@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 public class UserEvent extends BaseEvent {
 
-  //@JsonProperty("userid")
-  //private String userId;
+  //@JsonProperty("eventId")
+  //private String eventId;
   private User user;
 
   public UserEvent() {

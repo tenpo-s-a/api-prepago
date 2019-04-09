@@ -4,7 +4,8 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.dao.UserDao;
-import cl.multicaja.prepaid.model.v10.PrepaidUser11;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,7 +26,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
   @Test
   public void listenPrepaidUserCreateEventWithProcessor() throws Exception{
 
-    PrepaidUser11 userToCreate = buildPrepaidUser11();
+    PrepaidUser10 userToCreate = buildPrepaidUser11();
 
     cl.multicaja.prepaid.kafka.events.model.User userEventSend = new cl.multicaja.prepaid.kafka.events.model.User();
 
@@ -33,7 +34,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
     userEventSend.setFirstName(userToCreate.getName());
     userEventSend.setId(userToCreate.getUuid());
     userEventSend.setLastName(userToCreate.getLastName());
-    userEventSend.setLevel(userToCreate.getLevel());
+    userEventSend.setLevel(userToCreate.getUserLevel().toString());
     userEventSend.setState(userToCreate.getStatus().toString());
 
     String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
@@ -43,7 +44,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
     Thread.sleep(1000);
 
     //Find if data was saved on DataBase
-    PrepaidUser11 userFound = findPrepaidUserV11(null,userEventSend.getId(), null);
+    PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
 
     Assert.assertNotNull("No es nulo", userFound);
 
@@ -55,11 +56,121 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
     Assert.assertEquals("Igual",userToCreate.getDocumentNumber(),userFound.getDocumentNumber());
 
+    Assert.assertEquals("Igual",userToCreate.getTimestamps().getCreatedAt().toLocalDate(),userFound.getTimestamps().getCreatedAt().toLocalDate());
+    Assert.assertEquals("Igual",userToCreate.getTimestamps().getUpdatedAt().toLocalDate(),userFound.getTimestamps().getUpdatedAt().toLocalDate());
+
     Assert.assertEquals("Igual",userToCreate.getStatus(),userFound.getStatus());
-    Assert.assertEquals("Igual",userToCreate.getLevel(),userFound.getLevel());
+    Assert.assertEquals("Igual",userToCreate.getUserLevel(),userFound.getUserLevel());
 
   }
 
+
+  @Test
+  public void listenPrepaidUserCreateEventWithProcessorNotValidFields() throws Exception{
+    PrepaidUser10 userToCreate = buildPrepaidUser11();
+
+    cl.multicaja.prepaid.kafka.events.model.User userEventSend = new cl.multicaja.prepaid.kafka.events.model.User();
+
+    userEventSend.setId(userToCreate.getUuid());
+    userEventSend.setDocumentNumber(userToCreate.getRut().toString());
+    userEventSend.setFirstName(userToCreate.getName());
+    userEventSend.setLastName(userToCreate.getLastName());
+    userEventSend.setLevel(userToCreate.getUserLevel().toString());
+    userEventSend.setState(userToCreate.getStatus().toString());
+
+
+    //uiid
+    {
+      userEventSend.setId("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+    //documentNumber
+    {
+      userEventSend.setDocumentNumber("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+    //firstName
+    {
+      userEventSend.setFirstName("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+    //lastName
+    {
+      userEventSend.setLastName("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+    //level
+    {
+      userEventSend.setLevel("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+    //state
+    {
+      userEventSend.setState("");
+
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      Assert.assertNotNull("No es nulo", messageId);
+      Assert.assertNotEquals("No es cero",0,messageId);
+
+      Thread.sleep(1000);
+
+      //Find if data was saved on DataBase
+      PrepaidUser10 userFound = findPrepaidUserV10(null,userEventSend.getId(), null);
+      Assert.assertNull("Es nulo", userFound);
+    }
+
+
+  }
 
 
 }

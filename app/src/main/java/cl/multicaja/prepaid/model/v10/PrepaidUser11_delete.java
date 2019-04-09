@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class PrepaidUser11 {
+public class PrepaidUser11_delete {
 
   private Long id;
   private String uuid;

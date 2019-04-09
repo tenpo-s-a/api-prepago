@@ -8,10 +8,9 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -20,7 +19,6 @@ import org.apache.camel.Exchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,11 +66,17 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             req.getData().getPrepaidMovementReverse().setEstado(status);
             return redirectRequestReverse(createJMSEndpoint(ERROR_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
-          log.info("[BEFORE prepaidMovement] "+prepaidMovementReverse);
-          //prepaidMovementReverse = getRoute().getPrepaidMovementEJBBean10().getPrepaidMovementById(prepaidMovementReverse.getId());
-          log.info("[AFTER prepaidMovement] "+prepaidMovementReverse);
+          Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
 
-          String contrato = prepaidCard.getProcessorUserId();
+          if(account == null) {
+            log.error(String.format("Error cuenta no encontrada para el usuario [id=%d]",prepaidUser10.getId()));
+            req.getData().setNumError(Errors.ERROR_INDETERMINADO);
+            req.getData().setMsjError(Errors.ERROR_INDETERMINADO.name());
+            return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, true);
+          }
+          // El contrato se obtiene desde la cuenta.
+          String contrato = account.getAccountNumber();
+
           String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
           // Busca el movimiento de carga original
@@ -90,9 +94,9 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               // Se intenta realizar nuevamente la inclusion del movimiento original .
             InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().topup(contrato, pan, originalMovement.getCodcom(), originalMovement);
 
-            log.info("Respuesta reversa mov original");
-            log.info(inclusionMovimientosDTO.getRetorno());
-            log.info(inclusionMovimientosDTO.getDescRetorno());
+            log.debug("Respuesta reversa mov original");
+            log.debug(inclusionMovimientosDTO.getRetorno());
+            log.debug(inclusionMovimientosDTO.getDescRetorno());
 
               // Se verifica la respuesta de tecnocom
             if (inclusionMovimientosDTO.isRetornoExitoso()) {
@@ -233,29 +237,32 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
         log.info("processErrorTopupReverse - REQ: " + req);
         req.retryCountNext();
         PrepaidReverseData10 data = req.getData();
+        PrepaidUser10 user = data.getPrepaidUser10();
         if(Errors.TECNOCOM_TIME_OUT_RESPONSE.equals(data.getNumError()) ||
           Errors.TECNOCOM_TIME_OUT_CONEXION.equals(data.getNumError()) ||
           Errors.TECNOCOM_ERROR_REINTENTABLE.equals(data.getNumError())
         ) {
+
           String template = getRoute().getParametersUtil().getString("api-prepaid","template_ticket_cola_1","v1.0");
-          template = TemplateUtils.freshDeskTemplateColas1(template,String.format("Error al realizar reversa carga %s",data.getPrepaidTopup10().getTransactionOriginType().name()),String.format("%s %s",data.getUser().getName(),data.getUser().getLastname_1()),String.format("%s-%s",data.getUser().getRut().getValue(),data
-            .getUser().getRut().getDv()),data.getUser().getId(),data.getPrepaidMovementReverse().getNumaut(),data.getPrepaidMovementReverse().getMonto().longValue());
+          template = TemplateUtils.freshDeskTemplateColas1(template,String.format("Error al realizar reversa carga %s",data.getPrepaidTopup10().getTransactionOriginType().name()),String.format("%s %s",user.getName(),
+            user.getLastName()),user.getDocumentNumber(),user.getId(),data.getPrepaidMovementReverse().getNumaut(),data.getPrepaidMovementReverse().getMonto().longValue());
 
           NewTicket newTicket = createTicket("Error al realizar reversa carga",
             template,
-            String.valueOf(data.getUser().getRut().getValue()),
+            user.getDocumentNumber(),
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.REVERSE_TOPUP,
             req.getReprocesQueue());
-
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,data.getUser().getId(),newTicket);
-          if(ticket.getId() != null){
+          //TODO: Esto se debe mover de user a prepaid y cambiar el id que se utiliza.
+          //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,user.getUuid(),newTicket);
+          /*if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
           }
+           */
         } else {
           Map<String, Object> templateData = new HashMap<>();
-          templateData.put("idUsuario", req.getData().getUser().getId().toString());
-          templateData.put("rutCliente", req.getData().getUser().getRut().getValue().toString() + "-" + req.getData().getUser().getRut().getDv());
+          templateData.put("idUsuario", user.getId());
+          templateData.put("rutCliente", user.getDocumentNumber());
           getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TOPUP_REVERSE, templateData);
         }
         return req;
