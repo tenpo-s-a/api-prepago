@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountProcessor;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
@@ -664,6 +665,12 @@ public class TestBaseUnit extends TestApiBase {
     //user.setLevel(getRandomString(10));
     user.setUserLevel(PrepaidUserLevel.LEVEL_1);
     user.setUuid(getRandomString(10));
+
+    Timestamps timestamps = new Timestamps();
+    timestamps.setCreatedAt(new Timestamp(new Date().getTime()).toLocalDateTime());
+    timestamps.setUpdatedAt(new Timestamp(new Date().getTime()).toLocalDateTime());
+    user.setTimestamps(timestamps);
+
 
     return user;
   }
