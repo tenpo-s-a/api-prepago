@@ -77,6 +77,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
 
+  private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -126,7 +127,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
-    log.error(user);
+    log.info(user);
     getDbUtils().getJdbcTemplate().update(connection -> {
       PreparedStatement ps = connection
         .prepareStatement(INSERT_USER, new String[] {"id"});
@@ -156,9 +157,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(id == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
-    log.error("findById IN ID: "+id);
+    log.info("findById IN ID: "+id);
+
     try{
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, getUserMapper(), id);
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID, getUserRowMapper(), id);
     }catch (Exception e){
       return null;
     }
@@ -170,21 +172,23 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(userId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
+
     try{
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID_EXT, getUserMapper(), userId);
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_ID_EXT, getUserRowMapper(), userId);
     }catch (Exception e){
       return null;
     }
 
   }
-  public PrepaidUser10 findByNumDoc(Map<String, Object> headers, String userId) throws Exception {
 
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+  public PrepaidUser10 findByNumDoc(Map<String, Object> headers, String numDoc) throws Exception {
+
+    if(numDoc == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numDoc"));
     }
-    try{
 
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_NUMDOC, getUserMapper(), userId);
+    try{
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_NUMDOC, getUserRowMapper(), numDoc);
     }catch (Exception e){
       return null;
     }
@@ -291,8 +295,12 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     if(rut == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
-    List<PrepaidUser10> lst = this.getPrepaidUsers(headers, null, null, rut, null);
-    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+
+    try {
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_USER_BY_RUT, getUserRowMapper(), rut);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   @Override
@@ -493,7 +501,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  private org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserMapper(){
+
+  public org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserRowMapper() {
     return (ResultSet rs, int rowNum) -> {
       PrepaidUser10 u = new PrepaidUser10();
       u.setId(rs.getLong("id"));
@@ -505,6 +514,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setDocumentType(DocumentType.valueOfEnum(rs.getString("tipo_documento")));
       u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
       u.setUuid(rs.getString("uuid"));
+      u.setRut(rs.getInt("rut"));
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
       timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());

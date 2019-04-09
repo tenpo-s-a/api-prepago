@@ -52,7 +52,8 @@ public class Test_20180518151953_create_table_prp_movimiento extends TestDbBaseP
       new ColumnInfo("linref", SqlType.NUMERIC.getGetJavaType(), 8),
       new ColumnInfo("numbencta", SqlType.NUMERIC.getGetJavaType(), 5),
       new ColumnInfo("numplastico", SqlType.NUMERIC.getGetJavaType(), 12),
-      new ColumnInfo("nomcomred", SqlType.VARCHAR.getGetJavaType(), 27)
+      new ColumnInfo("nomcomred", SqlType.VARCHAR.getGetJavaType(), 27),
+      new ColumnInfo("id_tarjeta",SqlType.BIGINT.getGetJavaType())
     );
     Assert.assertEquals("Existe tabla prp_movimientoas", true, exists);
   }

@@ -18,6 +18,7 @@ import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ import static cl.multicaja.core.model.Errors.*;
  * @author abarazarte
  **/
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
 

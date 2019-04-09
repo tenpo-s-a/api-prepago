@@ -39,7 +39,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     Account account = createRandomAccount(prepaidUser);
 
-
     //
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
@@ -50,7 +49,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, 0);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, account, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);
@@ -100,7 +99,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, 0);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, account, 0);
 
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CREATE_CARD_RESP);
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
