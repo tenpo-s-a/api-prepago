@@ -64,6 +64,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     "            ?, ?, ?, ?, \n" +
     "            ?, ?, ?, ?, ?);\n", getSchema());
 
+  private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
+
   @EJB
   private PrepaidCardEJBBean10 prepaidCardEJB10;
 

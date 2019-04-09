@@ -111,7 +111,7 @@ public interface PrepaidCardEJB10 {
    * @return
    * @throws Exception
    */
-  void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
+  PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
 
   /**
    *  busca una tarjeta por pan y numero de contrato

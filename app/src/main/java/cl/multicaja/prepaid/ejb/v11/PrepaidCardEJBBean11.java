@@ -4,6 +4,7 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
@@ -218,9 +219,9 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   }
 
   @Override
-  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
-    /*
-    PrepaidUser10 prepaidUser = getPrepaidUserEJB11().findByExtId(null, userUuid);
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+
+    PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findByExtId(null, userUuid);
     if(prepaidUser == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
@@ -228,13 +229,17 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
     }
 
-    Account account = accountEJBBean10.findByUuid(accountUuid);
+    // Buscar que la cuenta exista
+    getAccountEJBBean10().findByUuid(accountUuid);
+    PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-    PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
-    getProductChangeDelegate().sendProductChange(prepaidUser, account, prepaidCard10, TipoAlta.NIVEL2);
-    */
+    // Subir el nivel del usuario
+    getPrepaidUserEJBBean10().updatePrepaidUserLevel(prepaidUser.getId(), PrepaidUserLevel.LEVEL_2);
+
+    // Notificar que se ha creado una tarjeta nueva
+    publishCardEvent(prepaidUser.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+
+    return prepaidCard;
   }
-
-
 
 }

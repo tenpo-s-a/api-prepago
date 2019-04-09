@@ -42,8 +42,30 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean10.class);
 
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
+  }
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
     return kafkaEventDelegate10;
@@ -322,7 +344,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public void upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
     throw new IllegalStateException();
   }
 

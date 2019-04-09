@@ -1,10 +1,8 @@
 package cl.multicaja.prepaid.resources.v10;
 
 import cl.multicaja.core.resources.BaseResource;
-import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
@@ -42,7 +40,8 @@ public final class PrepaidResource10 extends BaseResource {
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
-
+  @EJB
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   /**
    * CashIn Tempo
@@ -212,8 +211,8 @@ public final class PrepaidResource10 extends BaseResource {
   @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
   public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
-    return Response.ok().build();
+    PrepaidCard10 prepaidCard10 = prepaidCardEJBBean11.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
+    return Response.ok(prepaidCard10).build();
   }
 
   @POST

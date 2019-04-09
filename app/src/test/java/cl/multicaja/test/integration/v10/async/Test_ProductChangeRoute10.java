@@ -29,7 +29,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
   @BeforeClass
   @AfterClass
-  public static void beforeClass() {
+  public static void beforeEveryTest() {
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_tarjeta cascade", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));

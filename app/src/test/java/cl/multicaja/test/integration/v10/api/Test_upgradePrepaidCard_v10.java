@@ -26,7 +26,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
   @BeforeClass
   @AfterClass
-  public static void beforeClass() {
+  public static void beforeclass() {
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_usuario cascade", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_tarjeta cascade", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("truncate %s.prp_cuenta cascade", getSchema()));
@@ -57,30 +57,15 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
     HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
 
-    // Revisar que existan el evento de tarjeta cerrada en kafka
-    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidCard.getUuid());
-
-    Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event);
-    Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event.getData());
-
-    CardEvent cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
-
-    Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
-    Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
-    Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
-
     // Revisar que existan el evento de tarjeta creada en kafka
-    qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
-    event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, prepaidCard.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
 
-    cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
+    CardEvent cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 
     Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
