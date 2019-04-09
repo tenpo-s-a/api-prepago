@@ -173,6 +173,13 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     }
   }
 
+  /**
+   * Retorna el saldo de la cuenta
+   *
+   * @param headers
+   * @param accountId id de la cuenta
+   * @return
+   */
   public PrepaidBalance10 getBalance(Map<String, Object> headers, Long accountId) throws Exception {
 
     if(accountId == null){
@@ -249,6 +256,13 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
   }
 
+  /**
+   * Actualiza el saldo de la cuenta
+   *
+   * @param accountId id de la cuenta
+   * @param balance informacion del saldo
+   * @throws Exception
+   */
   public void updateBalance(Long accountId, PrepaidBalanceInfo10 balance) throws Exception {
 
     if(accountId == null){
