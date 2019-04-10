@@ -162,8 +162,8 @@ public class PendingCard10 extends BaseProcessor10 {
         }
 
         log.info(String.format("Obeteniendo datos de tarjeta %s", data.getPrepaidCard10().getProcessorUserId()));
-
-        DatosTarjetaDTO datosTarjetaDTO = getRoute().getTecnocomService().datosTarjeta(data.getPrepaidCard10().getProcessorUserId());
+        Account account = data.getAccount();
+        DatosTarjetaDTO datosTarjetaDTO = getRoute().getTecnocomService().datosTarjeta(account.getAccountNumber());
 
         log.info("Respuesta datos tarjeta");
         log.info(datosTarjetaDTO.getRetorno());
@@ -173,7 +173,7 @@ public class PendingCard10 extends BaseProcessor10 {
 
           PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, data.getPrepaidCard10().getId());
           PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
-          Account account = data.getAccount();
+
 
           prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));

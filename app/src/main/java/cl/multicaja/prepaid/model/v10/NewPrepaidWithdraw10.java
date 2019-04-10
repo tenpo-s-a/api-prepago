@@ -6,13 +6,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * @author abarazarte
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private String password;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private Long bankId;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private String accountType;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private Long accountNumber;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private String accountRut;
 
   public NewPrepaidWithdraw10() {

@@ -105,7 +105,7 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{user_id}/cash_out")
   public Response withdrawUserBalance(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    if(withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
+    if(withdrawRequest != null && withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
       throw new ValidationException(Errors.INVALID_MERCHANT_CODE);
     }
     PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
@@ -115,7 +115,7 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/{user_id}/defered_cash_out")
   public Response withdrawUserBalanceDefered(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    if(!withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
+    if(withdrawRequest != null &&  !withdrawRequest.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
       throw new ValidationException(Errors.INVALID_MERCHANT_CODE_DEFERED);
     }
     PrepaidWithdraw10 withdrawTopup = this.prepaidEJBBean10.withdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
