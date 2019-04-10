@@ -11,7 +11,6 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.json.JsonUtils;
-import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
@@ -86,6 +85,18 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
 
   private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
+
+  private static final String FIND_USER_BY_UUID = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
+
+  private static final String UPDATE_USER = String.format("UPDATE %s.prp_usuario\n" +
+    "SET\n" +
+    "  nombre = ?,\n" +
+    "  apellido = ?,\n" +
+    "  estado = ?,\n" +
+    "  nivel = ?,\n" +
+    "  fecha_actualizacion = ? \n" +
+    "WHERE\n" +
+    "  uuid = ?;", getSchema());
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -311,6 +322,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+
   @Override
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
@@ -509,131 +521,32 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-
   @Override
-  public PrepaidUser10 createPrepaidUserV10(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
-
-    final String SP_NAME = getSchema() + ".mc_prp_crear_usuario_v11";
+  public PrepaidUser10 updatePrepaidUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
 
     if(user == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
     }
 
-    if(user.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
+    log.info(user);
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      //PreparedStatement ps = connection
+      //  .prepareStatement(UPDATE_USER, new String[] {"id"});
 
-    if(user.getUuid() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uuid"));
-    }
+      PreparedStatement ps = connection.prepareStatement(UPDATE_USER);
 
-    Object[] params = {
-      user.getRut(),
-      user.getStatus().toString(),
-      user.getName(),
-      user.getLastName(),
-      user.getDocumentNumber(),
-      user.getUserLevel().toString(),
-      user.getUuid(),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
+      ps.setString(1,user.getName());
+      ps.setString(2,user.getLastName());
+      ps.setString(3,user.getStatus().toString());
+      ps.setString(4,user.getUserLevel().toString());
+      ps.setObject(5,LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setString(6,user.getUuid());
 
-    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
+      return ps;
+    });
 
-    if ("0".equals(resp.get("_error_code"))) {
-      return findPrepaidUserV10(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
-    } else {
-      log.error("createUserWithHibernate resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-
+    return this.findByExtId(null,user.getUuid());
   }
-
-  @Override
-  public PrepaidUser10 updatePrepaidUserV10(Map<String, Object> headers, PrepaidUser10 userToUpdate) throws Exception {
-
-    final String SP_NAME = getSchema() + ".mc_prp_actualizar_estado_usuario_v11";
-
-    if(userToUpdate == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
-    }
-
-    if(userToUpdate.getId() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
-    }
-
-    Object[] params = {
-      userToUpdate.getId(),
-      userToUpdate.getDocumentNumber(),
-      userToUpdate.getName(),
-      userToUpdate.getLastName(),
-      userToUpdate.getStatus().toString(),
-      userToUpdate.getUserLevel().toString(),
-      userToUpdate.getUuid(),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
-
-    if ("0".equals(resp.get("_error_code"))) {
-      return findPrepaidUserV10(null,getNumberUtils().toLong(resp.get("_r_id")),null,null);
-    } else {
-      log.error("updateUserWithHibernate resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-
-  }
-
-  @Override
-  public PrepaidUser10 findPrepaidUserV10(Map<String, Object> headers, Long id, String uuid, Integer rut) throws Exception {
-
-    final String SP_NAME = getSchema() + ".mc_prp_buscar_usuarios_v11";
-
-    Object[] params = {
-      id != null ? id : new NullParam(Types.BIGINT),
-      rut != null ? rut : new NullParam(Types.INTEGER),
-      uuid != null ? uuid : new NullParam(Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(SP_NAME, params);
-
-    if (resp!=null) {
-
-      List result = (List)resp.get("result");
-      if(result != null){
-        Map<String, Object> userResponse = (Map)result.get(0);
-
-        PrepaidUser10 prepaidUser = new PrepaidUser10();
-        prepaidUser.setId(Long.valueOf(userResponse.get("_id").toString()));
-        prepaidUser.setUuid(userResponse.get("_uuid").toString());
-        prepaidUser.setStatus(PrepaidUserStatus.valueOfEnum(userResponse.get("_estado").toString()));
-        prepaidUser.setName(userResponse.get("_nombre").toString());
-        prepaidUser.setLastName(userResponse.get("_apellido").toString());
-        prepaidUser.setDocumentNumber(userResponse.get("_numero_documento").toString());
-        prepaidUser.setUserLevel(PrepaidUserLevel.valueOfEnum(userResponse.get("_nivel").toString()));
-        Timestamps timestamps = new Timestamps();
-        timestamps.setCreatedAt(Timestamp.valueOf(userResponse.get("_fecha_creacion").toString()).toLocalDateTime());
-        timestamps.setUpdatedAt(Timestamp.valueOf(userResponse.get("_fecha_actualizacion").toString()).toLocalDateTime());
-        prepaidUser.setTimestamps(timestamps);
-        prepaidUser.setRut(Integer.valueOf(userResponse.get("_rut").toString()));
-
-        return prepaidUser;
-
-      }else{
-        return null;
-      }
-
-    } else {
-      log.error("findUserWithHibernate resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-
-  }
-
-
 
 
   public org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserRowMapper() {

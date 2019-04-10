@@ -2,40 +2,47 @@ package cl.multicaja.prepaid.kafka.events.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class User extends BaseModel{
 
-  private @JsonProperty("address") String address;
-  private @JsonProperty("countryCode") Long countryCode;
-  private @JsonProperty("documentNumber") String documentNumber;
-  private @JsonProperty("documentSeries") String documentSeries;
-  private @JsonProperty("email") String email;
-  private @JsonProperty("firstName") String firstName;
-  private @JsonProperty("id") String id;
-  private @JsonProperty("lastName") String lastName;
-  private @JsonProperty("level") String level;
-  private @JsonProperty("nationality") String nationality;
-  private @JsonProperty("phone") String phone;
-  private @JsonProperty("plan") String plan;
-  private @JsonProperty("profession") String profession;
-  private @JsonProperty("qrContent") String qrContent;
-  private @JsonProperty("regionCode") Long regionCode;
-  private @JsonProperty("state") String state;
+  @JsonProperty(value = "documentNumber",required = true)
+  @NotEmpty(message = "Document Number cannot be empty")
+  @NotBlank(message = "Document Number cannot be blank")
+  @NotNull(message = "Document Number cannot be null")
+  private String documentNumber;
 
-  public String getAddress() {
-    return address;
-  }
+  @JsonProperty(value = "firstName",required = true)
+  @NotEmpty(message = "First Name cannot be empty")
+  @NotBlank(message = "First Name cannot be blank")
+  @NotNull(message = "First Name cannot be null")
+  private String firstName;
 
-  public void setAddress(String address) {
-    this.address = address;
-  }
+  @JsonProperty(value = "id",required = true)
+  @NotEmpty(message = "id or uuid cannot be empty")
+  @NotBlank(message = "id or uuid cannot be blank")
+  @NotNull(message = "id or uuid cannot be null")
+  private String id;
 
-  public Long getCountryCode() {
-    return countryCode;
-  }
+  @JsonProperty(value = "lastName",required = true)
+  @NotEmpty(message = "Last Name cannot be empty")
+  @NotBlank(message = "Last Name cannot be blank")
+  @NotNull(message = "Last Name cannot be null")
+  private String lastName;
 
-  public void setCountryCode(Long countryCode) {
-    this.countryCode = countryCode;
-  }
+  @JsonProperty(value = "level",required = true)
+  @NotEmpty(message = "Level cannot be empty")
+  @NotBlank(message = "Level cannot be blank")
+  @NotNull(message = "Level cannot be null")
+  private String level;
+
+  @JsonProperty(value = "state",required = true)
+  @NotEmpty(message = "State cannot be empty")
+  @NotBlank(message = "State cannot be blank")
+  @NotNull(message = "State cannot be null")
+  private String state;
 
   public String getDocumentNumber() {
     return documentNumber;
@@ -43,22 +50,6 @@ public class User extends BaseModel{
 
   public void setDocumentNumber(String documentNumber) {
     this.documentNumber = documentNumber;
-  }
-
-  public String getDocumentSeries() {
-    return documentSeries;
-  }
-
-  public void setDocumentSeries(String documentSeries) {
-    this.documentSeries = documentSeries;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
   }
 
   public String getFirstName() {
@@ -93,54 +84,6 @@ public class User extends BaseModel{
 
   public void setLevel(String level) {
     this.level = level;
-  }
-
-  public String getNationality() {
-    return nationality;
-  }
-
-  public void setNationality(String nationality) {
-    this.nationality = nationality;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public void setPhone(String phone) {
-    this.phone = phone;
-  }
-
-  public String getPlan() {
-    return plan;
-  }
-
-  public void setPlan(String plan) {
-    this.plan = plan;
-  }
-
-  public String getProfession() {
-    return profession;
-  }
-
-  public void setProfession(String profession) {
-    this.profession = profession;
-  }
-
-  public String getQrContent() {
-    return qrContent;
-  }
-
-  public void setQrContent(String qrContent) {
-    this.qrContent = qrContent;
-  }
-
-  public Long getRegionCode() {
-    return regionCode;
-  }
-
-  public void setRegionCode(Long regionCode) {
-    this.regionCode = regionCode;
   }
 
   public String getState() {

@@ -123,26 +123,7 @@ public interface PrepaidUserEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidUser10 createPrepaidUserV10(Map<String, Object> headers, PrepaidUser10 user) throws Exception;
+  PrepaidUser10 updatePrepaidUser(Map<String,Object> headers, PrepaidUser10 user)throws Exception;
 
-  /**
-   *
-   * @param headers
-   * @param user
-   * @return
-   * @throws Exception
-   */
-  PrepaidUser10 updatePrepaidUserV10(Map<String,Object> headers, PrepaidUser10 user)throws Exception;
-
-  /**
-   *
-   * @param headers
-   * @param id
-   * @param uiid
-   * @param rut
-   * @return
-   * @throws Exception
-   */
-  PrepaidUser10 findPrepaidUserV10(Map<String, Object> headers, Long id, String uiid, Integer rut) throws Exception;
 
 }

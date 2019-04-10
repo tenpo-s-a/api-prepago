@@ -17,16 +17,16 @@ public class Test_PrepaidUserEJBBean11_updateUserFromTenpo extends TestBaseUnit 
   public void updateUserOk() throws Exception{
     PrepaidUser10 user = buildPrepaidUser11();
 
-    PrepaidUser10 userCreated = getPrepaidUserEJBBean10().createPrepaidUserV10(null,user);
+    PrepaidUser10 userCreated = getPrepaidUserEJBBean10().createUser(null,user);
     Assert.assertNotNull("No debe ser null",userCreated);
     Assert.assertNotNull("No debe ser null",userCreated.getId());
     Assert.assertNotEquals("El Id no debe ser 0",0,userCreated.getId().longValue());
 
     Integer newRut = getUniqueRutNumber();
     userCreated.setRut(newRut);
-    PrepaidUser10 userUpdated = getPrepaidUserEJBBean10().updatePrepaidUserV10(null,userCreated);
+    PrepaidUser10 userUpdated = getPrepaidUserEJBBean10().updatePrepaidUser(null,userCreated);
 
-    PrepaidUser10 userFound = getPrepaidUserEJBBean10().findPrepaidUserV10(null,null,userUpdated.getUuid(), null);
+    PrepaidUser10 userFound = getPrepaidUserEJBBean10().findByExtId(null,userUpdated.getUuid());
 
     Assert.assertNotNull("No es nulo", userFound);
 

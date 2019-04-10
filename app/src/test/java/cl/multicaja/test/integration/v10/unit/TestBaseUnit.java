@@ -656,21 +656,16 @@ public class TestBaseUnit extends TestApiBase {
 
     Integer rutOrDocumentNumber = getUniqueRutNumber();
 
+    user.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
+    user.setDocumentType(DocumentType.DNI_CL);
+
     user.setRut(rutOrDocumentNumber);
-    //user.setStatus(cl.multicaja.prepaid.model.v11.UserStatus.ACTIVE);
     user.setStatus(PrepaidUserStatus.ACTIVE);
     user.setName(getRandomString(10));
     user.setLastName(getRandomString(10));
     user.setDocumentNumber(rutOrDocumentNumber.toString());
-    //user.setLevel(getRandomString(10));
     user.setUserLevel(PrepaidUserLevel.LEVEL_1);
     user.setUuid(getRandomString(10));
-
-    Timestamps timestamps = new Timestamps();
-    timestamps.setCreatedAt(new Timestamp(new Date().getTime()).toLocalDateTime());
-    timestamps.setUpdatedAt(new Timestamp(new Date().getTime()).toLocalDateTime());
-    user.setTimestamps(timestamps);
-
 
     return user;
   }
@@ -1136,57 +1131,28 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidUser;
   }
 
-
-  /**
-   *
-   * @param user
-   * @return
-   * @throws Exception
-   */
-  public PrepaidUser10 createPrepaidUserV10(PrepaidUser10 user) throws BaseException,SQLException,Exception{
-
-    if(user == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
-    }
-
-    PrepaidUser10 userResponse = getPrepaidUserEJBBean10().createPrepaidUserV10(null, user);
-
-    Assert.assertNotNull("No debe ser null",userResponse);
-    Assert.assertNotNull("No debe ser null",userResponse.getId());
-    Assert.assertNotEquals("El Id no debe ser 0",0,userResponse.getId().longValue());
-
-    if(userResponse!=null){
-      return userResponse;
-    }else{
-      //log.error("createUserWithHibernate resp: " + user);
-      throw new BaseException(ERROR_INTERNO_BBDD);
-    }
-  }
-
   /**
    *
    * @param user
    * @throws BaseException
    */
-  public PrepaidUser10 updatePrepaidUserV10(PrepaidUser10 user) throws Exception{
+  public PrepaidUser10 updatePrepaidUser(PrepaidUser10 user) throws Exception{
     if(user == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
     }
 
-    return getPrepaidUserEJBBean10().updatePrepaidUserV10(null, user);
+    return getPrepaidUserEJBBean10().updatePrepaidUser(null, user);
   }
 
   /**
    *
-   * @param id
    * @param uiid
-   * @param rut
    * @return
    * @throws Exception
    */
-  public PrepaidUser10 findPrepaidUserV10(Long id, String uiid, Integer rut) throws Exception{
+  public PrepaidUser10 findPrepaidUserByExtId(String uiid) throws Exception{
 
-    return getPrepaidUserEJBBean10().findPrepaidUserV10(null,null,uiid,null);
+    return getPrepaidUserEJBBean10().findByExtId(null,uiid);
   }
 
   /**
