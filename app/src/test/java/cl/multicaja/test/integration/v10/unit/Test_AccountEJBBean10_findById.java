@@ -44,8 +44,7 @@ public class Test_AccountEJBBean10_findById extends TestBaseUnit {
   @Test
   public void findById() throws Exception {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
 
