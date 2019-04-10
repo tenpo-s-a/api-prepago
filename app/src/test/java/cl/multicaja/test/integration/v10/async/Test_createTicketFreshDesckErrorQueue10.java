@@ -12,7 +12,6 @@ import cl.multicaja.tecnocom.constants.TipoAlta;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
-import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -59,7 +58,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
     //SE CREA TARJETA
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -197,7 +196,7 @@ public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard = createPrepaidCardV2(prepaidCard);
 
 

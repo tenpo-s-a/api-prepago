@@ -5,11 +5,10 @@ import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -25,24 +24,24 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
  **/
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync {
 
-  //Todo: verificar cuando se toque la funcionalidad.
+
+  //TODO: Verificar cuando se haga la reversa de retiro
   @Ignore
   @Test
   public void withdrawFail_timeoutResponse() throws Exception {
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
     PrepaidWithdraw10 withdraw = null;
 
@@ -50,7 +49,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     TecnocomServiceHelper.getInstance().getTecnocomService().setAutomaticError(Boolean.TRUE);
     TecnocomServiceHelper.getInstance().getTecnocomService().setRetorno("1020");
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá");
     } catch(RunTimeValidationException rvex) {
 

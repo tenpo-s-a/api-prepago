@@ -10,7 +10,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
 
   private String password;
-  private Long bankAccountId;
+  private Long bankId;
+  private String accountType;
+  private Long accountNumber;
+  private String accountRut;
 
   public NewPrepaidWithdraw10() {
     super(PrepaidMovementType.WITHDRAW);
@@ -38,12 +41,36 @@ public class NewPrepaidWithdraw10 extends NewPrepaidBaseTransaction10 {
     this.password = password;
   }
 
-  public Long getBankAccountId() {
-    return bankAccountId;
+  public Long getBankId() {
+    return bankId;
   }
 
-  public void setBankAccountId(Long bankAccountId) {
-    this.bankAccountId = bankAccountId;
+  public void setBankId(Long bankId) {
+    this.bankId = bankId;
+  }
+
+  public String getAccountType() {
+    return accountType;
+  }
+
+  public void setAccountType(String accountType) {
+    this.accountType = accountType;
+  }
+
+  public Long getAccountNumber() {
+    return accountNumber;
+  }
+
+  public void setAccountNumber(Long accountNumber) {
+    this.accountNumber = accountNumber;
+  }
+
+  public String getAccountRut() {
+    return accountRut;
+  }
+
+  public void setAccountRut(String accountRut) {
+    this.accountRut = accountRut;
   }
 
   @Override

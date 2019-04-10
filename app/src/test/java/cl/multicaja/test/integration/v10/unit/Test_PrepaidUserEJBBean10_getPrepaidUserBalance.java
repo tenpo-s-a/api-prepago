@@ -4,8 +4,6 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
@@ -41,7 +39,7 @@ public class Test_PrepaidUserEJBBean10_getPrepaidUserBalance extends TestBaseUni
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = createRandomAccount(prepaidUser10);
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10,account.getAccountNumber());
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     prepaidUser10 = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUser10.getId());

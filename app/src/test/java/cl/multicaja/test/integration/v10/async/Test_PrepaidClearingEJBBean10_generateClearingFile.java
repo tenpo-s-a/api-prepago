@@ -5,11 +5,10 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import com.opencsv.CSVReader;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.*;
 
 import java.io.BufferedReader;
@@ -96,26 +95,25 @@ public class Test_PrepaidClearingEJBBean10_generateClearingFile extends TestBase
 
   @Test
   public void generateFileWithBankId() throws Exception{
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
     PrepaidWithdraw10 withdraw = null;
 
-    try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-
+    try{
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
     } catch(Exception vex) {
       Assert.fail("No debe pasar por acá");
     }

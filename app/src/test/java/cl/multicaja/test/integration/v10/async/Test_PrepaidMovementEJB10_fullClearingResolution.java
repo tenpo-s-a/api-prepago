@@ -4,9 +4,8 @@ import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.junit.*;
 
@@ -16,13 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables;
 import org.springframework.jdbc.core.RowMapper;
@@ -66,23 +63,26 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     // 2.- Preparar Test: >>No es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + Clearing Ok
     ResolutionPreparedVariables notWithdraw = new Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables();
     {
-      User user = registerUser();
-      UserAccount userAccount = createBankAccount(user);
+      UserAccount userAccount = randomBankAccount();
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-      prepaidCard = createPrepaidCard10(prepaidCard);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
       prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
+      PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction, PrepaidMovementType.TOPUP);
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
       prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
@@ -179,19 +179,21 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     invalidInformation_amountMastercard.clearingData10.getAmountMastercard().setValue(invalidInformation_amountMastercard.clearingData10.getAmountMastercard().getValue().add(new BigDecimal(1L))); // Altera el valor de amount mastercard
     clearingData10ToFile.add(invalidInformation_amountMastercard.clearingData10);
 
+    //TODO: Revisar este posteriormente
     // 12.- Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + >>Clearing InvalidInformation_accountRut
     Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables invalidInformation_accountRut;
     invalidInformation_accountRut = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
     invalidInformation_accountRut.clearingData10.setStatus(AccountingStatusType.OK); // Para preparar para el archivo
-    invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setValue(invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().getValue() + 1); // Altera rut
-    invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setDv("x");
+    //invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setValue(invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().getValue() + 1); // Altera rut
+    //invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setDv("x");
     clearingData10ToFile.add(invalidInformation_accountRut.clearingData10);
 
+    //TODO: Revisar este posteriormente
     // 13.- Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + >>Clearing InvalidInformation_bankAccount
     Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables invalidInformation_bankAccount;
     invalidInformation_bankAccount = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
-    invalidInformation_bankAccount.clearingData10.setStatus(AccountingStatusType.OK); // Para preparar para el archivo
-    invalidInformation_bankAccount.clearingData10.getUserBankAccount().setAccountNumber("11111111"); // Altera cuenta bancaria
+    //invalidInformation_bankAccount.clearingData10.setStatus(AccountingStatusType.OK); // Para preparar para el archivo
+    //invalidInformation_bankAccount.clearingData10.getUserBankAccount().setAccountNumber("11111111"); // Altera cuenta bancaria
     clearingData10ToFile.add(invalidInformation_bankAccount.clearingData10);
 
     // TODO: agregar comprobacion de nombre de banco al F1
@@ -230,11 +232,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     notInBd.setStatus(AccountingStatusType.OK);
     UserAccount bankAccount = new UserAccount();
     bankAccount.setId(55L);
-    bankAccount.setAccountNumber(getRandomNumericString(8));
-    Rut rut = new Rut();
-    rut.setValue(Integer.valueOf(getRandomNumericString(8)));
-    rut.setDv("3");
-    bankAccount.setRut(rut);
+    bankAccount.setAccountNumber(getUniqueRutNumber().longValue());
+
+    bankAccount.setRut(Integer.valueOf(getRandomNumericString(8)).toString());
     bankAccount.setAccountType("Cuenta Corriente");
     bankAccount.setBankName("BANCO DE CHILE");
     notInBd.setUserBankAccount(bankAccount);

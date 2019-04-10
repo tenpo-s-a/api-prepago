@@ -1,11 +1,7 @@
 package cl.multicaja.accounting.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.UserBankAccountStatus;
-import cl.multicaja.tecnocom.util.StringUtil;
-import com.itextpdf.text.pdf.security.MakeXmlSignature;
 import org.apache.commons.lang3.StringUtils;
 
 public class UserAccount extends BaseModel {
@@ -15,10 +11,12 @@ public class UserAccount extends BaseModel {
   private Long bankId;
   private String bankName;
   private String accountType;
-  private String accountNumber;
+  private Long accountNumber;
   private UserBankAccountStatus status;
-  private Timestamps timestamps;
-  private Rut rut;
+  private String rut;
+
+  public UserAccount() {
+  }
 
 
   public Long getId() {
@@ -61,11 +59,11 @@ public class UserAccount extends BaseModel {
     this.accountType = accountType;
   }
 
-  public String getAccountNumber() {
+  public Long getAccountNumber() {
     return accountNumber;
   }
 
-  public void setAccountNumber(String accountNumber) {
+  public void setAccountNumber(Long accountNumber) {
     this.accountNumber = accountNumber;
   }
 
@@ -77,27 +75,19 @@ public class UserAccount extends BaseModel {
     this.status = status;
   }
 
-  public Timestamps getTimestamps() {
-    return timestamps;
-  }
-
-  public void setTimestamps(Timestamps timestamps) {
-    this.timestamps = timestamps;
-  }
-
-  public Rut getRut() {
+  public String getRut() {
     return rut;
   }
 
-  public void setRut(Rut rut) {
+  public void setRut(String rut) {
     this.rut = rut;
   }
 
   public String getCensoredAccount() {
-    int numberOfDigits = accountNumber.length();
+    int numberOfDigits = String.valueOf(accountNumber).length();
     int numberOfX = Math.max(numberOfDigits - 4, 0);
     String censoredAccount = StringUtils.repeat("X", numberOfX);
-    censoredAccount = censoredAccount.concat(accountNumber.substring(numberOfX));
+    censoredAccount = censoredAccount.concat(String.valueOf(accountNumber).substring(numberOfX));
     return censoredAccount;
   }
 }

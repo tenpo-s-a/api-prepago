@@ -1,10 +1,8 @@
 package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.camel.ExchangeData;
-import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.EncryptUtil;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
@@ -53,7 +51,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
 
@@ -96,7 +94,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -159,7 +157,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -212,7 +210,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(prepaidUser.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();

@@ -9,7 +9,11 @@ public class Rut extends BaseModel {
 		super();
 	}
 
-	private Integer value;
+  public Rut(Integer value) {
+    this.value = value;
+  }
+
+  private Integer value;
 	private String dv;
 	private RutStatus status;
 	private String serialNumber;

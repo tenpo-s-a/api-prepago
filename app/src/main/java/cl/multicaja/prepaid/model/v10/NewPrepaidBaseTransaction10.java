@@ -4,6 +4,7 @@ import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class NewPrepaidBaseTransaction10 extends BaseModel {
 
   @JsonIgnore

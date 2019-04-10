@@ -48,11 +48,16 @@ public class PendingStoreInAccountingProcessor10 extends BaseProcessor10 {
         AccountingStatusType clearingStatus = AccountingStatusType.INITIAL;
 
         if(TipoFactura.RETIRO_TRANSFERENCIA.equals(prepaidMovement.getTipofac())) {
-          if (userAccount == null || userAccount.getId() == null) {
-            log.error("Error userAccountId es null");
+          if (userAccount == null ||
+            (userAccount.getBankId() == null ||
+              userAccount.getAccountNumber() == null||
+              userAccount.getRut() == null ||
+              userAccount.getAccountType()==null)) {
+            log.error("Error userAccount es null");
             return null;
           }
-          System.out.print("Recibi una user account con id: " + userAccount.getId());
+
+          log.info(String.format("TRX CASHOUT DEFERED [%d][%s][%s][%s]",userAccount.getBankId(),userAccount.getAccountNumber(),userAccount.getAccountType(),userAccount.getRut()));
           // Los movimientos de retiro web son los unicos que se insertan con status PENDING
           clearingStatus = AccountingStatusType.PENDING;
         }
@@ -65,7 +70,6 @@ public class PendingStoreInAccountingProcessor10 extends BaseProcessor10 {
 
         // Insertar en accounting como PENDING
         AccountingData10 accounting10 = getRoute().getPrepaidAccountingEJBBean10().buildAccounting10(mov, AccountingStatusType.PENDING, AccountingStatusType.PENDING);
-
         accounting10 = getRoute().getPrepaidAccountingEJBBean10().saveAccountingData(null, accounting10);
 
         // Insertar en clearing
