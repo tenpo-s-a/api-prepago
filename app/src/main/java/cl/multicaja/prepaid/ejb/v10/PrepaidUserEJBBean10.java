@@ -43,6 +43,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -70,8 +71,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private TecnocomService tecnocomService;
 
-  private UserClient userClient;
-
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
     "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
     "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
@@ -83,7 +82,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
-
   private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
 
   private static final String FIND_USER_BY_UUID = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
@@ -97,6 +95,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     "  fecha_actualizacion = ? \n" +
     "WHERE\n" +
     "  uuid = ?;", getSchema());
+
+  UserClient userClient;
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -113,7 +113,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
   }
-
 
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
@@ -373,6 +372,29 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_1);
     }
     return prepaidUser10;
+  }
+
+  public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
+    if(userId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(level == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "level"));
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("nivel = '")
+      .append(level.toString())
+      .append("', ");
+
+    sb.append("fecha_actualizacion = timezone('utc', now())");
+
+    int resp = getDbUtils().getJdbcTemplate().update(String.format("UPDATE %s.prp_usuario SET %s WHERE id = ?", getSchema(), sb.toString()), userId);
+
+    if(resp == 0) {
+      throw new ValidationException(ERROR_INTERNO_BBDD);
+    }
   }
 
   @Override

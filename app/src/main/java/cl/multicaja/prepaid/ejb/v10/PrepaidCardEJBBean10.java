@@ -2,6 +2,7 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
@@ -9,16 +10,20 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
+import cl.multicaja.prepaid.kafka.events.model.Card;
+import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.tecnocom.constants.TipoAlta;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -37,8 +42,30 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private static Log log = LogFactory.getLog(PrepaidCardEJBBean10.class);
 
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
+  }
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
     return kafkaEventDelegate10;
@@ -312,7 +339,13 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
    * @throws Exception
    */
   @Override
-  public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
+  public void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endpoint) throws Exception {
     throw new IllegalStateException();
   }
+
+  @Override
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+    throw new IllegalStateException();
+  }
+
 }

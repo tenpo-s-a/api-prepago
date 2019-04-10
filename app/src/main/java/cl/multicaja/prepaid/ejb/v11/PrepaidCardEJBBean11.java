@@ -1,14 +1,20 @@
 package cl.multicaja.prepaid.ejb.v11;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -161,18 +167,20 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     }
   }
 
-  /**
-   *  Busca una tarjeta por id y publica evento de tarjeta creada
+  /**@aqu
+   *  Busca una tarjeta por id y publica evento de tarjeta cerrada
    * @param cardId id interno de la tarjeta
    * @throws Exception
    */
-  public void publishCardCreatedEvent(String externalUserId, String accountUuid, Long cardId) throws Exception {
+  public void publishCardEvent(String externalUserId, String accountUuid, Long cardId, String endPoint) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
+
     if(StringUtils.isAllBlank(accountUuid)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
     }
+
     if(cardId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
     }
@@ -185,19 +193,19 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     card.setStatus(prepaidCard10.getStatus().toString());
 
     cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
-    timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
-    timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt().toLocalDateTime());
 
+    timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
+
+    timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt().toLocalDateTime());
     card.setTimestamps(timestamps);
 
     CardEvent cardEvent = new CardEvent();
     cardEvent.setCard(card);
     cardEvent.setAccountId(accountUuid);
     cardEvent.setUserId(externalUserId);
-
-    getKafkaEventDelegate10().publishCardCreatedEvent(cardEvent);
+    getKafkaEventDelegate10().publishCardEvent(cardEvent, endPoint);
   }
-
+  
   public String hashPan(String accountUuid, String pan) throws Exception {
     if(StringUtils.isAllBlank(accountUuid)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
@@ -208,6 +216,34 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(4, new SecureRandom(String.valueOf(accountUuid).getBytes()));
     return bCryptPasswordEncoder.encode(pan);
+  }
+
+  @Override
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+
+    PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findByExtId(null, userUuid);
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    if(PrepaidUserLevel.LEVEL_2.equals(prepaidUser.getUserLevel())) {
+      throw new ValidationException(CLIENTE_YA_TIENE_NIVEL_2);
+    }
+
+    // Validar que la cuenta exista
+    getAccountEJBBean10().findByUuid(accountUuid);
+
+    PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    if(prepaidCard == null) {
+      throw new NotFoundException(TARJETA_NO_EXISTE);
+    }
+
+    // Subir el nivel del usuario
+    getPrepaidUserEJBBean10().updatePrepaidUserLevel(prepaidUser.getId(), PrepaidUserLevel.LEVEL_2);
+
+    // Notificar que se ha creado una tarjeta nueva
+    publishCardEvent(prepaidUser.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+
+    return prepaidCard;
   }
 
 }
