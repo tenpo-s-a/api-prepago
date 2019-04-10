@@ -1,14 +1,21 @@
 package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.OutParam;
+import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountProcessor;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
+import cl.multicaja.tecnocom.constants.TipoDocumento;
+import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,15 +27,17 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.ejb.*;
 import javax.inject.Inject;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.CUENTA_NO_EXISTE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 @Stateless
 @LocalBean
@@ -37,8 +46,14 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static Log log = LogFactory.getLog(AccountEJBBean10.class);
 
+  //TODO: externalizar en parametros o variable de entorno
+  public static Integer BALANCE_CACHE_EXPIRATION_MILLISECONDS = 60000;
+
   private static final String INSERT_ACCOUNT_SQL
     = String.format("INSERT INTO %s.prp_cuenta (id_usuario, cuenta, procesador, saldo_info, saldo_expiracion, estado, creacion, actualizacion) VALUES(?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
+
+  private static final String UPDATE_BALANCE_SQL
+    = String.format("UPDATE %s.prp_cuenta SET saldo_info = ?, saldo_expiracion = ? WHERE id = ?", getSchema());
 
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
   
@@ -48,9 +63,21 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
     return kafkaEventDelegate10;
@@ -159,6 +186,128 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     return  this.findById((long) keyHolder.getKey());
     }catch (Exception e){
       return null;
+    }
+  }
+
+  /**
+   * Retorna el saldo de la cuenta
+   *
+   * @param headers
+   * @param accountId id de la cuenta
+   * @return
+   */
+  public PrepaidBalance10 getBalance(Map<String, Object> headers, Long accountId) throws Exception {
+
+    if(accountId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+
+    Account account = this.findById(accountId);
+
+    if(account == null){
+      throw new NotFoundException(CUENTA_NO_EXISTE);
+    }
+
+    PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findById(null, account.getUserId());
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    //permite refrescar el saldo del usuario de forma obligada, usado principalmente en test o podria usarse desde la web
+    Boolean forceRefreshBalance = headers != null ? getNumberUtils().toBoolean(headers.get("forceRefreshBalance"), Boolean.FALSE) : Boolean.FALSE;
+
+    Long balanceExpiration = account.getExpireBalance();
+
+    PrepaidBalanceInfo10 pBalance = null;
+
+    if(!StringUtils.isAllBlank(account.getBalanceInfo())) {
+      try {
+        pBalance = JsonUtils.getJsonParser().fromJson(account.getBalanceInfo(), PrepaidBalanceInfo10.class);
+      } catch(Exception ex) {
+        log.error("[getBalance] Error al convertir el saldo de la cuenta [id: %d]", ex);
+      }
+    }
+
+    Boolean updated = Boolean.FALSE;
+
+    //solamente si el usuario no tiene saldo registrado o se encuentra expirado, se busca en tecnocom
+    if (pBalance == null || balanceExpiration <= 0 || Instant.now().toEpochMilli() >= balanceExpiration || forceRefreshBalance) {
+
+      ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
+
+      if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
+        log.error("[getBalance] Respuesta del WS ConsultaSaldo [isRetornoExitoso: TRUE]");
+        pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
+        try {
+          this.updateBalance(accountId, pBalance);
+          updated = Boolean.TRUE;
+        } catch(Exception ex) {
+          log.error(String.format("[getBalance] Error al actualizar el saldo de la cuenta [id: %d]", accountId), ex);
+        }
+      } else {
+        log.error("[getBalance] Respuesta del WS ConsultaSaldo [isRetornoExitoso: FALSE]");
+        String codErrorTecnocom = consultaSaldoDTO != null ? consultaSaldoDTO.getRetorno() : null;
+        throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE).setData(new KeyValue("value", codErrorTecnocom));
+      }
+    }
+
+    //por defecto debe ser 0
+    BigDecimal balanceValue = BigDecimal.valueOf(0L);
+
+    if (pBalance != null) {
+      //El que le mostraremos al cliente será el saldo dispuesto principal menos el saldo autorizado principal
+      balanceValue = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
+    }
+
+    if(balanceValue.compareTo(BigDecimal.ZERO) < 0) {
+      balanceValue = balanceValue.multiply(BigDecimal.valueOf(-1));
+    }
+
+    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
+    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
+    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
+
+    //TODO: debe ser el valor de venta o el valor del día?.
+    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
+  }
+
+  /**
+   * Actualiza el saldo de la cuenta
+   *
+   * @param accountId id de la cuenta
+   * @param balance informacion del saldo
+   * @throws Exception
+   */
+  public void updateBalance(Long accountId, PrepaidBalanceInfo10 balance) throws Exception {
+
+    if(accountId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+    if(balance == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "balance"));
+    }
+
+    log.error(String.format("[updateBalance] Actualizando saldo de la cuenta [id: %d]", accountId));
+
+    //expira en X minutos
+    Long balanceExpiration = Instant.now()
+      .plusMillis(BALANCE_CACHE_EXPIRATION_MILLISECONDS)
+      .toEpochMilli();
+
+    int rows = getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(UPDATE_BALANCE_SQL);
+      ps.setString(1, JsonUtils.getJsonParser().toJson(balance));
+      ps.setLong(2, balanceExpiration);
+      ps.setLong(3, accountId);
+
+      return ps;
+    });
+
+    if(rows == 0) {
+      log.error(String.format("[updateBalance] Error al actualizar el saldo de la cuenta [id: %d]", accountId));
+      throw new Exception("No se pudo actualizar el saldo");
     }
   }
 

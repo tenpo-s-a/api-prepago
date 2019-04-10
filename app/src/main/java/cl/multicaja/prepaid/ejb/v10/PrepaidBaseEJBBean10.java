@@ -30,11 +30,17 @@ public abstract class PrepaidBaseEJBBean10 {
 
   private static DateUtils dateUtils;
 
+  private TecnocomService tecnocomService;
+
 
   public final static String APP_NAME = "prepaid.appname";
 
   public TecnocomService getTecnocomService() {
-    return TecnocomServiceHelper.getInstance().getTecnocomService();
+    if(tecnocomService == null) {
+      tecnocomService = TecnocomServiceHelper.getInstance().getTecnocomService();
+    }
+    return tecnocomService;
+
   }
 
   public TecnocomServiceHelper getTecnocomServiceHelper() {

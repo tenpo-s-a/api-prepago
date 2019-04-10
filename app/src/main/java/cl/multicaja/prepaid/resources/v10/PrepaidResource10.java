@@ -1,5 +1,7 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.core.exceptions.NotFoundException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
@@ -7,6 +9,7 @@ import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,6 +20,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
 
 /**
  * @author vutreras
@@ -33,6 +39,9 @@ public final class PrepaidResource10 extends BaseResource {
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
@@ -165,11 +174,19 @@ public final class PrepaidResource10 extends BaseResource {
 
   @GET
   @Path("/{userId}/balance")
+  @Deprecated
   public Response getPrepaidUserBalance(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidBalance10 prepaidBalance10 = this.prepaidUserEJBBean10.getPrepaidUserBalance(headersToMap(headers), userIdMc);
+    PrepaidUser10 prepaidUser10 = this.prepaidUserEJBBean10.getPrepaidUserByUserIdMc(headersToMap(headers), userIdMc);
+    if(prepaidUser10 == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    Account account = this.accountEJBBean10.findByUserId(prepaidUser10.getId());
+    if(account == null) {
+      throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE);
+    }
+    PrepaidBalance10 prepaidBalance10 =  this.accountEJBBean10.getBalance(headersToMap(headers), account.getId());
     return Response.ok(prepaidBalance10).build();
   }
-
 
   @POST
   @Path("/{userId}/identity/files")
@@ -183,6 +200,7 @@ public final class PrepaidResource10 extends BaseResource {
    */
   @POST
   @Path("/{userId}/simulation/topup")
+  @Deprecated
   public Response topupSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     SimulationTopupGroup10 simulationTopupGroup10 = this.prepaidEJBBean10.topupSimulationGroup(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationTopupGroup10).build();
@@ -190,11 +208,11 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/{userId}/simulation/withdrawal")
+  @Deprecated
   public Response withdrawalSimulation(SimulationNew10 simulationNew, @PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
     SimulationWithdrawal10 simulationWithdrawal10 = this.prepaidEJBBean10.withdrawalSimulation(headersToMap(headers), userIdMc, simulationNew);
     return Response.ok(simulationWithdrawal10).build();
   }
-
 
   @GET
   @Path("/{userId}/transactions")

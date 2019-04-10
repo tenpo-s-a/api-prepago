@@ -13,10 +13,12 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
+import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
 import cl.multicaja.prepaid.dao.AccountDao;
 import cl.multicaja.prepaid.dao.CardDao;
+import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
@@ -25,6 +27,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountProcessor;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
@@ -40,6 +43,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
+import org.postgresql.util.PSQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -50,8 +54,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @autor vutreras
@@ -239,6 +242,7 @@ public class TestBaseUnit extends TestApiBase {
     if (accountEJBBean10 == null) {
       accountEJBBean10 = new AccountEJBBean10();
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      accountEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
     }
     return accountEJBBean10;
   }
@@ -642,6 +646,30 @@ public class TestBaseUnit extends TestApiBase {
 
   public Account createRandomAccount(PrepaidUser10 prepaidUser) throws Exception {
     return accountEJBBean10.insertAccount(prepaidUser.getId(),getRandomNumericString(20));
+  }
+
+  /**
+   *
+   * @return
+   */
+  public PrepaidUser10 buildPrepaidUser11(){
+
+    PrepaidUser10 user = new PrepaidUser10();
+
+    Integer rutOrDocumentNumber = getUniqueRutNumber();
+
+    user.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
+    user.setDocumentType(DocumentType.DNI_CL);
+
+    user.setRut(rutOrDocumentNumber);
+    user.setStatus(PrepaidUserStatus.ACTIVE);
+    user.setName(getRandomString(10));
+    user.setLastName(getRandomString(10));
+    user.setDocumentNumber(rutOrDocumentNumber.toString());
+    user.setUserLevel(PrepaidUserLevel.LEVEL_1);
+    user.setUuid(getRandomString(10));
+
+    return user;
   }
 
   /**
@@ -1105,6 +1133,36 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidUser;
   }
 
+  /**
+   *
+   * @param user
+   * @throws BaseException
+   */
+  public PrepaidUser10 updatePrepaidUser(PrepaidUser10 user) throws Exception{
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "User"));
+    }
+
+    return getPrepaidUserEJBBean10().updatePrepaidUser(null, user);
+  }
+
+  /**
+   *
+   * @param uiid
+   * @return
+   * @throws Exception
+   */
+  public PrepaidUser10 findPrepaidUserByExtId(String uiid) throws Exception{
+
+    return getPrepaidUserEJBBean10().findByExtId(null,uiid);
+  }
+
+  /**
+   *
+   * @param prepaidUser
+   * @return
+   * @throws Exception
+   */
   public PrepaidUser10 createPrepaidUserV2(PrepaidUser10 prepaidUser) throws Exception {
 
     prepaidUser = getPrepaidUserEJBBean10().createUser(null, prepaidUser);

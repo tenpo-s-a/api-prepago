@@ -237,7 +237,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("Debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -317,7 +321,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (newPrepaidTopup.getTransactionOriginType()){
       case POS:
@@ -524,7 +532,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -567,7 +579,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance2 = getAccountEJBBean10().getBalance(headers, account.getId());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -639,7 +651,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -674,7 +690,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance2 = getAccountEJBBean10().getBalance(headers, account.getId());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -735,7 +751,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance10.getBalance().getValue().longValue() > 0);
 
@@ -855,7 +875,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null,prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -925,7 +949,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -968,7 +996,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance2 = getAccountEJBBean10().getBalance(headers, account.getId());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -1053,7 +1081,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -1088,7 +1120,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Map<String, Object> headers = new HashMap<>();
       headers.put("forceRefreshBalance", Boolean.TRUE);
 
-      PrepaidBalance10 prepaidBalance2 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      PrepaidBalance10 prepaidBalance2 = getAccountEJBBean10().getBalance(headers, account.getId());
 
       Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance2.getBalance().getValue().longValue() > prepaidBalance10.getBalance().getValue().longValue()  );
 
@@ -1162,7 +1194,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor", prepaidBalance10.getBalance().getValue().longValue() > 0);
 
@@ -1297,7 +1333,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null,prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     Assert.assertTrue("El saldo del usuario debe ser mayor",  prepaidBalance10.getBalance().getValue().longValue() > 0  );
 
@@ -1380,7 +1420,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard10.getId());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -1478,7 +1522,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(null, prepaidUser10.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
@@ -1536,7 +1584,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
 
-    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+    account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
 
     Assert.assertNotNull("Debe existir la cuenta", account);
 
