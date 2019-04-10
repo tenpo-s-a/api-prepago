@@ -96,6 +96,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     "WHERE\n" +
     "  uuid = ?;", getSchema());
 
+  UserClient userClient;
+
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
   }
@@ -111,7 +113,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
   }
-
 
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
@@ -373,8 +374,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return prepaidUser10;
   }
 
-  @Override
-    public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
+  public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
     if(userId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
     }
