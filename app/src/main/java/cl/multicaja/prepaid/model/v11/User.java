@@ -163,4 +163,25 @@ public class User  implements Serializable {
   public void setIntentosValidacion(Long intentosValidacion) {
     this.intentosValidacion = intentosValidacion;
   }
+
+
+  @Override
+  public String toString() {
+    return "User{" +
+      "id=" + id +
+      ", userId=" + userId +
+      ", status=" + status +
+      ", name='" + name + '\'' +
+      ", lastName='" + lastName + '\'' +
+      ", documentNumber='" + documentNumber + '\'' +
+      ", documentType=" + documentType +
+      ", level=" + level +
+      ", createdAt=" + createdAt +
+      ", updatedAt=" + updatedAt +
+      ", rut=" + rut +
+      ", saldo='" + saldo + '\'' +
+      ", saldoExpiracion=" + saldoExpiracion +
+      ", intentosValidacion=" + intentosValidacion +
+      '}';
+  }
 }
