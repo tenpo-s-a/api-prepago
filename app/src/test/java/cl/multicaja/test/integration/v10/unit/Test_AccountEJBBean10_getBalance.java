@@ -170,7 +170,7 @@ public class Test_AccountEJBBean10_getBalance extends TestBaseUnit {
       assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
       assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
-      assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
+      assertTrue("1: Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     {
@@ -179,7 +179,7 @@ public class Test_AccountEJBBean10_getBalance extends TestBaseUnit {
       assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
       assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
-      assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
+      assertFalse("2: No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     Thread.sleep(AccountEJBBean10.BALANCE_CACHE_EXPIRATION_MILLISECONDS + 1000);
@@ -190,7 +190,7 @@ public class Test_AccountEJBBean10_getBalance extends TestBaseUnit {
       assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
       assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
-      assertTrue("Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
+      assertTrue("3: Debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
 
     {
@@ -199,7 +199,7 @@ public class Test_AccountEJBBean10_getBalance extends TestBaseUnit {
       assertEquals("Debe ser igual", balance, prepaidBalance10.getBalance());
       assertEquals("Debe ser igual", pcaMain, prepaidBalance10.getPcaMain());
       assertEquals("Debe ser igual", pcaSecondary, prepaidBalance10.getPcaSecondary());
-      assertFalse("No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
+      assertFalse("4: No debe ser actualizado desde tecnocom", prepaidBalance10.isUpdated());
     }
   }
 }
