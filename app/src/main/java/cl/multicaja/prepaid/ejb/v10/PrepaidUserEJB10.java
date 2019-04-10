@@ -3,10 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
-import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -99,5 +96,15 @@ public interface PrepaidUserEJB10 {
    * @throws Exception
    */
   PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser10 updatePrepaidUser(Map<String,Object> headers, PrepaidUser10 user)throws Exception;
+
 
 }

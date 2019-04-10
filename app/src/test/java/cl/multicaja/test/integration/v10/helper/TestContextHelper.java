@@ -73,6 +73,8 @@ public class TestContextHelper extends TestBaseUnit {
 
       ProductChangeRoute10 productChangeRoute10 = new ProductChangeRoute10();
       productChangeRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      productChangeRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      productChangeRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
 
       MailRoute10 mailRoute10 = new MailRoute10(); // Agregar ruta al cammel para probar los emails salientes
       mailRoute10.setPrepaidEJBBean10(getPrepaidEJBBean10());
@@ -80,6 +82,7 @@ public class TestContextHelper extends TestBaseUnit {
       InvoiceRoute10 invoiceRoute10 = new InvoiceRoute10();
 
       KafkaEventsRoute10 kafkaEventsRoute10 = new KafkaEventsRoute10();
+      kafkaEventsRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
 
      /*
       camelFactory.startCamelContextWithRoutes(true,

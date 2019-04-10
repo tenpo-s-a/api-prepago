@@ -202,7 +202,6 @@ public interface PrepaidEJB10 {
    */
   PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
-
   /**
    * Obtiene los terminos y condiciones vigentes para preago
    *

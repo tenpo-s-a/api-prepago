@@ -4,7 +4,9 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
@@ -29,7 +31,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,6 +43,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.Set;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -63,8 +71,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
 
   private TecnocomService tecnocomService;
 
-  private UserClient userClient;
-
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
     "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
     "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
@@ -76,8 +82,21 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
-
   private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
+
+  private static final String FIND_USER_BY_UUID = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
+
+  private static final String UPDATE_USER = String.format("UPDATE %s.prp_usuario\n" +
+    "SET\n" +
+    "  nombre = ?,\n" +
+    "  apellido = ?,\n" +
+    "  estado = ?,\n" +
+    "  nivel = ?,\n" +
+    "  fecha_actualizacion = ? \n" +
+    "WHERE\n" +
+    "  uuid = ?;", getSchema());
+
+  UserClient userClient;
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -94,7 +113,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   public void setPrepaidMovementEJB10(PrepaidMovementEJBBean10 prepaidMovementEJB10) {
     this.prepaidMovementEJB10 = prepaidMovementEJB10;
   }
-
 
   public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
     this.accountEJBBean10 = accountEJBBean10;
@@ -303,6 +321,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+
   @Override
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
@@ -355,6 +374,29 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return prepaidUser10;
   }
 
+  public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
+    if(userId == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
+    }
+
+    if(level == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "level"));
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("nivel = '")
+      .append(level.toString())
+      .append("', ");
+
+    sb.append("fecha_actualizacion = timezone('utc', now())");
+
+    int resp = getDbUtils().getJdbcTemplate().update(String.format("UPDATE %s.prp_usuario SET %s WHERE id = ?", getSchema(), sb.toString()), userId);
+
+    if(resp == 0) {
+      throw new ValidationException(ERROR_INTERNO_BBDD);
+    }
+  }
+
   @Override
   public PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
     if(prepaidUser == null){
@@ -382,6 +424,33 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  @Override
+  public PrepaidUser10 updatePrepaidUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
+
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
+    }
+
+    log.info(user);
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      //PreparedStatement ps = connection
+      //  .prepareStatement(UPDATE_USER, new String[] {"id"});
+
+      PreparedStatement ps = connection.prepareStatement(UPDATE_USER);
+
+      ps.setString(1,user.getName());
+      ps.setString(2,user.getLastName());
+      ps.setString(3,user.getStatus().toString());
+      ps.setString(4,user.getUserLevel().toString());
+      ps.setObject(5,LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setString(6,user.getUuid());
+
+      return ps;
+    });
+
+    return this.findByExtId(null,user.getUuid());
+  }
+
 
   public org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserRowMapper() {
     return (ResultSet rs, int rowNum) -> {
@@ -403,4 +472,5 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return u;
     };
   }
+
 }
