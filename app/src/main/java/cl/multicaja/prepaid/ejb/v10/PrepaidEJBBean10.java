@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -2491,7 +2492,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidTransactionExtend10;
   }
 
-
   @Override
   public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
@@ -2973,7 +2973,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-    getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
+    //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
+    // Por ahora se setean para que pueda realizarse el cambio de producto.
+    if(prepaidUser.getDocumentNumber() == null) {
+      prepaidUser.setDocumentNumber(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+      prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    }
+
+    getProductChangeDelegate().sendProductChange(prepaidUser, null, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
   }
