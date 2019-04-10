@@ -1541,10 +1541,4 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
     return data;
   }
-
-  @Override
-  public void expireIpmMovements() throws SQLException {
-    getDbUtils().execute(String.format("%s.create_sp_mc_acc_expire_old_ipm_movements_v10", getSchemaAccounting()));
-  }
-
 }

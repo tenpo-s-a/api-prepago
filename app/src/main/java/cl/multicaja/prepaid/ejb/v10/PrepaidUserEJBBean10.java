@@ -4,7 +4,9 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
@@ -29,7 +31,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,6 +43,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -78,6 +85,18 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String FIND_USER_BY_NUMDOC =  String.format("SELECT * FROM %s.prp_usuario WHERE numero_documento = ?", getSchema());
 
   private static final String FIND_USER_BY_RUT = String.format("SELECT * FROM %s.prp_usuario WHERE rut = ?", getSchema());
+
+  private static final String FIND_USER_BY_UUID = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
+
+  private static final String UPDATE_USER = String.format("UPDATE %s.prp_usuario\n" +
+    "SET\n" +
+    "  nombre = ?,\n" +
+    "  apellido = ?,\n" +
+    "  estado = ?,\n" +
+    "  nivel = ?,\n" +
+    "  fecha_actualizacion = ? \n" +
+    "WHERE\n" +
+    "  uuid = ?;", getSchema());
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -303,6 +322,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+
   @Override
   public void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception {
 
@@ -356,125 +376,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userId) throws Exception {
-
-    if(userId == null){
-      userId = this.verifiUserAutentication(headers);
-    }
-
-    // Obtener Usuario MC
-    //User user = getUserClient().getUserById(headers, userIdMc);
-    PrepaidUser10 prepaidUser = findById(null,userId);
-
-
-    if(prepaidUser == null){
-      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
-    }
-
-    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
-      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
-    }
-
-    //permite refrescar el saldo del usuario de forma obligada, usado principalmente en test o podria usarse desde la web
-    boolean forceRefreshBalance = headers != null ? getNumberUtils().toBoolean(headers.get("forceRefreshBalance"), false) : false;
-
-    Long balanceExpiration = prepaidUser.getBalanceExpiration();
-
-    boolean updated = false;
-    PrepaidBalanceInfo10 pBalance = prepaidUser.getBalance();
-
-    //solamente si el usuario no tiene saldo registrado o se encuentra expirado, se busca en tecnocom
-    if (pBalance == null || balanceExpiration <= 0 || System.currentTimeMillis() >= balanceExpiration || forceRefreshBalance) {
-
-      Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
-      //se busca la ultima tarjeta para obtener el contrado de ella, aqui se puede lanzar una excepcion con codigos (TARJETA_PRIMERA_CARGA_PENDIENTE o TARJETA_PRIMERA_CARGA_EN_PROCESO)
-      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB10().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
-
-      if(prepaidCard10 == null) {
-
-        //Obtener ultimo movimiento
-        PrepaidMovement10 movement = getPrepaidMovementEJB10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(),
-          PrepaidMovementStatus.PENDING,
-          PrepaidMovementStatus.IN_PROCESS);
-
-        // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
-        if(movement != null){
-          throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
-        } else {
-          throw new ValidationException(TARJETA_PRIMERA_CARGA_PENDIENTE);
-        }
-
-      } else if(PrepaidCardStatus.PENDING.equals(prepaidCard10.getStatus())) {
-        throw new ValidationException(TARJETA_PRIMERA_CARGA_EN_PROCESO);
-      }
-
-      ConsultaSaldoDTO consultaSaldoDTO = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getDocumentNumber(), TipoDocumento.RUT);
-
-      if (consultaSaldoDTO != null && consultaSaldoDTO.isRetornoExitoso()) {
-        pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
-        try {
-          this.updatePrepaidUserBalance(headers, prepaidUser.getId(), pBalance);
-          updated = true;
-        } catch(Exception ex) {
-          log.error("Error al actualizar el saldo del usuario: " + userId, ex);
-        }
-      } else {
-        String codErrorTecnocom = consultaSaldoDTO != null ? consultaSaldoDTO.getRetorno() : null;
-        throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE).setData(new KeyValue("value", codErrorTecnocom));
-      }
-    }
-
-    //https://www.pivotaltracker.com/story/show/158367667
-    //por defecto debe ser 0
-    BigDecimal balanceValue = BigDecimal.valueOf(0L);
-
-    if (pBalance != null) {
-      //El que le mostraremos al cliente será el saldo dispuesto principal menos el saldo autorizado principal
-      balanceValue = BigDecimal.valueOf(pBalance.getSaldisconp().longValue() - pBalance.getSalautconp().longValue());
-    }
-
-    if(balanceValue.compareTo(BigDecimal.ZERO) < 0) {
-      balanceValue = balanceValue.multiply(BigDecimal.valueOf(-1));
-    }
-
-    NewAmountAndCurrency10 balance = new NewAmountAndCurrency10(balanceValue);
-    NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
-    NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
-
-    //TODO: debe ser el valor de venta o el valor del día?.
-    return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
-  }
-
-  @Override
-  public void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception {
-
-    if(userId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
-    }
-    if(balance == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "balance"));
-    }
-
-    //expira en 1 minuto (60
-    Long balanceExpiration = System.currentTimeMillis() + BALANCE_CACHE_EXPIRATION_MILLISECONDS;
-
-    Object[] params = {
-      userId, //id
-      JsonUtils.getJsonParser().toJson(balance), //saldo
-      balanceExpiration, //saldo_expiracion
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-
-    Map<String, Object> resp = getDbUtils().execute(getSchema() + ".mc_prp_actualizar_saldo_usuario_v10", params);
-
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("updatePrepaidUserBalance resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-  }
-
-  @Override
   public PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
     if(prepaidUser == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
@@ -501,6 +402,33 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
+  @Override
+  public PrepaidUser10 updatePrepaidUser(Map<String, Object> headers, PrepaidUser10 user) throws Exception {
+
+    if(user == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
+    }
+
+    log.info(user);
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      //PreparedStatement ps = connection
+      //  .prepareStatement(UPDATE_USER, new String[] {"id"});
+
+      PreparedStatement ps = connection.prepareStatement(UPDATE_USER);
+
+      ps.setString(1,user.getName());
+      ps.setString(2,user.getLastName());
+      ps.setString(3,user.getStatus().toString());
+      ps.setString(4,user.getUserLevel().toString());
+      ps.setObject(5,LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setString(6,user.getUuid());
+
+      return ps;
+    });
+
+    return this.findByExtId(null,user.getUuid());
+  }
+
 
   public org.springframework.jdbc.core.RowMapper<PrepaidUser10> getUserRowMapper() {
     return (ResultSet rs, int rowNum) -> {
@@ -522,4 +450,5 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       return u;
     };
   }
+
 }

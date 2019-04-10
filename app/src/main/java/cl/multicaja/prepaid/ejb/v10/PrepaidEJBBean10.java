@@ -1664,6 +1664,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
@@ -1738,7 +1739,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
-      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      Account acc = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+      balance = getAccountEJBBean10().getBalance(headers, acc.getId());
     }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
@@ -1784,6 +1787,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
     if(userIdMc == null){
@@ -1795,9 +1799,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(simulationNew.getPaymentMethod() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "method"));
     }
-
-    // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1816,7 +1817,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
+    Account acc = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    PrepaidBalance10 balance = getAccountEJBBean10().getBalance(headers, acc.getId());
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(amountValue);

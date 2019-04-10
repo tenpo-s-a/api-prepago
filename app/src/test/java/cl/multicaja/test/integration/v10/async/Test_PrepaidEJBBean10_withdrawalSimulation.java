@@ -1,14 +1,11 @@
 package cl.multicaja.test.integration.v10.async;
 
 
-import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.NameStatus;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
@@ -28,109 +25,8 @@ import static cl.multicaja.core.model.Errors.*;
  */
 public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsync {
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
-  public void withdrawalSimulation_not_ok_by_params_null() throws Exception {
-
-    final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
-
-    // userId null
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
-
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      try {
-
-        getPrepaidEJBBean10().withdrawalSimulation(null, null, simulationNew);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
-    }
-
-    // paymentMethod null
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
-
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(null);
-
-      try {
-
-        getPrepaidEJBBean10().withdrawalSimulation(null, Long.MAX_VALUE, simulationNew);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
-    }
-    // amount null
-    {
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(null);
-      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      try {
-
-        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
-    }
-    // amount.value null
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(null);
-
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      try {
-
-        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
-    }
-    // amount.currencyCode null
-    {
-      NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
-      amount.setCurrencyCode(null);
-
-      SimulationNew10 simulationNew = new SimulationNew10();
-      simulationNew.setAmount(amount);
-      simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-      try {
-
-        getPrepaidEJBBean10().withdrawalSimulation(null, 1L, simulationNew);
-
-        Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-      } catch(BadRequestException vex) {
-        Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
-      }
-    }
-  }
-
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
-  @Test
-  public void withdrawalSimulation_not_ok_by_user_not_found() throws Exception {
+  public void withdrawalSimulation_not_ok_by_prepaid_user_not_found() throws Exception {
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
@@ -145,43 +41,16 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
     } catch(NotFoundException vex) {
-      Assert.assertEquals("debe ser error de validacion de parametros", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
-    }
-  }
-
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
-  @Test
-  public void withdrawalSimulation_not_ok_by_prepaid_user_not_found() throws Exception {
-
-    User user = registerUser();
-
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
-
-    SimulationNew10 simulationNew = new SimulationNew10();
-    simulationNew.setAmount(amount);
-    simulationNew.setPaymentMethod(numberUtils.random() ? TransactionOriginType.WEB : TransactionOriginType.POS);
-
-    try {
-
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
-
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-
-    } catch(NotFoundException vex) {
       Assert.assertEquals("debe ser error de validacion de parametros", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_prepaid_user_disabled() throws Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-  prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(BigDecimal.valueOf(3000));
 
@@ -191,7 +60,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     try {
 
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser.getUserIdMc(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -200,24 +69,19 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_ok_WEB() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     //se carga 10.000 en tecnocom como saldo del usuario
     BigDecimal impfac = BigDecimal.valueOf(10000);
@@ -233,7 +97,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -248,24 +112,19 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_ok_POS() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     //se carga 10.000 en tecnocom como saldo del usuario
     BigDecimal impfac = BigDecimal.valueOf(10000);
@@ -281,7 +140,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+    SimulationWithdrawal10 resp = getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
 
     Assert.assertNotNull("debe retornar una respuesta", resp);
     Assert.assertNotNull("debe retornar un monto a descontar", resp.getAmountToDiscount());
@@ -294,24 +153,19 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_insufficient_balance_WEB() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     //se carga 10.000 en tecnocom como saldo del usuario
     BigDecimal impfac = BigDecimal.valueOf(10000);
@@ -331,7 +185,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro WEB  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -340,24 +194,19 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_insufficient_balance_POS() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     //se carga 10.000 en tecnocom como saldo del usuario
     BigDecimal impfac = BigDecimal.valueOf(10000);
@@ -377,7 +226,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       //debe lanzar excepcion de saldo insuficiente dado que intenta retirar 10.000 al cual se le agrega la comision de
       //retiro POS  y eso supera el saldo inicial de 10.000
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -386,24 +235,18 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_min_amount_web() throws Exception {
-    User user = registerUser();
-    updateUser(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
 
@@ -419,7 +262,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     System.out.println("Calcular carga WEB: " + simulationNew);
     try {
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
       Assert.fail("no debe pasar por aca");
     } catch(ValidationException vex) {
       System.out.println(vex);
@@ -427,24 +270,18 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_min_amount_pos() throws Exception {
-    User user = registerUser();
-    updateUser(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(5000, 10000));
 
@@ -460,7 +297,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     System.out.println("Calcular carga POS: " + simulationNew);
     try {
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
       Assert.fail("no debe pasar por aca");
     } catch(ValidationException vex) {
       System.out.println(vex);
@@ -468,24 +305,18 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_max_amount_web() throws Exception {
-    User user = registerUser();
-    updateUser(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     BigDecimal impfac = BigDecimal.valueOf(0);
 
@@ -501,30 +332,24 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     System.out.println("Calcular carga WEB: " + simulationNew);
     try {
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
     } catch (ValidationException ex) {
       Assert.assertEquals("debe ser error de supera saldo", EL_RETIRO_SUPERA_EL_MONTO_MAXIMO_DE_UN_RETIRO_WEB.getValue(), ex.getCode());
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
-  @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_max_amount_pos() throws Exception {
-    User user = registerUser();
-    updateUser(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    AltaClienteDTO altaClienteDTO = registerInTecnocom(user);
-
-    Assert.assertTrue("debe ser exitoso", altaClienteDTO.isRetornoExitoso());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10, altaClienteDTO);
-
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     BigDecimal impfac = BigDecimal.valueOf(0);
 
@@ -540,13 +365,12 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
     System.out.println("Calcular carga POS: " + simulationNew);
     try {
-      getPrepaidEJBBean10().withdrawalSimulation(null, user.getId(), simulationNew);
+      getPrepaidEJBBean10().withdrawalSimulation(null, prepaidUser10.getUserIdMc(), simulationNew);
     } catch (ValidationException ex) {
       Assert.assertEquals("debe ser error de supera saldo", EL_RETIRO_SUPERA_EL_MONTO_MAXIMO_DE_UN_RETIRO_POS.getValue(), ex.getCode());
     }
   }
 
-  //TODO: Revisar si esto se usara y corregir
   @Ignore
   @Test
   public void withdrawalSimulation_not_ok_by_monthly_limit() throws Exception {
@@ -574,7 +398,11 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     System.out.println(prepaidBalance10);
 
@@ -593,7 +421,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
         Thread.sleep(1000);
 
-        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
         System.out.println(prepaidBalance10);
 
@@ -620,7 +448,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
         Thread.sleep(1000);
 
-        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
         System.out.println(prepaidBalance10);
 
@@ -643,7 +471,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     }
 
 
-    prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+    prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
     sumBalance = prepaidBalance10.getBalance().getValue().longValue();
 
     //se retiran 150.000 mil pesos
@@ -655,7 +483,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
 
       Thread.sleep(1000);
 
-      prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+      prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
       System.out.println(prepaidBalance10);
 

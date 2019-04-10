@@ -188,4 +188,26 @@ public class PrepaidUser10 extends BaseModel {
   public int hashCode() {
     return Objects.hash(getId(), getUserIdMc(), getRut(), getStatus(), getTimestamps());
   }
+
+  @Override
+  public String toString() {
+    return "PrepaidUser10{" +
+      "id=" + id +
+      ", userIdMc=" + userIdMc +
+      ", rut=" + rut +
+      ", status=" + status +
+      ", timestamps=" + timestamps +
+      ", userLevel=" + userLevel +
+      ", balance=" + balance +
+      ", balanceExpiration=" + balanceExpiration +
+      ", hasPrepaidCard=" + hasPrepaidCard +
+      ", hasPendingFirstTopup=" + hasPendingFirstTopup +
+      ", identityVerificationAttempts=" + identityVerificationAttempts +
+      ", name='" + name + '\'' +
+      ", lastName='" + lastName + '\'' +
+      ", documentNumber='" + documentNumber + '\'' +
+      ", documentType=" + documentType +
+      ", uuid='" + uuid + '\'' +
+      '}';
+  }
 }
