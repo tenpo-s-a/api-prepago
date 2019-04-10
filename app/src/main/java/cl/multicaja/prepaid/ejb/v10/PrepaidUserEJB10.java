@@ -92,25 +92,6 @@ public interface PrepaidUserEJB10 {
   PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
-   * Retorna el saldo del cliente prepago
-   *
-   * @param headers
-   * @param userIdMc id de usuario multicaja
-   * @return
-   */
-  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   * Actualiza el saldo del cliente prepago
-   *
-   * @param headers
-   * @param userId id de usuario prepago
-   * @param balance
-   * @throws Exception
-   */
-  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
-
-  /**
    * Incrementa el contador de intentos de verificacion de identidad
    * @param headers
    * @param prepaidUser
