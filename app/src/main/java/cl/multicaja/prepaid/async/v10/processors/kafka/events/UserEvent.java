@@ -29,16 +29,14 @@ public class UserEvent extends BaseProcessor10 {
 
   private JsonUtils jsonUtils = new JsonUtils();
   private Map<String,Object> isAllValidMap = new HashMap<>();
+  private ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+  private Validator validator = factory.getValidator();
 
   public UserEvent(BaseRoute10 route) {
     super(route);
   }
 
-
   private Boolean validateFields(cl.multicaja.prepaid.kafka.events.model.User userFields){
-
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
 
     Set<ConstraintViolation<cl.multicaja.prepaid.kafka.events.model.User>> violations = validator.validate(userFields);
 

@@ -54,9 +54,6 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
 
     Assert.assertEquals("Igual",userToCreate.getDocumentNumber(),userFound.getDocumentNumber());
 
-    //Assert.assertEquals("Igual",userToCreate.getTimestamps().getCreatedAt().toLocalDate(),userFound.getTimestamps().getCreatedAt().toLocalDate());
-    //Assert.assertEquals("Igual",userToCreate.getTimestamps().getUpdatedAt().toLocalDate(),userFound.getTimestamps().getUpdatedAt().toLocalDate());
-
     Assert.assertEquals("Igual",userToCreate.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userToCreate.getUserLevel(),userFound.getUserLevel());
 
