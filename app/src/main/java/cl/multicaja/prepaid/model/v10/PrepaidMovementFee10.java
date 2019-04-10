@@ -1,11 +1,13 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
+
 import java.math.BigDecimal;
 
 public class PrepaidMovementFee10 {
   private Long id;
   private Long movementId; // Relacion a la tabla prp_movimiento
-  private String feeType;
+  private PrepaidMovementFeeType feeType;
   private BigDecimal amount;
   private BigDecimal iva;
   private Timestamps timestamps;
@@ -26,11 +28,11 @@ public class PrepaidMovementFee10 {
     this.movementId = movementId;
   }
 
-  public String getFeeType() {
+  public PrepaidMovementFeeType getFeeType() {
     return feeType;
   }
 
-  public void setFeeType(String feeType) {
+  public void setFeeType(PrepaidMovementFeeType feeType) {
     this.feeType = feeType;
   }
 

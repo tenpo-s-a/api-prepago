@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.kafka.events.model.*;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -23,7 +24,6 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -52,6 +52,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
   // Fee Queries
   private static final String FIND_FEE_BY_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id = ?", getSchema());
   private static final String FIND_FEE_BY_MOVEMENT_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id_movimiento = ?", getSchema());
+  private static final String INSERT_FEE_SQL = String.format("INSERT INTO %s.prp_movimiento_comision (id_movimiento, tipo_comision, monto, iva, creacion, actualizacion) VALUES(?, ?, ?, ?, timezone('utc', now()), timezone('utc', now()))", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -286,26 +287,70 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     getKafkaEventDelegate10().publishTransactionEvent(transactionEvent);
   }
 
-  public PrepaidMovementFee10 getMovementFeeById(Long feeId) throws Exception {
+  public PrepaidMovementFee10 getPrepaidMovementFeeById(Long feeId) throws Exception {
     if(feeId == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "feeId"));
     }
 
-    log.info(String.format("[getMovementFeeById] Buscando fee [feeId: %d]", feeId));
+    log.info(String.format("[getPrepaidMovementFeeById] Buscando fee [feeId: %d]", feeId));
 
     try {
       return getDbUtils().getJdbcTemplate()
         .queryForObject(FIND_FEE_BY_ID, getMovementFeeMapper(), feeId);
     } catch (EmptyResultDataAccessException ex) {
-      log.error(String.format("[getMovementFeeById] Fee [feeId: %d] no existe", feeId));
+      log.error(String.format("[getPrepaidMovementFeeById] Fee [feeId: %d] no existe", feeId));
       throw new ValidationException(COMISION_NO_EXISTE);
     } catch (Exception e) {
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
   }
 
-  public PrepaidMovementFee10 findFeeByMovementId(Long movementId) {
-    return new PrepaidMovementFee10();
+  public List getPrepaidMovementFeeByMovementId(Long movementId) throws BaseException {
+    if(movementId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
+    }
+
+    log.info(String.format("[getPrepaidMovementFeeByMovementId] Buscando fee [movementId: %d]", movementId));
+
+    return getDbUtils().getJdbcTemplate().query(FIND_FEE_BY_MOVEMENT_ID, getMovementFeeMapper(), movementId);
+    /*
+    try {
+      return getDbUtils().getJdbcTemplate().queryForList(FIND_FEE_BY_MOVEMENT_ID, getMovementFeeMapper(), movementId, PrepaidMovementFee10.class);
+    } catch (Exception e) {
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+    */
+
+  }
+
+  public PrepaidMovementFee10 createPrepaidMovementFee(PrepaidMovementFee10 prepaidMovementFee) throws Exception {
+    if(prepaidMovementFee == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee"));
+    }
+    if(prepaidMovementFee.getFeeType() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.feeType"));
+    }
+    if(prepaidMovementFee.getAmount() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.amount"));
+    }
+    if(prepaidMovementFee.getIva() == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.iva"));
+    }
+
+    log.info(String.format("[createPrepaidMovementFee] Guardando Comision de movimiento con [%s]", prepaidMovementFee.toString()));
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(INSERT_FEE_SQL, new String[] {"id"});
+      ps.setLong(1, prepaidMovementFee.getMovementId());
+      ps.setString(2, prepaidMovementFee.getFeeType().toString());
+      ps.setBigDecimal(3, prepaidMovementFee.getAmount());
+      ps.setBigDecimal(4, prepaidMovementFee.getIva());
+      return ps;
+    }, keyHolder);
+
+    return  this.getPrepaidMovementFeeById((long) keyHolder.getKey());
   }
 
   private RowMapper<PrepaidMovementFee10> getMovementFeeMapper() {
@@ -313,7 +358,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       PrepaidMovementFee10 prepaidMovementFee = new PrepaidMovementFee10();
       prepaidMovementFee.setId(rs.getLong("id"));
       prepaidMovementFee.setMovementId(rs.getLong("id_movimiento"));
-      prepaidMovementFee.setFeeType(rs.getString("tipo_comision"));
+      prepaidMovementFee.setFeeType(PrepaidMovementFeeType.valueOfEnum(rs.getString("tipo_comision")));
       prepaidMovementFee.setAmount(rs.getBigDecimal("monto"));
       prepaidMovementFee.setIva(rs.getBigDecimal("iva"));
       cl.multicaja.prepaid.model.v10.Timestamps timestamps = new cl.multicaja.prepaid.model.v10.Timestamps();

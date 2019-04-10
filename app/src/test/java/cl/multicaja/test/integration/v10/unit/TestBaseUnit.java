@@ -15,8 +15,6 @@ import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
-import cl.multicaja.prepaid.dao.AccountDao;
-import cl.multicaja.prepaid.dao.CardDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
@@ -24,11 +22,10 @@ import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
+import cl.multicaja.prepaid.helpers.users.model.User;
+import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.AccountProcessor;
-import cl.multicaja.prepaid.model.v11.AccountStatus;
-import cl.multicaja.prepaid.model.v11.DocumentType;
+import cl.multicaja.prepaid.model.v11.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -38,7 +35,6 @@ import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.cfg.Configuration;
 import org.junit.Assert;
 
 import javax.persistence.EntityManager;
@@ -48,6 +44,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.LIMITES_ERROR_GENERICO_$VALUE;
@@ -639,6 +636,15 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidUser;
   }
 
+  public PrepaidMovementFee10 buildPrepaidMovementFee10(PrepaidMovement10 prepaidMovement10) {
+    PrepaidMovementFee10 prepaidMovementFee = new PrepaidMovementFee10();
+    prepaidMovementFee.setMovementId(prepaidMovement10.getId());
+    prepaidMovementFee.setFeeType(PrepaidMovementFeeType.EXCHANGE_RATE_DIF);
+    prepaidMovementFee.setAmount(new BigDecimal(numberUtils.random(3000L, 50000L)));
+    prepaidMovementFee.setIva(prepaidMovementFee.getAmount().multiply(new BigDecimal(0.19)));
+    return prepaidMovementFee;
+  }
+
   public Account createRandomAccount(PrepaidUser10 prepaidUser) throws Exception {
     return accountEJBBean10.insertAccount(prepaidUser.getId(),getRandomNumericString(20));
   }
@@ -1149,12 +1155,20 @@ public class TestBaseUnit extends TestApiBase {
 
     prepaidCard = getPrepaidCardEJBBean11().createPrepaidCard(null, prepaidCard);
 
-    Assert.assertNotNull("debe retornar un usuario", prepaidCard);
+    Assert.assertNotNull("debe retornar una tarjeta", prepaidCard);
     Assert.assertEquals("debe tener id", true, prepaidCard.getId() > 0);
     Assert.assertEquals("debe tener idUser", true, prepaidCard.getIdUser() > 0);
     Assert.assertNotNull("debe tener status", prepaidCard.getStatus());
 
     return prepaidCard;
+  }
+
+  public PrepaidMovementFee10 createPrepaidMovementFee10(PrepaidMovementFee10 fee) throws Exception {
+    fee = getPrepaidMovementEJBBean11().createPrepaidMovementFee(fee);
+
+    Assert.assertNotNull("debe retornar una comision", fee);
+    Assert.assertEquals("debe tener id", true, fee.getId() > 0);
+    return fee;
   }
 
   /*
@@ -1963,5 +1977,10 @@ public class TestBaseUnit extends TestApiBase {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(ConfigUtils.getEnv());
     EntityManager em = emf.createEntityManager();
     return em;
+  }
+
+  public boolean isRecentLocalDateTime(LocalDateTime localDateTime, Integer minutesInterval) {
+    LocalDateTime nowTime = LocalDateTime.now(ZoneId.of("UTC"));
+    return nowTime.minusMinutes(minutesInterval).isBefore(localDateTime) && nowTime.plusMinutes(minutesInterval).isAfter(localDateTime);
   }
 }
