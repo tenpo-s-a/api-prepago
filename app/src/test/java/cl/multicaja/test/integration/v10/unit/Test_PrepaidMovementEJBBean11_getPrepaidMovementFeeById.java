@@ -32,6 +32,12 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeById extends Tes
     Assert.assertTrue("Debe tener fecha de creacion actualizacion", isRecentLocalDateTime(foundFee.getTimestamps().getUpdatedAt(), 5));
   }
 
+  @Test
+  public void getPrepaidMovementFee_notExist() throws Exception {
+    PrepaidMovementFee10 foundFee = getPrepaidMovementEJBBean11().getPrepaidMovementFeeById(Long.MAX_VALUE);
+    Assert.assertNull("No debe existir", foundFee);
+  }
+
   @Test(expected = BadRequestException.class)
   public void getPrepaidMovementFee_idNull() throws Exception {
     getPrepaidMovementEJBBean11().getPrepaidMovementFeeById(null);

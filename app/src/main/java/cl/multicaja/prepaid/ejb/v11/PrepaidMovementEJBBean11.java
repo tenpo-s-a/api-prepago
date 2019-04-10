@@ -299,7 +299,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
         .queryForObject(FIND_FEE_BY_ID, getMovementFeeMapper(), feeId);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidMovementFeeById] Fee [feeId: %d] no existe", feeId));
-      throw new ValidationException(COMISION_NO_EXISTE);
+      return null;
     } catch (Exception e) {
       throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
     }
