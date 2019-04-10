@@ -61,6 +61,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
+  private static final String FIND_ACCOUNT_BY_UUID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE uuid = ?", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -133,6 +134,21 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     }
   }
 
+  public Account findByUuid(String uuid) throws Exception {
+    if(StringUtils.isAllBlank(uuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "uuid"));
+    }
+
+    log.info(String.format("[findByUuid] Buscando cuenta/contrato por -> uuid [%s]", uuid));
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_ACCOUNT_BY_UUID_SQL, this.getAccountMapper(), uuid);
+    } catch (EmptyResultDataAccessException ex) {
+      //log.error(String.format("[findByUserIdAndAccountNumber] Cuenta/contrato con userId [%d] y accountNumber [%s] no existe", userId, accountNumber));
+      return null;
+    }
+  }
+
   public Account insertAccount(Long userId, String accountNumber) throws Exception {
     if(userId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -198,6 +214,31 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
+    return this.getBalance(headers, prepaidUser, account);
+  }
+
+  public PrepaidBalance10 getBalance(Map<String, Object> headers, PrepaidUser10 prepaidUser, Account account) throws Exception {
+
+    if(prepaidUser == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
+    }
+
+    if(StringUtils.isAllBlank(prepaidUser.getDocumentNumber())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser.documentNumber"));
+    }
+
+    if(account == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account"));
+    }
+
+    if(account.getId() == null || account.getId().equals(0L)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account.id"));
+    }
+
+    if(StringUtils.isAllBlank(account.getAccountNumber())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account.accountNumber"));
+    }
+
     //permite refrescar el saldo del usuario de forma obligada, usado principalmente en test o podria usarse desde la web
     Boolean forceRefreshBalance = headers != null ? getNumberUtils().toBoolean(headers.get("forceRefreshBalance"), Boolean.FALSE) : Boolean.FALSE;
 
@@ -224,10 +265,10 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
         log.error("[getBalance] Respuesta del WS ConsultaSaldo [isRetornoExitoso: TRUE]");
         pBalance = new PrepaidBalanceInfo10(consultaSaldoDTO);
         try {
-          this.updateBalance(accountId, pBalance);
+          this.updateBalance(account.getId(), pBalance);
           updated = Boolean.TRUE;
         } catch(Exception ex) {
-          log.error(String.format("[getBalance] Error al actualizar el saldo de la cuenta [id: %d]", accountId), ex);
+          log.error(String.format("[getBalance] Error al actualizar el saldo de la cuenta [id: %d]", account.getId()), ex);
         }
       } else {
         log.error("[getBalance] Respuesta del WS ConsultaSaldo [isRetornoExitoso: FALSE]");

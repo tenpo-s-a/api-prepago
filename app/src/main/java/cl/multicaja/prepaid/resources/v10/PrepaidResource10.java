@@ -185,6 +185,13 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
+  @GET
+  @Path("/{user_id}/account/{account_id}/balance")
+  public Response getAccountBalance(@PathParam("user_id") String userUuid, @PathParam("account_id") String accountUuid,@Context HttpHeaders headers) throws Exception {
+    PrepaidBalance10 prepaidBalance10 =  this.prepaidEJBBean10.getAccountBalance(headersToMap(headers), userUuid, accountUuid);
+    return Response.ok(prepaidBalance10).build();
+  }
+
   @POST
   @Path("/{userId}/identity/files")
   public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
