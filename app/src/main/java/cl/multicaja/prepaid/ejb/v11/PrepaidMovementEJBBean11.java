@@ -1,6 +1,8 @@
 package cl.multicaja.prepaid.ejb.v11;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.exceptions.BaseException;
+import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
@@ -21,6 +23,7 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,6 +48,10 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     "codent,centalta,cuenta,clamon,indnorcor,tipofac,fecfac,numreffac,pan,clamondiv,impdiv,impfac,cmbapli,numaut,indproaje," +
     "codcom,codact,impliq,clamonliq,codpais,nompob,numextcta,nummovext,clamone,tipolin,linref,numbencta,numplastico,nomcomred, id_tarjeta) " +
     "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", getSchema());
+
+  // Fee Queries
+  private static final String FIND_FEE_BY_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id = ?", getSchema());
+  private static final String FIND_FEE_BY_MOVEMENT_ID = String.format("SELECT * FROM %s.prp_movimiento_comision WHERE id_movimiento = ?", getSchema());
 
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
@@ -277,5 +284,43 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     transactionEvent.setCardId(cardUuid);
 
     getKafkaEventDelegate10().publishTransactionEvent(transactionEvent);
+  }
+
+  public PrepaidMovementFee10 getMovementFeeById(Long feeId) throws Exception {
+    if(feeId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    log.info(String.format("[getMovementFeeById] Buscando fee [feeId: %d]", feeId));
+
+    try {
+      return getDbUtils().getJdbcTemplate()
+        .queryForObject(FIND_FEE_BY_ID, getMovementFeeMapper(), feeId);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getMovementFeeById] Fee [feeId: %d] no existe", feeId));
+      throw new ValidationException(COMISION_NO_EXISTE);
+    } catch (Exception e) {
+      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
+    }
+  }
+
+  public PrepaidMovementFee10 findFeeByMovementId(Long movementId) {
+    return new PrepaidMovementFee10();
+  }
+
+  private RowMapper<PrepaidMovementFee10> getMovementFeeMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      PrepaidMovementFee10 prepaidMovementFee = new PrepaidMovementFee10();
+      prepaidMovementFee.setId(rs.getLong("id"));
+      prepaidMovementFee.setMovementId(rs.getLong("id_movimiento"));
+      prepaidMovementFee.setFeeType(rs.getString("tipo_comision"));
+      prepaidMovementFee.setAmount(rs.getBigDecimal("monto"));
+      prepaidMovementFee.setIva(rs.getBigDecimal("iva"));
+      cl.multicaja.prepaid.model.v10.Timestamps timestamps = new cl.multicaja.prepaid.model.v10.Timestamps();
+      timestamps.setCreatedAt(rs.getTimestamp("creacion").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("actualizacion").toLocalDateTime());
+      prepaidMovementFee.setTimestamps(timestamps);
+      return prepaidMovementFee;
+    };
   }
 }
