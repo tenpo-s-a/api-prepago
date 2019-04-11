@@ -475,7 +475,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getOpeningFee().getValue());
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue(), group.getSimulationTopupPOS().getCode());
   }
-
+  @Ignore
   @Test
   public void topupSimulation_not_ok_by_exceeds_balance() throws Exception {
 

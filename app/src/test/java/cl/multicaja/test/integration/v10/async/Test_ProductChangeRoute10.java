@@ -100,10 +100,6 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account.getAccountNumber());
     prepaidCard = createPrepaidCardV2(prepaidCard);
-    prepaidCard.setHashedPan(getRandomString(20));
-    prepaidCard.setAccountId(account.getId());
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard.getId(), Long.MAX_VALUE, prepaidCard);
-    prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
 
@@ -123,8 +119,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
     // Revisar que existan el evento de tarjeta cerrada en kafka
     qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidCard.getUuid());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidCard.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta cerrada event", event.getData());

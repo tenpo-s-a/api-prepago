@@ -40,26 +40,22 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
   @Test
   public void shouldReturn201_PrepaidCardUpgraded_Ok() throws Exception {
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
-    prepaidUser10 = getPrepaidUserEJBBean10().createUser(null, prepaidUser10);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // Crea cuenta/contrato
-    Account account = buildAccountFromTecnocom(prepaidUser10);
-    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
-    prepaidCard = createPrepaidCard10(prepaidCard);
-
-    prepaidCard.setHashedPan(getRandomString(20));
-    prepaidCard.setAccountId(account.getId());
-
-    getPrepaidCardEJBBean11().updatePrepaidCard(null, prepaidCard.getId(), Long.MAX_VALUE, prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
 
-    HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
+    HttpResponse lockResp = upgradePrepaidCard(prepaidUser.getUuid(), account.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
-
+    Thread.sleep(3000);
     // Revisar que existan el evento de tarjeta creada en kafka
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -72,11 +68,10 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
     Assert.assertEquals("Debe tener el mismo card id", prepaidCard.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
 
     // Revisar que el usuario haya cambiado su nivel a 2
-    PrepaidUser10 storedPrepaidUser = getPrepaidUserEJBBean10().findById(null, prepaidUser10.getId());
+    PrepaidUser10 storedPrepaidUser = getPrepaidUserEJBBean10().findById(null, prepaidCard.getId());
     Assert.assertEquals("Debe tener nivel 2", PrepaidUserLevel.LEVEL_2, storedPrepaidUser.getUserLevel());
   }
 
