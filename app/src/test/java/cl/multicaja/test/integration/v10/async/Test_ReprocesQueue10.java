@@ -79,8 +79,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-  //TODO: Corregir despues !!!!
-  @Ignore
   @Test
   public void testReinjectTopup() throws Exception {
 
@@ -93,9 +91,8 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -142,8 +139,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertEquals("El movimiento debe ser procesado exitosamente", PrepaidMovementStatus.PROCESS_OK, prepaidMovementResp.getEstado());
   }
 
-  //TODO: Corregir despues !!!!
-  @Ignore
   @Test
   public void testReinjectAltaCliente() throws Exception {
 
@@ -153,12 +148,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = createAccount(account.getUserId(),account.getAccountNumber());
-
-
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
-    prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -211,7 +200,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     account = createAccount(prepaidUser.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -264,32 +253,30 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-
-
-  //TODO: Corregir despues !!!!
-  @Ignore
   @Test
   public void testReinjectTopupReverse() throws Exception{
 
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(BigDecimal.ZERO));
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction,PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
     System.out.println(prepaidMovement);
@@ -301,7 +288,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard, prepaidUser, prepaidReverseMovement,2);
+    String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard10, prepaidUser, prepaidReverseMovement,2);
     Thread.sleep(3000);
 
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
@@ -412,25 +399,17 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(null);
 
 
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    System.out.println("prepaidUser: " + prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(prepaidCard.getProcessorUserId());
-    prepaidCard.setPan(datosTarjetaDTO.getPan());
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setEncryptedPan(EncryptUtil.getInstance().encrypt(prepaidCard.getPan()));
-    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    System.out.println("prepaidCard: " + prepaidCard);
+    System.out.println("prepaidCard: " + prepaidCard10);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -439,9 +418,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     getPrepaidMovementEJBBean10().updatePrepaidMovement(null,
       prepaidMovement.getId(),
-      prepaidCard.getPan(),
-      prepaidCard.getProcessorUserId().substring(4, 8),
-      prepaidCard.getProcessorUserId().substring(12),
+      prepaidCard10.getPan(),
+      account.getAccountNumber().substring(4, 8),
+      account.getAccountNumber().substring(12),
       123,
       123,
       152,
@@ -452,9 +431,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    Account account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), getRandomString(15));
-
-    String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard, account, 2);
+    String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, prepaidMovement, prepaidCard10, account, 2);
     Thread.sleep(2000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     //Se setea para que de error de conexion!
@@ -483,9 +460,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getNummovext());
     Assert.assertNotEquals("El movimiento debe ser procesado", Integer.valueOf(0), issuanceFeeMovement.getClamone());
 
-    PrepaidCard10 prepaidCard10 = remoteTopup.getData().getPrepaidCard10();
-    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard10);
-    Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
+    PrepaidCard10 prepaidCard2 = remoteTopup.getData().getPrepaidCard10();
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard2);
+    Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, prepaidCard2.getStatus());
 
     // Busca el movimiento en la BD
     List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
@@ -495,7 +472,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener un movimiento de comision con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, dbMovements.get(0).getEstado());
 
     // Busca la tarjeta en la BD
-    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard.getId());
+    PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, prepaidCard2.getId());
     Assert.assertNotNull("Deberia tener una tarjeta", dbPrepaidCard);
     Assert.assertEquals("Deberia tener una tarjeta en status ACTIVE", PrepaidCardStatus.ACTIVE, dbPrepaidCard.getStatus());
 
