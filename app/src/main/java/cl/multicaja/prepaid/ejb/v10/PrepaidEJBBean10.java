@@ -460,6 +460,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
+    getPrepaidMovementEJB11().createPrepaidMovementFee(prepaidMovementFee);
 
     prepaidTopup.setId(prepaidMovement.getId());
 
