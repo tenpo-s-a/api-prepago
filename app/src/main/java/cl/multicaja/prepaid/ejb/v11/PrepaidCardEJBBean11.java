@@ -229,7 +229,10 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     }
 
     // Validar que la cuenta exista
-    getAccountEJBBean10().findByUuid(accountUuid);
+    Account account = getAccountEJBBean10().findByUuid(accountUuid);
+    if(account == null){
+      throw new ValidationException(CUENTA_NO_EXISTE);
+    }
 
     PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
     if(prepaidCard == null) {

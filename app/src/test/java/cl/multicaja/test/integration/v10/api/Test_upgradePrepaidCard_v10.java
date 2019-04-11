@@ -41,19 +41,19 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn201_PrepaidCardUpgraded_Ok() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     // Crea cuenta/contrato
-    Account account = buildAccountFromTecnocom(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10,account.getAccountNumber());
     prepaidCard = createPrepaidCardV2(prepaidCard);
 
     prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
 
-    HttpResponse lockResp = upgradePrepaidCard(prepaidUser.getUuid(), account.getUuid());
+    HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
     Thread.sleep(3000);
     // Revisar que existan el evento de tarjeta creada en kafka
@@ -89,6 +89,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
   public void shouldReturn422_AccountNoExiste() throws Exception {
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 

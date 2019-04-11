@@ -3105,19 +3105,35 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-        //Send Async Mail
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("test.notification_tecnocom@mail.com");
-        //mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
+        log.info("=== PROCESOR NOTIFICATION ===");
+        log.info(notificationTecnocom.toString());
+        log.info("=== PROCESOR NOTIFICATION ===");
       }
       //TODO: Cuando se procese el callback y se cree el movimiento se debera agregar la generacion de boleta.
       //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
     }
 
     return notificationTecnocom;
+  }
+
+  public PrepaidBalance10 getAccountBalance(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+    if(StringUtils.isAllBlank(userUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userUuid"));
+    }
+    if(StringUtils.isAllBlank(accountUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
+    }
+
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(headers, userUuid);
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    Account account = getAccountEJBBean10().findByUuid(accountUuid);
+    if(account == null || !account.getUserId().equals(prepaidUser.getId())) {
+      throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE);
+    }
+
+    return this.accountEJBBean10.getBalance(headers, prepaidUser, account);
   }
 }
