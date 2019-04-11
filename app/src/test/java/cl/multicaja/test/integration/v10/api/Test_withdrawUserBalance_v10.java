@@ -982,4 +982,57 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
   }
 
+
+  @Test
+  public void shouldReturn201_OnPosWithdrawOldVersion() throws Exception {
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    // se hace una carga
+    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+
+    PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+    Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
+    prepaidWithdraw.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
+
+    HttpResponse resp = withdrawUserBalanceOld(prepaidWithdraw);
+
+    Assert.assertEquals("status 201", 201, resp.getStatus());
+
+    PrepaidWithdraw10 withdraw = resp.toObject(PrepaidWithdraw10.class);
+
+    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
+    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
+    Assert.assertNotNull("Deberia tener id", withdraw.getId());
+    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
+    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
+    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
+    Assert.assertNull("No deberia tener rut", withdraw.getRut());
+    Assert.assertNull("No deberia tener password", withdraw.getPassword());
+
+    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
+    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
+    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
+    Assert.assertEquals("Deberia tener el data", 2, withdraw.getMcVoucherData().size());
+
+    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
+    Assert.assertNotNull("Deberia tener data", variableData);
+
+    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
+    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
+    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
+    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
+    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
+
+    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
+    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
+    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
+    Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
+
+  }
+
+
 }

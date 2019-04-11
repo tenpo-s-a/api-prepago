@@ -19,7 +19,11 @@ public class Test_20190110172704_create_table_clearing extends TestDbBasePg {
       new ColumnInfo("file_id",SqlType.BIGINT.getGetJavaType()),
       new ColumnInfo("status", SqlType.VARCHAR.getGetJavaType(), 20),
       new ColumnInfo("created",SqlType.TIMESTAMP.getGetJavaType()),
-      new ColumnInfo("updated", SqlType.TIMESTAMP.getGetJavaType())
+      new ColumnInfo("updated", SqlType.TIMESTAMP.getGetJavaType()),
+      new ColumnInfo("bank_id", SqlType.BIGINT.getGetJavaType()),
+      new ColumnInfo("account_number", SqlType.VARCHAR.getGetJavaType(),30),
+      new ColumnInfo("account_type", SqlType.VARCHAR.getGetJavaType(),20),
+      new ColumnInfo("account_rut", SqlType.BIGINT.getGetJavaType())
     );
     Assert.assertTrue("Existe tabla clearing", exists);
   }
