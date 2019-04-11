@@ -45,7 +45,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, tipoAlta,4);
@@ -74,7 +74,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
@@ -98,7 +98,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCardV2(prepaidCard);
     prepaidCard.setHashedPan(getRandomString(20));
     prepaidCard.setAccountId(account.getId());

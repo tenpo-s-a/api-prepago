@@ -44,18 +44,15 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10,account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard = createPrepaidCardV2(prepaidCard);
-
-    prepaidCard = getPrepaidCardEJBBean11().getPrepaidCardById(null, prepaidCard.getId());
 
     HttpResponse lockResp = upgradePrepaidCard(prepaidUser10.getUuid(), account.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
-    Thread.sleep(3000);
+
     // Revisar que existan el evento de tarjeta creada en kafka
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidCard.getUuid());
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidCard.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());

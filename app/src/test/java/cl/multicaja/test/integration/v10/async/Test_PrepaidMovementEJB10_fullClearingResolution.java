@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();

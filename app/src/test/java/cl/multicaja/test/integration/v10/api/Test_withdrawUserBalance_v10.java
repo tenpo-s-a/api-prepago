@@ -271,7 +271,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
@@ -293,7 +293,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -318,7 +318,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -341,7 +341,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -368,7 +368,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
@@ -586,7 +586,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
@@ -610,7 +610,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10.setStatus(PrepaidCardStatus.EXPIRED);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
@@ -634,7 +634,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10.setStatus(PrepaidCardStatus.LOCKED_HARD);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 

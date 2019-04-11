@@ -79,7 +79,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -122,7 +122,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -163,7 +163,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -204,7 +204,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -244,7 +244,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -279,7 +279,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -314,7 +314,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
@@ -347,7 +347,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setProcessorUserId(account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);

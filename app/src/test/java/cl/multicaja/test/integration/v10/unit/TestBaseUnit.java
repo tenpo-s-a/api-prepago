@@ -840,8 +840,8 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-  public PrepaidCard10 buildPrepaidCardWithTecnocomData(PrepaidUser10 user, String accountNumber) throws Exception {
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(accountNumber);
+  public PrepaidCard10 buildPrepaidCardWithTecnocomData(PrepaidUser10 user, Account account) throws Exception {
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(account.getAccountNumber());
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(user.getId());
     prepaidCard.setProcessorUserId("");
@@ -852,6 +852,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNameOnCard(user.getName() + " " + user.getLastName());
     prepaidCard.setProducto(datosTarjetaDTO.getProducto());
     prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+    prepaidCard.setUuid(UUID.randomUUID().toString());
+    prepaidCard.setAccountId(account.getId());
     return prepaidCard;
   }
 

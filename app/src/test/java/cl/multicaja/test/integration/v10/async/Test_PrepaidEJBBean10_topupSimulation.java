@@ -796,7 +796,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Account account= buildAccountFromTecnocom(prepaidUser10);
     account = getAccountEJBBean10().insertAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
     BigDecimal impfac = BigDecimal.valueOf(0);

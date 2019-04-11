@@ -78,7 +78,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
       account = test.createAccount(account.getUserId(),account.getAccountNumber());
 
       //TARJETA
-      prepaidCard = test.buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      prepaidCard = test.buildPrepaidCardWithTecnocomData(prepaidUser,account);
       prepaidCard.setProcessorUserId(account.getAccountNumber());
       prepaidCard = test.createPrepaidCard10(prepaidCard);
 

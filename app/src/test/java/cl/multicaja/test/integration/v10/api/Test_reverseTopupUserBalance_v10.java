@@ -207,7 +207,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -232,7 +232,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
       Account account = buildAccountFromTecnocom(prepaidUser);
       account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
       prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -257,7 +257,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -293,7 +293,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -328,7 +328,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -362,7 +362,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -395,7 +395,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -436,7 +436,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -477,7 +477,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -515,7 +515,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
 
@@ -552,7 +552,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -593,7 +593,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
@@ -641,7 +641,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("La Cuenta debe ser != null ", account);
 
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
     Assert.assertNotNull("La tarjeta debe ser != null ", prepaidCard10);
 
