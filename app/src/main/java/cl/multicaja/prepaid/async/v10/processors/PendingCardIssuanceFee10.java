@@ -211,6 +211,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT
           );
 
+          // Expira cache del saldo de la cuenta
+          getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
           return req;
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {

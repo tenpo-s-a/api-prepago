@@ -3,21 +3,15 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
-import cl.multicaja.camel.JMSMessenger;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.model.NameStatus;
-import cl.multicaja.prepaid.helpers.users.model.RutStatus;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
@@ -26,13 +20,12 @@ import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +60,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
     getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
   }
-
 
   @Test
   public void topupUserBalance_not_ok_by_prepaidUser_not_found() throws Exception {
@@ -506,6 +498,33 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         //Assert.assertEquals("validacion del CDT: La carga supera el monto máximo de carga pos", Integer.valueOf(108202), vex.getCode());
       }
     }
+  }
+
+  @Test
+  public void topupUserBalance_ok_expireBalanceCache() throws Exception {
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+
+    //primera carga
+    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(3119));
+
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
+
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
+
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
+
+    Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
+
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+
+    Assert.assertNotNull(account);
+    Assert.assertTrue(account.getExpireBalance() > 0L && account.getExpireBalance() <= Instant.now().toEpochMilli());
   }
 
   // Desde la 2da carga en adelante la carga se hace de manera sincrona
@@ -1604,6 +1623,36 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener la misma fecha creacion", account.getCreatedAt(), accountEvent.getAccount().getTimestamps().getCreatedAt());
     Assert.assertEquals("Debe tener la misma fecha actualizacion", account.getUpdatedAt(), accountEvent.getAccount().getTimestamps().getUpdatedAt());
     Assert.assertEquals("Debe tener status ACTIVE", AccountStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());
+  }
+
+  @Test
+  public void topupUserBalance_sync_expireBalanceCache() throws Exception {
+
+    Map<Long, PrepaidMovement10> movements = new HashMap<>();
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
+    NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
+
+    //primera carga
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+
+    PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
+
+    Assert.assertNotNull("debe tener un id", resp.getId());
+    //Assert.assertFalse("debe ser enesima carga", resp.isFirstTopup());
+
+    PrepaidCard10 prepaidCard10 = waitForLastPrepaidCardInStatus(prepaidUser10, PrepaidCardStatus.ACTIVE);
+
+    Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
+    Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
+
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    Assert.assertTrue(account.getExpireBalance() > 0L && account.getExpireBalance() <= Instant.now().toEpochMilli());
   }
 
   void waitForAccountingToExist(Long trxId) throws Exception {

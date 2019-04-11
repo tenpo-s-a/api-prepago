@@ -156,6 +156,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             //actualiza movimiento original en accounting y clearing
             getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
+            //TODO: habilitar cuando se modifique la reversa de retiro
+
+            // Expira cache del saldo de la cuenta
+            //getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
             log.debug("********** Reversa de retiro realizada exitosamente **********");
 
             // Si estaba abierta, cerrar la transaccion en el CDT
@@ -187,6 +192,11 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
 
               //actualiza movimiento original en accounting y clearing
               getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
+
+              //TODO: habilitar cuando se modifique la reversa de retiro
+
+              // Expira cache del saldo de la cuenta
+              //getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
 
               // Si estaba abierta, cerrar la transaccion en el CDT
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
