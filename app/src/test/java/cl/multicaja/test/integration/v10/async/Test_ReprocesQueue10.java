@@ -64,8 +64,8 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
-    //Se setea para que de error de conexion!
 
+    //Se setea para que de error de conexion!
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 

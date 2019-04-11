@@ -25,7 +25,7 @@ public class Test_20190110172704_create_table_clearing extends TestDbBasePg {
       new ColumnInfo("account_type", SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("account_rut", SqlType.NUMERIC.getGetJavaType(),15)
     );
-   
+
     Assert.assertTrue("Existe tabla clearing", exists);
 
   }

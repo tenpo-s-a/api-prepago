@@ -2,6 +2,7 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -19,7 +20,7 @@ public class Test_getUserTopups_v10 extends TestBaseUnitApi {
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
-
+  @Ignore
   @Test
   public void getUserTopups_ok(){
     HttpResponse resp = getUserTopups(1L);

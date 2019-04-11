@@ -96,13 +96,13 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
 
     // Crea cuenta/contrato
     Account account = buildAccountFromTecnocom(prepaidUser);
-    account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account.getAccountNumber());
     prepaidCard = createPrepaidCardV2(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
-
+    System.out.println("MessgaeID =: "+messageId);
     //se verifica que el mensaje haya sido procesado
     Queue qResp = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_RESP);
     ExchangeData<PrepaidProductChangeData10> data = (ExchangeData<PrepaidProductChangeData10>) camelFactory.createJMSMessenger().getMessage(qResp, messageId);
