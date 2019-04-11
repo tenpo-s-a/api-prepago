@@ -297,6 +297,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           movement10.setIdTxExterno("");
           movement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, movement10);
 
+          // Expira cache del saldo de la cuenta
+          //getAccountEJBBean10().expireBalanceCache(account.getId());
+
           String msg = String.format("Error processing transaction - Transaction not found in database with userId = [%s], tipofac= [%s], indnorcor = [%s], numaut = [%s], fecfac = [%s], amount = [%s]",
             prepaidCard10.getIdUser(), trx.getTipoFac().getCode(), trx.getTipoFac().getCorrector(),  trx.getNumAut(), trx.getFecFac(), trx.getImpFac());
           log.error(msg);
@@ -457,6 +460,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           PrepaidMovement10 prepaidMovement10 =buildMovementAut(prepaidCard10.getIdUser(),prepaidCard10.getPan(),trx);
 
           getPrepaidMovementEJBBean10().addPrepaidMovement(null,prepaidMovement10);
+
+          // Expira cache del saldo de la cuenta
+          //getAccountEJBBean10().expireBalanceCache(account.getId());
 
           //Build Accounting
           PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();

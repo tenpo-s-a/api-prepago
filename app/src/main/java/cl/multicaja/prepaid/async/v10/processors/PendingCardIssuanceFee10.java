@@ -210,6 +210,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           );
           req.getData().setPrepaidCard10(prepaidCard);
 
+          // Expira cache del saldo de la cuenta
+          getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
           return req;
 
         } else if (CodigoRetorno._1000.equals(inclusionMovimientosDTO.getRetorno())) {
