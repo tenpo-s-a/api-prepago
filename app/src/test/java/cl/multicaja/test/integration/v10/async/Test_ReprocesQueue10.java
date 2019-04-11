@@ -109,6 +109,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, account,2);
+    System.out.println(messageId);
     Thread.sleep(3000);
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
     // Se setea para que no de error de conexion!
@@ -289,6 +290,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
     String messageId = sendPendingTopupReverse(prepaidTopup, prepaidCard10, prepaidUser, prepaidReverseMovement,2);
+    System.out.println(messageId);
     Thread.sleep(3000);
 
     // Vuelve a reinjectar en la cola y verifica que se ejecute correctamente.
