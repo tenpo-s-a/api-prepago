@@ -45,7 +45,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitA
     getPrepaidEJBBean10().reverseTopupUserBalance(null, prepaidUser.getUuid(), prepaidTopup, Boolean.TRUE);
 
     Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(50000, 60000)
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp3, prepaidTopup.getTransactionId());
 
     Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);

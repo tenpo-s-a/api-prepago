@@ -704,7 +704,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
             Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
 
             // Se publica evento de transaccion reversada
-            getPrepaidMovementEJB11().publishTransactionRejectedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, null, TransactionType.CASH_IN_MULTICAJA);
+            getPrepaidMovementEJB11().publishTransactionRejectedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), originalTopup, null, TransactionType.CASH_IN_MULTICAJA);
 
           } else {
             log.info(String.format("El plazo de reversa ha expirado para -> idPrepaidUser: %s, idTxExterna: %s, monto: %s", prepaidUser.getId(), originalTopup.getIdTxExterno(), originalTopup.getMonto()));
