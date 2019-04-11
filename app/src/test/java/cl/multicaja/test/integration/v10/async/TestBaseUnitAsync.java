@@ -6,6 +6,7 @@ import cl.multicaja.camel.JMSHeader;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.Utils;
+import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
@@ -52,11 +53,6 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
   @After
   public void after() {
-    try {
-      Thread.sleep(1000);
-    } catch (Exception e) {
-
-    }
     System.out.println("----------------------------------------------------------------");
     System.out.println("After Test - class: " + this.getClass().getSimpleName() + ", method: " + testName.getMethodName());
     System.out.println("----------------------------------------------------------------");
@@ -339,7 +335,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
-  public String sendPendingProductChange(User user, PrepaidCard10 prepaidCard, TipoAlta tipoAlta, int retryCount) {
+  public String sendPendingProductChange(PrepaidUser10 prepaidUser, Account account, PrepaidCard10 prepaidCard, TipoAlta tipoAlta, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -353,7 +349,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     Queue qReq = camelFactory.createJMSQueue(ProductChangeRoute10.PENDING_PRODUCT_CHANGE_REQ);
 
     //se crea la el objeto con los datos del proceso
-    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(user, prepaidCard, tipoAlta);
+    PrepaidProductChangeData10 data = new PrepaidProductChangeData10(prepaidUser, account, prepaidCard, tipoAlta);
 
     //se envia el mensaje a la cola
     ExchangeData<PrepaidProductChangeData10> req = new ExchangeData<>(data);
@@ -409,6 +405,32 @@ public class TestBaseUnitAsync extends TestContextHelper {
     }
 
     camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+
+    return messageId;
+  }
+
+  public String sendUserCreatedOrUpdated(String topicName, cl.multicaja.prepaid.kafka.events.model.User user, Integer retryCount){
+    String messageId = null;
+
+    if(user == null) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, UserEventCreated -> null =======");
+      throw new IllegalArgumentException();
+    }
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+    } else {
+
+      messageId = user.getId();
+      String jsonData = JsonUtils.getJsonParser().toJson(user);
+      Queue qReq = camelFactory.createJMSQueue(topicName);
+
+      ExchangeData<String> req = new ExchangeData<>(jsonData);
+      req.setRetryCount(retryCount < 0 ? 0 : retryCount);
+      req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
+
+      camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+    }
 
     return messageId;
   }

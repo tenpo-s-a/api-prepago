@@ -3,10 +3,7 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidBalance10;
-import cl.multicaja.prepaid.model.v10.PrepaidBalanceInfo10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.*;
 
 import java.util.List;
 import java.util.Map;
@@ -92,25 +89,6 @@ public interface PrepaidUserEJB10 {
   PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
-   * Retorna el saldo del cliente prepago
-   *
-   * @param headers
-   * @param userIdMc id de usuario multicaja
-   * @return
-   */
-  PrepaidBalance10 getPrepaidUserBalance(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   * Actualiza el saldo del cliente prepago
-   *
-   * @param headers
-   * @param userId id de usuario prepago
-   * @param balance
-   * @throws Exception
-   */
-  void updatePrepaidUserBalance(Map<String, Object> headers, Long userId, PrepaidBalanceInfo10 balance) throws Exception;
-
-  /**
    * Incrementa el contador de intentos de verificacion de identidad
    * @param headers
    * @param prepaidUser
@@ -118,5 +96,15 @@ public interface PrepaidUserEJB10 {
    * @throws Exception
    */
   PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
+
+  /**
+   *
+   * @param headers
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  PrepaidUser10 updatePrepaidUser(Map<String,Object> headers, PrepaidUser10 user)throws Exception;
+
 
 }

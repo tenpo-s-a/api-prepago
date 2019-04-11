@@ -129,6 +129,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   SimulationTopup10 topupSimulation(Map<String, Object> headers, PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew)throws Exception;
   /**
    *
@@ -138,6 +139,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
   /**
@@ -149,6 +151,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception;
 
   /**
@@ -198,7 +201,6 @@ public interface PrepaidEJB10 {
    * @throws Exception
    */
   PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
 
   /**
    * Obtiene los terminos y condiciones vigentes para preago

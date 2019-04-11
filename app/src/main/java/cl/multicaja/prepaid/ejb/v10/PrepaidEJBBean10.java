@@ -27,6 +27,7 @@ import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -1665,6 +1666,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public SimulationTopup10 topupSimulation(Map<String,Object> headers,PrepaidUser10 prepaidUser10, SimulationNew10 simulationNew) throws Exception {
 
     SimulationTopup10 simulationTopup = new SimulationTopup10();
@@ -1739,7 +1741,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
-      balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, prepaidUser10.getId());
+      Account acc = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+      balance = getAccountEJBBean10().getBalance(headers, acc.getId());
     }
 
     log.info("Saldo del usuario: " + balance.getBalance().getValue());
@@ -1785,6 +1789,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public SimulationWithdrawal10 withdrawalSimulation(Map<String,Object> headers, Long userIdMc, SimulationNew10 simulationNew) throws Exception {
 
     if(userIdMc == null){
@@ -1796,9 +1801,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(simulationNew.getPaymentMethod() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "method"));
     }
-
-    // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser10 = this.getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1817,7 +1819,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal calculatedAmount = amountValue.add(fee);
 
     //saldo del usuario
-    PrepaidBalance10 balance = this.getPrepaidUserEJB10().getPrepaidUserBalance(headers, userIdMc);
+    Account acc = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    PrepaidBalance10 balance = getAccountEJBBean10().getBalance(headers, acc.getId());
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(amountValue);
@@ -2489,7 +2493,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidTransactionExtend10;
   }
 
-
   @Override
   public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
@@ -2971,7 +2974,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
 
-    getProductChangeDelegate().sendProductChange(user, prepaidCard10, TipoAlta.NIVEL2);
+    //Fixme: eventualmente el prepaidUser debe venir ya con su documento, y estas lineas deberian borrarse
+    // Por ahora se setean para que pueda realizarse el cambio de producto.
+    if(prepaidUser.getDocumentNumber() == null) {
+      prepaidUser.setDocumentNumber(String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()));
+      prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    }
+
+    getProductChangeDelegate().sendProductChange(prepaidUser, null, prepaidCard10, TipoAlta.NIVEL2);
 
     return user;
   }

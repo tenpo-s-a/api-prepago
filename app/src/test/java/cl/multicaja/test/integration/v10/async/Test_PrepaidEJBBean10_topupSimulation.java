@@ -26,11 +26,8 @@ import static cl.multicaja.core.model.Errors.*;
  *
  * @autor vutreras
  */
-@Ignore
 public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_params_null() throws Exception {
 
@@ -122,11 +119,9 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_ok_WEB() throws Exception {
-
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
@@ -145,11 +140,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    System.out.println("Calcular carga WEB: " + simulationNew);
-
     SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getUserIdMc(), simulationNew);
-
-    System.out.println("respuesta calculo: " + resp);
 
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
@@ -166,8 +157,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertFalse("no debe ser primera carga", resp.getSimulationTopupWeb().getFirstTopup());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_WEB() throws Exception {
 
@@ -201,7 +190,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertTrue("no debe ser primera carga", resp.getSimulationTopupWeb().getFirstTopup());
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_ok_POS() throws Exception {
@@ -223,11 +211,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    System.out.println("Calcular carga POS: " + simulationNew);
-
     SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getUserIdMc(), simulationNew);
-
-    System.out.println("respuesta calculo: " + resp);
 
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(simulationNew.getAmount().getValue(), calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
 
@@ -244,8 +228,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertFalse("no debe ser primera carga", resp.getSimulationTopupPOS().getFirstTopup());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_ok_firstTopup_POS() throws Exception {
 
@@ -280,8 +262,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertTrue("no debe ser primera carga", resp.getSimulationTopupPOS().getFirstTopup());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_ok_first_topup() throws Exception {
 
@@ -316,8 +296,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener comision de apertura", getPercentage().getOPENING_FEE(), resp.getSimulationTopupWeb().getOpeningFee().getValue());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_first_topup_max_amount() throws Exception {
 
@@ -342,8 +320,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_min_amount() throws Exception {
     //WEB
@@ -415,7 +391,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_web() throws Exception {
@@ -459,7 +434,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_WEB.getValue(), group.getSimulationTopupWeb().getCode());
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_not_ok_by_max_amount_pos() throws Exception {
@@ -502,12 +476,10 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe ser error de supera saldo", LA_CARGA_SUPERA_EL_MONTO_MAXIMO_DE_CARGA_POS.getValue(), group.getSimulationTopupPOS().getCode());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_exceeds_balance() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10;
@@ -532,13 +504,11 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB); //da lo mismo si es WEB o POS, para los 2 casos es la misma validacion
 
-    System.out.println("Calcular carga WEB: " + simulationNew);
-
     try {
 
       //debe lanzar excepcion de supera saldo, dado que intenta cargar 100.001 que sumado al saldo inicial de 400.000
       //supera el maximo de 500.000
-      getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getUserIdMc(), simulationNew);
+      getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getId(), simulationNew);
 
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
 
@@ -547,7 +517,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
@@ -564,8 +533,6 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
-
-    Account account = createRandomAccount(prepaidUser10);
 
     //primera carga
     {
@@ -587,7 +554,11 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener una tarjeta", prepaidCard10);
     Assert.assertEquals("debe ser tarjeta activa", PrepaidCardStatus.ACTIVE, prepaidCard10.getStatus());
 
-    PrepaidBalance10 prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+    Assert.assertNotNull("Debe existir la cuenta", account);
+
+    PrepaidBalance10 prepaidBalance10 = getAccountEJBBean10().getBalance(null, account.getId());
 
     System.out.println(prepaidBalance10);
 
@@ -605,7 +576,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
         Thread.sleep(1000);
 
-        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
         System.out.println(prepaidBalance10);
 
@@ -633,7 +604,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
         Thread.sleep(1000);
 
-        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
         System.out.println(prepaidBalance10);
 
@@ -660,7 +631,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
         Thread.sleep(1000);
 
-        prepaidBalance10 = getPrepaidUserEJBBean10().getPrepaidUserBalance(headers, user.getId());
+        prepaidBalance10 = getAccountEJBBean10().getBalance(headers, account.getId());
 
         System.out.println(prepaidBalance10);
 
@@ -733,12 +704,10 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   /**
    * Simulacion en USD
    */
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_usd_ok_POS() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     //primera carga
@@ -756,11 +725,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.POS);
 
-    System.out.println("Calcular carga POS: " + simulationNew);
-
     SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getId(), simulationNew);
-
-    System.out.println("respuesta calculo: " + resp);
 
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.calculateFee(BigDecimal.valueOf(3540), calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_POS_FEE_PERCENTAGE()));
 
@@ -780,15 +745,11 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener monto inicial en pesos", BigDecimal.valueOf(3540), resp.getSimulationTopupWeb().getInitialAmount().getValue());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_usd_ok_WEB() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
-
-    Account account = createRandomAccount(prepaidUser10);
 
     //primera carga
     doTopup(prepaidUser10, 3119, NewPrepaidTopup10.WEB_MERCHANT_CODE);
@@ -805,11 +766,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     simulationNew.setAmount(amount);
     simulationNew.setPaymentMethod(TransactionOriginType.WEB);
 
-    System.out.println("Calcular carga WEB: " + simulationNew);
-
     SimulationTopupGroup10 resp = getPrepaidEJBBean10().topupSimulationGroup(null, prepaidUser10.getId(), simulationNew);
-
-    System.out.println("respuesta calculo: " + resp);
 
     NewAmountAndCurrency10 calculatedFee = new NewAmountAndCurrency10(calculationsHelper.getCalculatorParameter10().getCALCULATOR_TOPUP_WEB_FEE_AMOUNT());
 
@@ -827,15 +784,13 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertNotNull("debe tener monto inicial en pesos", resp.getSimulationTopupWeb().getInitialAmount());
     Assert.assertEquals("debe tener monto inicial en pesos", CodigoMoneda.CHILE_CLP, resp.getSimulationTopupWeb().getInitialAmount().getCurrencyCode());
     Assert.assertEquals("debe tener monto inicial en pesos", BigDecimal.valueOf(3540), resp.getSimulationTopupWeb().getInitialAmount().getValue());
-
   }
 
-  //TODO: Verificar si esto se seguira usando.
   @Ignore
   @Test
   public void topupSimulation_usd_not_ok_by_max_amount_web() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account= buildAccountFromTecnocom(prepaidUser10);
@@ -875,12 +830,10 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia tener la info en 0", BigDecimal.valueOf(0), group.getSimulationTopupPOS().getInitialAmount().getValue());
   }
 
-  //TODO: Verificar si esto se seguira usando.
-  @Ignore
   @Test
   public void topupSimulation_usd_not_ok_by_max_amount_pos() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     AltaClienteDTO altaClienteDTO = registerInTecnocomV2(prepaidUser10);
