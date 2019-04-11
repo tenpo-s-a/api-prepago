@@ -3109,14 +3109,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       }
 
       if(fieldsOnNullFromHeader.size() == 0 && fieldsOnNullFromBody.size() == 0 && isBase64 == true){ // accepted
-        //Send Async Mail
-        Map<String, Object> templateData = new HashMap<String, Object>();
-        templateData.put("notification_data",new ObjectMapper().writeValueAsString(notificationTecnocom));
-        EmailBody emailBody = new EmailBody();
-        emailBody.setTemplateData(templateData);
-        emailBody.setTemplate(MailTemplates.TEMPLATE_MAIL_NOTIFICATION_CALLBACK_TECNOCOM);
-        emailBody.setAddress("test.notification_tecnocom@mail.com");
-        //mailPrepaidEJBBean10.sendMailAsync(null,emailBody);
+        log.info("=== PROCESOR NOTIFICATION ===");
+        log.info(notificationTecnocom.toString());
+        log.info("=== PROCESOR NOTIFICATION ===");
       }
       //TODO: Cuando se procese el callback y se cree el movimiento se debera agregar la generacion de boleta.
       //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
