@@ -84,7 +84,7 @@ public class Test_PrepaidEJBBean10_getBalance extends TestBaseUnit {
 
     BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidUser10.getUuid(), prepaidCard10, impfac);
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(account.getAccountNumber(), prepaidCard10, impfac);
 
     assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 
