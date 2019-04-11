@@ -513,6 +513,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         // Evento de transaccion autorizada
         getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+
+        // Expira cache del saldo de la cuenta
+        getAccountEJBBean10().expireBalanceCache(account.getId());
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");
@@ -926,6 +929,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         clamone,
         null,
         status);
+
+      //TODO: verificar al modificar el retiro.
+      
+      // Expira cache del saldo de la cuenta
+      //getAccountEJBBean10().expireBalanceCache(account.getId());
 
       UserAccount userAccount = null;
       String messageId = null;
