@@ -78,8 +78,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     };
 
     try {
-      return getDbUtils().getJdbcTemplate()
-        .queryForObject(FIND_CARD_BY_ID_SQL, rm, id);
+      return getDbUtils().getJdbcTemplate().queryForObject(FIND_CARD_BY_ID_SQL, rm, id);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidCardById] Tarjeta [id: %d] no existe", id));
       throw new ValidationException(TARJETA_NO_EXISTE);
@@ -244,7 +243,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     getPrepaidUserEJBBean10().updatePrepaidUserLevel(prepaidUser.getId(), PrepaidUserLevel.LEVEL_2);
 
     // Notificar que se ha creado una tarjeta nueva
-    publishCardEvent(prepaidUser.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
+    publishCardEvent(prepaidUser.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
 
     return prepaidCard;
   }
