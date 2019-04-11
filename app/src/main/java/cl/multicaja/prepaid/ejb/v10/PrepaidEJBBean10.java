@@ -3119,4 +3119,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return notificationTecnocom;
   }
+
+  public PrepaidBalance10 getAccountBalance(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+    if(StringUtils.isAllBlank(userUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userUuid"));
+    }
+    if(StringUtils.isAllBlank(accountUuid)){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountUuid"));
+    }
+
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(headers, userUuid);
+    if(prepaidUser == null) {
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+
+    Account account = getAccountEJBBean10().findByUuid(accountUuid);
+    if(account == null || !account.getUserId().equals(prepaidUser.getId())) {
+      throw new ValidationException(SALDO_NO_DISPONIBLE_$VALUE);
+    }
+
+    return this.accountEJBBean10.getBalance(headers, prepaidUser, account);
+  }
 }
