@@ -2,17 +2,11 @@ package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import com.opencsv.CSVWriter;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.*;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -78,25 +72,32 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     // Crear todos los movimientos que SI estan en la BD
     List<ClearingData10> allClearingData = new ArrayList<>();
     for (int i = 0; i < totalMovements - numberOfNotInDatabaseMovements ; i++) {
-      User user = registerUser();
-      UserAccount userAccount = createBankAccount(user);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-      prepaidCard = createPrepaidCard10(prepaidCard);
+      UserAccount userAccount = randomBankAccount();
 
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.setBankAccountId(userAccount.getId());
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
       NewAmountAndCurrency10 amountAndCurrency10 = new NewAmountAndCurrency10(new BigDecimal(12000L));
       prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidWithdraw.setTotal(amountAndCurrency10);
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setMonto(prepaidWithdraw.getAmount().getValue());
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
@@ -188,10 +189,10 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
             data.setAmountMastercard(new NewAmountAndCurrency10(data.getAmountMastercard().getValue().add(new BigDecimal(1L))));
             break;
           case 3:
-            data.getUserBankAccount().setAccountNumber("1234");
+            data.getUserBankAccount().setAccountNumber(1234L);
             break;
           case 4:
-            data.getUserBankAccount().getRut().setValue(1234);
+            data.getUserBankAccount().setRut("1234");
             break;
         }
         data.setStatus(AccountingStatusType.OK);
@@ -230,10 +231,8 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
       data.setStatus(AccountingStatusType.OK);
       UserAccount bankAccount = new UserAccount();
       bankAccount.setId(55L);
-      bankAccount.setAccountNumber(getRandomNumericString(12));
-      Rut rut = new Rut();
-      rut.setValue(Integer.valueOf(getRandomNumericString(8)));
-      bankAccount.setRut(rut);
+      bankAccount.setAccountNumber(getUniqueLong());
+      bankAccount.setRut(getUniqueRutNumber().toString());
       data.setUserBankAccount(bankAccount);
       allClearingData.add(data);
       notInBDMovements.add(data);
@@ -304,28 +303,36 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     files10.setStatus(AccountingStatusType.OK);
     files10 = getPrepaidAccountingFileEJBBean10().insertAccountingFile(null, files10);
 
-    User user = registerUser();
-    UserAccount userAccount = createBankAccount(user);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    UserAccount userAccount = randomBankAccount();
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     ClearingData10 notWebWithdraw;
     // Not web withdraw
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.setBankAccountId(userAccount.getId());
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
+
       NewAmountAndCurrency10 amountAndCurrency10 = new NewAmountAndCurrency10(new BigDecimal(12000L));
       prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidWithdraw.setTotal(amountAndCurrency10);
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setMonto(prepaidWithdraw.getAmount().getValue());
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
@@ -379,17 +386,20 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     ClearingData10 clearingOK;
     // Ya esta clearing OK
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(getRandomNumericString(7));
-      prepaidWithdraw.setBankAccountId(userAccount.getId());
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
       NewAmountAndCurrency10 amountAndCurrency10 = new NewAmountAndCurrency10(new BigDecimal(12000L));
       prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidWithdraw.setTotal(amountAndCurrency10);
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setMonto(prepaidWithdraw.getAmount().getValue());
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
@@ -443,17 +453,20 @@ public class Test_PrepaidClearingEJBBean10_ProcessClearingFileResponse extends T
     // Ya esta conciliado
     ClearingData10 alreadyReconciled;
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(getRandomNumericString(7));
-      prepaidWithdraw.setBankAccountId(userAccount.getId());
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
       NewAmountAndCurrency10 amountAndCurrency10 = new NewAmountAndCurrency10(new BigDecimal(12000L));
       prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidWithdraw.setTotal(amountAndCurrency10);
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+      PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
       prepaidMovement10.setMonto(prepaidWithdraw.getAmount().getValue());
       prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
       prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);

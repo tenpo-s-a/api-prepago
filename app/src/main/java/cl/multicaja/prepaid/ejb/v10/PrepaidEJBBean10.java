@@ -347,7 +347,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(user == null) {
       // Busca si el usuario existe en Tenpo.
       user = validateTempoUser(userId);
-      if(user != null){
+      if(user == null){
         throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
       }
     }
@@ -513,6 +513,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         // Evento de transaccion autorizada
         getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+
+        // Expira cache del saldo de la cuenta
+        getAccountEJBBean10().expireBalanceCache(account.getId());
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");
@@ -777,41 +780,39 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
+  public PrepaidWithdraw10 withdrawUserBalanceDeprecated(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
+    PrepaidUser10 prepaidUser10 =   getPrepaidUserEJB10().findByNumDoc(headers,withdrawRequest.getRut().toString());
+    if(prepaidUser10 == null ){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+   return withdrawUserBalance(headers, prepaidUser10.getUuid(), withdrawRequest, fromEndPoint);
+  }
+
+
   @Override
-  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
+  public PrepaidWithdraw10 withdrawUserBalance(Map<String, Object> headers, String externalUserId, NewPrepaidWithdraw10 withdrawRequest , Boolean fromEndPoint) throws Exception {
 
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
     this.validateWithdrawRequest(withdrawRequest, false, fromEndPoint);
 
-    // Obtener usuario Multicaja
-    User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
-    if(user.getIsBlacklisted()){
-      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR);
-    }
-
     // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
-
-    // La clave solo se verifica cuando el movimiento viene desde el endpoint y si es de origen POS
-    if(fromEndPoint && TransactionOriginType.POS.equals(withdrawRequest.getTransactionOriginType())){
-      // Se verifica la clave
-      UserPasswordNew userPasswordNew = new UserPasswordNew();
-      userPasswordNew.setValue(withdrawRequest.getPassword());
-      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(headers,externalUserId);
+    if(prepaidUser == null ){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    else if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    Boolean isWebWithdraw = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType());
 
-    UserAccount userBankAccount = null;
-    if(isWebWithdraw) {
-      userBankAccount = getUserClient().getUserBankAccountById(null, user.getId(), withdrawRequest.getBankAccountId());
-      if(userBankAccount == null) {
-        throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
-      }
+    // Obtiene la cuenta del usuario prepago
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+    if(account == null){
+      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
-
+    // Obtiene la tarjeta de un usaurio rpeapgo
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
@@ -831,7 +832,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     //Se cambia para calcular la comision previo al envio al CDT
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
-    prepaidWithdraw.setUserId(user.getId());
+    prepaidWithdraw.setUserId(prepaidUser.getId());
     prepaidWithdraw.setStatus("exitoso");
     prepaidWithdraw.setTimestamps(new Timestamps());
 
@@ -840,11 +841,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
      */
     prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw);
 
-    CdtTransaction10 cdtTransaction = null;
-    cdtTransaction = new CdtTransaction10();
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
     cdtTransaction.setTransactionType(withdrawRequest.getCdtTransactionType());
-    cdtTransaction.setAccountId(String.format("PREPAGO_%d", user.getRut().getValue()));
+    cdtTransaction.setAccountId(String.format("PREPAGO_%s", prepaidUser.getDocumentNumber()));
     cdtTransaction.setGloss(withdrawRequest.getCdtTransactionType().getName() + " " + withdrawRequest.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdrawRequest.getTransactionId());
@@ -895,23 +895,22 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       Registra el movimiento en estado pendiente
      */
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement(prepaidWithdraw, prepaidUser, prepaidCard, cdtTransaction);
+
     // Estos dos tipos de retiros no viene del SWITCH, por lo que no requieren esa conciliacion
-    if(!fromEndPoint || isWebWithdraw){
+    if(!fromEndPoint || TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType())) {
       prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     }
+
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
     prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
-    String contrato = prepaidCard.getProcessorUserId();
+    String contrato = account.getAccountNumber();
     String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
     InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().withdraw(contrato, pan, prepaidWithdraw.getMerchantName(), prepaidMovement);
-
-    log.info("Respuesta inclusion");
-    log.info(inclusionMovimientosDTO.getRetorno());
-    log.info(inclusionMovimientosDTO.getDescRetorno());
+    log.info(String.format("Respuesta inclusion [%s] [%s]",inclusionMovimientosDTO.getRetorno(), inclusionMovimientosDTO.getDescRetorno()));
 
     if (inclusionMovimientosDTO.isRetornoExitoso()) {
       String centalta = inclusionMovimientosDTO.getCenalta();
@@ -923,7 +922,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
-        prepaidCard.getPan(),
+        prepaidCard.getHashedPan(),
         centalta,
         cuenta,
         numextcta,
@@ -932,26 +931,29 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         null,
         status);
 
+      //TODO: verificar al modificar el retiro.
+      
+      // Expira cache del saldo de la cuenta
+      //getAccountEJBBean10().expireBalanceCache(account.getId());
+
       UserAccount userAccount = null;
-      String messageId = null;
-      if(isWebWithdraw) {
-        /*
-          Enviar mail con solicitud de retiro tef de retiro
-         */
-        messageId = this.getMailDelegate().sendWithdrawRequestMail(prepaidWithdraw, prepaidUser, prepaidMovement, userBankAccount);
-      } else {
+      if(TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType())) {
+        // Si el retiro es diferido, rescato los datos de la cuenta para la transferenca
+        userAccount = new UserAccount();
+        userAccount.setAccountNumber(withdrawRequest.getAccountNumber());
+        userAccount.setBankId(withdrawRequest.getBankId());
+        userAccount.setRut(withdrawRequest.getAccountRut());
+        userAccount.setAccountType(withdrawRequest.getAccountType());
+      }
+      else {
         // se confirma la transaccion para los retiros no web
         cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionTypeConfirm());
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
-
-        //TODO: Se comenta por que ya no se enviaran mails
-        //messageId = this.getMailDelegate().sendWithdrawMail(prepaidWithdraw, user, prepaidMovement);
       }
       // Se envia informacion a accounting/clearing
-      prepaidWithdraw.setMessageId(messageId);
-      this.getDelegate().sendMovementToAccounting(prepaidMovement, userBankAccount);
+      this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
@@ -966,7 +968,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidWithdraw10 reverse = new PrepaidWithdraw10(withdrawRequest);
 
       PrepaidMovement10 prepaidMovementReverse = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransactionReverse);
-      if(!fromEndPoint || isWebWithdraw) {
+      if(!fromEndPoint || TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType())) {
         prepaidMovementReverse.setConSwitch(ReconciliationStatusType.RECONCILED);
       }
       prepaidMovementReverse.setPan(prepaidMovement.getPan());
@@ -1112,6 +1114,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   private void validateWithdrawRequest(NewPrepaidWithdraw10 request, Boolean isReverse, Boolean fromEndPoint) throws Exception {
+
     if(request == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "withdrawRequest"));
     }
@@ -1146,13 +1149,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction_id"));
     }
     // Solo los retiros web deberian venir con el id de la cuenta donde hacer el retiro
-    if(!isReverse && TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
-      if (request.getBankAccountId() == null) {
-        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_account_id"));
+    if(!isReverse &&  TransactionOriginType.WEB.equals(request.getTransactionOriginType())) {
+      if (request.getBankId() == null) {
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "bank_id"));
       }
-    }
-    if(fromEndPoint && TransactionOriginType.POS.equals(request.getTransactionOriginType()) && StringUtils.isBlank(request.getPassword())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "password"));
+      if (request.getAccountNumber() == null) {
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account_number"));
+      }
+      if (request.getAccountType() == null) {
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account_type"));
+      }
+      if (request.getAccountRut() == null) {
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account_rut"));
+      }
     }
   }
 

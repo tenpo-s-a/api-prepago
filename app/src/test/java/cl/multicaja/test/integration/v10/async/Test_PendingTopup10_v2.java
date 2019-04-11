@@ -30,6 +30,8 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @BeforeClass
   public static void getTecnocomInstance(){
     tc = TecnocomServiceHelper.getInstance();
+    tc.getTecnocomService().setAutomaticError(false);
+    tc.getTecnocomService().setRetorno(null);
   }
 
   @AfterClass
@@ -60,7 +62,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
@@ -104,7 +106,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
     prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
 
@@ -148,7 +150,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
 
@@ -228,7 +230,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
@@ -318,7 +320,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
 
@@ -411,7 +413,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
     prepaidCard = createPrepaidCard10(prepaidCard);
 

@@ -5,15 +5,12 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.RutUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -31,25 +28,24 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void PosWithdraw() throws Exception {
 
-    String password = "1235";
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
-
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     PrepaidWithdraw10 withdraw = null;
 
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
 
     } catch(Exception vex) {
       Assert.fail("No debe pasar por acá");
@@ -75,16 +71,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
     Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
     Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
-
-    Map<String, String> rutData = withdraw.getMcVoucherData().get(1);
-    Assert.assertNotNull("Deberia tener data", rutData);
-
-    Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
-    Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -95,27 +81,27 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void WebWithdraw() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
     PrepaidWithdraw10 withdraw = null;
 
     try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
 
     } catch(Exception vex) {
+      vex.printStackTrace();
       Assert.fail("No debe pasar por acá");
     }
 
@@ -146,9 +132,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertTrue("Deberia tener el atributo name", rutData.containsKey("name"));
     Assert.assertNotNull("Deberia tener el atributo", rutData.get("name"));
     Assert.assertEquals("Deberia tener el atributo name = rut","rut", rutData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", rutData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", rutData.get("value"));
-    Assert.assertEquals("Deberia tener el atributo value", RutUtils.getInstance().format(prepaidWithdraw.getRut(), null), rutData.get("value"));
 
     PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
@@ -160,21 +143,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   public void shouldReturnExceptionWhen_OnWithdraw_MinAmount() throws Exception {
     // POS
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108303), vex.getCode());
@@ -183,21 +165,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     //WEB
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108303), vex.getCode());
@@ -209,21 +190,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   public void shouldReturnExceptionWhen_OnWithdraw_MaxAmount() throws Exception {
     // POS
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(101560));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108302), vex.getCode());
@@ -232,21 +212,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     //WEB
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser(password);
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
 
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
         Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
       } catch(ValidationException vex) {
         Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108301), vex.getCode());
@@ -257,28 +236,26 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_OnWithdraw_MaxMonthlyAmount() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_2);
-
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     // Se cargan 500000
     {
-      InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(500000));
+      InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(500000));
       Assert.assertEquals("Carga OK", "000", mov.getRetorno());
     }
     // Se retiran 450000
     {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       } catch(ValidationException vex) {
         Assert.fail("No debe pasar por acá");
       }
@@ -286,25 +263,25 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
     // Se cargan 500000
     {
-      InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(490000));
+      InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(490000));
       Assert.assertEquals("Carga OK", "000", mov.getRetorno());
     }
     // Se retiran 450000
     {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(490000));
       try {
-        getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+        getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       } catch(ValidationException vex) {
         Assert.fail("No debe pasar por acá");
       }
     }
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(100000));
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", Integer.valueOf(108304), vex.getCode());
@@ -314,24 +291,24 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_OnWithdraw_InsufficientFounds() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(10000));
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(RunTimeValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", Integer.valueOf(106001), vex.getCode());
@@ -353,25 +330,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   public void shouldReturnExceptionWhen_WithdrawRequestNull() throws Exception {
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, null,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(BadRequestException vex) {
-      Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_MissingRut() throws Exception {
-
-    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    prepaidWithdraw.setTransactionId("123456789");
-    prepaidWithdraw.setMerchantCode("987654321");
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal("9999.90"));
-    prepaidWithdraw.setAmount(amount);
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,getRandomString(10),null,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -381,6 +340,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_MissingTransactionId() throws Exception {
 
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setRut(11111111);
     prepaidWithdraw.setMerchantCode("987654321");
@@ -390,7 +352,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -400,6 +362,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_MissingMerchantCode() throws Exception {
 
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setTransactionId("123456789");
     prepaidWithdraw.setRut(11111111);
@@ -409,7 +374,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -418,6 +383,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
   @Test
   public void shouldReturnExceptionWhen_MissingAmount() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setTransactionId("123456789");
@@ -425,7 +392,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setMerchantCode("987654321");
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -434,6 +401,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
   @Test
   public void shouldReturnExceptionWhen_MissingAmountCurrencyCode() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setTransactionId("123456789");
@@ -444,7 +413,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
@@ -453,6 +422,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
 
   @Test
   public void shouldReturnExceptionWhen_MissingAmountValue() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
     prepaidWithdraw.setTransactionId("123456789");
@@ -463,108 +434,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     prepaidWithdraw.setAmount(amount);
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(BadRequestException vex) {
       Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_MissingPassword() throws Exception {
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, null, "987654321");
-    prepaidWithdraw.setRut(getUniqueRutNumber());
-    prepaidWithdraw.setTransactionId("123456789");
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setPassword(null);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(BadRequestException vex) {
-      Assert.assertEquals("debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_McUserNull() throws Exception {
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, RandomStringUtils.randomNumeric(4), "987654321");
-    prepaidWithdraw.setRut(getUniqueRutNumber());
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(NotFoundException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_EXISTE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_AccountIdNull_onWebWithdraw() throws Exception {
-
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
-    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-    prepaidWithdraw.setBankAccountId(null);
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(BadRequestException vex) {
-      Assert.assertEquals("Debe ser error de validacion", PARAMETRO_FALTANTE_$VALUE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
-  public void shouldReturnExceptionWhen_AccountIdDoesNotBelongToUser_onWebWithdraw() throws Exception {
-
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidCard10 prepaidCard = createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-    InclusionMovimientosDTO mov =  topupInTecnocom(prepaidCard, BigDecimal.valueOf(10000));
-    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-    prepaidWithdraw.setBankAccountId(prepaidWithdraw.getBankAccountId() + 1L); // Change the id
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(NotFoundException vex) {
-      Assert.assertEquals("Debe ser error de validacion", CUENTA_NO_ASOCIADA_A_USUARIO.getValue(), vex.getCode());
     }
   }
 
   @Test
   public void shouldReturnExceptionWhen_PrepaidUserNull() throws Exception {
 
-    User user = registerUser();
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,getRandomString(10), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(NotFoundException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
@@ -574,16 +457,15 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_PrepaidUserDisabled() throws Exception {
 
-    User user = registerUser();
 
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser.setStatus(PrepaidUserStatus.DISABLED);
-    prepaiduser = createPrepaidUser10(prepaiduser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), vex.getCode());
@@ -591,38 +473,15 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   }
 
   @Test
-  public void shouldReturnExceptionWhen_InvalidPassword() throws Exception {
-
-    User user = registerUser("1234");
-
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser = createPrepaidUser10(prepaiduser);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "4321");
-    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
-
-    try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
-      Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
-    } catch(ValidationException vex) {
-      Assert.assertEquals("debe ser error de validacion", CLAVE_NO_COINCIDE.getValue(), vex.getCode());
-    }
-  }
-
-  @Test
   public void shouldReturnExceptionWhen_PrepaidCardNull() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser = createPrepaidUser10(prepaiduser);
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", CLIENTE_NO_TIENE_PREPAGO.getValue(), vex.getCode());
@@ -632,21 +491,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_PrepaidCardPending() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser = createPrepaidUser10(prepaiduser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
-    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -656,21 +514,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_PrepaidCardExpired() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser = createPrepaidUser10(prepaiduser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
-    prepaidCard.setStatus(PrepaidCardStatus.EXPIRED);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10.setStatus(PrepaidCardStatus.EXPIRED);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -680,21 +537,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_PrepaidCardHardLocked() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaiduser = buildPrepaidUser10(user);
-    prepaiduser = createPrepaidUser10(prepaiduser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaiduser);
-    prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10.setStatus(PrepaidCardStatus.LOCKED_HARD);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(ValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_INVALIDA_$VALUE.getValue(), vex.getCode());
@@ -704,20 +560,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
   @Test
   public void shouldReturnExceptionWhen_TecnocomError_UserDoesntExists() throws Exception {
 
-    String password = RandomStringUtils.randomNumeric(4);
-    User user = registerUser(password);
-    user = updateUserPassword(user, password);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    Account account = createRandomAccount(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
+    prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setIdUser(prepaidUser.getId());
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    createPrepaidCard10(buildPrepaidCard10(prepaidUser));
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
-      getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);
+      getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
       Assert.fail("No debe pasar por acá, debe lanzar excepcion de validacion");
     } catch(RunTimeValidationException vex) {
       Assert.assertEquals("debe ser error de validacion", TARJETA_ERROR_GENERICO_$VALUE.getValue(), vex.getCode());
@@ -735,4 +591,5 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
   }
+
 }
