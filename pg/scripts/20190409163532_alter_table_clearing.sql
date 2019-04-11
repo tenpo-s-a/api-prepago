@@ -18,14 +18,14 @@
 -- Migration SQL that makes the change goes here.
 
 ALTER TABLE ${schema.acc}.clearing
-  ADD COLUMN bank_id          NUMERIC(5) NOT NULL DEFAULT 0,
-  ADD COLUMN account_number   NUMERIC(15) NOT NULL DEFAULT '',
-  ADD COLUMN account_type     VARCHAR(20) NOT NULL DEFAULT 0,
+  ADD COLUMN bank_id          NUMERIC(10) NOT NULL DEFAULT 0,
+  ADD COLUMN account_number   NUMERIC(15) NOT NULL DEFAULT 0,
+  ADD COLUMN account_type     VARCHAR(20) NOT NULL DEFAULT '',
   ADD COLUMN account_rut      NUMERIC(15) NOT NULL DEFAULT 0;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-ALTER TABLE ${schema}.prp_usuario
+ALTER TABLE ${schema.acc}.clearing
   DROP COLUMN bank_id,
   DROP COLUMN account_number,
   DROP COLUMN account_type,
