@@ -164,8 +164,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn404_PrepaidUserNull() throws Exception {
     // POS
     {
-
-
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
@@ -180,8 +178,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser();
-
       NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
@@ -199,7 +195,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
     // POS
     {
-
       PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
       prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
       prepaidUser = createPrepaidUserV2(prepaidUser);
@@ -224,7 +219,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-
       PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
       prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
       prepaidUser = createPrepaidUserV2(prepaidUser);
@@ -480,7 +474,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
@@ -517,7 +510,6 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser,account.getAccountNumber());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-
 
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -624,8 +616,7 @@ public class Test_reverseTopupUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-
-
+  
   /**
    * Test que verifica el manejo del endpoint antiguo
    * @throws Exception
