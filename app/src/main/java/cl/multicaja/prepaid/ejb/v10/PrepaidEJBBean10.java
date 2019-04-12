@@ -690,8 +690,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
             PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
-            prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(headers, prepaidCard.getId());
-
+        
             PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
             if(!fromEndPoint){
               prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
