@@ -55,7 +55,7 @@ public interface PrepaidEJB10 {
    * @param withdrawRequest
    * @throws Exception
    */
-  void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndpoint) throws Exception;
+  void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception;
 
   /**
    *

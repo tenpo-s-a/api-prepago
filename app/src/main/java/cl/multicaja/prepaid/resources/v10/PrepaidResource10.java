@@ -127,7 +127,13 @@ public final class PrepaidResource10 extends BaseResource {
   @POST
   @Path("/withdrawal/reverse")
   public Response reverseWithdrawUserBalance(NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), withdrawRequest,true);
+    this.prepaidEJBBean10.reverseWithdrawUserBalanceOld(headersToMap(headers), withdrawRequest,true);
+    return Response.status(201).build();
+  }
+  @POST
+  @Path("/{user_id}/cash_out/reverse")
+  public Response reverseWithdrawUserBalandoV2(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
+    this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
     return Response.status(201).build();
   }
 

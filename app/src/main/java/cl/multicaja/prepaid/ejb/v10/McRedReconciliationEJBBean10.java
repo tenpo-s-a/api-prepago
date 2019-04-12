@@ -220,7 +220,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
               reverse.setMerchantCategory(0);
               reverse.setMerchantCode("000000000000000");
               reverse.setMovementType(PrepaidMovementType.TOPUP);
-              getPrepaidEJBBean10().reverseWithdrawUserBalance(null, reverse, false);
+              getPrepaidEJBBean10().reverseWithdrawUserBalance(null, user.getUuid(), reverse, false);
             }
           }
         } else {

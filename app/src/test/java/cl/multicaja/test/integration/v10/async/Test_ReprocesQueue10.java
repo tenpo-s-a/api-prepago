@@ -324,21 +324,21 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-  //TODO: Corregir cuando se modifique retiro
-  @Ignore
   @Test
   public void testReinjectWithdrawReversal() throws Exception{
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
@@ -357,7 +357,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
+    String messageId = sendPendingWithdrawReversal(withdraw10,prepaidUser, reverse, 2);
 
     Thread.sleep(2000);
     {

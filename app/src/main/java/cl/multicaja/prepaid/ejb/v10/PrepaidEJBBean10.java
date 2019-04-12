@@ -656,6 +656,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       PrepaidCardStatus.ACTIVE,
       PrepaidCardStatus.LOCKED);
 
+
     TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.CARGA_TRANSFERENCIA : TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
@@ -1006,26 +1007,30 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidWithdraw;
   }
 
+  public void reverseWithdrawUserBalanceOld(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findByNumDoc(headers,withdrawRequest.getRut().toString());
+    if(prepaidUser10 == null ){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    reverseWithdrawUserBalance(headers,prepaidUser10.getUuid(),withdrawRequest,fromEndPoint);
+  }
+
   @Override
-  public void reverseWithdrawUserBalance(Map<String, Object> headers, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
+  public void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
     this.validateWithdrawRequest(withdrawRequest, true, fromEndPoint);
 
-    // Obtener usuario Multicaja
-    User user = this.getUserMcByRut(headers, withdrawRequest.getRut());
-    if(user.getIsBlacklisted()){
-      throw new ValidationException(CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR);
+    // Obtener usuario prepago
+    PrepaidUser10 prepaidUser = getPrepaidUserEJB10().findByExtId(headers, extUserId);
+
+    if(prepaidUser == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
-    // Obtener usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, user.getId());
-    if(fromEndPoint) {
-      // Se verifica la clave
-      UserPasswordNew userPasswordNew = new UserPasswordNew();
-      userPasswordNew.setValue(withdrawRequest.getPassword());
-      getUserClient().checkPassword(headers, prepaidUser.getUserIdMc(), userPasswordNew);
+    if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
+      throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -1036,13 +1041,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
 
     // Se verifica si ya se tiene una reversa con los mismos datos
-    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-      withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, tipoFacReverse);
+    PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(), withdrawRequest.getTransactionId(),
+      PrepaidMovementType.WITHDRAW, tipoFacReverse);
 
     if(previousReverse == null) {
       // Busca el movimiento de retiro original
-      PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(),
-        withdrawRequest.getTransactionId(), PrepaidMovementType.WITHDRAW, tipoFacTopup);
+      PrepaidMovement10 originalwithdraw = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(prepaidUser.getId(), withdrawRequest.getTransactionId(),
+        PrepaidMovementType.WITHDRAW, tipoFacTopup);
 
       if(originalwithdraw != null) {
         if(originalwithdraw.getMonto().stripTrailingZeros().equals(withdrawRequest.getAmount().getValue().stripTrailingZeros())) {
@@ -1065,6 +1070,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
             if(!fromEndPoint){
               prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
             }
+
             prepaidMovement.setPan(originalwithdraw.getPan());
             prepaidMovement.setCentalta(originalwithdraw.getCentalta());
             prepaidMovement.setCuenta(originalwithdraw.getCuenta());

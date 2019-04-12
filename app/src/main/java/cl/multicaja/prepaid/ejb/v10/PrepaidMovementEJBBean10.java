@@ -1054,7 +1054,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           newPrepaidWithdraw10.setPassword("CONCI");
           log.info(newPrepaidWithdraw10);
 
-          getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10, false);
+          getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
         }
         /**
          * Si es una reversa de retiro - Se crea el movimiento contrario
@@ -1285,7 +1285,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newPrepaidWithdraw10.setPassword("CONCI");
       log.info(newPrepaidWithdraw10);
 
-      getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10, false);
+      getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
 
       //TODO: que pasa con la reversa?
     }
@@ -1844,7 +1844,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
             // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
           case REJECTED_FORMAT: {
-
+              PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, prepaidMovement10.getId());
               // Se crea movimiento de reversa
               NewPrepaidWithdraw10 newPrepaidWithdraw10 = new NewPrepaidWithdraw10();
               newPrepaidWithdraw10.setAmount(new NewAmountAndCurrency10(prepaidMovement10.getMonto()));
@@ -1855,7 +1855,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               newPrepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
               //TODO:reverseWithdrawUserBalance
               // Se envia movimiento a reversar
-              getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10,false);
+              getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10,false);
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);

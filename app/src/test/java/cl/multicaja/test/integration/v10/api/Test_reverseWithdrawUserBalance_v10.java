@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -31,7 +32,17 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
    * @param newPrepaidWithdraw10
    * @return
    */
-  private HttpResponse reverseWithdrawUserBalance(NewPrepaidWithdraw10 newPrepaidWithdraw10) {
+  private HttpResponse reverseWithdrawUserBalance(String extUserId, NewPrepaidWithdraw10 newPrepaidWithdraw10) {
+    HttpHeader[] headers = new HttpHeader[]{
+      new HttpHeader("Content-Type", "application/json"),
+      new HttpHeader(Constants.HEADER_USER_TIMEZONE, "America/Santiago")
+    };
+    HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/cash_out/reverse", extUserId), toJson(newPrepaidWithdraw10));
+    System.out.println("respHttp: " + respHttp);
+    return respHttp;
+  }
+
+  private HttpResponse reverseWithdrawUserBalanceOld(NewPrepaidWithdraw10 newPrepaidWithdraw10) {
     HttpHeader[] headers = new HttpHeader[]{
       new HttpHeader("Content-Type", "application/json"),
       new HttpHeader(Constants.HEADER_USER_TIMEZONE, "America/Santiago")
@@ -44,12 +55,12 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   private void updateCreationDate(Long id) {
     getDbUtils().getJdbcTemplate().execute(String.format("UPDATE %s.prp_movimiento set fecha_creacion = ((fecha_creacion - INTERVAL '1 DAY')) WHERE id = %s", getSchema(), id));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
+
   @Test
   public void shouldReturn400_OnMissingBody() {
 
-    HttpResponse resp = reverseWithdrawUserBalance(null);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), null);
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
     BadRequestException bex = resp.toObject(BadRequestException.class);
@@ -57,14 +68,13 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: request", bex.getMessage().contains("withdrawRequest"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingAmount() {
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -73,8 +83,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount", bex.getMessage().contains("amount"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingAmountValue() {
 
@@ -82,7 +91,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
     prepaidWithdraw.setAmount(amount);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -91,8 +100,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount.value", bex.getMessage().contains("amount.value"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingAmountCurrencyCode() {
 
@@ -101,7 +109,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     amount.setValue(new BigDecimal("9999.90"));
     prepaidWithdraw.setAmount(amount);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -110,55 +118,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: amount.currency_code", bex.getMessage().contains("amount.currency_code"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
-  @Test
-  public void shouldReturn400_OnMissingRut() {
 
-    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal("9999.90"));
-    prepaidWithdraw.setAmount(amount);
-
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-    Assert.assertEquals("status 400", 400, resp.getStatus());
-
-    BadRequestException bex = resp.toObject(BadRequestException.class);
-    Assert.assertNotNull("Deberia tener error", bex);
-    Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
-    Assert.assertTrue("Debe tener error: rut", bex.getMessage().contains("rut"));
-  }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
-  @Test
-  public void shouldReturn400_OnMissingPassword() {
-
-    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    NewAmountAndCurrency10 amount = new NewAmountAndCurrency10();
-    amount.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    amount.setValue(new BigDecimal("9999.90"));
-    prepaidWithdraw.setMerchantCode(getUniqueLong().toString());
-    prepaidWithdraw.setAmount(amount);
-    prepaidWithdraw.setRut(0);
-    prepaidWithdraw.setTransactionId("1235");
-    prepaidWithdraw.setMerchantCode("1235");
-    prepaidWithdraw.setMerchantName("asdasdasd");
-    prepaidWithdraw.setMerchantCategory(1);
-
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-    Assert.assertEquals("status 400", 400, resp.getStatus());
-
-    BadRequestException bex = resp.toObject(BadRequestException.class);
-    Assert.assertNotNull("Deberia tener error", bex);
-    Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
-    System.out.println(bex.getMessage());
-    Assert.assertTrue("Debe tener error: password", bex.getMessage().contains("password"));
-  }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void shouldReturn400_OnMissingMerchantCode() {
 
@@ -170,7 +130,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setAmount(amount);
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -179,8 +139,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_code", bex.getMessage().contains("merchant_code"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingMerchantName() {
 
@@ -193,7 +152,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setMerchantCode("1235");
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -202,8 +161,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_name", bex.getMessage().contains("merchant_name"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingMerchantCategory() {
 
@@ -217,7 +175,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setMerchantName("asdasdasd");
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -226,8 +184,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: merchant_category", bex.getMessage().contains("merchant_category"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn400_OnMissingTransactionId() {
 
@@ -242,7 +199,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidWithdraw);
 
     Assert.assertEquals("status 400", 400, resp.getStatus());
 
@@ -251,90 +208,17 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 101004", PARAMETRO_FALTANTE_$VALUE.getValue(), bex.getCode());
     Assert.assertTrue("Debe tener error: transaction_id", bex.getMessage().contains("transaction_id"));
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
-  @Test
-  public void shouldReturn404_UserNull() throws Exception {
-    // POS
-    {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1235", getRandomNumericString(15));
-      prepaidWithdraw.setRut(Integer.MAX_VALUE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 404", 404, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_NO_EXISTE.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(null, "1245", getRandomNumericString(15));
-      prepaidWithdraw.setRut(Integer.MAX_VALUE);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidWithdraw.setPassword("1235");
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 404", 404, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_NO_EXISTE.getValue(), errorObj.get("code"));
-    }
-  }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
-  @Test
-  public void shouldReturn422_UserBlacklisted() throws Exception {
-    // POS
-    {
-      User user = registerUser(UserIdentityStatus.TERRORIST);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1356", getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR.getValue(), errorObj.get("code"));
-    }
-
-    //WEB
-    {
-      User user = registerUser();
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-
-      user.setIdentityStatus(UserIdentityStatus.TERRORIST);
-      updateUser(user);
-
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
-
-      Assert.assertEquals("status 422", 422, resp.getStatus());
-      Map<String, Object> errorObj = resp.toMap();
-      Assert.assertNotNull("Deberia tener error", errorObj);
-      Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_EN_LISTA_NEGRA_NO_PUEDE_RETIRAR.getValue(), errorObj.get("code"));
-    }
-  }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
     // POS
     {
-      User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
+
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
+      HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidTopup);
 
       Assert.assertEquals("status 404", 404, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -346,10 +230,10 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     {
       User user = registerUser();
 
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
+      HttpResponse resp = reverseWithdrawUserBalance(getRandomString(10), prepaidTopup);
 
       Assert.assertEquals("status 404", 404, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -357,24 +241,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_NO_TIENE_PREPAGO.getValue(), errorObj.get("code"));
     }
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
     // POS
     {
-      User user = registerUser();
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
       prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "2356", getRandomNumericString(15));
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
+      HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidTopup);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -384,18 +263,14 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser();
-
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
       prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
-      HttpResponse resp = reverseWithdrawUserBalance(prepaidTopup);
+      HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidTopup);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -403,26 +278,26 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 102015", CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO.getValue(), errorObj.get("code"));
     }
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_POS() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     createPrepaidMovement10(prepaidMovement);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 202", 202, resp.getStatus());
 
@@ -436,26 +311,26 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn202_ReverseAlreadyReceived_WEB() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
     PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
     createPrepaidMovement10(prepaidMovement);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 202", 202, resp.getStatus());
 
@@ -469,23 +344,23 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn202_OriginalWithdrawNull_POS() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 202", 202, resp.getStatus());
 
@@ -500,23 +375,23 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn202_OriginalWithdrawNull_WEB() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 202", 202, resp.getStatus());
 
@@ -531,17 +406,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener 1 movimiento de reversa", movement);
     Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movement.size());
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn422_differentAmount_POS() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", getRandomNumericString(15));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -555,7 +432,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidWithdraw.getAmount().setValue(prepaidWithdraw.getAmount().getValue().add(BigDecimal.TEN));
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -569,17 +446,20 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn422_differentAmount_WEB() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -593,7 +473,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     prepaidWithdraw.getAmount().setValue(prepaidWithdraw.getAmount().getValue().add(BigDecimal.TEN));
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
 
@@ -607,17 +487,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimiento de reversa", movement);
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", getRandomNumericString(15));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -631,7 +513,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     this.updateCreationDate(originalWithdraw.getId());
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 410", 410, resp.getStatus());
 
@@ -646,17 +528,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNull("No debe tener movimientos de reversa", movement);
 
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn410_OriginalWithdrawReverseTimeExpired_WEB() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1245", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -670,7 +554,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     this.updateCreationDate(originalWithdraw.getId());
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 410", 410, resp.getStatus());
 
@@ -684,17 +568,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     Assert.assertNull("No debe tener movimientos de reversa", movement);
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn201_ReverseAccepted_POS() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", getRandomNumericString(15));
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -706,7 +592,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -718,17 +604,19 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
   }
-  //TODO: Verificar si esto se seguira usando
-  @Ignore
+
   @Test
   public void shouldReturn201_ReverseAccepted_WEB() throws Exception {
-    User user = registerUser("1235");
-    user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, "1235", NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setPassword("1235");
 
@@ -741,7 +629,7 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener id", originalWithdraw.getId());
     Assert.assertTrue("Debe tener id", originalWithdraw.getId() > 0);
 
-    HttpResponse resp = reverseWithdrawUserBalance(prepaidWithdraw);
+    HttpResponse resp = reverseWithdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
     Assert.assertEquals("status 201", 201, resp.getStatus());
 
@@ -752,4 +640,5 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("Debe tener movimientos de reversa", movement);
     Assert.assertEquals("Debe tener movimientos de reversa", 1,movement.size());
   }
+
 }
