@@ -32,7 +32,7 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
   }
 
   @Test
-  public void publishCardEvent() throws Exception {
+  public void publishCardCreatedEvent() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
@@ -82,18 +82,55 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", card.getPan(), cardEvent.getCard().getPan());
+  }
+
+  @Test
+  public void publishCardClosedEvent() throws Exception {
+
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
+    // Crea cuenta/contrato
+    Account account = createRandomAccount(prepaidUser10);
+
+    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
+    card = createPrepaidCardV2(card);
+
+    // Actualiza la tarjeta
+    String pan = getRandomNumericString(16);
+    String encryptedPan = getRandomString(20);
+    String hashedPan = getRandomString(20);
+    PrepaidCardStatus cardStatus = PrepaidCardStatus.ACTIVE;
+    Integer cardExpiration = 1023;
+    String nameOnCard = getRandomString(20);
+    String producto = getRandomNumericString(2);
+    String numeroUnico = getRandomNumericString(8);
+
+    card.setStatus(cardStatus);
+    card.setExpiration(cardExpiration);
+    card.setNameOnCard(nameOnCard);
+    card.setPan(pan);
+    card.setEncryptedPan(encryptedPan);
+    card.setHashedPan(hashedPan);
+    card.setProducto(producto);
+    card.setNumeroUnico(numeroUnico);
+    card.setAccountId(account.getId());
+
+    getPrepaidCardEJBBean11().updatePrepaidCard(null, card.getId(), account.getId(), card);
+
+    card = getPrepaidCardEJBBean11().getPrepaidCardById(null, card.getId());
 
     // Revisar que envia a tarjeta cerrada
     getPrepaidCardEJBBean11().publishCardEvent(prepaidUser10.getUserIdMc().toString(), account.getUuid(), card.getId(), KafkaEventsRoute10.SEDA_CARD_CLOSED_EVENT);
 
-    qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
-    event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CLOSED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
       .getMessage(qResp, card.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());
 
-    cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
+    CardEvent cardEvent = getJsonParser().fromJson(event.getData(), CardEvent.class);
 
     Assert.assertEquals("Debe tener el mismo id", card.getUuid(), cardEvent.getCard().getId());
     Assert.assertEquals("Debe tener el mismo accountId", account.getUuid(), cardEvent.getAccountId());
