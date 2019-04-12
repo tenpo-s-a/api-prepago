@@ -314,10 +314,9 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     String uuid =  RandomStringUtils.random(10);
 
     PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setId(1L);
+    prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setUuid(uuid);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-
 
     PrepaidMovement10 reverse = new PrepaidMovement10();
     reverse.setId(Long.MAX_VALUE);
