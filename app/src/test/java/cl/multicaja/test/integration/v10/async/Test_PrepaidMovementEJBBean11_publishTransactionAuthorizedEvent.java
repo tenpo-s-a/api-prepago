@@ -15,6 +15,7 @@ import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,9 +125,12 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionAuthorizedEvent ext
     movement.setFechaCreacion(Timestamp.from(Instant.now()));
     movement.setFechaActualizacion(Timestamp.from(Instant.now()));
 
-    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10(BigDecimal.TEN);
+    List<PrepaidMovementFee10> feeList = new ArrayList<>();
+    PrepaidMovementFee10 fee = new PrepaidMovementFee10();
+    fee.setAmount(BigDecimal.TEN);
+    feeList.add(fee);
 
-    getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(userUuid, accountUuid, cardUuid, movement, fee, TransactionType.CASH_IN_MULTICAJA);
+    getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(userUuid, accountUuid, cardUuid, movement, feeList, TransactionType.CASH_IN_MULTICAJA);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
@@ -148,8 +152,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionAuthorizedEvent ext
 
     List<Fee> fees = transactionEvent.getTransaction().getFees();
     Assert.assertEquals("Debe tener 1 fee", 1, fees.size());
-    Assert.assertEquals("Debe tener mismo fee", fee.getCurrencyCode(), fees.get(0).getAmount().getCurrencyCode());
-    Assert.assertEquals("Debe tener mismo fee", fee.getValue(), fees.get(0).getAmount().getValue());
+    Assert.assertEquals("Debe tener mismo fee", fee.getAmount(), fees.get(0).getAmount().getValue());
   }
 
   @Test

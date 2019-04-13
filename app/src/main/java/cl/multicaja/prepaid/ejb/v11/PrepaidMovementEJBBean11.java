@@ -268,6 +268,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       for(PrepaidMovementFee10 fee : feeList) {
         Fee f = new Fee();
         f.setAmount(new NewAmountAndCurrency10(fee.getAmount()));
+        f.setType(fee.getFeeType().toString());
         fees.add(f);
       }
     }
