@@ -522,7 +522,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
 
         // Evento de transaccion autorizada
-        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
       }
       else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
         log.info("Error Timeout Response");

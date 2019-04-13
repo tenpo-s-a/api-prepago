@@ -195,20 +195,20 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     };
   }
 
-  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.AUTHORIZED);
+  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.AUTHORIZED);
   }
 
-  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REJECTED);
+  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.REJECTED);
   }
 
-  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REVERSED);
+  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.REVERSED);
   }
 
-  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.PAID);
+  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.PAID);
   }
 
   /**
@@ -216,7 +216,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
    *
    * @throws Exception
    */
-  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type, TransactionStatus status) throws Exception {
+  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type, TransactionStatus status) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
@@ -261,13 +261,15 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     transaction.setStatus(status.toString());
 
     List<Fee> fees;
-    if(fee == null) {
+    if(feeList == null || feeList.isEmpty()) {
       fees = Collections.emptyList();
     } else {
       fees = new ArrayList<>();
-      Fee f = new Fee();
-      f.setAmount(fee);
-      fees.add(f);
+      for(PrepaidMovementFee10 fee : feeList) {
+        Fee f = new Fee();
+        f.setAmount(new NewAmountAndCurrency10(fee.getAmount()));
+        fees.add(f);
+      }
     }
 
     transaction.setFees(fees);
