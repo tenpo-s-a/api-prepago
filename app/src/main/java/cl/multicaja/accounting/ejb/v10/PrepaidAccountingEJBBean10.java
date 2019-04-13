@@ -34,7 +34,6 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
@@ -514,7 +513,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
           fee = getPercentage().getTOPUP_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
-          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
 
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
@@ -524,7 +523,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         else {
           // Comision es Fija $200
           fee = getPercentage().getTOPUP_POS_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
-          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -535,7 +534,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(trxOriginType)) {
           fee = getPercentage().getWITHDRAW_WEB_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
-          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(fee);
           accounting.setFeeIva(feeIva);
           accounting.setCollectorFee(BigDecimal.ZERO);
@@ -544,7 +543,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         else {
           // Comision es Fija $200
           fee = getPercentage().getTOPUP_POS_FEE_AMOUNT().setScale(0, BigDecimal.ROUND_HALF_UP);
-          feeIva = getCalculationsHelper().calculateFeeIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
+          feeIva = getCalculationsHelper().calculateIva(fee).setScale(0, BigDecimal.ROUND_HALF_UP);
           accounting.setFee(BigDecimal.ZERO);
           accounting.setFeeIva(BigDecimal.ZERO);
           accounting.setCollectorFee(fee);
@@ -552,7 +551,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         }
         break;
       }
-
       default: {
         //TODO: Se debe verificar.
         accounting.setFee(BigDecimal.ZERO);

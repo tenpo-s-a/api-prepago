@@ -22,6 +22,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Instant;
@@ -319,7 +320,13 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-  public PrepaidMovementFee10 createPrepaidMovementFee(PrepaidMovementFee10 prepaidMovementFee) throws Exception {
+  public void addPrepaidMovementFeeList(List<PrepaidMovementFee10> feeList) throws Exception {
+    for(PrepaidMovementFee10 fee : feeList) {
+      addPrepaidMovementFee(fee);
+    }
+  }
+
+  public PrepaidMovementFee10 addPrepaidMovementFee(PrepaidMovementFee10 prepaidMovementFee) throws Exception {
     if(prepaidMovementFee == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee"));
     }
@@ -329,11 +336,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     if(prepaidMovementFee.getAmount() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.amount"));
     }
-    if(prepaidMovementFee.getIva() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.iva"));
-    }
 
-    log.info(String.format("[createPrepaidMovementFee] Guardando Comision de movimiento con [%s]", prepaidMovementFee.toString()));
+    log.info(String.format("[addPrepaidMovementFee] Guardando Comision de movimiento con [%s]", prepaidMovementFee.toString()));
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -342,7 +346,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setLong(1, prepaidMovementFee.getMovementId());
       ps.setString(2, prepaidMovementFee.getFeeType().toString());
       ps.setBigDecimal(3, prepaidMovementFee.getAmount());
-      ps.setBigDecimal(4, prepaidMovementFee.getIva());
+      ps.setBigDecimal(4, new BigDecimal(0L)); //Todo: Columna debe eliminarse
       return ps;
     }, keyHolder);
 

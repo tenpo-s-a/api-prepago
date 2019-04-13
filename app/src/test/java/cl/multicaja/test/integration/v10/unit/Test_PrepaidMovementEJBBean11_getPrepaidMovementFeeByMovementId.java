@@ -29,7 +29,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     insertedMovements.add(fee);
 
     fee = buildPrepaidMovementFee10(prepaidMovement);
-    fee.setFeeType(PrepaidMovementFeeType.TOPUP);
+    fee.setFeeType(PrepaidMovementFeeType.TOPUP_POS_FEE);
     fee = createPrepaidMovementFee10(fee);
     insertedMovements.add(fee);
 

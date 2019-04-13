@@ -4,6 +4,7 @@ import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.prepaid.ejb.v10.MastercardCurrencyUpdateEJBBean10;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
+import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
@@ -12,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.EJB;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @autor vutreras
@@ -58,9 +61,7 @@ public class CalculationsHelper {
     return instance;
   }
 
-  public  int getOneHundred() {
-    return ONE_HUNDRED;
-  }
+  public  int getOneHundred() { return ONE_HUNDRED; }
 
   public CalculatorParameter10 getCalculatorParameter10() {
     return calculatorParameter10;
@@ -87,22 +88,32 @@ public class CalculationsHelper {
     return rounded;
   }
 
-  public BigDecimal calculateFeeIva(BigDecimal amount){
+  /**
+   * Dado un monto total y un tipo de iva ("iva incluido" o "mas iva") calcula los dos valores, monto e iva.
+   * @param totalFee
+   * @param ivaType
+   * @return
+   */
+  public Map<String, BigDecimal> calculateFeeAndIva(BigDecimal totalFee, IvaType ivaType) {
+    BigDecimal iva = calculateIva(totalFee);
+    BigDecimal fee = totalFee;
+
+    if(IvaType.IVA_INCLUDED.equals(ivaType)) {
+      fee = totalFee.subtract(iva);
+    } else if (IvaType.PLUS_IVA.equals(ivaType)) {
+      fee = totalFee;
+    }
+
+    Map<String, BigDecimal> amountAndIva = new HashMap<>();
+    amountAndIva.put("fee", fee);
+    amountAndIva.put("iva", iva);
+    return amountAndIva;
+  }
+
+  public BigDecimal calculateIva(BigDecimal amount){
     BigDecimal result = amount.multiply(BigDecimal.valueOf(1.19)).subtract(amount);
     BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     return rounded;
-  }
-  /**
-   * Calcula el IVA dado el monto total
-   *
-   * @param amount
-   * @return
-   */
-  public BigDecimal calculateIvaFromTotal(BigDecimal amount) {
-    //TODO: Fue necesario agregar un limite de digitos despues de la coma, 4 esta bien?
-    BigDecimal iva = amount.subtract(amount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA()), 4,  RoundingMode.HALF_UP));
-    log.info(String.format("Amount: [%s], Iva: [%s]", amount, iva));
-    return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
   }
 
   /**

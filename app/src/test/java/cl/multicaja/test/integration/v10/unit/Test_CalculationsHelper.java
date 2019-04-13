@@ -1,11 +1,14 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
+import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
+import cl.multicaja.prepaid.model.v11.IvaType;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Map;
 
 /**
  * @autor vutreras
@@ -72,7 +75,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getCalculatorParameter10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(125), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(119), commission);
   }
 
   @Test
@@ -83,7 +86,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getCalculatorParameter10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1190), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(119), commission);
   }
 
   @Test
@@ -94,7 +97,7 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getCalculatorParameter10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(999), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(119), commission);
   }
 
   @Test
@@ -105,7 +108,29 @@ public class Test_CalculationsHelper extends TestBaseUnit {
     // MAX(100; 0,5% * amount) + IVA
     BigDecimal commission = calculationsHelper.calculateFee(amount, calculationsHelper.getCalculatorParameter10().getTOPUP_POS_FEE_PERCENTAGE());
 
-    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(1000), commission);
+    Assert.assertEquals("deben ser iguales", BigDecimal.valueOf(119), commission);
+  }
+
+  @Test
+  public void testCalculateAmountAndIva_IvaIncluded() {
+    BigDecimal originalFee = new BigDecimal(100L);
+    Map<String, BigDecimal> feeAndIva = getCalculationsHelper().calculateFeeAndIva(originalFee, IvaType.IVA_INCLUDED);
+
+    BigDecimal fee = feeAndIva.get("fee");
+    BigDecimal iva = feeAndIva.get("iva");
+    Assert.assertEquals("Fee debe ser 81", new BigDecimal(81L), fee);
+    Assert.assertEquals("Iva debe ser 19", new BigDecimal(19L), iva);
+  }
+
+  @Test
+  public void testCalculateAmountAndIva_PlusIva() {
+    BigDecimal originalFee = new BigDecimal(100L);
+    Map<String, BigDecimal> feeAndIva = getCalculationsHelper().calculateFeeAndIva(originalFee, IvaType.PLUS_IVA);
+
+    BigDecimal fee = feeAndIva.get("fee");
+    BigDecimal iva = feeAndIva.get("iva");
+    Assert.assertEquals("Fee debe ser 100", new BigDecimal(100L), fee);
+    Assert.assertEquals("Iva debe ser 19", new BigDecimal(19L), iva);
   }
 
   @Test

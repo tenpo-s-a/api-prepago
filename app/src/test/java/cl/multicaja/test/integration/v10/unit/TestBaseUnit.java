@@ -13,12 +13,8 @@ import cl.multicaja.core.test.TestApiBase;
 import cl.multicaja.core.utils.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.prepaid.async.v10.*;
-import cl.multicaja.prepaid.dao.AccountDao;
-import cl.multicaja.prepaid.dao.CardDao;
-import cl.multicaja.prepaid.dao.UserDao;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
@@ -30,7 +26,6 @@ import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.*;
-import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
@@ -41,7 +36,6 @@ import cl.multicaja.accounting.model.v10.UserAccountNew;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.postgresql.util.PSQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -884,7 +878,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setValue(new BigDecimal(3238));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);
@@ -931,7 +925,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setValue(new BigDecimal(3238));
 
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
@@ -1225,7 +1219,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   public PrepaidMovementFee10 createPrepaidMovementFee10(PrepaidMovementFee10 fee) throws Exception {
-    fee = getPrepaidMovementEJBBean11().createPrepaidMovementFee(fee);
+    fee = getPrepaidMovementEJBBean11().addPrepaidMovementFee(fee);
 
     Assert.assertNotNull("debe retornar una comision", fee);
     Assert.assertEquals("debe tener id", true, fee.getId() > 0);
