@@ -136,7 +136,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Test
-  public void topupUserBalance_validate_cdt() throws Exception {
+  public void topupUserBalance_validate_cdt_and_prepaidMovement() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
