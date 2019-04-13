@@ -13,6 +13,7 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
 
   private String status;
   private Timestamps timestamps;
+  private List<PrepaidMovementFee10> feeList;
   private NewAmountAndCurrency10 fee;
   private NewAmountAndCurrency10 total;
   @JsonIgnore
@@ -68,6 +69,10 @@ public class PrepaidWithdraw10 extends NewPrepaidWithdraw10 implements IPrepaidT
   public NewAmountAndCurrency10 getFee() {
     return fee;
   }
+
+  public void setFeeList(List<PrepaidMovementFee10> feeList) { this.feeList = feeList; }
+
+  public List<PrepaidMovementFee10> getFeeList() { return this.feeList; }
 
   public void setFee(NewAmountAndCurrency10 fee) {
     this.fee = fee;
