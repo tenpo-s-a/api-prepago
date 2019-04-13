@@ -13,6 +13,8 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
   private String status;
   private Timestamps timestamps;
   @JsonIgnore
+  private List<PrepaidMovementFee10> feeList;
+  @JsonIgnore
   private NewAmountAndCurrency10 fee;
   @JsonIgnore
   private NewAmountAndCurrency10 total;
@@ -65,6 +67,10 @@ public class PrepaidTopup10 extends NewPrepaidTopup10 implements IPrepaidTransac
   public void setTimestamps(Timestamps timestamps) {
     this.timestamps = timestamps;
   }
+
+  public void setFeeList(List<PrepaidMovementFee10> feeList) { this.feeList = feeList; }
+
+  public List<PrepaidMovementFee10> getFeeList() { return feeList; }
 
   public NewAmountAndCurrency10 getFee() {
     return fee;

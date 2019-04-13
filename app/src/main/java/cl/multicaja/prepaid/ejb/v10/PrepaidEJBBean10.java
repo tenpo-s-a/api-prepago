@@ -1474,6 +1474,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       break;
     }
 
+    transaction.setFeeList(feeList);
     transaction.setFee(fee);
     transaction.setTotal(total);
     return transaction;

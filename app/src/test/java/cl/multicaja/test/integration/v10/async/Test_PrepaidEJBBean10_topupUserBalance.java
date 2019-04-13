@@ -16,6 +16,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
+import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
@@ -1009,7 +1010,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
-    Thread.sleep(2000);
+    // Porque se espera si ya se sabe que el movimiento fue procesado
+    //Thread.sleep(2000);
 
     // Segunda carga debe ser sincrona
     {
@@ -1052,6 +1054,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo monto", prepaidTopup10.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
       Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
       Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+
+      List<Fee> feeList = transactionEvent.getTransaction().getFees();
+      Assert.assertEquals("El evento debe tener 2 fees", 2, feeList.size());
     }
 
     boolean dataFound = waitForClearingToExist();
