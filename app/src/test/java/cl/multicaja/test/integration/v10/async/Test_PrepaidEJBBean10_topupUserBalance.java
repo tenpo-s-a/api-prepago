@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.camel.CamelFactory;
 import cl.multicaja.camel.ExchangeData;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -18,6 +19,7 @@ import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,7 @@ import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -38,8 +41,10 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
  */
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
-  final BigDecimal defaultTopupAmount = BigDecimal.valueOf(3238);
-  final BigDecimal defaultIvaAmount = BigDecimal.valueOf(238);
+  final BigDecimal topupTotalAmount = BigDecimal.valueOf(3238); // Total carga
+  final BigDecimal feeTotalAmount = BigDecimal.valueOf(238); // Fee base + iva
+  final BigDecimal feeBaseAmount = BigDecimal.valueOf(200); // Fee base
+  final BigDecimal feeIvaAmount = BigDecimal.valueOf(38); // Iva
 
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
@@ -136,15 +141,16 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Test
-  public void topupUserBalance_validate_cdt_and_prepaidMovement() throws Exception {
+  public void topupUserBalance_validate_cdt_prepaidMovement_and_pos_fees() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(getRandomNumericString(15));
 
     //se debe establecer la primera carga mayor a 3238 dado que es el valor minimo definido por un limite del CDT
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(5000L));
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -171,6 +177,72 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
       waitForAccountingToExist(prepaidTopup.getId());
 
+      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
+
+      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee base", baseFee);
+      Assert.assertEquals("Debe tener valor 200", feeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+      Assert.assertEquals("Debe tener valor 38", feeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+    } else {
+      Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
+    }
+  }
+
+  @Test
+  public void topupUserBalance_validate_cdt_prepaidMovement_and_web_fees() throws Exception {
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+
+    //se debe establecer la primera carga mayor a 3238 dado que es el valor minimo definido por un limite del CDT
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
+
+    PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
+
+    Assert.assertNotNull("Debe tener id", prepaidTopup.getId());
+
+    String messageId = prepaidTopup.getMessageId();
+
+    if (CamelFactory.getInstance().isCamelRunning()) {
+      Assert.assertNotNull("Debe tener messageId dado que camel si se encuentra en ejecucion", messageId);
+
+      Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_TOPUP_RESP);
+      ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup);
+      Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
+      Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
+
+      Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
+      Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
+
+      Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
+      Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
+
+      waitForAccountingToExist(prepaidTopup.getId());
+
+      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
+
+      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee base", baseFee);
+      Assert.assertEquals("Debe tener valor 0", BigDecimal.ZERO, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+      Assert.assertEquals("Debe tener valor 0", BigDecimal.ZERO, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
     } else {
       Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
     }
@@ -183,9 +255,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
+    prepaidTopup10.setMerchantCode(getRandomNumericString(15));
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(defaultTopupAmount);
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -205,10 +278,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision(238) - comision de apertura (0)", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision(238) - comision de apertura (0)", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision(0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision(0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -255,6 +328,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+
     } else {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
@@ -267,9 +341,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(getRandomNumericString(15));
 
     //primera carga
-    newPrepaidTopup.getAmount().setValue(defaultTopupAmount);
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -289,10 +364,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (newPrepaidTopup.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -339,6 +414,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+
     } else {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
@@ -480,7 +556,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(defaultTopupAmount);
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -500,10 +576,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -530,7 +606,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
-      secondTopup.getAmount().setValue(defaultTopupAmount);
+      secondTopup.getAmount().setValue(topupTotalAmount);
 
       PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
@@ -898,7 +974,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(defaultTopupAmount);
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -918,10 +994,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -948,7 +1024,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
-      secondTopup.getAmount().setValue(defaultTopupAmount);
+      secondTopup.getAmount().setValue(topupTotalAmount);
 
       PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
@@ -1368,7 +1444,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(defaultTopupAmount);
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -1390,10 +1466,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -1472,7 +1548,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(defaultTopupAmount);
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -1492,10 +1568,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", defaultTopupAmount.subtract(defaultIvaAmount), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(feeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", defaultTopupAmount, prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 

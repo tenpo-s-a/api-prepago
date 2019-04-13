@@ -112,14 +112,28 @@ public class Test_CalculationsHelper extends TestBaseUnit {
   }
 
   @Test
+  public void testCalculateIva_plusIva() {
+    BigDecimal originalFee = BigDecimal.valueOf(100L);
+    BigDecimal iva = getCalculationsHelper().calculateIncludedIva(originalFee);
+    Assert.assertEquals("Debe ser 16", BigDecimal.valueOf(16), iva);
+  }
+
+  @Test
+  public void testCalculateIva_ivaIncluded() {
+    BigDecimal originalFee = BigDecimal.valueOf(100L);
+    BigDecimal iva = getCalculationsHelper().calculateIva(originalFee);
+    Assert.assertEquals("Debe ser 19", BigDecimal.valueOf(19), iva);
+  }
+
+  @Test
   public void testCalculateAmountAndIva_IvaIncluded() {
     BigDecimal originalFee = new BigDecimal(100L);
     Map<String, BigDecimal> feeAndIva = getCalculationsHelper().calculateFeeAndIva(originalFee, IvaType.IVA_INCLUDED);
 
     BigDecimal fee = feeAndIva.get("fee");
     BigDecimal iva = feeAndIva.get("iva");
-    Assert.assertEquals("Fee debe ser 81", new BigDecimal(81L), fee);
-    Assert.assertEquals("Iva debe ser 19", new BigDecimal(19L), iva);
+    Assert.assertEquals("Fee debe ser 84", BigDecimal.valueOf(84), fee);
+    Assert.assertEquals("Iva debe ser 16", BigDecimal.valueOf(16), iva);
   }
 
   @Test
@@ -129,8 +143,8 @@ public class Test_CalculationsHelper extends TestBaseUnit {
 
     BigDecimal fee = feeAndIva.get("fee");
     BigDecimal iva = feeAndIva.get("iva");
-    Assert.assertEquals("Fee debe ser 100", new BigDecimal(100L), fee);
-    Assert.assertEquals("Iva debe ser 19", new BigDecimal(19L), iva);
+    Assert.assertEquals("Fee debe ser 100", BigDecimal.valueOf(100), fee);
+    Assert.assertEquals("Iva debe ser 19", BigDecimal.valueOf(19), iva);
   }
 
   @Test

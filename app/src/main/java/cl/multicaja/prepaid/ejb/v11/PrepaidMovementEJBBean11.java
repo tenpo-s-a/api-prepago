@@ -306,12 +306,12 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-  public List<PrepaidMovementFee10> getPrepaidMovementFeeByMovementId(Long movementId) throws BaseException {
+  public List<PrepaidMovementFee10> getPrepaidMovementFeesByMovementId(Long movementId) throws BaseException {
     if(movementId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
     }
 
-    log.info(String.format("[getPrepaidMovementFeeByMovementId] Buscando fee [movementId: %d]", movementId));
+    log.info(String.format("[getPrepaidMovementFeesByMovementId] Buscando fee [movementId: %d]", movementId));
 
     try {
       return getDbUtils().getJdbcTemplate().query(FIND_FEE_BY_MOVEMENT_ID, getMovementFeeMapper(), movementId);

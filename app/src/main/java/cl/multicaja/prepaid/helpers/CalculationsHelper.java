@@ -95,25 +95,42 @@ public class CalculationsHelper {
    * @return
    */
   public Map<String, BigDecimal> calculateFeeAndIva(BigDecimal totalFee, IvaType ivaType) {
-    BigDecimal iva = calculateIva(totalFee);
+    BigDecimal iva = BigDecimal.ZERO;
     BigDecimal fee = totalFee;
 
     if(IvaType.IVA_INCLUDED.equals(ivaType)) {
+      iva = calculateIncludedIva(totalFee);
       fee = totalFee.subtract(iva);
     } else if (IvaType.PLUS_IVA.equals(ivaType)) {
       fee = totalFee;
+      iva = calculateIva(totalFee);
     }
 
     Map<String, BigDecimal> amountAndIva = new HashMap<>();
-    amountAndIva.put("fee", fee);
-    amountAndIva.put("iva", iva);
+    amountAndIva.put("fee", fee.setScale(0, RoundingMode.HALF_UP));
+    amountAndIva.put("iva", iva.setScale(0, RoundingMode.HALF_UP));
     return amountAndIva;
   }
 
+  /**
+   * Calcula el iva dado el monto entregado: (iva = amount * 0.19)
+   * @param amount
+   * @return
+   */
   public BigDecimal calculateIva(BigDecimal amount){
-    BigDecimal result = amount.multiply(BigDecimal.valueOf(1.19)).subtract(amount);
+    BigDecimal result = amount.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA())).subtract(amount);
     BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     return rounded;
+  }
+
+  /**
+   * Calcula el iva cuando el totalAmount entregado es el valor con el iva incluido (totalAmount = iva + monto inicial).
+   * @param totalAmount
+   * @return
+   */
+  public BigDecimal calculateIncludedIva(BigDecimal totalAmount) {
+    BigDecimal baseAmount = totalAmount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA()), 0, RoundingMode.HALF_UP);
+    return totalAmount.subtract(baseAmount);
   }
 
   /**
