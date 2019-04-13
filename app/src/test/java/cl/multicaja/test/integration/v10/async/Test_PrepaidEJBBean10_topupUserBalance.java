@@ -633,17 +633,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNull("No Deberia existir un topup en la cola", remoteTopup2);
     }
 
-     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
-
+    boolean dataFound = waitForClearingToExist();
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
@@ -1064,17 +1054,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
     }
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
-
+    boolean dataFound = waitForClearingToExist();
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
@@ -1478,16 +1458,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
+    boolean dataFound = waitForClearingToExist();
 
     AccountingTxType txType = AccountingTxType.CARGA_POS;
     AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
@@ -1580,16 +1551,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
+    boolean dataFound = waitForClearingToExist();
 
     AccountingTxType txType = AccountingTxType.CARGA_POS;
     AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
@@ -1646,12 +1608,24 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
   void waitForAccountingToExist(Long trxId) throws Exception {
     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    for(int j = 0; j < 10; j++) {
+    for(int j = 0; j < 20; j++) {
       Thread.sleep(500);
       AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, trxId);
       if(accountingData10 != null) {
         break;
       }
     }
+  }
+
+  boolean waitForClearingToExist() throws Exception {
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    for(int j = 0; j < 20; j++) {
+      Thread.sleep(500);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 }
