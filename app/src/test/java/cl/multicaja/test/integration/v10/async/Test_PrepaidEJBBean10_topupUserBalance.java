@@ -41,10 +41,10 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
  */
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
-  final BigDecimal topupTotalAmount = BigDecimal.valueOf(3238); // Total carga
-  final BigDecimal feeTotalAmount = BigDecimal.valueOf(238); // Fee base + iva
-  final BigDecimal feeBaseAmount = BigDecimal.valueOf(200); // Fee base
-  final BigDecimal feeIvaAmount = BigDecimal.valueOf(38); // Iva
+  private final BigDecimal topupTotalAmount = BigDecimal.valueOf(3238); // Total carga
+  private final BigDecimal feeTotalAmount = BigDecimal.valueOf(238); // Fee base + iva
+  private final BigDecimal feeBaseAmount = BigDecimal.valueOf(200); // Fee base
+  private final BigDecimal feeIvaAmount = BigDecimal.valueOf(38); // Iva
 
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
