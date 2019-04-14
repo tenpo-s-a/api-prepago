@@ -243,7 +243,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
       createPrepaidCard10(buildPrepaidCard10FromTecnocom(user, prepaidUser));
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500201));
 
       try {
         getPrepaidEJBBean10().withdrawUserBalance(null, prepaidWithdraw,true);

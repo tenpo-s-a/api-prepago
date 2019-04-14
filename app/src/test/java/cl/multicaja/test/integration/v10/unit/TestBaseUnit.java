@@ -859,7 +859,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setTransactionId(getUniqueInteger().toString());
 
     NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
+    newAmountAndCurrency.setValue(new BigDecimal(3238));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidTopup.setAmount(newAmountAndCurrency);
     prepaidTopup.setTotal(newAmountAndCurrency);

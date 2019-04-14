@@ -8,6 +8,7 @@ import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.kafka.events.model.TransactionStatus;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -128,6 +129,7 @@ public class Test_PrepaidMovementEJBBean11_publishTransactionRejectedEvent exten
     List<PrepaidMovementFee10> feeList = new ArrayList<>();
     PrepaidMovementFee10 fee = new PrepaidMovementFee10();
     fee.setAmount(BigDecimal.TEN);
+    fee.setFeeType(PrepaidMovementFeeType.TOPUP_POS_FEE);
     feeList.add(fee);
 
     getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(userUuid, accountUuid, cardUuid, movement, feeList, TransactionType.CASH_IN_MULTICAJA);
