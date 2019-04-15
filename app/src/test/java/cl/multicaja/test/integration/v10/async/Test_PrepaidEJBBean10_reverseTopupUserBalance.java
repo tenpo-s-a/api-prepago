@@ -26,10 +26,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitA
     account = createAccount(account.getUserId(), account.getAccountNumber());
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard10.setUuid(UUID.randomUUID().toString());
-    prepaidCard10.setAccountId(account.getId());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-
+    System.out.println(prepaidCard10.getId());
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));

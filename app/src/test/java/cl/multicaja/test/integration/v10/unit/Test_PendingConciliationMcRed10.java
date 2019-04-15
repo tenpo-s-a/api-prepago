@@ -5,6 +5,7 @@ import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
 import com.opencsv.CSVWriter;
@@ -372,6 +373,12 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     int totalNumberOfMovements = cantidad + movementsInfo.size() + onlyFileMovementCount;
     for (int i = 0; i < totalNumberOfMovements; i++) {

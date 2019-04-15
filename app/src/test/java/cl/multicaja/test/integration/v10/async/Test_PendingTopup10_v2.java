@@ -315,14 +315,13 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   public void pendingTopup_transactionAuthorizaedEvent() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
-    account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -330,7 +329,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 

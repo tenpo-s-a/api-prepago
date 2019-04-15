@@ -372,20 +372,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, user.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null, user.getId());
     if (prepaidCard == null) {
-
-      prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, user.getId(),
-        PrepaidCardStatus.LOCKED_HARD,
-        PrepaidCardStatus.EXPIRED);
-
-      if (prepaidCard != null) {
+      prepaidCard = getPrepaidCardEJB11().getInvalidCardByUserId(headers,user.getId());
+      if(prepaidCard != null){
         throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
     }
+
     //Se mueve para que al CDT se ingrese sin comisiones
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
     prepaidTopup.setUserId(user.getId());
@@ -476,7 +470,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-      InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(prepaidCard.getProcessorUserId(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
+      InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
 
       // Responde OK
       if (inclusionMovimientosDTO.isRetornoExitoso()) {
@@ -653,13 +647,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    // Obtiene la tarjeta
-    //TODO: seguiremos utilizando esta validacion?
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null, prepaidUser.getId());
+    if (prepaidCard == null) {
+      prepaidCard = getPrepaidCardEJB11().getInvalidCardByUserId(headers,prepaidUser.getId());
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+    }
     TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.CARGA_TRANSFERENCIA : TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
@@ -815,23 +809,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
     // Obtiene la tarjeta de un usaurio rpeapgo
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null, prepaidUser.getId());
     if (prepaidCard == null) {
-
-        prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-        PrepaidCardStatus.LOCKED_HARD,
-        PrepaidCardStatus.EXPIRED,
-        PrepaidCardStatus.PENDING);
-
-      if (prepaidCard != null) {
-        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString()));
+      prepaidCard = getPrepaidCardEJB11().getInvalidCardByUserId(headers,prepaidUser.getId());
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
-
-      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
     //Se cambia para calcular la comision previo al envio al CDT
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setUserId(prepaidUser.getId());
@@ -924,7 +909,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
-        prepaidCard.getHashedPan(),
+        prepaidCard.getPan(),
         centalta,
         cuenta,
         numextcta,
@@ -1039,9 +1024,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null, prepaidUser.getId());
+    if (prepaidCard == null) {
+      prepaidCard = getPrepaidCardEJB11().getInvalidCardByUserId(headers,prepaidUser.getId());
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+    }
 
     TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.RETIRO_TRANSFERENCIA : TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
@@ -1991,6 +1980,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener tarjeta
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
+    Account account = getAccountEJBBean10().findById(prepaidCard.getId());
+
     if(prepaidCard == null) {
       //Obtener ultimo movimiento
       // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
@@ -2031,7 +2022,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     try{
       prepaidTransactionExtend10 = createConsultaMovimientoToList(
-        prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
+        account.getAccountNumber(),user.getRut().getValue().toString(),
         TipoDocumento.RUT,_startDate,_endDate);
 
       prepaidTransactionExtend10.setErrorCode(0);
