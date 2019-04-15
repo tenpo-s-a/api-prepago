@@ -29,6 +29,7 @@ import javax.jms.Queue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -314,7 +315,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertTrue("Debe haber al menos 1 movimiento de account", accounting10s.size() >= 1);
 
@@ -640,7 +641,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     boolean dataFound = waitForClearingToExist();
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertTrue("Debe haber al menos 2 movimientos de accounting", accounting10s.size() >= 2);
 
@@ -1572,7 +1573,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 

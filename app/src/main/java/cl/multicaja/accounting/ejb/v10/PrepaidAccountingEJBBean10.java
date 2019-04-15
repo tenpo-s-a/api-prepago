@@ -152,6 +152,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   private List<AccountingData10> searchAccountingData(Map<String, Object> header, Date dateToSearch, Long idTrx) throws Exception {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
     String dateString = null;
 

@@ -179,7 +179,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -301,7 +301,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -425,7 +425,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -551,7 +551,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -650,7 +650,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -772,7 +772,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -896,7 +896,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
@@ -1022,7 +1022,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     }
 
     // verifica movimiento accounting y clearing
-    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
     Assert.assertNotNull("No debe ser null", accounting10s);
     Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
 
