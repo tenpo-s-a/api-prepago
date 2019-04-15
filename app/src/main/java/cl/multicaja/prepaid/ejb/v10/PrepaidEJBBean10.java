@@ -1177,132 +1177,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 newPrepaidUserSignup) throws Exception {
-
-    if(newPrepaidUserSignup == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "newPrepaidUserSignup"));
-    }
-    if(newPrepaidUserSignup.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
-    }
-    if(StringUtils.isAllBlank(newPrepaidUserSignup.getEmail())){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "email"));
-    }
-
-    if(newPrepaidUserSignup.isLogin()) {
-
-      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers,newPrepaidUserSignup.getRut());
-
-      if(prepaidUser10 != null) {
-        throw new ValidationException(CLIENTE_YA_TIENE_PREPAGO);
-      }
-
-    } else {
-
-      User user = getUserClient().getUserByRut(headers, newPrepaidUserSignup.getRut());
-
-      if (user == null) {
-
-        user = getUserClient().getUserByEmail(headers, newPrepaidUserSignup.getEmail());
-
-        if (user != null) {
-
-          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
-
-            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, newPrepaidUserSignup.getRut());
-
-            if (prepaidUser10 != null) {
-
-              PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser10.getId());
-
-              if (prepaidCard10 != null) {
-                throw new ValidationException(CORREO_YA_TIENE_TARJETA);
-              } else {
-                throw new ValidationException(CORREO_PERTENECE_A_CLIENTE);
-              }
-
-            } else {
-              throw new ValidationException(CORREO_PERTENECE_A_CLIENTE);
-            }
-
-          } else if (UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
-            throw new ValidationException(CORREO_YA_UTILIZADO);
-          } else {
-            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-          }
-        }
-      } else {
-
-        if (user.getEmail().getValue().equalsIgnoreCase(newPrepaidUserSignup.getEmail())) {
-
-          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
-
-            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, newPrepaidUserSignup.getRut());
-
-            if (prepaidUser10 != null) {
-
-              PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser10.getId());
-
-              if (prepaidCard10 != null) {
-                throw new ValidationException(CLIENTE_YA_TIENE_TARJETA);
-              } else {
-                throw new ValidationException(CLIENTE_YA_TIENE_CLAVE);
-              }
-            }
-
-          } else if (!UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
-            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-          }
-
-        } else {
-
-          if (UserStatus.ENABLED.equals(user.getGlobalStatus())) {
-
-            PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserByRut(headers, newPrepaidUserSignup.getRut());
-
-            if (prepaidUser10 != null) {
-
-              PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser10.getId());
-
-              if (prepaidCard10 != null) {
-                throw new ValidationException(RUT_YA_TIENE_TARJETA);
-              } else {
-                throw new ValidationException(RUT_YA_TIENE_CLAVE);
-              }
-            }
-
-          } else if (!UserStatus.PREREGISTERED.equals(user.getGlobalStatus())) {
-            throw new ValidationException(CLIENTE_BLOQUEADO_O_BORRADO);
-          }
-        }
-      }
-    }
-    SignUPNew signUPNew = new SignUPNew(newPrepaidUserSignup.getEmail(),newPrepaidUserSignup.getRut());
-    SignUp signUp = getUserClient().signUp(headers, signUPNew);
-
-    PrepaidUserSignup10 prepaidUserSignup10 = new PrepaidUserSignup10();
-    prepaidUserSignup10.setId(signUp.getId());
-    prepaidUserSignup10.setUserId(signUp.getUserId());
-    prepaidUserSignup10.setName(signUp.getName());
-    prepaidUserSignup10.setLastname_1(signUp.getLastname_1());
-    prepaidUserSignup10.setEmail(signUp.getEmail());
-    prepaidUserSignup10.setRut(signUp.getRut());
-    prepaidUserSignup10.setMustAcceptTermsAndConditions(Boolean.TRUE);
-    prepaidUserSignup10.setMustChoosePassword(Boolean.TRUE);
-    prepaidUserSignup10.setMustValidateCellphone(Boolean.TRUE);
-    prepaidUserSignup10.setMustValidateEmail(Boolean.TRUE);
-
-    AppFile tac = this.getLastTermsAndConditions(headers);
-    if(tac != null) {
-      List<String> tacs = new ArrayList<>();
-      tacs.add(tac.getVersion());
-      prepaidUserSignup10.setTermsAndConditionsList(tacs);
-    }
-
-    return prepaidUserSignup10;
-  }
-
-  @Override
+  @Deprecated
   public PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null) {
@@ -1545,91 +1420,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   /**
-   * V2
-   * @param transaction
-   * @param user
-   * @param prepaidCard
-   * @param cdtTransaction
-   * @return
-   */
-
-  public PrepaidMovement10 buildPrepaidMovement(IPrepaidTransaction10 transaction, cl.multicaja.prepaid.model.v11.User user, PrepaidCard10 prepaidCard, CdtTransaction10 cdtTransaction) {
-
-    String codent = null;
-    try {
-      codent = getParametersUtil().getString("api-prepaid", "cod_entidad", "v10");
-    } catch (SQLException e) {
-      log.error("Error al cargar parametro cod_entidad");
-      codent = getConfigUtils().getProperty("tecnocom.codEntity");
-    }
-
-    TipoFactura tipoFactura = null;
-
-    // Verifico el tipo de movimiento (TOPUP/WITHDRAW) y el origen (POS/WEB)
-    switch (transaction.getMovementType()) {
-      case TOPUP:
-        if(TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          tipoFactura = TipoFactura.CARGA_TRANSFERENCIA;
-        } else {
-          tipoFactura = TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
-        }
-        break;
-      case WITHDRAW:
-        if(TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
-          tipoFactura = TipoFactura.RETIRO_TRANSFERENCIA;
-        } else {
-          tipoFactura = TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
-        }
-        break;
-    }
-
-    PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
-
-    prepaidMovement.setIdMovimientoRef(cdtTransaction.getTransactionReference());
-    prepaidMovement.setIdPrepaidUser(user.getId());
-    prepaidMovement.setIdTxExterno(cdtTransaction.getExternalTransactionId());
-    prepaidMovement.setTipoMovimiento(transaction.getMovementType());
-    prepaidMovement.setMonto(transaction.getAmount().getValue());
-    prepaidMovement.setEstado(PrepaidMovementStatus.PENDING);
-    prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
-    prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
-    prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
-    prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setCodent(codent);
-    prepaidMovement.setCentalta(""); //contrato (Numeros del 5 al 8) - se debe actualizar despues
-    prepaidMovement.setCuenta(""); ////contrato (Numeros del 9 al 20) - se debe actualizar despues
-    prepaidMovement.setClamon(CodigoMoneda.CHILE_CLP);
-    prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFactura.getCorrector())); //0-Normal
-    prepaidMovement.setTipofac(tipoFactura);
-    prepaidMovement.setFecfac(new Date(System.currentTimeMillis()));
-    prepaidMovement.setNumreffac(""); //se debe actualizar despues, es el id de PrepaidMovement10
-    prepaidMovement.setPan(prepaidCard != null ? prepaidCard.getPan() : ""); // se debe actualizar despues
-    prepaidMovement.setClamondiv(0);
-    prepaidMovement.setImpdiv(BigDecimal.ZERO);
-    prepaidMovement.setImpfac(transaction.getAmount().getValue());
-    prepaidMovement.setCmbapli(0); // se debe actualizar despues
-    prepaidMovement.setNumaut(""); // se debe actualizar despues con los 6 ultimos digitos de NumFacturaRef
-    prepaidMovement.setIndproaje(IndicadorPropiaAjena.AJENA); // A-Ajena
-    prepaidMovement.setCodcom(transaction.getMerchantCode());
-    prepaidMovement.setCodact(transaction.getMerchantCategory());
-    prepaidMovement.setImpliq(BigDecimal.ZERO); // se debe actualizar despues
-    prepaidMovement.setClamonliq(0); // se debe actualizar despues
-    prepaidMovement.setCodpais(CodigoPais.CHILE);
-    prepaidMovement.setNompob(""); // se debe actualizar despues
-    prepaidMovement.setNumextcta(0); // se debe actualizar despues
-    prepaidMovement.setNummovext(0); // se debe actualizar despues
-    prepaidMovement.setClamone(0); // se debe actualizar despues
-    prepaidMovement.setTipolin(""); // se debe actualizar despues
-    prepaidMovement.setLinref(0); // se debe actualizar despues
-    prepaidMovement.setNumbencta(1); // se debe actualizar despues
-    prepaidMovement.setNumplastico(0L); // se debe actualizar despues
-    prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setNomcomred(transaction.getMerchantName());
-
-    return prepaidMovement;
-  }
-
-  /**
    *
    * @param simulationNew
    */
@@ -1654,6 +1444,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public SimulationTopupGroup10 topupSimulationGroup(Map<String,Object> headers, Long userId, SimulationNew10 simulationNew) throws Exception {
 
     if(userId == null){
@@ -1964,9 +1755,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return prepaidUser;
   }
-
-
-
 
   @Override
   public PrepaidTransactionExtend10 getTransactions(
@@ -2513,6 +2301,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
@@ -2536,6 +2325,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
@@ -2559,6 +2349,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
+  @Deprecated
   private PrepaidCard10 getPrepaidCardToLock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null)  {
@@ -2573,6 +2364,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
+  @Deprecated
   private PrepaidCard10 getPrepaidCardToUnlock(Map<String, Object> headers, Long userId)throws Exception {
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, userId);
     if(prepaidCard == null) {
@@ -2590,16 +2382,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   public User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     User user = getUserClient().getUserById(headers, userIdMc);
-
-    if (user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    return user;
-  }
-
-  public User getUserMcByRut(Map<String, Object> headers, Integer rut) throws Exception {
-    User user = getUserClient().getUserByRut(headers, rut);
 
     if (user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
@@ -2627,6 +2409,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @return
    * @throws Exception
    */
+  @Deprecated
   private AppFile getLastTermsAndConditions(Map<String, Object> headers) throws Exception {
       Optional<AppFile> file =  getFilesEJBBean10().getAppFiles(headers, null, TERMS_AND_CONDITIONS, null, AppFileStatus.ENABLED)
       .stream()
@@ -2635,6 +2418,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return (file.isPresent()) ? file.get() : null;
   }
 
+  @Deprecated
   public PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception {
     AppFile tacFile = this.getLastTermsAndConditions(headers);
 
@@ -2658,6 +2442,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @throws Exception
    */
   @Override
+  @Deprecated
   public void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -2700,6 +2485,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception {
 
     if(userIdMc == null){
@@ -2885,6 +2671,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
+  @Deprecated
   public User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityValidation) throws Exception {
     if(userIdMc == null || Long.valueOf(0).equals(userIdMc)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
@@ -2986,6 +2773,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return user;
   }
 
+  @Deprecated
   private User processSuccessfulIdentityVerification(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
 
     //Cambiar status del usuario

@@ -68,19 +68,11 @@ public interface PrepaidEJB10 {
   /**
    *
    * @param headers
-   * @param signupRequest
-   * @return
-   * @throws Exception
-   */
-  PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception;
-
-  /**
-   *
-   * @param headers
    * @param userIdMc
    * @return
    * @throws Exception
    */
+  @Deprecated
   PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception;
 
 
@@ -209,6 +201,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception;
 
   /**
@@ -218,6 +211,7 @@ public interface PrepaidEJB10 {
    * @param termsAndConditions10
    * @throws Exception
    */
+  @Deprecated
   void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
 
   /**
@@ -227,6 +221,7 @@ public interface PrepaidEJB10 {
    * @param identityVerificationFiles
    * @throws Exception
    */
+  @Deprecated
   User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
 
   /**
@@ -245,6 +240,7 @@ public interface PrepaidEJB10 {
    * @param identityVerification
    * @throws Exception
    */
+  @Deprecated
   User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
 
 }
