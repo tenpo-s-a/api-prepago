@@ -106,6 +106,20 @@ spec:
   location: MESH_EXTERNAL
   ports:
   - number: 9080
-    name: http
+    name: http-api-prepaid-tecnocom
     protocol: HTTP
   resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: kafka
+  namespace: api-prepaid
+spec:
+  hosts:
+  - "137.116.88.31"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 9092
+    name: tcp-api-prepaid-kafka
+    protocol: TCP
