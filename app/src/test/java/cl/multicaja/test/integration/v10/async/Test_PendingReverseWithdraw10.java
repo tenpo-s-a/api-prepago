@@ -6,8 +6,8 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -37,15 +37,16 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test
   public void reverseRetryCount4() throws Exception {
-    User user = registerUser();
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account =  buildAccountFromTecnocom(prepaidUser);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
@@ -109,15 +110,16 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test
   public void reverseWithdraw_OriginalMovement_ProcessOk_pos() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account =  buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(getRandomString(15));
@@ -134,7 +136,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -208,22 +210,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTecnocom_pos() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account =  buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(getRandomString(15));
@@ -233,7 +236,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -333,22 +336,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse1_pos() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account =  buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(getRandomString(15));
@@ -358,7 +362,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -457,21 +461,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2_pos() throws Exception {
-    User user = registerUser();
+    
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(getRandomString(15));
@@ -481,7 +487,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -500,7 +506,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(originalWithdraw);
 
-    InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(prepaidCard, originalWithdraw);
+    InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(account, prepaidCard, originalWithdraw);
     Assert.assertTrue("Debe ser exitosa", withdrawTecnocom.isRetornoExitoso());
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
@@ -580,15 +586,16 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test
   public void reverseWithdraw_OriginalMovement_ProcessOk_web() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -605,7 +612,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -679,22 +686,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTecnocom_web() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -704,7 +712,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -804,22 +812,23 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse1_web() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
 
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -829,7 +838,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -928,21 +937,22 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2_web() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
     prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -952,7 +962,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
@@ -971,7 +981,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     // crea los movimientos de accounting y clearing correspondientes
     addAccountingAndClearing(originalWithdraw);
 
-    InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(prepaidCard, originalWithdraw);
+    InclusionMovimientosDTO withdrawTecnocom = inclusionMovimientosTecnocom(account, prepaidCard, originalWithdraw);
     Assert.assertTrue("Debe ser exitosa", withdrawTecnocom.isRetornoExitoso());
 
     PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
@@ -1054,21 +1064,22 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_Rejected() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
-    InclusionMovimientosDTO firstTopup = topupInTecnocom(prepaidCard, BigDecimal.valueOf(50000));
+    InclusionMovimientosDTO firstTopup = topupInTecnocom(account.getAccountNumber(), prepaidCard, BigDecimal.valueOf(50000));
     Assert.assertTrue("Debe ser exitosa", firstTopup.isRetornoExitoso());
 
-    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(prepaidCard.getProcessorUserId(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
+    ConsultaSaldoDTO balance = getTecnocomService().consultaSaldo(account.getAccountNumber(), prepaidUser.getRut().toString(), TipoDocumento.RUT);
     Assert.assertTrue("Debe ser exitosa", balance.isRetornoExitoso());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
 
