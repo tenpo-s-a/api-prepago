@@ -52,7 +52,7 @@ public class Test_PrepaidEJBBean10_calculateTopupFeeAndTotal extends TestBaseUni
 
   @Test
   public void calculateFeeAndTotal_withdraw() throws Exception {
-    PrepaidWithdraw10 prepaidWithdraw10 = buildPrepaidWithdraw10();
+    PrepaidWithdraw10 prepaidWithdraw10 = buildPrepaidWithdrawV2();
     NewAmountAndCurrency10 amount = new NewAmountAndCurrency10(new BigDecimal(5000));
     prepaidWithdraw10.setAmount(amount);
     ArrayList<PrepaidMovementFee10> feeList = new ArrayList<>();
