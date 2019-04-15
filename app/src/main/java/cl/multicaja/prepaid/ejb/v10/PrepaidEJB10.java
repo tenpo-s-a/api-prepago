@@ -58,25 +58,6 @@ public interface PrepaidEJB10 {
   void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception;
 
   /**
-   *
-   * @param headers
-   * @param userId
-   * @return
-   */
-  List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
-
-  /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  @Deprecated
-  PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-
-  /**
    * Retorna la informacion de la ultima tarjeta del usuario
    *
    * @param headers

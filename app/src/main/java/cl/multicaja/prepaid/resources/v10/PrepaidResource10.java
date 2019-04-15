@@ -151,14 +151,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @POST
-  @Path("/{userId}/finish_signup")
-  @Deprecated
-  public Response finishSignup(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers), userId);
-    return Response.ok(prepaidUser10).build();
-  }
-
-  @POST
   @Path("/{userId}/signup/tac")
   @Deprecated
   public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {

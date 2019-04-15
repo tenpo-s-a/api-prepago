@@ -1172,45 +1172,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId) {
-    return null;
-  }
-
-  @Override
-  @Deprecated
-  public PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception {
-
-    if(userIdMc == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "userId"));
-    }
-
-    User user = getUserClient().getUserById(headers,userIdMc);
-    if(user == null){
-      throw new ValidationException(CLIENTE_NO_EXISTE);
-    }
-    if(!user.getHasPassword()){
-      throw new ValidationException(CLIENTE_NO_TIENE_CLAVE);
-    }
-    if(!EmailStatus.VERIFIED.equals(user.getEmail().getStatus())){
-      throw new ValidationException(PROCESO_DE_REGISTRO_EMAIL_NO_VALIDADO);
-    }
-    if(!CellphoneStatus.VERIFIED.equals(user.getCellphone().getStatus())) {
-      throw new ValidationException(PROCESO_DE_REGISTRO_CELULAR_NO_VALIDADO);
-    }
-
-    user = getUserClient().finishSignup(headers, userIdMc, "Prepago");
-
-    PrepaidUser10 prepaidUser10 = new PrepaidUser10();
-    prepaidUser10.setUserIdMc(user.getId());
-    prepaidUser10.setRut(user.getRut().getValue());
-    prepaidUser10.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser10.setBalanceExpiration(0L);
-    prepaidUser10 = getPrepaidUserEJB10().createPrepaidUser(headers,prepaidUser10);
-
-    return prepaidUser10;
-  }
-
-  @Override
   public PrepaidCard10 getPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception {
 
     if(userIdMc == null){
