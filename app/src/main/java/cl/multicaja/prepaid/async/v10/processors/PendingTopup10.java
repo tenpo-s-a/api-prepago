@@ -155,7 +155,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               data.setCdtTransactionConfirm10(cdtTransactionConfirm);
 
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
               // Expira cache del saldo de la cuenta
               getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
@@ -198,7 +198,7 @@ public class PendingTopup10 extends BaseProcessor10 {
               data.getPrepaidMovement10().setEstado(status);
               data.getPrepaidMovement10().setEstadoNegocio(businessStatus);
 
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionRejectedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
               Endpoint endpoint = createJMSEndpoint(ERROR_TOPUP_REQ);
               return redirectRequest(endpoint, exchange, req, false);
