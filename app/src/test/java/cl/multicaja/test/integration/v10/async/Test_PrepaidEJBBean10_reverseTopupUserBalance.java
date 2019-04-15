@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public class Test_PrepaidEJBBean10_reverseTopupUserBalance extends TestBaseUnitAsync{
-
   @Test
   public void reverseTopup_transactionEvent() throws Exception {
 
