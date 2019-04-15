@@ -647,7 +647,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null, prepaidUser.getId());
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getActiveCardByUserId(null,prepaidUser.getId());
     if (prepaidCard == null) {
       prepaidCard = getPrepaidCardEJB11().getInvalidCardByUserId(headers,prepaidUser.getId());
       if(prepaidCard != null){
