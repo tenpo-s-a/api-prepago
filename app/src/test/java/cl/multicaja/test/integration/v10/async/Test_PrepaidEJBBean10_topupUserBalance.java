@@ -559,7 +559,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     //primera carga
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(3119));
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
 
