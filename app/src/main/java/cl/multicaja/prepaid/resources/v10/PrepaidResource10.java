@@ -249,26 +249,6 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok().status(201).build();
   }
 
-  /*
-   *  idnetity verification
-   */
-
-  @POST
-  @Path("/{user_id}/identity_validation")
-  @Deprecated
-  public Response processIdentityValidation(IdentityValidation10 identityValidation10, @PathParam("user_id") Long userId, @Context HttpHeaders headers) {
-    try {
-      User user = this.prepaidEJBBean10.processIdentityVerification(headersToMap(headers), userId, identityValidation10);
-      return Response.ok(user).status(201).build();
-    } catch (Exception ex) {
-      log.error("Error processing identity validation for userId: " + userId);
-      ex.printStackTrace();
-      //TODO: informar error?
-    }
-    return Response.ok().status(201).build();
-  }
-
-
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")
   public Response processRefundMovement(@PathParam("user_prepago_id") Long userPrepagoId, @PathParam("movement_id") Long movementId, @Context HttpHeaders headers) {

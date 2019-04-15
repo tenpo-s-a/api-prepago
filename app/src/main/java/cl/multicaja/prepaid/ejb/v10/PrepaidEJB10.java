@@ -185,15 +185,4 @@ public interface PrepaidEJB10 {
    */
   String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception;
 
-
-  /**
-   * Procesa la informacion de verificacion de identidad del usuario realizada en Freshdesk
-   * @param headers
-   * @param userIdMc
-   * @param identityVerification
-   * @throws Exception
-   */
-  @Deprecated
-  User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
-
 }
