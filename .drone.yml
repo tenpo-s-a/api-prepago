@@ -13,6 +13,7 @@ pipeline:
   dbusers_migration:
     image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
     commands:
+      - ./drone-mvn-cache.sh
       - sleep 15
       - cd /app/pg && ./db-create.sh -Denv=ci
       - cd /app/pg && ./migrate-up.sh -Denv=ci
@@ -77,6 +78,8 @@ pipeline:
     when:
       event: [ push ]
       status: [ success, failure ]
+      branch:
+        exclude: master
 
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
@@ -119,17 +122,17 @@ pipeline:
     when:
       event: [ push ]
 
-  publish_dbmigration_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
-    tags:
-      - dbmigration-${DRONE_COMMIT_SHA}
-    dockerfile: Dockerfile.ci.migration
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
+  #publish_dbmigration_image:
+  #  registry: mccontainerregistry.azurecr.io
+  #  image: plugins/docker
+  #  repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
+  #  tags:
+  #    - dbmigration-${DRONE_COMMIT_SHA}
+  #  dockerfile: Dockerfile.ci.migration
+  #  secrets: [ docker_username, docker_password ]
+  #  when:
+  #    event: [ push ]
+  #    branch: master
 
   #publish_ci_image:
   #  registry: mccontainerregistry.azurecr.io
