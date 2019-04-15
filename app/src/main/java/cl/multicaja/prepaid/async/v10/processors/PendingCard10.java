@@ -81,7 +81,7 @@ public class PendingCard10 extends BaseProcessor10 {
           Account account = getRoute().getAccountEJBBean10().insertAccount(data.getPrepaidUser10().getId(), altaClienteDTO.getContrato());
           log.info(String.format("Account [%s]",account.getAccountNumber()));
           // publica evento de contrato/cuenta creada
-          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getId(), account);
+          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUuid(), account);
 
           PrepaidCard10 prepaidCard = new PrepaidCard10();
           prepaidCard.setAccountId(account.getId());
