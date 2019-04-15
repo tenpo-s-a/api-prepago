@@ -185,14 +185,6 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
-  @POST
-  @Path("/{userId}/identity/files")
-  @Deprecated
-  public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    User user = this.prepaidEJBBean10.uploadIdentityVerificationFiles(headersToMap(headers),userId, identityVerificationFiles);
-    return Response.ok(user).build();
-  }
-
   /*
      Prepaid Simulations
    */

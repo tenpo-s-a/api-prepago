@@ -178,16 +178,6 @@ public interface PrepaidEJB10 {
   PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
-   * Cargar informacion sobre las fotos de verificacion de identidad del usuario
-   * @param headers
-   * @param userIdMc
-   * @param identityVerificationFiles
-   * @throws Exception
-   */
-  @Deprecated
-  User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
-
-  /**
    * Busca en las colas erroneas el mensaje por el id y lo vuelve a inyectar para ser reprocesado.
    * @param headers
    * @param reprocesQueue

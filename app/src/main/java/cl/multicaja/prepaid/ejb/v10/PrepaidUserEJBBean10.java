@@ -398,6 +398,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
+  @Deprecated
   public PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception {
     if(prepaidUser == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));

@@ -95,6 +95,7 @@ public interface PrepaidUserEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
 
   /**
