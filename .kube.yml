@@ -123,3 +123,4 @@ spec:
   - number: 9092
     name: tcp-api-prepaid-kafka
     protocol: TCP
+  resolution: NONE
