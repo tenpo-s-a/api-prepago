@@ -70,15 +70,13 @@ public class Test_PrepaidEJBBean10_getBalance extends TestBaseUnit {
   @Test
   public void getBalance_ok() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
-    account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), account.getAccountNumber());
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardByAccountNumber(prepaidUser10, account.getAccountNumber());
-    prepaidCard10.setAccountId(account.getId());
-    prepaidCard10.setProcessorUserId(account.getAccountNumber());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     assertTrue("Saldo debe ser empty o null", StringUtils.isAllBlank(account.getBalanceInfo()));
@@ -86,7 +84,7 @@ public class Test_PrepaidEJBBean10_getBalance extends TestBaseUnit {
 
     BigDecimal impfac = BigDecimal.valueOf(numberUtils.random(3000, 10000));
 
-    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(prepaidCard10, impfac);
+    InclusionMovimientosDTO inclusionMovimientosDTO = topupInTecnocom(account.getAccountNumber(), prepaidCard10, impfac);
 
     assertTrue("debe ser exitoso", inclusionMovimientosDTO.isRetornoExitoso());
 

@@ -21,6 +21,8 @@ import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import cl.multicaja.tecnocom.model.response.Response;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -59,9 +61,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
   private CdtEJBBean10 cdtEJBBean10;
 
   @Spy
-  private UserClient userClient;
-
-  @Spy
   private TecnocomService tecnocomService;
 
   @Spy
@@ -94,20 +93,14 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Test
   public void reverseWithdrawByTecnocomTimeoutResponse() throws Exception {
-    //MC user
-    User user = new User();
-    Rut rut = new Rut();
-    rut.setValue(Integer.MAX_VALUE);
-    user.setRut(rut);
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.setId(Long.MAX_VALUE);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
 
+    String uuid = RandomStringUtils.random(10);
     //Prepaid user
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setId(Long.MAX_VALUE);
     prepaidUser.setUserIdMc(Long.MAX_VALUE);
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setUuid(uuid);
 
     //PrepaidCard
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
@@ -144,14 +137,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setNumError("0");
 
-    // UserMc
-    Mockito.doReturn(user).when(userClient).getUserByRut(headers, Integer.MAX_VALUE);
-
     // PrepaidUser
-    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).getPrepaidUserByUserIdMc(headers, Long.MAX_VALUE);
-
-    // CheckPassword
-    Mockito.doNothing().when(userClient).checkPassword(Mockito.any(), Mockito.anyLong(), Mockito.any(UserPasswordNew.class));
+    Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
     //PrepaidCard
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean10).getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
@@ -214,7 +201,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       Mockito.any(TipoFactura.class));
 
     try{
-      prepaidEJBBean10.withdrawUserBalance(headers, withdrawRequest,true);
+      prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);
     } catch (RunTimeValidationException vex) {
       // Se verifica que se llamaron los metodos
       Mockito.verify(prepaidMovementEJBBean10, Mockito.times(2)).addPrepaidMovement(Mockito.any(), Mockito.any(PrepaidMovement10.class));

@@ -55,6 +55,9 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
   private static final String UPDATE_BALANCE_SQL
     = String.format("UPDATE %s.prp_cuenta SET saldo_info = ?, saldo_expiracion = ? WHERE id = ?", getSchema());
 
+  private static final String EXPIRE_BALANCE__CACHE_SQL
+    = String.format("UPDATE %s.prp_cuenta SET saldo_expiracion = ? WHERE id = ?", getSchema());
+
   private static final String FIND_ACCOUNT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id = ?", getSchema());
   
   private static final String FIND_ACCOUNT_BY_UUID_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE uuid = ?", getSchema());
@@ -332,6 +335,34 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     if(rows == 0) {
       log.error(String.format("[updateBalance] Error al actualizar el saldo de la cuenta [id: %d]", accountId));
       throw new Exception("No se pudo actualizar el saldo");
+    }
+  }
+
+  /**
+   * Expira el cache del saldo de una cuenta
+   *
+   * @param accountId id de la cuenta
+   * @throws Exception
+   */
+  public void expireBalanceCache(Long accountId) throws Exception {
+    if(accountId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+    log.error(String.format("[expireBalanceCache] Expirando cache del saldo de cuenta [id: %d]", accountId));
+
+    int rows = getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(EXPIRE_BALANCE__CACHE_SQL);
+
+      ps.setLong(1, Instant.now().toEpochMilli());
+      ps.setLong(2, accountId);
+
+      return ps;
+    });
+
+    if(rows == 0) {
+      log.error(String.format("[expireBalanceCache] Error al expirar cache el saldo de la cuenta [id: %d]", accountId));
+      throw new ValidationException(CUENTA_NO_EXISTE);
     }
   }
 

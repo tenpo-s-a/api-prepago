@@ -133,7 +133,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_TOPUP_REQ), exchange, req, false);
           }
           else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
-            log.debug("********** Realizando reversa de retiro **********");
+            log.debug("********** Realizando reversa de carga **********");
             log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
 
             // Se intenta realizar reversa del movimiento.
@@ -152,7 +152,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               req.getData().getPrepaidMovementReverse().setEstado(PrepaidMovementStatus.PROCESS_OK);
               req.getData().getPrepaidMovementReverse().setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
-              log.debug("********** Reversa de retiro realizada exitosamente **********");
+              log.debug("********** Reversa de carga realizada exitosamente **********");
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null,originalMovement.getIdMovimientoRef());
               CdtTransaction10 cdtTxReversa = callCDT(prepaidTopup,prepaidUser10,0L,
                 CdtTransactionType.PRIMERA_CARGA.equals(movRef.getTransactionType())?CdtTransactionType.REVERSA_PRIMERA_CARGA:CdtTransactionType.REVERSA_CARGA);
@@ -164,10 +164,13 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
               //actualiza movimiento original en accounting y clearing
               getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
 
+              // Expira cache del saldo de la cuenta
+              getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
               return req;
             } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
               if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
-                log.debug("********** Reversa de retiro ya existia **********");
+                log.debug("********** Reversa de carga ya existia **********");
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, originalMovement.getId(), BusinessStatusType.REVERSED);
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.PROCESS_OK);
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.CONFIRMED);
@@ -181,8 +184,11 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
                 }
                 //actualiza movimiento original en accounting y clearing
                 getRoute().getPrepaidMovementEJBBean10().updateAccountingStatusReconciliationDateAndClearingStatus(originalMovement.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
+
+                // Expira cache del saldo de la cuenta
+                getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
               } else {
-                log.debug("********** Reversa de retiro rechazada **********");
+                log.debug("********** Reversa de carga rechazada **********");
                 log.debug(inclusionMovimientosDTO.getDescRetorno());
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovementReverse.getId(), PrepaidMovementStatus.REJECTED);
                 getRoute().getPrepaidMovementEJBBean10().updatePrepaidBusinessStatus(null, prepaidMovementReverse.getId(), BusinessStatusType.REJECTED);

@@ -192,8 +192,10 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
   public void pendingCreateCardUnit() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    Account account = createRandomAccount(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();

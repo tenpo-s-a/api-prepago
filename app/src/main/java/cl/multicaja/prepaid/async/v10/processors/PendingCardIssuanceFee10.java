@@ -152,17 +152,15 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           return redirectRequest(endpoint, exchange, req, false);
         }
 
-        String contrato = prepaidCard.getProcessorUserId();
+        //String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
         //TODO: para el cobro de emision se toma el mismo merchant name de la carga? o se debe colocar el de prepago?
         String nomcomred = prepaidTopup.getMerchantName();
+        log.info(String.format("Account [%s]",account.getAccountNumber()));
+        InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().issuanceFee(account.getAccountNumber(), pan, nomcomred, issuanceFeeMovement);
 
-        InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().issuanceFee(contrato, pan, nomcomred, issuanceFeeMovement);
-
-        log.info("Respuesta inclusion");
-        log.info(inclusionMovimientosDTO.getRetorno());
-        log.info(inclusionMovimientosDTO.getDescRetorno());
+        log.info(String.format("Respuesta alta de issuanceFee [%s] [%s]",inclusionMovimientosDTO.getRetorno(),inclusionMovimientosDTO.getDescRetorno()));
 
         if (inclusionMovimientosDTO.isRetornoExitoso()) {
 
@@ -210,6 +208,10 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
             prepaidCard.getId(),
             KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT
           );
+          req.getData().setPrepaidCard10(prepaidCard);
+
+          // Expira cache del saldo de la cuenta
+          getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
 
           return req;
 

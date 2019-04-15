@@ -45,7 +45,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, tipoAlta,4);
@@ -74,7 +74,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     String messageId = sendPendingProductChange(prepaidUser, account, prepaidCard, TipoAlta.NIVEL2,0);
@@ -98,7 +98,7 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = getAccountEJBBean10().insertAccount(prepaidUser.getId(), account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardByAccountNumber(prepaidUser, account.getAccountNumber());
+    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser, account);
     prepaidCard = createPrepaidCardV2(prepaidCard);
     prepaidCard.setHashedPan(getRandomString(20));
     prepaidCard.setAccountId(account.getId());
@@ -136,10 +136,10 @@ public class Test_ProductChangeRoute10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe tener el mismo userId", prepaidUser.getUserIdMc().toString(), cardEvent.getUserId());
     Assert.assertEquals("Debe tener el mismo pan", prepaidCard.getPan(), cardEvent.getCard().getPan());
 
+
     // Revisar que existan el evento de tarjeta creada en kafka
     qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.CARD_CREATED_TOPIC);
-    event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-      .getMessage(qResp, prepaidCard.getUuid());
+    event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidCard.getUuid());
 
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event);
     Assert.assertNotNull("Deberia existir un evento de tarjeta creada event", event.getData());

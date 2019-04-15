@@ -827,8 +827,15 @@ public class TestBaseUnit extends TestApiBase {
     return account;
   }
 
-  public PrepaidCard10 buildPrepaidCardByAccountNumber(PrepaidUser10 user, String accountNumber) throws Exception {
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(accountNumber);
+  /**
+   *
+   * @param user
+   * @param accountNumber
+   * @return
+   * @throws Exception
+   */
+  public PrepaidCard10 buildPrepaidCardWithTecnocomData(PrepaidUser10 user, Account account) throws Exception {
+    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(account.getAccountNumber());
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setIdUser(user.getId());
     prepaidCard.setProcessorUserId("");
@@ -839,6 +846,8 @@ public class TestBaseUnit extends TestApiBase {
     prepaidCard.setNameOnCard(user.getName() + " " + user.getLastName());
     prepaidCard.setProducto(datosTarjetaDTO.getProducto());
     prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
+    prepaidCard.setUuid(UUID.randomUUID().toString());
+    prepaidCard.setAccountId(account.getId());
     return prepaidCard;
   }
 
@@ -941,15 +950,19 @@ public class TestBaseUnit extends TestApiBase {
    * @param user
    * @return
    */
+  @Deprecated
   public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) throws Exception {
     return buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
   }
 
+  @Deprecated
   public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) throws Exception {
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getRandomNumericString(15);
     return buildNewPrepaidWithdraw10(user, password, merchantCode);
   }
 
+
+  @Deprecated
   public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password, String merchantCode) throws Exception {
 
     NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
@@ -961,21 +974,36 @@ public class TestBaseUnit extends TestApiBase {
     newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
     newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
     prepaidWithdraw.setAmount(newAmountAndCurrency);
-
     prepaidWithdraw.setMerchantCategory(1);
     prepaidWithdraw.setMerchantName(getRandomString(6));
-
-    prepaidWithdraw.setPassword(password);
-
-    // Los retiros web requieren que el usuario tenga una cuenta asociada
-    if (NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE.equals(merchantCode)) {
-      UserAccount bankAccount = createBankAccount(user);
-      prepaidWithdraw.setBankAccountId(bankAccount.getId());
-    }
 
     return prepaidWithdraw;
   }
 
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdrawV2() throws Exception {
+    return buildNewPrepaidWithdrawV2(getRandomNumericString(15));
+  }
+
+  public NewPrepaidWithdraw10 buildNewPrepaidWithdrawV2(String merchantCode) throws Exception {
+
+    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
+    prepaidWithdraw.setMerchantCode(merchantCode);
+    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
+    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
+    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
+    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
+    prepaidWithdraw.setAmount(newAmountAndCurrency);
+    prepaidWithdraw.setMerchantCategory(1);
+    prepaidWithdraw.setMerchantName(getRandomString(6));
+    if(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE.equals(merchantCode)){
+      UserAccount userAccount = randomBankAccount();
+      prepaidWithdraw.setBankId(userAccount.getBankId());
+      prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+      prepaidWithdraw.setAccountType(userAccount.getAccountType());
+      prepaidWithdraw.setAccountRut(userAccount.getRut());
+    }
+    return prepaidWithdraw;
+  }
 
   /**
    *
@@ -1012,12 +1040,10 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidWithdraw;
   }
 
-  public PrepaidWithdraw10 buildPrepaidWithdraw10() {
+  public PrepaidWithdraw10 buildPrepaidWithdrawV2(){
 
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10();
-
     prepaidWithdraw.setMerchantCode(merchantCode);
     prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
 
@@ -1039,6 +1065,7 @@ public class TestBaseUnit extends TestApiBase {
 
     return prepaidWithdraw;
   }
+
 
   /**
    *
@@ -1078,11 +1105,11 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws BaseException
    */
-  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidWithdraw10 prepaidWithdraw) throws BaseException {
+  public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidWithdraw10 prepaidWithdraw) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(prepaidWithdraw.getAmount().getValue());
     cdtTransaction.setTransactionType(prepaidWithdraw.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getDocumentNumber());
     cdtTransaction.setGloss(prepaidWithdraw.getCdtTransactionType().getName()+" "+prepaidWithdraw.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(prepaidWithdraw.getTransactionId());
@@ -1624,6 +1651,7 @@ public class TestBaseUnit extends TestApiBase {
    * @param prepaidCard10
    * @return
    */
+  @Deprecated
   public InclusionMovimientosDTO topupInTecnocom(PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
 
     if (prepaidCard10 == null) {
@@ -1660,6 +1688,42 @@ public class TestBaseUnit extends TestApiBase {
 
     return inclusionMovimientosDTO;
   }
+
+
+  public InclusionMovimientosDTO topupInTecnocom(String accountNumber, PrepaidCard10 prepaidCard10, BigDecimal impfac) throws BaseException {
+
+    if (prepaidCard10 == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10"));
+    }
+
+    if (impfac == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(accountNumber == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountNumber"));
+    }
+    if (StringUtils.isBlank(prepaidCard10.getPan())) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidCard10.pan"));
+    }
+
+    String pan = prepaidCard10.getPan();
+    CodigoMoneda clamon = CodigoMoneda.CHILE_CLP;
+    IndicadorNormalCorrector indnorcor = IndicadorNormalCorrector.NORMAL;
+    TipoFactura tipofac = TipoFactura.CARGA_TRANSFERENCIA;
+    String codcom = "1";
+    Integer codact = 1;
+    CodigoMoneda clamondiv = CodigoMoneda.NONE;
+    String nomcomred = "prueba";
+    String numreffac = getUniqueLong().toString();
+    String numaut = TecnocomServiceHelper.getNumautFromIdMov(numreffac);
+
+    InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomService().inclusionMovimientos(accountNumber, pan, clamon, indnorcor, tipofac,
+      numreffac, impfac, numaut, codcom,
+      nomcomred, codact, clamondiv,impfac);
+
+    return inclusionMovimientosDTO;
+  }
+
   @Deprecated
   public InclusionMovimientosDTO inclusionMovimientosTecnocom(PrepaidCard10 prepaidCard10, PrepaidMovement10 movement10) throws BaseException {
 
@@ -1732,10 +1796,12 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard10;
   }
 
+  @Deprecated
   protected UserAccount createBankAccount(User user) throws Exception {
     return createBankAccount(user, 1L, "Cuenta corriente", "mi cuenta de test", getRandomNumericString(8), user.getRut().getValue());
   }
 
+  @Deprecated
   protected UserAccount createBankAccount(User user, Long bankId, String type, String name, String number, Integer rut) throws Exception {
     UserAccountNew newAccountRequest = new UserAccountNew();
     newAccountRequest.setBankId(bankId);
@@ -1745,6 +1811,15 @@ public class TestBaseUnit extends TestApiBase {
     newAccountRequest.setRut(rut);
     UserAccount newAccount = getUserClient().createUserBankAccount(null, user.getId(), newAccountRequest);
     return newAccount;
+  }
+
+  protected UserAccount randomBankAccount(){
+    UserAccount userAccount = new UserAccount();
+    userAccount.setBankId(getUniqueRutNumber().longValue());
+    userAccount.setAccountNumber(getUniqueRutNumber().longValue());
+    userAccount.setAccountType("Vista");
+    userAccount.setRut(getUniqueRutNumber().toString());
+    return userAccount;
   }
 
   public Map<String,Object> getDefaultHeaders(){

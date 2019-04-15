@@ -3,22 +3,13 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.junit.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAsync {
 
@@ -116,25 +107,32 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     }
   }
 
+  //TODO: Revisar esto.
   public ResolutionPreparedVariables prepareTest(Long fileId, String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
-    User user = registerUser();
-    UserAccount userAccount = createBankAccount(user);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    UserAccount userAccount = randomBankAccount();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(merchantCode);
-    prepaidWithdraw.setBankAccountId(userAccount.getId());
+    prepaidWithdraw.setBankId(userAccount.getBankId());
+    prepaidWithdraw.setAccountNumber(userAccount.getAccountNumber());
+    prepaidWithdraw.setAccountType(userAccount.getAccountType());
+    prepaidWithdraw.setAccountRut(userAccount.getRut());
     prepaidWithdraw.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidWithdraw.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidWithdraw);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidWithdraw);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard, cdtTransaction, PrepaidMovementType.WITHDRAW);
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidWithdraw, prepaidCard10, cdtTransaction, PrepaidMovementType.WITHDRAW);
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement.setConTecnocom(tecnocomStatus);
     prepaidMovement.setEstado(movementStatus);

@@ -157,6 +157,9 @@ public class PendingTopup10 extends BaseProcessor10 {
 
               getRoute().getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), data.getAccount().getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
+              // Expira cache del saldo de la cuenta
+              getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+
               Endpoint toAccounting = createJMSEndpoint(PENDING_SEND_MOVEMENT_TO_ACCOUNTING_REQ);
               redirectRequest(toAccounting, exchange, req, Boolean.FALSE);
 
