@@ -212,22 +212,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @PUT
-  @Path("/{userId}/card/lock")
-  @Deprecated
-  public Response lockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = this.prepaidEJBBean10.lockPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @PUT
-  @Path("/{userId}/card/unlock")
-  @Deprecated
-  public Response unlockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = this.prepaidEJBBean10.unlockPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
   public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
     PrepaidCard10 prepaidCard10 = prepaidCardEJBBean11.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);

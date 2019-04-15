@@ -158,26 +158,6 @@ public interface PrepaidEJB10 {
   PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception;
 
   /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  @Deprecated
-  PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  @Deprecated
-  PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
    * Busca en las colas erroneas el mensaje por el id y lo vuelve a inyectar para ser reprocesado.
    * @param headers
    * @param reprocesQueue
