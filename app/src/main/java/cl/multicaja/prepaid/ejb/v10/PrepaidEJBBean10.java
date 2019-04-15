@@ -648,6 +648,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
     if(prepaidUser.getStatus().equals(PrepaidUserStatus.DISABLED)){
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
@@ -679,7 +680,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           String timezone;
           if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
             timezone="America/Santiago";
-          } else{
+          }
+          else {
             timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
           }
           if(getDateUtils().inLastHours(24L, originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
@@ -690,7 +692,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
             PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
-        
+
             PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
             if(!fromEndPoint){
               prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
