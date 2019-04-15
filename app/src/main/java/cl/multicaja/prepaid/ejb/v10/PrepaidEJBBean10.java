@@ -47,6 +47,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -2003,6 +2004,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Date _endDate, _endDateFilter;
 
     if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
+      /* TODO: borra este comentario
       String timeZone = "";
       if(headers != null && headers.containsKey(Constants.HEADER_USER_TIMEZONE)) {
         timeZone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
@@ -2010,6 +2012,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         timeZone = "America/Santiago";
       }
       _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),timeZone);
+      */
+      _startDate = Date.from(prepaidCard.getTimestamps().getCreatedAt().atZone(ZoneId.of("UTC")).toInstant());
       _endDate = new Date(System.currentTimeMillis());
     } else {
       _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");

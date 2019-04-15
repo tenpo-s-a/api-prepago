@@ -2,21 +2,13 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
-import cl.multicaja.prepaid.kafka.events.model.Card;
-import cl.multicaja.prepaid.kafka.events.CardEvent;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.tecnocom.constants.TipoAlta;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -151,8 +143,8 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       c.setProducto(String.valueOf(row.get("_producto")));
       c.setNumeroUnico(String.valueOf(row.get("_numero_unico")));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_fecha_creacion")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_fecha_actualizacion")).toLocalDateTime());
       c.setTimestamps(timestamps);
       return c;
     };

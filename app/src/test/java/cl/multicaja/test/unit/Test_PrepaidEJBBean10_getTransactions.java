@@ -11,7 +11,6 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
@@ -34,6 +33,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -225,7 +226,7 @@ public class Test_PrepaidEJBBean10_getTransactions {
     prepaidCard10.setProcessorUserId("1");
 
     Timestamps timestamps = new Timestamps();
-    timestamps.setCreatedAt(new Timestamp(new Date().getTime()));
+    timestamps.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
     prepaidCard10.setTimestamps(timestamps);
 
     Response response = new Response();

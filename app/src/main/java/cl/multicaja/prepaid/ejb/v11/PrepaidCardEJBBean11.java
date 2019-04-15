@@ -6,7 +6,6 @@ import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.model.v10.*;
@@ -62,8 +61,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       c.setProducto(rs.getString("producto"));
       c.setNumeroUnico(rs.getString("numero_unico"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion"));
-      timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion"));
+      timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());
       c.setTimestamps(timestamps);
 
       c.setUuid(rs.getString("uuid"));
@@ -187,10 +186,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     card.setStatus(prepaidCard10.getStatus().toString());
 
     cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
-
-    timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt().toLocalDateTime());
-
-    timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt().toLocalDateTime());
+    timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt());
+    timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt());
     card.setTimestamps(timestamps);
 
     CardEvent cardEvent = new CardEvent();
