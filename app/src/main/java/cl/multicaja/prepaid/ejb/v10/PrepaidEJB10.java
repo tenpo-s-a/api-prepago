@@ -164,6 +164,7 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
 
   /**
@@ -173,27 +174,8 @@ public interface PrepaidEJB10 {
    * @return
    * @throws Exception
    */
+  @Deprecated
   PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   * Obtiene los terminos y condiciones vigentes para preago
-   *
-   * @param headers
-   * @return
-   * @throws Exception
-   */
-  @Deprecated
-  PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception;
-
-  /**
-   *  Aceptar los terminos y condiciones
-   * @param headers
-   * @param userIdMc
-   * @param termsAndConditions10
-   * @throws Exception
-   */
-  @Deprecated
-  void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
 
   /**
    * Cargar informacion sobre las fotos de verificacion de identidad del usuario

@@ -139,26 +139,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   /*
-    Prepaid Signup
-   */
-
-  @GET
-  @Path("/signup/tac")
-  @Deprecated
-  public Response getTermsAndConditions(@Context HttpHeaders headers) throws Exception {
-    PrepaidTac10 tac = this.prepaidEJBBean10.getTermsAndConditions(headersToMap(headers));
-    return Response.ok(tac).build();
-  }
-
-  @POST
-  @Path("/{userId}/signup/tac")
-  @Deprecated
-  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
-    return Response.ok().build();
-  }
-
-  /*
     Prepaid User
    */
   @GET
