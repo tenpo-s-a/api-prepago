@@ -15,9 +15,11 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
+import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import org.apache.commons.lang3.StringUtils;
@@ -25,8 +27,10 @@ import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -38,6 +42,16 @@ import static cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10.P
  * @autor vutreras
  */
 public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
+
+  private final BigDecimal topupTotalAmount = BigDecimal.valueOf(3238); // Total carga
+
+  private final BigDecimal posFeeTotalAmount = BigDecimal.valueOf(238); // Pos Fee base + iva
+  private final BigDecimal posFeeBaseAmount = BigDecimal.valueOf(200); // Pos Fee base
+  private final BigDecimal posFeeIvaAmount = BigDecimal.valueOf(38); // Web Iva
+
+  private final BigDecimal webFeeTotalAmount = BigDecimal.valueOf(0); // Web Fee base + iva
+  private final BigDecimal webFeeBaseAmount = BigDecimal.valueOf(0); // Web Fee base
+  private final BigDecimal webFeeIvaAmount = BigDecimal.valueOf(0); // Web Iva
 
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static TecnocomServiceHelper tc;
@@ -133,15 +147,16 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Test
-  public void topupUserBalance_validate_cdt() throws Exception {
+  public void topupUserBalance_validate_cdt_prepaidMovement_and_pos_fees() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(getRandomNumericString(15));
 
-    //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(3119, 10000)));
+    //se debe establecer la primera carga mayor a 3238 dado que es el valor minimo definido por un limite del CDT
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -163,7 +178,22 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
       Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
 
+      Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
+      Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
+
       waitForAccountingToExist(prepaidTopup.getId());
+
+      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
+
+      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee base", baseFee);
+      Assert.assertEquals("Debe tener valor 200", posFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+      Assert.assertEquals("Debe tener valor 38", posFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
 
     } else {
       Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
@@ -171,15 +201,16 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
   }
 
   @Test
-  public void topupUserBalance_validate_prepaidMovement() throws Exception {
+  public void topupUserBalance_validate_cdt_prepaidMovement_and_web_fees() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
-    //se debe establecer la primera carga mayor a 3000 dado que es el valor minimo definido por un limite del CDT
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(numberUtils.random(4000, 10000)));
+    //se debe establecer la primera carga mayor a 3238 dado que es el valor minimo definido por un limite del CDT
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 prepaidTopup = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -198,10 +229,25 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidTopup.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
       Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
+      Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
+      Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
+
       Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
       Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
 
       waitForAccountingToExist(prepaidTopup.getId());
+
+      // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
+      List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
+      Assert.assertEquals("Deben haber 2 fees asignadas a este movimiento", 2, prepaidMovementFee10List.size());
+
+      PrepaidMovementFee10 baseFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee base", baseFee);
+      Assert.assertEquals("Debe tener valor 0", webFeeBaseAmount, baseFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir una fee iva", ivaFee);
+      Assert.assertEquals("Debe tener valor 0", webFeeIvaAmount, ivaFee.getAmount().setScale(0, RoundingMode.HALF_UP));
 
     } else {
       Assert.assertNull("No debe tener messageId dado que camel no se encuentra en ejecucion", messageId);
@@ -215,9 +261,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
+    prepaidTopup10.setMerchantCode(getRandomNumericString(15));
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -237,10 +284,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision(119) - comision de apertura (990))", 3000L, prepaidBalance10.getBalance().getValue().longValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision(238) - comision de apertura (0)", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision(0) - comision de apertura (990))", 3119L, prepaidBalance10.getBalance().getValue().longValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision(0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -268,7 +315,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertTrue("Debe haber al menos 1 movimiento de account", accounting10s.size() >= 1);
 
@@ -287,6 +334,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+
     } else {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
@@ -299,9 +347,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
+    newPrepaidTopup.setMerchantCode(getRandomNumericString(15));
 
     //primera carga
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(3119));
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -321,10 +370,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (newPrepaidTopup.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -371,6 +420,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
       Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
       Assert.assertEquals("Debe estar en estado INITIAL", AccountingStatusType.INITIAL, clearing10.getStatus());
+
     } else {
       Assert.fail("No debe caer aqui. No encontro los datos en accounting y clearing");
     }
@@ -509,7 +559,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 newPrepaidTopup = buildPrepaidTopup10();
 
     //primera carga
-    newPrepaidTopup.getAmount().setValue(BigDecimal.valueOf(3119));
+    newPrepaidTopup.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null, prepaidUser.getUuid(), newPrepaidTopup,true);
 
@@ -539,7 +589,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -559,10 +609,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -589,6 +639,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
+      secondTopup.getAmount().setValue(topupTotalAmount);
 
       PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
@@ -615,19 +666,9 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNull("No Deberia existir un topup en la cola", remoteTopup2);
     }
 
-     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
-
+    boolean dataFound = waitForClearingToExist();
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertTrue("Debe haber al menos 2 movimientos de accounting", accounting10s.size() >= 2);
 
@@ -956,7 +997,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -976,10 +1017,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -1001,11 +1042,13 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", resp.getId(), remoteTopup.getData().getPrepaidTopup10().getId());
     Assert.assertEquals("Deberia ser igual al enviado al procesdo por camel", prepaidUser10.getId(), remoteTopup.getData().getPrepaidUser10().getId());
 
-    Thread.sleep(2000);
+    // Porque se espera si ya se sabe que el movimiento fue procesado
+    //Thread.sleep(2000);
 
     // Segunda carga debe ser sincrona
     {
       NewPrepaidTopup10 secondTopup = buildNewPrepaidTopup10();
+      secondTopup.getAmount().setValue(topupTotalAmount);
 
       PrepaidTopup10 resp2 = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), secondTopup,true);
 
@@ -1043,19 +1086,11 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo monto", prepaidTopup10.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
       Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
       Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+
+      assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
     }
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
-
+    boolean dataFound = waitForClearingToExist();
     if (dataFound) {
       List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
       Assert.assertNotNull("No debe ser null", accounting10s);
@@ -1186,6 +1221,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo monto", secondTopup.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
       Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
       Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+
+      assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
     }
   }
 
@@ -1315,6 +1352,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
         Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
         Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
 
+        assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
 
         PrepaidMovement10 topupReverse = getPrepaidMovementEJBBean10().getPrepaidMovementByIdTxExterno(secondTopup.getTransactionId(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
 
@@ -1328,8 +1366,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
-
-
   }
 
   @Test
@@ -1411,6 +1447,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener el mismo monto", secondTopup.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
       Assert.assertEquals("Debe tener el mismo tipo", "CASH_IN_MULTICAJA", transactionEvent.getTransaction().getType());
       Assert.assertEquals("Debe tener el status REJECTED", "REJECTED", transactionEvent.getTransaction().getStatus());
+
+      assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
     }
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
@@ -1425,7 +1463,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -1447,10 +1485,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -1459,16 +1497,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
+    boolean dataFound = waitForClearingToExist();
 
     AccountingTxType txType = AccountingTxType.CARGA_POS;
     AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
@@ -1529,7 +1558,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(topupTotalAmount);
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -1549,10 +1578,10 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     switch (prepaidTopup10.getTransactionOriginType()){
       case POS:
-        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (119) - comision de apertura (0))", BigDecimal.valueOf(3000), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3000 pesos (carga inicial - comision (238) - comision de apertura (0))", topupTotalAmount.subtract(posFeeTotalAmount), prepaidBalance10.getBalance().getValue());
         break;
       case WEB:
-        Assert.assertEquals("El saldo del usuario debe ser 3119 pesos (carga inicial - comision (0) - comision de apertura (0))", BigDecimal.valueOf(3119), prepaidBalance10.getBalance().getValue());
+        Assert.assertEquals("El saldo del usuario debe ser 3238 pesos (carga inicial - comision (0) - comision de apertura (0))", topupTotalAmount, prepaidBalance10.getBalance().getValue());
         break;
     }
 
@@ -1561,16 +1590,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     Assert.assertEquals("debe tener status -> PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, topup.getEstado());
     Assert.assertEquals("debe tener estado negocio -> CONFIRMED", BusinessStatusType.CONFIRMED, topup.getEstadoNegocio());
 
-    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    Boolean dataFound = false;
-    for(int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
-      if (clearing10s.size() > 0) {
-        dataFound = true;
-        break;
-      }
-    }
+    boolean dataFound = waitForClearingToExist();
 
     AccountingTxType txType = AccountingTxType.CARGA_POS;
     AccountingMovementType movementType = AccountingMovementType.CARGA_POS;
@@ -1580,7 +1600,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     }
 
     if (dataFound) {
-      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now());
+      List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
       Assert.assertNotNull("No debe ser null", accounting10s);
       Assert.assertEquals("Debe haber 1 solo movimiento de account", 1, accounting10s.size());
 
@@ -1636,7 +1656,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
-    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3119));
+    prepaidTopup10.getAmount().setValue(BigDecimal.valueOf(3238));
 
     PrepaidTopup10 resp = getPrepaidEJBBean10().topupUserBalance(null,prepaidUser10.getUuid(), prepaidTopup10,true);
 
@@ -1657,12 +1677,47 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
   void waitForAccountingToExist(Long trxId) throws Exception {
     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
-    for(int j = 0; j < 10; j++) {
+    for(int j = 0; j < 20; j++) {
       Thread.sleep(500);
       AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, trxId);
       if(accountingData10 != null) {
         break;
       }
+    }
+  }
+
+  boolean waitForClearingToExist() throws Exception {
+    // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
+    for(int j = 0; j < 20; j++) {
+      Thread.sleep(500);
+      List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.INITIAL, null);
+      if (clearing10s.size() > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void assertFees(List<Fee> feeList, TransactionOriginType transactionOriginType) {
+    Assert.assertEquals("El evento debe tener 2 fees", 2, feeList.size());
+
+    if(TransactionOriginType.POS.equals(transactionOriginType)) {
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de pos", fee);
+      Assert.assertEquals("Debe tener un valor de 200", posFeeBaseAmount, fee.getAmount().getValue());
+
+      fee = feeList.stream().filter(f -> PrepaidMovementFeeType.IVA.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de iva", fee);
+      Assert.assertEquals("Debe tener un valor de 38", posFeeIvaAmount, fee.getAmount().getValue());
+
+    } else if (TransactionOriginType.WEB.equals(transactionOriginType)) {
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de pos", fee);
+      Assert.assertEquals("Debe tener un valor de 0", webFeeBaseAmount, fee.getAmount().getValue());
+
+      fee = feeList.stream().filter(f -> PrepaidMovementFeeType.IVA.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de iva", fee);
+      Assert.assertEquals("Debe tener un valor de 0", webFeeIvaAmount, fee.getAmount().getValue());
     }
   }
 }

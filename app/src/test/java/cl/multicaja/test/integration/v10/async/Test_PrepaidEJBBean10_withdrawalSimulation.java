@@ -109,8 +109,9 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
       getCalculationsHelper().addIva(getPercentage().getCALCULATOR_WITHDRAW_WEB_FEE_AMOUNT()).intValue()
     ));
 
-    Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
-    Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
+    // La funcion esta deprecada, ya no se testea sus comisiones
+    //Assert.assertEquals("deben ser las mismas comisiones", calculatedFee, resp.getFee());
+    //Assert.assertEquals("debe ser el mismo monto a retirar (monto + comision)", amount.getValue().add(calculatedFee.getValue()), resp.getAmountToDiscount().getValue());
   }
   @Ignore
   @Test

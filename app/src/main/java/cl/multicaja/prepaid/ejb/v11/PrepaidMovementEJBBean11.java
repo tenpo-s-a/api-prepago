@@ -22,6 +22,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Instant;
@@ -194,20 +195,20 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     };
   }
 
-  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.AUTHORIZED);
+  public void publishTransactionAuthorizedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.AUTHORIZED);
   }
 
-  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REJECTED);
+  public void publishTransactionRejectedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.REJECTED);
   }
 
-  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.REVERSED);
+  public void publishTransactionReversedEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.REVERSED);
   }
 
-  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type) throws Exception {
-    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, fee, type, TransactionStatus.PAID);
+  public void publishTransactionPaidEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type) throws Exception {
+    this.publishTransactionEvent(externalUserId, accountUuid, cardUuid, movement, feeList, type, TransactionStatus.PAID);
   }
 
   /**
@@ -215,7 +216,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
    *
    * @throws Exception
    */
-  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, NewAmountAndCurrency10 fee, TransactionType type, TransactionStatus status) throws Exception {
+  private void publishTransactionEvent(String externalUserId, String accountUuid, String cardUuid, PrepaidMovement10 movement, List<PrepaidMovementFee10> feeList, TransactionType type, TransactionStatus status) throws Exception {
     if(StringUtils.isAllBlank(externalUserId)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
@@ -260,13 +261,16 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     transaction.setStatus(status.toString());
 
     List<Fee> fees;
-    if(fee == null) {
+    if(feeList == null || feeList.isEmpty()) {
       fees = Collections.emptyList();
     } else {
       fees = new ArrayList<>();
-      Fee f = new Fee();
-      f.setAmount(fee);
-      fees.add(f);
+      for(PrepaidMovementFee10 fee : feeList) {
+        Fee f = new Fee();
+        f.setAmount(new NewAmountAndCurrency10(fee.getAmount()));
+        f.setType(fee.getFeeType().toString());
+        fees.add(f);
+      }
     }
 
     transaction.setFees(fees);
@@ -305,12 +309,12 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-  public List<PrepaidMovementFee10> getPrepaidMovementFeeByMovementId(Long movementId) throws BaseException {
+  public List<PrepaidMovementFee10> getPrepaidMovementFeesByMovementId(Long movementId) throws BaseException {
     if(movementId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "movementId"));
     }
 
-    log.info(String.format("[getPrepaidMovementFeeByMovementId] Buscando fee [movementId: %d]", movementId));
+    log.info(String.format("[getPrepaidMovementFeesByMovementId] Buscando fee [movementId: %d]", movementId));
 
     try {
       return getDbUtils().getJdbcTemplate().query(FIND_FEE_BY_MOVEMENT_ID, getMovementFeeMapper(), movementId);
@@ -319,7 +323,13 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
-  public PrepaidMovementFee10 createPrepaidMovementFee(PrepaidMovementFee10 prepaidMovementFee) throws Exception {
+  public void addPrepaidMovementFeeList(List<PrepaidMovementFee10> feeList) throws Exception {
+    for(PrepaidMovementFee10 fee : feeList) {
+      addPrepaidMovementFee(fee);
+    }
+  }
+
+  public PrepaidMovementFee10 addPrepaidMovementFee(PrepaidMovementFee10 prepaidMovementFee) throws Exception {
     if(prepaidMovementFee == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee"));
     }
@@ -329,11 +339,8 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     if(prepaidMovementFee.getAmount() == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.amount"));
     }
-    if(prepaidMovementFee.getIva() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidMovementFee.iva"));
-    }
 
-    log.info(String.format("[createPrepaidMovementFee] Guardando Comision de movimiento con [%s]", prepaidMovementFee.toString()));
+    log.info(String.format("[addPrepaidMovementFee] Guardando Comision de movimiento con [%s]", prepaidMovementFee.toString()));
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -342,7 +349,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       ps.setLong(1, prepaidMovementFee.getMovementId());
       ps.setString(2, prepaidMovementFee.getFeeType().toString());
       ps.setBigDecimal(3, prepaidMovementFee.getAmount());
-      ps.setBigDecimal(4, prepaidMovementFee.getIva());
+      ps.setBigDecimal(4, new BigDecimal(0L)); //Todo: Columna debe eliminarse
       return ps;
     }, keyHolder);
 
