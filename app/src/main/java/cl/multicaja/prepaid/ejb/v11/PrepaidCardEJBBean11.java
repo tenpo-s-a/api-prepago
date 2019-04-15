@@ -132,6 +132,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     " t.pan = ? AND\n" +
     " c.cuenta = ?",getSchema(),getSchema(),getSchema());
 
+  private static String UPDATE_PREPAID_CARD_STATUS = String.format("UPDATE %s.prp_tarjeta SET estado = ? where id = ?",getSchema());
+
   private static String INSERT_PREPAID_CARD = "INSERT INTO prepago.prp_tarjeta(\n" +
     "            pan, pan_encriptado, estado, \n" +
     "            nombre_tarjeta, producto, numero_unico, fecha_creacion, fecha_actualizacion, \n" +
@@ -142,6 +144,35 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
   public PrepaidCardEJBBean11() {
     super();
+  }
+
+
+  public PrepaidCard10 updatePrepaidCardStatus(Long cardId, PrepaidCardStatus status) throws Exception {
+
+      if(cardId == null){
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "cardId"));
+      }
+      if(status == null){
+        throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+      }
+
+      log.info(String.format("[updateBalance] Actualizando tarjeta  [cardId: %d][status: %s]", cardId,status));
+
+      int rows = getDbUtils().getJdbcTemplate().update(connection -> {
+        PreparedStatement ps = connection
+          .prepareStatement(UPDATE_PREPAID_CARD_STATUS);
+        ps.setString(1, status.name());
+        ps.setLong(2, cardId);
+        return ps;
+      });
+
+      if(rows == 0) {
+        log.error(String.format("[updateBalance] Error Actualizando tarjeta  [cardId: %d][status: %s]", cardId,status));
+        throw new Exception("No se pudo actualizar el saldo");
+      }
+      log.error(String.format("[updateBalance] Actualizando tarjeta  [cardId: %d][status: %s] Reg:", cardId,status,rows));
+
+      return this.getPrepaidCardById(null,cardId);
   }
 
   @Override

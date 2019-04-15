@@ -295,9 +295,18 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+        if(account == null) {
+          String msg = String.format("Error processing transaction - FileID [%s] PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        }
+
         //Se busca el movimiento
-        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-          trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
+        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(account.getUserId(), trx.getNumAut(),
+          java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
         if(originalMovement == null) {
           // Movimiento original no existe.
