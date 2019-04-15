@@ -9,10 +9,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.model.Card;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -216,7 +213,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   }
 
   @Override
-  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCardResponse10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
 
     PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findByExtId(null, userUuid);
     if(prepaidUser == null) {
@@ -243,7 +240,13 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     // Notificar que se ha creado una tarjeta nueva
     publishCardEvent(prepaidUser.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
 
-    return prepaidCard;
+    PrepaidCardResponse10 prepaidCardResponse10 = new PrepaidCardResponse10();
+    prepaidCardResponse10.setId(prepaidCard.getUuid());
+    prepaidCardResponse10.setPan(prepaidCard.getPan());
+    prepaidCardResponse10.setNameOnCard(prepaidCard.getNameOnCard());
+    prepaidCardResponse10.setStatus(prepaidCard.getStatus().toString());
+    prepaidCardResponse10.setTimestamps(prepaidCard.getTimestamps());
+    return prepaidCardResponse10;
   }
 
 }

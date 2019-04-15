@@ -13,10 +13,7 @@ import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
+import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
 import org.apache.commons.lang3.StringUtils;
@@ -344,7 +341,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCardResponse10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
     throw new IllegalStateException();
   }
 
