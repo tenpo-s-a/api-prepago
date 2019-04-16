@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
 import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
@@ -660,6 +661,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setAccountId(account.getId());
+    prepaidCard10.setUuid(UUID.randomUUID().toString());
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));

@@ -274,7 +274,7 @@ public class PendingCard10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario",prepaidUser10.getId());
         templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
+        //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
       }
       return req;
       }

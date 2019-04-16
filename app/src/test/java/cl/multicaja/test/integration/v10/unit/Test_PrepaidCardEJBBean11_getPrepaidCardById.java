@@ -48,6 +48,5 @@ public class Test_PrepaidCardEJBBean11_getPrepaidCardById extends TestBaseUnit {
 
     Assert.assertEquals("Debe ser la misma tarjeta", card.getId(), dbCard.getId());
     Assert.assertEquals("Debe ser la misma tarjeta", card.getPan(), dbCard.getPan());
-    Assert.assertEquals("Debe ser la misma tarjeta", card.getProcessorUserId(), dbCard.getProcessorUserId());
   }
 }

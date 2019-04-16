@@ -471,10 +471,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
-
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
         if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
 
-          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(prepaidCard10.getIdUser(),trx.getTipoFac(), trx.getNumAut());
+          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(account.getUserId() , trx.getTipoFac(), trx.getNumAut());
 
           // Si la autorizacion ya fue creada, no se vuelve a insertar
           if(originalMovement != null) {
