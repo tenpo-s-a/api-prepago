@@ -660,6 +660,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidCard10.setIdUser(prepaidUser.getId());
     prepaidCard10.setAccountId(account.getId());
     prepaidCard10.setUuid(UUID.randomUUID().toString());
+    prepaidCard10.setHashedPan(getRandomString(20));
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
@@ -702,6 +703,13 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
+      HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
+
+      Assert.assertEquals("status 422", 422, resp.getStatus());
+      Map<String, Object> errorObj = resp.toMap();
+      Assert.assertNotNull("Deberia tener error", errorObj);
+      Assert.assertEquals("Deberia tener error code = 130005", REVERSA_MOVIMIENTO_REVERSADO.getValue(), errorObj.get("code"));
+
       List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
         prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null,
         IndicadorNormalCorrector.NORMAL, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
@@ -732,7 +740,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-      HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
+      HttpResponse resp = withdrawUserBalanceDefered(prepaidUser.getUuid(), prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
