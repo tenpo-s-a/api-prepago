@@ -1,6 +1,0 @@
-"Id Unico","Nombre Archivo 1","Id en Archivo 1","Nombre Archivo 2","Id en Archivo 2","Origen","Fecha Transaccion","Responsable","Descripción","Id Movimiento","Tipo de Movimiento"
-"6244","nombreArchivo7","7","nombreArchivo8","8","CLEARING_RESOLUTION","2019-04-15 18:43:02","OTI_PREPAID","DESCRIPCION_INDEFINIDA","7","TOPUP"
-"6243","nombreArchivo6","6"," "," ","CLEARING_RESOLUTION","2019-04-15 18:43:02","OTI_PREPAID","DESCRIPCION_INDEFINIDA","6","TOPUP"
-"6242","nombreArchivo4","4","nombreArchivo5","5","CLEARING_RESOLUTION","2019-04-15 18:43:02","RECONCILIATION_PREPAID","MOVIMIENTO_RECHAZADO_EN_AUTORIZACION","4","TOPUP"
-"6241","nombreArchivo3","3"," "," ","CLEARING_RESOLUTION","2019-04-15 18:43:02","RECONCIALITION_MULTICAJA_OTI_PREPAGO","ERROR_DE_ESTADO_EN_BBDD","4","TOPUP"
-"6240","nombreArchivo1","1","nombreArchivo2","2","CLEARING_RESOLUTION","2019-04-15 18:43:02","OTI_PREPAID","DESCRIPCION_INDEFINIDA","3","TOPUP"
