@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.api;
 
-import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
@@ -704,7 +703,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
       List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
-        prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null, IndicadorNormalCorrector.NORMAL, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
+        prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null,
+        IndicadorNormalCorrector.NORMAL, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
 
       Assert.assertNotNull("Debe tener 1 movimiento de reversa", movements);
       Assert.assertEquals("Debe tener 1 movimiento de reversa", 1, movements.size());

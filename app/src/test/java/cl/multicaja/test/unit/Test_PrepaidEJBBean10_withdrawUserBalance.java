@@ -150,8 +150,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     // Account
     Mockito.doReturn(account).when(accountEJBBean10).findByUserId(Long.MAX_VALUE);
 
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId(null,Long.MAX_VALUE);
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     //Cdt withdraw
     Mockito.doReturn(cdtTransaction).when(cdtEJBBean10).addCdtTransaction(Mockito.any(), Mockito.any());

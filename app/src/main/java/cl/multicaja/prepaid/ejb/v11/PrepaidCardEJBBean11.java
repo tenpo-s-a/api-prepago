@@ -45,7 +45,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
 
   private static final String FIND_CARD_BY_ID_SQL = String.format("SELECT * FROM %s.prp_tarjeta WHERE id = ?", getSchema());
   private static final String UPDATE_CARD_BY_ID_SQL = "UPDATE %s.prp_tarjeta SET %s WHERE id = ?";
-  private static final String FIND_ACTIVE_CARD_BY_USERID = String.format("SELECT \n" +
+  private static final String FIND_CARD_BY_USERID_STATUS = "SELECT \n" +
     "  t.id  as id,\n" +
     "  t.pan as pan,\n" +
     "  t.pan_encriptado as pan_encriptado,\n" +
@@ -64,8 +64,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     "INNER JOIN %s.prp_usuario u on c.id_usuario = u.id\n" +
     "WHERE\n" +
     " u.id = ? AND\n" +
-    " (t.estado = 'ACTIVE' OR \n" +
-    " t.estado = 'LOCKED' )", getSchema(), getSchema(), getSchema());
+    " (%s)";
 
 
   private static final String FIND_INVALID_CARD_BY_USERID = String.format("SELECT \n" +
@@ -141,6 +140,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     "    VALUES (?, ?, ?, ?,\n" +
     "            ?, ?, ?, ?,\n" +
     "            ?, ?, ?,?,?);\n";
+
+  private static String SEARCH_BY_ACCOUNT_ID = String.format("SELECT * FROM %s.prp_tarjeta where id_cuenta = ?",getSchema());
 
   public PrepaidCardEJBBean11() {
     super();
@@ -363,9 +364,27 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     return prepaidCard;
   }
 
-  public PrepaidCard10 getActiveCardByUserId(Map<String, Object> headers, Long userId)  throws Exception{
+
+  public PrepaidCard10 getByUserIdAndStatus(Map<String, Object> headers, Long userId,PrepaidCardStatus ... lstStatus)  throws Exception{
     try {
-      return getDbUtils().getJdbcTemplate().queryForObject(FIND_ACTIVE_CARD_BY_USERID, getCardMapper(), userId);
+
+      StringBuilder sb = new StringBuilder();
+
+      int i = 1;
+      for(PrepaidCardStatus status :lstStatus ) {
+        sb.append("t.estado = '");
+        sb.append(status.name());
+        if(i == lstStatus.length) {
+          sb.append("'");
+        } else {
+          sb.append("' OR ");
+        }
+        i++;
+      }
+
+      String QUERY = String.format(FIND_CARD_BY_USERID_STATUS,getSchema(),getSchema(),getSchema(),sb.toString());
+
+      return getDbUtils().getJdbcTemplate().queryForObject(QUERY, getCardMapper(), userId);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidCardById] Tarjeta [id: %d] no existe", userId));
      return null;
@@ -421,6 +440,15 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       return getDbUtils().getJdbcTemplate().queryForObject(FIND_CARD_BY_PAN_USERID, getCardMapper(), userId,pan);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidCardById] Tarjeta [id: %d] [pan: %s] no existe", userId,pan));
+      return null;
+    }
+  }
+
+  public PrepaidCard10 getPrepaidCardByAccountId(Long accountId){
+    try {
+      return getDbUtils().getJdbcTemplate().queryForObject(SEARCH_BY_ACCOUNT_ID, getCardMapper(),accountId);
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidCardById] Tarjeta [accountId: %d] no existe", accountId));
       return null;
     }
   }

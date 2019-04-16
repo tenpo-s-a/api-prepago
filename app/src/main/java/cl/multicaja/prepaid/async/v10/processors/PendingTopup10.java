@@ -90,8 +90,10 @@ public class PendingTopup10 extends BaseProcessor10 {
           log.info(account);
 
           //TODO: Esto se cambiara ya que la tarjeta tiene que venir seleccionada o se usara la principal.
-          PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getActiveCardByUserId(null, prepaidUser10.getId());
-          log.info(prepaidCard);
+          PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getByUserIdAndStatus(null, prepaidUser10.getId(),
+                                                                                                              PrepaidCardStatus.ACTIVE,
+                                                                                                              PrepaidCardStatus.LOCKED,
+                                                                                                              PrepaidCardStatus.PENDING);
 
           if (prepaidCard != null) {
 
@@ -205,10 +207,7 @@ public class PendingTopup10 extends BaseProcessor10 {
 
             //https://www.pivotaltracker.com/story/show/157816408
             //3-En caso de tener estado bloqueado duro o expirada no se deberá seguir ningún proceso
-
-            prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(),
-                                                                                        PrepaidCardStatus.LOCKED_HARD,
-                                                                                        PrepaidCardStatus.EXPIRED);
+            prepaidCard = getRoute().getPrepaidCardEJBBean11().getInvalidCardByUserId(null, prepaidUser10.getId());
 
             if (prepaidCard == null) {
               Endpoint endpoint = createJMSEndpoint(PENDING_EMISSION_REQ);

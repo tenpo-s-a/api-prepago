@@ -51,8 +51,10 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         PrepaidMovement10 prepaidMovementReverse = data.getPrepaidMovementReverse();
 
         PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
+
         Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
-        PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getActiveCardByUserId(null, prepaidUser10.getId());
+
+        PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
 
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;

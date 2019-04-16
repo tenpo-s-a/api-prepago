@@ -172,7 +172,6 @@ public class PendingCard10 extends BaseProcessor10 {
           PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, data.getPrepaidCard10().getId());
           PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
 
-
           prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
           prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));

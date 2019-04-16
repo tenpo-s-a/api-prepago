@@ -287,11 +287,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId(null, prepaidUser.getId());
-    //PrepaidCard
-    Mockito.doReturn(null).when(prepaidCardEJBBean11).getInvalidCardByUserId(null, prepaidUser.getId());
-
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     // Reverse
     Mockito.doReturn(reverse).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(), Mockito.anyString(),
@@ -345,10 +341,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId(null, prepaidUser.getId());
-    //PrepaidCard
-    Mockito.doReturn(null).when(prepaidCardEJBBean11).getInvalidCardByUserId(null, prepaidUser.getId());
+
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
 
 
@@ -419,10 +413,8 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId( null, Long.MAX_VALUE);
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getInvalidCardByUserId( null, Long.MAX_VALUE);
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
+
 
     Mockito.doReturn(null)
       .doReturn(originalTopup)
@@ -488,11 +480,7 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
-    //PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId(null, Long.MAX_VALUE);
-    //PrepaidCard
-    Mockito.doReturn(null).when(prepaidCardEJBBean11).getInvalidCardByUserId(null,Long.MAX_VALUE);
-
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     Mockito.doReturn(null)
       .doReturn(originalTopup)
@@ -558,12 +546,10 @@ public class Test_PrepaidEJBBean10_reverseTopupUserBalance {
     PrepaidMovement10 reverseMovement = new PrepaidMovement10();
     reverseMovement.setId(Long.MAX_VALUE);
 
-
     // PrepaidUser
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers, uuid);
 
-    // PrepaidCard
-    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getActiveCardByUserId(null, prepaidUser.getId());
+    Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     /*
       PrepaidMovement
