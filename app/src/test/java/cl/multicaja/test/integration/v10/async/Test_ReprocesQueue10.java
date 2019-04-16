@@ -50,9 +50,8 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -149,7 +148,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
@@ -179,7 +177,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
 
     // Busca la tarjeta en la BD
     PrepaidCard10 dbPrepaidCard = getPrepaidCardEJBBean10().getPrepaidCardById(null, remoteTopup.getData().getPrepaidCard10().getId());
@@ -239,12 +236,9 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
     Assert.assertNotNull("Debe contener getPan",remoteTopup.getData().getPrepaidCard10().getPan());
     Assert.assertNotNull("Debe contener getNameOnCard",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
-    Assert.assertNotNull("Debe contener getExpiration",remoteTopup.getData().getPrepaidCard10().getExpiration());
     Assert.assertNotNull("Debe contener getEncryptedPan",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
-    Assert.assertNotNull("Deberia contener codigo de producto",remoteTopup.getData().getPrepaidCard10().getProducto());
     Assert.assertNotNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());
 
     // Busca la tarjeta en la BD
@@ -324,21 +318,21 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
   }
 
-  //TODO: Corregir cuando se modifique retiro
-  @Ignore
   @Test
   public void testReinjectWithdrawReversal() throws Exception{
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(null);
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
 
@@ -357,7 +351,7 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
-    String messageId = sendPendingWithdrawReversal(withdraw10, user,prepaidUser, reverse, 2);
+    String messageId = sendPendingWithdrawReversal(withdraw10,prepaidUser, reverse, 2);
 
     Thread.sleep(2000);
     {

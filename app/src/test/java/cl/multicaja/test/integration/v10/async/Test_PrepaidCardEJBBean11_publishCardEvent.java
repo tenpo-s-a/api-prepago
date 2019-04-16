@@ -34,14 +34,16 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
   @Test
   public void publishCardCreatedEvent() throws Exception {
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser10= buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    // Crea cuenta/contrato
-    Account account = createRandomAccount(prepaidUser10);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
     card = createPrepaidCardV2(card);
+
+
     // Actualiza la tarjeta
     String pan = getRandomNumericString(16);
     String encryptedPan = getRandomString(20);
@@ -90,10 +92,10 @@ public class Test_PrepaidCardEJBBean11_publishCardEvent extends TestBaseUnitAsyn
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    // Crea cuenta/contrato
-    Account account = createRandomAccount(prepaidUser10);
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 card = buildPrepaidCard10(prepaidUser10);
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
     card = createPrepaidCardV2(card);
 
     // Actualiza la tarjeta

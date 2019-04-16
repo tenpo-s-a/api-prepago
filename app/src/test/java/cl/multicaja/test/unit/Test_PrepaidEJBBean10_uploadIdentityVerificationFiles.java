@@ -14,6 +14,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import com.hazelcast.client.impl.protocol.util.ParameterUtil;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -153,6 +154,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
+  @Ignore
   @Test
   public void prepaidUserNull() throws Exception {
     User user = new User();
@@ -177,6 +179,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
+  @Ignore
   @Test
   public void prepaidUserDisabled() throws Exception {
     User user = new User();
@@ -204,6 +207,7 @@ public class Test_PrepaidEJBBean10_uploadIdentityVerificationFiles {
     }
   }
 
+  @Ignore
   @Test
   public void uploadIdentityVerificationFiles() throws Exception {
     User user = new User();

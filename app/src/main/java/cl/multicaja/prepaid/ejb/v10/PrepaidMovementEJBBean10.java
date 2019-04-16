@@ -18,11 +18,11 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -34,7 +34,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.util.Base64Utils;
 
 import javax.ejb.*;
@@ -42,11 +41,13 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -54,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.core.test.TestBase.numberUtils;
 import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 
 @Stateless
@@ -63,7 +63,9 @@ import static cl.multicaja.prepaid.helpers.CalculationsHelper.getParametersUtil;
 public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidMovementEJB10 {
 
   private static Log log = LogFactory.getLog(PrepaidMovementEJBBean10.class);
+
   private static final String FIND_MOVEMENT_BY_ID_SQL = String.format("SELECT * FROM %s.prp_movimiento WHERE id = ?", getSchema());
+
   private static final String INSERT_MOVEMENT_SQL
     = String.format("INSERT INTO %s.prp_movimiento (id_movimiento_ref, id_usuario, id_tx_externo, tipo_movimiento, monto, " +
     "estado, estado_de_negocio, estado_con_switch,estado_con_tecnocom,origen_movimiento,fecha_creacion,fecha_actualizacion," +
@@ -83,7 +85,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private PrepaidUserEJBBean10 prepaidUserEJB10;
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJB10;
+  private PrepaidCardEJBBean11 prepaidCardEJB11;
 
   @EJB
   private CdtEJBBean10 cdtEJB10;
@@ -179,8 +181,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return prepaidUserEJB10;
   }
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
-    return prepaidCardEJB10;
+  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
+    return prepaidCardEJB11;
+  }
+
+  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
+    this.prepaidCardEJB11 = prepaidCardEJB11;
   }
 
   public CdtEJBBean10 getCdtEJB10() {
@@ -189,10 +195,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   public void setPrepaidUserEJB10(PrepaidUserEJBBean10 prepaidUserEJB10) {
     this.prepaidUserEJB10 = prepaidUserEJB10;
-  }
-
-  public void setPrepaidCardEJB10(PrepaidCardEJBBean10 prepaidCardEJB10) {
-    this.prepaidCardEJB10 = prepaidCardEJB10;
   }
 
   public void setCdtEJB10(CdtEJBBean10 cdtEJB10) {
@@ -792,19 +794,22 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public PrepaidMovement10 getPrepaidMovementForTecnocomReconciliation(Long idPrepaidUser, String numaut, Date fecfac, TipoFactura tipofac) throws Exception {
+
     if (idPrepaidUser == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
+
     if (numaut == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
+
     if (fecfac == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fecfac"));
     }
+
     if (tipofac == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipofac"));
     }
-
 
     List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, IndicadorNormalCorrector.fromValue(tipofac.getCorrector()), tipofac, fecfac, numaut);
 
@@ -850,14 +855,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
 
     if (insertSwitchFile) {
-      List<McRedReconciliationFileDetail> movementList = mcRedReconciliationEJBBean.getFileMovementsHist(null, null, null, prepaidMovement.getIdTxExterno());
+      List<McRedReconciliationFileDetail> movementList = getMcRedReconciliationEJBBean().getFileMovementsHist(null, null, null, prepaidMovement.getIdTxExterno());
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
       if (movementList != null && !movementList.isEmpty()) {
         // Se registra la iformacion para poder encontrar el movimiento en el archivo
         McRedReconciliationFileDetail switchMovement = movementList.get(0);
         researchMovementInformationFiles.setIdArchivo(switchMovement.getFileId());
         researchMovementInformationFiles.setIdEnArchivo(switchMovement.getIdForResearch());
-        List<ReconciliationFile10> file10List = reconciliationFilesEJBBean10.getReconciliationFile(null, switchMovement.getFileId(), null, null, null, null);
+        List<ReconciliationFile10> file10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, switchMovement.getFileId(), null, null, null, null);
         ReconciliationFile10 file10 = file10List.get(0);
         researchMovementInformationFiles.setNombreArchivo(file10.getFileName());
         researchMovementInformationFiles.setTipoArchivo(file10.getType().toString());
@@ -872,8 +877,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
 
     if (insertTecnocomFile) {
-      PrepaidCard10 prepaidCard10 = prepaidCardEJB10.getPrepaidCardByPanAndUserId(prepaidMovement.getPan(), prepaidMovement.getIdPrepaidUser());
-      List<MovimientoTecnocom10> movimientoTecnocom10List = tecnocomReconciliationEJBBean.buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardByPanAndUserId(prepaidMovement.getPan(), prepaidMovement.getIdPrepaidUser());
+      List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
       if (movimientoTecnocom10List != null && movimientoTecnocom10List.size() <= 0) {
@@ -881,7 +886,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         MovimientoTecnocom10 movimientoTecnocom10 = movimientoTecnocom10List.get(0);
         researchMovementInformationFiles.setIdArchivo(movimientoTecnocom10.getIdArchivo());
         researchMovementInformationFiles.setIdEnArchivo(movimientoTecnocom10.getIdForResearch());
-        List<ReconciliationFile10> file10List = reconciliationFilesEJBBean10.getReconciliationFile(null, movimientoTecnocom10.getIdArchivo(), null, null, null, null);
+        List<ReconciliationFile10> file10List = getReconciliationFilesEJBBean10().getReconciliationFile(null, movimientoTecnocom10.getIdArchivo(), null, null, null, null);
         ReconciliationFile10 file10 = file10List.get(0);
         researchMovementInformationFiles.setNombreArchivo(file10.getFileName());
         researchMovementInformationFiles.setTipoArchivo(ReconciliationFileType.TECNOCOM_FILE.toString());
@@ -1054,7 +1059,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           newPrepaidWithdraw10.setPassword("CONCI");
           log.info(newPrepaidWithdraw10);
 
-          getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10, false);
+          getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
         }
         /**
          * Si es una reversa de retiro - Se crea el movimiento contrario
@@ -1285,7 +1290,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newPrepaidWithdraw10.setPassword("CONCI");
       log.info(newPrepaidWithdraw10);
 
-      getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10, false);
+      getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
 
       //TODO: que pasa con la reversa?
     }
@@ -1361,7 +1366,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           prepaidTopup10.setTransactionId(movFull.getIdTxExterno());
           prepaidTopup10.setAmount(new NewAmountAndCurrency10(movFull.getMonto(), movFull.getClamon()));
 
-          PrepaidCard10 card = getPrepaidCardEJB10().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
+          PrepaidCard10 card = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser10.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
           getPrepaidEJBBean10().getDelegate().sendPendingTopupReverse(prepaidTopup10, card, prepaidUser10, movFull);
         } else {
           PrepaidWithdraw10 prepaidWithdraw10 = new PrepaidWithdraw10();
@@ -1476,12 +1481,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       if (prepaidUser10 == null) {
         log.info("prepaidTopup10 null");
       }
-      //Se busca user para obterner rut
-      User user = userClient.getUserById(null, prepaidUser10.getUserIdMc());
-      if (user == null) {
-        log.info("user null");
-        return;
-      }
 
       // Enviar movimiento a REFUND
       createMovementConciliate(null, movFull.getId(), ReconciliationActionType.REFUND, ReconciliationStatusType.TO_REFUND);
@@ -1506,12 +1505,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       // Enviar ticket a freshdesk
       String template = getParametersUtil().getString("api-prepaid", "template_ticket_devolucion", "v1.0");
-      template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", user.getName(), user.getLastname_1()), String.format("%s-%s", user.getRut().getValue(), user.getRut().getDv()), user.getId(), movFull.getNumaut(), movFull.getMonto().longValue(), user.getEmail().getValue(), user.getCellphone().getValue());
+      template = TemplateUtils.freshDeskTemplateDevolucion(template, String.format("%s %s", prepaidUser10.getName(), prepaidUser10.getDocumentNumber()), String.format("%s", prepaidUser10.getDocumentNumber()), prepaidUser10.getId(), movFull.getNumaut(), movFull.getMonto().longValue(), "",0L);
 
       NewTicket newTicket = new NewTicket();
       newTicket.setDescription(template);
       newTicket.setGroupId(GroupId.OPERACIONES);
-      newTicket.setUniqueExternalId(String.valueOf(user.getRut().getValue()));
+      newTicket.setUniqueExternalId(String.valueOf(prepaidUser10.getDocumentNumber()));
       newTicket.setType(TicketType.DEVOLUCION);
       newTicket.setStatus(StatusType.OPEN);
       newTicket.setPriority(PriorityType.URGENT);
@@ -1519,7 +1518,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
-      Ticket ticket = getUserClient().createFreshdeskTicket(null, user.getId(), newTicket);
+      Ticket ticket = getUserClient().createFreshdeskTicket(null, prepaidUser10.getId(), newTicket);
+
       if (ticket != null && ticket.getId() != null) {
         log.info("Ticket Creado Exitosamente");
       } else {
@@ -1844,7 +1844,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
             // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
           case REJECTED_FORMAT: {
-
+              PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, prepaidMovement10.getId());
               // Se crea movimiento de reversa
               NewPrepaidWithdraw10 newPrepaidWithdraw10 = new NewPrepaidWithdraw10();
               newPrepaidWithdraw10.setAmount(new NewAmountAndCurrency10(prepaidMovement10.getMonto()));
@@ -1855,7 +1855,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               newPrepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
               //TODO:reverseWithdrawUserBalance
               // Se envia movimiento a reversar
-              getPrepaidEJBBean10().reverseWithdrawUserBalance(null, newPrepaidWithdraw10,false);
+              getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10,false);
 
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);

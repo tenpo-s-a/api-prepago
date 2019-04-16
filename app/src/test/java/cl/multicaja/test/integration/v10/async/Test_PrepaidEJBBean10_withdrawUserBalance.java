@@ -25,8 +25,6 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync {
 
 
-  //TODO: Verificar cuando se haga la reversa de retiro
-  @Ignore
   @Test
   public void withdrawFail_timeoutResponse() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
@@ -40,9 +38,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
 
     InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    Thread.sleep(2000);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
-
     PrepaidWithdraw10 withdraw = null;
 
     String messageId = "";

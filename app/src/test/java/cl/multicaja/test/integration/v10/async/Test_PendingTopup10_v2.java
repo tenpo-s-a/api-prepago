@@ -11,10 +11,7 @@ import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
@@ -23,6 +20,7 @@ import java.math.BigDecimal;
  * @autor vutreras
  */
 @SuppressWarnings("unchecked")
+@Ignore
 public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
 
   private static TecnocomServiceHelper tc;
@@ -56,26 +54,23 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_with_card_lockedhard() throws Exception {
 
+    disableAutomaticErrorInTecnocom();
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-
     prepaidCard.setStatus(PrepaidCardStatus.LOCKED_HARD);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser10, prepaidTopup);
-
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
-
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account,0);
@@ -144,15 +139,16 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_with_prepaidCard_ACTIVE_prepaidMovement_PROCESS_OK_and_cdt_confirm() throws Exception {
 
+    getTecnocomInstance();
+
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
@@ -224,8 +220,9 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_with_prepaidCard_PENDING_prepaidMovement_PROCESS_OK_and_cdt_confirm() throws Exception {
 
+    disableAutomaticErrorInTecnocom();
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
@@ -233,7 +230,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(BigDecimal.ZERO));
@@ -314,24 +311,24 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   @Test
   public void pendingTopup_transactionAuthorizaedEvent() throws Exception {
 
+    disableAutomaticErrorInTecnocom();
+
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
-    account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser10, prepaidTopup);
-
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard, cdtTransaction);
-
+    PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser10, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account, 0);
@@ -408,13 +405,12 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
   public void pendingTopup_transactionRejectedEvent() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = buildAccountFromTecnocom(prepaidUser10);
     account = createAccount(prepaidUser10.getId(),account.getAccountNumber());
 
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser10, account);
-
     prepaidCard = createPrepaidCard10(prepaidCard);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -430,7 +426,7 @@ public class Test_PendingTopup10_v2 extends TestBaseUnitAsync {
     tc.getTecnocomService().setAutomaticError(true);
     tc.getTecnocomService().setRetorno("200");
 
-    String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account, 0);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser10, cdtTransaction, prepaidMovement, account, 2);
 
     //se verifica que el mensaje haya sido procesado y lo busca en la cola de respuestas cargas pendientes
 

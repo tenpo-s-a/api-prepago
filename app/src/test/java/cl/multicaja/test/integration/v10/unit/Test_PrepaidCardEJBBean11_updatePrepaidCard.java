@@ -56,7 +56,6 @@ public class Test_PrepaidCardEJBBean11_updatePrepaidCard extends TestBaseUnit {
     Assert.assertEquals("la tarjeta debe estar actualizada", encryptedPan, c1.getEncryptedPan());
     Assert.assertEquals("la tarjeta debe estar actualizada", hashedPan, c1.getHashedPan());
     Assert.assertEquals("la tarjeta debe estar actualizada", cardStatus, c1.getStatus());
-    Assert.assertEquals("la tarjeta debe estar actualizada", cardExpiration, c1.getExpiration());
     Assert.assertEquals("la tarjeta debe estar actualizada", nameOnCard, c1.getNameOnCard());
     Assert.assertEquals("la tarjeta debe estar actualizada", producto, c1.getProducto());
     Assert.assertEquals("la tarjeta debe estar actualizada", numeroUnico, c1.getNumeroUnico());

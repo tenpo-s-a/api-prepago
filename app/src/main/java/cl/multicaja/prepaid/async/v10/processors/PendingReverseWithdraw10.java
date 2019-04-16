@@ -10,6 +10,7 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
@@ -50,7 +51,10 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         PrepaidMovement10 prepaidMovementReverse = data.getPrepaidMovementReverse();
 
         PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
-        PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean10().getLastPrepaidCardByUserId(null, prepaidUser10.getId());
+
+        Account account = getRoute().getAccountEJBBean10().findByUserId(prepaidUser10.getId());
+
+        PrepaidCard10 prepaidCard = getRoute().getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
 
         if(req.getRetryCount() > getMaxRetryCount()) {
           PrepaidMovementStatus status;
@@ -68,8 +72,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           Endpoint endpoint = createJMSEndpoint(ERROR_REVERSAL_WITHDRAW_REQ);
           return redirectRequestReverse(endpoint, exchange, req, false);
         }
+        //NO SE OBTIENE DE LA TARJETA SI NO QUE DE LA CUENTA.
+        String contrato = account.getAccountNumber();
 
-        String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
         // Busca el movimiento de retiro original

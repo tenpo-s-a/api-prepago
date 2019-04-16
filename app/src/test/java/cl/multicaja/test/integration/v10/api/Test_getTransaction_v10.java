@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -42,6 +43,8 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
     }
   }
 
+  //TODO: Esto no se utilizara
+  @Ignore
   @Test
   public void getTransactionsOk() throws Exception{
     {

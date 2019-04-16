@@ -520,10 +520,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard10.setStatus(PrepaidCardStatus.EXPIRED);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
 
     try {
@@ -563,11 +562,10 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    Account account = createRandomAccount(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
-    prepaidCard10.setAccountId(account.getId());
-    prepaidCard10.setIdUser(prepaidUser.getId());
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
     prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();

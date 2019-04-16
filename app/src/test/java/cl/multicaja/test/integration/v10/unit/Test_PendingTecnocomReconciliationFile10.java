@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import cl.multicaja.test.integration.v10.async.TestBaseUnitAsync;
@@ -28,6 +29,7 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
   private List<String> contracts = Arrays.asList("09870001000000000091", "09870001000000000092", "09870001000000000093","09870001000000000012","09870001000000000013");
   private List<PrepaidUser10> users = new ArrayList<>();
   private List<PrepaidCard10> prepaidCards = new ArrayList<>();
+  private List<Account> accounts = new ArrayList<>();
   private static TecnocomReconciliationFile onlineFile;
   private static TecnocomReconciliationFile apiFile;
 
@@ -42,26 +44,30 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
 
     users.clear();
     prepaidCards.clear();
-
+    accounts.clear();
     for (int i = 0; i < pans.size(); i++) {
       String pan = pans.get(i);
       String processorUserId =  contracts.get(i);
 
       System.out.println(String.format("%s -> %s", pan, processorUserId));
 
-      // Crea usuario
-      User user = registerUser();
 
       // Crea usuario prepago
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+      PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-      PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
+      Account account = createAccount(prepaidUser10.getId(),processorUserId);
+
+      PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
       prepaidCard10.setPan(Utils.replacePan(pan));
-      prepaidCard10.setProcessorUserId(processorUserId);
-      prepaidCard10 = createPrepaidCard10(prepaidCard10);
+      prepaidCard10.setAccountId(account.getId());
+      prepaidCard10.setUuid(UUID.randomUUID().toString());
+      prepaidCard10.setHashedPan(getRandomString(20));
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
       users.add(prepaidUser10);
       prepaidCards.add(prepaidCard10);
+      accounts.add(account);
     }
   }
 
@@ -148,11 +154,11 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
@@ -234,11 +240,12 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx :satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
+
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
       PrepaidMovement10 movement10 = TecnocomFileHelper.getInstance().buildMovement(userId, pan, trx);
@@ -318,11 +325,12 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
+
 
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
@@ -404,11 +412,11 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
@@ -494,11 +502,12 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
+
 
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
@@ -580,11 +589,11 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
 
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
@@ -667,11 +676,12 @@ public class Test_PendingTecnocomReconciliationFile10 extends TestBaseUnitAsync 
     // Se agregan transacciones con monto diferente
     for (MovimientoTecnocom10 trx : satList) {
 
-      Long userId = prepaidCards.stream()
-        .filter(card -> trx.getContrato().equals(card.getProcessorUserId()))
+      Long userId = accounts.stream()
+        .filter(account -> trx.getContrato().equals(account.getAccountNumber()))
         .findAny()
         .get()
-        .getIdUser();
+        .getUserId();
+
 
 
       String pan = Utils.replacePan(encryptUtil.decrypt(trx.getPan()));
