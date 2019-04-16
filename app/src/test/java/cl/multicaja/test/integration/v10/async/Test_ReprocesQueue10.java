@@ -50,9 +50,8 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
     Account account = buildAccountFromTecnocom(prepaidUser);
     account = createAccount(account.getUserId(),account.getAccountNumber());
 
-
     PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    prepaidCard = createPrepaidCardV2(prepaidCard);
 
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -148,7 +147,6 @@ public class Test_ReprocesQueue10 extends TestBaseUnitAsync {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
-
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 

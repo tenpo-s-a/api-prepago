@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static cl.multicaja.core.model.Errors.PARAMETRO_NO_CUMPLE_FORMATO_$VALUE;
-import static cl.multicaja.core.model.Errors.TRANSACCION_ERROR_GENERICO_$VALUE;
+import static cl.multicaja.core.model.Errors.*;
 
 /**
  * @author abarazarte
@@ -685,33 +684,24 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
   }
 
-  //TODO: Verificar cuado se haga la reversa.
-  @Ignore
+
   @Test
   public void shouldReturn422_OnWithdraw_Reversed() throws Exception {
     // POS
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser();
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10(prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, getRandomNumericString(15));
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
-
-      //HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
-
-      //Assert.assertEquals("status 422", 422, resp.getStatus());
-      //Map<String, Object> errorObj = resp.toMap();
-      //Assert.assertNotNull("Deberia tener error", errorObj);
-      //Assert.assertEquals("Deberia tener error code = 130005", REVERSA_MOVIMIENTO_REVERSADO.getValue(), errorObj.get("code"));
 
       List<PrepaidMovement10> movements = getPrepaidMovementEJBBean10().getPrepaidMovements(null, null,
         prepaidUser.getId(), prepaidWithdraw.getTransactionId(), PrepaidMovementType.WITHDRAW, null, null, null, IndicadorNormalCorrector.NORMAL, TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA, null, null);
@@ -728,22 +718,21 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
     // WEB
     {
-      String password = RandomStringUtils.randomNumeric(4);
-      User user = registerUser();
-      user = updateUserPassword(user, password);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
 
-      prepaidUser = createPrepaidUser10(prepaidUser);
+      PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-      createPrepaidCard10(buildPrepaidCard10(prepaidUser));
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
+      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       PrepaidMovement10 prepaidMovement = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
       prepaidMovement = createPrepaidMovement10(prepaidMovement);
-      /*
-      HttpResponse resp = withdrawUserBalance(prepaidWithdraw);
+
+      HttpResponse resp = withdrawUserBalance(prepaidUser.getUuid(), prepaidWithdraw);
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -761,9 +750,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Debe tener status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, prepaidMovement10.getEstado());
       Assert.assertEquals("Debe tener businessStatus REVERSED", BusinessStatusType.REVERSED, prepaidMovement10.getEstadoNegocio());
       Assert.assertEquals("Debe tener conTecnocom RECONCILIED", ReconciliationStatusType.RECONCILED, prepaidMovement10.getConTecnocom());
-
-       */
     }
+
   }
 
   @Test

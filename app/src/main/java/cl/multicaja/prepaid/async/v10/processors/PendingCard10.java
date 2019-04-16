@@ -306,15 +306,15 @@ public class PendingCard10 extends BaseProcessor10 {
           );
 
           //TODO: Verificar si aca deber ir el UUID Tempo
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
-          }
+          //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
+          //if(ticket.getId() != null){
+          //   log.info("Ticket Creado Exitosamente");
+          //}
         } else {
           Map<String, Object> templateData = new HashMap<>();
           templateData.put("idUsuario", prepaidUser10.getId());
           templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
+          //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
         }
         return req;
       }
