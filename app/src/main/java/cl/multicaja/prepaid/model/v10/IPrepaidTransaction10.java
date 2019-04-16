@@ -24,6 +24,8 @@ public interface IPrepaidTransaction10 {
 
   Integer getMerchantCategory();
 
+  void setFeeList(List<PrepaidMovementFee10> feeList);
+
   void setFee(NewAmountAndCurrency10 fee);
 
   void setTotal(NewAmountAndCurrency10 total);

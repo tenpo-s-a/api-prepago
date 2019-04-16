@@ -23,7 +23,7 @@ public class Test_PrepaidMovementEJBBean11_createPrepaidMovementFeeById extends 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     PrepaidMovementFee10 fee = buildPrepaidMovementFee10(prepaidMovement);
-    fee = getPrepaidMovementEJBBean11().createPrepaidMovementFee(fee);
+    fee = getPrepaidMovementEJBBean11().addPrepaidMovementFee(fee);
 
     PrepaidMovementFee10 foundFee = getPrepaidMovementEJBBean11().getPrepaidMovementFeeById(fee.getId());
 
@@ -38,7 +38,7 @@ public class Test_PrepaidMovementEJBBean11_createPrepaidMovementFeeById extends 
 
   @Test(expected = BadRequestException.class)
   public void createPrepaidMovementFee_feeNull() throws Exception {
-    getPrepaidMovementEJBBean11().createPrepaidMovementFee(null);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFee(null);
   }
 
   @Test(expected = BadRequestException.class)
@@ -47,7 +47,7 @@ public class Test_PrepaidMovementEJBBean11_createPrepaidMovementFeeById extends 
     prepaidMovementFee.setFeeType(null);
     prepaidMovementFee.setAmount(new BigDecimal(1000L));
     prepaidMovementFee.setIva(new BigDecimal(190L));
-    getPrepaidMovementEJBBean11().createPrepaidMovementFee(prepaidMovementFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidMovementFee);
   }
 
   @Test(expected = BadRequestException.class)
@@ -56,16 +56,7 @@ public class Test_PrepaidMovementEJBBean11_createPrepaidMovementFeeById extends 
     prepaidMovementFee.setFeeType(PrepaidMovementFeeType.EXCHANGE_RATE_DIF);
     prepaidMovementFee.setAmount(null);
     prepaidMovementFee.setIva(new BigDecimal(190L));
-    getPrepaidMovementEJBBean11().createPrepaidMovementFee(prepaidMovementFee);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void createPrepaidMovementFee_ivaNull() throws Exception {
-    PrepaidMovementFee10 prepaidMovementFee = new PrepaidMovementFee10();
-    prepaidMovementFee.setFeeType(PrepaidMovementFeeType.EXCHANGE_RATE_DIF);
-    prepaidMovementFee.setAmount(new BigDecimal(1000L));
-    prepaidMovementFee.setIva(null);
-    getPrepaidMovementEJBBean11().createPrepaidMovementFee(prepaidMovementFee);
+    getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidMovementFee);
   }
 
 }

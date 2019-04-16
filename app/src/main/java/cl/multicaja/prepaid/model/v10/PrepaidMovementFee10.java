@@ -1,10 +1,11 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.core.model.BaseModel;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 
 import java.math.BigDecimal;
 
-public class PrepaidMovementFee10 {
+public class PrepaidMovementFee10 extends BaseModel {
   private Long id;
   private Long movementId; // Relacion a la tabla prp_movimiento
   private PrepaidMovementFeeType feeType;

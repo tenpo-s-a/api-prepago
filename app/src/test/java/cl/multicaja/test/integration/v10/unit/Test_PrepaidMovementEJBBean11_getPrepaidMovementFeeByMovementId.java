@@ -29,7 +29,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     insertedMovements.add(fee);
 
     fee = buildPrepaidMovementFee10(prepaidMovement);
-    fee.setFeeType(PrepaidMovementFeeType.TOPUP);
+    fee.setFeeType(PrepaidMovementFeeType.TOPUP_POS_FEE);
     fee = createPrepaidMovementFee10(fee);
     insertedMovements.add(fee);
 
@@ -40,7 +40,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     createPrepaidMovementFee10(fee);
 
     // Buscar con el primer id
-    List<PrepaidMovementFee10> results = getPrepaidMovementEJBBean11().getPrepaidMovementFeeByMovementId(prepaidMovement.getId());
+    List<PrepaidMovementFee10> results = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidMovement.getId());
 
     Assert.assertNotNull("Debe existir", results);
     Assert.assertEquals("Debe tener tamaño 2", 2, results.size());
@@ -55,7 +55,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
     }
 
     // Buscar con Id que no existe
-    List<PrepaidMovementFee10> emptyResults = getPrepaidMovementEJBBean11().getPrepaidMovementFeeByMovementId(Long.MAX_VALUE);
+    List<PrepaidMovementFee10> emptyResults = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(Long.MAX_VALUE);
 
     Assert.assertNotNull("Debe existir", emptyResults);
     Assert.assertEquals("Debe tener tamaño 0", 0, emptyResults.size());
@@ -63,6 +63,6 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovementFeeByMovementId ext
 
   @Test(expected = BadRequestException.class)
   public void getPrepaidMovementFeeByMovementId_nullId() throws Exception {
-    getPrepaidMovementEJBBean11().getPrepaidMovementFeeByMovementId(null);
+    getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(null);
   }
 }

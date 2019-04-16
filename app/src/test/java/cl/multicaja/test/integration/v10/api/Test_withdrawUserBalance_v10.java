@@ -347,7 +347,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
 
       NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500101));
+      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500250));
 
       HttpResponse resp = withdrawUserBalanceDefered(prepaidUser.getUuid(), prepaidWithdraw);
 
