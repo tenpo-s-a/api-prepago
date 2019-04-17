@@ -1154,7 +1154,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
   }
 
   @Test
-  public void reverseWithdraw_OriginalMovement_ProcessOk_POS() throws Exception {
+  public void reverseWithdraw_OriginalMovement_ProcessOk_POS_Event() throws Exception {
 
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
@@ -1167,7 +1167,9 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
 
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
-    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(1000));
+    prepaidWithdraw.setMerchantCode(RandomStringUtils.randomAlphanumeric(15));
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(5000));
+    prepaidWithdraw.setMerchantCode(getRandomString(15));
 
     PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
 
@@ -1223,16 +1225,41 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
       Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
       Assert.assertEquals("Deberia estar con estado negocio PROCESS_OK", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
-
-      Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
-      ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
-        .getMessage(qResp3, withdraw10.getTransactionId());
-
-      Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
-      Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
-
     }
 
+    // verifica movimiento accounting y clearing
+    List<AccountingData10> accounting10s = getPrepaidAccountingEJBBean10().searchAccountingData(null, LocalDateTime.now(ZoneId.of("UTC")));
+    Assert.assertNotNull("No debe ser null", accounting10s);
+    Assert.assertEquals("Debe haber 1 movimientos de account", 1, accounting10s.size());
+
+    Long movId = originalWithdraw.getId();
+
+    AccountingData10 accounting10 = accounting10s.stream().filter(acc -> acc.getIdTransaction().equals(movId)).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener una carga", accounting10);
+    Assert.assertEquals("Debe tener tipo POS", AccountingTxType.RETIRO_POS, accounting10.getType());
+    Assert.assertEquals("Debe tener acc movement type POS", AccountingMovementType.RETIRO_POS, accounting10.getAccountingMovementType());
+    Assert.assertEquals("Debe tener el mismo imp fac", originalWithdraw.getImpfac().stripTrailingZeros(), accounting10.getAmount().getValue().stripTrailingZeros());
+    Assert.assertEquals("Debe tener accountingStatus NOT_OK", AccountingStatusType.NOT_OK, accounting10.getAccountingStatus());
+    Assert.assertEquals("Debe tener status NOT_SEND", AccountingStatusType.NOT_SEND, accounting10.getStatus());
+    Assert.assertEquals("Debe tener el mismo id", movId, accounting10.getIdTransaction());
+    Assert.assertTrue("Tiene fecha de conciliacion menor a now()", this.checkReconciliationDate(accounting10.getConciliationDate()));
+
+    List<ClearingData10> clearing10s = getPrepaidClearingEJBBean10().searchClearingData(null, null, AccountingStatusType.NOT_SEND, null);
+    Assert.assertNotNull("No debe ser null", clearing10s);
+    Assert.assertEquals("Debe haber 1 movimiento de clearing", 1, clearing10s.size());
+
+    ClearingData10 clearing10 = clearing10s.stream().filter(acc -> acc.getAccountingId().equals(accounting10.getId())).findFirst().orElse(null);
+    Assert.assertNotNull("deberia tener un retiro", clearing10);
+    Assert.assertEquals("Debe tener el id de accounting", accounting10.getId(), clearing10.getAccountingId());
+    Assert.assertEquals("Debe tener el id de la cuenta", Long.valueOf(0), clearing10.getUserBankAccount().getId());
+    Assert.assertEquals("Debe estar en estado NOT_SEND", AccountingStatusType.NOT_SEND, clearing10.getStatus());
+
+    Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+      .getMessage(qResp3, withdraw10.getTransactionId());
+
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
 
   }
 
