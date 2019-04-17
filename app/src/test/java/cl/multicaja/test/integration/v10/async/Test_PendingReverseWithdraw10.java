@@ -5,6 +5,7 @@ import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
@@ -1150,6 +1151,89 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
       Assert.assertEquals("Deberia estar con estado negocio CONFIRMED", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
 
     }
+  }
+
+  @Test
+  public void reverseWithdraw_OriginalMovement_ProcessOk_POS() throws Exception {
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(1000));
+
+    PrepaidWithdraw10 withdraw10 = new PrepaidWithdraw10(prepaidWithdraw);
+
+    PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, withdraw10);
+    originalWithdraw.setEstado(PrepaidMovementStatus.PROCESS_OK);
+    originalWithdraw.setEstadoNegocio(BusinessStatusType.CONFIRMED);
+    originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
+    originalWithdraw.setMonto(withdraw10.getAmount().getValue());
+    originalWithdraw = createPrepaidMovement10(originalWithdraw);
+
+    CdtTransaction10 cdtTransaction = new CdtTransaction10();
+    cdtTransaction.setAmount(withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
+    cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
+    cdtTransaction.setTransactionReference(0L);
+    cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
+    cdtTransaction.setIndSimulacion(Boolean.FALSE);
+    cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+    Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
+
+    // crea los movimientos de accounting y clearing correspondientes
+    addAccountingAndClearing(originalWithdraw);
+
+    PrepaidMovement10 reverse = buildReversePrepaidMovement10(prepaidUser, prepaidWithdraw);
+    reverse.setNumaut(null);
+    reverse.setIdTxExterno(withdraw10.getTransactionId());
+    reverse.setMonto(withdraw10.getAmount().getValue());
+    reverse.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    reverse = createPrepaidMovement10(reverse);
+
+    String messageId = sendPendingWithdrawReversal(withdraw10, prepaidUser, reverse, 0);
+
+    {
+      //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de procesados
+      Queue qResp = camelFactory.createJMSQueue(TransactionReversalRoute10.PENDING_REVERSAL_WITHDRAW_RESP);
+      ExchangeData<PrepaidReverseData10> remoteReverse = (ExchangeData<PrepaidReverseData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
+
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de reversa de retiro", remoteReverse);
+
+      PrepaidMovement10 reverseMovement = remoteReverse.getData().getPrepaidMovementReverse();
+      Assert.assertNotNull("Deberia existir un mensaje en la cola de error de reversa de retiro", reverseMovement);
+      Assert.assertEquals("El movimiento debe ser procesado", PrepaidMovementStatus.PROCESS_OK, reverseMovement.getEstado());
+      Assert.assertEquals("El movimiento debe ser procesado", BusinessStatusType.CONFIRMED, reverseMovement.getEstadoNegocio());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNumextcta());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getNummovext());
+      Assert.assertEquals("El movimiento debe ser procesado", Integer.valueOf(0), reverseMovement.getClamone());
+
+
+      PrepaidMovement10 originalDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(originalWithdraw.getId());
+      Assert.assertEquals("Deberia estar con status REVERSED", BusinessStatusType.REVERSED, originalDb.getEstadoNegocio());
+      PrepaidMovement10 reverseDb = getPrepaidMovementEJBBean10().getPrepaidMovementById(reverse.getId());
+      Assert.assertEquals("Deberia estar con status PROCESS_OK", PrepaidMovementStatus.PROCESS_OK, reverseDb.getEstado());
+      Assert.assertEquals("Deberia estar con estado negocio PROCESS_OK", BusinessStatusType.CONFIRMED, reverseDb.getEstadoNegocio());
+
+      Queue qResp3 = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_REVERSED_TOPIC);
+      ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000)
+        .getMessage(qResp3, withdraw10.getTransactionId());
+
+      Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event);
+      Assert.assertNotNull("Deberia existir un evento de transaccion reversada", event.getData());
+
+    }
+
+
   }
 
   private void addAccountingAndClearing(PrepaidMovement10 prepaidMovement, AccountingStatusType clearingStatus) throws Exception {

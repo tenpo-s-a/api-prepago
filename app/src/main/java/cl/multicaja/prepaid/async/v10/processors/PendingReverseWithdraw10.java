@@ -165,7 +165,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             //TODO: habilitar cuando se modifique la reversa de retiro
 
             // Expira cache del saldo de la cuenta
-            //getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+            getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
 
             log.debug("********** Reversa de retiro realizada exitosamente **********");
 
@@ -184,9 +184,13 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             }
             // Publica evento de Trx reversada.
             if(PrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidWithdraw.getMerchantCode())){
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(), originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_WEB);
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(),
+                originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_WEB);
+              log.info("Published Event CASH_OUT_WEB");
             } else{
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(), originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
+              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(),
+                originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
+              log.info("Published Event CASH_OUT_MULTICAJA");
             }
 
             return req;
