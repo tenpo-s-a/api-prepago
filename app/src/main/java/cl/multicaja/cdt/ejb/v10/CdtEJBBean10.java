@@ -154,7 +154,6 @@ public class CdtEJBBean10 implements CdtEJB10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idCuenta"));
     }
 
-
     Object[] params = new Object[] {
       idRef,
       new OutParam("_id", Types.BIGINT),

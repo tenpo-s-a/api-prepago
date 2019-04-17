@@ -939,6 +939,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
+        //EVENTO DE RETIRO
+        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
+        log.info("Published event CASH_OUT_MULTICAJA");
       }
       // Se envia informacion a accounting/clearing
       this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
@@ -1009,6 +1012,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   @Override
   public void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception {
+
     if(fromEndPoint == null){
       fromEndPoint = Boolean.FALSE;
     }
@@ -1023,6 +1027,11 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     if(!PrepaidUserStatus.ACTIVE.equals(prepaidUser.getStatus())){
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
+    }
+
+    Account account = getAccountEJBBean10().findByUserId(prepaidUser.getId());
+    if(account == null){
+      throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
@@ -1074,6 +1083,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
             prepaidMovement.setIndnorcor(IndicadorNormalCorrector.fromValue(tipoFacReverse.getCorrector()));
             prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
             prepaidMovement = getPrepaidMovementEJB10().getPrepaidMovementById(prepaidMovement.getId());
+            // Publica evento de Trx reversada.
+            if(PrepaidWithdraw10.WEB_MERCHANT_CODE.equals(withdrawRequest.getMerchantCode())){
+              // Se publica evento de transaccion reversada
+              getPrepaidMovementEJB11().publishTransactionReversedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), originalwithdraw, null, TransactionType.CASH_OUT_WEB);
+
+              log.info("Published Event CASH_OUT_WEB");
+            } else{
+              getPrepaidMovementEJB11().publishTransactionReversedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), originalwithdraw, null, TransactionType.CASH_OUT_MULTICAJA);
+              log.info("Published Event CASH_OUT_MULTICAJA");
+            }
+
             this.getDelegate().sendPendingWithdrawReversal(reverse,prepaidUser,prepaidMovement);
 
           } else {

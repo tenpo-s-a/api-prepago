@@ -4,11 +4,9 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -52,6 +50,12 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
   @Spy
   private ParametersUtil parametersUtil;
+
+  @Spy
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
+
+  @Spy
+  private AccountEJBBean10 accountEJBBean10;
 
   @Spy
   @InjectMocks
@@ -295,6 +299,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
+
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     Mockito.doReturn(originalWithdraw).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Long.MAX_VALUE, "0987654321", PrepaidMovementType.WITHDRAW,
@@ -351,6 +357,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     reverse.setId(Long.MAX_VALUE);
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
+
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
 
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
@@ -422,6 +430,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
+
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
 
@@ -490,6 +500,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
     originalTopup.setFechaCreacion(Timestamp.from(ZonedDateTime.now().minusHours(24).minusSeconds(1).toInstant()));
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
+
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
 
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
@@ -572,6 +584,8 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
     Mockito.doReturn(prepaidUser).when(prepaidUserEJBBean10).findByExtId(headers,uuid);
 
+    Mockito.doReturn(account).when(accountEJBBean10).findByUserId(prepaidUser.getId());
+
     Mockito.doReturn(prepaidCard10).when(prepaidCardEJBBean11).getByUserIdAndStatus(null, prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
 
     // PrepaidMovement - Reversa
@@ -590,6 +604,13 @@ public class Test_PrepaidEJBBean10_reverseWithdrawalUserBalance {
 
     Mockito.doReturn("123456789")
       .when(delegate).sendPendingWithdrawReversal(Mockito.any(), Mockito.any(), Mockito.any());
+
+    Mockito.doNothing().when(prepaidMovementEJBBean11).publishTransactionReversedEvent(Mockito.any(),
+      Mockito.any(),
+      Mockito.any(),
+      Mockito.any(),
+      Mockito.any(),
+      Mockito.any());
 
     prepaidEJBBean10.reverseWithdrawUserBalance(headers, uuid, reverseRequest,true);
 
