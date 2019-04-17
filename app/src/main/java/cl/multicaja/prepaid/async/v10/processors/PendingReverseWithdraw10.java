@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -88,9 +89,9 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
           log.debug(String.format("********** Movimiento original con id %s se encuentra en status: %s **********", originalMovement.getId(), originalMovement.getEstado()));
           return redirectRequestReverse(createJMSEndpoint(PENDING_REVERSAL_WITHDRAW_REQ), exchange, req, true);
 
-        } else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ){
+        } else if (PrepaidMovementStatus.ERROR_TECNOCOM_REINTENTABLE.equals(originalMovement.getEstado()) || PrepaidMovementStatus.ERROR_TIMEOUT_RESPONSE.equals(originalMovement.getEstado()) ) {
           log.debug("********** Reintentando movimiento original **********");
-          log.info(String.format("LLamando reversa mov original %s", prepaidCard.getProcessorUserId()));
+          log.info(String.format("LLamando reversa mov original %s",account.getAccountNumber()));
 
           // Se intenta realizar nuevamente la inclusion del movimiento original .
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().withdraw(contrato, pan, originalMovement.getCodcom(), originalMovement);
@@ -137,7 +138,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
         } else if(PrepaidMovementStatus.PROCESS_OK.equals(originalMovement.getEstado())) {
           log.debug("********** Realizando reversa de retiro **********");
           String numaut = prepaidMovementReverse.getNumaut();
-          log.info(String.format("LLamando reversa %s", prepaidCard.getProcessorUserId()));
+          log.info(String.format("LLamando reversa %s", account.getAccountNumber()));
 
           // Se intenta realizar reversa del movimiento.
           InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().reverse(contrato, pan, originalMovement.getCodcom(), prepaidMovementReverse);
@@ -164,7 +165,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             //TODO: habilitar cuando se modifique la reversa de retiro
 
             // Expira cache del saldo de la cuenta
-            //getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+            getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
 
             log.debug("********** Reversa de retiro realizada exitosamente **********");
 
@@ -181,6 +182,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             if(!"0".equals(cdtTxReversa.getNumError())) {
               log.error("Error al confirmar reversa en CDT");
             }
+
             return req;
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
             if(inclusionMovimientosDTO.getDescRetorno().contains("MPE5501")) {
@@ -201,7 +203,7 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
               //TODO: habilitar cuando se modifique la reversa de retiro
 
               // Expira cache del saldo de la cuenta
-              //getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
+              getRoute().getAccountEJBBean10().expireBalanceCache(account.getId());
 
               // Si estaba abierta, cerrar la transaccion en el CDT
               CdtTransaction10 movRef = getRoute().getCdtEJBBean10().buscaMovimientoReferencia(null, originalMovement.getIdMovimientoRef());
