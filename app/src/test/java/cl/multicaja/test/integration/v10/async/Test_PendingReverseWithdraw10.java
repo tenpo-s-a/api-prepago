@@ -1178,7 +1178,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     originalWithdraw.setEstadoNegocio(BusinessStatusType.CONFIRMED);
     originalWithdraw.setIdTxExterno(withdraw10.getTransactionId());
     originalWithdraw.setMonto(withdraw10.getAmount().getValue());
-    originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
@@ -1189,6 +1188,10 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());
     cdtTransaction.setIndSimulacion(Boolean.FALSE);
     cdtTransaction = getCdtEJBBean10().addCdtTransaction(null, cdtTransaction);
+
+
+    originalWithdraw.setIdMovimientoRef(cdtTransaction.getId());
+    originalWithdraw = createPrepaidMovement10(originalWithdraw);
 
     Assert.assertTrue("Debe crear la transaccion CDT", cdtTransaction.isNumErrorOk());
 
