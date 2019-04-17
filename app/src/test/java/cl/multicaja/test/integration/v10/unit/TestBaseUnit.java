@@ -1150,7 +1150,7 @@ public class TestBaseUnit extends TestApiBase {
    * @return
    * @throws Exception
    */
-
+  @Deprecated
   public PrepaidUser10 createPrepaidUser10(PrepaidUser10 prepaidUser) throws Exception {
 
     prepaidUser = getPrepaidUserEJBBean10().createPrepaidUser(null, prepaidUser);

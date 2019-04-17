@@ -7,7 +7,6 @@ import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoDocumento;
@@ -466,7 +465,6 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
    */
   @Test
   public void reverseWithdraw_OriginalMovement_ErrorTimeoutResponse2_pos() throws Exception {
-    User user = registerUser();
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
@@ -493,7 +491,7 @@ public class Test_PendingReverseWithdraw10 extends TestBaseUnitAsync {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionType(withdraw10.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
+    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + prepaidUser.getDocumentNumber());
     cdtTransaction.setGloss(withdraw10.getCdtTransactionType().getName()+" "+ withdraw10.getAmount().getValue());
     cdtTransaction.setTransactionReference(0L);
     cdtTransaction.setExternalTransactionId(withdraw10.getTransactionId());

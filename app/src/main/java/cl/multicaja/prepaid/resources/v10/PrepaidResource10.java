@@ -130,43 +130,12 @@ public final class PrepaidResource10 extends BaseResource {
     this.prepaidEJBBean10.reverseWithdrawUserBalanceOld(headersToMap(headers), withdrawRequest,true);
     return Response.status(201).build();
   }
+
   @POST
   @Path("/{user_id}/cash_out/reverse")
   public Response reverseWithdrawUserBalandoV2(@PathParam("user_id") String extUserId, NewPrepaidWithdraw10 withdrawRequest, @Context HttpHeaders headers) throws Exception {
     this.prepaidEJBBean10.reverseWithdrawUserBalance(headersToMap(headers), extUserId, withdrawRequest,true);
     return Response.status(201).build();
-  }
-
-  /*
-    Prepaid Signup
-   */
-
-  @POST
-  @Path("/signup")
-  public Response initSignup(NewPrepaidUserSignup10 signupRequest, @Context HttpHeaders headers) throws Exception {
-    PrepaidUserSignup10 prepaidUserSignup10 = this.prepaidEJBBean10.initUserSignup(headersToMap(headers),signupRequest);
-    return Response.ok(prepaidUserSignup10).status(201).build();
-  }
-
-  @GET
-  @Path("/signup/tac")
-  public Response getTermsAndConditions(@Context HttpHeaders headers) throws Exception {
-    PrepaidTac10 tac = this.prepaidEJBBean10.getTermsAndConditions(headersToMap(headers));
-    return Response.ok(tac).build();
-  }
-
-  @POST
-  @Path("/{userId}/finish_signup")
-  public Response finishSignup(@PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    PrepaidUser10 prepaidUser10 = this.prepaidEJBBean10.finishSignup(headersToMap(headers), userId);
-    return Response.ok(prepaidUser10).build();
-  }
-
-  @POST
-  @Path("/{userId}/signup/tac")
-  public Response acceptTermsAndConditions(NewTermsAndConditions10 newTermsAndConditions, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    this.prepaidEJBBean10.acceptTermsAndConditions(headersToMap(headers),userId, newTermsAndConditions);
-    return Response.ok().build();
   }
 
   /*
@@ -216,13 +185,6 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidBalance10).build();
   }
 
-  @POST
-  @Path("/{userId}/identity/files")
-  public Response uploadIdentityVerificationFiles(Map<String, UserFile> identityVerificationFiles, @PathParam("userId") Long userId, @Context HttpHeaders headers) throws Exception {
-    User user = this.prepaidEJBBean10.uploadIdentityVerificationFiles(headersToMap(headers),userId, identityVerificationFiles);
-    return Response.ok(user).build();
-  }
-
   /*
      Prepaid Simulations
    */
@@ -250,20 +212,6 @@ public final class PrepaidResource10 extends BaseResource {
   }
 
   @PUT
-  @Path("/{userId}/card/lock")
-  public Response lockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = this.prepaidEJBBean10.lockPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @PUT
-  @Path("/{userId}/card/unlock")
-  public Response unlockPrepaidCard(@PathParam("userId") Long userIdMc, @Context HttpHeaders headers) throws Exception {
-    PrepaidCard10 prepaidCard10 = this.prepaidEJBBean10.unlockPrepaidCard(headersToMap(headers), userIdMc);
-    return Response.ok(prepaidCard10).build();
-  }
-
-  @PUT
   @Path("/{userId}/account/{accountId}/upgrade_card")
   public Response upgradeCard(@PathParam("userId") String userUuid, @PathParam("accountId") String accountUuid, @Context HttpHeaders headers) throws Exception {
     PrepaidCard10 prepaidCard10 = prepaidCardEJBBean11.upgradePrepaidCard(headersToMap(headers), userUuid, accountUuid);
@@ -272,6 +220,7 @@ public final class PrepaidResource10 extends BaseResource {
 
   @POST
   @Path("/{user_id}/mail")
+  @Deprecated
   public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
     this.mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody);
     return Response.ok().status(201).build();
@@ -283,25 +232,6 @@ public final class PrepaidResource10 extends BaseResource {
     this.prepaidEJBBean10.reprocessQueue(headersToMap(headers), reprocesQueue);
     return Response.ok().status(201).build();
   }
-
-  /*
-   *  idnetity verification
-   */
-
-  @POST
-  @Path("/{user_id}/identity_validation")
-  public Response processIdentityValidation(IdentityValidation10 identityValidation10, @PathParam("user_id") Long userId, @Context HttpHeaders headers) {
-    try {
-      User user = this.prepaidEJBBean10.processIdentityVerification(headersToMap(headers), userId, identityValidation10);
-      return Response.ok(user).status(201).build();
-    } catch (Exception ex) {
-      log.error("Error processing identity validation for userId: " + userId);
-      ex.printStackTrace();
-      //TODO: informar error?
-    }
-    return Response.ok().status(201).build();
-  }
-
 
   @POST
   @Path("/{user_prepago_id}/transactions/{movement_id}/refund")

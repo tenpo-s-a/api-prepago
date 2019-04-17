@@ -58,33 +58,6 @@ public interface PrepaidEJB10 {
   void reverseWithdrawUserBalance(Map<String, Object> headers,String extUserId, NewPrepaidWithdraw10 withdrawRequest, Boolean fromEndPoint) throws Exception;
 
   /**
-   *
-   * @param headers
-   * @param userId
-   * @return
-   */
-  List<PrepaidTopup10> getUserTopups(Map<String, Object> headers, Long userId);
-
-  /**
-   *
-   * @param headers
-   * @param signupRequest
-   * @return
-   * @throws Exception
-   */
-  PrepaidUserSignup10 initUserSignup(Map<String, Object> headers, NewPrepaidUserSignup10 signupRequest) throws Exception;
-
-  /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  PrepaidUser10 finishSignup(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-
-  /**
    * Retorna la informacion de la ultima tarjeta del usuario
    *
    * @param headers
@@ -195,66 +168,11 @@ public interface PrepaidEJB10 {
   PrepaidUser10 findPrepaidUser(Map<String, Object> headers, Integer rut) throws Exception;
 
   /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  PrepaidCard10 lockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   *
-   * @param headers
-   * @param userIdMc
-   * @return
-   * @throws Exception
-   */
-  PrepaidCard10 unlockPrepaidCard(Map<String, Object> headers, Long userIdMc) throws Exception;
-
-  /**
-   * Obtiene los terminos y condiciones vigentes para preago
-   *
-   * @param headers
-   * @return
-   * @throws Exception
-   */
-  PrepaidTac10 getTermsAndConditions(Map<String, Object> headers) throws Exception;
-
-  /**
-   *  Aceptar los terminos y condiciones
-   * @param headers
-   * @param userIdMc
-   * @param termsAndConditions10
-   * @throws Exception
-   */
-  void acceptTermsAndConditions(Map<String, Object> headers, Long userIdMc, NewTermsAndConditions10 termsAndConditions10) throws Exception;
-
-  /**
-   * Cargar informacion sobre las fotos de verificacion de identidad del usuario
-   * @param headers
-   * @param userIdMc
-   * @param identityVerificationFiles
-   * @throws Exception
-   */
-  User uploadIdentityVerificationFiles(Map<String, Object> headers, Long userIdMc, Map<String, UserFile> identityVerificationFiles) throws Exception;
-
-  /**
    * Busca en las colas erroneas el mensaje por el id y lo vuelve a inyectar para ser reprocesado.
    * @param headers
    * @param reprocesQueue
    * @throws Exception
    */
   String reprocessQueue(Map<String, Object> headers, ReprocesQueue reprocesQueue) throws Exception;
-
-
-  /**
-   * Procesa la informacion de verificacion de identidad del usuario realizada en Freshdesk
-   * @param headers
-   * @param userIdMc
-   * @param identityVerification
-   * @throws Exception
-   */
-  User processIdentityVerification(Map<String, Object> headers, Long userIdMc, IdentityValidation10 identityVerification) throws Exception;
 
 }
