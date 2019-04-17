@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
 
   @Test
   public void pendingWithdrawToAccount_ok() throws Exception {
-    LocalDateTime dateToday = LocalDateTime.now();
+    LocalDateTime dateToday = LocalDateTime.now(ZoneId.of("UTC"));
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
     prepaidMovement.setId(100L);
@@ -41,7 +42,7 @@ public class Test_PendingStoreWithdrawToAccounting extends TestBaseUnitAsync {
     prepaidMovement.setImpfac(new BigDecimal(10000));
     prepaidMovement.setTipoMovimiento(PrepaidMovementType.WITHDRAW);
     prepaidMovement.setOriginType(MovementOriginType.API);
-    prepaidMovement.setFechaCreacion(Timestamp.from(Instant.now()));
+    prepaidMovement.setFechaCreacion(Timestamp.valueOf(dateToday));
 
     UserAccount userAccount = randomBankAccount();
 

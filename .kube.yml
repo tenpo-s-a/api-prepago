@@ -84,7 +84,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: db
+  name: api-prepaid-se-db
   namespace: api-prepaid
 spec:
   hosts:
@@ -98,7 +98,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: tecnocom
+  name: api-prepaid-se-tecnocom
   namespace: api-prepaid
 spec:
   hosts:
@@ -106,6 +106,21 @@ spec:
   location: MESH_EXTERNAL
   ports:
   - number: 9080
-    name: http
+    name: http-api-prepaid-tecnocom
     protocol: HTTP
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: api-prepaid-se-kafka
+  namespace: api-prepaid
+spec:
+  hosts:
+  - "137.116.88.31"
+  location: MESH_EXTERNAL
+  ports:
+  - number: 9092
+    name: tcp-api-prepaid-kafka
+    protocol: TCP
   resolution: NONE

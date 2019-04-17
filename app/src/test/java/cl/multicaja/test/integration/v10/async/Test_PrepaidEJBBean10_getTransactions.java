@@ -9,6 +9,7 @@ import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import java.util.List;
 
 public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
 
+  //TODO: No se usara
+  @Ignore
   @Test
   public void getTransacctions() throws Exception {
 

@@ -116,7 +116,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     /******************************
      * Validacion de datos Tarjeta
      ******************************/
-    Assert.assertNotNull("Deberia tener una PrepaidCard ProcessorUserId", remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
     Assert.assertNotNull("Deberia tener PAN", remoteTopup.getData().getPrepaidCard10().getPan());
     Assert.assertNotNull("Deberia tener PAN Encriptado", remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
     Assert.assertNotNull("Deberia tener Expire Date", remoteTopup.getData().getPrepaidCard10().getExpiration());
@@ -224,10 +223,8 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     Assert.assertNotNull("Deberia existir un topup", remoteTopup);
     Assert.assertNotNull("Deberia existir un topup", remoteTopup.getData());
     Assert.assertNotNull("Debe contener una tarjeta",remoteTopup.getData().getPrepaidCard10());
-    Assert.assertNotNull("Debe contener un contrato",remoteTopup.getData().getPrepaidCard10().getProcessorUserId());
     Assert.assertNotNull("Debe contener getPan",remoteTopup.getData().getPrepaidCard10().getPan());
     Assert.assertNotNull("Debe contener getNameOnCard",remoteTopup.getData().getPrepaidCard10().getNameOnCard());
-    Assert.assertNotNull("Debe contener getExpiration",remoteTopup.getData().getPrepaidCard10().getExpiration());
     Assert.assertNotNull("Debe contener getEncryptedPan",remoteTopup.getData().getPrepaidCard10().getEncryptedPan());
     Assert.assertNotNull("Deberia contener codigo de producto",remoteTopup.getData().getPrepaidCard10().getProducto());
     Assert.assertNotNull("Deberia contener numero unico de cliente",remoteTopup.getData().getPrepaidCard10().getNumeroUnico());

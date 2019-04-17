@@ -106,7 +106,8 @@ public final class ParametersUtil {
    * @throws SQLException
    */
   public <T> T getObject(String application, String name, String version, Class<T> clazz) throws SQLException {
-    return this.getParameter(application, name, version) != null ? JsonUtils.getJsonParser().fromJson((String)this.getParameter(application, name, version),clazz) : null;
+    Object foundParameter = this.getParameter(application, name, version);
+    return foundParameter != null ? JsonUtils.getJsonParser().fromJson((String) foundParameter, clazz) : null;
   }
 
   public <T> T getObject(String application, String name, String version, Class<T> clazz, T defaultValue) throws SQLException {

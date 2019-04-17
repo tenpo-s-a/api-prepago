@@ -85,6 +85,16 @@ public interface PrepaidEJB10 {
   IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception;
 
   /**
+   * Calcula la comision total y total segun el tipo (TOPUP/WITHDRAW)
+   *
+   * @param transaction
+   * @param feeList
+   * @return
+   * @throws Exception
+   */
+  IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction, List<PrepaidMovementFee10> feeList) throws Exception;
+
+  /**
    *  Agrega la informacion para el voucher requerida por el POS/Switch
    *
    * @param transaction al que se le agregara el voucher

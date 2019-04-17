@@ -21,18 +21,18 @@ import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
-import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.DocumentType;
+import cl.multicaja.prepaid.model.v11.IvaType;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -135,7 +135,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private TecnocomServiceHelper tecnocomServiceHelper;
 
-  private UserClient userClient;
 
   private EncryptUtil encryptUtil;
 
@@ -271,14 +270,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
   @Override
-  public UserClient getUserClient() {
-    if(userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
-  }
-
-  @Override
   public Map<String, Object> info() throws Exception{
     Map<String, Object> map = new HashMap<>();
     map.put("class", this.getClass().getSimpleName());
@@ -372,30 +363,25 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     3- Para cualquier otro estado de la tarjeta, se deberá seguir el proceso
      */
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, user.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null, user.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
     if (prepaidCard == null) {
-
-      prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, user.getId(),
-        PrepaidCardStatus.LOCKED_HARD,
-        PrepaidCardStatus.EXPIRED);
-
-      if (prepaidCard != null) {
+      prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null, user.getId(),PrepaidCardStatus.LOCKED_HARD,PrepaidCardStatus.EXPIRED);
+      if(prepaidCard != null){
         throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
     }
+
     //Se mueve para que al CDT se ingrese sin comisiones
     PrepaidTopup10 prepaidTopup = new PrepaidTopup10(topupRequest);
     prepaidTopup.setUserId(user.getId());
     prepaidTopup.setStatus("exitoso");
     prepaidTopup.setTimestamps(new Timestamps());
 
-     /*
+    /*
       Calcular monto a cargar y comisiones
-     */
-    prepaidTopup = (PrepaidTopup10) this.calculateFeeAndTotal(prepaidTopup);
+    */
+    List<PrepaidMovementFee10> feeList = this.calculateFeeList(prepaidTopup);
+    prepaidTopup = (PrepaidTopup10) this.calculateFeeAndTotal(prepaidTopup, feeList);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     log.info(String.format("Monto a cargar $ %d [$ %d]-[$ %d]",topupRequest.getAmount().getValue().subtract(prepaidTopup.getFee().getValue()).longValue(),topupRequest.getAmount().getValue().longValue(),prepaidTopup.getFee().getValue().longValue()));
@@ -461,6 +447,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
     prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(null, prepaidMovement);
 
+    /*
+      Registra las comisiones asociadas a este movimiento
+     */
+    for(PrepaidMovementFee10 fee : feeList) {
+      fee.setMovementId(prepaidMovement.getId()); // Asigna el idMovement a cada fee
+    }
+    getPrepaidMovementEJB11().addPrepaidMovementFeeList(feeList); // Se insertan en la BD
+
     prepaidTopup.setId(prepaidMovement.getId());
 
 
@@ -476,7 +470,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-      InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(prepaidCard.getProcessorUserId(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
+      InclusionMovimientosDTO inclusionMovimientosDTO = getTecnocomServiceHelper().topup(account.getAccountNumber(), pan, prepaidTopup.getMerchantName(), prepaidMovement);
 
       // Responde OK
       if (inclusionMovimientosDTO.isRetornoExitoso()) {
@@ -512,7 +506,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         this.getDelegate().sendMovementToAccounting(prepaidMovement, null);
 
         // Evento de transaccion autorizada
-        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
         // Expira cache del saldo de la cuenta
         getAccountEJBBean10().expireBalanceCache(account.getId());
@@ -541,14 +535,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         String messageId = this.getDelegate().sendPendingTopupReverse(prepaidTopup, prepaidCard, user, prepaidMovementReverse);
 
         // Evento de transaccion rechazada
-        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
         throw new RunTimeValidationException(TARJETA_ERROR_GENERICO_$VALUE).setData(new KeyValue("value", inclusionMovimientosDTO.getDescRetorno()), new KeyValue("messageId", messageId));
       }
       else {
         log.info("Error no reintentable");
         // Evento de transaccion rechazada
-        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFee(), TransactionType.CASH_IN_MULTICAJA);
+        getPrepaidMovementEJB11().publishTransactionRejectedEvent(user.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidTopup.getFeeList(), TransactionType.CASH_IN_MULTICAJA);
 
         //Colocar el movimiento en error
         getPrepaidMovementEJB10().updatePrepaidMovementStatus(null, prepaidMovement.getId(), PrepaidMovementStatus.REJECTED);
@@ -648,17 +642,18 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(prepaidUser == null){
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
     if(prepaidUser.getStatus().equals(PrepaidUserStatus.DISABLED)){
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    // Obtiene la tarjeta
-    //TODO: seguiremos utilizando esta validacion?
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
+    if (prepaidCard == null) {
+      prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.LOCKED_HARD,PrepaidCardStatus.EXPIRED);
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+    }
     TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.CARGA_TRANSFERENCIA : TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA;
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(topupRequest.getTransactionOriginType()) ? TipoFactura.ANULA_CARGA_TRANSFERENCIA : TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA;
 
@@ -679,7 +674,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           String timezone;
           if(headers == null || !headers.containsKey(Constants.HEADER_USER_TIMEZONE)){
             timezone="America/Santiago";
-          } else{
+          }
+          else {
             timezone= headers.get(Constants.HEADER_USER_TIMEZONE).toString();
           }
           if(getDateUtils().inLastHours(24L, originalTopup.getFechaCreacion(), timezone) || !fromEndPoint) {
@@ -690,7 +686,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
             PrepaidTopup10 reverse = new PrepaidTopup10(topupRequest);
 
-            prepaidCard = getPrepaidCardEJB11().getPrepaidCardById(headers, prepaidCard.getId());
 
             PrepaidMovement10 prepaidMovement = buildPrepaidMovement(reverse, prepaidUser, prepaidCard, cdtTransaction);
             if(!fromEndPoint){
@@ -814,23 +809,15 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
     // Obtiene la tarjeta de un usaurio rpeapgo
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
-
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
     if (prepaidCard == null) {
-
-        prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-        PrepaidCardStatus.LOCKED_HARD,
-        PrepaidCardStatus.EXPIRED,
-        PrepaidCardStatus.PENDING);
-
-      if (prepaidCard != null) {
-        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString()));
+      prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.LOCKED_HARD,PrepaidCardStatus.EXPIRED,PrepaidCardStatus.PENDING);
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
       }
-
       throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
     }
+
     //Se cambia para calcular la comision previo al envio al CDT
     PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10(withdrawRequest);
     prepaidWithdraw.setUserId(prepaidUser.getId());
@@ -923,7 +910,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
       getPrepaidMovementEJB10().updatePrepaidMovement(null,
         prepaidMovement.getId(),
-        prepaidCard.getHashedPan(),
+        prepaidCard.getPan(),
         centalta,
         cuenta,
         numextcta,
@@ -1038,9 +1025,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new ValidationException(CLIENTE_PREPAGO_BLOQUEADO_O_BORRADO);
     }
 
-    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(),
-      PrepaidCardStatus.ACTIVE,
-      PrepaidCardStatus.LOCKED);
+    PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.ACTIVE,PrepaidCardStatus.LOCKED);
+    if (prepaidCard == null) {
+      prepaidCard = getPrepaidCardEJB11().getByUserIdAndStatus(null,prepaidUser.getId(),PrepaidCardStatus.LOCKED_HARD,PrepaidCardStatus.EXPIRED);
+      if(prepaidCard != null){
+        throw new ValidationException(TARJETA_INVALIDA_$VALUE).setData(new KeyValue("value", prepaidCard.getStatus().toString())); //tarjeta invalida
+      }
+    }
 
     TipoFactura tipoFacTopup = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.RETIRO_TRANSFERENCIA : TipoFactura.RETIRO_EFECTIVO_COMERCIO_MULTICJA;
     TipoFactura tipoFacReverse = TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType()) ? TipoFactura.ANULA_RETIRO_TRANSFERENCIA : TipoFactura.ANULA_RETIRO_EFECTIVO_COMERCIO_MULTICJA;
@@ -1205,6 +1196,128 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
+  private List<PrepaidMovementFee10> calculateFeeList(IPrepaidTransaction10 transaction) throws BaseException {
+    if(transaction == null || transaction.getAmount() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
+    }
+    if(transaction.getAmount().getValue() == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount.value"));
+    }
+    if(StringUtils.isBlank(transaction.getMerchantCode())){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
+    }
+
+    List<PrepaidMovementFee10> feeList = null;
+    switch (transaction.getMovementType()) {
+      case TOPUP: // Calcula las comisiones segun el tipo de carga (WEB o POS)
+        if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+          feeList = calculateFeeList(transaction.getAmount().getValue(),
+                                     getPercentage().getTOPUP_WEB_FEE_AMOUNT(),
+                                     getPercentage().getTOPUP_WEB_FEE_PERCENTAGE(),
+                                     getPercentage().getTOPUP_WEB_FEE_IVA_TYPE(),
+                                     PrepaidMovementFeeType.TOPUP_WEB_FEE);
+        } else {
+          feeList = calculateFeeList(transaction.getAmount().getValue(),
+                                     getPercentage().getTOPUP_POS_FEE_AMOUNT(),
+                                     getPercentage().getTOPUP_POS_FEE_PERCENTAGE(),
+                                     getPercentage().getTOPUP_POS_FEE_IVA_TYPE(),
+                                     PrepaidMovementFeeType.TOPUP_POS_FEE);
+        }
+        break;
+      case WITHDRAW:
+        // TODO: que se calculen las comisiones de los retiros
+        break;
+      default:
+        feeList = new ArrayList<>();
+        break;
+    }
+    return feeList;
+  }
+
+
+  /**
+   * Construye una lista de fees (monto e iva)
+   *
+   * @param transactionAmount
+   * @param baseFee
+   * @param percentFee
+   * @param ivaType
+   * @param feeType
+   * @return
+   */
+  private List<PrepaidMovementFee10> calculateFeeList(BigDecimal transactionAmount, BigDecimal baseFee, BigDecimal percentFee, IvaType ivaType, PrepaidMovementFeeType feeType) {
+
+    ArrayList<PrepaidMovementFee10> feeList = new ArrayList<>();
+
+    // Cobro base
+    BigDecimal baseFeeAmount = baseFee.setScale(0, BigDecimal.ROUND_HALF_UP);
+
+    // Cobro porcentual
+    BigDecimal percentFeeAmount = transactionAmount.multiply(percentFee).setScale(0, RoundingMode.HALF_UP);
+
+    // Total Fee
+    BigDecimal totalFee = baseFeeAmount.add(percentFeeAmount);
+
+    // Dado el monto total y el tipo de iva ("incluido" o "mas iva") separa los dos valores
+    Map<String, BigDecimal> feeAndIva = getCalculationsHelper().calculateFeeAndIva(totalFee, ivaType);
+
+    // Crear la fee de prepago
+    PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+    prepaidFee.setAmount(feeAndIva.get("fee"));
+    prepaidFee.setFeeType(feeType);
+    feeList.add(prepaidFee);
+
+    // Crear el iva de la fee de prepago
+    PrepaidMovementFee10 ivaFee = new PrepaidMovementFee10();
+    ivaFee.setAmount(feeAndIva.get("iva"));
+    ivaFee.setFeeType(PrepaidMovementFeeType.IVA);
+    feeList.add(ivaFee);
+
+    return feeList;
+  }
+
+  @Override
+  public IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction, List<PrepaidMovementFee10> feeList) throws Exception {
+    if(transaction == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "transaction"));
+    }
+    if(feeList == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "feeList"));
+    }
+
+    CodigoMoneda currencyCodeClp = CodigoMoneda.CHILE_CLP;
+
+    NewAmountAndCurrency10 total = new NewAmountAndCurrency10();
+    total.setCurrencyCode(currencyCodeClp);
+
+    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
+    fee.setCurrencyCode(currencyCodeClp);
+
+    // Suma la lista de fees
+    BigDecimal totalFee = BigDecimal.ZERO;
+    for(PrepaidMovementFee10 feeDetail : feeList) {
+      totalFee = totalFee.add(feeDetail.getAmount());
+    }
+    fee.setValue(totalFee);
+
+    // Calcula el total a restar de la cuenta del usuario
+    switch (transaction.getMovementType()) {
+      case TOPUP:
+        //TODO: se debe agregar al calculo el cobro de emision
+        total.setValue(transaction.getAmount().getValue().subtract(totalFee));
+      break;
+      case WITHDRAW:
+        total.setValue(transaction.getAmount().getValue().add(totalFee));
+      break;
+    }
+
+    transaction.setFeeList(feeList);
+    transaction.setFee(fee);
+    transaction.setTotal(total);
+    return transaction;
+  }
+
+  @Deprecated
   @Override
   public IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction) throws Exception {
 
@@ -1241,7 +1354,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
         // Calculo el total
         total.setValue(transaction.getAmount().getValue().subtract(fee.getValue()));
-      break;
+        break;
       case WITHDRAW:
         // Calcula las comisiones segun el tipo de carga (WEB o POS)
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
@@ -1254,7 +1367,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         // Calculo el total
         total.setValue(transaction.getAmount().getValue().add(fee.getValue()));
-      break;
+        break;
     }
 
     transaction.setFee(fee);
@@ -1739,6 +1852,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Obtener tarjeta
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserId(headers, prepaidUser.getId());
 
+    Account account = getAccountEJBBean10().findById(prepaidCard.getId());
+
     if(prepaidCard == null) {
       //Obtener ultimo movimiento
       // Si el ultimo movimiento esta en estatus Pendiente o En Proceso
@@ -1779,7 +1894,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     try{
       prepaidTransactionExtend10 = createConsultaMovimientoToList(
-        prepaidCard.getProcessorUserId(),user.getRut().getValue().toString(),
+        account.getAccountNumber(),user.getRut().getValue().toString(),
         TipoDocumento.RUT,_startDate,_endDate);
 
       prepaidTransactionExtend10.setErrorCode(0);

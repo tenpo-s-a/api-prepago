@@ -366,7 +366,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     }
   }
 
-  public void publishAccountCreatedEvent(Long externalUserId, Account acc) throws Exception {
+  public void publishAccountCreatedEvent(String externalUserId, Account acc) throws Exception {
     if(externalUserId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
     }
@@ -375,7 +375,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "account"));
     }
 
-    log.info(String.format("[publishAccountCreatedEvent] Publicando evento ACCOUNT_CREATED -> account [userId: %d, id: %d, uuid: %s]", externalUserId, acc.getId(), acc.getUuid()));
+    log.info(String.format("[publishAccountCreatedEvent] Publicando evento ACCOUNT_CREATED -> account [userId: %s, id: %d, uuid: %s]", externalUserId, acc.getId(), acc.getUuid()));
 
     cl.multicaja.prepaid.kafka.events.model.Account account = new cl.multicaja.prepaid.kafka.events.model.Account();
     account.setId(acc.getUuid());
@@ -387,7 +387,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     account.setTimestamps(timestamps);
 
     AccountEvent accountEvent = new AccountEvent();
-    accountEvent.setUserId(externalUserId.toString());
+    accountEvent.setUserId(externalUserId);
     accountEvent.setAccount(account);
 
     getKafkaEventDelegate10().publishAccountCreatedEvent(accountEvent);
