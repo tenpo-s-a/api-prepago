@@ -182,16 +182,6 @@ public class PendingReverseWithdraw10 extends BaseProcessor10  {
             if(!"0".equals(cdtTxReversa.getNumError())) {
               log.error("Error al confirmar reversa en CDT");
             }
-            // Publica evento de Trx reversada.
-            if(PrepaidWithdraw10.WEB_MERCHANT_CODE.equals(prepaidWithdraw.getMerchantCode())){
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(),
-                originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_WEB);
-              log.info("Published Event CASH_OUT_WEB");
-            } else{
-              getRoute().getPrepaidMovementEJBBean11().publishTransactionReversedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard.getUuid(),
-                originalMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
-              log.info("Published Event CASH_OUT_MULTICAJA");
-            }
 
             return req;
           } else if(CodigoRetorno._200.equals(inclusionMovimientosDTO.getRetorno())) {
