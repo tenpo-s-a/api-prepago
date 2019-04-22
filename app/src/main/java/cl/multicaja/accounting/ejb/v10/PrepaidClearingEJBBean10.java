@@ -441,7 +441,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
   }
 
-
+  //TODO: La creacion del CSV se migra  a prepaid-batch-worker, revisar los test que hacen uso y modificarlos.
   public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
