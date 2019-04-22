@@ -1,19 +1,8 @@
 package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidTransaction10;
-import cl.multicaja.prepaid.model.v10.PrepaidTransactionExtend10;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
 
@@ -22,9 +11,8 @@ public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
   @Test
   public void getTransacctions() throws Exception {
 
-    User user = registerUser();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    /*PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
@@ -51,7 +39,7 @@ public class Test_PrepaidEJBBean10_getTransactions extends TestBaseUnitAsync{
 
     Assert.assertNotNull("List<PrepaidTransaction10> or Data Not Null ",prepaidTransactionExtend10.getData());
     Assert.assertEquals("Size = a 2", 2,prepaidTransactionExtend10.getData().size() );
-
+     */
   }
 
   @Test(expected = BadRequestException.class)

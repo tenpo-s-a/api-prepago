@@ -3,7 +3,6 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.DateUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -12,7 +11,10 @@ import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -21,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
 

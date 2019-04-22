@@ -5,7 +5,6 @@ import cl.multicaja.camel.ProcessorMetadata;
 import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.TipoAlta;
@@ -13,7 +12,6 @@ import cl.multicaja.tecnocom.constants.TipoDocumento;
 import cl.multicaja.tecnocom.dto.AltaClienteDTO;
 import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.Queue;
@@ -122,10 +120,8 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
   @Test
   public void pendingCardIssuanceFee_PrepaidMovementNull() throws Exception {
 
-    User user = registerUser();
-
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard = new PrepaidCard10();
     prepaidCard.setStatus(PrepaidCardStatus.PENDING);

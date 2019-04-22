@@ -1,13 +1,9 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.ArrayList;
 
@@ -27,10 +23,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_rejectedTopups() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -156,10 +152,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_rejectedWithdraw() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -285,10 +281,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_topup_ok() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -419,10 +415,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_topup_files_notOK() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -548,10 +544,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_topup_reversed() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -681,10 +677,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_withdraw_ok() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -814,10 +810,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_withdraw_reversed() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();
@@ -947,10 +943,10 @@ public class Test_PrepaidMovementEJBBean10_expireNotReconciledMovements extends 
 
   @Test
   public void expire_tecnocom() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     ArrayList<PrepaidMovement10> topupMovements = new ArrayList<>();
     ArrayList<PrepaidMovement10> topupReversedMovements = new ArrayList<>();

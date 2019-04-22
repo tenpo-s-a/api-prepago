@@ -3,7 +3,6 @@ package cl.multicaja.prepaid.async.v10.model;
 import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.model.Errors;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.lang3.builder.ToStringBuilder;

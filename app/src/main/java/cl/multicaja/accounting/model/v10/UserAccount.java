@@ -1,7 +1,6 @@
 package cl.multicaja.accounting.model.v10;
 
 import cl.multicaja.core.model.BaseModel;
-import cl.multicaja.prepaid.helpers.users.model.UserBankAccountStatus;
 import org.apache.commons.lang3.StringUtils;
 
 public class UserAccount extends BaseModel {
@@ -12,7 +11,6 @@ public class UserAccount extends BaseModel {
   private String bankName;
   private String accountType;
   private Long accountNumber;
-  private UserBankAccountStatus status;
   private String rut;
 
   public UserAccount() {
@@ -67,13 +65,6 @@ public class UserAccount extends BaseModel {
     this.accountNumber = accountNumber;
   }
 
-  public UserBankAccountStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(UserBankAccountStatus status) {
-    this.status = status;
-  }
 
   public String getRut() {
     return rut;

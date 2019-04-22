@@ -5,8 +5,8 @@ import cl.multicaja.accounting.model.v10.AccountingStatusType;
 import cl.multicaja.accounting.model.v10.AccountingTxType;
 import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -31,18 +31,22 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
   @Test
   public void getWebWithdraws() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
 
     List<Long> clearingIds = new ArrayList<>();
 
     // mov 1 - RETIRO_WEB + Pendiente Con Tecnocom + Clearing OK
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -70,7 +74,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 2 - RETIRO_WEB + Con Tecnocom OK + Clearing OK
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -100,7 +104,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 3 - RETIRO_WEB + Con Tecnocom OK + Clearing PENDING
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -128,7 +132,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 4 - RETIRO_WEB + Con Tecnocom OK + Clearing REJECTED
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -158,7 +162,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 5 - RETIRO_WEB + Con Tecnocom OK + Clearing SENT
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -186,7 +190,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 6 - Ya procesado
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -230,18 +234,21 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
   @Test
   public void getWebWithdraws_empty() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10(prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
     List<Long> clearingIds = new ArrayList<>();
 
     // mov 1 - RETIRO_WEB + Pendiente Con Tecnocom + Clearing OK
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -269,7 +276,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 3 - RETIRO_WEB + Con Tecnocom OK + Clearing PENDING
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -297,7 +304,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 5 - RETIRO_WEB + Con Tecnocom OK + Clearing SENT
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento
@@ -325,7 +332,7 @@ public class Test_PrepaidClearingEJBBean10_getWebWithdrawForReconciliation exten
 
     // mov 6 - Ya procesado
     {
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
       //Movimiento

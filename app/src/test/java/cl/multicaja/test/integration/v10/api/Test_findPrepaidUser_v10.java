@@ -1,12 +1,7 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.NameStatus;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
-import cl.multicaja.prepaid.model.v10.Timestamps;
+import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,9 +54,8 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_PrepaidUserNull() throws Exception {
 
-    User user = registerUser();
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
+    HttpResponse resp = findPrepaidUser(getUniqueRutNumber().toString());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
 
@@ -73,13 +67,11 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidUserActive() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
+    HttpResponse resp = findPrepaidUser(prepaidUser.getDocumentNumber());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -102,13 +94,11 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidUserDisabled() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser.setStatus(PrepaidUserStatus.DISABLED);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
+    HttpResponse resp = findPrepaidUser(prepaidUser.getDocumentNumber());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -131,15 +121,10 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidUserLevel1() throws Exception {
 
-    User user = registerUser();
-    user.setNameStatus(NameStatus.UNVERIFIED);
-    user = updateUser(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_1);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
+    HttpResponse resp = findPrepaidUser(prepaidUser.getDocumentNumber());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -162,13 +147,10 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidUserLevel2() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    HttpResponse resp = findPrepaidUser(user.getRut().getValue().toString());
+    HttpResponse resp = findPrepaidUser(prepaidUser.getDocumentNumber());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 

@@ -2,22 +2,19 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
-import cl.multicaja.core.utils.EncryptUtil;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoRetorno;
-import cl.multicaja.tecnocom.constants.TipoAlta;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
-import cl.multicaja.tecnocom.dto.AltaClienteDTO;
-import cl.multicaja.tecnocom.dto.DatosTarjetaDTO;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;

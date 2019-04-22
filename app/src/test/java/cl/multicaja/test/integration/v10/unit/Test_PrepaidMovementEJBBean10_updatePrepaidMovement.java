@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.junit.Assert;
@@ -12,13 +11,10 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
   @Test
   public void updatePrepaidMovement_status_ok() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement10.setNumaut("123456");
@@ -37,13 +33,10 @@ public class Test_PrepaidMovementEJBBean10_updatePrepaidMovement extends TestBas
   @Test
   public void updatePrepaidMovement_data_ok() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement10.setNumaut("123456");
