@@ -33,8 +33,6 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);

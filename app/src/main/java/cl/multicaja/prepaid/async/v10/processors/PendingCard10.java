@@ -261,9 +261,9 @@ public class PendingCard10 extends BaseProcessor10 {
         //TODO: Verificar que ID tiene que ir aca
         //TODO: Revisar como se generaran los Tickets
         Ticket ticket = null;//getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
-        if(ticket.getId() != null){
-          log.info("Ticket Creado Exitosamente");
-        }
+        //if(ticket.getId() != null){
+          //log.info("Ticket Creado Exitosamente");
+        //}
       } else {
         /**
          *  ENVIO DE MAIL ERROR ENVIO DE TARJETA

@@ -48,7 +48,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
 
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102001", 102001, errorObj.get("code"));
+    Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
   }
 
   @Test
@@ -147,7 +147,7 @@ public class Test_findPrepaidUser_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidUserLevel2() throws Exception {
 
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     HttpResponse resp = findPrepaidUser(prepaidUser.getDocumentNumber());

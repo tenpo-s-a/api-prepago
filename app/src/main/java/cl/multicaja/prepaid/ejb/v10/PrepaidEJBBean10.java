@@ -1817,7 +1817,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     // Busco el usuario MC
 
     // Busco el usuario prepago
-    PrepaidUser10 prepaidUser = null;
+    PrepaidUser10 prepaidUser = prepaidUserEJB10.findByNumDoc(headers,rut.toString());
 
     if(prepaidUser == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);

@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.SimulationNew10;
+import org.junit.Test;
 
 /**
  * @autor vutreras
@@ -22,12 +23,11 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-  /*
+
   //TODO: Verificar si esto se seguira usando
-  @Ignore
   @Test
   public void topupSimulation_not_ok_by_params_null() throws Exception {
-
+    /*
     final Integer codErrorParamNull = PARAMETRO_FALTANTE_$VALUE.getValue();
 
     {
@@ -95,8 +95,9 @@ public class Test_topupSimulation_v10 extends TestBaseUnitApi {
       Assert.assertEquals("status 400", 400, respHttp.getStatus());
       Assert.assertEquals("debe ser error de validacion de parametros", codErrorParamNull, vex.getCode());
     }
+    */
   }
-   */
+
 
   /*
   //TODO: Verificar si esto se seguira usando

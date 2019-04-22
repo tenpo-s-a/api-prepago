@@ -35,10 +35,6 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = createAccount(account.getUserId(),account.getAccountNumber());
-
-    //
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
 
@@ -48,7 +44,7 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
 
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
-    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, account, 0);
+    String messageId = sendPendingTopup(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement, null, 0);
 
     //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
     Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_EMISSION_RESP);
@@ -257,11 +253,9 @@ public class Test_PendingCard10 extends TestBaseUnitAsync {
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
-
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
     PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
-
     prepaidMovement = createPrepaidMovement10(prepaidMovement);
 
     String messageId = sendPendingEmissionCard(prepaidTopup, prepaidUser, cdtTransaction, prepaidMovement,4);

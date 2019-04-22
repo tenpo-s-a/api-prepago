@@ -294,9 +294,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
 
           //TODO: Se debe verificar si este id seria el uuid de Tempo
           Ticket ticket = null; //getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
-          }
+          //if(ticket.getId() != null){
+            //log.info("Ticket Creado Exitosamente");
+          //}
         } else {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", user.getId());
