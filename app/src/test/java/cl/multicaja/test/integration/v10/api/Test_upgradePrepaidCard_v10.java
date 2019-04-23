@@ -87,7 +87,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
 
     HttpResponse resp = upgradePrepaidCard(prepaidUser10.getUuid(), getRandomNumericString(10));
 
-    Assert.assertEquals("status 422", 422, resp.getStatus());
+    Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
     Assert.assertNotNull("Deberia tener error", errorObj);
     Assert.assertEquals("Deberia tener error code = 102003", CUENTA_NO_EXISTE.getValue(), errorObj.get("code"));
