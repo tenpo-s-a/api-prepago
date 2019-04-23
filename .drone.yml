@@ -92,6 +92,18 @@ pipeline:
       event: [ push ]
       branch: master
 
+  db_mock_migration_staging:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-down.sh 1000 -Denv=development-mock
+      - ./migrate-up.sh -Denv=development-mock
+      - ./migrate-bootstrap.sh --force -Denv=development-mock
+    when:
+      event: [ push ]
+      branch: master
+
   db_migration_sandbox:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -168,6 +180,38 @@ pipeline:
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
       - DB_HOST_NAME=prepaid-postgresql-staging
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_mock_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: deployment-mock.staging.yml
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_dev_mock
+      - API_ENVIRONMENT=development-mock
+      - DB_USERNAME=prepago
+      - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
+      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
+      - DB_HOST_NAME=prepaid-postgresql-staging
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_virtual_service_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: virtual-service.staging.yml
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_destination_rule_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: destination-rule.staging.yml
     when:
       event: [ push ]
       branch: master
