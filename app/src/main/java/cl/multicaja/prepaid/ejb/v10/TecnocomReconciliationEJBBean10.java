@@ -35,9 +35,8 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.*;
 import java.sql.Date;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -200,7 +199,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     }
 
     // Se procesan las autorizaciones
-    List<MovimientoTecnocom10> autoList = this.buscaMovimientosTecnocom(fileId,OriginOpeType.AUT_ORIGIN);
+    List<MovimientoTecnocom10> autoList = this.buscaMovimientosTecnocom(fileId, OriginOpeType.AUT_ORIGIN);
 
     if(autoList != null){
       // TRX Insertadas x Servicio.
@@ -471,10 +470,14 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
+
         Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+
+        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
+
         if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
 
-          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(account.getUserId() , trx.getTipoFac(), trx.getNumAut());
+
 
           // Si la autorizacion ya fue creada, no se vuelve a insertar
           if(originalMovement != null) {
@@ -620,26 +623,20 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     return buscaMovimientosTecnocom("prp_movimientos_tecnocom_hist", fileId, originOpeType, encryptedPan, indnorcor, tipofac, fecfac, numaut);
   }
 
-  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId, OriginOpeType originOpeType, int[] tipoFacturas) throws Exception {
-    if(fileId == null) {
+  public List<MovimientoTecnocom10> buscaMovimientosTecnocom(Long fileId, OriginOpeType originOpeType, String tipoFacturas) throws Exception {
+    if (fileId == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileId"));
     }
-    if(originOpeType == null) {
+    if (originOpeType == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "originOpeType"));
     }
-    if(tipoFacturas == null || tipoFacturas.length == 0) {
+    if (tipoFacturas == null || tipoFacturas.isEmpty()) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "tipoFacturas"));
     }
 
-    StringBuilder tipofacSet = new StringBuilder();
-    tipofacSet.append('[');
-    tipofacSet.append(tipoFacturas.toString());
-    tipofacSet.append(']');
-
-    String searchQuery = String.format("SELECT * FROM %s.prp_movimientos_tecnocom WHERE idArchivo = %d AND originope = '%s' AND tipofac IN %s", getSchema(), fileId, originOpeType.getValue(), tipofacSet.toString());
+    String searchQuery = String.format("SELECT * FROM %s.prp_movimientos_tecnocom WHERE idArchivo = %d AND originope = '%s' AND tipofac IN (%s)", getSchema(), fileId, originOpeType.getValue(), tipoFacturas);
     log.info("query: " + searchQuery);
-
-    return (List<MovimientoTecnocom10>) getDbUtils().getJdbcTemplate().queryForMap(searchQuery, getMovimientoTecnocomRowMapper());
+    return getDbUtils().getJdbcTemplate().query(searchQuery, getMovimientoTCMapper());
   }
 
   /**
@@ -667,6 +664,59 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     Map<String, Object> resp = getDbUtils().execute(getSchema() + ".prp_busca_movimientos_tecnocom_v11", getMovimientoTecnocomRowMapper(), params);
 
     return (List)resp.get("result");
+  }
+
+  private org.springframework.jdbc.core.RowMapper<MovimientoTecnocom10> getMovimientoTCMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
+      movimientoTecnocom10.setId(rs.getLong("id"));
+      movimientoTecnocom10.setIdArchivo(rs.getLong("idarchivo"));
+      movimientoTecnocom10.setCuenta(rs.getString("cuenta"));
+      movimientoTecnocom10.setPan(rs.getString("pan"));
+      movimientoTecnocom10.setCodEnt(rs.getString("codent"));
+      movimientoTecnocom10.setCentAlta(rs.getString("centalta"));
+
+      NewAmountAndCurrency10 impFac = new NewAmountAndCurrency10();
+      impFac.setValue(rs.getBigDecimal("impfac"));
+      impFac.setCurrencyCode(CodigoMoneda.fromValue(rs.getInt("clamon")));
+      movimientoTecnocom10.setImpFac(impFac);
+
+      NewAmountAndCurrency10 impDiv = new NewAmountAndCurrency10();
+      impDiv.setValue(rs.getBigDecimal("impdiv"));
+      impDiv.setCurrencyCode(CodigoMoneda.fromValue(rs.getInt("clamondiv")));
+      movimientoTecnocom10.setImpDiv(impDiv);
+
+      NewAmountAndCurrency10 impLiq = new NewAmountAndCurrency10();
+      impLiq.setValue(rs.getBigDecimal("impliq"));
+      impLiq.setCurrencyCode(CodigoMoneda.fromValue(rs.getInt("clamonliq")));
+      movimientoTecnocom10.setImpLiq(impLiq);
+
+      movimientoTecnocom10.setIndNorCor(rs.getInt("indnorcor"));
+      movimientoTecnocom10.setTipoFac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), movimientoTecnocom10.getIndNorCor()));
+
+      movimientoTecnocom10.setFecFac(rs.getDate("fecfac").toLocalDate());
+      movimientoTecnocom10.setNumRefFac(rs.getString("numreffac"));
+
+      movimientoTecnocom10.setCmbApli(rs.getBigDecimal("cmbapli"));
+      movimientoTecnocom10.setNumAut(rs.getString("numaut"));
+      movimientoTecnocom10.setIndProaje(rs.getString("indproaje"));
+      movimientoTecnocom10.setCodCom(rs.getString("codcom"));
+      movimientoTecnocom10.setCodAct(rs.getInt("codact"));
+      movimientoTecnocom10.setCodPais(rs.getInt("codpais"));
+      movimientoTecnocom10.setNomPob(rs.getString("nompob"));
+      movimientoTecnocom10.setNumExtCta(rs.getLong("numextcta"));
+      movimientoTecnocom10.setNumMovExt(rs.getLong("nummovext"));
+      movimientoTecnocom10.setClamone(CodigoMoneda.fromValue(rs.getInt("clamone")));
+      movimientoTecnocom10.setTipoLin(rs.getString("tipolin"));
+      movimientoTecnocom10.setLinRef(rs.getInt("linref"));
+      movimientoTecnocom10.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+      movimientoTecnocom10.setFechaActualizacion(rs.getTimestamp("fecha_actualizacion"));
+      movimientoTecnocom10.setFecTrn(rs.getTimestamp("fectrn"));
+      movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(rs.getBigDecimal("impautcon")));
+      movimientoTecnocom10.setOriginOpe(rs.getString("originope"));
+      movimientoTecnocom10.setContrato(rs.getString("contrato"));
+      return movimientoTecnocom10;
+    };
   }
 
   private RowMapper getMovimientoTecnocomRowMapper() {

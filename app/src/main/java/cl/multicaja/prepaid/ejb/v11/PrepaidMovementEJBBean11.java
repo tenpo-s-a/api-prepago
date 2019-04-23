@@ -23,8 +23,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -140,6 +142,45 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
         .queryForObject(FIND_MOVEMENT_BY_ID_SQL, this.getMovementMapper(), id);
     } catch (EmptyResultDataAccessException ex) {
       log.error(String.format("[getPrepaidMovementById]  Movimiento con id [%d] no existe", id));
+      return null;
+    }
+  }
+
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception {
+    StringBuilder query = new StringBuilder();
+    query.append(String.format("SELECT * FROM %s.prp_movimiento WHERE ", getSchema()));
+    query.append(id != null ? String.format("id = %d AND ", id) : "");
+    query.append(idMovimientoRef != null ? String.format("id_movimiento_ref = %d AND ", idMovimientoRef) : "");
+    query.append(idPrepaidUser != null ? String.format("id_usuario = %d AND ", idPrepaidUser) : "");
+    query.append(idTxExterno != null ? String.format("id_tx_externo = '%s' AND ", idTxExterno) : "");
+    query.append(tipoMovimiento != null ? String.format("tipo_movimiento = '%s' AND ", tipoMovimiento.toString()) : "");
+    query.append(estado != null ? String.format("estado = '%s' AND ", estado.toString()) : "");
+    query.append(cuenta != null ? String.format("cuenta = '%s' AND ", cuenta) : "");
+    query.append(clamon != null ? String.format("clamon = %d AND ", clamon.getValue()) : "");
+    query.append(indnorcor != null ? String.format("indnorcor = %d AND ", indnorcor.getValue()) : "");
+    query.append(tipofac != null ? String.format("tipofac = %d AND ", tipofac.getCode()) : "");
+    if (fecfac != null) {
+      SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD");
+      String fecfacString = sdf.format(fecfac);
+      query.append(String.format("fecfac = to_date(%s, 'YYYY-MM-DD') AND ", fecfacString));
+    }
+    query.append(numaut != null ? String.format("numaut = '%s' AND ", numaut) : "");
+    query.append(estadoConSwitch != null ? String.format("estado_con_switch = '%s' AND ", estadoConSwitch.getValue()) : "");
+    query.append(estadoConTecnocom != null ? String.format("estado_con_tecnocom = '%s' AND ", estadoConTecnocom.getValue()) : "");
+    query.append(origen != null ? String.format("origen = '%s' AND ", origen.getValue()) : "");
+    query.append(pan != null ? String.format("pan = '%s' AND ", pan) : "");
+    query.append(codcom != null ? String.format("codcom = '%s' AND ", codcom) : "");
+    query.append("1 = 1");
+
+    log.info(String.format("[getPrepaidMovements] Buscando movimiento [id: %d]", id));
+
+    try {
+      return getDbUtils().getJdbcTemplate().query(query.toString(), this.getMovementMapper());
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidMovements] Movimiento con id [%d] no existe", id));
       return null;
     }
   }

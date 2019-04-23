@@ -703,7 +703,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
-  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUse, TipoFactura tipoFactura, String numaut) throws Exception {
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUse, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
     if (idPrepaidUse == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUse"));
     }
