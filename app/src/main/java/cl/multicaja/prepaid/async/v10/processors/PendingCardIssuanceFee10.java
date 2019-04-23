@@ -193,14 +193,9 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           issuanceFeeMovement.setEstadoNegocio(businessStatus);
 
           // Activa la tarjeta luego de realizado el cobro de emision
-          prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
+          prepaidCard = getRoute().getPrepaidCardEJBBean11().updatePrepaidCardStatus(prepaidCard.getId(),PrepaidCardStatus.ACTIVE);
 
-          getRoute().getPrepaidCardEJBBean10().updatePrepaidCard(null,
-            prepaidCard.getId(),
-            prepaidCard.getIdUser(),
-            PrepaidCardStatus.PENDING,
-            prepaidCard);
-
+          req.getData().setPrepaidCard10(prepaidCard);
           // publica evento de tarjeta creada
           getRoute().getPrepaidCardEJBBean11().publishCardEvent(
             user.getUuid(),

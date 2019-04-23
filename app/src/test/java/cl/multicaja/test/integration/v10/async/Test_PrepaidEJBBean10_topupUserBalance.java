@@ -178,6 +178,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un objeto de cdt", remoteTopup.getData().getCdtTransaction10());
       Assert.assertNotNull("debe tener un id de cdt", remoteTopup.getData().getCdtTransaction10().getExternalTransactionId());
 
+
       Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
       Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
 
@@ -235,7 +236,6 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un objeto de prepaidMovement", remoteTopup.getData().getPrepaidMovement10());
       Assert.assertTrue("debe tener un id de prepaidMovement", remoteTopup.getData().getPrepaidMovement10().getId() > 0);
 
-      waitForAccountingToExist(prepaidTopup.getId());
 
       // Valida que existan las fees almacenadas en la tabla prp_movimiento_comision
       List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(prepaidTopup.getId());
@@ -1553,8 +1553,8 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
     tc.getTecnocomService().setRetorno(null);
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2(PrepaidUserLevel.LEVEL_2);
-
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
+
     NewPrepaidTopup10 prepaidTopup10 = buildNewPrepaidTopup10();
 
     //primera carga
@@ -1639,7 +1639,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertNotNull("Debe tener id", accountEvent.getAccount().getId());
     Assert.assertEquals("Debe tener el mismo id", account.getUuid(), accountEvent.getAccount().getId());
-    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getId().toString(), accountEvent.getUserId());
+    Assert.assertEquals("Debe tener el mismo userId", prepaidUser10.getUuid(), accountEvent.getUserId());
     Assert.assertEquals("Debe tener la misma fecha creacion", account.getCreatedAt(), accountEvent.getAccount().getTimestamps().getCreatedAt());
     Assert.assertEquals("Debe tener la misma fecha actualizacion", account.getUpdatedAt(), accountEvent.getAccount().getTimestamps().getUpdatedAt());
     Assert.assertEquals("Debe tener status ACTIVE", AccountStatus.ACTIVE.toString(), accountEvent.getAccount().getStatus());
@@ -1674,6 +1674,7 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
 
     Assert.assertTrue(account.getExpireBalance() > 0L && account.getExpireBalance() <= Instant.now().toEpochMilli());
   }
+
 
   void waitForAccountingToExist(Long trxId) throws Exception {
     // Revisar/esperar que existan los datos en accounting y clearing (esperando que se ejecute metodo async)
@@ -1720,4 +1721,5 @@ public class Test_PrepaidEJBBean10_topupUserBalance extends TestBaseUnitAsync {
       Assert.assertEquals("Debe tener un valor de 0", webFeeIvaAmount, fee.getAmount().getValue());
     }
   }
+
 }

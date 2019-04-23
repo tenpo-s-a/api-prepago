@@ -89,15 +89,6 @@ public interface PrepaidUserEJB10 {
   PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
-   * Incrementa el contador de intentos de verificacion de identidad
-   * @param headers
-   * @param prepaidUser
-   * @return
-   * @throws Exception
-   */
-  PrepaidUser10 incrementIdentityVerificationAttempt(Map<String, Object> headers, PrepaidUser10 prepaidUser) throws Exception;
-
-  /**
    *
    * @param headers
    * @param user

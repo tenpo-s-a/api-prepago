@@ -246,42 +246,11 @@ public class Test_PendingCardIssuanceFee10 extends TestBaseUnitAsync {
     ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
     Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
   }
-
-  //TODO : Verificar si este test es necesario.
-  @Ignore
-  @Test
-  public void pendingCardIssuanceFee_UserIdNull() throws Exception {
-
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    prepaidUser.setId(null);
-
-    PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setStatus(PrepaidCardStatus.PENDING);
-
-    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-
-
-    String messageId = sendPendingCardIssuanceFee(prepaidUser, prepaidTopup, null, prepaidCard, null, 0);
-
-    //se verifica que el mensaje haya sido procesado por el proceso asincrono y lo busca en la cola de emisiones pendientes
-    Queue qResp = camelFactory.createJMSQueue(PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_RESP);
-
-    ExchangeData<PrepaidTopupData10> remoteTopup = (ExchangeData<PrepaidTopupData10>)camelFactory.createJMSMessenger().getMessage(qResp, messageId);
-    Assert.assertNull("No deberia existir un mensaje en la cola de cobro de emision", remoteTopup);
-
-    // Busca el movimiento en la BD
-    //List<PrepaidMovement10> dbMovements = getPrepaidMovementEJBBean10().getPrepaidMovementByIdPrepaidUserAndTipoMovimiento( prepaidUser.getId(), PrepaidMovementType.ISSUANCE_FEE);
-
-   // Assert.assertNull("No debe tener un movimiento de comision", dbMovements);
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.PENDING));
-    Assert.assertNull("Deberia tener una tarjeta", getPrepaidCardEJBBean10().getLastPrepaidCardByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE));
-  }
-
+  
   @Test
   public void pendingCardIssuanceFee_UserId0() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Account account = createRandomAccount(prepaidUser);
 

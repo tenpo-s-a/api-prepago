@@ -3,6 +3,7 @@ package cl.multicaja.test.integration.v10.async;
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
+import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -25,8 +26,6 @@ import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
 public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync {
 
 
-  //TODO: Verificar cuando se haga la reversa de retiro
-  @Ignore
   @Test
   public void withdrawFail_timeoutResponse() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
@@ -40,9 +39,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
 
     InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(10000));
     Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    Thread.sleep(2000);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
-
     PrepaidWithdraw10 withdraw = null;
 
     String messageId = "";
@@ -81,4 +80,33 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     Assert.assertEquals("Deberia estar en status PROCESS_OK" + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovementReverse.getEstado());
 
   }
+
+
+  @Test
+  public void withdraw_event() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(30000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    Thread.sleep(2000);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
+    PrepaidWithdraw10 withdraw = null;
+
+    withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
+
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidWithdraw.getTransactionId());
+    Assert.assertNotNull("Debe existir el evento", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+  }
+
 }

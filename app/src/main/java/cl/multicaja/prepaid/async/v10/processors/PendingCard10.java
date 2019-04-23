@@ -81,7 +81,7 @@ public class PendingCard10 extends BaseProcessor10 {
           Account account = getRoute().getAccountEJBBean10().insertAccount(data.getPrepaidUser10().getId(), altaClienteDTO.getContrato());
           log.info(String.format("Account [%s]",account.getAccountNumber()));
           // publica evento de contrato/cuenta creada
-          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getId(), account);
+          getRoute().getAccountEJBBean10().publishAccountCreatedEvent(data.getPrepaidUser10().getUuid(), account);
 
           PrepaidCard10 prepaidCard = new PrepaidCard10();
           prepaidCard.setAccountId(account.getId());
@@ -171,7 +171,6 @@ public class PendingCard10 extends BaseProcessor10 {
 
           PrepaidCard10 prepaidCard10 = getRoute().getPrepaidCardEJBBean11().getPrepaidCardById(null, data.getPrepaidCard10().getId());
           PrepaidUser10 prepaidUser10 = data.getPrepaidUser10();
-
 
           prepaidCard10.setNameOnCard(prepaidUser10.getName() + " " + prepaidUser10.getLastName());
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
@@ -274,7 +273,7 @@ public class PendingCard10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario",prepaidUser10.getId());
         templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
+        //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_EMISSION_ERROR, templateData);
       }
       return req;
       }
@@ -306,15 +305,15 @@ public class PendingCard10 extends BaseProcessor10 {
           );
 
           //TODO: Verificar si aca deber ir el UUID Tempo
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
-          }
+          //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
+          //if(ticket.getId() != null){
+          //   log.info("Ticket Creado Exitosamente");
+          //}
         } else {
           Map<String, Object> templateData = new HashMap<>();
           templateData.put("idUsuario", prepaidUser10.getId());
           templateData.put("rutCliente", prepaidUser10.getDocumentNumber());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
+          //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_CREATE_CARD, templateData);
         }
         return req;
       }

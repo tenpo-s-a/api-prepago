@@ -84,7 +84,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: db
+  name: api-prepaid-se-db
   namespace: api-prepaid
 spec:
   hosts:
@@ -98,7 +98,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: tecnocom
+  name: api-prepaid-se-tecnocom
   namespace: api-prepaid
 spec:
   hosts:
@@ -113,7 +113,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: kafka
+  name: api-prepaid-se-kafka
   namespace: api-prepaid
 spec:
   hosts:

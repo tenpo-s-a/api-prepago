@@ -18,10 +18,12 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +63,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
 
   @EJB
-  private PrepaidCardEJBBean10 prepaidCardEJBBean10;
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
   @EJB
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
@@ -74,6 +76,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
+
+  @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
 
   @Inject
   private PrepaidInvoiceDelegate10 prepaidInvoiceDelegate10;
@@ -105,12 +111,12 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     this.prepaidAccountingEJBBean10 = prepaidAccountingEJBBean10;
   }
 
-  public PrepaidCardEJBBean10 getPrepaidCardEJBBean10() {
-    return prepaidCardEJBBean10;
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
   }
 
-  public void setPrepaidCardEJBBean10(PrepaidCardEJBBean10 prepaidCardEJBBean10) {
-    this.prepaidCardEJBBean10 = prepaidCardEJBBean10;
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
@@ -121,6 +127,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
   }
 
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
+  }
+
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
+  }
 
   private EncryptUtil getEncryptUtil(){
     if(encryptUtil == null){
@@ -272,7 +285,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
 
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
 
         if(prepaidCard10 == null) {
           String msg = String.format("Error processing transaction - FileID [%s] PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
@@ -282,9 +295,18 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
 
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+        if(account == null) {
+          String msg = String.format("Error processing transaction - FileID [%s] PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
+          log.error(msg);
+          trx.setHasError(Boolean.TRUE);
+          trx.setErrorDetails(msg);
+          throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
+        }
+
         //Se busca el movimiento
-        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
-          trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
+        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(account.getUserId(), trx.getNumAut(),
+          java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
         if(originalMovement == null) {
           // Movimiento original no existe.
@@ -358,8 +380,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         //Se obtiene el pan
         String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
 
+        //Busca cuenta
+
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan, trx.getContrato());
 
         if(prepaidCard10 == null) {
           String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileId, trx.getContrato());
@@ -370,8 +394,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         }
         // Procesa las operaciones
         if(trx.getOperationType().equals(TecnocomOperationType.OP)) {
+
+          Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
           //Se busca el movimiento
-          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(prepaidCard10.getIdUser(),
+          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForTecnocomReconciliation(account.getUserId(),
             trx.getNumAut(), java.sql.Date.valueOf(trx.getFecFac()), trx.getTipoFac());
 
           if(originalMovement == null) {
@@ -436,7 +462,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         String pan = Utils.replacePan(getEncryptUtil().decrypt(trx.getPan()));
         System.out.println(String.format("[%s]  [%s]",pan,trx.getContrato()));
         //Se busca la tarjeta correspondiente al movimiento
-        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean10().getPrepaidCardByPanAndProcessorUserId(null, pan,trx.getContrato());
+        PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByPanAndProcessorUserId(null, pan,trx.getContrato());
 
         if(prepaidCard10 == null) {
           String msg = String.format("Error processing transaction - PrepaidCard not found with processorUserId [%s]", fileId, String.format("%s%s%s",trx.getCuenta(),trx.getCentAlta(),trx.getCodEnt()));
@@ -445,10 +471,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           trx.setErrorDetails(msg);
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
-
+        Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
         if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
 
-          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(prepaidCard10.getIdUser(),trx.getTipoFac(), trx.getNumAut());
+          PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(account.getUserId() , trx.getTipoFac(), trx.getNumAut());
 
           // Si la autorizacion ya fue creada, no se vuelve a insertar
           if(originalMovement != null) {
