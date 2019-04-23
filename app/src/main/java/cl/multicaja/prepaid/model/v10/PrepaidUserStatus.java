@@ -11,7 +11,8 @@ public enum PrepaidUserStatus {
   VALIDATED,
   UNCONFIRMED,
   BLOCKED,
-  CONFIRMED;
+  CONFIRMED,
+  CLOSED;
 
   public static PrepaidUserStatus valueOfEnum(String name) {
     try {

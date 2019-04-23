@@ -4,12 +4,15 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.model.Errors;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
+import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.model.Timestamps;
+import cl.multicaja.prepaid.kafka.events.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.AccountProcessor;
@@ -66,11 +69,16 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static final String FIND_ACCOUNT_BY_NUMBER_AND_USER_SQL = String.format("SELECT * FROM %s.prp_cuenta WHERE id_usuario = ? AND cuenta = ?", getSchema());
 
+  private static final String UPDATE_ACCOUNT_STATUS = String.format("UPDATE %s.prp_cuenta SET estado = ? where id = ?",getSchema());
+
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJBBean10;
+
+  @EJB
+  private PrepaidCardEJBBean11 prepaidCardEJBBean11;
 
 
   public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
@@ -79,6 +87,14 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
   public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
+  public PrepaidCardEJBBean11 getPrepaidCardEJBBean11() {
+    return prepaidCardEJBBean11;
+  }
+
+  public void setPrepaidCardEJBBean11(PrepaidCardEJBBean11 prepaidCardEJBBean11) {
+    this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
   public KafkaEventDelegate10 getKafkaEventDelegate10() {
@@ -366,6 +382,30 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     }
   }
 
+  public void updateStatus(Long accountId, AccountStatus status) throws Exception {
+
+    if(accountId == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "accountId"));
+    }
+    if(status == null){
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "status"));
+    }
+
+    log.error(String.format("[updateStatus Actualizando status de la cuenta [id: %d]", accountId));
+
+    int rows = getDbUtils().getJdbcTemplate().update(connection -> {
+      PreparedStatement ps = connection
+        .prepareStatement(UPDATE_ACCOUNT_STATUS);
+      ps.setString(1, status.name());
+      ps.setLong(2, accountId);
+      return ps;
+    });
+    if(rows == 0) {
+      log.error(String.format("[updateStatus] Error al actualizar el status de la cuenta [id: %d]", accountId));
+      throw new Exception("No se pudo actualizar el status");
+    }
+  }
+
   public void publishAccountCreatedEvent(String externalUserId, Account acc) throws Exception {
     if(externalUserId == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "externalUserId"));
@@ -379,7 +419,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
 
     cl.multicaja.prepaid.kafka.events.model.Account account = new cl.multicaja.prepaid.kafka.events.model.Account();
     account.setId(acc.getUuid());
-    account.setStatus(acc.getStatus());
+    account.setStatus(acc.getStatus().name());
 
     Timestamps timestamps = new Timestamps();
     timestamps.setCreatedAt(acc.getCreatedAt());
@@ -400,7 +440,7 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       a.setUuid(rs.getString("uuid"));
       a.setUserId(rs.getLong("id_usuario"));
       a.setAccountNumber(rs.getString("cuenta"));
-      a.setStatus(rs.getString("estado"));
+      a.setStatus(AccountStatus.valueOfEnum(rs.getString("estado")));
       a.setBalanceInfo(rs.getString("saldo_info"));
       a.setExpireBalance(rs.getLong("saldo_expiracion"));
       a.setProcessor(rs.getString("procesador"));
@@ -409,4 +449,34 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       return a;
     };
   }
+
+  public void  closeAccount(String  userExtId) throws Exception {
+
+    log.info(String.format("[closeAccount] Cerrando cuenta [Usuario %s]",userExtId));
+    PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findByExtId(null, userExtId);
+    if(prepaidUser10 == null){
+      log.info("Usuario no existe");
+      throw new ValidationException(CLIENTE_NO_TIENE_PREPAGO);
+    }
+    getPrepaidUserEJBBean10().updatePrepaidUserStatus(null,prepaidUser10.getId(),PrepaidUserStatus.CLOSED);
+
+    Account account = findByUserId(prepaidUser10.getId());
+    if(account == null){
+      log.info("Cuenta no existe");
+      throw new ValidationException(CUENTA_NO_EXISTE);
+    }
+    this.updateStatus(account.getId(),AccountStatus.CLOSED);
+
+    PrepaidCard10 prepaidCard10 = getPrepaidCardEJBBean11().getPrepaidCardByAccountId(account.getId());
+    if(prepaidCard10 == null) {
+      log.info("Tarjeta no existe");
+      throw new ValidationException(TARJETA_NO_EXISTE);
+    }
+    getPrepaidCardEJBBean11().updatePrepaidCardStatus(prepaidCard10.getId(),PrepaidCardStatus.CLOSED);
+
+    log.info(String.format("[closeAccount] Cuenta Cerrada: [Usuario %s][Cuenta %s][Tarjeta %s] ",prepaidUser10.getUuid(),account.getUuid(),prepaidCard10.getUuid()));
+
+  }
+
+
 }
