@@ -464,8 +464,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       c.setProducto(rs.getString("producto"));
       c.setNumeroUnico(rs.getString("numero_unico"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion"));
-      timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion"));
+      timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());
       c.setTimestamps(timestamps);
       c.setUuid(rs.getString("uuid"));
       c.setHashedPan(rs.getString("pan_hash"));
