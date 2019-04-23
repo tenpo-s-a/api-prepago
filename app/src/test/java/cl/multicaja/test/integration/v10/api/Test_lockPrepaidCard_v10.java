@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,13 +16,13 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
    * @param userIdMc
    * @return
    */
-  private HttpResponse getPrepaidCard(Long userIdMc) {
+  private HttpResponse getPrepaidCard(String userIdMc) {
     HttpResponse respHttp = apiGET(String.format("/1.0/prepaid/%s/card", userIdMc));
     System.out.println("respHttp: " + respHttp);
     return respHttp;
   }
 
-  private HttpResponse lockPrepaidCard(Long userIdMc) {
+  private HttpResponse lockPrepaidCard(String userIdMc) {
     HttpResponse respHttp = apiPUT(String.format("/1.0/prepaid/%s/card/lock", userIdMc), null);
     System.out.println("respHttp: " + respHttp);
     return respHttp;
@@ -32,9 +31,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidCardActive() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
@@ -42,7 +39,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getUuid());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -63,7 +60,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
 
-    HttpResponse lockResp = lockPrepaidCard(user.getId());
+    HttpResponse lockResp = lockPrepaidCard(prepaidUser10.getUuid());
     Assert.assertEquals("status 200", 200, resp.getStatus());
     card1 = lockResp.toObject(PrepaidCard10.class);
 
@@ -87,9 +84,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn200_PrepaidCardLocked() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
@@ -97,7 +92,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidCard10.setStatus(PrepaidCardStatus.LOCKED);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getUuid());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -118,7 +113,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de creacion", timestamps.getCreatedAt());
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
 
-    HttpResponse lockResp = lockPrepaidCard(user.getId());
+    HttpResponse lockResp = lockPrepaidCard(prepaidUser10.getUuid());
     Assert.assertEquals("status 200", 200, lockResp.getStatus());
     card1 = lockResp.toObject(PrepaidCard10.class);
 
@@ -142,7 +137,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn404_McUserNull() {
 
-    HttpResponse resp = lockPrepaidCard(Long.MAX_VALUE);
+    HttpResponse resp = lockPrepaidCard("o");
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -153,9 +148,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
-    User user = registerUser();
-
-    HttpResponse resp = lockPrepaidCard(user.getId());
+    HttpResponse resp = lockPrepaidCard("o");
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -166,9 +159,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10.setStatus(PrepaidUserStatus.DISABLED);
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
@@ -177,7 +168,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = lockPrepaidCard(user.getId());
+    HttpResponse resp = lockPrepaidCard(prepaidUser10.getUuid());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -188,13 +179,11 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn422_FirstTopupPending() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
-    HttpResponse resp = lockPrepaidCard(user.getId());
+    HttpResponse resp = lockPrepaidCard(prepaidUser10.getUuid());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -205,9 +194,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn422_FirstTopupInProgress() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
 
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
@@ -215,7 +202,7 @@ public class Test_lockPrepaidCard_v10 extends TestBaseUnitApi {
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = lockPrepaidCard(user.getId());
+    HttpResponse resp = lockPrepaidCard(prepaidUser10.getUuid());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();

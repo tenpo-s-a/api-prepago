@@ -1904,7 +1904,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     List<PrepaidTransaction10> listMergeTransaction10 = new ArrayList<>();
     PrepaidTransactionExtend10 prepaidTransactionExtend10 = new PrepaidTransactionExtend10();
-
+    /*
     try{
       prepaidTransactionExtend10 = createConsultaMovimientoToList(
         account.getAccountNumber(),user.getRut().getValue().toString(),
