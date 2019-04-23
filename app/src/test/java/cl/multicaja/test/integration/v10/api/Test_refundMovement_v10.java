@@ -5,10 +5,11 @@ import cl.multicaja.cdt.ejb.v10.CdtEJBBean10;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.math.BigDecimal;
 
 import static cl.multicaja.prepaid.model.v10.BusinessStatusType.REFUND_OK;
@@ -29,24 +30,26 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_carga_web() throws  Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
     prepaidTopup.setFirstTopup(false);
     prepaidTopup.setMerchantCode(WEB_MERCHANT_CODE);
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(REJECTED);
@@ -96,24 +99,26 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_carga_pos() throws  Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-    prepaidCard = createPrepaidCard10(prepaidCard);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
     prepaidTopup.setFirstTopup(false);
     prepaidTopup.setMerchantCode(TransactionOriginType.POS.toString());
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
     prepaidMovement10.setEstado(REJECTED);
@@ -162,25 +167,27 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_primera_carga_web() throws  Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
     prepaidTopup.setFirstTopup(true);
     prepaidTopup.setMerchantCode(TransactionOriginType.WEB.toString());
 
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
     //cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -232,23 +239,25 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_primera_carga_pos() throws  Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
     prepaidTopup.setFirstTopup(true);
     prepaidTopup.setMerchantCode(TransactionOriginType.POS.toString());
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -300,21 +309,23 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_with_user_not_found() throws  Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);
@@ -335,22 +346,24 @@ public class Test_refundMovement_v10 extends TestBaseUnitApi {
   @Test
   public void refund_status_on_movement_with_movement_not_found() throws Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
 
-    prepaidCard = createPrepaidCard10(prepaidCard);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
     prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-    CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+    CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
     cdtTransaction = createCdtTransaction10(cdtTransaction);
     //cdtTransaction.setIndSimulacion(Boolean.FALSE);
 
-    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction);
+    PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard10, cdtTransaction);
 
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.NOT_RECONCILED);

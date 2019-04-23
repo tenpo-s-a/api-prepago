@@ -2,24 +2,15 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
-import cl.multicaja.prepaid.kafka.events.model.Card;
-import cl.multicaja.prepaid.kafka.events.CardEvent;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
-import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.tecnocom.constants.TipoAlta;
-import org.apache.commons.lang3.StringUtils;
+import cl.multicaja.prepaid.model.v10.Timestamps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +21,8 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * @author vutreras
@@ -154,8 +146,8 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       c.setProducto(String.valueOf(row.get("_producto")));
       c.setNumeroUnico(String.valueOf(row.get("_numero_unico")));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_fecha_creacion"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_fecha_actualizacion"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_fecha_creacion")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_fecha_actualizacion")).toLocalDateTime());
       c.setTimestamps(timestamps);
       return c;
     };

@@ -1,7 +1,5 @@
 package cl.multicaja.prepaid.model.v10;
 
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-
 public class ReconciliationFile10 {
   Long id;
   String fileName;

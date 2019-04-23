@@ -15,17 +15,15 @@ import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.core.utils.*;
+import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
 import cl.multicaja.prepaid.async.v10.KafkaEventDelegate10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
-import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.model.v11.DocumentType;
@@ -35,7 +33,6 @@ import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.*;
 import cl.multicaja.tecnocom.dto.*;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,7 +44,10 @@ import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
@@ -114,19 +114,10 @@ public final class TestHelpersResource10 extends BaseResource {
   @Inject
   private KafkaEventDelegate10 kafkaEventDelegate10;
 
-  private UserClient userClient;
-
-	private void validate() {
+ 	private void validate() {
     if (ConfigUtils.isEnvProduction()) {
       throw new SecurityException("Este metodo no puede ser ejecutado en un ambiente de produccion");
     }
-  }
-
-  public UserClient getUserClient() {
-	  if(userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
   }
 
   private void jdbcExecute(JdbcTemplate jdbcTemplate, String sql) {
@@ -185,60 +176,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.status(200).build();
   }
 
-  @POST
-  @Path("/prepaiduser")
-  public Response createPrepaidUser(User user, @Context HttpHeaders headers) throws Exception {
-
-    validate();
-
-    NameStatus initialNameStatus = user.getNameStatus();
-    UserIdentityStatus initialIdentityStatus = user.getIdentityStatus();
-    RutStatus initialRutStatus = user.getRut() != null ? user.getRut().getStatus() : null;
-
-    Map<String, Object> mapHeaders = headersToMap(headers);
-
-    if (user.getId() != null) {
-      user = getUserClient().getUserById(mapHeaders, user.getId());
-    } else {
-      SignUp signUp = getUserClient().signUp(mapHeaders, new SignUPNew(user.getEmail().getValue(),user.getRut().getValue()));
-      user = getUserClient().getUserById(mapHeaders, signUp.getUserId());
-    }
-
-    if (user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    if (StringUtils.isBlank(user.getName())) {
-      user.setName(null);
-    }
-    if (StringUtils.isBlank(user.getLastname_1())) {
-      user.setLastname_1(null);
-    }
-    if (StringUtils.isBlank(user.getLastname_2())) {
-      user.setLastname_2(null);
-    }
-
-    user.setNameStatus(initialNameStatus == null ? NameStatus.VERIFIED : initialNameStatus);
-    user.setIdentityStatus(initialIdentityStatus ==  null ? UserIdentityStatus.NORMAL : initialIdentityStatus);
-    user.getRut().setStatus(initialRutStatus == null ? RutStatus.VERIFIED : initialRutStatus);
-
-    user.setGlobalStatus(UserStatus.ENABLED);
-    user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.getCellphone().setStatus(CellphoneStatus.VERIFIED);
-    user.setPassword(String.valueOf(1357));
-
-    user = getUserClient().fillUser(null,user);
-
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(user.getId());
-    prepaidUser.setRut(user.getRut().getValue());
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
-
-    prepaidUserEJBBean10.createPrepaidUser(mapHeaders, prepaidUser);
-
-    return Response.ok(user).status(200).build();
-  }
 
   @POST
   @Path("/{userId}/randomPurchase")
@@ -469,12 +406,13 @@ public final class TestHelpersResource10 extends BaseResource {
       templateData.put("description", "Se adjunta archivo para reporte E06");
 
       // Enviamos el archivo al mail de reportes diarios
-      EmailBody emailBodyToSend = new EmailBody();
+      /*EmailBody emailBodyToSend = new EmailBody();
       emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), file.getName());
       emailBodyToSend.setTemplateData(templateData);
       emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_E06_REPORT);
       emailBodyToSend.setAddress("e06_report@multicaja.cl");
       mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+       */
 
       //backofficeDelegate10.uploadE06ReportFile(file.getName());
 
@@ -488,36 +426,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return Response.ok(response).status(202).build();
   }
 
-  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
-    Integer rut = getUniqueRutNumber();
-    String email = getUniqueEmail();
-    SignUp signUp = getUserClient().signUp(null, new SignUPNew(email, rut));
-    User user = getUserClient().getUserById(null, signUp.getUserId());
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user = getUserClient().fillUser(null, user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setIdentityStatus(identityStatus);
-    user.setPassword(password);
-    user = getUserClient().updateUser(null, user.getId(), user);
-    return user;
-  }
-
-  //TODO: Verificar y luego eliminar
   @Deprecated
-  public PrepaidUser10 buildPrepaidUser10(User user) {
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(user != null ? user.getId() : null);
-    prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
-    return prepaidUser;
-  }
-
   public PrepaidUser10 buildPrepaidUser10() {
     PrepaidUser10 prepaidUser = new PrepaidUser10();
     prepaidUser.setUserIdMc(getUniqueLong());
@@ -532,6 +441,24 @@ public final class TestHelpersResource10 extends BaseResource {
     return prepaidUser;
   }
 
+  public PrepaidUser10 buildPrepaidUserV2() {
+    PrepaidUser10 prepaidUser = new PrepaidUser10();
+    prepaidUser.setUserIdMc(getUniqueLong());
+    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
+    prepaidUser.setBalanceExpiration(0L);
+    prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    prepaidUser.setName(getRandomString(10));
+    prepaidUser.setLastName(getRandomString(10));
+    prepaidUser.setUserLevel(PrepaidUserLevel.LEVEL_1);
+    prepaidUser.setDocumentNumber(getUniqueRutNumber().toString());
+    prepaidUser.setDocumentType(DocumentType.DNI_CL);
+    prepaidUser.setName(getRandomString(10));
+    prepaidUser.setLastName(getRandomString(10));
+    prepaidUser.setUuid(UUID.randomUUID().toString());
+
+    return prepaidUser;
+  }
 
 
   public Account buildPrepaidAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
@@ -580,26 +507,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return prepaidTopup;
   }
 
-  @Deprecated
-  public PrepaidTopup10 buildPrepaidTopup10(User user) {
-
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-
-    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidTopup.setMerchantCode(merchantCode);
-    prepaidTopup.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3000));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidTopup.setAmount(newAmountAndCurrency);
-    prepaidTopup.setTotal(newAmountAndCurrency);
-    prepaidTopup.setMerchantCategory(1);
-    prepaidTopup.setMerchantName(getRandomString(6));
-
-    return prepaidTopup;
-  }
 
   public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidTopup10 prepaidTopup) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
@@ -613,17 +520,6 @@ public final class TestHelpersResource10 extends BaseResource {
     return cdtTransaction;
   }
 
-  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
-    cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
-    cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
-    cdtTransaction.setIndSimulacion(false);
-    return cdtTransaction;
-  }
 
   public CdtTransaction10 createCdtTransaction10(CdtTransaction10 cdtTransaction) throws Exception {
 
@@ -920,29 +816,7 @@ public final class TestHelpersResource10 extends BaseResource {
     return messageId;
   }
 
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) {
-
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-
-    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidWithdraw.setMerchantCode(merchantCode);
-    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextDouble(2000,9000)));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidWithdraw.setAmount(newAmountAndCurrency);
-
-    prepaidWithdraw.setMerchantCategory(1);
-    prepaidWithdraw.setMerchantName(getRandomString(6));
-
-    prepaidWithdraw.setPassword(password);
-
-    return prepaidWithdraw;
-  }
-
-  /**
+   /*
    * Envia un mensaje directo al proceso PENDING_REVERSAL_WITHDRAW_REQ
    *
    * @param prepaidWithdraw
@@ -951,7 +825,7 @@ public final class TestHelpersResource10 extends BaseResource {
    * @param retryCount
    * @return
    */
-  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
+  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
 
     if (!CamelFactory.getInstance().isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
@@ -1108,9 +982,7 @@ public final class TestHelpersResource10 extends BaseResource {
     tc.getTecnocomService().setAutomaticError(false);
     tc.getTecnocomService().setRetorno(CodigoRetorno._1010);
 
-    User user = registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, UserIdentityStatus.NORMAL);
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10();
+    PrepaidUser10 prepaidUser = buildPrepaidUserV2();
     prepaidUser = prepaidUserEJBBean10.createPrepaidUser(null, prepaidUser);
 
     PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
@@ -1122,7 +994,7 @@ public final class TestHelpersResource10 extends BaseResource {
     prepaidMovement = prepaidMovementEJBBean10.addPrepaidMovement(null, prepaidMovement);
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
+    AltaClienteDTO altaClienteDTO = tc.getTecnocomService().altaClientes(prepaidUser.getName(), prepaidUser.getLastName(), "", prepaidUser.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
     PrepaidCard10 prepaidCard10 = new PrepaidCard10();
     prepaidCard10.setProcessorUserId(altaClienteDTO.getContrato());
     prepaidCard10.setIdUser(prepaidUser.getId());
@@ -1352,7 +1224,7 @@ public final class TestHelpersResource10 extends BaseResource {
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", prepaidMovement.getId().toString());
 
-      Ticket ticket = getUserClient().createFreshdeskTicket(headersToMap(headers), prepaidUser.getId(), newTicket);
+      Ticket ticket = null; //getUserClient().createFreshdeskTicket(headersToMap(headers), prepaidUser.getId(), newTicket);
 
       returnResponse = Response.ok(newTicket).status(201).build();
 
@@ -1365,65 +1237,4 @@ public final class TestHelpersResource10 extends BaseResource {
     return returnResponse;
 
   }
-
-  @PUT
-  @Path("/{user_id}/level_0")
-  public Response userLevel0(@PathParam("user_id") Long userId) throws Exception {
-    validate();
-
-    User user = getUserClient().getUserById(null, userId);
-
-    if(user == null) {
-      throw new NotFoundException();
-    }
-
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.setIdentityStatus(UserIdentityStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.UNVERIFIED);
-
-    user = getUserClient().updateUser(null, userId, user);
-
-    return Response.ok(user).build();
-  }
-
-  @PUT
-  @Path("/{user_id}/level_1")
-  public Response userLevel1(@PathParam("user_id") Long userId) throws Exception {
-    validate();
-
-    User user = getUserClient().getUserById(null, userId);
-
-    if(user == null) {
-      throw new NotFoundException();
-    }
-
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
-    user.setNameStatus(NameStatus.UNVERIFIED);
-
-    user = getUserClient().updateUser(null, userId, user);
-
-    return Response.ok(user).build();
-  }
-
-  @PUT
-  @Path("/{user_id}/level_2")
-  public Response userLevel2(@PathParam("user_id") Long userId) throws Exception {
-    validate();
-
-    User user = getUserClient().getUserById(null, userId);
-
-    if(user == null) {
-      throw new NotFoundException();
-    }
-
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user.setIdentityStatus(UserIdentityStatus.NORMAL);
-    user.setNameStatus(NameStatus.VERIFIED);
-
-    user = getUserClient().updateUser(null, userId, user);
-
-    return Response.ok(user).build();
-  }
-
 }

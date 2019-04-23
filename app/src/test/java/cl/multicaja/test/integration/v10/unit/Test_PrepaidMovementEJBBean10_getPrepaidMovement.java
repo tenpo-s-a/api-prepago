@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
 import cl.multicaja.prepaid.model.v10.PrepaidMovementStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidTopup10;
@@ -31,13 +30,10 @@ public class Test_PrepaidMovementEJBBean10_getPrepaidMovement extends TestBaseUn
   @Test
   public void getPrepaidMovement() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement1 = createPrepaidMovement10(prepaidMovement1);

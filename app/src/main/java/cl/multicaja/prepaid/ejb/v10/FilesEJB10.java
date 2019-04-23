@@ -1,11 +1,5 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.prepaid.helpers.users.model.AppFile;
-import cl.multicaja.prepaid.helpers.users.model.AppFileStatus;
-import cl.multicaja.prepaid.helpers.users.model.UserFile;
-import cl.multicaja.prepaid.helpers.users.model.UserFileStatus;
-
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +26,7 @@ public interface FilesEJB10 {
    * @return
    * @throws Exception
    */
-  List<AppFile> getAppFiles(Map<String, Object> headers, Long id, String name, String version, AppFileStatus status) throws Exception;
+  //List<AppFile> getAppFiles(Map<String, Object> headers, Long id, String name, String version, AppFileStatus status) throws Exception;
 
   /**
    * Busca los archivos de usuario de forma dinamica y genera una lista
@@ -46,7 +40,7 @@ public interface FilesEJB10 {
    * @return
    * @throws Exception
    */
-  List<UserFile> getUsersFile(Map<String, Object> headers, Long id, Long userId, String name, String version, UserFileStatus status) throws Exception;
+  //List<UserFile> getUsersFile(Map<String, Object> headers, Long id, Long userId, String name, String version, UserFileStatus status) throws Exception;
 
   /**
    *  Busca un archivo de usuario por id
@@ -56,7 +50,7 @@ public interface FilesEJB10 {
    * @return
    * @throws Exception
    */
-  UserFile getUserFileById(Map<String, Object> headers, Long userIdMc, Long id) throws Exception;
+  //UserFile getUserFileById(Map<String, Object> headers, Long userIdMc, Long id) throws Exception;
 
   /**
    * Agrega un nuevo archivo al usuario
@@ -71,6 +65,6 @@ public interface FilesEJB10 {
    * @return
    * @throws Exception
    */
-  UserFile createUserFile(Map<String, Object> headers, Long userId, Long appFileId, String name, String version, String description, String mimeType, String location) throws Exception;
+  //UserFile createUserFile(Map<String, Object> headers, Long userId, Long appFileId, String name, String version, String description, String mimeType, String location) throws Exception;
 
 }

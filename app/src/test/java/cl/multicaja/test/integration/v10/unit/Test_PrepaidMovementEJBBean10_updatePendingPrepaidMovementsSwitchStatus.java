@@ -3,10 +3,8 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
-import cl.multicaja.tecnocom.constants.TipoFactura;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -116,10 +114,11 @@ public class Test_PrepaidMovementEJBBean10_updatePendingPrepaidMovementsSwitchSt
   }
 
   public void fillDB() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
 
     // Agregamos movimientos con fecha de modo que 4 movimientos validos esten dentro del dia 2018-08-03.

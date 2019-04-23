@@ -3,9 +3,8 @@ package cl.multicaja.prepaid.ejb.v10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
+
 import java.util.List;
 import java.util.Map;
 

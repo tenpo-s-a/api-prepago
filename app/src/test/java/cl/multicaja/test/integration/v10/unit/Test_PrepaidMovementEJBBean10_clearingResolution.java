@@ -3,8 +3,9 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.accounting.model.v10.*;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.User;
 import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -29,6 +30,7 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento_conciliado CASCADE", getSchema()));
   }
 
+
   @Test
   public void clearingResolution_All() throws Exception {
 
@@ -39,20 +41,22 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
     // 2. Preparar Test: No es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + Clearing Ok
     ResolutionPreparedVariables notWithdraw = new ResolutionPreparedVariables();
     {
-      User user = registerUser();
-      UserAccount userAccount = createBankAccount(user);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidCard10 prepaidCard = buildPrepaidCard10FromTecnocom(user, prepaidUser);
-      prepaidCard = createPrepaidCard10(prepaidCard);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      Account account = buildAccountFromTecnocom(prepaidUser);
+      account = createAccount(account.getUserId(),account.getAccountNumber());
+
+      PrepaidCard10 prepaidCard = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+      prepaidCard = createPrepaidCardV2(prepaidCard);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
       prepaidTopup.setFee(new NewAmountAndCurrency10(new BigDecimal(500L)));
       prepaidTopup.setTotal(new NewAmountAndCurrency10(new BigDecimal(10000L)));
 
-      CdtTransaction10 cdtTransaction = buildCdtTransaction10(user, prepaidTopup);
+      CdtTransaction10 cdtTransaction = buildCdtTransaction10(prepaidUser, prepaidTopup);
       cdtTransaction = createCdtTransaction10(cdtTransaction);
 
       PrepaidMovement10 prepaidMovement = buildPrepaidMovement10(prepaidUser, prepaidTopup, prepaidCard, cdtTransaction, PrepaidMovementType.TOPUP);
@@ -73,6 +77,13 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       clearingData.setAccountingId(accountingData.getId());
       clearingData.setIdTransaction(prepaidMovement.getId());
       clearingData.setStatus(AccountingStatusType.OK);
+
+      UserAccount userAccount = new UserAccount();
+      userAccount.setRut(getUniqueRutNumber().toString());
+      userAccount.setAccountType("Corriente");
+      userAccount.setBankId(1L);
+      userAccount.setAccountNumber(getUniqueLong());
+
       clearingData.setUserBankAccount(userAccount);
       getPrepaidClearingEJBBean10().insertClearingData(null, clearingData);
 

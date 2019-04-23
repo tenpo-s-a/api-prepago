@@ -258,7 +258,7 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
       null,
       toJson(researchMovementInformationFilesList),
       ReconciliationOriginType.SWITCH.name(),
-      switchMovement.getDateTrx(),
+      switchMovement.getDateTrx().toLocalDateTime(),
       ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
       ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
       prepaidMovementId,

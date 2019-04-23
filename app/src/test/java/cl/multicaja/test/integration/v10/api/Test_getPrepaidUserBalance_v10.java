@@ -4,15 +4,15 @@ import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.Account;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
+import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
 
 /**
  * @autor vutreras

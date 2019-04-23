@@ -3,10 +3,7 @@ package cl.multicaja.test.integration.v10.api;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -59,11 +56,10 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
 
   private void createTopupReverse() throws Exception {
 
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10(user);
+    NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.setMerchantCode(getRandomNumericString(15));
     prepaidTopup.getAmount().setValue(BigDecimal.valueOf(getUniqueInteger()));
 
@@ -104,16 +100,13 @@ public class Test_conciliaciones_v10 extends TestBaseUnitApi {
 
    private void reverseWithdraw() throws Exception {
 
-      User user = registerUser("1235");
-      user = updateUserPassword(user, "1235");
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-
-      NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user);
-      prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
-      prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
-      prepaidWithdraw.setPassword("1235");
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
+    prepaidWithdraw.setMerchantCode(getRandomNumericString(15));
+    prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(500));
+    prepaidWithdraw.setPassword("1235");
 
       PrepaidMovement10 originalWithdraw = buildPrepaidMovement10(prepaidUser, new PrepaidWithdraw10(prepaidWithdraw));
       originalWithdraw.setIdTxExterno(prepaidWithdraw.getTransactionId());

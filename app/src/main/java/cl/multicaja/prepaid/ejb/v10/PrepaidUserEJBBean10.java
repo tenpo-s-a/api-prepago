@@ -2,28 +2,16 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.KeyValue;
-import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.core.utils.json.JsonUtils;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v10.Timestamps;
-import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.AccountProcessor;
-import cl.multicaja.prepaid.model.v11.AccountStatus;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.TecnocomService;
-import cl.multicaja.tecnocom.constants.TipoDocumento;
-import cl.multicaja.tecnocom.dto.ConsultaSaldoDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,20 +19,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.Set;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -96,7 +80,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     "WHERE\n" +
     "  uuid = ?;", getSchema());
 
-  UserClient userClient;
 
   public PrepaidCardEJBBean10 getPrepaidCardEJB10() {
     return prepaidCardEJB10;
@@ -122,13 +105,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     return accountEJBBean10;
   }
 
-  @Override
-  public UserClient getUserClient() {
-    if(userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
-  }
 
   @Override
   public TecnocomService getTecnocomService() {
@@ -347,32 +323,6 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     }
   }
 
-  @Override
-  public PrepaidUser10 getUserLevel(User user, PrepaidUser10 prepaidUser10) throws Exception {
-
-    if(user == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
-    }
-    if(user.getRut() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
-    }
-    if(user.getRut().getStatus() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.status"));
-    }
-    if(user.getNameStatus() == null){
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.nameStatus"));
-    }
-    if(prepaidUser10 == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "prepaidUser"));
-    }
-
-    if(RutStatus.VERIFIED.equals(user.getRut().getStatus()) && NameStatus.VERIFIED.equals(user.getNameStatus())) {
-      prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_2);
-    } else {
-      prepaidUser10.setUserLevel(PrepaidUserLevel.LEVEL_1);
-    }
-    return prepaidUser10;
-  }
 
   public void updatePrepaidUserLevel(Long userId, PrepaidUserLevel level) throws BaseException {
     if(userId == null) {

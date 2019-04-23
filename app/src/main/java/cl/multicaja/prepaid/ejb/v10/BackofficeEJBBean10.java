@@ -2,10 +2,6 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.prepaid.async.v10.BackofficeDelegate10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.TicketsResponse;
-import cl.multicaja.prepaid.model.v10.MailTemplates;
 import com.opencsv.CSVWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,16 +11,11 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Stateless
 @LocalBean
@@ -32,8 +23,6 @@ import java.util.stream.Collectors;
 public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
 
   private static Log log = LogFactory.getLog(BackofficeEJBBean10.class);
-
-  private UserClient userClient;
 
   @EJB
   private MailPrepaidEJBBean10 mailPrepaidEJBBean10;
@@ -53,22 +42,15 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
     this.mailPrepaidEJBBean10 = mailPrepaidEJBBean10;
   }
 
-  @Override
-  public UserClient getUserClient() {
-    if(userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
-  }
 
-  public TicketsResponse getEmergencyTickets(Integer page, LocalDateTime from, LocalDateTime to) throws Exception {
+  /*public TicketsResponse getEmergencyTickets(Integer page, LocalDateTime from, LocalDateTime to) throws Exception {
     return UserClient.getInstance().getEmergencyTickets(null, page, from, to);
-  }
+  }*/
 
   private static final DateTimeFormatter fileDateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
   public File generateE06Report(ZonedDateTime date) throws Exception {
-
+/*
     LocalDateTime firstDayForSearch = ZonedDateTime.ofInstant(date
       .with(TemporalAdjusters.firstDayOfMonth())
       .withHour(0)
@@ -161,6 +143,8 @@ public class BackofficeEJBBean10 extends PrepaidBaseEJBBean10 {
     String fileName = String.format("E06_%s.CSV", fileId);
 
     return this.createReportCsv(directoryName + "/" + fileName, localTickets);
+
+ */return null;
   }
 
   private File createReportCsv(String filename, List<Ticket> tickets) throws IOException {

@@ -17,16 +17,12 @@ import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.helpers.tenpo.ApiCall;
 import cl.multicaja.prepaid.helpers.tenpo.model.State;
-import cl.multicaja.prepaid.helpers.users.model.*;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
-import cl.multicaja.prepaid.model.v10.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
-import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -53,8 +49,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_IDENTITY_VALIDATION_NO_OK;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_RETRY_IDENTITY_VALIDATION;
 
 
 /**
@@ -1190,7 +1184,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    User user = this.getUserMcById(headers, userIdMc);
+   //User user = this.getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1784,11 +1778,12 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Busco el usuario MC
-    User user = getUserClient().getUserById(headers, userIdMc);
+    //User user = getUserClient().getUserById(headers, userIdMc);
 
-    if(user == null) {
+    /*if(user == null) {
       throw new NotFoundException(CLIENTE_NO_EXISTE);
     }
+     */
 
     // Busco el usuario prepago
     PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1798,7 +1793,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtiene el nivel del usuario
-    prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
+   // prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -1819,23 +1814,17 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     if(rut == null || Integer.valueOf(0).equals(rut)){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "rut"));
     }
-
     // Busco el usuario MC
-    User user = getUserClient().getUserByRut(headers, rut);
-
-    if(user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
 
     // Busco el usuario prepago
-    PrepaidUser10 prepaidUser = this.getPrepaidUserEJB10().getPrepaidUserByUserIdMc(headers, user.getId());
+    PrepaidUser10 prepaidUser = prepaidUserEJB10.findByNumDoc(headers,rut.toString());
 
     if(prepaidUser == null) {
       throw new NotFoundException(CLIENTE_NO_TIENE_PREPAGO);
     }
 
     // Obtiene el nivel del usuario
-    prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
+    //prepaidUser = this.getPrepaidUserEJB10().getUserLevel(user, prepaidUser);
 
     PrepaidCard10 prepaidCard = getPrepaidCardEJB11().getLastPrepaidCardByUserIdAndOneOfStatus(null, prepaidUser.getId(),
       PrepaidCardStatus.ACTIVE,
@@ -1864,7 +1853,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
 
     // Obtener usuario Multicaja
-    User user = getUserMcById(headers, userIdMc);
+    //User user = getUserMcById(headers, userIdMc);
 
     // Obtener usuario prepago
     PrepaidUser10 prepaidUser = getPrepaidUserByUserIdMc(headers, userIdMc);
@@ -1892,7 +1881,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Date _startDate, _startDateFilter;
     Date _endDate, _endDateFilter;
 
-    if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
+    /*if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
       String timeZone = "";
       if(headers != null && headers.containsKey(Constants.HEADER_USER_TIMEZONE)) {
         timeZone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
@@ -1963,6 +1952,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidTransactionExtend10.setData(listMergeTransaction10);
 
     return prepaidTransactionExtend10;
+
+     */
+    return null;
   }
 
 
@@ -2394,17 +2386,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidTransactionExtend10.setData(listTransaction10);
     return prepaidTransactionExtend10;
-  }
-
-  public User getUserMcById(Map<String, Object> headers, Long userIdMc) throws Exception {
-
-    User user = getUserClient().getUserById(headers, userIdMc);
-
-    if (user == null) {
-      throw new NotFoundException(CLIENTE_NO_EXISTE);
-    }
-
-    return user;
   }
 
   private PrepaidUser10 getPrepaidUserByUserIdMc(Map<String, Object> headers, Long userIdMc) throws Exception {

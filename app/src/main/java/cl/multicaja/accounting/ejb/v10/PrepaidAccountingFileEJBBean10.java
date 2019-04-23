@@ -12,7 +12,7 @@ import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+import cl.multicaja.prepaid.model.v10.Timestamps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -99,8 +99,8 @@ public class PrepaidAccountingFileEJBBean10 extends PrepaidBaseEJBBean10 impleme
       c.setUrl(String.valueOf(row.get("_url")));
       c.setStatus(AccountingStatusType.valueOfEnum(row.get("_status").toString().trim()));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_created")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_updated")).toLocalDateTime());
       c.setTimestamps(timestamps);
       return c;
     };

@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,13 +12,10 @@ public class Test_PrepaidMovementEJBBean10_isFirstTopup extends TestBaseUnit {
   @Test
   public void isFirstTopup_False() throws Exception {
 
-    User user = registerUser();
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement1 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement1.setEstadoNegocio(BusinessStatusType.REVERSED);
@@ -37,11 +33,8 @@ public class Test_PrepaidMovementEJBBean10_isFirstTopup extends TestBaseUnit {
   @Test
   public void isFirstTopup_True() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-
-    prepaidUser = createPrepaidUser10(prepaidUser);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     Assert.assertTrue("Es primera carga", getPrepaidMovementEJBBean10().isFirstTopup(prepaidUser.getId()));
   }

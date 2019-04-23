@@ -2,15 +2,11 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidProductChangeData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -135,7 +131,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     // Notificar que se ha creado una tarjeta nueva
     getRoute().getPrepaidCardEJBBean11().publishCardEvent(user.getUserIdMc().toString(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
   }
-
+  /*
   private void sendSuccessMail(User user, Boolean hasCard) throws Exception {
 
     Map<String, Object> templateData = new HashMap<>();
@@ -148,7 +144,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
     emailBody.setTemplate(hasCard ? TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITH_CARD : TEMPLATE_MAIL_IDENTITY_VALIDATION_OK_WITHOUT_CARD);
 
     getRoute().getUserClient().sendMail(null, user.getId(), emailBody);
-  }
+  }*/
 
   public ProcessorRoute processErrorProductChange() {
     return new ProcessorRoute<ExchangeData<PrepaidProductChangeData10>, ExchangeData<PrepaidProductChangeData10>>() {
@@ -161,7 +157,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("idUsuario", req.getData().getPrepaidUser().getId().toString());
         templateData.put("rutCliente", req.getData().getPrepaidUser().getDocumentNumber());
-        getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
+        //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_PRODUCT_CHANGE, templateData);
         return req;
       }
     };

@@ -13,12 +13,8 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.users.model.Rut;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.model.v11.AccountProcessor;
 import cl.multicaja.prepaid.model.v11.AccountStatus;
-import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -339,8 +335,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       data.setTransactionDate((Timestamp) row.get("_transaction_date"));
       data.setConciliationDate((Timestamp) row.get("_conciliation_date"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_created")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_updated")).toLocalDateTime());
       data.setTimestamps(timestamps);
 
       //data.setAccountingId(getNumberUtils().toLong(row.get("_accounting_id"))); //IdAccounting
@@ -391,16 +387,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         //Obtener el Id del usuario
         Long prepaidUserId = getPrepaidMovementEJBBean10().getPrepaidMovementById(mov.getIdTransaction()).getIdPrepaidUser();
         Long userIdMc = getPrepaidUserEJBBean10().getPrepaidUserById(null, prepaidUserId).getUserIdMc();
-
-        UserAccount userAccount = getUserClient().getUserBankAccountById(null, userIdMc, mov.getUserBankAccount().getId());
-        if(userAccount == null) {
-          throw new ValidationException(CUENTA_NO_ASOCIADA_A_USUARIO);
-        }
-
-        mov.getUserBankAccount().setAccountNumber(userAccount.getAccountNumber());
-        mov.getUserBankAccount().setAccountType(userAccount.getAccountType());
-        mov.getUserBankAccount().setBankName(userAccount.getBankName());
-        mov.getUserBankAccount().setRut(userAccount.getRut());
+        //TODO: Verificar como se cargaran los datos de las cuentas de transferencia
       }
     }
 
@@ -454,7 +441,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return atTimezone.format(DateTimeFormatter.ofPattern(pattern));
   }
 
-
+  //TODO: La creacion del CSV se migra  a prepaid-batch-worker, revisar los test que hacen uso y modificarlos.
   public File createClearingCSV(String filename, String fileId, List<ClearingData10> lstClearingMovement10s) throws IOException {
     File file = new File(filename);
     FileWriter outputFile = new FileWriter(file);
@@ -548,7 +535,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
           LocalDateTime localDateTime = getDateUtils().dateStringToLocalDateTime(record[6],DATE_PATTERN);
           ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.of(ZONEID.AMERICA_SANTIAGO.getValue()));
           ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-          timestamps.setCreatedAt(Timestamp.valueOf(utcZoned.toLocalDateTime()));
+          timestamps.setCreatedAt(utcZoned.toLocalDateTime());
 
           clearingData.setTimestamps(timestamps);
 
@@ -673,7 +660,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   public void createClearingResearch(
     List<ResearchMovementInformationFiles> researchMovementInformationFilesList,
     ReconciliationOriginType reconciliationOriginType,
-    Timestamp dateOfTransaction,
+    LocalDateTime dateOfTransaction,
     ResearchMovementResponsibleStatusType researchMovementResponsibleStatusType,
     ResearchMovementDescriptionType researchMovementDescriptionType,
     Long movRef,
@@ -723,8 +710,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       c.setUserBankAccount(ua);
 
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt(rs.getTimestamp("created"));
-      timestamps.setUpdatedAt(rs.getTimestamp("_updated"));
+      timestamps.setCreatedAt(rs.getTimestamp("created").toLocalDateTime());
+      timestamps.setUpdatedAt(rs.getTimestamp("_updated").toLocalDateTime());
       c.setTimestamps(timestamps);
 
        return c;
@@ -741,8 +728,8 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       clearing10.setStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_status"))));
       clearing10.setFileId(getNumberUtils().toLong(row.get("_file_id")));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_created"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_updated"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_created")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_updated")).toLocalDateTime());
       clearing10.setTimestamps(timestamps);
       return clearing10;
     };

@@ -10,10 +10,12 @@ import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
+import javax.ejb.Local;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -256,7 +258,7 @@ public interface PrepaidMovementEJB10 {
     Map<String, Object> headers,
     String filesInfo,
     String originType,
-    Timestamp dateOfTransaction,
+    LocalDateTime dateOfTransaction,
     String responsible,
     String description,
     Long movRef,
