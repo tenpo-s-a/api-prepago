@@ -2,11 +2,13 @@ package cl.multicaja.prepaid.ejb.v10;
 
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.BaseException;
-import cl.multicaja.core.utils.*;
+import cl.multicaja.core.utils.ConfigUtils;
+import cl.multicaja.core.utils.DateUtils;
+import cl.multicaja.core.utils.KeyValue;
+import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
 import cl.multicaja.prepaid.model.v10.CalculatorParameter10;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
@@ -45,10 +47,6 @@ public abstract class PrepaidBaseEJBBean10 {
 
   public TecnocomServiceHelper getTecnocomServiceHelper() {
     return TecnocomServiceHelper.getInstance();
-  }
-
-  public UserClient getUserClient(){
-    return UserClient.getInstance();
   }
 
   public CalculatorParameter10 getPercentage(){

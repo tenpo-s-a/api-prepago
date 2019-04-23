@@ -20,10 +20,6 @@ import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.*;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.*;
 import cl.multicaja.prepaid.utils.ParametersUtil;
@@ -73,7 +69,6 @@ public class TestBaseUnit extends TestApiBase {
   private static MailPrepaidEJBBean10 mailPrepaidEJBBean10;
   private static FilesEJBBean10 filesEJBBean10;
   private static ReprocesQueueDelegate10 reprocesQueueDelegate10;
-  private static UserClient userClient;
   private static ProductChangeDelegate10 productChangeDelegate10;
   private static PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
   private static TecnocomReconciliationEJBBean10 tecnocomReconciliationEJBBean10;
@@ -109,13 +104,6 @@ public class TestBaseUnit extends TestApiBase {
       configUtils = new ConfigUtils("api-prepaid");
     }
     return configUtils;
-  }
-
-  public static UserClient getUserClient() {
-    if (userClient == null) {
-      userClient = new UserClient();
-    }
-    return userClient;
   }
 
   public static CalculationsHelper getCalculationsHelper(){
@@ -209,7 +197,6 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
       prepaidMovementEJBBean10.setCdtEJB10(getCdtEJBBean10());
       prepaidMovementEJBBean10.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
-      prepaidMovementEJBBean10.setUserClient(getUserClient());
       prepaidMovementEJBBean10.setPrepaidEJBBean10(getPrepaidEJBBean10());
       prepaidMovementEJBBean10.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
       prepaidMovementEJBBean10.setMailDelegate(getMailDelegate());
@@ -400,211 +387,6 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   * realiza un signUp con rut e email
-   *
-   * @param rut
-   * @param email
-   * @return
-   * @throws Exception
-   */
-  public SignUp signupUser(Integer rut, String email) throws Exception {
-    return getUserClient().signUp(null, new SignUPNew(email,rut));
-  }
-
-  /**
-   * realiza un signUp con datos aleatorios
-   *
-   * @return
-   * @throws Exception
-   */
-  public SignUp signupUser() throws Exception {
-    Integer rut = getUniqueRutNumber();
-    String email = getUniqueEmail();
-    return this.signupUser(rut, email);
-  }
-
-  /**
-   * realiza un signUp con datos aleatorios y retorna el usuario creado
-   *
-   * @return
-   * @throws Exception
-   */
-  public User signupUserAndGetUser() throws Exception {
-    SignUp singUP = signupUser();
-    return getUserClient().getUserById(null, singUP.getUserId());
-  }
-
-  /**
-   * actualiza un usuario
-   *
-   * @param u
-   * @return
-   * @throws Exception
-   */
-  public User updateUser(User u) throws Exception {
-    return getUserClient().updateUser(null,u.getId(),u);
-  }
-
-  /**
-   * registra un usuario y además lo deja habilitado completamente
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser() throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED);
-  }
-
-  /**
-   * registra un usuario y además lo deja en algun estado
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(UserStatus status) throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)),status);
-  }
-
-  /**
-   * registra un usuario y además lo deja en algun estado de identidad
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(UserIdentityStatus status) throws Exception {
-    return registerUser(String.valueOf(numberUtils.random(1111,9999)), UserStatus.ENABLED, status);
-  }
-
-  /**
-   * registra un usuario con clave
-   *
-   * @param password
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password) throws Exception {
-    return registerUser(password ,UserStatus.ENABLED);
-  }
-
-  /**
-   * registra un usuario con clave y estado especifico
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password, UserStatus status) throws Exception {
-    return registerUser(password, status, UserIdentityStatus.NORMAL);
-  }
-
-  /**
-   * registra un usuario con clave y estado especifico
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUser(String password, UserStatus status, UserIdentityStatus identityStatus) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.VERIFIED);
-    user.getEmail().setStatus(EmailStatus.VERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setIdentityStatus(identityStatus);
-    user.setPassword(password);
-    user = updateUser(user);
-    return user;
-  }
-
-  /**
-   * actualiza la clave de un usuario
-   *
-   * @param user
-   * @param newPassword
-   * @return
-   * @throws Exception
-   */
-  public User updateUserPassword(User user, String newPassword) throws Exception {
-    UserPasswordNew pass = new UserPasswordNew();
-    pass.setValue(newPassword);
-    user = getUserClient().updateUserPassword(null, user.getId(), pass);
-    return user;
-  }
-
-  /**
-   *
-   * @return
-   * @throws Exception
-   */
-  public User registerUserFirstTopup() throws Exception {
-    return registerUserFirstTopup(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
-  }
-
-  /**
-   *
-   * @param password
-   * @param status
-   * @return
-   * @throws Exception
-   */
-  public User registerUserFirstTopup(String password, UserStatus status) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(password);
-    user = updateUser(user);
-    return user;
-  }
-
-  public User registerUserBlackListed() throws Exception {
-    return registerUserBlackListed(String.valueOf(numberUtils.random(1111,9999)),UserStatus.ENABLED);
-  }
-  public User registerUserBlackListed(String password, UserStatus status) throws Exception {
-    User user = signupUserAndGetUser();
-    user.setName(null);
-    user.setLastname_1(null);
-    user.setLastname_2(null);
-    user.setOccupation(null);
-    user = getUserClient().fillUser(null,user);
-    user.setGlobalStatus(status);
-    user.getRut().setStatus(RutStatus.UNVERIFIED);
-    user.getEmail().setStatus(EmailStatus.UNVERIFIED);
-    user.setNameStatus(NameStatus.VERIFIED);
-    user.setPassword(password);
-    user.setIdentityStatus(UserIdentityStatus.TERRORIST);
-    user = updateUser(user);
-    return user;
-  }
-  /**
-   *
-   * @return
-   */
-  @Deprecated
-  public PrepaidUser10 buildPrepaidUser10(User user) {
-    PrepaidUser10 prepaidUser = new PrepaidUser10();
-    prepaidUser.setUserIdMc(user != null ? user.getId() : null);
-    prepaidUser.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidUser.setStatus(PrepaidUserStatus.ACTIVE);
-    prepaidUser.setBalanceExpiration(0L);
-    return prepaidUser;
-  }
-
-
-  /**
    *
    * @return
    */
@@ -781,34 +563,6 @@ public class TestBaseUnit extends TestApiBase {
     return buildPrepaidCard10(prepaidUser);
   }
 
-  /**
-   * construye una tarjeta desde tecnocom
-   * @param user
-   * @param prepaidUser
-   * @return
-   */
-  public PrepaidCard10 buildPrepaidCard10FromTecnocom(User user, PrepaidUser10 prepaidUser) throws Exception {
-
-    TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
-    AltaClienteDTO altaClienteDTO = getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, tipoAlta);
-
-    DatosTarjetaDTO datosTarjetaDTO = getTecnocomService().datosTarjeta(altaClienteDTO.getContrato());
-
-    PrepaidCard10 prepaidCard = new PrepaidCard10();
-    prepaidCard.setIdUser(prepaidUser.getId());
-    prepaidCard.setProcessorUserId(altaClienteDTO.getContrato());
-    prepaidCard.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
-    prepaidCard.setEncryptedPan(encryptUtil.encrypt(datosTarjetaDTO.getPan()));
-    prepaidCard.setStatus(PrepaidCardStatus.ACTIVE);
-    prepaidCard.setExpiration(datosTarjetaDTO.getFeccadtar());
-    prepaidCard.setNameOnCard(user.getName() + " " + user.getLastname_1());
-    prepaidCard.setProducto(datosTarjetaDTO.getProducto());
-    prepaidCard.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
-
-    return prepaidCard;
-  }
-
-
   public Account buildAccountFromTecnocom(PrepaidUser10 prepaidUser) throws Exception {
 
     TipoAlta tipoAlta = prepaidUser.getUserLevel() == PrepaidUserLevel.LEVEL_2 ? TipoAlta.NIVEL2 : TipoAlta.NIVEL1;
@@ -853,33 +607,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard;
   }
 
-
-  /**
-   *
-   * @param user
-   * @return
-   */
-  @Deprecated
-  public PrepaidTopup10 buildPrepaidTopup10(User user) {
-
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
-
-    PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidTopup.setMerchantCode(merchantCode);
-    prepaidTopup.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3238));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidTopup.setAmount(newAmountAndCurrency);
-    prepaidTopup.setTotal(newAmountAndCurrency);
-    prepaidTopup.setMerchantCategory(1);
-    prepaidTopup.setMerchantName(getRandomString(6));
-
-    return prepaidTopup;
-  }
-
   public PrepaidTopup10 buildPrepaidTopup10() {
 
     String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
@@ -900,32 +627,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidTopup;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  @Deprecated
-  public NewPrepaidTopup10 buildNewPrepaidTopup10(User user) {
-
-    String merchantCode = numberUtils.random() ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getRandomNumericString(15);
-
-    NewPrepaidTopup10 prepaidTopup = new NewPrepaidTopup10();
-    prepaidTopup.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidTopup.setMerchantCode(merchantCode);
-    prepaidTopup.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
-
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidTopup.setAmount(newAmountAndCurrency);
-
-    prepaidTopup.setMerchantCategory(1);
-    prepaidTopup.setMerchantName(getRandomString(6));
-
-    return prepaidTopup;
-  }
 
   public NewPrepaidTopup10 buildNewPrepaidTopup10() {
 
@@ -945,41 +646,6 @@ public class TestBaseUnit extends TestApiBase {
     prepaidTopup.setMerchantName(getRandomString(6));
 
     return prepaidTopup;
-  }
-
-  /**
-   *
-   * @param user
-   * @return
-   */
-  @Deprecated
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user) throws Exception {
-    return buildNewPrepaidWithdraw10(user, String.valueOf(numberUtils.random(1111,9999)));
-  }
-
-  @Deprecated
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password) throws Exception {
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE : getRandomNumericString(15);
-    return buildNewPrepaidWithdraw10(user, password, merchantCode);
-  }
-
-
-  @Deprecated
-  public NewPrepaidWithdraw10 buildNewPrepaidWithdraw10(User user, String password, String merchantCode) throws Exception {
-
-    NewPrepaidWithdraw10 prepaidWithdraw = new NewPrepaidWithdraw10();
-    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidWithdraw.setMerchantCode(merchantCode);
-    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(RandomUtils.nextLong(2000,9000)));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidWithdraw.setAmount(newAmountAndCurrency);
-    prepaidWithdraw.setMerchantCategory(1);
-    prepaidWithdraw.setMerchantName(getRandomString(6));
-
-    return prepaidWithdraw;
   }
 
   public NewPrepaidWithdraw10 buildNewPrepaidWithdrawV2() throws Exception {
@@ -1007,40 +673,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidWithdraw;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  @Deprecated
-  public PrepaidWithdraw10 buildPrepaidWithdraw10(User user) {
-
-    String merchantCode = numberUtils.random(0,2) == 0 ? NewPrepaidTopup10.WEB_MERCHANT_CODE : getUniqueLong().toString();
-
-    PrepaidWithdraw10 prepaidWithdraw = new PrepaidWithdraw10();
-
-    prepaidWithdraw.setRut(user != null ? user.getRut().getValue() : null);
-    prepaidWithdraw.setMerchantCode(merchantCode);
-    prepaidWithdraw.setTransactionId(getUniqueInteger().toString());
-
-    NewAmountAndCurrency10 newAmountAndCurrency = new NewAmountAndCurrency10();
-    newAmountAndCurrency.setValue(new BigDecimal(3119));
-    newAmountAndCurrency.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidWithdraw.setAmount(newAmountAndCurrency);
-
-    prepaidWithdraw.setMerchantCategory(1);
-    prepaidWithdraw.setMerchantName(getRandomString(6));
-
-    NewAmountAndCurrency10 fee = new NewAmountAndCurrency10();
-    fee.setValue(new BigDecimal(100));
-    fee.setCurrencyCode(CodigoMoneda.CHILE_CLP);
-    prepaidWithdraw.setFee(fee);
-
-    prepaidWithdraw.setMcVoucherType("A");
-    prepaidWithdraw.setMcVoucherData(new ArrayList<>());
-
-    return prepaidWithdraw;
-  }
 
   public PrepaidWithdraw10 buildPrepaidWithdrawV2(){
 
@@ -1068,25 +700,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidWithdraw;
   }
 
-
-  /**
-   *
-   * @param user
-   * @param prepaidTopup
-   * @return
-   * @throws BaseException
-   */
-  public CdtTransaction10 buildCdtTransaction10(User user, PrepaidTopup10 prepaidTopup) throws BaseException {
-    CdtTransaction10 cdtTransaction = new CdtTransaction10();
-    cdtTransaction.setAmount(prepaidTopup.getAmount().getValue());
-    cdtTransaction.setTransactionType(prepaidTopup.getCdtTransactionType());
-    cdtTransaction.setAccountId(getConfigUtils().getProperty(APP_NAME) + "_" + user.getRut().getValue());
-    cdtTransaction.setGloss(prepaidTopup.getCdtTransactionType().getName()+" "+prepaidTopup.getAmount().getValue());
-    cdtTransaction.setTransactionReference(0L);
-    cdtTransaction.setExternalTransactionId(prepaidTopup.getTransactionId());
-    cdtTransaction.setIndSimulacion(false);
-    return cdtTransaction;
-  }
 
   public CdtTransaction10 buildCdtTransaction10(PrepaidUser10 user, PrepaidTopup10 prepaidTopup) throws BaseException {
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
@@ -1670,41 +1283,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidMovement10;
   }
 
-  /**
-   *
-   * @param user
-   * @return
-   */
-  @Deprecated
-  public AltaClienteDTO registerInTecnocom(User user) throws BaseException {
-
-    if (user == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user"));
-    }
-
-    if (user.getName() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.name"));
-    }
-
-    if (user.getLastname_1() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_1"));
-    }
-
-    if (user.getLastname_2() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.lastname_2"));
-    }
-
-    if (user.getRut() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut"));
-    }
-
-    if (user.getRut().getValue() == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "user.rut.value"));
-    }
-
-    return getTecnocomService().altaClientes(user.getName(), user.getLastname_1(), user.getLastname_2(), user.getRut().getValue().toString(), TipoDocumento.RUT, TipoAlta.NIVEL2);
-  }
-
   public AltaClienteDTO registerInTecnocomV2(PrepaidUser10 user) throws BaseException {
 
     if (user == null) {
@@ -1876,23 +1454,6 @@ public class TestBaseUnit extends TestApiBase {
     return prepaidCard10;
   }
 
-  @Deprecated
-  protected UserAccount createBankAccount(User user) throws Exception {
-    return createBankAccount(user, 1L, "Cuenta corriente", "mi cuenta de test", getRandomNumericString(8), user.getRut().getValue());
-  }
-
-  @Deprecated
-  protected UserAccount createBankAccount(User user, Long bankId, String type, String name, String number, Integer rut) throws Exception {
-    UserAccountNew newAccountRequest = new UserAccountNew();
-    newAccountRequest.setBankId(bankId);
-    newAccountRequest.setAccountType(type);
-    newAccountRequest.setAccountAlias(name);
-    newAccountRequest.setAccountNumber(number);
-    newAccountRequest.setRut(rut);
-    UserAccount newAccount = getUserClient().createUserBankAccount(null, user.getId(), newAccountRequest);
-    return newAccount;
-  }
-
   protected UserAccount randomBankAccount(){
     UserAccount userAccount = new UserAccount();
     userAccount.setBankId(getUniqueRutNumber().longValue());
@@ -1908,6 +1469,7 @@ public class TestBaseUnit extends TestApiBase {
     header.put(Constants.HEADER_USER_TIMEZONE,"America/Santiago");
     return header;
   }
+
   protected AccountingData10 buildRandomAccouting(AccountingTxType accountingTxType){
     AccountingData10 accounting10 = new AccountingData10();
     accounting10.setTransactionDate(new Timestamp((new Date()).getTime()));

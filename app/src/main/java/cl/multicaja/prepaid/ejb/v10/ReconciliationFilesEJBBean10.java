@@ -7,11 +7,7 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.FileStatus;
-import cl.multicaja.prepaid.model.v10.ReconciliationFile10;
-import cl.multicaja.prepaid.model.v10.ReconciliationFileType;
-import cl.multicaja.prepaid.model.v10.ReconciliationOriginType;
+import cl.multicaja.prepaid.model.v10.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -93,8 +89,8 @@ public class ReconciliationFilesEJBBean10 extends PrepaidBaseEJBBean10 implement
         reconciliationFile10.setType(ReconciliationFileType.valueOf(String.valueOf(row.get("_tipo"))));
         reconciliationFile10.setStatus(FileStatus.valueOf(String.valueOf(row.get("_status"))));
         Timestamps timestamps = new Timestamps();
-        timestamps.setCreatedAt((Timestamp)row.get("_created_at"));
-        timestamps.setUpdatedAt((Timestamp)row.get("_updated_at"));
+        timestamps.setCreatedAt(((Timestamp)row.get("_created_at")).toLocalDateTime());
+        timestamps.setUpdatedAt(((Timestamp)row.get("_updated_at")).toLocalDateTime());
         reconciliationFile10.setTimestamps(timestamps);
         return reconciliationFile10;
       } catch(Exception e) {

@@ -7,7 +7,6 @@ import cl.multicaja.core.model.Errors;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -279,11 +278,12 @@ public class PendingTopup10 extends BaseProcessor10 {
           templateDataToUser.put("date", local.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
           templateDataToUser.put("time", local.format(DateTimeFormatter.ofPattern("HH:mm")));
 
-          EmailBody emailBody = new EmailBody();
+          /*EmailBody emailBody = new EmailBody();
           emailBody.setTemplateData(templateDataToUser);
           emailBody.setTemplate(TEMPLATE_MAIL_ERROR_TOPUP_TO_USER);
           emailBody.setAddress("soporte@multicaja.cl");// TODO: Esto hay que verificarlo
           //getRoute().getMailPrepaidEJBBean10().sendMailAsync(null, data.getUser().getId(), emailBody);
+           */
         }
         return req;
       }

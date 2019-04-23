@@ -1,14 +1,11 @@
 package cl.multicaja.prepaid.resources.v10;
 
+import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
 import cl.multicaja.core.model.Errors;
-import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.resources.BaseResource;
 import cl.multicaja.prepaid.ejb.v10.*;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserFile;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import org.apache.commons.logging.Log;
@@ -20,7 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.CLIENTE_NO_TIENE_PREPAGO;
 import static cl.multicaja.core.model.Errors.SALDO_NO_DISPONIBLE_$VALUE;
@@ -218,13 +214,14 @@ public final class PrepaidResource10 extends BaseResource {
     return Response.ok(prepaidCardResponse10).build();
   }
 
+  /*
   @POST
   @Path("/{user_id}/mail")
   @Deprecated
   public Response sendMail(EmailBody emailBody, @PathParam("user_id") Long userId, @Context HttpHeaders headers) throws Exception {
     this.mailPrepaidEJBBean10.sendMailAsync(headersToMap(headers), userId, emailBody);
     return Response.ok().status(201).build();
-  }
+  }*/
 
   @POST
   @Path("/Queue")

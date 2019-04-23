@@ -4,17 +4,12 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.Constants;
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserIdentityStatus;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -213,8 +208,6 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
   public void shouldReturn404_PrepaidUserNull() throws Exception {
     // POS
     {
-
-
       NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 
@@ -228,8 +221,6 @@ public class Test_reverseWithdrawUserBalance_v10 extends TestBaseUnitApi {
 
     //WEB
     {
-      User user = registerUser();
-
       NewPrepaidWithdraw10 prepaidTopup = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       prepaidTopup.getAmount().setValue(BigDecimal.valueOf(500));
 

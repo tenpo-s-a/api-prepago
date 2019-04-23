@@ -1,14 +1,12 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +27,11 @@ public class Test_PrepaidMovementEJBBean10_updateResearchMovement extends TestBa
       List<ResearchMovementInformationFiles> researchMovementInformationFilesList = new ArrayList<>();
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
 
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
+
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
@@ -48,7 +47,7 @@ public class Test_PrepaidMovementEJBBean10_updateResearchMovement extends TestBa
         null,
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.SWITCH.name(),
-        dateOfTransaction,
+        dateOfTransaction.toLocalDateTime(),
         ResearchMovementResponsibleStatusType.IS_TABLE.getValue(),
         ResearchMovementDescriptionType.ERROR_UNDEFINED.getValue(),
         100L,

@@ -1,6 +1,7 @@
 package cl.multicaja.accounting.model.v10;
 
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
+
+import cl.multicaja.prepaid.model.v10.Timestamps;
 
 public class AccountingFiles10 {
 

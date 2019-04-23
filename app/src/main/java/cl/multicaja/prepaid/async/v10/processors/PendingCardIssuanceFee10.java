@@ -8,7 +8,6 @@ import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -25,7 +24,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.ERROR_CARD_ISSUANCE_FEE_REQ;
+import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.PENDING_CARD_ISSUANCE_FEE_REQ;
 import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_ISSUANCE_FEE;
 
 /**
@@ -293,15 +293,16 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
           //TODO: Se debe verificar si este id seria el uuid de Tempo
-          Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
-          if(ticket.getId() != null){
-            log.info("Ticket Creado Exitosamente");
-          }
+          Ticket ticket = null; //getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
+          //if(ticket.getId() != null){
+            //log.info("Ticket Creado Exitosamente");
+          //}
         } else {
           Map<String, Object> templateData = new HashMap<String, Object>();
           templateData.put("idUsuario", user.getId());
           templateData.put("rutCliente", user.getDocumentNumber());
-          getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_ISSUANCE_FEE, templateData);
+          //TODO: Verificar como enviar mail
+          //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_ISSUANCE_FEE, templateData);
         }
       return req;
       }

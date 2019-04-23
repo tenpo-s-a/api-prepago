@@ -48,8 +48,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", reconciliationFile10.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", reconciliationFile10.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", reconciliationFile10.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
   }
 
   @Test
@@ -74,8 +74,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", reconciliationFile10.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", reconciliationFile10.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", reconciliationFile10.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
   }
 
   @Test
@@ -101,8 +101,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", reconciliationFile10.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", reconciliationFile10.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", reconciliationFile10.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
   }
 
   @Test
@@ -134,8 +134,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", reconciliationFile10.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", reconciliationFile10.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", reconciliationFile10.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
 
     // Chequea que el segundo se haya encontrado
     List<ReconciliationFile10> filteredFiles2 = reconciliationFile10List.stream().filter(file -> (file.getId().equals(anotherFile.getId()))).collect(Collectors.toList());
@@ -145,8 +145,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", anotherFile.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", anotherFile.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", anotherFile.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
   }
 
   @Test
@@ -176,8 +176,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
     Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", thirdFile.getProcess(), foundFile.getProcess());
     Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", thirdFile.getType(), foundFile.getType());
     Assert.assertEquals("Status igual a Status registrado?", thirdFile.getStatus(), foundFile.getStatus());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+    Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
   }
 
   @Test
@@ -211,8 +211,8 @@ public class Test_ReconciliationFilesEJBBean10_getReconciliationFile extends Tes
           Assert.assertEquals("Proceso Encontrado igual a Proceso registrado?", insertedFile.getProcess(), foundFile.getProcess());
           Assert.assertEquals("Tipo Encontrado igual a Tipo registrado?", insertedFile.getType(), foundFile.getType());
           Assert.assertEquals("Status igual a Status registrado?", insertedFile.getStatus(), foundFile.getStatus());
-          Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().toLocalDateTime().getDayOfYear());
-          Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().toLocalDateTime().getDayOfYear());
+          Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getCreatedAt().getDayOfYear());
+          Assert.assertEquals("Debe tener create date asignada", currentDay, foundFile.getTimestamps().getUpdatedAt().getDayOfYear());
           comparedFiles++;
         }
       }

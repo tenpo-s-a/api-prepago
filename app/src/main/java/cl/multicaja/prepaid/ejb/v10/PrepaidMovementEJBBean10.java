@@ -21,9 +21,6 @@ import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
-import cl.multicaja.prepaid.helpers.users.UserClient;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
@@ -79,8 +76,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   @Inject
   private MailDelegate10 mailDelegate;
 
-  private UserClient userClient;
-
   @EJB
   private PrepaidUserEJBBean10 prepaidUserEJB10;
 
@@ -113,20 +108,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
 
-  @Override
-  public UserClient getUserClient() {
-    if (userClient == null) {
-      userClient = UserClient.getInstance();
-    }
-    return userClient;
-  }
-
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
-  }
-
-  public void setUserClient(UserClient userClient) {
-    this.userClient = userClient;
   }
 
   public McRedReconciliationEJBBean10 getMcRedReconciliationEJBBean() {
@@ -904,7 +887,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       null,
       toJson(researchMovementInformationFilesList),
       origin.toString(),
-      prepaidMovement.getFechaCreacion(),
+      prepaidMovement.getFechaCreacion().toLocalDateTime(),
       responsible.getValue(),
       description.getValue(),
       prepaidMovement.getId(),
@@ -1518,7 +1501,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
-      Ticket ticket = getUserClient().createFreshdeskTicket(null, prepaidUser10.getId(), newTicket);
+      //TODO: Revisar esto despues ya que es parte de la conciliacion
+      Ticket ticket = null;//getUserClient().createFreshdeskTicket(null, prepaidUser10.getId(), newTicket);
 
       if (ticket != null && ticket.getId() != null) {
         log.info("Ticket Creado Exitosamente");
@@ -1643,7 +1627,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         null,
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.MOTOR.name(),
-        mov.getFechaCreacion(),
+        mov.getFechaCreacion().toLocalDateTime(),
         ResearchMovementResponsibleStatusType.STATUS_UNDEFINED.getValue(),
         ResearchMovementDescriptionType.DESCRIPTION_UNDEFINED.getValue(),
         mov.getId(),
@@ -1744,7 +1728,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         null,
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.CLEARING_RESOLUTION.name(),
-        prepaidMovement10.getFechaCreacion(),
+        prepaidMovement10.getFechaCreacion().toLocalDateTime(),
         ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
         researchDescription.getValue(),
         prepaidMovement10.getId(),
@@ -1773,7 +1757,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         null,
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.CLEARING_RESOLUTION.name(),
-        prepaidMovement10.getFechaCreacion(),
+        prepaidMovement10.getFechaCreacion().toLocalDateTime(),
         ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA.getValue(),
         ResearchMovementDescriptionType.ERROR_INFO.getValue(),
         prepaidMovement10.getId(),
@@ -1801,7 +1785,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         null,
         toJson(researchMovementInformationFilesList),
         ReconciliationOriginType.CLEARING_RESOLUTION.toString(),
-        prepaidMovement10.getFechaCreacion(),
+        prepaidMovement10.getFechaCreacion().toLocalDateTime(),
         ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
         ResearchMovementDescriptionType.ERROR_STATUS_IN_DB.getValue(),
         prepaidMovement10.getId(),
@@ -1878,7 +1862,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               null,
               toJson(researchMovementInformationFilesList),
               ReconciliationOriginType.CLEARING_RESOLUTION.toString(),
-              prepaidMovement10.getFechaCreacion(),
+              prepaidMovement10.getFechaCreacion().toLocalDateTime(),
               ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
               String.format("Error: F3-Clearing procesando clearingData con status: %s", clearingData10.getStatus().getValue()),
               prepaidMovement10.getId(),
@@ -1938,7 +1922,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
   @Override
   public Map<String, Object> createResearchMovement(
-    Map<String, Object> headers, String filesInfo, String originType, Timestamp dateOfTransaction,
+    Map<String, Object> headers, String filesInfo, String originType, LocalDateTime dateOfTransaction,
     String responsible, String description, Long movRef, String movementType, String sentStatus) throws Exception {
 
 
@@ -2174,13 +2158,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     attachmentFile.close();
 
     // Enviamos el archivo al mail de reportes diarios
-    EmailBody emailBodyToSend = new EmailBody();
-    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
-    emailBodyToSend.setTemplateData(null);
-    emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
-    emailBodyToSend.setAddress(emailAddress);
-    mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
-
+    /*
+      EmailBody emailBodyToSend = new EmailBody();
+      emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
+      emailBodyToSend.setTemplateData(null);
+      emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_RESEARCH_REPORT);
+      emailBodyToSend.setAddress(emailAddress);
+      mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+    */
     Files.delete(Paths.get(file));
 
     //change status of research_movements to sent_ok
