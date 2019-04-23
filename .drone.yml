@@ -10,18 +10,6 @@ pipeline:
     when:
       event: [ push ]
 
-  dbusers_migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
-    commands:
-      - ./drone-mvn-cache.sh
-      - sleep 15
-      - cd /app/pg && ./db-create.sh -Denv=ci
-      - cd /app/pg && ./migrate-up.sh -Denv=ci
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
   db_test:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -122,30 +110,6 @@ pipeline:
     when:
       event: [ push ]
 
-  #publish_dbmigration_image:
-  #  registry: mccontainerregistry.azurecr.io
-  #  image: plugins/docker
-  #  repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
-  #  tags:
-  #    - dbmigration-${DRONE_COMMIT_SHA}
-  #  dockerfile: Dockerfile.ci.migration
-  #  secrets: [ docker_username, docker_password ]
-  #  when:
-  #    event: [ push ]
-  #    branch: master
-
-  #publish_ci_image:
-  #  registry: mccontainerregistry.azurecr.io
-  #  image: plugins/docker
-  #  repo: mccontainerregistry.azurecr.io/api-prepago
-  #  tags:
-  #    - ci-${DRONE_COMMIT_SHA}
-  #  dockerfile: Dockerfile.ci
-  #  secrets: [ docker_username, docker_password ]
-  #  when:
-  #    event: [ push ]
-  #    branch: master
-
   publish_image:
     registry: mccontainerregistry.azurecr.io
     image: plugins/docker
@@ -203,20 +167,6 @@ pipeline:
 services:
   database:
     image: postgres:9.6.3-alpine
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
-  api-users:
-    image: mccontainerregistry.azurecr.io/api-users:1978397996a8eb6e153ab69f949ac2d22dc80063
-    environment:
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=api_users_ci
-      - DB_HOST_FQDN=database
-      - API_ENVIRONMENT=ci
-    log-driver: none
     when:
       event: [ push ]
       branch:
