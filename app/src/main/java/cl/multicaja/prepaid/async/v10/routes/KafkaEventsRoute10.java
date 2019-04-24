@@ -42,7 +42,6 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       // Eventos a consumir
       from(getTopicConsumerEndpoint(USER_CREATED_TOPIC)).process(new UserEvent(this).processUserCreatedEvent());
       from(getTopicConsumerEndpoint(USER_UPDATED_TOPIC)).process(new UserEvent(this).processUserUpdatedEvent());
-
       //Eventos a publicar
       // Contrato/cuenta
       from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_ACCOUNT_CREATED_EVENT, concurrentConsumers, sedaSize))

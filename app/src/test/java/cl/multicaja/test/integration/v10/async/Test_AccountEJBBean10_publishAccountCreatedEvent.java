@@ -30,7 +30,7 @@ public class Test_AccountEJBBean10_publishAccountCreatedEvent extends TestBaseUn
   public void publishAccountCreatedEvent() throws Exception {
 
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     Account account = getAccountEJBBean10().insertAccount(prepaidUser10.getId(), getRandomNumericString(15));
 
