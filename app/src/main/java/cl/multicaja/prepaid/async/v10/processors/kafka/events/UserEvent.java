@@ -122,6 +122,7 @@ public class UserEvent extends BaseProcessor10 {
     };
   }
 
+
   public Processor processUserUpdatedEvent(){
     return new Processor() {
       @Override
@@ -138,18 +139,35 @@ public class UserEvent extends BaseProcessor10 {
 
           PrepaidUser10 userFound = getRoute().getPrepaidUserEJBBean10().findByExtId(null,userResponse.getId());
 
+          // Existe el usuario
           if(userFound != null){
 
-            PrepaidUser10 userToUpdate = buildPrepaidUserToUpdate(userResponse,userFound);
-            if(userToUpdate!=null){
-              PrepaidUser10 userUpdated = getRoute().getPrepaidUserEJBBean10().updatePrepaidUser(null,userToUpdate);
-              log.info("[processUserCreatedEvent] Processing USER_UPDATED event SUCCESS with this values: "+userUpdated.toString());
-            }else{
-              log.info("[processUserCreatedEvent] Processing USER_UPDATED event FAIL with invalid fields: "+isAllValidMap.toString());
-            }
+              if(!PrepaidUserStatus.CLOSED.name().equals(userResponse.getState())) {
+                if(PrepaidUserStatus.CLOSED.equals(userFound.getStatus())){ //La cuenta del usuario ya fue cerrada, no se permite actualizar status
+                  throw new Exception("Account is Closed");
+                }
+                else {// Si el status a actualizar es distinto de CLOSED  y la cuenta no se a cerrado se actualiza
+                  PrepaidUser10 userToUpdate = buildPrepaidUserToUpdate(userResponse,userFound);
+                  if(userToUpdate!=null) {
+                  PrepaidUser10 userUpdated = getRoute().getPrepaidUserEJBBean10().updatePrepaidUser(null, userToUpdate);
+                  log.info("[processUserUpdatedEvent] Processing USER_UPDATED event SUCCESS with this values: "+userUpdated.toString());
+                  }else{
+                    log.info("[processUserUpdatedEvent] Processing USER_UPDATED event FAIL with this values: "+data);
+                  }
+                }
+              } else{ // Si el status  a actualizar es CLOSED
+                if(PrepaidUserStatus.CLOSED.equals(userFound.getStatus())){ //La cuenta del usuario ya fue cerrada, no se permite actualizar status
+                  throw new Exception("Account is Closed");
+                }
+                getRoute().getAccountEJBBean10().closeAccount(userResponse.getId());
+                log.info(String.format("[processUserCreatedEvent]Account CLOSED SUCCESS with this values: %s ",data));
+              }
+          }else {
+            log.info(String.format("[processUserUpdatedEvent] User not exist %s",userResponse.getId()));
           }
         }catch(Exception ex){
-          log.error("[processUserCreatedEvent] Processing USER_UPDATED FAIL error: "+ex);
+          ex.printStackTrace();
+          log.error("[processUserUpdatedEvent] Processing USER_UPDATED FAIL error: "+ex);
         }
 
       }

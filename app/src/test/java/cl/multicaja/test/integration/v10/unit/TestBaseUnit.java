@@ -223,6 +223,7 @@ public class TestBaseUnit extends TestApiBase {
       accountEJBBean10 = new AccountEJBBean10();
       accountEJBBean10.setKafkaEventDelegate10(getKafkaEventDelegate10());
       accountEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      accountEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
     }
     return accountEJBBean10;
   }
@@ -575,7 +576,7 @@ public class TestBaseUnit extends TestApiBase {
     account.setUpdatedAt(LocalDateTime.now());
     account.setUpdatedAt(LocalDateTime.now());
     account.setUuid(UUID.randomUUID().toString());
-    account.setStatus(AccountStatus.ACTIVE.name());
+    account.setStatus(AccountStatus.ACTIVE);
     account.setExpireBalance(0l);
     account.setBalanceInfo("");
 

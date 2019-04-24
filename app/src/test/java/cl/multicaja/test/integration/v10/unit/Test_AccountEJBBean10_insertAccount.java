@@ -59,7 +59,7 @@ public class Test_AccountEJBBean10_insertAccount extends TestBaseUnit {
 
     Assert.assertNotNull(account.getId());
     Assert.assertNotNull(account.getUuid());
-    Assert.assertEquals(AccountStatus.ACTIVE.toString(), account.getStatus());
+    Assert.assertEquals(AccountStatus.ACTIVE, account.getStatus());
     Assert.assertEquals(AccountProcessor.TECNOCOM_CL.toString(), account.getProcessor());
     Assert.assertEquals("Debe ser la misma cuenta", prepaidUser10.getId(), account.getUserId());
     Assert.assertEquals("Debe ser la misma cuenta", accountNumber, account.getAccountNumber());
@@ -76,7 +76,7 @@ public class Test_AccountEJBBean10_insertAccount extends TestBaseUnit {
 
     Assert.assertNotNull(account.getId());
     Assert.assertNotNull(account.getUuid());
-    Assert.assertEquals(AccountStatus.ACTIVE.toString(), account.getStatus());
+    Assert.assertEquals(AccountStatus.ACTIVE, account.getStatus());
     Assert.assertEquals(AccountProcessor.TECNOCOM_CL.toString(), account.getProcessor());
     Assert.assertEquals("Debe ser la misma cuenta", prepaidUser10.getId(), account.getUserId());
     Assert.assertEquals("Debe ser la misma cuenta", accountNumber, account.getAccountNumber());
