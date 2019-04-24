@@ -163,14 +163,14 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     query.append(indnorcor != null ? String.format("indnorcor = %d AND ", indnorcor.getValue()) : "");
     query.append(tipofac != null ? String.format("tipofac = %d AND ", tipofac.getCode()) : "");
     if (fecfac != null) {
-      SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD");
+      SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
       String fecfacString = sdf.format(fecfac);
-      query.append(String.format("fecfac = to_date(%s, 'YYYY-MM-DD') AND ", fecfacString));
+      query.append(String.format("fecfac = to_date('%s', 'YYYYMMDD') AND ", fecfacString));
     }
     query.append(numaut != null ? String.format("numaut = '%s' AND ", numaut) : "");
     query.append(estadoConSwitch != null ? String.format("estado_con_switch = '%s' AND ", estadoConSwitch.getValue()) : "");
     query.append(estadoConTecnocom != null ? String.format("estado_con_tecnocom = '%s' AND ", estadoConTecnocom.getValue()) : "");
-    query.append(origen != null ? String.format("origen = '%s' AND ", origen.getValue()) : "");
+    query.append(origen != null ? String.format("origen_movimiento = '%s' AND ", origen.getValue()) : "");
     query.append(pan != null ? String.format("pan = '%s' AND ", pan) : "");
     query.append(codcom != null ? String.format("codcom = '%s' AND ", codcom) : "");
     query.append("1 = 1");
