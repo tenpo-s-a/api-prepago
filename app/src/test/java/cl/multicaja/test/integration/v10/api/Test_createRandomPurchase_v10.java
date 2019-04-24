@@ -2,22 +2,15 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpHeader;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
-import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
-import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.ejb.EJB;
 import java.math.BigDecimal;
 import java.util.List;
 

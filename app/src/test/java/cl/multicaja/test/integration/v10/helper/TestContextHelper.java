@@ -44,7 +44,6 @@ public class TestContextHelper extends TestBaseUnit {
       prepaidTopupRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       prepaidTopupRoute10.setCdtEJBBean10(getCdtEJBBean10());
       prepaidTopupRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
-      prepaidTopupRoute10.setUserClient(getUserClient());
       prepaidTopupRoute10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       prepaidTopupRoute10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       prepaidTopupRoute10.setAccountEJBBean10(getAccountEJBBean10());
@@ -58,14 +57,12 @@ public class TestContextHelper extends TestBaseUnit {
       transactionReversalRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
       transactionReversalRoute10.setCdtEJBBean10(getCdtEJBBean10());
       transactionReversalRoute10.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
-      transactionReversalRoute10.setUserClient(getUserClient());
       transactionReversalRoute10.setAccountEJBBean10(getAccountEJBBean10());
       transactionReversalRoute10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       transactionReversalRoute10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
 
       CurrencyConvertionRoute10 currencyConvertionRoute10 = new CurrencyConvertionRoute10();
       currencyConvertionRoute10.setPrepaidCardEJBBean10(getPrepaidCardEJBBean10());
-      currencyConvertionRoute10.setUserClient(getUserClient());
 
       TecnocomReconciliationRoute10 tecnocomReconciliationRoute10 = new TecnocomReconciliationRoute10();
       tecnocomReconciliationRoute10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
@@ -85,6 +82,7 @@ public class TestContextHelper extends TestBaseUnit {
 
       KafkaEventsRoute10 kafkaEventsRoute10 = new KafkaEventsRoute10();
       kafkaEventsRoute10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
+      kafkaEventsRoute10.setAccountEJBBean10(getAccountEJBBean10());
 
      /*
       camelFactory.startCamelContextWithRoutes(true,

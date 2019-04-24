@@ -10,18 +10,6 @@ pipeline:
     when:
       event: [ push ]
 
-  dbusers_migration:
-    image: mccontainerregistry.azurecr.io/api-users-dbmigration:dbmigration-462fd8e2aa5c2482d0a8990dee681ad8688fb57c
-    commands:
-      - ./drone-mvn-cache.sh
-      - sleep 15
-      - cd /app/pg && ./db-create.sh -Denv=ci
-      - cd /app/pg && ./migrate-up.sh -Denv=ci
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
   db_test:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -92,6 +80,20 @@ pipeline:
       event: [ push ]
       branch: master
 
+  db_mock_migration_staging:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=mock
+      - ./db-drop.sh -Denv=mock
+      - ./db-create.sh -Denv=mock
+      - ./migrate-up.sh -Denv=mock
+      - ./migrate-bootstrap.sh --force -Denv=mock
+    when:
+      event: [ push ]
+      branch: master
+
   db_migration_sandbox:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -122,30 +124,6 @@ pipeline:
     when:
       event: [ push ]
 
-  #publish_dbmigration_image:
-  #  registry: mccontainerregistry.azurecr.io
-  #  image: plugins/docker
-  #  repo: mccontainerregistry.azurecr.io/api-prepago-dbmigration
-  #  tags:
-  #    - dbmigration-${DRONE_COMMIT_SHA}
-  #  dockerfile: Dockerfile.ci.migration
-  #  secrets: [ docker_username, docker_password ]
-  #  when:
-  #    event: [ push ]
-  #    branch: master
-
-  #publish_ci_image:
-  #  registry: mccontainerregistry.azurecr.io
-  #  image: plugins/docker
-  #  repo: mccontainerregistry.azurecr.io/api-prepago
-  #  tags:
-  #    - ci-${DRONE_COMMIT_SHA}
-  #  dockerfile: Dockerfile.ci
-  #  secrets: [ docker_username, docker_password ]
-  #  when:
-  #    event: [ push ]
-  #    branch: master
-
   publish_image:
     registry: mccontainerregistry.azurecr.io
     image: plugins/docker
@@ -156,60 +134,6 @@ pipeline:
     when:
       event: [ push ]
       branch: master
-
-  kong_staging:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/staging/terraform-state"
-    vars:
-      kong_admin_uri: https://kong.staging.multicajadigital.cloud/admin
-      cluster_environment: staging
-    secrets:
-      - source: consul_http_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_http_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ push ]
-      branch: [ master ]
-
-  kong_sandbox:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/sandbox/terraform-state"
-    vars:
-      kong_admin_uri: https://kong.sandbox.multicajadigital.cloud/admin
-      cluster_environment: sandbox
-    secrets:
-      - source: consul_http_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_http_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ tag ]
-      ref: refs/tags/snapshot*
-
-  kong_production:
-    image: mccontainerregistry.azurecr.io/tools/drone-terraform:2.0.0
-    root_dir: terraform
-    init_options:
-      backend-config:
-        - "path=apps/api-prepaid/production/terraform-state"
-    vars:
-      kong_admin_uri: https://kong.production.multicajadigital.cloud/admin
-      cluster_environment: production
-    secrets:
-      - source: consul_http_addr
-        target: CONSUL_HTTP_ADDR
-      - source: consul_http_token
-        target: CONSUL_HTTP_TOKEN
-    when:
-      event: [ tag ]
-      ref: refs/tags/release*
 
   deploy_to_staging:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
@@ -222,6 +146,38 @@ pipeline:
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
       - DB_HOST_NAME=prepaid-postgresql-staging
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_mock_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: deployment-mock.staging.yml
+    vars:
+      - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_dev_mock
+      - API_ENVIRONMENT=mock
+      - DB_USERNAME=prepago
+      - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
+      - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
+      - DB_HOST_NAME=prepaid-postgresql-staging
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_virtual_service_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: virtual-service.staging.yml
+    when:
+      event: [ push ]
+      branch: master
+
+  deploy_destination_rule_to_staging:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: staging
+    template: destination-rule.staging.yml
     when:
       event: [ push ]
       branch: master
@@ -257,20 +213,6 @@ pipeline:
 services:
   database:
     image: postgres:9.6.3-alpine
-    when:
-      event: [ push ]
-      branch:
-        exclude: master
-
-  api-users:
-    image: mccontainerregistry.azurecr.io/api-users:1978397996a8eb6e153ab69f949ac2d22dc80063
-    environment:
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=api_users_ci
-      - DB_HOST_FQDN=database
-      - API_ENVIRONMENT=ci
-    log-driver: none
     when:
       event: [ push ]
       branch:

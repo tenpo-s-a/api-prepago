@@ -8,7 +8,6 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
@@ -27,8 +26,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_EMISSION_ERROR;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_ERROR_CREATE_CARD;
 
 /**
  * @autor vutreras
@@ -262,10 +259,11 @@ public class PendingCard10 extends BaseProcessor10 {
 
         NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
         //TODO: Verificar que ID tiene que ir aca
-        Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
-        if(ticket.getId() != null){
-          log.info("Ticket Creado Exitosamente");
-        }
+        //TODO: Revisar como se generaran los Tickets
+        Ticket ticket = null;//getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
+        //if(ticket.getId() != null){
+          //log.info("Ticket Creado Exitosamente");
+        //}
       } else {
         /**
          *  ENVIO DE MAIL ERROR ENVIO DE TARJETA

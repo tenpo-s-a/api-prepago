@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -19,10 +18,10 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliados extends T
 
   @Test
   public void findMovement_ok() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);
@@ -44,10 +43,10 @@ public class Test_PrepaidMovementEJBBean10_buscaMovimientosConciliados extends T
 
   @Test
   public void findMovement_doesntExistId() throws Exception {
-    User user = registerUser();
-    PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-    prepaidUser = createPrepaidUser10(prepaidUser);
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser, prepaidTopup);
     prepaidMovement10.setConTecnocom(ReconciliationStatusType.RECONCILED);
     prepaidMovement10.setConSwitch(ReconciliationStatusType.RECONCILED);

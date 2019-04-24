@@ -1,26 +1,11 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.core.model.Errors;
-import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidCard10;
-import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
-import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import java.util.Map;
-
-import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.TEMPLATE_MAIL_SEND_CARD;
 
 /**
  * @author gosalass
@@ -56,7 +41,7 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
   }
 
-  @Override
+  /*@Override
   public void sendMailAsync(Map<String, Object> headers, Long userId, EmailBody content) throws Exception {
 
     if (userId == null) {
@@ -75,7 +60,9 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     }
   }
 
-  @Override
+   */
+
+  /*@Override
   public void sendMailAsync(Map<String, Object> headers, EmailBody content) throws Exception {
 
     if (content == null){
@@ -96,4 +83,5 @@ public class MailPrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements MailPr
     emailBody.setAddress("soporte-prepago@multicaja.cl");
     sendMailAsync(null, emailBody);
   }
+   */
 }

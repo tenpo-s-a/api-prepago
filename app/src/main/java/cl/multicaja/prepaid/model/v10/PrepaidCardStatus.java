@@ -10,7 +10,8 @@ public enum PrepaidCardStatus implements Serializable {
   ACTIVE,
   LOCKED,
   LOCKED_HARD,
-  EXPIRED;
+  EXPIRED,
+  CLOSED;
 
   public static PrepaidCardStatus valueOfEnum(String name) {
     try {

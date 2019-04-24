@@ -1,11 +1,9 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.helpers.users.model.UserStatus;
 import cl.multicaja.prepaid.model.v10.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -28,20 +26,18 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
+  //TODO: aca ya no existe get card
+  @Ignore
   @Test
   public void shouldReturn200_PrepaidCardActive() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
 
-    prepaidCard10 = createPrepaidCard10(prepaidCard10);
-
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
@@ -64,13 +60,11 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
+  @Ignore
   @Test
   public void shouldReturn200_PrepaidCardLocked() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUser10(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
@@ -78,7 +72,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -100,21 +94,19 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
+  @Ignore
   @Test
   public void shouldReturn200_PrepaidCardLockedHard() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.LOCKED_HARD);
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -136,21 +128,19 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
+  @Ignore
   @Test
   public void shouldReturn200_PrepaidCardExpired() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.EXPIRED);
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 200", 200, resp.getStatus());
 
@@ -172,23 +162,12 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertNotNull("deberia tener fecha de actualizacion", timestamps.getUpdatedAt());
   }
 
-  @Test
-  public void shouldReturn404_McUserNull() {
-
-    HttpResponse resp = getPrepaidCard(Long.MAX_VALUE);
-
-    Assert.assertEquals("status 404", 404, resp.getStatus());
-    Map<String, Object> errorObj = resp.toMap();
-    Assert.assertNotNull("Deberia tener error", errorObj);
-    Assert.assertEquals("Deberia tener error code = 102001", 102001, errorObj.get("code"));
-  }
-
+  @Ignore
   @Test
   public void shouldReturn404_PrepaidUserNull() throws Exception {
 
-    User user = registerUser();
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(getUniqueLong());
 
     Assert.assertEquals("status 404", 404, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -196,21 +175,20 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 102003", 102003, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_PrepaidUserDisabled() throws Exception {
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10.setStatus(PrepaidUserStatus.DISABLED);
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -218,16 +196,13 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 102004", 102004, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_FirstTopupPending() throws Exception {
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    User user = registerUser();
-
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -235,20 +210,19 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 106007", 106007, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_FirstTopupInProcess_PrepaidCardPending() throws Exception {
-    User user = registerUser();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10(prepaidUser10);
     prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
 
     prepaidCard10 = createPrepaidCard10(prepaidCard10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -256,21 +230,20 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_FirstTopupInProcess_MovementPending() throws Exception {
-    User user = registerUser();
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
     prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -278,21 +251,19 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_FirstTopupInProcess_MovementInProcess() throws Exception {
-    User user = registerUser();
+    PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+    prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+    PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
     PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
     prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
     prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-    HttpResponse resp = getPrepaidCard(user.getId());
+    HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
     Assert.assertEquals("status 422", 422, resp.getStatus());
     Map<String, Object> errorObj = resp.toMap();
@@ -300,27 +271,25 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
   }
 
+  @Ignore
   @Test
   public void shouldReturn422_FirstTopupInProcess_MovementErrorAndPending() throws Exception {
     {
-      User user = registerUser();
+      PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidTopup = buildPrepaidTopup10();
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.PENDING);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = getPrepaidCard(user.getId());
+      HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -328,29 +297,27 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 106008", 106008, errorObj.get("code"));
     }
     {
-      User user = registerUser();
+      PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
+      prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
-      PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
 
-      prepaidUser10 = createPrepaidUser10(prepaidUser10);
-
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
       PrepaidMovement10 prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_EMISSION_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidTopup = buildPrepaidTopup10();
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.ERROR_IN_PROCESS_CREATE_CARD);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      prepaidTopup = buildPrepaidTopup10(user);
+      prepaidTopup = buildPrepaidTopup10();
       prepaidMovement10 = buildPrepaidMovement10(prepaidUser10, prepaidTopup);
       prepaidMovement10.setEstado(PrepaidMovementStatus.IN_PROCESS);
       prepaidMovement10 = createPrepaidMovement10(prepaidMovement10);
 
-      HttpResponse resp = getPrepaidCard(user.getId());
+      HttpResponse resp = getPrepaidCard(prepaidUser10.getId());
 
       Assert.assertEquals("status 422", 422, resp.getStatus());
       Map<String, Object> errorObj = resp.toMap();
@@ -359,6 +326,7 @@ public class Test_getPrepaidCard_v10 extends TestBaseUnitApi {
     }
   }
 
+  @Ignore
   @Test
   public void shouldReturn400_Id0() {
 

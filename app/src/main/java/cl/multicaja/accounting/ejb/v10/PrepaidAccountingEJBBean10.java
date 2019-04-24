@@ -14,10 +14,11 @@ import cl.multicaja.core.utils.db.InParam;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
-import cl.multicaja.prepaid.ejb.v10.*;
+import cl.multicaja.prepaid.ejb.v10.MailPrepaidEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidBaseEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidCardEJBBean10;
+import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.helpers.CalculationsHelper;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.helpers.users.model.Timestamps;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.tecnocom.constants.*;
 import com.opencsv.CSVWriter;
@@ -43,7 +44,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cl.multicaja.core.model.Errors.*;
+import static cl.multicaja.core.model.Errors.ERROR_DE_COMUNICACION_CON_BBDD;
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 /**
  * Todos los metodos para el nuevo esquema de contabilidad.
@@ -743,15 +745,17 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
 
     attachmentFile.close();
-
+    //TODO: Revisar como quedara esto
     // Enviamos el archivo al mail de reportes diarios
-    EmailBody emailBodyToSend = new EmailBody();
+    /*EmailBody emailBodyToSend = new EmailBody();
 
     emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
     emailBodyToSend.setTemplateData(null);
     emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
     emailBodyToSend.setAddress(emailAddress);
     mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
+
+     */
 
     Files.delete(Paths.get(file));
   }
@@ -836,8 +840,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       c.setFileName(String.valueOf(row.get("_file_name")));
       c.setStatus(IpmFileStatus.valueOfEnum(row.get("_status").toString().trim()));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_create_date"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_update_date"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_create_date")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_update_date")).toLocalDateTime());
       c.setTimestamps(timestamps);
       return c;
     };
@@ -1390,8 +1394,8 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       data.setTransactionDate((Timestamp) row.get("_transaction_date"));
       data.setConciliationDate((Timestamp) row.get("_conciliation_date"));
       Timestamps timestamps = new Timestamps();
-      timestamps.setCreatedAt((Timestamp)row.get("_create_date"));
-      timestamps.setUpdatedAt((Timestamp)row.get("_update_date"));
+      timestamps.setCreatedAt(((Timestamp)row.get("_create_date")).toLocalDateTime());
+      timestamps.setUpdatedAt(((Timestamp)row.get("_update_date")).toLocalDateTime());
       data.setTimestamps(timestamps);
 
       data.setAccountingStatus(AccountingStatusType.fromValue(String.valueOf(row.get("_accounting_status"))));

@@ -2,44 +2,27 @@ package cl.multicaja.prepaid.async.v10.processors;
 
 import cl.multicaja.camel.ExchangeData;
 import cl.multicaja.camel.ProcessorRoute;
-import cl.multicaja.core.model.Errors;
-import cl.multicaja.core.utils.DateUtils;
-import cl.multicaja.core.utils.NumberUtils;
-import cl.multicaja.core.utils.RutUtils;
-import cl.multicaja.core.utils.Utils;
 import cl.multicaja.prepaid.async.v10.model.PrepaidTopupData10;
 import cl.multicaja.prepaid.async.v10.routes.BaseRoute10;
 import cl.multicaja.prepaid.async.v10.routes.MailRoute10;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.NewTicket;
-import cl.multicaja.prepaid.helpers.freshdesk.model.v10.Ticket;
-import cl.multicaja.prepaid.helpers.users.model.EmailBody;
-import cl.multicaja.prepaid.model.v10.*;
-import cl.multicaja.prepaid.utils.TemplateUtils;
-import cl.multicaja.tecnocom.constants.CodigoRetorno;
-import cl.multicaja.tecnocom.dto.Cvv2DTO;
+import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
+import cl.multicaja.prepaid.model.v10.PrepaidMovement10;
+import cl.multicaja.prepaid.model.v10.PrepaidWithdraw10;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Base64Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.*;
-import static cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10.*;
-import static cl.multicaja.prepaid.model.v10.MailTemplates.*;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_WITHDRAW_FAILED_REQ;
+import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.ERROR_SEND_MAIL_WITHDRAW_SUCCESS_REQ;
 import static cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE;
 
 /**

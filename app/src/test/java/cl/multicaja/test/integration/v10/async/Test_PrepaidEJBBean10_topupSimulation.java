@@ -5,7 +5,6 @@ import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -522,7 +521,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
   @Test
   public void topupSimulation_not_ok_by_cdt_limit() throws Exception {
 
-    Map<String, Object> headers = new HashMap<>();
+    /*Map<String, Object> headers = new HashMap<>();
     headers.put("forceRefreshBalance", Boolean.TRUE);
 
     String merchantCodeWEB = NewPrepaidTopup10.WEB_MERCHANT_CODE;
@@ -665,6 +664,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       System.out.println(vex);
       Assert.assertTrue("debe ser error de limite de cdt", vex.getCode() > TRANSACCION_ERROR_GENERICO_$VALUE.getValue() && vex.getCode() < SALDO_SUPERARA_LOS_$$VALUE.getValue());
     }
+     */
   }
 
   private void doTopup(PrepaidUser10 prepaidUser10,Integer amount, String merchantCode) throws Exception {
@@ -676,7 +676,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.assertNotNull("debe tener un id", resp.getId());
   }
 
-  private void doWithdraw(User user, String password, Long amount, String merchantCode) throws Exception {
+  /*private void doWithdraw(User user, String password, Long amount, String merchantCode) throws Exception {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password);
     prepaidWithdraw.setMerchantCode(merchantCode);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
@@ -688,8 +688,10 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
     }
   }
 
+   */
+
   //TODO: Revisar si esto se usara
-  private void doWithdraw(User user, String password, Long amount, String merchantCode, Long bankAccountId) throws Exception {
+  /*private void doWithdraw(User user, String password, Long amount, String merchantCode, Long bankAccountId) throws Exception {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user,password);
     prepaidWithdraw.setMerchantCode(merchantCode);
     //prepaidWithdraw.setBankAccountId(bankAccountId);
@@ -701,6 +703,7 @@ public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
       Assert.fail("No debe pasar por aca");
     }
   }
+   */
 
   /**
    * Simulacion en USD

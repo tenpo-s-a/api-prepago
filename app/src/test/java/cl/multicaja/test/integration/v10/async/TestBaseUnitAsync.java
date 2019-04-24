@@ -14,7 +14,6 @@ import cl.multicaja.prepaid.async.v10.routes.InvoiceRoute10;
 import cl.multicaja.prepaid.async.v10.routes.PrepaidTopupRoute10;
 import cl.multicaja.prepaid.async.v10.routes.ProductChangeRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -260,35 +259,12 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
-  /**
-   * Envia un mensaje directo al proceso PENDING_REVERSAL_WITHDRAW_REQ
-   *
-   * @param prepaidWithdraw
-   * @param user
-   * @param reverse
-   * @param retryCount
-   * @return
-   */
-  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 user, PrepaidMovement10 reverse, int retryCount) {
-    return sendPendingWithdrawReversal(prepaidWithdraw, null, user, reverse, retryCount);
-  }
-
-  /**
-   * Envia un mensaje directo al proceso PENDING_REVERSAL_WITHDRAW_REQ
-   *
-   * @param prepaidWithdraw
-   * @param user
-   * @param reverse
-   * @param retryCount
-   * @return
-   */
-  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, User user, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
+  public String sendPendingWithdrawReversal(PrepaidWithdraw10 prepaidWithdraw, PrepaidUser10 prepaidUser, PrepaidMovement10 reverse, int retryCount) {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
       return null;
     }
-
     //se crea un messageId unico
     String messageId = getRandomString(20);
 
@@ -307,6 +283,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     return messageId;
   }
+
 
   public String sendPendingTopupReverse(PrepaidTopup10 prepaidTopup,PrepaidCard10 prepaidCard10, PrepaidUser10 prepaidUser10, PrepaidMovement10 prepaidMovement, int retryCount) {
 

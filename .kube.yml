@@ -6,16 +6,44 @@ metadata:
   labels:
     istio-injection: enabled
 ---
+###########
+# Service #
+###########
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-prepaid
+  labels:
+    app: api-prepaid
+    service: api-prepaid
+  namespace: api-prepaid
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: api-prepaid
+---
+##############
+# Deployment #
+##############
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: api-prepaid
   namespace: api-prepaid
+  labels:
+    app: api-prepaid
+    version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: api-prepaid
+      version: v1
   template:
     metadata:
       labels:
@@ -41,45 +69,6 @@ spec:
             value: ${API_ENVIRONMENT}
       imagePullSecrets:
         - name: container-reg-credentials
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-prepaid
-  labels:
-    app: api-prepaid
-  namespace: api-prepaid
-spec:
-  type: ClusterIP
-  ports:
-  - port: 80
-    targetPort: 8080
-    protocol: TCP
-    name: http
-  selector:
-    app: api-prepaid
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: api-prepaid-vts
-  namespace: api-prepaid
-spec:
-  hosts:
-  - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
-  gateways:
-  - global-gateway.default.svc.cluster.local
-  http:
-  - match:
-    - uri:
-        prefix: /prepaid/1.0
-    rewrite:
-      uri: /api-prepaid-1.0/1.0
-    route:
-    - destination:
-        host: api-prepaid
-        port:
-          number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry

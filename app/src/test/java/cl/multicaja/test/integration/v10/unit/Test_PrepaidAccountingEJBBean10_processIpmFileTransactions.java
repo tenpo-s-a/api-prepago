@@ -3,20 +3,19 @@ package cl.multicaja.test.integration.v10.unit;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFile;
 import cl.multicaja.accounting.helpers.mastercard.model.IpmFileStatus;
 import cl.multicaja.accounting.model.v10.*;
-import cl.multicaja.core.utils.ConfigUtils;
-import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewAmountAndCurrency10;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,24 +45,20 @@ public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends 
 
     System.out.println(String.format("%s -> %s", pan, processorUserId));
 
-    // Crea usuario
-    User user = registerUser();
-
     // Crea usuario prepago
-    PrepaidUser10 prepaidUser10 = buildPrepaidUser10(user);
-    prepaidUser10 = createPrepaidUser10(prepaidUser10);
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
 
     PrepaidCard10 prepaidCard10 = buildPrepaidCard10();
     prepaidCard10.setPan(Utils.replacePan(pan));
     prepaidCard10.setProcessorUserId(processorUserId);
     prepaidCard10.setEncryptedPan(encryptUtil.encrypt(pan));
-    prepaidCard10.setIdUser(prepaidUser10.getId());
+    prepaidCard10.setIdUser(prepaidUser.getId());
     createPrepaidCard10(prepaidCard10);
-
 
     //
     String movement = "INSERT INTO %s.prp_movimiento VALUES (1030, 0, %d, '275175', 'PURCHASE', 166, 'PENDING', 'IN_PROCESS', 'RECONCILED', 'RECONCILED', 'OPE', '2019-02-25 15:12:55.415489', '2019-02-25 15:12:55.415489', '', '0001', '000000000014', 152, 0, 3007, '2018-08-08', '', '5176081118013603', 840, 25, 166, 0, '275175', 'A', 'USA', 0, 0, 0, 152, '', 0, 0, 0, '', 0, 1, 0, '');";
-    DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema(),prepaidUser10.getId()));
+    DBUtils.getInstance().getJdbcTemplate().execute(String.format(movement, getSchema(),prepaidUser.getId()));
 
     String accounting = "INSERT INTO %s.accounting VALUES (575, 1030, 'COMPRA_OTRA_MONEDA', 'Cargo por compra cm', 'IpmFile', 0, 152, 0, 0, 0, 0, 0, 0.00, 0.00, 0, 'PENDING', 0, 'PENDING', '2018-08-08 05:28:21', '2019-02-25 12:12:55', '2019-02-25 15:12:55.489402', '2019-02-25 15:12:55.489402');";
     DBUtils.getInstance().getJdbcTemplate().execute(String.format(accounting, getSchemaAccounting()));

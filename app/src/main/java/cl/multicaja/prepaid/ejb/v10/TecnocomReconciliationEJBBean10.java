@@ -424,7 +424,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
               null,
               new ObjectMapper().writeValueAsString(researchMovementInformationFilesList),
               ReconciliationOriginType.TECNOCOM.toString(),
-              trx.getFecTrn(),
+              trx.getFecTrn().toLocalDateTime(),
               ResearchMovementResponsibleStatusType.OTI_PREPAID.getValue(),
               ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB.getValue(),
               0L,

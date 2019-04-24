@@ -1,8 +1,6 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.utils.Utils;
-import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import org.junit.After;
@@ -11,7 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author abarazarte

@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -508,7 +507,6 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Test
   public void shouldReturn400_OnMerchantCodeFormat() throws Exception {
 
-    User user = registerUser();
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2();
     prepaidWithdraw.setRut(getUniqueRutNumber());

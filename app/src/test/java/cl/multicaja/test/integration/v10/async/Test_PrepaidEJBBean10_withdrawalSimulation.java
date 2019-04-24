@@ -3,7 +3,6 @@ package cl.multicaja.test.integration.v10.async;
 
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
@@ -377,7 +376,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
   @Test
   public void withdrawalSimulation_not_ok_by_monthly_limit() throws Exception {
 
-    Map<String, Object> headers = new HashMap<>();
+    /*Map<String, Object> headers = new HashMap<>();
     headers.put("forceRefreshBalance", Boolean.TRUE);
 
     String merchantCodeWEB = NewPrepaidTopup10.WEB_MERCHANT_CODE;
@@ -518,6 +517,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
       System.out.println(vex);
       Assert.assertEquals("debe ser error de supera saldo", EL_RETIRO_SUPERA_EL_MONTO_MAXIMO_DE_RETIROS_MENSUALES.getValue(), vex.getCode());
     }
+     */
   }
 
   private void doTopup(PrepaidUser10 user, Integer amount, String merchantCode) throws Exception {
@@ -530,6 +530,7 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
     Assert.assertNotNull("debe tener un id", resp.getId());
   }
 
+  /*
   private void doWirhdraw(User user, String password, Long amount, String merchantCode) throws Exception {
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdraw10(user, password, merchantCode);
     prepaidWithdraw.getAmount().setValue(BigDecimal.valueOf(amount));
@@ -539,4 +540,5 @@ public class Test_PrepaidEJBBean10_withdrawalSimulation extends TestBaseUnitAsyn
       Assert.fail("No debe pasar por aca");
     }
   }
+   */
 }

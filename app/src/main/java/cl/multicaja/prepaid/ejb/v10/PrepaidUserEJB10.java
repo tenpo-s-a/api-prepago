@@ -1,9 +1,7 @@
 package cl.multicaja.prepaid.ejb.v10;
 
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.ValidationException;
-import cl.multicaja.prepaid.helpers.users.model.User;
-import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v10.PrepaidUser10;
+import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -76,17 +74,6 @@ public interface PrepaidUserEJB10 {
    */
   void updatePrepaidUserStatus(Map<String, Object> headers, Long userId, PrepaidUserStatus status) throws Exception;
 
-  /**
-   *  Verifica el nivel del usuario
-   *
-   * @param oUser usuario multicaja
-   * @param prepaidUser10 usuario prepago
-   * @throws NotFoundException 102001 si el usuario MC es null
-   * @throws ValidationException 101004 si el rut, status del rut o el nameStatus es null
-   * @throws NotFoundException 302003 si el usuario prepago es null
-   * @return el nivel del usuario
-   */
-  PrepaidUser10 getUserLevel(User oUser, PrepaidUser10 prepaidUser10) throws Exception;
 
   /**
    *

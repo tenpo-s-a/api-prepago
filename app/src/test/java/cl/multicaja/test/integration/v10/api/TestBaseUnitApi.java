@@ -2,7 +2,6 @@ package cl.multicaja.test.integration.v10.api;
 
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.http.HttpResponse;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10;
 import cl.multicaja.prepaid.model.v10.NewPrepaidTopup10;
 import cl.multicaja.test.integration.TestSuite;
@@ -13,11 +12,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.math.BigDecimal;
-import java.util.Properties;
 
 /**
  * @autor vutreras

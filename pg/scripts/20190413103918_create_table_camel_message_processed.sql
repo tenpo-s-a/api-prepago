@@ -16,10 +16,10 @@
 
 -- // create_table_camel_message_processed
 -- Migration SQL that makes the change goes here.
-CREATE TABLE public.CAMEL_MESSAGEPROCESSED (processorName VARCHAR(255), messageId VARCHAR(100), createdAt TIMESTAMP);
+CREATE TABLE public.camel_messageprocessed (processorName VARCHAR(255), messageId VARCHAR(100), createdAt TIMESTAMP);
 
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP TABLE IF EXISTS public.CAMEL_MESSAGEPROCESSED;
+DROP TABLE IF EXISTS public.camel_messageprocessed;

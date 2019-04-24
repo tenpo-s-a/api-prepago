@@ -1,12 +1,17 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.accounting.model.v10.*;
+import cl.multicaja.accounting.model.v10.AccountingData10;
+import cl.multicaja.accounting.model.v10.AccountingStatusType;
+import cl.multicaja.accounting.model.v10.AccountingTxType;
+import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.utils.ConfigUtils;
 import cl.multicaja.core.utils.db.DBUtils;
-import cl.multicaja.prepaid.helpers.users.model.User;
 import cl.multicaja.prepaid.model.v10.*;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -42,10 +47,10 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   @Test
   public void processMovementForAccounting_PosTopup()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setMerchantCode(getRandomString(15));
       List<Long> originalMovementsIds = new ArrayList<>();
 
@@ -127,10 +132,9 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   @Test
   public void processMovementForAccounting_TefTopup()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
       prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       List<Long> originalMovementsIds = new ArrayList<>();
 
@@ -214,10 +218,9 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   @Test
   public void processMovementForAccounting_PosWithdraw()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(getRandomString(15));
       List<Long> originalMovementsIds = new ArrayList<>();
 
@@ -299,10 +302,9 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   @Test
   public void processMovementForAccounting_TefWithdraw()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdraw10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+      PrepaidWithdraw10 prepaidWithdraw = buildPrepaidWithdrawV2();
       prepaidWithdraw.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
       List<Long> originalMovementsIds = new ArrayList<>();
 
@@ -373,10 +375,9 @@ public class Test_PrepaidAccountingEJBBean10_processMovementForAccounting extend
   @Test
   public void nothingToProcessMovementForAccounting()throws Exception {
     {
-      User user = registerUser();
-      PrepaidUser10 prepaidUser = buildPrepaidUser10(user);
-      prepaidUser = createPrepaidUser10(prepaidUser);
-      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10(user);
+      PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+      prepaidUser = createPrepaidUserV2(prepaidUser);
+      PrepaidTopup10 prepaidTopup = buildPrepaidTopup10();
 
       List<Long> originalMovementsIds = new ArrayList<>();
 
