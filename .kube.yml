@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: api-prepaid
+  name: prepaid
   labels:
     istio-injection: enabled
 ---
@@ -16,7 +16,7 @@ metadata:
   labels:
     app: api-prepaid
     service: api-prepaid
-  namespace: api-prepaid
+  namespace: prepaid
 spec:
   type: ClusterIP
   ports:
@@ -34,7 +34,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: api-prepaid
-  namespace: api-prepaid
+  namespace: prepaid
   labels:
     app: api-prepaid
     version: v1
@@ -74,7 +74,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: api-prepaid-se-db
-  namespace: api-prepaid
+  namespace: prepaid
 spec:
   hosts:
   - "prepaid-postgresql-staging.postgres.database.azure.com"
@@ -88,7 +88,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: api-prepaid-se-tecnocom
-  namespace: api-prepaid
+  namespace: prepaid
 spec:
   hosts:
   - "200.111.44.187"
@@ -103,7 +103,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: api-prepaid-se-kafka
-  namespace: api-prepaid
+  namespace: prepaid
 spec:
   hosts:
   - "137.116.88.31"

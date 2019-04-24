@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: api-prepaid-mock
-  namespace: api-prepaid
+  namespace: prepaid
   labels:
     app: api-prepaid
     version: v2

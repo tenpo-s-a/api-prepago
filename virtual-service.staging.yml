@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: api-prepaid-vts
-  namespace: api-prepaid
+  namespace: prepaid
 spec:
   hosts:
   - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
