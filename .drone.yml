@@ -88,7 +88,6 @@ pipeline:
       - ./db-create.sh -Denv=development-mock
       - ./db-drop.sh -Denv=development-mock
       - ./db-create.sh -Denv=development-mock
-      - ./migrate-down.sh 1000 -Denv=development-mock
       - ./migrate-up.sh -Denv=development-mock
       - ./migrate-bootstrap.sh --force -Denv=development-mock
     when:
