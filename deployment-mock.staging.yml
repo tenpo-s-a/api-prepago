@@ -6,18 +6,18 @@ metadata:
   namespace: api-prepaid
   labels:
     app: api-prepaid
-    version: v1
+    version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: api-prepaid
-      version: v1
+      version: v2
   template:
     metadata:
       labels:
         app: api-prepaid
-        version: v1
+        version: v2
     spec:
       containers:
       - name: api-prepaid
