@@ -85,11 +85,11 @@ pipeline:
     commands:
       - ./drone-mvn-cache.sh
       - cd pg
-      - ./db-create.sh -Denv=development-mock
-      - ./db-drop.sh -Denv=development-mock
-      - ./db-create.sh -Denv=development-mock
-      - ./migrate-up.sh -Denv=development-mock
-      - ./migrate-bootstrap.sh --force -Denv=development-mock
+      - ./db-create.sh -Denv=mock
+      - ./db-drop.sh -Denv=mock
+      - ./db-create.sh -Denv=mock
+      - ./migrate-up.sh -Denv=mock
+      - ./migrate-bootstrap.sh --force -Denv=mock
     when:
       event: [ push ]
       branch: master
@@ -157,7 +157,7 @@ pipeline:
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev_mock
-      - API_ENVIRONMENT=development-mock
+      - API_ENVIRONMENT=mock
       - DB_USERNAME=prepago
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
