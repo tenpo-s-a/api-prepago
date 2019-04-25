@@ -521,11 +521,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getOperationType(), prepaidMovement10);
 
-          // Como no se encontro en la BD este movimiento no pasó por el callback
-          // Por lo que es necesario levantar el evento de transaccion
-          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
-          TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
-          getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
+          if (IndicadorNormalCorrector.fromValue(trx.getIndNorCor()).equals(IndicadorNormalCorrector.NORMAL)) {
+            // Como no se encontro en la BD este movimiento no pasó por el callback
+            // Por lo que es necesario levantar el evento de transaccion
+            PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
+            TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
+            getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
+          }
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
