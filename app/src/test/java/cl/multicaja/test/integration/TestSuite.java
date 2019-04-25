@@ -23,8 +23,6 @@ public class TestSuite extends TestSuiteBase {
 
   private static boolean runningInTestSuite = false;
 
-  private static HttpUtils httpUtils = HttpUtils.getInstance();
-
   private static ConfigUtils configUtils = ConfigUtils.getInstance();
 
   /**
@@ -71,14 +69,6 @@ public class TestSuite extends TestSuiteBase {
   }
 
   public static Class<?>[] suite() throws Exception {
-
-      // Se verifica la conexion con api-users
-      String url = configUtils.getProperty("apis.user.url");
-      HttpResponse httpResponse = httpUtils.get(String.format("%s/ping", url));
-      if(HttpError.TIMEOUT_CONNECTION.equals(httpResponse.getHttpError()) || HttpError.TIMEOUT_RESPONSE.equals(httpResponse.getHttpError())){
-        throw new IllegalStateException("Sin conexion con api-users");
-      }
-
 
       String packageName = TestSuite.class.getPackage().getName();
       log.info("packageName: " + packageName);

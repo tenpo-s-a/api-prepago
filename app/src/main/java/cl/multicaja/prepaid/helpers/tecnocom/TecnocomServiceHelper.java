@@ -80,7 +80,7 @@ public final class TecnocomServiceHelper {
       }
       boolean useMock = config.getPropertyBoolean("tecnocom.service.mock", false);
       if (useMock) {
-        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder);
+        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder, ".");
       } else {
         this.tecnocomService = new TecnocomServiceImpl(apiKey, apiUrl, channel, codent, hashOrder);
       }

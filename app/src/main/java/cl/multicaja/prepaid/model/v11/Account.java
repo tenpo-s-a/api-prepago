@@ -7,38 +7,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
-@Entity
-@Table(name = "prp_cuenta", schema ="prepago")
 public class Account implements Serializable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  @Column(name = "id_usuario")
   private Long userId;
-
   private String uuid;
-
-  @Column(name = "cuenta")
   private String accountNumber; // Numero de contrato en procesadora
-
-  @Column(name = "procesador")
   private String processor;
-
-  @Column(name = "saldo_info")
   private String balanceInfo;
-
-  @Column(name = "saldo_expiracion")
   private Long expireBalance;
-
-  @Column(name = "estado")
-  private String status;
-
-  @Column(name = "creacion")
+  private AccountStatus status;
   private LocalDateTime createdAt;
-
-  @Column(name = "actualizacion")
   private LocalDateTime updatedAt;
 
   public Long getId() {
@@ -97,11 +76,11 @@ public class Account implements Serializable {
     this.expireBalance = expireBalance;
   }
 
-  public String getStatus() {
+  public AccountStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(AccountStatus status) {
     this.status = status;
   }
 
