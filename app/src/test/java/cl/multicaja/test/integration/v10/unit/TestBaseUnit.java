@@ -344,6 +344,8 @@ public class TestBaseUnit extends TestApiBase {
       tecnocomReconciliationEJBBean10 = new TecnocomReconciliationEJBBean10();
       tecnocomReconciliationEJBBean10.setPrepaidCardEJBBean11(getPrepaidCardEJBBean11());
       tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean10(getPrepaidMovementEJBBean10());
+      tecnocomReconciliationEJBBean10.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
+      tecnocomReconciliationEJBBean10.setPrepaidUserEJBBean10(getPrepaidUserEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidAccountingEJBBean10(getPrepaidAccountingEJBBean10());
       tecnocomReconciliationEJBBean10.setPrepaidClearingEJBBean10(getPrepaidClearingEJBBean10());
       tecnocomReconciliationEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());

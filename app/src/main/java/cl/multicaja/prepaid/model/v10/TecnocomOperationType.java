@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 
 public enum TecnocomOperationType {
   OP("OP"), // Operacion.
-  AU("AU"); // Autorizacion.
+  AU("AU"), // Autorizacion.
+  NOTIFIED("NOTIFIED"); // Notificado por callback
 
   String value;
 

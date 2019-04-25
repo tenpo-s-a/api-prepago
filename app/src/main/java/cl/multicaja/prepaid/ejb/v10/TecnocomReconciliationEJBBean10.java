@@ -19,9 +19,11 @@ import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.*;
@@ -68,10 +70,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
 
   @EJB
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
+
+  @EJB
   private PrepaidAccountingEJBBean10 prepaidAccountingEJBBean10;
 
   @EJB
   private PrepaidClearingEJBBean10 prepaidClearingEJBBean10;
+
+  @EJB
+  private PrepaidUserEJBBean10 prepaidUserEJBBean10;
 
   @EJB
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
@@ -118,12 +126,28 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     this.prepaidCardEJBBean11 = prepaidCardEJBBean11;
   }
 
+  public PrepaidUserEJBBean10 getPrepaidUserEJBBean10() {
+    return prepaidUserEJBBean10;
+  }
+
+  public void setPrepaidUserEJBBean10(PrepaidUserEJBBean10 prepaidUserEJBBean10) {
+    this.prepaidUserEJBBean10 = prepaidUserEJBBean10;
+  }
+
   public PrepaidMovementEJBBean10 getPrepaidMovementEJBBean10() {
     return prepaidMovementEJBBean10;
   }
 
   public void setPrepaidMovementEJBBean10(PrepaidMovementEJBBean10 prepaidMovementEJBBean10) {
     this.prepaidMovementEJBBean10 = prepaidMovementEJBBean10;
+  }
+
+  public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
+    return prepaidMovementEJBBean11;
+  }
+
+  public void setPrepaidMovementEJBBean11(PrepaidMovementEJBBean11 prepaidMovementEJBBean11) {
+    this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
   }
 
   public AccountEJBBean10 getAccountEJBBean10() {
@@ -211,6 +235,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
     // Expira los movimientos
     this.getPrepaidMovementEJBBean10().expireNotReconciledMovements(ReconciliationFileType.TECNOCOM_FILE);
+    this.getPrepaidMovementEJBBean11().expireNotReconciledAuthorizations(); //expira los movimientos con estado NOTIFIED y AUTHORIZED
 
   }
 
@@ -473,48 +498,57 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
         Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
 
-        PrepaidMovement10 originalMovement = getPrepaidMovementEJBBean10().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
+        // Expira cache del saldo de la cuenta
+        //getAccountEJBBean10().expireBalanceCache(account.getId());
 
-        if(trx.getOperationType().equals(TecnocomOperationType.AU)) {
+        // El estado del movimiento se estandariza en base al tipo de operacion (AU -> AUTHORIZED, OP -> PROCESS_OK)
+        PrepaidMovementStatus movementStatus = trx.getOperationType().equals(TecnocomOperationType.AU) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
 
+        // El estado con tecnocom se estandariza para dejar conciliado o pendiente el movimiento
+        ReconciliationStatusType tecnocomStatus = trx.getOperationType().equals(TecnocomOperationType.AU) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
 
+        PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
 
-          // Si la autorizacion ya fue creada, no se vuelve a insertar
-          if(originalMovement != null) {
-            // Autorozacion ya insertada
-            log.info("Autorizacion ya insertada.");
-            continue;
+        if (prepaidMovement10 == null) {
+          // No existe en nuestra tabla, debe insertarlo
+          prepaidMovement10 = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10.getPan(), trx);
+
+          // Se crea con el mismo estado del archivo
+          prepaidMovement10.setEstado(movementStatus);
+          prepaidMovement10.setConTecnocom(tecnocomStatus);
+          getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+
+          // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
+          insertIntoAccoutingAndClearing(trx.getOperationType(), prepaidMovement10);
+
+          // Como no se encontro en la BD este movimiento no pasó por el callback
+          // Por lo que es necesario levantar el evento de transaccion
+          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
+          TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
+          getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
+        } else {
+          PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
+
+          // Se actualiza al mismo estado que se encuentre en el archivo
+          getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(null, prepaidMovement10.getId(), movementStatus);
+
+          // Se actualiza el estado de tecnocom para dejar conciliado o pendiente el movimiento
+          getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), tecnocomStatus);
+
+          if (originalStatus.equals(TecnocomOperationType.NOTIFIED)) {
+            // Existe en la tabla pero esta cambiando de NOTIFIED a otro estado, por lo que se crea en la tablas de contabilidad
+            insertIntoAccoutingAndClearing(trx.getOperationType(), prepaidMovement10);
+          } else {
+            // Existe en la tabla y está cambiando a estado OP (PROCESS_OK), debemos actualizar sus campos en las tablas de contabilidad
+
+            LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = localDateTime.format(formatter);
+            getPrepaidAccountingEJBBean10().updateAccountingStatusAndConciliationDate(null, prepaidMovement10.getId(), AccountingStatusType.OK, formattedDate);
+            getPrepaidClearingEJBBean10().updateClearingData(null, prepaidMovement10.getId(), AccountingStatusType.PENDING);
           }
-          // Build Movement
-          PrepaidMovement10 prepaidMovement10 =buildMovementAut(prepaidCard10.getIdUser(),prepaidCard10.getPan(),trx);
 
-          getPrepaidMovementEJBBean10().addPrepaidMovement(null,prepaidMovement10);
-
-          // Expira cache del saldo de la cuenta
-          //getAccountEJBBean10().expireBalanceCache(account.getId());
-
-          //Build Accounting
-          PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
-          prepaidAccountingMovement.setPrepaidMovement10(prepaidMovement10);
-
-          AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().buildAccounting10(prepaidAccountingMovement, AccountingStatusType.PENDING,AccountingStatusType.PENDING);
-          // Los movimientos se insertan con fecha de conciliacion lejana, esta se debe actualizar cuando el movimiento es conciliado
-          accountingData10.setConciliationDate(Timestamp.valueOf(ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime()));
-
-          accountingData10=getPrepaidAccountingEJBBean10().saveAccountingData(null,accountingData10);
-
-          //Build Clearing
-          ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().buildClearing(accountingData10.getId(),null);
-
-          clearingData10=getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
-
-          // Si la autorizacion no fue creada por el callback se debera generar aca
           prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
-
-          log.debug("INSERT MOV AUT");
-        }else {
-          log.error(trx.getOperationType());
-          log.error(trx.getMovementType());
         }
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -526,6 +560,37 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       }
     }
     log.info("INSERT AUT OUT");
+  }
+
+
+  private void insertIntoAccoutingAndClearing(TecnocomOperationType tecnocomOperationType, PrepaidMovement10 prepaidMovement10) throws Exception {
+    // Crear accounting
+    PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
+    prepaidAccountingMovement.setPrepaidMovement10(prepaidMovement10);
+
+    AccountingStatusType accountingStatus;
+    AccountingStatusType clearingStatus;
+    LocalDateTime reconciliationDate;
+
+    if (tecnocomOperationType.equals(TecnocomOperationType.AU)) {
+      accountingStatus = AccountingStatusType.PENDING;
+      clearingStatus = AccountingStatusType.INITIAL;
+      reconciliationDate = ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime();
+    } else {
+      accountingStatus = AccountingStatusType.OK;
+      clearingStatus = AccountingStatusType.PENDING;
+      reconciliationDate = LocalDateTime.now(ZoneId.of("UTC"));
+    }
+
+    AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().buildAccounting10(prepaidAccountingMovement, AccountingStatusType.PENDING, accountingStatus);
+    // Los movimientos se insertan con fecha de conciliacion lejana, esta se debe actualizar cuando el movimiento es conciliado
+    accountingData10.setConciliationDate(Timestamp.valueOf(reconciliationDate));
+    accountingData10 = getPrepaidAccountingEJBBean10().saveAccountingData(null, accountingData10);
+
+    //Build Clearing
+    ClearingData10 clearingData10 = getPrepaidClearingEJBBean10().buildClearing(accountingData10.getId(),null);
+    clearingData10.setStatus(clearingStatus);
+    getPrepaidClearingEJBBean10().insertClearingData(null,clearingData10);
   }
 
   private PrepaidMovement10 buildMovementAut(Long userId, String pan, MovimientoTecnocom10 batchTrx) {

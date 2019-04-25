@@ -420,6 +420,26 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
+  public void expireNotReconciledAuthorizations() {
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED' " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuery = queryExpire.toString();
+
+    //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
+    String expiredNotifiedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.NOTIFIED.toString(),getSchema(),2);
+    getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
+
+    //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
+    String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.AUTHORIZED.toString(),getSchema(),7);
+    getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
+  }
+
   public void expireNotReconciledMovements(ReconciliationFileType fileType) throws Exception {
     if (fileType == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "fileType"));
@@ -686,14 +706,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 
-  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUse, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
-    if (idPrepaidUse == null) {
-      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUse"));
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
     }
     if (numaut == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
     }
-    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUse, null, null, null, null, null, null, tipoFactura, null, numaut);
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut);
     return lst != null && !lst.isEmpty() ? lst.get(0) : null;
   }
 

@@ -185,6 +185,17 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if (numaut == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut, null, null, null, null, codcom);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
   private RowMapper<PrepaidMovement10> getMovementMapper() {
     return (ResultSet rs, int rowNum) -> {
       PrepaidMovement10 movement = new PrepaidMovement10();
