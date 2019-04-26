@@ -107,9 +107,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getClamon() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.CLAMON_AU.getStart(), this.CLAMON_AU.getEnd());
     } else{
       return "";
@@ -117,9 +117,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   private String getIndnorcor() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.INDNORCOR.getStart(), this.INDNORCOR.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.INDNORCOR_AU.getStart(), this.INDNORCOR_AU.getEnd());
     } else{
       return "";
@@ -127,9 +127,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   private String getTipoFactura() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.TIPOFAC.getStart(), this.TIPOFAC.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.TIPOFAC_AU.getStart(), this.TIPOFAC_AU.getEnd());
     } else{
       return "";
@@ -139,12 +139,12 @@ public class TecnocomReconciliationFileDetail {
   public TipoFactura getTipoFac() {
     return TipoFactura.valueOfEnumByCodeAndCorrector(NumberUtils.getInstance().toInt(this.getTipoFactura()), NumberUtils.getInstance().toInt(this.getIndnorcor()));
   }
-  public TecnocomOperationType getOperationType(){
-    return TecnocomOperationType.fromValue(this.getTiporeg());
+  public TecnocomReconciliationRegisterType getRegisterType(){
+    return TecnocomReconciliationRegisterType.fromValue(this.getTiporeg());
   }
 
   public String getFecfac() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())) {
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())) {
       return this.detail.substring(this.FECFAC.getStart(), this.FECFAC.getEnd());
     } else {
       return "";
@@ -153,9 +153,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getNumaut() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.NUMAUT.getStart(), this.NUMAUT.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.NUMAUT_AU.getStart(), this.NUMAUT_AU.getEnd());
     } else{
       return "";
@@ -163,7 +163,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public BigDecimal getImpfac() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.getScaledValue(this.detail.substring(this.IMPFAC.getStart(), this.IMPFAC.getEnd()), this.IMPFAC.getDecimal());
     } else{
       return BigDecimal.ZERO;
@@ -171,9 +171,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getCodcom() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.CODCOM.getStart(), this.CODCOM.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.CODCOM_AU.getStart(), this.CODCOM_AU.getEnd());
     } else{
       return "";
@@ -181,9 +181,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getCodact() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.CODACT.getStart(), this.CODACT.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.CODACT_AU.getStart(), this.CODACT_AU.getEnd());
     } else{
       return "";
@@ -192,7 +192,7 @@ public class TecnocomReconciliationFileDetail {
 
 
   public String getCmbApli() {
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.CMBAPLI_AU.getStart(), this.CMBAPLI_AU.getEnd());
     } else{
       return "";
@@ -200,7 +200,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getCodpais() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.CODPAIS.getStart(), this.CODPAIS.getEnd());
     } else{
       return CodigoPais.CHILE.getValue().toString();
@@ -208,7 +208,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getOrigenope() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())) {
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())) {
       return this.detail.substring(this.ORIGENOPE.getStart(), this.ORIGENOPE.getEnd());
     } else {
       return "AUTO";
@@ -216,7 +216,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getNummovext() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.NUMMOVEXT.getStart(), this.NUMMOVEXT.getEnd());
     } else{
       return "";
@@ -225,7 +225,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getNumextcta() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.NUMEXTCTA.getStart(), this.NUMEXTCTA.getEnd());
     } else{
       return "";
@@ -233,7 +233,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getTipolin() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.TIPOLIN.getStart(), this.TIPOLIN.getEnd());
     } else{
       return "";
@@ -242,7 +242,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getLinref() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.LINREF.getStart(), this.LINREF.getEnd());
     } else{
       return "";
@@ -250,7 +250,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getFecTrn(){
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.FECTRN_AU.getStart(),this.FECTRN_AU.getEnd());
     } else{
       return "";
@@ -258,7 +258,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getHorTrn(){
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return  this.detail.substring(this.HORTRN_AU.getStart(),this.HORTRN_AU.getEnd());
     } else{
       return "";
@@ -266,7 +266,7 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public BigDecimal getImpDiv() {
-    if(TecnocomOperationType.AU.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.getScaledValue(this.detail.substring(this.IMPDIV_AU.getStart(), this.IMPDIV_AU.getEnd()), this.IMPDIV_AU.getDecimal());
     } else{
       return BigDecimal.ZERO;
@@ -274,9 +274,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getClamonDiv() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.CLAMON.getStart(), this.CLAMON.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.CLAMON_AU.getStart(), this.CLAMON_AU.getEnd());
     } else{
       return "0";
@@ -289,9 +289,9 @@ public class TecnocomReconciliationFileDetail {
   }
 
   public String getNomComRed(){
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
       return this.detail.substring(this.NOMCOMRED.getStart(),this.NOMCOMRED.getEnd());
-    } else if (TecnocomOperationType.AU.equals(this.getOperationType())){
+    } else if (TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return this.detail.substring(this.NOMCOMRED_AU.getStart(),this.NOMCOMRED_AU.getEnd());
     } else{
       return "";
@@ -361,7 +361,7 @@ public class TecnocomReconciliationFileDetail {
 
   @Override
   public String toString() {
-    if(TecnocomOperationType.OP.equals(this.getOperationType())){
+    if(TecnocomReconciliationRegisterType.OP.equals(this.getRegisterType())){
     return "TecnocomReconciliationFileDetail{" +
       "contrato='" + this.getContrato() + '\'' +
       "indnorcor='" + this.getIndnorcor() + '\'' +
@@ -372,7 +372,7 @@ public class TecnocomReconciliationFileDetail {
       "impfac='" + this.getImpfac() + '\'' +
       "origenope='" + this.getOrigenope() + '\'' +
       '}';
-    }else if(TecnocomOperationType.AU.equals(this.getOperationType())){
+    }else if(TecnocomReconciliationRegisterType.AU.equals(this.getRegisterType())){
       return "TecnocomReconciliationFileDetail{" +
         "pan='" + this.getPan() + '\'' +
         "contrato='" + this.getContrato() + '\'' +

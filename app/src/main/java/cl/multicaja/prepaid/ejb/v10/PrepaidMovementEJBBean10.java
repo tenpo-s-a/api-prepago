@@ -421,8 +421,14 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   public void expireNotReconciledAuthorizations() {
+    //TODO:
+    // Aun falta levantar un evento de revesar por cada movimiento expirado, por lo que:
+    // 1) Se debe hacer un query que busque todos los movimiento a expirar
+    // 2) Llamar a la query existente, para que actualiza los estados a expirados
+    // 3) Con la lista obtenida en (1), levantar un evento de reversa por cada movimiento.
+
     StringBuilder queryExpire = new StringBuilder();
-    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED' " );
+    queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
     queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
     queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
     queryExpire.append("AND mov.estado = '%s' ");
@@ -433,10 +439,12 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
     //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
     String expiredNotifiedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.NOTIFIED.toString(),getSchema(),2);
+    log.info("Expirando autorizaciones notificadas: " + expiredNotifiedQuery);
     getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
 
     //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
     String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.AUTHORIZED.toString(),getSchema(),7);
+    log.info("Expirando autorizaciones autorizadas: " + expiredAuthorizedQuery);
     getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
   }
 

@@ -6,6 +6,7 @@ import cl.multicaja.accounting.model.v10.ClearingData10;
 import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.cdt.model.v10.CdtTransaction10;
 import cl.multicaja.core.utils.EncryptUtil;
+import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
@@ -26,6 +27,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   static Account account;
@@ -103,13 +106,6 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
       Thread.sleep(100);
 
-      // Insertar un archivo extra de cada tipo para expirar movimientos
-      newReconciliationFile10.setFileName("archivo_tecnocom_2.txt");
-      newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
-      getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
-
-      Thread.sleep(100);
-
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Error al crear el usuario y su tarjeta");
@@ -127,12 +123,82 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_archivos_conciliacion CASCADE", getSchema()));
   }
 
-  @Test(expected = ValidateException.class)
-  public void processTecnocomTableData_cardDoesNotExist() throws Exception {
+  @Test
+  public void processTecnocomTableData_expireNotified() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado NOTIFIED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, null, null, PrepaidMovementType.TOPUP);
+    insertedMovement.setEstado(PrepaidMovementStatus.NOTIFIED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
+    insertedMovement = createPrepaidMovement10(insertedMovement);
+
+    // Crea 1 archivo extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(2);
+
+    // Como hay dos archivos tecnocom en la tabla, debe expirar los movimientos NOTIFIED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    deleteReconciliationFiles(createdFiles);
+  }
+
+  @Test
+  public void processTecnocomTableData_expireAuthorized() throws Exception {
+    PrepaidTopup10 topup = buildPrepaidTopup10();
+
+    // Se inserta un movimiento en estado NOTIFIED
+    PrepaidMovement10 insertedMovement = buildPrepaidMovementV2(prepaidUser, topup, null, null, PrepaidMovementType.TOPUP);
+    insertedMovement.setEstado(PrepaidMovementStatus.AUTHORIZED);
+    insertedMovement.setTipoMovimiento(PrepaidMovementType.SUSCRIPTION);
+    insertedMovement.setFechaCreacion(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC")).minusHours(1)));
+    insertedMovement = createPrepaidMovement10(insertedMovement);
+
+    // Crea 7 archivos extra para que se expire el movimiento
+    List<ReconciliationFile10> createdFiles = createReconciliationFiles(7);
+
+    // Como hay 7 archivos tecnocom en la tabla, debe expirar los movimientos AUTHORIZED
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    PrepaidMovement10 foundMovement = getPrepaidMovementEJBBean11().getPrepaidMovementById(insertedMovement.getId());
+    Assert.assertEquals("Debe haber cambiado estado con tecnocom a NOT_RECONCILED", ReconciliationStatusType.NOT_RECONCILED, foundMovement.getConTecnocom());
+    Assert.assertEquals("Debe haber cambiado a estado EXPIRED", PrepaidMovementStatus.EXPIRED, foundMovement.getEstado());
+
+    deleteReconciliationFiles(createdFiles);
+  }
+
+  @Test
+  public void processTecnocomTableData_whenMovNotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    System.out.println("hola");
+  }
+
+  private List<ReconciliationFile10> createReconciliationFiles(int numberOfFiles) throws Exception {
+    ArrayList<ReconciliationFile10> reconciliationFile10s = new ArrayList<>();
+    for (int i = 0; i < numberOfFiles; i++) {
+      ReconciliationFile10 newReconciliationFile10 = new ReconciliationFile10();
+      newReconciliationFile10.setStatus(FileStatus.OK);
+      newReconciliationFile10.setProcess(ReconciliationOriginType.TECNOCOM);
+      newReconciliationFile10.setFileName(getRandomString(10));
+      newReconciliationFile10.setType(ReconciliationFileType.TECNOCOM_FILE);
+      newReconciliationFile10 = getReconciliationFilesEJBBean10().createReconciliationFile(null, newReconciliationFile10);
+      reconciliationFile10s.add(newReconciliationFile10);
+    }
+    return reconciliationFile10s;
+  }
+
+  private void deleteReconciliationFiles(List<ReconciliationFile10> reconciliationFile10s) {
+    for (ReconciliationFile10 reconciliationFile10 : reconciliationFile10s) {
+      getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_archivos_conciliacion WHERE id = %d", getSchema(), reconciliationFile10.getId()));
+    }
   }
 
   MovimientoTecnocom10 createMovimientoTecnocom(Long fileId) {
@@ -141,7 +207,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumAut(getRandomNumericString(6));
     registroTecnocom.setTipoFac(TipoFactura.COMPRA_INTERNACIONAL);
     registroTecnocom.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
-    registroTecnocom.setPan(getRandomNumericString(15));
+    registroTecnocom.setPan(EncryptUtil.getInstance().encrypt(getRandomNumericString(16)));
     registroTecnocom.setCentAlta("fill");
     registroTecnocom.setClamone(CodigoMoneda.USA_USD);
     registroTecnocom.setCmbApli(new BigDecimal(1L));

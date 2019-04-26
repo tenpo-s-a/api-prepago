@@ -23,6 +23,7 @@ import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -284,14 +285,13 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setIdArchivo(fileId);
     movimientoTecnocom10.setOriginOpe(detail.getOrigenope());
     movimientoTecnocom10.setContrato(detail.getContrato());
-    if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.AU){
+    movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
+    movimientoTecnocom10.setRegisterType(detail.getRegisterType());
+    if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.PURCHASES){
       movimientoTecnocom10.setFecTrn(Timestamp.valueOf(String.format("%s %s",detail.getFecTrn(),detail.getHorTrn())));
       movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
-      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
       impFac.setValue(BigDecimal.ZERO);
       movimientoTecnocom10.setImpFac(impFac);
-    } else if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.OP) {
-      movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecfac()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
     }
 
     return movimientoTecnocom10;
@@ -417,7 +417,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
         // Procesa las operaciones
-        if(trx.getOperationType().equals(TecnocomOperationType.OP)) {
+        if(trx.getRegisterType().equals(TecnocomReconciliationRegisterType.OP)) {
 
           Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
           //Se busca el movimiento
@@ -502,10 +502,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         //getAccountEJBBean10().expireBalanceCache(account.getId());
 
         // El estado del movimiento se estandariza en base al tipo de operacion (AU -> AUTHORIZED, OP -> PROCESS_OK)
-        PrepaidMovementStatus movementStatus = trx.getOperationType().equals(TecnocomOperationType.AU) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
+        PrepaidMovementStatus movementStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getOperationType()) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
 
         // El estado con tecnocom se estandariza para dejar conciliado o pendiente el movimiento
-        ReconciliationStatusType tecnocomStatus = trx.getOperationType().equals(TecnocomOperationType.AU) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
+        ReconciliationStatusType tecnocomStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getOperationType()) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
 
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
 
@@ -519,7 +519,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
-          insertIntoAccoutingAndClearing(trx.getOperationType(), prepaidMovement10);
+          insertIntoAccoutingAndClearing(trx.getRegisterType(), prepaidMovement10);
 
           if (IndicadorNormalCorrector.fromValue(trx.getIndNorCor()).equals(IndicadorNormalCorrector.NORMAL)) {
             // Como no se encontro en la BD este movimiento no pasó por el callback
@@ -537,9 +537,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Se actualiza el estado de tecnocom para dejar conciliado o pendiente el movimiento
           getPrepaidMovementEJBBean11().updateStatusMovementConTecnocom(null, prepaidMovement10.getId(), tecnocomStatus);
 
-          if (originalStatus.equals(TecnocomOperationType.NOTIFIED)) {
+          if (originalStatus.equals(PrepaidMovementStatus.NOTIFIED)) {
             // Existe en la tabla pero esta cambiando de NOTIFIED a otro estado, por lo que se crea en la tablas de contabilidad
-            insertIntoAccoutingAndClearing(trx.getOperationType(), prepaidMovement10);
+            insertIntoAccoutingAndClearing(trx.getRegisterType(), prepaidMovement10);
           } else {
             // Existe en la tabla y está cambiando a estado OP (PROCESS_OK), debemos actualizar sus campos en las tablas de contabilidad
 
@@ -565,7 +565,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   }
 
 
-  private void insertIntoAccoutingAndClearing(TecnocomOperationType tecnocomOperationType, PrepaidMovement10 prepaidMovement10) throws Exception {
+  private void insertIntoAccoutingAndClearing(TecnocomReconciliationRegisterType tecnocomReconciliationRegisterType, PrepaidMovement10 prepaidMovement10) throws Exception {
     // Crear accounting
     PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
     prepaidAccountingMovement.setPrepaidMovement10(prepaidMovement10);
@@ -574,7 +574,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     AccountingStatusType clearingStatus;
     LocalDateTime reconciliationDate;
 
-    if (tecnocomOperationType.equals(TecnocomOperationType.AU)) {
+    if (TecnocomReconciliationRegisterType.AU.equals(tecnocomReconciliationRegisterType)) {
       accountingStatus = AccountingStatusType.PENDING;
       clearingStatus = AccountingStatusType.INITIAL;
       reconciliationDate = ZonedDateTime.now(ZoneOffset.UTC).plusYears(1000).toLocalDateTime();

@@ -9,9 +9,8 @@ import java.util.stream.Stream;
 
 
 public enum TecnocomOperationType {
-  OP("OP"), // Operacion.
-  AU("AU"), // Autorizacion.
-  NOTIFIED("NOTIFIED"); // Notificado por callback
+  PURCHASES("PURCHASES"), // Compras internacionales, suscripciones
+  REGULAR("REGULAR"); // Cargas, retiros
 
   String value;
 

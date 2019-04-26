@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
@@ -46,7 +47,7 @@ public class MovimientoTecnocom10 implements Serializable{
   private String errorDetails;
   private String originOpe;
 
-
+  private TecnocomReconciliationRegisterType registerType;
 
   public Long getId() {
     return id;
@@ -319,10 +320,10 @@ public class MovimientoTecnocom10 implements Serializable{
       case SUSCRIPCION_INTERNACIONAL:
       case ANULA_COMPRA_INTERNACIONAL:
       case ANULA_SUSCRIPCION_INTERNACIONAL:
-        operationType = TecnocomOperationType.AU;
+        operationType = TecnocomOperationType.PURCHASES;
         break;
       default:
-        operationType = TecnocomOperationType.OP;
+        operationType = TecnocomOperationType.REGULAR;
         break;
     }
     return operationType;
@@ -356,6 +357,14 @@ public class MovimientoTecnocom10 implements Serializable{
         break;
     }
     return type;
+  }
+
+  public TecnocomReconciliationRegisterType getRegisterType() {
+    return registerType;
+  }
+
+  public void setRegisterType(TecnocomReconciliationRegisterType registerType) {
+    this.registerType = registerType;
   }
 
   public String getIdForResearch() {
