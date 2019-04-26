@@ -10,6 +10,7 @@
 *.iml
 pg/pg-prepaid.iml
 app/datos-mock.cache
+.factorypath
 
 target/
 
