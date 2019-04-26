@@ -32,10 +32,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -63,6 +65,11 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private static ZoneId here = ZoneId.of("America/Santiago");
   private EncryptUtil encryptUtil;
 
+  private static final String INSERT_MOVEMENT_SQL = "INSERT INTO %s.%s (" +
+  "idArchivo, cuenta, pan, codent, centalta, clamon, indnorcor, tipofac, fecfac, numreffac, clamondiv, impdiv, " +
+  "impfac, cmbapli, numaut, indproaje, codcom, codact, impliq, clamonliq, codpais, nompob, numextcta, nummovext, " +
+  "clamone, tipolin, linref, fectrn, impautcon, originope, fecha_creacion, fecha_actualizacion, contrato, tiporeg" +
+  ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
   @EJB
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -286,7 +293,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     movimientoTecnocom10.setOriginOpe(detail.getOrigenope());
     movimientoTecnocom10.setContrato(detail.getContrato());
     movimientoTecnocom10.setFecFac(Date.valueOf(detail.getFecTrn()).toLocalDate()); // TODO: cual es el formato del string? Para pasarlo directamente a LocalDate sin tener que pasar por sql.Date
-    movimientoTecnocom10.setRegisterType(detail.getRegisterType());
+    movimientoTecnocom10.setTipoReg(detail.getTiporeg());
     if(movimientoTecnocom10.getOperationType() == TecnocomOperationType.PURCHASES){
       movimientoTecnocom10.setFecTrn(Timestamp.valueOf(String.format("%s %s",detail.getFecTrn(),detail.getHorTrn())));
       movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(detail.getImpAutCon()));
@@ -417,7 +424,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           throw new ValidationException(ERROR_PROCESSING_FILE.getValue(), msg);
         }
         // Procesa las operaciones
-        if(trx.getRegisterType().equals(TecnocomReconciliationRegisterType.OP)) {
+        if(trx.getTipoReg().equals(TecnocomReconciliationRegisterType.OP)) {
 
           Account account = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
           //Se busca el movimiento
@@ -502,10 +509,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
         //getAccountEJBBean10().expireBalanceCache(account.getId());
 
         // El estado del movimiento se estandariza en base al tipo de operacion (AU -> AUTHORIZED, OP -> PROCESS_OK)
-        PrepaidMovementStatus movementStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getOperationType()) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
+        PrepaidMovementStatus movementStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg()) ? PrepaidMovementStatus.AUTHORIZED : PrepaidMovementStatus.PROCESS_OK;
 
         // El estado con tecnocom se estandariza para dejar conciliado o pendiente el movimiento
-        ReconciliationStatusType tecnocomStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getOperationType()) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
+        ReconciliationStatusType tecnocomStatus = TecnocomReconciliationRegisterType.AU.equals(trx.getTipoReg()) ? ReconciliationStatusType.PENDING : ReconciliationStatusType.RECONCILED;
 
         PrepaidMovement10 prepaidMovement10 = getPrepaidMovementEJBBean11().getPrepaidMovementForAut(account.getUserId(), trx.getTipoFac(), trx.getNumAut(), trx.getCodCom());
 
@@ -516,18 +523,16 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           // Se crea con el mismo estado del archivo
           prepaidMovement10.setEstado(movementStatus);
           prepaidMovement10.setConTecnocom(tecnocomStatus);
-          getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+          prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
-          insertIntoAccoutingAndClearing(trx.getRegisterType(), prepaidMovement10);
+          insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
 
-          if (IndicadorNormalCorrector.fromValue(trx.getIndNorCor()).equals(IndicadorNormalCorrector.NORMAL)) {
-            // Como no se encontro en la BD este movimiento no pasó por el callback
-            // Por lo que es necesario levantar el evento de transaccion
-            PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
-            TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
-            getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
-          }
+          // Como no se encontro en la BD este movimiento no pasó por el callback
+          // Por lo que es necesario levantar el evento de transaccion
+          PrepaidUser10 prepaidUser10 = getPrepaidUserEJBBean10().findById(null, account.getUserId());
+          TransactionType transactionType = prepaidMovement10.getTipoMovimiento().equals(PrepaidMovementType.SUSCRIPTION) ? TransactionType.SUSCRIPTION : TransactionType.PURCHASE;
+          getPrepaidMovementEJBBean11().publishTransactionAuthorizedEvent(prepaidUser10.getUuid(), account.getUuid(), prepaidCard10.getUuid(), prepaidMovement10, Collections.emptyList(), transactionType);
         } else {
           PrepaidMovementStatus originalStatus = prepaidMovement10.getEstado();
 
@@ -539,7 +544,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
 
           if (originalStatus.equals(PrepaidMovementStatus.NOTIFIED)) {
             // Existe en la tabla pero esta cambiando de NOTIFIED a otro estado, por lo que se crea en la tablas de contabilidad
-            insertIntoAccoutingAndClearing(trx.getRegisterType(), prepaidMovement10);
+            insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
           } else {
             // Existe en la tabla y está cambiando a estado OP (PROCESS_OK), debemos actualizar sus campos en las tablas de contabilidad
 
@@ -598,7 +603,6 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
   private PrepaidMovement10 buildMovementAut(Long userId, String pan, MovimientoTecnocom10 batchTrx) {
 
     PrepaidMovement10 prepaidMovement = new PrepaidMovement10();
-
     prepaidMovement.setIdMovimientoRef(0L);
     prepaidMovement.setIdPrepaidUser(userId);
     prepaidMovement.setIdTxExterno(batchTrx.getNumAut());
@@ -704,6 +708,17 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     String searchQuery = String.format("SELECT * FROM %s.prp_movimientos_tecnocom WHERE idArchivo = %d AND originope = '%s' AND tipofac IN (%s)", getSchema(), fileId, originOpeType.getValue(), tipoFacturas);
     log.info("query: " + searchQuery);
     return getDbUtils().getJdbcTemplate().query(searchQuery, getMovimientoTCMapper());
+  }
+
+  public MovimientoTecnocom10 buscaMovimientoTecnocomById(Long id) throws BaseException {
+    if (id == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "id"));
+    }
+
+    String searchQuery = String.format("SELECT * FROM %s.prp_movimientos_tecnocom WHERE id = %d", getSchema(), id);
+    log.info("query: " + searchQuery);
+    List<MovimientoTecnocom10> movimientoTecnocom10s = getDbUtils().getJdbcTemplate().query(searchQuery, getMovimientoTCMapper());
+    return (movimientoTecnocom10s == null || movimientoTecnocom10s.isEmpty()) ? null : movimientoTecnocom10s.get(0);
   }
 
   /**
@@ -870,7 +885,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
    * @return
    * @throws Exception
    */
-  public MovimientoTecnocom10 insertaMovimientoTecnocom(MovimientoTecnocom10 movTc) throws Exception{
+  public MovimientoTecnocom10 insertaMovimientoTecnocom(MovimientoTecnocom10 movTc) throws Exception {
 
     if(movTc == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "empty"));
@@ -894,49 +909,58 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "NumAut"));
     }
 
-    Object[] params = {
-      movTc.getIdArchivo() != null ? new InParam(movTc.getIdArchivo(), Types.BIGINT) : new NullParam(Types.BIGINT),
-      movTc.getCuenta() != null ? new InParam(movTc.getCuenta(),Types.VARCHAR): new NullParam(Types.BIGINT), // Cuenta
-      movTc.getPan() != null ? new InParam(movTc.getPan(),Types.VARCHAR): new NullParam(Types.VARCHAR), // PAN encriptado
-      movTc.getCodEnt() != null ? new InParam(movTc.getCodEnt(),Types.VARCHAR): new NullParam(Types.VARCHAR),// COD ENT
-      movTc.getCentAlta() != null ? new InParam(movTc.getCentAlta(),Types.VARCHAR): new NullParam(Types.VARCHAR), // CENALTA
-      movTc.getImpFac().getCurrencyCode().getValue() != null ? new InParam(movTc.getImpFac().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamon
-      movTc.getIndNorCor() != null ? new InParam(movTc.getIndNorCor(),Types.NUMERIC): new NullParam(Types.NUMERIC),//indnorcor
-      movTc.getTipoFac() != null ? new InParam(movTc.getTipoFac().getCode(),Types.NUMERIC): new NullParam(Types.NUMERIC),//tipofac
-      movTc.getFecFac() != null ? new InParam(movTc.getFecFac(),Types.DATE): new NullParam(Types.DATE),//tipofac
-      movTc.getNumRefFac() != null ? new InParam(movTc.getNumRefFac(),Types.VARCHAR): new NullParam(Types.VARCHAR), // numreffac
-      movTc.getImpDiv() != null ? new InParam(movTc.getImpDiv().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamondiv
-      movTc.getImpDiv() != null ? new InParam(movTc.getImpDiv().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impdiv
-      movTc.getImpFac() != null ? new InParam(movTc.getImpFac().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impfac
-      movTc.getCmbApli() != null ? new InParam(movTc.getCmbApli(),Types.NUMERIC): new NullParam(Types.NUMERIC),//cmbapli
-      movTc.getNumAut() != null ? new InParam(movTc.getNumAut(),Types.VARCHAR): new NullParam(Types.VARCHAR), // numaut
-      movTc.getIndProaje() != null ? new InParam(movTc.getIndProaje(),Types.VARCHAR): new NullParam(Types.VARCHAR), // indproaje
-      movTc.getCodCom() != null ? new InParam(movTc.getCodCom(),Types.VARCHAR): new NullParam(Types.VARCHAR),//codcom
-      movTc.getCodAct() != null ? new InParam(movTc.getCodAct(),Types.NUMERIC): new NullParam(Types.NUMERIC),//codact
-      movTc.getImpLiq() != null ? new InParam(movTc.getImpLiq().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//impliq
-      movTc.getImpLiq() != null ?new InParam(movTc.getImpLiq().getCurrencyCode().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamonliq
-      movTc.getCodPais() != null ? new InParam(movTc.getCodPais(),Types.NUMERIC): new NullParam(Types.NUMERIC),//codpais
-      movTc.getNomPob() != null ? new InParam(movTc.getNomPob(),Types.VARCHAR): new NullParam(Types.VARCHAR),//nompob
-      movTc.getNumExtCta() != null ? new InParam(movTc.getNumExtCta(),Types.NUMERIC): new NullParam(Types.NUMERIC),//numextcta
-      movTc.getNumMovExt() != null ? new InParam(movTc.getNumMovExt(),Types.NUMERIC): new NullParam(Types.NUMERIC),//nummovext
-      movTc.getClamone() != null ? new InParam(movTc.getClamone().getValue(),Types.NUMERIC): new NullParam(Types.NUMERIC),//clamone
-      movTc.getTipoLin() != null ? new InParam(movTc.getTipoLin(),Types.VARCHAR): new NullParam(Types.VARCHAR),//tipolin
-      movTc.getLinRef() != null ? new InParam(movTc.getLinRef(),Types.NUMERIC): new NullParam(Types.NUMERIC),//linref
-      movTc.getFecTrn() != null ? new InParam(movTc.getFecTrn(),Types.TIMESTAMP): new NullParam(Types.TIMESTAMP),
-      movTc.getImpautcon() != null ? new InParam(movTc.getLinRef(),Types.NUMERIC) :  new NullParam(Types.NUMERIC),
-      movTc.getOriginOpe() != null ? new InParam(movTc.getOriginOpe(),Types.VARCHAR): new NullParam(Types.VARCHAR),
-      movTc.getContrato() != null ? new InParam(movTc.getContrato(),Types.VARCHAR): new NullParam(Types.VARCHAR),
-      new OutParam("_r_id", Types.BIGINT),
-      new OutParam("_error_code", Types.VARCHAR),
-      new OutParam("_error_msg", Types.VARCHAR)
-    };
-    Map<String, Object> resp = getDbUtils().execute(getSchema()+ ".mc_prp_crea_movimiento_tecnocom_v10", params);
-    if (!"0".equals(resp.get("_error_code"))) {
-      log.error("mc_prp_crea_movimiento_tecnocom_v10 resp: " + resp);
-      throw new BaseException(ERROR_DE_COMUNICACION_CON_BBDD);
-    }
-    movTc.setId(getNumberUtils().toLong(resp.get("_r_id")));
-    return movTc;
+    log.info(String.format("[addPrepaidMovement] Guardando Movimiento con [%s]", movTc.toString()));
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    String insertIntoMovimientosTecnocom = String.format(INSERT_MOVEMENT_SQL, getSchema(), "prp_movimientos_tecnocom");
+    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocom, movTc), keyHolder);
+
+    String insertIntoMovimientosTecnocomHist = String.format(INSERT_MOVEMENT_SQL, getSchema(), "prp_movimientos_tecnocom_hist");
+    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocomHist, movTc), keyHolder);
+
+    return this.buscaMovimientoTecnocomById((long) keyHolder.getKey());
+  }
+
+  private PreparedStatementCreator getInsertMovementCreator(String insertQuery, MovimientoTecnocom10 movTc) {
+    return (connection -> {
+      PreparedStatement ps = connection.prepareStatement(insertQuery, new String[]{"id"});
+      ps.setLong(1, movTc.getIdArchivo());
+      ps.setString(2, movTc.getCuenta());
+      ps.setString(3, movTc.getPan());
+      ps.setString(4, movTc.getCodEnt());
+      ps.setString(5, movTc.getCentAlta());
+      ps.setInt(6, movTc.getImpFac().getCurrencyCode().getValue());
+      ps.setInt(7, movTc.getIndNorCor());
+      ps.setInt(8, movTc.getTipoFac().getCode());
+      ps.setDate(9, java.sql.Date.valueOf(movTc.getFecFac()));
+      ps.setString(10, movTc.getNumRefFac());
+      ps.setInt(11, movTc.getImpDiv().getCurrencyCode().getValue());
+      ps.setBigDecimal(12, movTc.getImpDiv().getValue());
+      ps.setBigDecimal(13, movTc.getImpFac().getValue());
+      ps.setBigDecimal(14, movTc.getCmbApli());
+      ps.setString(15, movTc.getNumAut());
+      ps.setString(16, movTc.getIndProaje());
+      ps.setString(17, movTc.getCodCom());
+      ps.setInt(18, movTc.getCodAct());
+      ps.setBigDecimal(19, movTc.getImpLiq().getValue());
+      ps.setInt(20, movTc.getImpLiq().getCurrencyCode().getValue());
+      ps.setInt(21, movTc.getCodPais());
+      ps.setString(22, movTc.getNomPob());
+      ps.setLong(23, movTc.getNumExtCta());
+      ps.setLong(24, movTc.getNumMovExt());
+      ps.setInt(25, movTc.getClamone().getValue());
+      ps.setString(26, movTc.getTipoLin());
+      ps.setInt(27, movTc.getLinRef());
+      ps.setTimestamp(28, movTc.getFecTrn());
+      ps.setBigDecimal(29, movTc.getImpautcon().getValue());
+      ps.setString(30, movTc.getOriginOpe());
+      ps.setTimestamp(31, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
+      ps.setTimestamp(32, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
+      ps.setString(33, movTc.getContrato());
+      ps.setString(34, movTc.getTipoReg() != null ? movTc.getTipoReg().getValue() : "");
+      return ps;
+    });
   }
 
 }

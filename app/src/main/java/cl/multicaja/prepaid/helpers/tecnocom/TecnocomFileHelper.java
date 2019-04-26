@@ -247,11 +247,11 @@ public class TecnocomFileHelper {
           footerLine = line;
         } else {
           TecnocomReconciliationFileDetail detail = new TecnocomReconciliationFileDetail(line);
-          if(TecnocomOperationType.OP.equals(detail.getOperationType())) {
-            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
+          if(TecnocomReconciliationRegisterType.OP.equals(detail.getTiporeg())) {
+            file.getDetails().add(detail);
           }
-          else if (TecnocomOperationType.AU.equals(detail.getOperationType())){
-            file.getDetails().add(new TecnocomReconciliationFileDetail(line));
+          else if (TecnocomReconciliationRegisterType.AU.equals(detail.getTiporeg())){
+            file.getDetails().add(detail);
           }
           if(!line.startsWith(String.format("%sD", pattern))) {
             if(!file.isSuspicious()) {

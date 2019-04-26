@@ -10,9 +10,11 @@ import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.*;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -173,12 +175,46 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
   @Test
   public void processTecnocomTableData_whenMovNotInDBAndFileStateIsAU_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
     MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
-
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
 
     getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
 
-    System.out.println("hola");
+    // Verificar que exista el movimiento nuevo en la BD en estado AU
+    PrepaidMovement10 prepaidMovement10 = getPrepaidMovement(movimientoTecnocom10.getMovementType(), movimientoTecnocom10.getTipoFac(), movimientoTecnocom10.getNumAut(), prepaidCard.getPan(), movimientoTecnocom10.getCodCom());
+    Assert.assertNotNull("Debe exitir el nuevo movimiento en la BD", prepaidMovement10);
+
+    // Este test esta fallando (queda en estado PROCESS_OK), debido a que al sacar los movimientos tecnocom
+    // (archivo: cl/multicaja/prepaid/ejb/v10/TecnocomReconciliationEJBBean10.java, linea 234)
+    // NO se esta rellenando el tiporeg (columna recientemente agregada), por lo que la comparacion de si es AU u OP siempre falla
+    // y le pone estado PROCESS_OK.
+    // Lo que hay que hacer es modificar la funcion que busca los archivos tecnocom de cierto archivo (que ahora esta como un SP):
+    // - modificarla para que ahora trabaje con query
+    // - leer y guardar el tiporeg en el objeto...
+    // Y ahi las coparaciones deberian funcionar y este movimiento quedar en estado AUTHORIZED.
+    Assert.assertEquals("Debe tener estado AUTHORIZED", PrepaidMovementStatus.AUTHORIZED, prepaidMovement10.getEstado());
+
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
+    // Verificar que exista en la cola de eventos transaction_authorized
+  }
+
+  @Test
+  public void processTecnocomTableData_whenMovNotInDBAndFileStateIsOP_movIsInsertedAndLiqAccMustExistInInitialState() throws Exception {
+    MovimientoTecnocom10 movimientoTecnocom10 = createMovimientoTecnocom(tecnocomReconciliationFile10.getId());
+    movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.OP);
+    movimientoTecnocom10 = getTecnocomReconciliationEJBBean10().insertaMovimientoTecnocom(movimientoTecnocom10);
+
+    getTecnocomReconciliationEJBBean10().processTecnocomTableData(tecnocomReconciliationFile10.getId());
+
+    // Verificar que exista en la BD en estado AU
+    // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
+    // Verificar que exista en la cola de eventos transaction_authorized
+  }
+
+  private PrepaidMovement10 getPrepaidMovement(PrepaidMovementType movementType, TipoFactura tipofac, String numaut, String pan, String codcom) throws Exception {
+    List<PrepaidMovement10> prepaidMovement10s = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null, null, movementType,
+      null, null, null, null, tipofac, null, numaut, null, null, null, pan, codcom);
+    return (prepaidMovement10s != null && !prepaidMovement10s.isEmpty()) ? prepaidMovement10s.get(0) : null;
   }
 
   private List<ReconciliationFile10> createReconciliationFiles(int numberOfFiles) throws Exception {
@@ -207,16 +243,16 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumAut(getRandomNumericString(6));
     registroTecnocom.setTipoFac(TipoFactura.COMPRA_INTERNACIONAL);
     registroTecnocom.setIndNorCor(IndicadorNormalCorrector.NORMAL.getValue());
-    registroTecnocom.setPan(EncryptUtil.getInstance().encrypt(getRandomNumericString(16)));
+    registroTecnocom.setPan(prepaidCard.getEncryptedPan());
     registroTecnocom.setCentAlta("fill");
     registroTecnocom.setClamone(CodigoMoneda.USA_USD);
     registroTecnocom.setCmbApli(new BigDecimal(1L));
     registroTecnocom.setCodAct(0);
-    registroTecnocom.setCodCom(getRandomString(10));
+    registroTecnocom.setCodCom(getRandomString(15));
     registroTecnocom.setCodEnt(getRandomString(4));
-    registroTecnocom.setCodPais(1);
+    registroTecnocom.setCodPais(CodigoPais.CHILE.getValue());
     registroTecnocom.setContrato(account.getAccountNumber());
-    registroTecnocom.setCuenta(account.getAccountNumber());
+    registroTecnocom.setCuenta(getRandomNumericString(10));
     registroTecnocom.setFecFac(LocalDate.now(ZoneId.of("UTC")));
     registroTecnocom.setFecTrn(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
     registroTecnocom.setImpautcon(new NewAmountAndCurrency10(new BigDecimal(5000L)));
@@ -231,6 +267,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumRefFac(getRandomString(10));
     registroTecnocom.setOriginOpe(OriginOpeType.AUT_ORIGIN.getValue());
     registroTecnocom.setTipoLin(getRandomString(4));
+    registroTecnocom.setTipoReg(TecnocomReconciliationRegisterType.OP);
     return registroTecnocom;
   }
 

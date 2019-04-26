@@ -6,7 +6,6 @@ import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 
@@ -47,7 +46,7 @@ public class MovimientoTecnocom10 implements Serializable{
   private String errorDetails;
   private String originOpe;
 
-  private TecnocomReconciliationRegisterType registerType;
+  private TecnocomReconciliationRegisterType tipoReg;
 
   public Long getId() {
     return id;
@@ -359,12 +358,12 @@ public class MovimientoTecnocom10 implements Serializable{
     return type;
   }
 
-  public TecnocomReconciliationRegisterType getRegisterType() {
-    return registerType;
+  public TecnocomReconciliationRegisterType getTipoReg() {
+    return tipoReg;
   }
 
-  public void setRegisterType(TecnocomReconciliationRegisterType registerType) {
-    this.registerType = registerType;
+  public void setTipoReg(TecnocomReconciliationRegisterType tipoReg) {
+    this.tipoReg = tipoReg;
   }
 
   public String getIdForResearch() {
