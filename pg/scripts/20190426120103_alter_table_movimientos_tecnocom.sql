@@ -21,13 +21,13 @@ ALTER TABLE ${schema}.prp_movimientos_tecnocom
   ADD COLUMN tiporeg VARCHAR(5) NOT NULL DEFAULT '';
   
 ALTER TABLE ${schema}.prp_movimientos_tecnocom
-  ADD COLUMN nomcomred VARCHAR(5) NOT NULL DEFAULT '';
+  ADD COLUMN nomcomred VARCHAR(27) NOT NULL DEFAULT '';
 
 ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
   ADD COLUMN tiporeg VARCHAR(5) NOT NULL DEFAULT '';
     
 ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
-  ADD COLUMN nomcomred VARCHAR(5) NOT NULL DEFAULT '';
+  ADD COLUMN nomcomred VARCHAR(27) NOT NULL DEFAULT '';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
