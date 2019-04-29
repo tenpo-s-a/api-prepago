@@ -38,7 +38,7 @@ public class PrepaidUser10 extends BaseModel {
   private String documentNumber;
   private DocumentType documentType;
   private String uuid;
-
+  private UserPlanType userPlan;
 
   public PrepaidUser10() {
     super();
@@ -171,6 +171,14 @@ public class PrepaidUser10 extends BaseModel {
 
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  public UserPlanType getUserPlan() {
+    return userPlan;
+  }
+
+  public void setUserPlan(UserPlanType userPlan) {
+    this.userPlan = userPlan;
   }
 
   @Override

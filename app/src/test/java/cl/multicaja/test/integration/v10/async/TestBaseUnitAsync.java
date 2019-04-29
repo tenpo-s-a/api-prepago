@@ -22,6 +22,8 @@ import cl.multicaja.test.integration.v10.helper.TestContextHelper;
 import cl.multicaja.test.integration.v10.unit.TestBaseUnit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.camel.Exchange;
+import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +33,10 @@ import org.junit.BeforeClass;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
+import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.SEDA_ACCOUNT_CREATED_EVENT;
 import static cl.multicaja.prepaid.async.v10.routes.MailRoute10.PENDING_SEND_MAIL_WITHDRAW_REQ;
 
 /**
@@ -386,7 +391,7 @@ public class TestBaseUnitAsync extends TestContextHelper {
     return messageId;
   }
 
-  public String sendUserCreatedOrUpdated(String topicName, cl.multicaja.prepaid.kafka.events.model.User user, Integer retryCount){
+  public String sendUserCreatedOrUpdated(String topicName, cl.multicaja.prepaid.kafka.events.model.User user){
     String messageId = null;
 
     if(user == null) {
@@ -396,20 +401,16 @@ public class TestBaseUnitAsync extends TestContextHelper {
 
     if (!camelFactory.isCamelRunning()) {
       log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+      return null;
     } else {
-
+      Map<String, Object> headers = new HashMap<>();
       messageId = user.getId();
       String jsonData = JsonUtils.getJsonParser().toJson(user);
-      Queue qReq = camelFactory.createJMSQueue(topicName);
-
-      ExchangeData<String> req = new ExchangeData<>(jsonData);
-      req.setRetryCount(retryCount < 0 ? 0 : retryCount);
-      req.getProcessorMetadata().add(new ProcessorMetadata(req.getRetryCount(), qReq.toString()));
-
-      camelFactory.createJMSMessenger().putMessage(qReq, messageId, req, new JMSHeader("JMSCorrelationID", messageId));
+      headers.put(KafkaConstants.PARTITION_KEY, 0);
+      headers.put(KafkaConstants.KEY, "1");
+      camelFactory.createProducerTemplate().sendBodyAndHeaders(topicName, jsonData, headers);
+      return messageId;
     }
-
-    return messageId;
   }
 
 }

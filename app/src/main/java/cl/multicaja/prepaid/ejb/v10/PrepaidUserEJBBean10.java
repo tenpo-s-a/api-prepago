@@ -58,10 +58,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
     "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
     "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
-    "            apellido, numero_documento, tipo_documento, nivel, uuid)\n" +
+    "            apellido, numero_documento, tipo_documento, nivel, uuid,plan)\n" +
     "    VALUES (?, ?, ?, ?, ?, \n" +
     "            ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?, ?);\n", getSchema());
+    "            ?, ?, ?, ?, ?,?);\n", getSchema());
 
   private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
@@ -126,7 +126,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       PreparedStatement ps = connection
         .prepareStatement(INSERT_USER, new String[] {"id"});
       ps.setLong(1, user.getUserIdMc());
-      ps.setLong(2, user.getRut());
+      ps.setLong(2, 0);
       ps.setString(3, user.getStatus().name());
       ps.setString(4, "");
       ps.setLong(5, 0L);
@@ -139,7 +139,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       ps.setString(12,user.getDocumentType().name());
       ps.setString(13,user.getUserLevel().name());
       ps.setString(14,user.getUuid());
-
+      ps.setString(15,user.getUserPlan().name());
       return ps;
     }, keyHolder);
 
@@ -390,6 +390,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
       u.setUuid(rs.getString("uuid"));
       u.setRut(rs.getInt("rut"));
+      u.setUserPlan(UserPlanType.valueOfEnum(rs.getString("plan")));
+
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
       timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());
