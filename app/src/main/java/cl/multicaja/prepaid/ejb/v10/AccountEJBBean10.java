@@ -195,8 +195,8 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
       ps.setString(4, "");
       ps.setLong(5, 0L);
       ps.setString(6, AccountStatus.ACTIVE.toString());
-      ps.setTimestamp(7, Timestamp.from(Instant.now()));
-      ps.setTimestamp(8, Timestamp.from(Instant.now()));
+      ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
 
       return ps;
     }, keyHolder);
