@@ -32,17 +32,18 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     cl.multicaja.prepaid.kafka.events.model.User userEventSend = new cl.multicaja.prepaid.kafka.events.model.User();
 
-    userEventSend.setDocumentNumber(userCreated.getDocumentNumber());
+    userEventSend.setDocumentNumber(getRandomString(10));
     userEventSend.setFirstName(userCreated.getName());
     userEventSend.setId(userCreated.getUuid());
     userEventSend.setLastName(userCreated.getLastName());
     userEventSend.setLevel(userCreated.getUserLevel().toString());
     userEventSend.setState(userCreated.getStatus().toString());
-
+    userEventSend.setPlan(userToCreate.getUserPlan().name());
+    userEventSend.setTributaryIdentifier(userToCreate.getDocumentNumber());
     //Data To Change for Update
-    userEventSend.setLevel(PrepaidUserLevel.LEVEL_2.toString());
+    userEventSend.setLevel(PrepaidUserLevel.LEVEL_2.name());
 
-    String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_UPDATED_TOPIC,userEventSend,0);
+    String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
 
     Thread.sleep(sleepTimerMillis);
 
@@ -52,7 +53,6 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     Assert.assertNotNull("No es nulo", userFound);
 
     Assert.assertEquals("Igual",userCreated.getUuid(),userFound.getUuid());
-    Assert.assertEquals("Igual",userCreated.getRut(),userFound.getRut());
     Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userCreated.getName(),userFound.getName());
     Assert.assertEquals("Igual",userCreated.getLastName(),userFound.getLastName());
@@ -61,7 +61,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
     Assert.assertEquals("Igual",userEventSend.getLevel(),userFound.getUserLevel().toString());
-
+    Assert.assertEquals("Igual",userToCreate.getUserPlan(),userFound.getUserPlan());
 
   }
 
@@ -87,7 +87,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     {
       userEventSend.setFirstName("");
 
-      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
       Assert.assertNotNull("No es nulo", messageId);
       Assert.assertNotEquals("No es cero",0,messageId);
 
@@ -104,7 +104,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     {
       userEventSend.setLastName("");
 
-      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
       Assert.assertNotNull("No es nulo", messageId);
       Assert.assertNotEquals("No es cero",0,messageId);
 
@@ -121,7 +121,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     {
       userEventSend.setLevel("");
 
-      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
       Assert.assertNotNull("No es nulo", messageId);
       Assert.assertNotEquals("No es cero",0,messageId);
 
@@ -138,7 +138,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
     {
       userEventSend.setState("");
 
-      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_CREATED_TOPIC,userEventSend,0);
+      String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
       Assert.assertNotNull("No es nulo", messageId);
       Assert.assertNotEquals("No es cero",0,messageId);
 
@@ -150,7 +150,6 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
       Assert.assertNotEquals("No Igual",userEventSend.getState(),userFound.getStatus());
       Assert.assertEquals("Igual",userCreated.getStatus(),userFound.getStatus());
     }
-
 
   }
 

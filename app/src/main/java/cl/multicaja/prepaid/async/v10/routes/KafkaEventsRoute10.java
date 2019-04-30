@@ -15,7 +15,10 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   public static final String SEDA_TRANSACTION_PAID_EVENT = "seda:KafkaEventsRoute10.transactionPaid";
   public static final String SEDA_INVOICE_ISSUED_EVENT = "seda:KafkaEventsRoute10.invoiceIssued";
   public static final String SEDA_INVOICE_REVERSED_EVENT = "seda:KafkaEventsRoute10.invoiceReversed";
+  //Solo para los test
 
+  public static final String SEDA_USER_CREATE_EVENT = "seda:KafkaEventsRoute10.userCreated";
+  public static final String SEDA_USER_UPDATE_EVENT = "seda:KafkaEventsRoute10.userUpdated";
 
   public static final String USER_CREATED_TOPIC = "USER_CREATED";
   public static final String USER_UPDATED_TOPIC = "USER_UPDATED";
@@ -39,9 +42,17 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
 
     if(getConfigUtils().getPropertyBoolean("kafka.enabled")) {
 
+
+      //Solo para los test
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_CREATE_EVENT, concurrentConsumers, sedaSize))
+        .to(getTopicProducerEndpoint(USER_CREATED_TOPIC));
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_UPDATE_EVENT, concurrentConsumers, sedaSize))
+        .to(getTopicProducerEndpoint(USER_UPDATED_TOPIC));
+
       // Eventos a consumir
       from(getTopicConsumerEndpoint(USER_CREATED_TOPIC)).process(new UserEvent(this).processUserCreatedEvent());
       from(getTopicConsumerEndpoint(USER_UPDATED_TOPIC)).process(new UserEvent(this).processUserUpdatedEvent());
+
       //Eventos a publicar
       // Contrato/cuenta
       from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_ACCOUNT_CREATED_EVENT, concurrentConsumers, sedaSize))
@@ -77,6 +88,13 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       // Si kafka no esta habilitado, se publica y consume desde colas en ActiveMQ
 
       // Eventos a consumir
+
+      //Solo para los test
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_CREATE_EVENT, concurrentConsumers, sedaSize))
+        .to(createJMSEndpoint(USER_CREATED_TOPIC));
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_UPDATE_EVENT, concurrentConsumers, sedaSize))
+        .to(createJMSEndpoint(USER_UPDATED_TOPIC));
+
       from(createJMSEndpoint(USER_CREATED_TOPIC))
         .process(new UserEvent(this).processUserCreatedEvent());
       from(createJMSEndpoint(USER_UPDATED_TOPIC))

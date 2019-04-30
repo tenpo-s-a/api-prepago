@@ -44,6 +44,19 @@ public class User extends BaseModel{
   @NotNull(message = "State cannot be null")
   private String state;
 
+  @JsonProperty(value = "plan",required = true)
+  @NotEmpty(message = "plan cannot be empty")
+  @NotBlank(message = "plan cannot be blank")
+  @NotNull(message = "plan cannot be null")
+  private String plan;
+
+  @JsonProperty(value = "tributaryIdentifier",required = true)
+  @NotEmpty(message = "tributaryIdentifier cannot be empty")
+  @NotBlank(message = "tributaryIdentifier cannot be blank")
+  @NotNull(message = "tributaryIdentifier cannot be null")
+  private String tributaryIdentifier;
+
+
   public String getDocumentNumber() {
     return documentNumber;
   }
@@ -92,5 +105,21 @@ public class User extends BaseModel{
 
   public void setState(String state) {
     this.state = state;
+  }
+
+  public String getPlan() {
+    return plan;
+  }
+
+  public void setPlan(String plan) {
+    this.plan = plan;
+  }
+
+  public String getTributaryIdentifier() {
+    return tributaryIdentifier;
+  }
+
+  public void setTributaryIdentifier(String tributaryIdentifier) {
+    this.tributaryIdentifier = tributaryIdentifier;
   }
 }
