@@ -63,7 +63,7 @@ public class UserEvent extends BaseProcessor10 {
       userToCreate.setStatus(PrepaidUserStatus.valueOfEnum(userIn.getState()));
       userToCreate.setName(userIn.getFirstName());
       userToCreate.setLastName(userIn.getLastName());
-      userToCreate.setDocumentNumber(userIn.getTributaryIdentifier());
+      userToCreate.setDocumentNumber(userIn.getDocumentNumber());
       userToCreate.setUserLevel(PrepaidUserLevel.valueOfEnum(userIn.getLevel()));
       userToCreate.setUuid(userIn.getId());
       userToCreate.setUserPlan(UserPlanType.valueOfEnum(userIn.getPlan()));

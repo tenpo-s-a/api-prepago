@@ -50,13 +50,6 @@ public class User extends BaseModel{
   @NotNull(message = "plan cannot be null")
   private String plan;
 
-  @JsonProperty(value = "tributaryIdentifier",required = true)
-  @NotEmpty(message = "tributaryIdentifier cannot be empty")
-  @NotBlank(message = "tributaryIdentifier cannot be blank")
-  @NotNull(message = "tributaryIdentifier cannot be null")
-  private String tributaryIdentifier;
-
-
   public String getDocumentNumber() {
     return documentNumber;
   }
@@ -115,11 +108,4 @@ public class User extends BaseModel{
     this.plan = plan;
   }
 
-  public String getTributaryIdentifier() {
-    return tributaryIdentifier;
-  }
-
-  public void setTributaryIdentifier(String tributaryIdentifier) {
-    this.tributaryIdentifier = tributaryIdentifier;
-  }
 }

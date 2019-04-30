@@ -32,14 +32,14 @@ public class Test_PrepaidUserEJBBean10_prepaidUserUpdatedEventFromTenpo extends 
 
     cl.multicaja.prepaid.kafka.events.model.User userEventSend = new cl.multicaja.prepaid.kafka.events.model.User();
 
-    userEventSend.setDocumentNumber(getRandomString(10));
+    userEventSend.setDocumentNumber(userToCreate.getDocumentNumber());
     userEventSend.setFirstName(userCreated.getName());
     userEventSend.setId(userCreated.getUuid());
     userEventSend.setLastName(userCreated.getLastName());
     userEventSend.setLevel(userCreated.getUserLevel().toString());
     userEventSend.setState(userCreated.getStatus().toString());
     userEventSend.setPlan(userToCreate.getUserPlan().name());
-    userEventSend.setTributaryIdentifier(userToCreate.getDocumentNumber());
+
     //Data To Change for Update
     userEventSend.setLevel(PrepaidUserLevel.LEVEL_2.name());
 
