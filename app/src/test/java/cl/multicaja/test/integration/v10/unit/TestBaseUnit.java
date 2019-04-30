@@ -446,7 +446,7 @@ public class TestBaseUnit extends TestApiBase {
 
     user.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
     user.setDocumentType(DocumentType.DNI_CL);
-
+    user.setRut(rutOrDocumentNumber);
     user.setStatus(PrepaidUserStatus.ACTIVE);
     user.setName(getRandomString(10));
     user.setLastName(getRandomString(10));

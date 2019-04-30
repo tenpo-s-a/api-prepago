@@ -126,7 +126,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       PreparedStatement ps = connection
         .prepareStatement(INSERT_USER, new String[] {"id"});
       ps.setLong(1, user.getUserIdMc());
-      ps.setLong(2, 0);
+      ps.setLong(2, user.getRut());
       ps.setString(3, user.getStatus().name());
       ps.setString(4, "");
       ps.setLong(5, 0L);
