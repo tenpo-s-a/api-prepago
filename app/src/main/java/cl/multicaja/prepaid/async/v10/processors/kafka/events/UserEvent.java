@@ -59,7 +59,14 @@ public class UserEvent extends BaseProcessor10 {
       userToCreate.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
       userToCreate.setDocumentType(DocumentType.DNI_CL);
 
-      userToCreate.setRut(numberUtils.toInt(userIn.getDocumentNumber()));
+      String[] rutPart = userIn.getDocumentNumber().split("-");
+      String numericRut;
+      if (rutPart != null && rutPart.length == 2) {
+        numericRut = rutPart[0];
+      } else {
+        numericRut = String.valueOf(Long.valueOf(System.currentTimeMillis()).intValue());
+      }
+      userToCreate.setRut(getRoute().getNumberUtils().toInt(numericRut));
       userToCreate.setStatus(PrepaidUserStatus.valueOfEnum(userIn.getState()));
       userToCreate.setName(userIn.getFirstName());
       userToCreate.setLastName(userIn.getLastName());
