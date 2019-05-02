@@ -25,7 +25,7 @@ public class Test_PrepaidUserEJBBean10_prepaidUserCreatedEventFromTenpo extends 
   public void listenPrepaidUserCreateEventWithProcessor() throws Exception{
 
     PrepaidUser10 userToCreate = buildPrepaidUser11();
-
+    userToCreate.setDocumentNumber(userToCreate.getDocumentNumber()+"k");
     cl.multicaja.prepaid.kafka.events.model.User userEventSend = new cl.multicaja.prepaid.kafka.events.model.User();
 
 
