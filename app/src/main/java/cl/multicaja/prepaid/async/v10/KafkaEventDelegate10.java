@@ -83,8 +83,8 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);
       } else {
-        headers.put(KafkaConstants.PARTITION_KEY, 0);
-        headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
+        //headers.put(KafkaConstants.PARTITION_KEY, 0);
+        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
         this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, toJson(accountEvent), headers);
       }
     }
@@ -109,8 +109,8 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(endPoint, req, headers);
       } else {
-        headers.put(KafkaConstants.PARTITION_KEY, 0);
-        headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
+        //headers.put(KafkaConstants.PARTITION_KEY, 0);
+        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
 
         this.getProducerTemplate().sendBodyAndHeaders(endPoint, toJson(cardEvent), headers);
       }
@@ -152,8 +152,8 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(route, req, headers);
       } else {
-        headers.put(KafkaConstants.PARTITION_KEY, 0);
-        headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
+        //headers.put(KafkaConstants.PARTITION_KEY, 0);
+        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
 
         this.getProducerTemplate().sendBodyAndHeaders(route, toJson(transactionEvent), headers);
       }
