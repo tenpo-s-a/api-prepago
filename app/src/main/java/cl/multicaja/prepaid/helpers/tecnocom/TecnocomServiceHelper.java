@@ -80,7 +80,9 @@ public final class TecnocomServiceHelper {
       }
       boolean useMock = config.getPropertyBoolean("tecnocom.service.mock", false);
       if (useMock) {
-        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder, ".");
+        String mockPath = System.getenv("TECNOCOM_MOCK_DATA_PATH");
+
+        this.tecnocomService = new TecnocomServiceMockImpl(apiKey, apiUrl, channel, codent, hashOrder, StringUtils.isAllBlank(mockPath) ? "." : mockPath);
       } else {
         this.tecnocomService = new TecnocomServiceImpl(apiKey, apiUrl, channel, codent, hashOrder);
       }
