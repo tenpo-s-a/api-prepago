@@ -28,6 +28,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -413,8 +415,8 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       ps.setString(4, prepaidCard10.getNameOnCard());
       ps.setString(5, prepaidCard10.getProducto());
       ps.setString(6, prepaidCard10.getNumeroUnico());
-      ps.setTimestamp(7, Timestamp.from(Instant.now()));
-      ps.setTimestamp(8, Timestamp.from(Instant.now()));
+      ps.setTimestamp(7,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(9,prepaidCard10.getUuid());
       ps.setString(10,prepaidCard10.getHashedPan());
       ps.setLong(11,prepaidCard10.getAccountId());
