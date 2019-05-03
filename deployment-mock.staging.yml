@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: tc-mock-pv-claim
+  name: tc-mock-data-pv-claim
   namespace: prepaid
 spec:
   accessModes:
@@ -54,7 +54,7 @@ spec:
       volumes:
       - name: tc-mock-volume
         persistentVolumeClaim:
-          claimName: tc-mock-pv-claim
+          claimName: tc-mock-data-pv-claim
       imagePullSecrets:
         - name: container-reg-credentials
 ---
