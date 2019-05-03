@@ -9,20 +9,15 @@ import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.kafka.events.AccountEvent;
 import cl.multicaja.prepaid.kafka.events.CardEvent;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
-import cl.multicaja.prepaid.kafka.events.model.*;
-import cl.multicaja.prepaid.kafka.events.model.Timestamps;
-import cl.multicaja.prepaid.model.v10.*;
 import org.apache.camel.ProducerTemplate;
-import org.apache.camel.component.kafka.KafkaConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.security.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10.*;
@@ -157,6 +152,28 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(route, toJson(transactionEvent), headers);
       }
+    }
+  }
+
+  /**
+   * Envia un evento test
+   *
+   */
+  public void publishTestEvent(String body) {
+
+    if (!camelFactory.isCamelRunning()) {
+      log.error("====== No fue posible enviar mensaje al proceso asincrono, camel no se encuentra en ejecución =======");
+    } else {
+
+      Map<String, Object> headers = new HashMap<>();
+      log.info("[publishTestEvent] publicando evento de prueba");
+      Map<String, Object> msg = new HashMap<>();
+      msg.put("message", StringUtils.isAllBlank(body) ? "empty" : body);
+      msg.put("date", LocalDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME));
+
+
+
+      this.getProducerTemplate().sendBodyAndHeaders("direct:prepaid/test_kafka_endpoint", toJson(msg), headers);
     }
   }
 }

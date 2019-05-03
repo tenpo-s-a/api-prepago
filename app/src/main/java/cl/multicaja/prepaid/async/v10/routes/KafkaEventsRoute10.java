@@ -34,6 +34,8 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   private static final String TRANSACTION_INVOICE_ISSUED_TOPIC = "TRANSACTION_INVOICE_ISSUED";
   private static final String TRANSACTION_INVOICE_REVERSED_TOPIC = "TRANSACTION_INVOICE_REVERSED";
 
+  private static final String TEST_ENDPOINT_TOPIC = "TEST_TOPIC_ENDPOINT";
+
   @Override
   public void configure() throws Exception {
     int concurrentConsumers = 10;
@@ -83,6 +85,10 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
         .to(getTopicProducerEndpoint(TRANSACTION_INVOICE_ISSUED_TOPIC));
       from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_INVOICE_REVERSED_EVENT, concurrentConsumers, sedaSize))
         .to(getTopicProducerEndpoint(TRANSACTION_INVOICE_REVERSED_TOPIC));
+
+      // Test endpoint
+      from("direct:prepaid/test_kafka_endpoint")
+        .to(getTopicProducerEndpoint(TEST_ENDPOINT_TOPIC));
 
     } else {
       // Si kafka no esta habilitado, se publica y consume desde colas en ActiveMQ
