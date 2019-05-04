@@ -116,6 +116,8 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd pg
       - ./db-create.sh -Denv=mock
+      - ./db-drop.sh -Denv=mock
+      - ./db-create.sh -Denv=mock
       - ./migrate-up.sh -Denv=mock
     when:
       event: [ push ]
@@ -153,6 +155,8 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd pg
       - ./db-create.sh -Denv=uat_mock
+      - ./db-drop.sh -Denv=uat_mock
+      - ./db-create.sh -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
     when:
       event: [ tag ]
@@ -185,7 +189,6 @@ pipeline:
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
       - DB_HOST_NAME=prepaid-postgresql-staging
-      - TECNOCOM_MOCK_DATA_PATH=/mock-data
     when:
       event: [ push ]
       branch: master
@@ -226,7 +229,6 @@ pipeline:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev_mock
       - API_ENVIRONMENT=uat_mock
-      - TECNOCOM_MOCK_DATA_PATH=/mock-data
     consul_kv: env/uat.env
     when:
       event: [ tag ]
