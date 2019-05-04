@@ -116,9 +116,10 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd pg
       - ./db-create.sh -Denv=mock
-      - ./db-drop.sh -Denv=mock
-      - ./db-create.sh -Denv=mock
       - ./migrate-up.sh -Denv=mock
+      - ./migrate-down.sh -Denv=mock
+      - ./migrate-up.sh -Denv=mock
+      - ./migrate-bootstrap.sh --force -Denv=mock
     when:
       event: [ push ]
       branch: master
@@ -155,9 +156,10 @@ pipeline:
       - ./drone-mvn-cache.sh
       - cd pg
       - ./db-create.sh -Denv=uat_mock
-      - ./db-drop.sh -Denv=uat_mock
-      - ./db-create.sh -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
+      - ./migrate-down.sh -Denv=uat_mock
+      - ./migrate-up.sh -Denv=uat_mock
+      - ./migrate-bootstrap.sh --force -Denv=uat_mock
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
