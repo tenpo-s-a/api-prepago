@@ -1237,4 +1237,19 @@ public final class TestHelpersResource10 extends BaseResource {
     return returnResponse;
 
   }
+
+
+  @POST
+  @Path("/kafka_event")
+  public Response sendKafkaEvent(Map<String, Object> body, @Context HttpHeaders headers) throws Exception {
+
+    try {
+      kafkaEventDelegate10.publishTestEvent(body.get("message").toString());
+      return Response.noContent().build();
+    } catch (Exception ex) {
+      return Response.ok(ex).status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+  }
+
 }
