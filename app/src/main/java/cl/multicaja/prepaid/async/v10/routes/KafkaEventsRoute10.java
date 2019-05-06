@@ -165,10 +165,10 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       .append(host)
       .append("?topic=")
       .append(topic)
-      .append("&brokers=")
-      .append(host)
       .append("&batchSize=0")
-      .append("&autoCommitEnable=true");
+      .append("&autoCommitEnable=true")
+      .append("&brokers=")
+      .append(host);
 
     log.info(String.format("kafka producer endpoint -> [%s]", sb.toString()));
     return sb.toString();
