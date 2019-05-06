@@ -165,8 +165,7 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       .append(host)
       .append("?topic=")
       .append(topic)
-      .append("&batchSize=0")
-      .append("&autoCommitEnable=true")
+      .append("&batchSize=1")
       .append("&brokers=")
       .append(host);
 
