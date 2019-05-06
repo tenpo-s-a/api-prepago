@@ -7,6 +7,7 @@ import cl.multicaja.prepaid.kafka.events.model.User;
 import cl.multicaja.prepaid.model.v10.PrepaidUser10;
 import cl.multicaja.prepaid.model.v10.PrepaidUserLevel;
 import cl.multicaja.prepaid.model.v10.PrepaidUserStatus;
+import cl.multicaja.prepaid.model.v10.UserPlanType;
 import cl.multicaja.prepaid.model.v11.DocumentType;
 import cl.multicaja.tecnocom.util.json.JsonUtils;
 import org.apache.camel.Exchange;
@@ -58,13 +59,21 @@ public class UserEvent extends BaseProcessor10 {
       userToCreate.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
       userToCreate.setDocumentType(DocumentType.DNI_CL);
 
-      userToCreate.setRut(numberUtils.toInt(userIn.getDocumentNumber()));
+      String[] rutPart = userIn.getDocumentNumber().split("-");
+      String numericRut;
+      if (rutPart != null && rutPart.length == 2) {
+        numericRut = rutPart[0];
+      } else {
+        numericRut = String.valueOf(Long.valueOf(System.currentTimeMillis()).intValue());
+      }
+      userToCreate.setRut(getRoute().getNumberUtils().toInt(numericRut));
       userToCreate.setStatus(PrepaidUserStatus.valueOfEnum(userIn.getState()));
       userToCreate.setName(userIn.getFirstName());
       userToCreate.setLastName(userIn.getLastName());
       userToCreate.setDocumentNumber(userIn.getDocumentNumber());
       userToCreate.setUserLevel(PrepaidUserLevel.valueOfEnum(userIn.getLevel()));
       userToCreate.setUuid(userIn.getId());
+      userToCreate.setUserPlan(UserPlanType.valueOfEnum(userIn.getPlan()));
 
     }else{
       userToCreate = null;
@@ -81,6 +90,7 @@ public class UserEvent extends BaseProcessor10 {
       userToUpdate.setName(userIn.getFirstName());
       userToUpdate.setLastName(userIn.getLastName());
       userToUpdate.setUserLevel(PrepaidUserLevel.valueOfEnum(userIn.getLevel()));
+      userToUpdate.setUserPlan(UserPlanType.valueOfEnum(userIn.getPlan()));
 
     }else{
       userToUpdate = null;
@@ -100,8 +110,7 @@ public class UserEvent extends BaseProcessor10 {
           log.info("[processUserCreatedEvent] Processing USER_CREATED event");
           log.info(String.format("[processUserCreatedEvent] %s", exchange.getMessage().getBody()));
 
-          ExchangeData exchangeData = (ExchangeData) exchange.getMessage().getBody();
-          String data = exchangeData.getData().toString();
+          String data =  exchange.getIn().getBody(String.class);
 
           cl.multicaja.prepaid.kafka.events.model.User userResponse = jsonUtils.fromJson(data, cl.multicaja.prepaid.kafka.events.model.User.class);
 
@@ -132,8 +141,7 @@ public class UserEvent extends BaseProcessor10 {
           log.info("[processUserUpdatedEvent] Processing USER_UPDATED event");
           log.info(String.format("[processUserUpdatedEvent] %s", exchange.getMessage().getBody()));
 
-          ExchangeData exchangeData = (ExchangeData) exchange.getMessage().getBody();
-          String data = exchangeData.getData().toString();
+          String data =  exchange.getIn().getBody(String.class);
 
           cl.multicaja.prepaid.kafka.events.model.User userResponse = jsonUtils.fromJson(data, cl.multicaja.prepaid.kafka.events.model.User.class);
 

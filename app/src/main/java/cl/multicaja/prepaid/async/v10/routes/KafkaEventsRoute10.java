@@ -15,7 +15,10 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   public static final String SEDA_TRANSACTION_PAID_EVENT = "seda:KafkaEventsRoute10.transactionPaid";
   public static final String SEDA_INVOICE_ISSUED_EVENT = "seda:KafkaEventsRoute10.invoiceIssued";
   public static final String SEDA_INVOICE_REVERSED_EVENT = "seda:KafkaEventsRoute10.invoiceReversed";
+  //Solo para los test
 
+  public static final String SEDA_USER_CREATE_EVENT = "seda:KafkaEventsRoute10.userCreated";
+  public static final String SEDA_USER_UPDATE_EVENT = "seda:KafkaEventsRoute10.userUpdated";
 
   public static final String USER_CREATED_TOPIC = "USER_CREATED";
   public static final String USER_UPDATED_TOPIC = "USER_UPDATED";
@@ -31,6 +34,8 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
   private static final String TRANSACTION_INVOICE_ISSUED_TOPIC = "TRANSACTION_INVOICE_ISSUED";
   private static final String TRANSACTION_INVOICE_REVERSED_TOPIC = "TRANSACTION_INVOICE_REVERSED";
 
+  private static final String TEST_ENDPOINT_TOPIC = "TEST_TOPIC_ENDPOINT";
+
   @Override
   public void configure() throws Exception {
     int concurrentConsumers = 10;
@@ -39,9 +44,17 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
 
     if(getConfigUtils().getPropertyBoolean("kafka.enabled")) {
 
+
+      //Solo para los test
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_CREATE_EVENT, concurrentConsumers, sedaSize))
+        .to(getTopicProducerEndpoint(USER_CREATED_TOPIC));
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_UPDATE_EVENT, concurrentConsumers, sedaSize))
+        .to(getTopicProducerEndpoint(USER_UPDATED_TOPIC));
+
       // Eventos a consumir
       from(getTopicConsumerEndpoint(USER_CREATED_TOPIC)).process(new UserEvent(this).processUserCreatedEvent());
       from(getTopicConsumerEndpoint(USER_UPDATED_TOPIC)).process(new UserEvent(this).processUserUpdatedEvent());
+
       //Eventos a publicar
       // Contrato/cuenta
       from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_ACCOUNT_CREATED_EVENT, concurrentConsumers, sedaSize))
@@ -73,10 +86,21 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_INVOICE_REVERSED_EVENT, concurrentConsumers, sedaSize))
         .to(getTopicProducerEndpoint(TRANSACTION_INVOICE_REVERSED_TOPIC));
 
+      // Test endpoint
+      from("direct:prepaid/test_kafka_endpoint")
+        .to(getTopicProducerEndpoint(TEST_ENDPOINT_TOPIC));
+
     } else {
       // Si kafka no esta habilitado, se publica y consume desde colas en ActiveMQ
 
       // Eventos a consumir
+
+      //Solo para los test
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_CREATE_EVENT, concurrentConsumers, sedaSize))
+        .to(createJMSEndpoint(USER_CREATED_TOPIC));
+      from(String.format("%s?concurrentConsumers=%s&size=%s", SEDA_USER_UPDATE_EVENT, concurrentConsumers, sedaSize))
+        .to(createJMSEndpoint(USER_UPDATED_TOPIC));
+
       from(createJMSEndpoint(USER_CREATED_TOPIC))
         .process(new UserEvent(this).processUserCreatedEvent());
       from(createJMSEndpoint(USER_UPDATED_TOPIC))
@@ -141,6 +165,7 @@ public final class KafkaEventsRoute10 extends BaseRoute10 {
       .append(host)
       .append("?topic=")
       .append(topic)
+      .append("&producerBatchSize=1")
       .append("&brokers=")
       .append(host);
 

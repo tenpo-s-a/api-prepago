@@ -6,7 +6,6 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
-  - api.private.local
   - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
   gateways:
   - global-gateway.default.svc.cluster.local

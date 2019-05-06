@@ -19,16 +19,28 @@
 
 ALTER TABLE ${schema}.prp_movimientos_tecnocom
   ADD COLUMN tiporeg VARCHAR(5) NOT NULL DEFAULT '';
+  
+ALTER TABLE ${schema}.prp_movimientos_tecnocom
+  ADD COLUMN nomcomred VARCHAR(27) NOT NULL DEFAULT '';
 
 ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
   ADD COLUMN tiporeg VARCHAR(5) NOT NULL DEFAULT '';
+    
+ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
+  ADD COLUMN nomcomred VARCHAR(27) NOT NULL DEFAULT '';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
 ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
   DROP COLUMN tiporeg;
+  
+ALTER TABLE ${schema}.prp_movimientos_tecnocom_hist
+  DROP COLUMN nomcomred;
 
 ALTER TABLE ${schema}.prp_movimientos_tecnocom
   DROP COLUMN tiporeg;
+  
+ALTER TABLE ${schema}.prp_movimientos_tecnocom
+  DROP COLUMN nomcomred;
 

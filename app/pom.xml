@@ -61,13 +61,13 @@
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>multicaja-async</artifactId>
-      <version>54eceecfc6fd1c572fe8c247ec941c2e4f80e98b</version>
+      <version>7e501c5e01f5000558e2ec35cae9e7c2d30718bb</version>
     </dependency>
 
     <dependency>
       <groupId>cl.multicaja</groupId>
       <artifactId>tecnocom-gateway</artifactId>
-      <version>cf7a575ca15e23b92f48c8702ad0525ebc7c3bc1</version>
+      <version>0f093f4d741dee4fad99355c3eed33262b73ed4d</version>
     </dependency>
 
     <dependency>

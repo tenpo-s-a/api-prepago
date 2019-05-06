@@ -2659,4 +2659,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     return this.accountEJBBean10.getBalance(headers, prepaidUser, account);
   }
+
+
+
+
+
+
 }
