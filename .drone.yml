@@ -8,7 +8,7 @@ pipeline:
     volumes:
       - /tmp/cache:/cache
     when:
-      event: [ push ]
+      event: [ push, tag ]
 
   db_test:
     image: maven:3.6.0-jdk-8-alpine
@@ -78,16 +78,6 @@ pipeline:
       event: [ push ]
       branch: master
 
-  rebuild-cache:
-    image: drillster/drone-volume-cache
-    rebuild: true
-    mount:
-      - ./.m2
-    volumes:
-      - /tmp/cache:/cache
-    when:
-      event: [ push ]
-
   publish_image:
     registry: mccontainerregistry.azurecr.io
     image: plugins/docker
@@ -117,7 +107,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=mock
       - ./migrate-up.sh -Denv=mock
-      - ./migrate-down.sh -Denv=mock
+      - ./migrate-down.sh 1000 -Denv=mock
       - ./migrate-up.sh -Denv=mock
       - ./migrate-bootstrap.sh --force -Denv=mock
     when:
@@ -157,7 +147,7 @@ pipeline:
       - cd pg
       - ./db-create.sh -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
-      - ./migrate-down.sh -Denv=uat_mock
+      - ./migrate-down.sh 1000 -Denv=uat_mock
       - ./migrate-up.sh -Denv=uat_mock
       - ./migrate-bootstrap.sh --force -Denv=uat_mock
     when:
@@ -167,6 +157,7 @@ pipeline:
   deploy_to_staging:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: staging
+    template: kube.staging.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev
@@ -214,6 +205,7 @@ pipeline:
   deploy_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: delta
+    template: kube.uat.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api
@@ -261,6 +253,17 @@ pipeline:
   #  when:
   #    event: [ tag ]
   #    ref: refs/tags/release*
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./.m2
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ push, tag ]
+
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
