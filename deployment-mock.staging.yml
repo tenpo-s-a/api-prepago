@@ -36,6 +36,8 @@ spec:
             value: ${DB_HOST_FQDN}
           - name: API_ENVIRONMENT
             value: ${API_ENVIRONMENT}
+          - name: TECNOCOM_MOCK_DATA_PATH
+            value: /opt/payara5
       imagePullSecrets:
         - name: container-reg-credentials
 ---
