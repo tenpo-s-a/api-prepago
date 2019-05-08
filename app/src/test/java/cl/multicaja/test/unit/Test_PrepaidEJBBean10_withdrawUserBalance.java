@@ -222,10 +222,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(IvaType.IVA_INCLUDED).when(calculatorParameter10).getWITHDRAW_POS_FEE_IVA_TYPE();
     Mockito.doReturn(calculatorParameter10).when(prepaidEJBBean10).getPercentage();
 
-    Mockito.doReturn(1.19).when(calculatorParameter10).getIVA();
-
     CalculationsHelper calculationsHelperMock = Mockito.mock(CalculationsHelper.class);
-    Mockito.doReturn(calculatorParameter10).when(calculationsHelperMock).getCalculatorParameter10();
     Mockito.doReturn(calculationsHelperMock).when(prepaidEJBBean10).getCalculationsHelper();
 
     try{
