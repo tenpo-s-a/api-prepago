@@ -91,6 +91,8 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
+  - "tc.uat.multicajadigital"
+  addresses:
   - "200.111.44.187"
   location: MESH_EXTERNAL
   ports:
