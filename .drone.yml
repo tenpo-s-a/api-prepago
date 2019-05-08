@@ -8,7 +8,7 @@ pipeline:
     volumes:
       - /tmp/cache:/cache
     when:
-      event: [ push ]
+      event: [ push, tag ]
 
   db_test:
     image: maven:3.6.0-jdk-8-alpine
@@ -77,16 +77,6 @@ pipeline:
     when:
       event: [ push ]
       branch: master
-
-  rebuild-cache:
-    image: drillster/drone-volume-cache
-    rebuild: true
-    mount:
-      - ./.m2
-    volumes:
-      - /tmp/cache:/cache
-    when:
-      event: [ push ]
 
   publish_image:
     registry: mccontainerregistry.azurecr.io
@@ -261,6 +251,17 @@ pipeline:
   #  when:
   #    event: [ tag ]
   #    ref: refs/tags/release*
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./.m2
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ push, tag ]
+
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
