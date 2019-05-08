@@ -191,6 +191,7 @@ pipeline:
       - DB_PASSWORD=N8BC2VQ74PrGv4SeXdHvcT8VPT7pTWU2
       - DB_HOST_FQDN=prepaid-postgresql-staging.postgres.database.azure.com
       - DB_HOST_NAME=prepaid-postgresql-staging
+      - TECNOCOM_MOCK_DATA_PATH=/opt/payara5
     when:
       event: [ push ]
       branch: master
@@ -231,6 +232,7 @@ pipeline:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev_mock
       - API_ENVIRONMENT=uat_mock
+      - TECNOCOM_MOCK_DATA_PATH=/opt/payara5
     consul_kv: env/uat.env
     when:
       event: [ tag ]
