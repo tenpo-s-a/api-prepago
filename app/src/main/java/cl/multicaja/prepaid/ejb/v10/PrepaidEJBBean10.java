@@ -1219,7 +1219,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
-  private List<PrepaidMovementFee10> calculateFeeList(IPrepaidTransaction10 transaction) throws BaseException {
+  public List<PrepaidMovementFee10> calculateFeeList(IPrepaidTransaction10 transaction) throws BaseException {
     if(transaction == null || transaction.getAmount() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
