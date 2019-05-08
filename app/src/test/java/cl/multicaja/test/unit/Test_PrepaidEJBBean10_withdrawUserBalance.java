@@ -12,6 +12,7 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
@@ -215,14 +216,14 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
       Mockito.any(TipoFactura.class));
 
-
     CalculatorParameter10 calculatorParameter10 = Mockito.mock(CalculatorParameter10.class);
     Mockito.doReturn(new BigDecimal(100)).when(calculatorParameter10).getWITHDRAW_POS_FEE_AMOUNT();
     Mockito.doReturn(new BigDecimal(0)).when(calculatorParameter10).getWITHDRAW_POS_FEE_PERCENTAGE();
     Mockito.doReturn(IvaType.IVA_INCLUDED).when(calculatorParameter10).getWITHDRAW_POS_FEE_IVA_TYPE();
-    Mockito.doReturn(1.19).when(calculatorParameter10).getIVA();
     Mockito.doReturn(calculatorParameter10).when(prepaidEJBBean10).getPercentage();
 
+    CalculatorParameter10 calculatorParameterSpy = Mockito.spy(prepaidEJBBean10.getCalculationsHelper().getCalculatorParameter10());
+    Mockito.doReturn(1.19).when(calculatorParameterSpy).getIVA();
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);
