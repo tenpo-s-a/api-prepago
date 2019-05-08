@@ -264,7 +264,6 @@ pipeline:
     when:
       event: [ push, tag ]
 
-
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
     channel: drone_deployments
