@@ -6,6 +6,7 @@ import cl.multicaja.prepaid.async.v10.model.PrepaidReverseData10;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.kafka.events.TransactionEvent;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -98,15 +99,20 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     Thread.sleep(2000);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
-    PrepaidWithdraw10 withdraw = null;
-
-    withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
+    PrepaidWithdraw10 withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidUser.getUuid(), prepaidWithdraw,true);
 
     Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
     ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidWithdraw.getTransactionId());
     Assert.assertNotNull("Debe existir el evento", event);
     Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
 
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo monto", withdraw.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
+    Assert.assertEquals("Debe tener el mismo tipo", "CASH_OUT_MULTICAJA", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+
+    //assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
   }
 
 }
