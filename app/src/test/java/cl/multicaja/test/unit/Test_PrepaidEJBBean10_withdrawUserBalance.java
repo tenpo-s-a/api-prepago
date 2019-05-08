@@ -198,7 +198,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       .when(prepaidMovementEJBBean11).addPrepaidMovementFeeList(Mockito.any());
 
     Mockito.doReturn(withdraw10)
-      .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class));
+      .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class), Mockito.anyList());
 
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("1020");
@@ -222,8 +222,11 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(IvaType.IVA_INCLUDED).when(calculatorParameter10).getWITHDRAW_POS_FEE_IVA_TYPE();
     Mockito.doReturn(calculatorParameter10).when(prepaidEJBBean10).getPercentage();
 
-    CalculatorParameter10 calculatorParameterSpy = Mockito.spy(prepaidEJBBean10.getCalculationsHelper().getCalculatorParameter10());
-    Mockito.doReturn(1.19).when(calculatorParameterSpy).getIVA();
+    Mockito.doReturn(1.19).when(calculatorParameter10).getIVA();
+
+    CalculationsHelper calculationsHelperMock = Mockito.mock(CalculationsHelper.class);
+    Mockito.doReturn(calculatorParameter10).when(calculationsHelperMock).getCalculatorParameter10();
+    Mockito.doReturn(calculationsHelperMock).when(prepaidEJBBean10).getCalculationsHelper();
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);
