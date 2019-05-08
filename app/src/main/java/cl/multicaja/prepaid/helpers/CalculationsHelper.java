@@ -129,9 +129,7 @@ public class CalculationsHelper {
    * @return
    */
   public BigDecimal calculateIncludedIva(BigDecimal totalAmount) {
-    BigDecimal baseAmount = new BigDecimal(1L);
-    //BigDecimal baseAmount = totalAmount.divide(new BigDecimal(1), 0, RoundingMode.HALF_UP);
-    //BigDecimal baseAmount = totalAmount.divide(BigDecimal.valueOf(/*getCalculatorParameter10().getIVA()*/1.19), 0, RoundingMode.HALF_UP);
+    BigDecimal baseAmount = totalAmount.divide(BigDecimal.valueOf(getCalculatorParameter10().getIVA()), 0, RoundingMode.HALF_UP);
     return totalAmount.subtract(baseAmount);
   }
 
