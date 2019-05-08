@@ -1257,9 +1257,9 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
                                      PrepaidMovementFeeType.WITHDRAW_WEB_FEE);
         } else {
           feeList = calculateFeeList(transaction.getAmount().getValue(),
-                                     getPercentage().getTOPUP_POS_FEE_AMOUNT(),
-                                     getPercentage().getTOPUP_POS_FEE_PERCENTAGE(),
-                                     getPercentage().getTOPUP_POS_FEE_IVA_TYPE(),
+                                     getPercentage().getWITHDRAW_POS_FEE_AMOUNT(),
+                                     getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE(),
+                                     getPercentage().getWITHDRAW_POS_FEE_IVA_TYPE(),
                                      PrepaidMovementFeeType.WITHDRAW_POS_FEE);
         }
         break;

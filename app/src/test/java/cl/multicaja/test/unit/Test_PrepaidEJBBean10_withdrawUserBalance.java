@@ -11,9 +11,11 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -51,6 +53,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Spy
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @Spy
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @Spy
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -188,6 +193,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       .doReturn(withdrawReverseMovement)
       .when(prepaidMovementEJBBean10).getPrepaidMovementById(Long.MAX_VALUE);
 
+    Mockito.doNothing()
+      .when(prepaidMovementEJBBean11).addPrepaidMovementFeeList(Mockito.any());
+
     Mockito.doReturn(withdraw10)
       .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class));
 
@@ -206,6 +214,14 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(),
       Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
       Mockito.any(TipoFactura.class));
+
+
+    CalculatorParameter10 calculatorParameter10 = Mockito.mock(CalculatorParameter10.class);
+    Mockito.doReturn(new BigDecimal(100)).when(calculatorParameter10).getWITHDRAW_POS_FEE_AMOUNT();
+    Mockito.doReturn(new BigDecimal(0)).when(calculatorParameter10).getWITHDRAW_POS_FEE_PERCENTAGE();
+    Mockito.doReturn(IvaType.IVA_INCLUDED).when(calculatorParameter10).getWITHDRAW_POS_FEE_IVA_TYPE();
+    Mockito.doReturn(calculatorParameter10).when(prepaidEJBBean10).getPercentage();
+
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);
