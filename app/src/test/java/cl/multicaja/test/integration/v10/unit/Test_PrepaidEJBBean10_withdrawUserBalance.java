@@ -1,14 +1,12 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.camel.ExchangeData;
-import cl.multicaja.core.exceptions.BadRequestException;
-import cl.multicaja.core.exceptions.NotFoundException;
-import cl.multicaja.core.exceptions.RunTimeValidationException;
-import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.core.utils.RutUtils;
 import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +15,8 @@ import org.junit.Test;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -79,6 +79,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
+
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
   }
 
 
@@ -141,6 +143,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.IN_PROCESS, BusinessStatusType.IN_PROCESS, dbPrepaidMovement.getEstadoNegocio());
+
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
   }
 
   @Test
@@ -592,6 +596,26 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
+  }
+
+  private void verifyFees(Long movementId, String codcom) throws BaseException {
+    // Verificar que existan las fees almacenadas en BD
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(movementId);
+    Assert.assertEquals("Debe tener 2 fees", 2, prepaidMovementFee10List.size());
+
+    if (NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(codcom)) {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 84", new BigDecimal(84L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 16", new BigDecimal(16L), ivaFee.getAmount().stripTrailingZeros());
+    } else {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 200", new BigDecimal(200L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 38", new BigDecimal(38L), ivaFee.getAmount().stripTrailingZeros());
+    }
   }
 
 }
