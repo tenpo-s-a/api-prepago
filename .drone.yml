@@ -221,7 +221,7 @@ pipeline:
     template: deployment-mock.staging.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
-      - DB_NAME=prepago_api_dev_mock
+      - DB_NAME=prepago_api_mock
       - API_ENVIRONMENT=uat_mock
     consul_kv: env/uat.env
     when:
