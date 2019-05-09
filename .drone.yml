@@ -240,7 +240,7 @@ pipeline:
   deploy_destination_rule_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: delta
-    template: destination-rule.staging_uat.yml
+    template: destination-rule.uat.yml
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
@@ -263,7 +263,6 @@ pipeline:
       - /tmp/cache:/cache
     when:
       event: [ push, tag ]
-
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
