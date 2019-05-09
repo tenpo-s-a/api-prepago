@@ -61,6 +61,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
   private static Log log = LogFactory.getLog(PrepaidEJBBean10.class);
   private static final BigDecimal NEGATIVE = new BigDecimal(-1);
+  private static final BigDecimal ONEHUNDRED = new BigDecimal(100);
   private static String APP_NAME = "prepaid.appname";
   private static String TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS";
 
@@ -1281,7 +1282,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
    * @param feeType
    * @return
    */
-  private List<PrepaidMovementFee10> calculateFeeList(BigDecimal transactionAmount, BigDecimal baseFee, BigDecimal percentFee, IvaType ivaType, PrepaidMovementFeeType feeType) {
+  public List<PrepaidMovementFee10> calculateFeeList(BigDecimal transactionAmount, BigDecimal baseFee, BigDecimal percentFee, IvaType ivaType, PrepaidMovementFeeType feeType) {
 
     ArrayList<PrepaidMovementFee10> feeList = new ArrayList<>();
 
@@ -1289,7 +1290,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     BigDecimal baseFeeAmount = baseFee.setScale(0, BigDecimal.ROUND_HALF_UP);
 
     // Cobro porcentual
-    BigDecimal percentFeeAmount = transactionAmount.multiply(percentFee).setScale(0, RoundingMode.HALF_UP);
+    BigDecimal percentFeeAmount = transactionAmount.multiply(percentFee).divide(ONEHUNDRED).setScale(0, RoundingMode.HALF_UP);
 
     // Total Fee
     BigDecimal totalFee = baseFeeAmount.add(percentFeeAmount);
