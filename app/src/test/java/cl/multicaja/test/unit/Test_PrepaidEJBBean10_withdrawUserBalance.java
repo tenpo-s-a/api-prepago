@@ -218,19 +218,6 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
       Mockito.any(TipoFactura.class));
 
-    /*
-    CalculatorParameter10 calculatorParameter10 = Mockito.mock(CalculatorParameter10.class);
-    Mockito.doReturn(new BigDecimal(100)).when(calculatorParameter10).getWITHDRAW_POS_FEE_AMOUNT();
-    Mockito.doReturn(new BigDecimal(0)).when(calculatorParameter10).getWITHDRAW_POS_FEE_PERCENTAGE();
-    Mockito.doReturn(IvaType.IVA_INCLUDED).when(calculatorParameter10).getWITHDRAW_POS_FEE_IVA_TYPE();
-    Mockito.doReturn(1.19).when(calculatorParameter10).getIVA();
-    Mockito.doReturn(calculatorParameter10).when(prepaidEJBBean10).getPercentage();
-
-    CalculationsHelper calculationsHelperMock = Mockito.mock(CalculationsHelper.class);
-    Mockito.doReturn(calculatorParameter10).when(calculationsHelperMock).getCalculatorParameter10();
-    Mockito.doReturn(calculationsHelperMock).when(prepaidEJBBean10).getCalculationsHelper();
-
-     */
     Mockito.doReturn(Collections.EMPTY_LIST).when(prepaidEJBBean10).calculateFeeList(Mockito.any(IPrepaidTransaction10.class));
 
     try{
