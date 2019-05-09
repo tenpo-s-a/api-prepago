@@ -7,8 +7,10 @@ import cl.multicaja.prepaid.async.v10.routes.KafkaEventsRoute10;
 import cl.multicaja.prepaid.async.v10.routes.TransactionReversalRoute10;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.kafka.events.TransactionEvent;
+import cl.multicaja.prepaid.kafka.events.model.Fee;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,8 @@ import org.junit.Test;
 
 import javax.jms.Queue;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 import static cl.multicaja.core.model.Errors.TARJETA_ERROR_GENERICO_$VALUE;
 
@@ -112,7 +116,30 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     Assert.assertEquals("Debe tener el mismo tipo", "CASH_OUT_MULTICAJA", transactionEvent.getTransaction().getType());
     Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
 
-    //assertFees(transactionEvent.getTransaction().getFees(), secondTopup.getTransactionOriginType());
+    assertFees(transactionEvent.getTransaction().getFees(), TransactionOriginType.POS);
+  }
+
+  void assertFees(List<Fee> feeList, TransactionOriginType transactionOriginType) {
+    Assert.assertEquals("El evento debe tener 2 fees", 2, feeList.size());
+
+    if(TransactionOriginType.POS.equals(transactionOriginType)) {
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de pos", fee);
+      Assert.assertEquals("Debe tener un valor de 200", new BigDecimal(200), fee.getAmount().getValue().setScale(0, RoundingMode.HALF_UP));
+
+      fee = feeList.stream().filter(f -> PrepaidMovementFeeType.IVA.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de iva", fee);
+      Assert.assertEquals("Debe tener un valor de 38", new BigDecimal(38), fee.getAmount().getValue().setScale(0, RoundingMode.HALF_UP));
+
+    } else if (TransactionOriginType.WEB.equals(transactionOriginType)) {
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de pos", fee);
+      Assert.assertEquals("Debe tener un valor de 84", new BigDecimal(84), fee.getAmount().getValue().stripTrailingZeros());
+
+      fee = feeList.stream().filter(f -> PrepaidMovementFeeType.IVA.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de iva", fee);
+      Assert.assertEquals("Debe tener un valor de 16", new BigDecimal(16), fee.getAmount().getValue().stripTrailingZeros());
+    }
   }
 
 }
