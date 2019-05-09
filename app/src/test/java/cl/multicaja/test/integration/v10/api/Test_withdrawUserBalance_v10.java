@@ -49,9 +49,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Before
   @After
-  public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
+  public void clearData() throws InterruptedException {
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
 
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_comision", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
@@ -106,6 +106,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
 
     verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    Thread.sleep(5000);
   }
 
   @Test
@@ -159,6 +161,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("El merchant code debe estar completado con 0", "0000000000" + merchantCode, dbPrepaidMovement.getCodcom());
 
     verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    Thread.sleep(5000);
   }
 
 
@@ -214,6 +218,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Debe tener el merchantCode truncado con los ultimos 15 digitos", merchantCode, dbPrepaidMovement.getCodcom());
 
     verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    Thread.sleep(5000);
   }
 
   @Test
@@ -266,6 +272,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.IN_PROCESS, BusinessStatusType.IN_PROCESS, dbPrepaidMovement.getEstadoNegocio());
 
     verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    Thread.sleep(5000);
   }
 
   @Test
@@ -1037,6 +1045,7 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
 
+    Thread.sleep(5000);
   }
 
   private void verifyFees(Long movementId, String codcom) throws BaseException {

@@ -123,7 +123,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     Assert.assertEquals("El evento debe tener 2 fees", 2, feeList.size());
 
     if(TransactionOriginType.POS.equals(transactionOriginType)) {
-      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_POS_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_POS_FEE.toString().equals(f.getType())).findAny().orElse(null);
       Assert.assertNotNull("Debe existir un fee de pos", fee);
       Assert.assertEquals("Debe tener un valor de 200", new BigDecimal(200), fee.getAmount().getValue().setScale(0, RoundingMode.HALF_UP));
 
@@ -132,8 +132,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
       Assert.assertEquals("Debe tener un valor de 38", new BigDecimal(38), fee.getAmount().getValue().setScale(0, RoundingMode.HALF_UP));
 
     } else if (TransactionOriginType.WEB.equals(transactionOriginType)) {
-      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.TOPUP_WEB_FEE.toString().equals(f.getType())).findAny().orElse(null);
-      Assert.assertNotNull("Debe existir un fee de pos", fee);
+      Fee fee = feeList.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_WEB_FEE.toString().equals(f.getType())).findAny().orElse(null);
+      Assert.assertNotNull("Debe existir un fee de web", fee);
       Assert.assertEquals("Debe tener un valor de 84", new BigDecimal(84), fee.getAmount().getValue().stripTrailingZeros());
 
       fee = feeList.stream().filter(f -> PrepaidMovementFeeType.IVA.toString().equals(f.getType())).findAny().orElse(null);
