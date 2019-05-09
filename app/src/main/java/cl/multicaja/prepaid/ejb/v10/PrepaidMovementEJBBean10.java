@@ -1823,7 +1823,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
 
-              //TODO: Verificar si es que hay que publicar evento de retiro autorizado
+              //TODO: Verificar si es que hay que publicar evento de retiro confirmado
             }
             break;
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
