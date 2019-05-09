@@ -88,7 +88,7 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
 
 
   @Test
-  public void withdraw_event() throws Exception {
+  public void withdrawPOS_event() throws Exception {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
@@ -117,6 +117,38 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnitAsync
     Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
 
     assertFees(transactionEvent.getTransaction().getFees(), TransactionOriginType.POS);
+  }
+
+  @Test
+  public void withdrawWEB_event() throws Exception {
+    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
+    prepaidUser = createPrepaidUserV2(prepaidUser);
+
+    Account account = buildAccountFromTecnocom(prepaidUser);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser,account);
+    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
+
+    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(), prepaidCard10, BigDecimal.valueOf(30000));
+    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
+    Thread.sleep(2000);
+
+    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidWithdraw10.WEB_MERCHANT_CODE);
+    PrepaidWithdraw10 withdraw = getPrepaidEJBBean10().withdrawUserBalance(null, prepaidUser.getUuid(), prepaidWithdraw,true);
+
+    Queue qResp = camelFactory.createJMSQueue(KafkaEventsRoute10.TRANSACTION_AUTHORIZED_TOPIC);
+    ExchangeData<String> event = (ExchangeData<String>) camelFactory.createJMSMessenger(30000, 60000).getMessage(qResp, prepaidWithdraw.getTransactionId());
+    Assert.assertNotNull("Debe existir el evento", event);
+    Assert.assertNotNull("Deberia existir un evento de transaccion autorizada", event.getData());
+
+    TransactionEvent transactionEvent = getJsonParser().fromJson(event.getData(), TransactionEvent.class);
+
+    Assert.assertEquals("Debe tener el mismo monto", withdraw.getAmount().getValue(), transactionEvent.getTransaction().getPrimaryAmount().getValue());
+    Assert.assertEquals("Debe tener el mismo tipo", "CASH_OUT_MULTICAJA", transactionEvent.getTransaction().getType());
+    Assert.assertEquals("Debe tener el status AUTHORIZED", "AUTHORIZED", transactionEvent.getTransaction().getStatus());
+
+    assertFees(transactionEvent.getTransaction().getFees(), TransactionOriginType.WEB);
   }
 
   void assertFees(List<Fee> feeList, TransactionOriginType transactionOriginType) {
