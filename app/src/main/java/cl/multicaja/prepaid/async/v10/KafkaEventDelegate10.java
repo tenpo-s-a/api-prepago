@@ -78,8 +78,6 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, req, headers);
       } else {
-        //headers.put(KafkaConstants.PARTITION_KEY, 0);
-        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
         this.getProducerTemplate().sendBodyAndHeaders(SEDA_ACCOUNT_CREATED_EVENT, toJson(accountEvent), headers);
       }
     }
@@ -104,8 +102,6 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(endPoint, req, headers);
       } else {
-        //headers.put(KafkaConstants.PARTITION_KEY, 0);
-        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
 
         this.getProducerTemplate().sendBodyAndHeaders(endPoint, toJson(cardEvent), headers);
       }
@@ -147,8 +143,6 @@ public final class KafkaEventDelegate10 {
 
         this.getProducerTemplate().sendBodyAndHeaders(route, req, headers);
       } else {
-        //headers.put(KafkaConstants.PARTITION_KEY, 0);
-        //headers.put(KafkaConstants.KEY, Instant.now().toEpochMilli());
 
         this.getProducerTemplate().sendBodyAndHeaders(route, toJson(transactionEvent), headers);
       }
@@ -170,8 +164,6 @@ public final class KafkaEventDelegate10 {
       Map<String, Object> msg = new HashMap<>();
       msg.put("message", StringUtils.isAllBlank(body) ? "empty" : body);
       msg.put("date", LocalDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME));
-
-
 
       this.getProducerTemplate().sendBodyAndHeaders("direct:prepaid/test_kafka_endpoint", toJson(msg), headers);
     }
