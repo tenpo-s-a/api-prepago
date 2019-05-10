@@ -346,7 +346,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
       throw new NotFoundException(CUENTA_NO_EXISTE);
     }
 
-    PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndOneOfStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
+    PrepaidCard10 prepaidCard = getByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
     if(prepaidCard == null) {
       throw new NotFoundException(TARJETA_NO_EXISTE);
     }
@@ -365,7 +365,6 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     prepaidCardResponse10.setTimestamps(prepaidCard.getTimestamps());
     return prepaidCardResponse10;
   }
-
 
   public PrepaidCard10 getByUserIdAndStatus(Map<String, Object> headers, Long userId,PrepaidCardStatus ... lstStatus)  throws Exception{
     try {
