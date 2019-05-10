@@ -337,7 +337,7 @@ public class PrepaidCardEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   }
 
   @Override
-  public Card upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
     throw new IllegalStateException();
   }
 

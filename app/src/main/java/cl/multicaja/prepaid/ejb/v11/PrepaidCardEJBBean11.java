@@ -331,7 +331,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   }
 
   @Override
-  public Card upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
 
     PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findByExtId(null, userUuid);
     if(prepaidUser == null) {
@@ -358,18 +358,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     // Notificar que se ha creado una tarjeta nueva
     publishCardEvent(prepaidUser.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
 
-    Card card = new Card();
-    card.setId(prepaidCard.getUuid());
-    card.setPan(prepaidCard.getPan());
-    card.setStatus(prepaidCard.getStatus().toString());
-
-    cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
-
-    timestamps.setCreatedAt(prepaidCard.getTimestamps().getCreatedAt());
-    timestamps.setUpdatedAt(prepaidCard.getTimestamps().getUpdatedAt());
-    card.setTimestamps(timestamps);
-
-    return card;
+    return prepaidCard;
   }
 
 
