@@ -7,6 +7,7 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
+import cl.multicaja.core.utils.db.SqlType;
 import cl.multicaja.core.utils.json.JsonUtils;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
@@ -58,10 +59,10 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
   private static final String INSERT_USER = String.format("INSERT INTO prepago.prp_usuario(\n" +
     "            id_usuario_mc, rut, estado, saldo_info, saldo_expiracion, \n" +
     "            intentos_validacion, fecha_creacion, fecha_actualizacion, nombre, \n" +
-    "            apellido, numero_documento, tipo_documento, nivel, uuid)\n" +
+    "            apellido, numero_documento, tipo_documento, nivel, uuid,plan)\n" +
     "    VALUES (?, ?, ?, ?, ?, \n" +
     "            ?, ?, ?, ?, \n" +
-    "            ?, ?, ?, ?, ?);\n", getSchema());
+    "            ?, ?, ?, ?, ?,?);\n", getSchema());
 
   private static final String FIND_USER_BY_ID_EXT = String.format("SELECT * FROM %s.prp_usuario WHERE uuid = ?", getSchema());
   private static final String FIND_USER_BY_ID = String.format("SELECT * FROM %s.prp_usuario WHERE id = ?", getSchema());
@@ -123,23 +124,22 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
     KeyHolder keyHolder = new GeneratedKeyHolder();
     log.info(user);
     getDbUtils().getJdbcTemplate().update(connection -> {
-      PreparedStatement ps = connection
-        .prepareStatement(INSERT_USER, new String[] {"id"});
+      PreparedStatement ps = connection.prepareStatement(INSERT_USER, new String[] {"id"});
       ps.setLong(1, user.getUserIdMc());
       ps.setLong(2, user.getRut());
       ps.setString(3, user.getStatus().name());
       ps.setString(4, "");
       ps.setLong(5, 0L);
       ps.setLong(6, 0L);
-      ps.setObject(7, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
-      ps.setObject(8, LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
+      ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(9,user.getName());
       ps.setString(10,user.getLastName());
       ps.setString(11,user.getDocumentNumber());
       ps.setString(12,user.getDocumentType().name());
       ps.setString(13,user.getUserLevel().name());
       ps.setString(14,user.getUuid());
-
+      ps.setString(15,user.getUserPlan().name());
       return ps;
     }, keyHolder);
 
@@ -367,7 +367,7 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       ps.setString(2,user.getLastName());
       ps.setString(3,user.getStatus().toString());
       ps.setString(4,user.getUserLevel().toString());
-      ps.setObject(5,LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")));
+      ps.setTimestamp(5,Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"))));
       ps.setString(6,user.getUuid());
 
       return ps;
@@ -390,6 +390,8 @@ public class PrepaidUserEJBBean10 extends PrepaidBaseEJBBean10 implements Prepai
       u.setUserLevel(PrepaidUserLevel.valueOfEnum(rs.getString("nivel")));
       u.setUuid(rs.getString("uuid"));
       u.setRut(rs.getInt("rut"));
+      u.setUserPlan(UserPlanType.valueOfEnum(rs.getString("plan")));
+
       Timestamps timestamps = new Timestamps();
       timestamps.setCreatedAt(rs.getTimestamp("fecha_creacion").toLocalDateTime());
       timestamps.setUpdatedAt(rs.getTimestamp("fecha_actualizacion").toLocalDateTime());

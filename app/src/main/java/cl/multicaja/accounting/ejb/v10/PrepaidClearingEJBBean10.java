@@ -562,6 +562,7 @@ public class PrepaidClearingEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       return clearingData10s;
   }
 
+  // F1 de clearing
   private void processClearingBankResponse(List<ClearingData10> clearingDataInFile, String fileName, String fileId) throws Exception {
     //TODO (poca prioridad): Es posible que el archivo de respuesta tenga transacciones de mas de 1 dia
     final List<ClearingData10>  clearingDataInTable = searchClearignDataByFileId(null, fileId);

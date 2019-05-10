@@ -6,6 +6,7 @@ metadata:
   namespace: prepaid
 spec:
   hosts:
+  - ${INTERNAL_LB}
   - api.${CLUSTER_ENVIRONMENT}.${CLUSTER_DOMAIN}
   gateways:
   - global-gateway.default.svc.cluster.local
@@ -15,6 +16,17 @@ spec:
         prefix: /prepaid/1.0/prepaid/dee63b13-d3cc-44cf-a86b-f6ec37330a11
     rewrite:
       uri: /api-prepaid-1.0/1.0/prepaid/dee63b13-d3cc-44cf-a86b-f6ec37330a11
+    route:
+      - destination:
+          host: api-prepaid
+          subset: v2
+          port:
+            number: 80
+  - match:
+    - uri:
+        prefix: /prepaid/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
     route:
       - destination:
           host: api-prepaid

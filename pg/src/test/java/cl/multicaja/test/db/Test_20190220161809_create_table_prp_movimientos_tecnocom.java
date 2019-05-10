@@ -46,8 +46,9 @@ public class Test_20190220161809_create_table_prp_movimientos_tecnocom extends T
       new ColumnInfo("originope",SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType()),
-      new ColumnInfo("contrato",SqlType.VARCHAR.getGetJavaType(),30)
-
+      new ColumnInfo("contrato",SqlType.VARCHAR.getGetJavaType(),30),
+      new ColumnInfo("tiporeg",SqlType.VARCHAR.getGetJavaType(),5),
+      new ColumnInfo("nomcomred",SqlType.VARCHAR.getGetJavaType(),27)
     );
     Assert.assertTrue("Existe la tabla prp_movimientos_tecnocom", exists);
 
@@ -91,7 +92,9 @@ public class Test_20190220161809_create_table_prp_movimientos_tecnocom extends T
       new ColumnInfo("originope",SqlType.VARCHAR.getGetJavaType(),20),
       new ColumnInfo("fecha_creacion", SqlType.TIMESTAMP.getGetJavaType()),
       new ColumnInfo("fecha_actualizacion", SqlType.TIMESTAMP.getGetJavaType()),
-      new ColumnInfo("contrato",SqlType.VARCHAR.getGetJavaType(),30)
+      new ColumnInfo("contrato",SqlType.VARCHAR.getGetJavaType(),30),
+      new ColumnInfo("tiporeg",SqlType.VARCHAR.getGetJavaType(),5),
+      new ColumnInfo("nomcomred",SqlType.VARCHAR.getGetJavaType(),27)
     );
     Assert.assertTrue("Existe la tabla prp_movimientos_tecnocom_hist", exists);
 

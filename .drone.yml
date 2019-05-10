@@ -8,7 +8,7 @@ pipeline:
     volumes:
       - /tmp/cache:/cache
     when:
-      event: [ push ]
+      event: [ push, tag ]
 
   db_test:
     image: maven:3.6.0-jdk-8-alpine
@@ -69,6 +69,27 @@ pipeline:
       branch:
         exclude: master
 
+  build:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd app && ./package.sh
+    when:
+      event: [ push ]
+      branch: master
+
+  publish_image:
+    registry: mccontainerregistry.azurecr.io
+    image: plugins/docker
+    repo: mccontainerregistry.azurecr.io/api-prepago
+    tags:
+      - ${DRONE_COMMIT_SHA}
+      - latest
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: [ push ]
+      branch: master
+
   db_migration_staging:
     image: maven:3.6.0-jdk-8-alpine
     commands:
@@ -85,6 +106,8 @@ pipeline:
     commands:
       - ./drone-mvn-cache.sh
       - cd pg
+      - ./db-create.sh -Denv=mock
+      - ./migrate-up.sh -Denv=mock
       - ./migrate-down.sh 1000 -Denv=mock
       - ./migrate-up.sh -Denv=mock
       - ./migrate-bootstrap.sh --force -Denv=mock
@@ -92,50 +115,50 @@ pipeline:
       event: [ push ]
       branch: master
 
-  db_migration_sandbox:
-    image: maven:3.6.0-jdk-8-alpine
+  db_consul_uat:
+    image: hashicorp/consul-template:alpine
     commands:
-      - ./drone-mvn-cache.sh
-      - cd pg
-      - ./db-create.sh -Denv=sandbox
-      - ./migrate-up.sh -Denv=sandbox
+      - /bin/consul-template -template "./pg/environments/uat.properties.tmpl:./pg/environments/uat.properties" -once
+      - /bin/consul-template -template "./pg/environments/uat_mock.properties.tmpl:./pg/environments/uat_mock.properties" -once
+    environment:
+      - DB_NAME=prepago_api
+      - DB_MOCK_NAME=prepago_api_mock
+    secrets:
+      - consul_http_addr
+      - consul_http_token
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
 
-  build:
+  db_migration_uat:
     image: maven:3.6.0-jdk-8-alpine
     commands:
       - ./drone-mvn-cache.sh
-      - cd app && ./package.sh
+      - cd pg
+      - ./db-create.sh -Denv=uat
+      - ./migrate-up.sh -Denv=uat
     when:
-      event: [ push ]
-      branch: master
+      event: [ tag ]
+      ref: refs/tags/snapshot*
 
-  rebuild-cache:
-    image: drillster/drone-volume-cache
-    rebuild: true
-    mount:
-      - ./.m2
-    volumes:
-      - /tmp/cache:/cache
+  db_mock_migration_uat:
+    image: maven:3.6.0-jdk-8-alpine
+    commands:
+      - ./drone-mvn-cache.sh
+      - cd pg
+      - ./db-create.sh -Denv=uat_mock
+      - ./migrate-up.sh -Denv=uat_mock
+      - ./migrate-down.sh 1000 -Denv=uat_mock
+      - ./migrate-up.sh -Denv=uat_mock
+      - ./migrate-bootstrap.sh --force -Denv=uat_mock
     when:
-      event: [ push ]
-
-  publish_image:
-    registry: mccontainerregistry.azurecr.io
-    image: plugins/docker
-    repo: mccontainerregistry.azurecr.io/api-prepago
-    tags:
-      - ${DRONE_COMMIT_SHA}
-    secrets: [ docker_username, docker_password ]
-    when:
-      event: [ push ]
-      branch: master
+      event: [ tag ]
+      ref: refs/tags/snapshot*
 
   deploy_to_staging:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
     cluster: staging
+    template: kube.staging.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api_dev
@@ -180,26 +203,67 @@ pipeline:
       event: [ push ]
       branch: master
 
-  deploy_to_sandbox:
+  deploy_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-    cluster: sandbox
+    cluster: delta
+    template: kube.uat.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
       - DB_NAME=prepago_api
-      - API_ENVIRONMENT=sandbox
-    consul_kv: env/sandbox.env
+      - API_ENVIRONMENT=uat
+    consul_kv: env/uat.env
     when:
       event: [ tag ]
       ref: refs/tags/snapshot*
 
-  deploy_to_production:
+  deploy_mock_to_uat:
     image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
-    cluster: production
+    cluster: delta
+    template: deployment-mock.staging.yml
     vars:
       - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+      - DB_NAME=prepago_api_mock
+      - API_ENVIRONMENT=uat_mock
+    consul_kv: env/uat.env
     when:
       event: [ tag ]
-      ref: refs/tags/release*
+      ref: refs/tags/snapshot*
+
+  deploy_virtual_service_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: virtual-service.uat.yml
+    consul_kv: env/uat.env
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  deploy_destination_rule_to_uat:
+    image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+    cluster: delta
+    template: destination-rule.uat.yml
+    when:
+      event: [ tag ]
+      ref: refs/tags/snapshot*
+
+  #deploy_to_production:
+  #  image: mccontainerregistry.azurecr.io/tools/drone-phoenix:1.0.0
+  #  cluster: production
+  #  vars:
+  #    - IMAGE=mccontainerregistry.azurecr.io/api-prepago:${DRONE_COMMIT_SHA}
+  #  when:
+  #    event: [ tag ]
+  #    ref: refs/tags/release*
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./.m2
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      event: [ push, tag ]
 
   slack:
     image: mccontainerregistry.azurecr.io/tools/drone-slack:1.0.0
