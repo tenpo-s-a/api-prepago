@@ -311,7 +311,6 @@ public class AccountEJBBean10 extends PrepaidBaseEJBBean10 {
     NewAmountAndCurrency10 pcaMain = getCalculationsHelper().calculatePcaMain(balance);
     NewAmountAndCurrency10 pcaSecondary = getCalculationsHelper().calculatePcaSecondary(balance, pcaMain);
 
-    //TODO: debe ser el valor de venta o el valor del día?.
     return new PrepaidBalance10(balance, pcaMain, pcaSecondary, getCalculationsHelper().getUsdValue().intValue(), updated);
   }
 

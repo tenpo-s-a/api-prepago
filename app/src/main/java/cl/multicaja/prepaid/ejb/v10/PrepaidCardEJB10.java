@@ -1,5 +1,6 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.prepaid.kafka.events.model.Card;
 import cl.multicaja.prepaid.model.v10.CcrDetailRecord10;
 import cl.multicaja.prepaid.model.v10.CurrencyUsd;
 import cl.multicaja.prepaid.model.v10.PrepaidCard10;
@@ -111,7 +112,7 @@ public interface PrepaidCardEJB10 {
    * @return
    * @throws Exception
    */
-  PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
+  Card upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception;
 
   /**
    *  busca una tarjeta por pan y numero de contrato

@@ -179,7 +179,6 @@ public class CalculationsHelper {
       return BigDecimal.valueOf(0d);
     }
     double pca = _calculatePca(amount);
-    //TODO: debe ser el valor de venta o el valor del día?.
     return BigDecimal.valueOf(pca / getUsdValue()).setScale(2, RoundingMode.CEILING);
   }
 
@@ -193,7 +192,6 @@ public class CalculationsHelper {
       return BigDecimal.valueOf(0d);
     }
 
-    //TODO: debe ser el valor de venta o el valor del día?.
     BigDecimal amount = BigDecimal.valueOf(((eed.doubleValue() * getUsdValue()) * 1.022) + 240).setScale(0, RoundingMode.CEILING);
 
     // Se redondea el monto al 10 mas cercano
@@ -208,7 +206,6 @@ public class CalculationsHelper {
    * @return
    */
   public Double getUsdValue() throws Exception {
-    //TODO: revisar bien esto. Ya que si es null impacta en los tests
     if(ConfigUtils.isEnvTest() || ConfigUtils.isEnvCI()) {
       return Double.valueOf(645);
     }
@@ -216,22 +213,6 @@ public class CalculationsHelper {
       return getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd().getSellCurrencyConvertion();
     }
   }
-
-  /**
-   *
-   * @return
-   * @throws Exception
-   */
-  public Double getDayUsdValue() throws Exception {
-    //TODO: revisar bien esto. Ya que si es null impacta en los tests
-    if(ConfigUtils.isEnvTest() || ConfigUtils.isEnvCI()) {
-      return Double.valueOf(645);
-    }
-    else{
-      return getMastercardCurrencyUpdateEJBBean10().getCurrencyUsd().getDayCurrencyConvertion();
-    }
-  }
-
   
   /**
    * Para uso en calculo del dolar valor día.

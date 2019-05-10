@@ -19,7 +19,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 
-//FIXME: estos test no tienen ningun assert
+//TODO: estos test no tienen ningun assert
+@Ignore
 public class Test_createTicketFreshDesckErrorQueue10 extends TestBaseUnitAsync {
   private static TecnocomServiceHelper tc;
 

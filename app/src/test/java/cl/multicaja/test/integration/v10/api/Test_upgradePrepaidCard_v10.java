@@ -31,7 +31,7 @@ public class Test_upgradePrepaidCard_v10 extends TestBaseUnitApi {
     return respHttp;
   }
 
-  //TODO: Revisar por que falla !!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //TODO: Revisar por que falla
   @Ignore
   @Test
   public void shouldReturn201_PrepaidCardUpgraded_Ok() throws Exception {

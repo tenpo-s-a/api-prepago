@@ -1158,9 +1158,8 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       // Se obtiene el movimiento completo.--
       PrepaidMovement10 movFull = getPrepaidMovementById(mov.getId());
 
-      //TODO: Cambio para buscar usuario con datos nuevos.
-      //Se busca usuario prepago para obtener user
-      //PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().getPrepaidUserById(null,movFull.getIdPrepaidUser());
+
+      //TODO: Se deberia buscar el usuario apartir de la tarjeta y Cuenta.
       PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, movFull.getIdPrepaidUser());
       log.info(prepaidUser10);
       if (prepaidUser10 == null) {
@@ -1275,7 +1274,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
 
-      //TODO: que pasa con la reversa?
+      //FIXME: que pasa con la reversa? Revisar con Negocio
     }
     /**
      * ID 8 - Movimiento (Retiro)
@@ -1307,7 +1306,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.RESEARCH, AccountingStatusType.RESEARCH);
       }
 
-      //TODO: que pasa con la reversa?
+      //FIXME: que pasa con la reversa? Revisar con Negocio
     }
     /**
      * ID 9 - Movimiento (Carga o Reversa)
@@ -1335,7 +1334,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
 
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
         PrepaidTopup10 prepaidTopup = new PrepaidTopup10();
-        //prepaidTopup.setMerchantName(movFull.getNomcomred()); // Todo: cuando mezcle la otra rama
+        prepaidTopup.setMerchantName(movFull.getNomcomred());
         prepaidTopup.setMerchantName("nomcomred");
         prepaidTopup.setMerchantCode(movFull.getCodcom());
         CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, movFull.getIdTxExterno(), prepaidTopup.getCdtTransactionType());
@@ -1501,7 +1500,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       newTicket.setProductId(43000001595L);
       newTicket.addCustomField("cf_id_movimiento", movFull.getId().toString());
 
-      //TODO: Revisar esto despues ya que es parte de la conciliacion
+      //FIXME: Implementar creacion de ticket en Freshdesk
       Ticket ticket = null;//getUserClient().createFreshdeskTicket(null, prepaidUser10.getId(), newTicket);
 
       if (ticket != null && ticket.getId() != null) {
@@ -1574,7 +1573,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       createMovementConciliate(null, mov.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.NOT_RECONCILED);
       updatePrepaidBusinessStatus(null, mov.getId(), BusinessStatusType.REJECTED);
 
-      // TODO: esto va? no se hace mencion a los estado clearing/accounting
+      // FIXME: esto va? no se hace mencion a los estado clearing/accounting. Revisar con Negocio
       if (IndicadorNormalCorrector.NORMAL.equals(mov.getIndnorcor())) {
         this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.NOT_OK, AccountingStatusType.NOT_SEND);
       }
@@ -1837,7 +1836,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               newPrepaidWithdraw10.setMerchantName("Resolucion");
               newPrepaidWithdraw10.setTransactionId(prepaidMovement10.getIdTxExterno());
               newPrepaidWithdraw10.setMovementType(PrepaidMovementType.WITHDRAW);
-              //TODO:reverseWithdrawUserBalance
+
               // Se envia movimiento a reversar
               getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10,false);
 
@@ -1845,7 +1844,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
 
               this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.NOT_OK, clearingData10.getStatus());
-              //TODO: Verificar si es que hay que publicar evento
+              //TODO: Verificar si es que hay que publicar evento? Revisar con Negocio
             }
             break;
           // Nunca deberia llegar aqui
@@ -1884,7 +1883,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       }
       break;
       default:
-        //TODO: Viene en el archivo del banco, y no podemos conciliarlo, se envía a investigar.
+        //TODO: Viene en el archivo del banco, y no podemos conciliarlo, se envía a investigar. Revisar con Negocio
         break;
     }
   }

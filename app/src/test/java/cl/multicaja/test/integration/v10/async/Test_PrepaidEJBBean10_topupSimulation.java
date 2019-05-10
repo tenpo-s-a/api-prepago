@@ -1,7 +1,6 @@
 package cl.multicaja.test.integration.v10.async;
 
 
-import cl.multicaja.accounting.model.v10.UserAccount;
 import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.ValidationException;
@@ -14,8 +13,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -25,6 +22,8 @@ import static cl.multicaja.core.model.Errors.*;
  *
  * @autor vutreras
  */
+//TODO: No se esta realizando simulaciones. Verificar con negocio si se mantiene esta funcionalidad.
+@Ignore
 public class Test_PrepaidEJBBean10_topupSimulation extends TestBaseUnitAsync {
 
   @Ignore

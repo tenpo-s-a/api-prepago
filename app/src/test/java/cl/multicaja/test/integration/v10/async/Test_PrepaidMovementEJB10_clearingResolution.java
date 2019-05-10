@@ -107,7 +107,7 @@ public class Test_PrepaidMovementEJB10_clearingResolution extends TestBaseUnitAs
     }
   }
 
-  //TODO: Revisar esto.
+  //TODO: Revisar esto al trabajar los retiros WEB
   public ResolutionPreparedVariables prepareTest(Long fileId, String merchantCode, ReconciliationStatusType tecnocomStatus, PrepaidMovementStatus movementStatus, AccountingStatusType clearingStatus) throws Exception {
 
     UserAccount userAccount = randomBankAccount();

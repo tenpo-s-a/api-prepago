@@ -494,7 +494,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
-    //FIXME: Verificar todo lo que son devolucione y anulaciones. ACTION: Validar si se puede con la información del servicio, generar esta verificación.
+    //FIXME: Verificar todo lo que son devoluciones y anulaciones. ACTION: Validar si se puede con la información del servicio, generar esta verificación.
     AccountingData10 accounting = new AccountingData10();
     accounting.setIdTransaction(movement.getId());
     accounting.setOrigin(AccountingOriginType.MOVEMENT);
@@ -737,29 +737,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return utc.withZoneSameInstant(ZoneId.of(timeZone));
   }
 
-  public void sendFile(String fileName, String emailAddress) throws Exception {
-
-    String file = "accounting_files/" + fileName;
-
-    FileInputStream attachmentFile = new FileInputStream(file);
-    String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
-
-    attachmentFile.close();
-    //FIXME: Revisar como quedara esto
-    // Enviamos el archivo al mail de reportes diarios ACTION: Se elimina esto, ahora solo sería mediante FTP.
-    /*EmailBody emailBodyToSend = new EmailBody();
-
-    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
-    emailBodyToSend.setTemplateData(null);
-    emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
-    emailBodyToSend.setAddress(emailAddress);
-    mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
-
-     */
-
-    Files.delete(Paths.get(file));
-  }
-
   @Override
   public IpmFile saveIpmFileRecord(Map<String, Object> headers, IpmFile file) throws Exception {
     if(file == null){
@@ -948,6 +925,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este método.
   @Override
+  @Deprecated
   public void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception {
     if(ipmFile == null) {
       throw new Exception("IpmFile object null");
@@ -1198,6 +1176,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   }
 
   @Override
+  @Deprecated
   public AccountingTxType getTransactionType(IpmMessage trx) throws Exception {
     if(trx == null){
       throw new Exception("Transaction is null");
@@ -1219,6 +1198,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
+  @Deprecated
   public AccountingMovementType getMovementType(IpmMessage trx) throws Exception {
     if(trx == null){
       throw new Exception("Transaction is null");
@@ -1242,6 +1222,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
 
   //FIXME: Esto se debe borrar ya no se usa.
   @Override
+  @Deprecated
   public Boolean isSubscriptionMerchant(final String merchantName) throws Exception {
     if(StringUtils.isAllBlank(merchantName)) {
       throw new Exception("merchantName is null or empty");

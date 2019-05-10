@@ -254,13 +254,13 @@ public class PendingTopup10 extends BaseProcessor10 {
           }
           */
         } else if (Errors.ERROR_INDETERMINADO.equals(data.getNumError())) {
-          //TODO: que hacer con los errores indeterminados? deberian devolverse? investigarse?
+          //FIXME: que hacer con los errores indeterminados? deberian devolverse? investigarse?
           // Estos son errores de excepcion no esperados. Probablemente no deberian devolverse
-          // tan rapido. Investigar?
+          // tan rapido. Investigar? Verificar con Negocio
         } else if (PrepaidMovementStatus.REJECTED.equals(data.getPrepaidMovement10().getEstado())) {
           // Comienza el proceso de devolucion
 
-          // TODO: Se debe verificar que hacer en este caso !!!!!!!
+          //FIXME: Que se hace en este caso? se levante un evento a la capa B?
 
           // Se le envia un correo al usuario notificandole que hubo un problema con la carga
           Map<String, Object> templateDataToUser = new HashMap<String, Object>();
