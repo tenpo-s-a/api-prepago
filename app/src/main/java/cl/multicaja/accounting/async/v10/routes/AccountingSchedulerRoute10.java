@@ -18,7 +18,7 @@ public class AccountingSchedulerRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    //TODO: definir cada cuanto se ejecuta esta tarea
+    //TODO: definir cada cuanto se ejecuta esta tarea ACTION:BORRAR ESTA CLASE
 
     // Cada 5to dia del mes a las 22H
     //from("quartz2://myGroup/myfirstrigger?cron=0+0+22+5+1/1+?+*")

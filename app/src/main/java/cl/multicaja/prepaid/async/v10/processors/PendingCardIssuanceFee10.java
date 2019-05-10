@@ -155,7 +155,6 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
         //String contrato = prepaidCard.getProcessorUserId();
         String pan = getRoute().getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
-        //TODO: para el cobro de emision se toma el mismo merchant name de la carga? o se debe colocar el de prepago?
         String nomcomred = prepaidTopup.getMerchantName();
         log.info(String.format("Account [%s]",account.getAccountNumber()));
         InclusionMovimientosDTO inclusionMovimientosDTO = getRoute().getTecnocomServiceHelper().issuanceFee(account.getAccountNumber(), pan, nomcomred, issuanceFeeMovement);
@@ -292,7 +291,7 @@ public class PendingCardIssuanceFee10 extends BaseProcessor10 {
           newTicket.addCustomField(CustomFieldsName.NOMBRE_COLA, QueuesNameType.ISSUANCE_FEE.getValue());
           newTicket.addCustomField(CustomFieldsName.REINTENTOS, req.getReprocesQueue());
 
-          //TODO: Se debe verificar si este id seria el uuid de Tempo
+          //FIXME: Implementar la creación de tickets en freshdesk
           Ticket ticket = null; //getRoute().getUserClient().createFreshdeskTicket(null,user.getId(),newTicket);
           //if(ticket.getId() != null){
             //log.info("Ticket Creado Exitosamente");

@@ -28,6 +28,7 @@ import static cl.multicaja.prepaid.model.v10.NewPrepaidBaseTransaction10.WEB_MER
 /**
  * @autor abarazarte
  */
+//TODO: Eliminar, ya no se enviará mail al usuario, verificar en vez de enviar mails se creen los eventos necesarios.
 public class PendingSendMail10 extends BaseProcessor10 {
 
   private static Log log = LogFactory.getLog(PendingSendMail10.class);
@@ -57,7 +58,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         }
 
         PrepaidMovement10 prepaidMovement = data.getPrepaidMovement10();
-        //TODO: ESTO SE ELIMINARA
+
         /*
         Map<String, Object> templateData = new HashMap<>();
 
@@ -103,7 +104,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
           Endpoint endpoint = createJMSEndpoint(MailRoute10.ERROR_SEND_MAIL_WITHDRAW_REQ);
           return redirectRequest(endpoint, exchange, req, false);
         }
-        //TODO: ESTO SE ELIMINARA
+
         /*
         Map<String, Object> templateData = new HashMap<>();
 
@@ -147,7 +148,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         withdraw10.setAmount(new NewAmountAndCurrency10(data.getPrepaidMovement10().getMonto()));
         withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
         getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
-        //TODO: ESTO SE ELIMINARA
+
         /*
         Map<String, Object> templateData = new HashMap<>();
 
@@ -195,7 +196,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         withdraw10.setMerchantCode(WEB_MERCHANT_CODE);
         getRoute().getPrepaidEJBBean10().calculateFeeAndTotal(withdraw10);
 
-        //TODO: Esto se eliminara
+
         /*
         Map<String, Object> templateData = new HashMap<>();
 
@@ -236,7 +237,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         req.retryCountNext();
 
         PrepaidTopupData10 data = req.getData();
-        //TODO: ESTO SE ELIMINARA
+
         /*
         Map<String, Object> templateData = new HashMap<>();
 
@@ -272,7 +273,7 @@ public class PendingSendMail10 extends BaseProcessor10 {
         PrepaidTopupData10 data = req.getData();
 
         Map<String, Object> templateData = new HashMap<>();
-        //TODO: ESTO SE ELIMINARA
+
         /*
         templateData.put("user_name", StringUtils.capitalize(data.getUser().getName()));
         templateData.put("amount", String.valueOf(NumberUtils.getInstance().toClp(data.getPrepaidMovement10().getMonto())));
@@ -299,7 +300,6 @@ public class PendingSendMail10 extends BaseProcessor10 {
     writer.createXmpMetadata();
     document.addCreationDate();
 
-    //FIXME: falla ya que la imagen no existe
     //document.open();
     //PdfContentByte cb = writer.getDirectContentUnder();
     //Image img = Image.getInstance("https://mcprepaid.blob.core.windows.net/tarjetaprepago/tarjeta.png");

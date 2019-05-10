@@ -259,7 +259,7 @@ public class PendingReverseTopup10 extends BaseProcessor10 {
             data.getPrepaidTopup10().getMessageId(),
             QueuesNameType.REVERSE_TOPUP,
             req.getReprocesQueue());
-          //TODO: Esto se debe mover de user a prepaid y cambiar el id que se utiliza.
+          //FIXME: Implementar la creación de tickets en freshdesk
           //Ticket ticket = getRoute().getUserClient().createFreshdeskTicket(null,user.getUuid(),newTicket);
           /*if(ticket.getId() != null){
             log.info("Ticket Creado Exitosamente");
