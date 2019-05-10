@@ -55,7 +55,7 @@ public class TestBaseUnitApi extends TestContextHelper {
     destroyCamelContext();
   }
 
-  protected void topupUserBalance(String externalUserId, BigDecimal amount) {
+  protected HttpResponse topupUserBalance(String externalUserId, BigDecimal amount) {
     NewPrepaidTopup10 prepaidTopup = buildNewPrepaidTopup10();
     prepaidTopup.getAmount().setValue(amount);
     prepaidTopup.setMerchantCode(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
@@ -63,6 +63,7 @@ public class TestBaseUnitApi extends TestContextHelper {
     HttpResponse respHttp = apiPOST(String.format("/1.0/prepaid/%s/cash_in",externalUserId), toJson(prepaidTopup));
     System.out.println("respHttp: " + respHttp);
     Assert.assertEquals("Debe cargar ok", 201, respHttp.getStatus());
+    return respHttp;
   }
 
 }

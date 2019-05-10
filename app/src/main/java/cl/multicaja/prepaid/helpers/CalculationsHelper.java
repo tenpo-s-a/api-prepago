@@ -81,7 +81,7 @@ public class CalculationsHelper {
 
     BigDecimal max = BigDecimal.valueOf(100).max(percentage);
 
-    BigDecimal result = max.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA()));
+    BigDecimal result = max.multiply(BigDecimal.valueOf(getCalculatorParameter10().getIVA()));
     // Se redondea de la mitad hacia arriba
     BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     log.info("Amount: " + amount + ", feePercentage: " + feePercentage + ", percentage calculated: " + percentage + ", max: " + max + ", with iva: " + result + ", final: " + rounded);
@@ -118,7 +118,7 @@ public class CalculationsHelper {
    * @return
    */
   public BigDecimal calculateIva(BigDecimal amount){
-    BigDecimal result = amount.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA())).subtract(amount);
+    BigDecimal result = amount.multiply(BigDecimal.valueOf(getCalculatorParameter10().getIVA())).subtract(amount);
     BigDecimal rounded = result.setScale(0, RoundingMode.HALF_UP);
     return rounded;
   }
@@ -129,7 +129,7 @@ public class CalculationsHelper {
    * @return
    */
   public BigDecimal calculateIncludedIva(BigDecimal totalAmount) {
-    BigDecimal baseAmount = totalAmount.divide(BigDecimal.valueOf(calculatorParameter10.getIVA()), 0, RoundingMode.HALF_UP);
+    BigDecimal baseAmount = totalAmount.divide(BigDecimal.valueOf(getCalculatorParameter10().getIVA()), 0, RoundingMode.HALF_UP);
     return totalAmount.subtract(baseAmount);
   }
 
@@ -140,7 +140,7 @@ public class CalculationsHelper {
    * @return
    */
   public BigDecimal addIva(BigDecimal amount) {
-    BigDecimal iva = amount.multiply(BigDecimal.valueOf(calculatorParameter10.getIVA()));
+    BigDecimal iva = amount.multiply(BigDecimal.valueOf(getCalculatorParameter10().getIVA()));
     log.info(String.format("Amount: [%s], Iva: [%s]", amount, iva));
     return amount.intValue() > 0 ? iva : BigDecimal.ZERO;
   }
