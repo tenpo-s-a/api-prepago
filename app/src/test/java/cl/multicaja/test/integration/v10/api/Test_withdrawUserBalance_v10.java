@@ -51,8 +51,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
   @Before
   @After
   public void clearData() throws InterruptedException {
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.clearing", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.accounting", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.accounting CASCADE", getSchemaAccounting()));
 
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_comision", getSchema()));
     getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
