@@ -24,6 +24,17 @@ spec:
             number: 80
   - match:
     - uri:
+        prefix: /prepaid/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
+    rewrite:
+      uri: /api-prepaid-1.0/1.0/prepaid/e6295417-91fd-4c6f-8774-48c2c53cd52a
+    route:
+      - destination:
+          host: api-prepaid
+          subset: v2
+          port:
+            number: 80
+  - match:
+    - uri:
         prefix: /prepaid/1.0
     rewrite:
       uri: /api-prepaid-1.0/1.0
