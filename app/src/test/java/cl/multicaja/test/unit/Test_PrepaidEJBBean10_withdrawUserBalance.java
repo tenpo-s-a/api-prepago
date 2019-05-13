@@ -11,9 +11,12 @@ import cl.multicaja.prepaid.ejb.v10.PrepaidEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidMovementEJBBean10;
 import cl.multicaja.prepaid.ejb.v10.PrepaidUserEJBBean10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
+import cl.multicaja.prepaid.helpers.CalculationsHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.IvaType;
 import cl.multicaja.prepaid.utils.ParametersUtil;
 import cl.multicaja.tecnocom.TecnocomService;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
@@ -35,6 +38,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +56,9 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
 
   @Spy
   private PrepaidMovementEJBBean10 prepaidMovementEJBBean10;
+
+  @Spy
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
 
   @Spy
   private PrepaidCardEJBBean11 prepaidCardEJBBean11;
@@ -188,8 +196,11 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
       .doReturn(withdrawReverseMovement)
       .when(prepaidMovementEJBBean10).getPrepaidMovementById(Long.MAX_VALUE);
 
+    Mockito.doNothing()
+      .when(prepaidMovementEJBBean11).addPrepaidMovementFeeList(Mockito.any());
+
     Mockito.doReturn(withdraw10)
-      .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class));
+      .when(prepaidEJBBean10).calculateFeeAndTotal(Mockito.any(IPrepaidTransaction10.class), Mockito.any());
 
     Response response = new Response();
     response.getRunServiceResponse().getReturn().setRetorno("1020");
@@ -206,6 +217,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance {
     Mockito.doReturn(null).when(prepaidMovementEJBBean10).getPrepaidMovementForReverse(Mockito.anyLong(),
       Mockito.anyString(), Mockito.any(PrepaidMovementType.class),
       Mockito.any(TipoFactura.class));
+
+    Mockito.doReturn(Collections.EMPTY_LIST).when(prepaidEJBBean10).calculateFeeList(Mockito.any(IPrepaidTransaction10.class));
 
     try{
       prepaidEJBBean10.withdrawUserBalance(headers,prepaidUser.getUuid(), withdrawRequest,true);

@@ -27,49 +27,18 @@ public class PendingTecnocomReconciliationFile10 extends BaseProcessor10 {
     return new Processor() {
       @Override
       public void process(Exchange exchange) throws Exception {
-        final InputStream inputStream = exchange.getIn().getBody(InputStream.class);
-        String fileName = exchange.getIn().getBody(GenericFile.class).getFileName();
-        log.info("Proccess file name : " + fileName);
+        Long fileId = exchange.getMessage().getHeader("fileId", Long.class);
+        log.info("[processReconciliationFile] Processing file: " + fileId);
         try{
-
-          File tempFile = new File("./" + fileName + "_decrypted");
-          String privateKey = System.getenv("TECNOCOM_PGP_PRIVATE_KEY");
-          String publicKey = System.getenv("TECNOCOM_PGP_PUBLIC_KEY");
-          String passphrase = System.getenv("TECNOCOM_PGP_PASSPHRASE");
-
-          if(StringUtils.isAllBlank(privateKey)) {
-            String msg = "TECNOCOM_PGP_PRIVATE_KEY env variable not found";
-            log.error(msg);
-            tempFile.delete();
-            throw new Exception(msg);
-          }
-
-          if(StringUtils.isAllBlank(publicKey)) {
-            String msg = "TECNOCOM_PGP_PUBLIC_KEY env variable not found";
-            log.error(msg);
-            tempFile.delete();
-            throw new Exception(msg);
-          }
-
-          if(StringUtils.isAllBlank(passphrase)) {
-            String msg = "TECNOCOM_PGP_PASSPHRASE env variable not found";
-            log.error(msg);
-            tempFile.delete();
-            throw new Exception(msg);
-          }
-
-          // Desencriptar Archivo
-          InputStream decryptedData = PgpUtil.decryptFileToIs(inputStream, privateKey, publicKey, tempFile, passphrase);
-          // Procesa el Archivo y lo mete en la tabla.
-          Long fileId = getRoute().getTecnocomReconciliationEJBBean10().processFile(decryptedData, fileName);
           //Procesa la data guardada en la tabla
+          //TODO: se debe verificar la lectura de los movimientos desde la tabla para hacer las comparaciones correspondientes
+          // Se debe buscar la tarjeta por el hash del pan
           getRoute().getTecnocomReconciliationEJBBean10().processTecnocomTableData(fileId);
           // llamar a F3
           getRoute().getPrepaidMovementEJBBean10().clearingResolution();
 
         } catch(Exception e) {
-          log.info("Error processing file: " + fileName);
-          inputStream.close();
+          log.info("Error processing file: " + fileId);
           throw e;
         }
       }
