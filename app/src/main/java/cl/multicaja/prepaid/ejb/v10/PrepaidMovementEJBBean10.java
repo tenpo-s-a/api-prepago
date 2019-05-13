@@ -19,9 +19,13 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.MailDelegate10;
 import cl.multicaja.prepaid.async.v10.PrepaidTopupDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
+import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.*;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
+import cl.multicaja.prepaid.kafka.events.model.Transaction;
+import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.prepaid.utils.TemplateUtils;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,10 +45,7 @@ import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -83,6 +84,9 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private PrepaidCardEJBBean11 prepaidCardEJB11;
 
   @EJB
+  private AccountEJBBean10 accountEJBBean10;
+
+  @EJB
   private CdtEJBBean10 cdtEJB10;
 
   @EJB
@@ -107,6 +111,10 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   private ReconciliationFilesEJBBean10 reconciliationFilesEJBBean10;
 
   private ResearchMovementInformationFiles researchMovementInformationFiles;
+
+  @EJB
+  private PrepaidMovementEJBBean11 prepaidMovementEJBBean11;
+
 
   protected String toJson(Object obj) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(obj);
@@ -164,12 +172,13 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     return prepaidUserEJB10;
   }
 
-  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
-    return prepaidCardEJB11;
+
+  public AccountEJBBean10 getAccountEJBBean10() {
+    return accountEJBBean10;
   }
 
-  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
-    this.prepaidCardEJB11 = prepaidCardEJB11;
+  public void setAccountEJBBean10(AccountEJBBean10 accountEJBBean10) {
+    this.accountEJBBean10 = accountEJBBean10;
   }
 
   public CdtEJBBean10 getCdtEJB10() {
@@ -220,6 +229,23 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     for (PrepaidMovement10 movement : data) {
       addPrepaidMovement(header, movement);
     }
+  }
+
+  public PrepaidMovementEJBBean11 getPrepaidMovementEJBBean11() {
+    return prepaidMovementEJBBean11;
+  }
+
+  public void setPrepaidMovementEJBBean11(PrepaidMovementEJBBean11 prepaidMovementEJBBean11) {
+    this.prepaidMovementEJBBean11 = prepaidMovementEJBBean11;
+  }
+
+
+  public PrepaidCardEJBBean11 getPrepaidCardEJB11() {
+    return prepaidCardEJB11;
+  }
+
+  public void setPrepaidCardEJB11(PrepaidCardEJBBean11 prepaidCardEJB11) {
+    this.prepaidCardEJB11 = prepaidCardEJB11;
   }
 
   @Override
@@ -420,7 +446,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
-  public void expireNotReconciledAuthorizations() {
+  public void expireNotReconciledAuthorizations() throws Exception {
     //TODO:
     // Aun falta levantar un evento de revesar por cada movimiento expirado, por lo que:
     // 1) Se debe hacer un query que busque todos los movimiento a expirar
@@ -438,14 +464,140 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     String expiredQuery = queryExpire.toString();
 
     //Expira los movimientos con estado Notified que ya cumplieron 2 archivos
+    List<PrepaidMovement10> notifiedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.NOTIFIED.toString(), 2);
+
     String expiredNotifiedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.NOTIFIED.toString(),getSchema(),2);
     log.info("Expirando autorizaciones notificadas: " + expiredNotifiedQuery);
     getDbUtils().getJdbcTemplate().execute(expiredNotifiedQuery);
 
+    //Levanta eventos por cada movimiento expirado para notificadas
+    this.lauchEventReverse(notifiedMovements);
+
     //Expira los movimientos con estado Authorized que ya cumplieron 7 archivos
+    List<PrepaidMovement10> authorizedMovements = this.searchMovementsForExpire(PrepaidMovementStatus.AUTHORIZED.toString(), 7);
+
     String expiredAuthorizedQuery = String.format(expiredQuery,getSchema(),PrepaidMovementStatus.AUTHORIZED.toString(),getSchema(),7);
     log.info("Expirando autorizaciones autorizadas: " + expiredAuthorizedQuery);
     getDbUtils().getJdbcTemplate().execute(expiredAuthorizedQuery);
+
+    //Levanta eventos por cada movimiento expirado para autorizadas
+    this.lauchEventReverse(authorizedMovements);
+
+    //Se cierran los estados para accounting y clearing
+    this.closingStatusForAccountingAndClearing(authorizedMovements);
+
+  }
+
+  public void lauchEventReverse(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+      TransactionType transactionType = null;
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      Account account10 = getAccountEJBBean10().findById(prepaidCard10.getAccountId());
+      PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null,account10.getUserId());
+      List<PrepaidMovementFee10> feeList = new ArrayList<PrepaidMovementFee10>();
+
+      if (movement.getTipofac() == TipoFactura.COMPRA_INTERNACIONAL) {
+        transactionType = TransactionType.PURCHASE;
+      }
+      if (movement.getTipofac() == TipoFactura.SUSCRIPCION_INTERNACIONAL) {
+        transactionType = TransactionType.SUSCRIPTION;
+      }
+
+      getPrepaidMovementEJBBean11().publishTransactionReversedEvent(
+        prepaidUser10.getUuid(),
+        account10.getUuid(),
+        prepaidCard10.getUuid(),
+        movement,
+        feeList,
+        transactionType
+      );
+
+    }
+
+  }
+
+  public List<PrepaidMovement10> searchMovementsForExpire(String movement, int numFiles){
+    StringBuilder queryExpire = new StringBuilder();
+    queryExpire.append("select * from  %s.prp_movimiento mov " );
+    queryExpire.append("WHERE (mov.tipo_movimiento = 'SUSCRIPTION' OR mov.tipo_movimiento = 'PURCHASE') ");
+    queryExpire.append("AND mov.estado_con_tecnocom = 'PENDING' ");
+    queryExpire.append("AND mov.estado = '%s' ");
+    queryExpire.append("AND (SELECT COUNT(f.id) ");
+    queryExpire.append("FROM %s.prp_archivos_conciliacion f ");
+    queryExpire.append("WHERE f.created_at >= mov.fecha_creacion AND f.tipo = 'TECNOCOM_FILE' AND f.status = 'OK' ) >= %d");
+    String expiredQuerySelected = queryExpire.toString();
+
+    //PrepaidMovementStatus.NOTIFIED.toString()
+    String expiredQuerySelect = String.format(expiredQuerySelected,getSchema(),movement,getSchema(),numFiles);
+    log.info("Buscando autorizaciones " + movement +": " + expiredQuerySelect);
+
+    return getDbUtils().getJdbcTemplate().query(expiredQuerySelect, this.getMovementMapper());
+
+  }
+
+  public void closingStatusForAccountingAndClearing(List<PrepaidMovement10> movement10s) throws Exception {
+    for (PrepaidMovement10 movement: movement10s) {
+
+      PrepaidCard10 prepaidCard10 = getPrepaidCardEJB11().getPrepaidCardById(null, movement.getCardId());
+      AccountingData10 acc = getPrepaidAccountingEJB10().searchAccountingByIdTrx(null,movement.getId());
+      ClearingData10 clearingData10 = getPrepaidClearingEJB10().searchClearingDataByAccountingId(null, acc.getId());
+
+      // Al expirar los movimientos en acc y liq se deben cerrar estos (not_ok y not_send respectivamente)
+      getPrepaidAccountingEJB10().updateAccountingStatus(null, acc.getId(),AccountingStatusType.NOT_OK);
+      getPrepaidClearingEJB10().updateClearingData(null, clearingData10.getId(), AccountingStatusType.NOT_SEND);
+
+    }
+  }
+
+  private org.springframework.jdbc.core.RowMapper<PrepaidMovement10> getMovementMapper() {
+    return (ResultSet rs, int rowNum) -> {
+      PrepaidMovement10 movement = new PrepaidMovement10();
+      movement.setId(rs.getLong("id"));
+      movement.setIdMovimientoRef(rs.getLong("id_movimiento_ref"));
+      movement.setIdPrepaidUser(rs.getLong("id_usuario"));
+      movement.setIdTxExterno(rs.getString("id_tx_externo"));
+      movement.setTipoMovimiento(PrepaidMovementType.valueOfEnum(rs.getString("tipo_movimiento")));
+      movement.setMonto(rs.getBigDecimal("monto"));
+      movement.setEstado(PrepaidMovementStatus.valueOfEnum(rs.getString("estado")));
+      movement.setEstadoNegocio(BusinessStatusType.valueOfEnum(rs.getString("estado_de_negocio")));
+      movement.setConSwitch(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_switch")));
+      movement.setConTecnocom(ReconciliationStatusType.valueOfEnum(rs.getString("estado_con_tecnocom")));
+      movement.setOriginType(MovementOriginType.valueOf(rs.getString("origen_movimiento")));
+      movement.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+      movement.setFechaActualizacion(rs.getTimestamp("fecha_actualizacion"));
+      movement.setCodent(rs.getString("codent"));
+      movement.setCentalta(rs.getString("centalta"));
+      movement.setCuenta(rs.getString("cuenta"));
+      movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
+      movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
+      movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"), rs.getInt("indnorcor")));
+      movement.setFecfac(rs.getDate("fecfac"));
+      movement.setNumreffac(rs.getString("numreffac"));
+      movement.setPan(rs.getString("pan"));
+      movement.setClamondiv(rs.getInt("clamondiv"));
+      movement.setImpdiv(rs.getBigDecimal("impdiv"));
+      movement.setImpfac(rs.getBigDecimal("impfac"));
+      movement.setCmbapli(rs.getInt("cmbapli"));
+      movement.setNumaut(rs.getString("numaut"));
+      movement.setIndproaje(IndicadorPropiaAjena.fromValue(rs.getString("indproaje")));
+      movement.setCodcom(rs.getString("codcom"));
+      movement.setCodact(rs.getInt("codact"));
+      movement.setImpliq(rs.getBigDecimal("impliq"));
+      movement.setClamonliq(rs.getInt("clamonliq"));
+      movement.setCodpais(CodigoPais.fromValue(rs.getInt("codpais")));
+      movement.setNompob(rs.getString("nompob"));
+      movement.setNumextcta(rs.getInt("numextcta"));
+      movement.setNummovext(rs.getInt("nummovext"));
+      movement.setClamone(rs.getInt("clamone"));
+      movement.setTipolin(rs.getString("tipolin"));
+      movement.setLinref(rs.getInt("linref"));
+      movement.setNumbencta(rs.getInt("numbencta"));
+      movement.setNumplastico(rs.getLong("numplastico"));
+      movement.setNomcomred(rs.getString("nomcomred"));
+      movement.setCardId(rs.getLong("id_tarjeta"));
+
+      return movement;
+    };
   }
 
   public void expireNotReconciledMovements(ReconciliationFileType fileType) throws Exception {
