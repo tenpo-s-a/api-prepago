@@ -10,10 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -532,6 +529,7 @@ public class Test_20190305195605_create_sp_busca_movimientos_a_investigar extend
     Assert.assertEquals("Se debe encontrar 1 registro",Long.valueOf(1),resultRecords);
   }
 
+  @Ignore
   @Test
   public void testSearchResearchMovementBy_SentStatusNull() throws SQLException,IOException {
 

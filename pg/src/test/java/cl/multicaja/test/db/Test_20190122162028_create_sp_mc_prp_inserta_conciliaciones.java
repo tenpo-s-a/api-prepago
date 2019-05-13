@@ -1,5 +1,7 @@
 package cl.multicaja.test.db;
 
+import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.test.TestDbBasePg;
@@ -7,10 +9,19 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
+
+import static cl.multicaja.core.model.Errors.PARAMETRO_FALTANTE_$VALUE;
 
 public class Test_20190122162028_create_sp_mc_prp_inserta_conciliaciones extends TestDbBasePg {
 
@@ -48,8 +59,7 @@ public class Test_20190122162028_create_sp_mc_prp_inserta_conciliaciones extends
   @Test
   public void insertConciliacionesOK() throws Exception {
 
-    Map<String, Object> data = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement();
-    Long idMovimiento = numberUtils.toLong(data.get("_id"));
+    Long idMovimiento = insertRandomMovement();
     System.out.println("idMovimiento: "+idMovimiento);
     Map<String, Object> dataConciliaciones = creaConciliaciones(idMovimiento,"TECNOCOM","OK");
     System.out.println(String.format("Num Err: %s Msj: %s",dataConciliaciones.get("_error_code"),dataConciliaciones.get("_error_msg")));

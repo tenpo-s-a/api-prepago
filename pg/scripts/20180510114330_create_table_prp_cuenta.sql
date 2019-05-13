@@ -17,11 +17,9 @@
 -- // create_table_prp_cuenta
 -- Migration SQL that makes the change goes here.
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE ${schema}.prp_cuenta (
   id                BIGSERIAL NOT NULL,
-  uuid              VARCHAR(50) DEFAULT uuid_generate_v4()::VARCHAR,
+  uuid              VARCHAR(50) NOT NULL DEFAULT uuid_generate_v4()::VARCHAR,
   id_usuario        BIGINT REFERENCES  ${schema}.prp_usuario,
   cuenta            VARCHAR(100) NOT NULL,
   procesador        VARCHAR(30) NOT NULL,

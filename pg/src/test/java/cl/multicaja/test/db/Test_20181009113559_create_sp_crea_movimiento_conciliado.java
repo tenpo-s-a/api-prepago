@@ -18,9 +18,9 @@ public class Test_20181009113559_create_sp_crea_movimiento_conciliado extends Te
     dbUtils.getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_conciliado", SCHEMA));
   }
   @Test
-  public void testCreaMovimientoConciliado() throws SQLException {
-    Map<String,Object> mov = Test_20180523092338_create_sp_mc_prp_crea_movimiento_v10.insertRandomMovement();
-    Map<String, Object> data = creaMovimientoConciliado(numberUtils.toLong(mov.get("_id")), "CARGA", "OK");
+  public void testCreaMovimientoConciliado() throws Exception {
+    Long idMovimiento = insertRandomMovement();
+    Map<String, Object> data = creaMovimientoConciliado(idMovimiento, "CARGA", "OK");
     Assert.assertNotNull("Data no debe ser null", data);
     Assert.assertEquals("No debe ser 0","0",data.get("_error_code"));
     Assert.assertEquals("Deben ser iguales","",data.get("_error_msg"));

@@ -15,10 +15,8 @@ public class Test_20180510114251_create_table_prp_tarjeta extends TestDbBasePg {
   public void checkIfExistsTable_prp_tarjeta() {
     boolean exists = dbUtils.tableExists(SCHEMA, "prp_tarjeta", true,
       new ColumnInfo("id", SqlType.BIGSERIAL.getGetJavaType()),
-      new ColumnInfo("id_usuario", SqlType.BIGINT.getGetJavaType()),
       new ColumnInfo("pan", SqlType.VARCHAR.getGetJavaType(), 16),
       new ColumnInfo("pan_encriptado", SqlType.VARCHAR.getGetJavaType(), 100),
-      new ColumnInfo("contrato", SqlType.VARCHAR.getGetJavaType(), 20),
       new ColumnInfo("expiracion", "int4", 10),
       new ColumnInfo("estado", SqlType.VARCHAR.getGetJavaType(), 20),
       new ColumnInfo("nombre_tarjeta", SqlType.VARCHAR.getGetJavaType(), 100),

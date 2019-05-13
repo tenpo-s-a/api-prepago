@@ -19,41 +19,36 @@
 
 CREATE SCHEMA IF NOT EXISTS ${schema};
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE ${schema}.prp_usuario (
   id                  BIGSERIAL NOT NULL,
-  id_usuario_mc       BIGINT NOT NULL,
-  rut                 INTEGER NOT NULL,
-  estado              VARCHAR(20) NOT NULL,
-  saldo_info          TEXT DEFAULT '' NOT NULL,
-  saldo_expiracion    BIGINT DEFAULT 0 NOT NULL,
-  intentos_validacion BIGINT DEFAULT 0 NOT NULL,
+  uuid                VARCHAR(100) NOT NULL DEFAULT '',
+  numero_documento    VARCHAR(30) NOT NULL DEFAULT '',
+  tipo_documento      VARCHAR(20) NOT NULL DEFAULT '',
+  nombre              VARCHAR(30) NOT NULL DEFAULT '',
+  apellido            VARCHAR(30) NOT NULL DEFAULT '',
+  nivel               VARCHAR(20) NOT NULL DEFAULT '',
+  estado              VARCHAR(20) NOT NULL DEFAULT '',
+  plan                VARCHAR(20) NOT NULL DEFAULT '',
   fecha_creacion      TIMESTAMP NOT NULL,
   fecha_actualizacion TIMESTAMP NOT NULL,
   CONSTRAINT prp_usuario_pk PRIMARY KEY(id),
-  CONSTRAINT prp_usuario_u1 UNIQUE(id_usuario_mc),
-  CONSTRAINT prp_usuario_u2 UNIQUE(rut),
-  CONSTRAINT prp_usuario_u3 UNIQUE(id_usuario_mc, rut)
+  CONSTRAINT prp_usuario_u1 UNIQUE(uuid),
+  CONSTRAINT prp_usuario_u2 UNIQUE(numero_documento)
 );
-COMMENT ON CONSTRAINT prp_usuario_u1 ON ${schema}.prp_usuario IS 'id_usuario_mc no puede repetirse';
-COMMENT ON CONSTRAINT prp_usuario_u2 ON ${schema}.prp_usuario IS 'El rut no puede repetirse';
-COMMENT ON CONSTRAINT prp_usuario_u2 ON ${schema}.prp_usuario IS 'El id_usuario_mc junto al rut no puede repetirse';
 
 CREATE INDEX prp_usuario_i1 ON ${schema}.prp_usuario (id);
 --COMMENT ON INDEX prp_usuario_u2_i1 IS 'Permite realizar la busqueda por id';
 
-CREATE INDEX prp_usuario_i2 ON ${schema}.prp_usuario (id_usuario_mc);
---COMMENT ON INDEX prp_usuario_i2 IS 'Permite realizar la busqueda por id_usuario_mc';
-
-CREATE INDEX prp_usuario_i3 ON ${schema}.prp_usuario (rut);
-
---COMMENT ON INDEX prp_usuario_i2 IS 'Permite realizar la busqueda por id_usuario_mc';
-CREATE INDEX prp_usuario_i4 ON ${schema}.prp_usuario (estado);
 
 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
 DROP TABLE IF EXISTS ${schema}.prp_usuario CASCADE;
+
+DROP EXTENSION  IF EXISTS "uuid-ossp";
 
 DROP SCHEMA IF EXISTS ${schema} CASCADE;
 

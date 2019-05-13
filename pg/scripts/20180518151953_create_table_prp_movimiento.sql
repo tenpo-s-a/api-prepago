@@ -20,7 +20,7 @@
 CREATE TABLE ${schema}.prp_movimiento (
   id                  BIGSERIAL NOT NULL,
   id_movimiento_ref   BIGINT NOT NULL,
-  id_usuario          BIGINT REFERENCES ${schema}.prp_usuario(id),
+  id_tarjeta          BIGINT REFERENCES ${schema}.prp_tarjeta(id),
   id_tx_externo       VARCHAR(50) NOT NULL,
   tipo_movimiento     VARCHAR(50) NOT NULL,
   monto               NUMERIC NOT NULL,
@@ -63,8 +63,8 @@ CREATE TABLE ${schema}.prp_movimiento (
 );
 
 CREATE INDEX prp_movimiento_i1 ON ${schema}.prp_movimiento (id);
-CREATE INDEX prp_movimiento_i2 ON ${schema}.prp_movimiento (id_usuario);
-CREATE INDEX prp_movimiento_i3 ON ${schema}.prp_movimiento (id_usuario,tipo_movimiento);
+CREATE INDEX prp_movimiento_i2 ON ${schema}.prp_movimiento (id_tarjeta);
+CREATE INDEX prp_movimiento_i3 ON ${schema}.prp_movimiento (id_tarjeta,tipo_movimiento);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
