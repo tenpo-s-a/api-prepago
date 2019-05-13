@@ -447,11 +447,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
   }
 
   public void expireNotReconciledAuthorizations() throws Exception {
-    //TODO:
-    // Aun falta levantar un evento de revesar por cada movimiento expirado, por lo que:
-    // 1) Se debe hacer un query que busque todos los movimiento a expirar
-    // 2) Llamar a la query existente, para que actualiza los estados a expirados
-    // 3) Con la lista obtenida en (1), levantar un evento de reversa por cada movimiento.
 
     StringBuilder queryExpire = new StringBuilder();
     queryExpire.append("UPDATE %s.prp_movimiento mov SET estado_con_tecnocom = 'NOT_RECONCILED', estado = 'EXPIRED' " );
