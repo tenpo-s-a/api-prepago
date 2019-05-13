@@ -1914,7 +1914,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Date _endDate, _endDateFilter;
 
     /*if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
-      _startDate = Date.from(prepaidCard.getTimestamps().getCreatedAt().atZone(ZoneId.of("UTC")).toInstant());
+      String timeZone = "";
+      if(headers != null && headers.containsKey(Constants.HEADER_USER_TIMEZONE)) {
+        timeZone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
+      }else {
+        timeZone = "America/Santiago";
+      }
+      _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),timeZone);
       _endDate = new Date(System.currentTimeMillis());
     } else {
       _startDate = getDateUtils().dateStringToDate(startDate,"dd-MM-yyyy");
