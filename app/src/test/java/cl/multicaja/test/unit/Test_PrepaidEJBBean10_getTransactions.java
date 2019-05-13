@@ -182,7 +182,7 @@ public class Test_PrepaidEJBBean10_getTransactions {
     prepaidCard10.setProcessorUserId("1");
 
     Timestamps timestamps = new Timestamps();
-    timestamps.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+    timestamps.setCreatedAt(LocalDateTime.now());
     prepaidCard10.setTimestamps(timestamps);
 
     Response response = new Response();
