@@ -45,7 +45,7 @@ public class Test_AccountEJBBean10_closeAccountEvent extends TestBaseUnitAsync{
     userEventSend.setLevel(prepaidUser.getUserLevel().toString());
     userEventSend.setState(PrepaidUserStatus.CLOSED.name());
 
-    String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.USER_UPDATED_TOPIC,userEventSend,0);
+    String messageId = sendUserCreatedOrUpdated(KafkaEventsRoute10.SEDA_USER_UPDATE_EVENT,userEventSend);
 
     Thread.sleep(2000);
 

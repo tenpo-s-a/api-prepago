@@ -44,6 +44,12 @@ public class User extends BaseModel{
   @NotNull(message = "State cannot be null")
   private String state;
 
+  @JsonProperty(value = "plan",required = true)
+  @NotEmpty(message = "plan cannot be empty")
+  @NotBlank(message = "plan cannot be blank")
+  @NotNull(message = "plan cannot be null")
+  private String plan;
+
   public String getDocumentNumber() {
     return documentNumber;
   }
@@ -93,4 +99,13 @@ public class User extends BaseModel{
   public void setState(String state) {
     this.state = state;
   }
+
+  public String getPlan() {
+    return plan;
+  }
+
+  public void setPlan(String plan) {
+    this.plan = plan;
+  }
+
 }

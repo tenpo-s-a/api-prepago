@@ -111,7 +111,7 @@ public class TestBaseUnit extends TestApiBase {
   }
 
   /**
-   *
+   *Get Schema Prepaid 
    * @return
    */
   public static String getSchema() {
@@ -434,7 +434,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidUser.setUuid(UUID.randomUUID().toString());
     prepaidUser.setDocumentType(DocumentType.DNI_CL);
     prepaidUser.setUserLevel(userLevel);
-
+    prepaidUser.setUserPlan(UserPlanType.FREE);
     return prepaidUser;
   }
 
@@ -463,15 +463,14 @@ public class TestBaseUnit extends TestApiBase {
 
     user.setUserIdMc(Long.valueOf(getRandomNumericString(10)));
     user.setDocumentType(DocumentType.DNI_CL);
-
     user.setRut(rutOrDocumentNumber);
     user.setStatus(PrepaidUserStatus.ACTIVE);
     user.setName(getRandomString(10));
     user.setLastName(getRandomString(10));
     user.setDocumentNumber(rutOrDocumentNumber.toString());
     user.setUserLevel(PrepaidUserLevel.LEVEL_1);
-    user.setUuid(getRandomString(10));
-
+    user.setUuid(UUID.randomUUID().toString());
+    user.setUserPlan(UserPlanType.FREE);
     return user;
   }
 
