@@ -1913,16 +1913,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Date _startDate, _startDateFilter;
     Date _endDate, _endDateFilter;
 
-    if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
-      /* TODO: borra este comentario
-      String timeZone = "";
-      if(headers != null && headers.containsKey(Constants.HEADER_USER_TIMEZONE)) {
-        timeZone = headers.get(Constants.HEADER_USER_TIMEZONE).toString();
-      }else {
-        timeZone = "America/Santiago";
-      }
-      _startDate = getDateUtils().timeStampToLocaleDate( new Date(prepaidCard.getTimestamps().getCreatedAt().getTime()),timeZone);
-      */
+    /*if(StringUtils.isAllBlank(startDate) || StringUtils.isAllBlank(endDate)) {
       _startDate = Date.from(prepaidCard.getTimestamps().getCreatedAt().atZone(ZoneId.of("UTC")).toInstant());
       _endDate = new Date(System.currentTimeMillis());
     } else {
@@ -1935,7 +1926,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     List<PrepaidTransaction10> listMergeTransaction10 = new ArrayList<>();
     PrepaidTransactionExtend10 prepaidTransactionExtend10 = new PrepaidTransactionExtend10();
-    /*
+
     try{
       prepaidTransactionExtend10 = createConsultaMovimientoToList(
         account.getAccountNumber(),user.getRut().getValue().toString(),
