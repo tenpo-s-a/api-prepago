@@ -124,7 +124,7 @@ public class FeeService {
       case PURCHASE:
         return 1;
       case SUSCRIPTION:
-        return 2;
+        return 55;
       default:
         return -1;
     }
