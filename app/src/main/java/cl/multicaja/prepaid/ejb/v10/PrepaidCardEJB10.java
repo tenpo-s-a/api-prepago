@@ -1,8 +1,9 @@
 package cl.multicaja.prepaid.ejb.v10;
 
+import cl.multicaja.prepaid.model.v10.PrepaidCard10;
+import cl.multicaja.prepaid.model.v10.PrepaidCardStatus;
 import cl.multicaja.prepaid.model.v10.*;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 

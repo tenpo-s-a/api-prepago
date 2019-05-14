@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+//TODO: eliminar ya que el IPM se leera en prepaid-batch-worker
+@Deprecated
 public class Test_PrepaidAccountingEJBBean10_processIpmFileTransactions extends TestBaseUnit {
 
   public static void clearData() {

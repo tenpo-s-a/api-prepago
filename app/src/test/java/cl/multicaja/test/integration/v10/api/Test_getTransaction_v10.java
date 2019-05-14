@@ -18,6 +18,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 
+//TODO: Revisar, esto no se utilizara
+@Ignore
 public class Test_getTransaction_v10 extends TestBaseUnitApi {
 
   private HttpResponse getTransactions(Long userIdMc, String fecha_desde, String fecha_hasta) {
@@ -41,8 +43,7 @@ public class Test_getTransaction_v10 extends TestBaseUnitApi {
     }
   }
 
-  //TODO: Esto no se utilizara
-  @Ignore
+
   @Test
   public void getTransactionsOk() throws Exception{
     {

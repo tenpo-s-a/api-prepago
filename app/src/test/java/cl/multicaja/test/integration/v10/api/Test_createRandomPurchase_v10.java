@@ -14,6 +14,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 
+//TODO: Revisar si se seguira utilizando esto
+@Ignore
 public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
 
   private HttpResponse createRandomPurchase(Long userIdMc) {
@@ -34,8 +36,6 @@ public class Test_createRandomPurchase_v10 extends TestBaseUnitApi  {
     return respHttp;
   }
 
-  //TODO: Revisar y corregir.
-  @Ignore
   @Test
   public void shouldCreateRandomPurchase() throws Exception {
 

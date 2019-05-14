@@ -225,6 +225,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       }
     }
   }
+
+  //TODO: La lectura del archivo OPD se esta realizando en el proyecto prepaid-batch-worker
+  @Deprecated
   private MovimientoTecnocom10 buildMovimientoTecnocom(Long fileId,TecnocomReconciliationFileDetail detail){
     MovimientoTecnocom10 movimientoTecnocom10 = new MovimientoTecnocom10();
 
@@ -571,26 +574,26 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     prepaidMovement.setConTecnocom(ReconciliationStatusType.PENDING);
     // Switch Conciliado ya que no pasa por switch
     prepaidMovement.setConSwitch(ReconciliationStatusType.RECONCILED);
-    prepaidMovement.setNomcomred(""); // Todo: MovimientoTecnocom debe traer el merchant name
+    prepaidMovement.setNomcomred(""); //FIXME: MovimientoTecnocom debe traer el merchant name. Si lo debe traer. Se agrego el campo en la tabla prp_movimiento_tecnocom
 
     return prepaidMovement;
   }
 
+  //TODO: Implementado en prepaid-batch-worker
+  @Deprecated
   private void processErrorSuspiciousFile(String fileName) {
     log.info(String.format("processErrorSuspiciousFile - %s", fileName));
 
     Map<String, Object> templateData = new HashMap<>();
     templateData.put("fileName", fileName);
-    //TODO: definir template de correo
     //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
   }
 
+  //FIXME: Revisar con negocio, como informar o que hacer con un error de transaccion
   private void processErrorTrx(Long fileId, MovimientoTecnocom10 trx) {
     log.info("processErrorTrx");
-    //TODO: definir como informar las transacciones
     Map<String, Object> templateData = new HashMap<>();
     //templateData.put("fileName", fileName);
-    //TODO: definir template de correo
     //getRoute().getMailPrepaidEJBBean10().sendInternalEmail(TEMPLATE_MAIL_ERROR_TECNOCOM_FILE_SUSPICIOUS, templateData);
   }
 

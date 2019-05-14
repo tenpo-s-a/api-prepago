@@ -24,6 +24,8 @@ import java.util.List;
 import cl.multicaja.test.integration.v10.async.Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables;
 import org.springframework.jdbc.core.RowMapper;
 
+//TODO: Revisar cuando se trabajen los retiros WEB
+@Ignore
 public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUnitAsync {
   static String folderDir = "";
 
@@ -179,19 +181,19 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
     invalidInformation_amountMastercard.clearingData10.getAmountMastercard().setValue(invalidInformation_amountMastercard.clearingData10.getAmountMastercard().getValue().add(new BigDecimal(1L))); // Altera el valor de amount mastercard
     clearingData10ToFile.add(invalidInformation_amountMastercard.clearingData10);
 
-    //TODO: Revisar este posteriormente
     // 12.- Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + >>Clearing InvalidInformation_accountRut
     Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables invalidInformation_accountRut;
     invalidInformation_accountRut = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
     invalidInformation_accountRut.clearingData10.setStatus(AccountingStatusType.OK); // Para preparar para el archivo
+    //TODO: Revisar este posteriormente, se debe obtener los datos de la cuenta bancaria desde la tabla clearing
     //invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setValue(invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().getValue() + 1); // Altera rut
     //invalidInformation_accountRut.clearingData10.getUserBankAccount().getRut().setDv("x");
     clearingData10ToFile.add(invalidInformation_accountRut.clearingData10);
 
-    //TODO: Revisar este posteriormente
     // 13.- Preparar Test: Es RETIRO + Es WEB + OK Tecnocom + NO Conciliado en BD + MovStatus: process_ok + >>Clearing InvalidInformation_bankAccount
     Test_PrepaidMovementEJB10_clearingResolution.ResolutionPreparedVariables invalidInformation_bankAccount;
     invalidInformation_bankAccount = prepareTest(files10.getId(), NewPrepaidWithdraw10.WEB_MERCHANT_CODE, ReconciliationStatusType.RECONCILED, PrepaidMovementStatus.PROCESS_OK, AccountingStatusType.PENDING);
+    //TODO: Revisar este posteriormente, se debe obtener los datos de la cuenta bancaria desde la tabla clearing
     //invalidInformation_bankAccount.clearingData10.setStatus(AccountingStatusType.OK); // Para preparar para el archivo
     //invalidInformation_bankAccount.clearingData10.getUserBankAccount().setAccountNumber("11111111"); // Altera cuenta bancaria
     clearingData10ToFile.add(invalidInformation_bankAccount.clearingData10);
@@ -578,8 +580,9 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
 
     // 12. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid rut
     {
-      //TODO: Revisar esto, ya que como no se estan verificando que coincidan (Datos cuenta) los datos se confirma en CDT
+
       // Revisar que no haya confirmado en el cdt
+      //TODO: Revisar esto, ya que como no se estan verificando que coincidan (Datos cuenta) los datos se confirma en CDT
       CdtTransaction10 foundCdtTransation = getCdtEJBBean10().buscaMovimientoByIdExternoAndTransactionType(null, invalidInformation_accountRut.prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB_CONF);
       //Assert.assertNull("No debe existir la confirmacion en el cdt", foundCdtTransation);
 
@@ -608,8 +611,8 @@ public class Test_PrepaidMovementEJB10_fullClearingResolution extends TestBaseUn
       //assertResearchFile(researchMovement10, foundClearing.getResearchId(), ResearchMovementResponsibleStatusType.RECONCILIATION_MULTICAJA, ResearchMovementDescriptionType.ERROR_INFO);
     }
 
-    //TODO: Revisar esto, ya que como no se estan verificando que coincidan (Datos cuenta) los datos se confirma en CDT
     // 13. Chequea test: Es RETIRO + Es WEB + Tecnocom: NOT_RECONCILED + NO Conciliado en BD + MovStatus: process OK + >> Clearing Invalid account
+    //TODO: Revisar esto, ya que como no se estan verificando que coincidan (Datos cuenta) los datos se confirma en CDT
     {
       /*
       // Revisar que no haya confirmado en el cdt

@@ -494,7 +494,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       movementType = AccountingMovementType.COMPRA_MONEDA;
       trxOriginType = TransactionOriginType.MASTERCARDINT;
     }
-    //TODO: Verificar todo lo que son devolucione y anulaciones.
+    //FIXME: Verificar todo lo que son devoluciones y anulaciones. ACTION: Validar si se puede con la información del servicio, generar esta verificación.
     AccountingData10 accounting = new AccountingData10();
     accounting.setIdTransaction(movement.getId());
     accounting.setOrigin(AccountingOriginType.MOVEMENT);
@@ -555,7 +555,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         break;
       }
       default: {
-        //TODO: Se debe verificar.
+        //FIXME: Se debe verificar. ACTION: Hay que implementar las fees, para compra y suscripción, tener en cuenta las reglas de negocio para esta verificación
         accounting.setFee(BigDecimal.ZERO);
         accounting.setFeeIva(BigDecimal.ZERO);
         accounting.setCollectorFee(BigDecimal.ZERO);
@@ -590,7 +590,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    // TODO: Agregar tasa de intercambio
+    // FIXME: Agregar tasa de intercambio ACTION: Revisar en el proyecto prepaid batch worker
     String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -651,7 +651,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     FileWriter outputFile = new FileWriter(file);
     CSVWriter writer = new CSVWriter(outputFile,',');
 
-    // TODO: Agregar tasa de intercambio
+    // FIXME: Agregar tasa de intercambio ACTION: REvisar en el proyecto prepaid batch worker
     String[] header = new String[]{"ID_PREPAGO","ID_CONTABILIDAD", "ID_TRX", "ID_CUENTA_ORIGEN", "TIPO_TRX", "MOV_CONTABLE",
       "FECHA_TRX", "FECHA_CONCILIACION", "MONTO_TRX_PESOS", "MONTO_TRX_MCARD_PESOS", "MONTO_TRX_USD", "VALOR_USD",
       "DIF_TIPO_CAMBIO", "COMISION_PREPAGO_PESOS", "IVA_COMISION_PREPAGO_PESOS", "COMISION_RECAUDADOR_MC_PESOS",
@@ -735,29 +735,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
 
     return utc.withZoneSameInstant(ZoneId.of(timeZone));
-  }
-
-  public void sendFile(String fileName, String emailAddress) throws Exception {
-
-    String file = "accounting_files/" + fileName;
-
-    FileInputStream attachmentFile = new FileInputStream(file);
-    String fileToSend = Base64Utils.encodeToString(IOUtils.toByteArray(attachmentFile));
-
-    attachmentFile.close();
-    //TODO: Revisar como quedara esto
-    // Enviamos el archivo al mail de reportes diarios
-    /*EmailBody emailBodyToSend = new EmailBody();
-
-    emailBodyToSend.addAttached(fileToSend, MimeType.CSV.getValue(), fileName);
-    emailBodyToSend.setTemplateData(null);
-    emailBodyToSend.setTemplate(MailTemplates.TEMPLATE_MAIL_ACCOUNTING_FILE_OK);
-    emailBodyToSend.setAddress(emailAddress);
-    mailPrepaidEJBBean10.sendMailAsync(null, emailBodyToSend);
-
-     */
-
-    Files.delete(Paths.get(file));
   }
 
   @Override
@@ -946,7 +923,9 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     return ipmFile;
   }
 
+  //FIXME: Ya no procesamos las transacciones del ipm de esta forma. ACTION: Borrar este método.
   @Override
+  @Deprecated
   public void processIpmFileTransactions(Map<String, Object> headers, IpmFile ipmFile) throws Exception {
     if(ipmFile == null) {
       throw new Exception("IpmFile object null");
@@ -1052,7 +1031,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
       acc.setCollectorFee(BigDecimal.ZERO);
       acc.setCollectorFeeIva(BigDecimal.ZERO);
 
-      //TODO: Revisar Fecha. Usar fecha del archivo IPM?
       acc.setConciliationDate(Timestamp.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
       acc.setStatus(AccountingStatusType.PENDING);
       acc.setAccountingStatus(AccountingStatusType.PENDING);
@@ -1066,16 +1044,15 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
           PrepaidMovement10 mov = buildMovementAut(prepaidCard10.getIdUser(), prepaidCard10 ,trx,getTipoMovimientoFromAccTxType(acc.getType()),getTipoFacFromAccTxType(acc.getType()));
           movement10s.add(mov);
         }else{
-          //TODO: Si la tarjeta no existe se debe investigar.
+
         }
         transactions.add(acc);
 
-        //TODO: verificar si estos movimientos que solo vinieron en el IPM se deben agregar a investigar
       }
       else {
         // Si El movimiento ya existe, se actualiza la data y los status.
         System.out.println("!! OPD Accounting");
-        // TODO: deberia modificar es el accountingStatus
+
         acc.setStatus(AccountingStatusType.OK);
         this.updateAccountingDataFull(headers,acc); // Actualizar todos los valores de Accounting
         // Busca el movimiento de clearing  y luego le actualiza el status
@@ -1083,8 +1060,6 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
         getPrepaidClearingEJBBean10().updateClearingData(headers,clearingData10.getId(),AccountingStatusType.PENDING);
         // Movimiento actualizado a procesado OK
         getPrepaidMovementEJBBean10().updatePrepaidMovementStatus(headers,prepaidMovement10.getId(),PrepaidMovementStatus.PROCESS_OK);
-
-        //FIXME: no faltaria cambiar el estado conciliado con tecnocom a RECONCILED? ahora que ya llego en el IPM.
       }
     }
     // Se añaden los movimientos que no llegaron desde un Archivo de operaciones diarias.
@@ -1201,6 +1176,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
   }
 
   @Override
+  @Deprecated
   public AccountingTxType getTransactionType(IpmMessage trx) throws Exception {
     if(trx == null){
       throw new Exception("Transaction is null");
@@ -1222,6 +1198,7 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
+  @Deprecated
   public AccountingMovementType getMovementType(IpmMessage trx) throws Exception {
     if(trx == null){
       throw new Exception("Transaction is null");
@@ -1243,13 +1220,14 @@ public class PrepaidAccountingEJBBean10 extends PrepaidBaseEJBBean10 implements 
     }
   }
 
+  //FIXME: Esto se debe borrar ya no se usa.
   @Override
+  @Deprecated
   public Boolean isSubscriptionMerchant(final String merchantName) throws Exception {
     if(StringUtils.isAllBlank(merchantName)) {
       throw new Exception("merchantName is null or empty");
     }
 
-    //TODO: externalizar en parametro la lista de comercios?
     List<String> merchants = Arrays.asList("Netflix", "Spotify", "Uber", "Itunes");
 
     return merchants

@@ -12,7 +12,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+//TODO: Corregir tests ignorados cuando se trabaje el retiro web
+@Ignore
 public class Test_PrepaidMovementEJBBean10_processClearingResolution extends TestBaseUnit {
 
   @Before
@@ -26,7 +27,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     DBUtils.getInstance().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting_files CASCADE", getSchemaAccounting()));
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test
   public void processClearingResolution_allOK() throws Exception {
@@ -71,7 +71,7 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     clearingData10.setIdTransaction(prepaidMovement10.getId());
     getPrepaidClearingEJBBean10().insertClearingData(null, clearingData10);
 
-    // Todo OK
+    //OK
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
 
     // Revisar que haya confirmado en el cdt
@@ -99,7 +99,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     getPrepaidMovementEJBBean10().processClearingResolution(null);
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test(expected = ValidationException.class)
   public void processClearingResolution_ValidationException_notWithdraw() throws Exception {
@@ -140,7 +139,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test(expected = ValidationException.class)
   public void processClearingResolution_ValidationException_notWeb() throws Exception {
@@ -180,7 +178,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     getPrepaidMovementEJBBean10().processClearingResolution(clearingData10);
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test
   public void processClearingResolution_movement_notProcessOK() throws Exception {
@@ -242,7 +239,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test
   public void processClearingResolution_TecnocomStatus_NotReconciled() throws Exception {
@@ -306,7 +302,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test
   public void processClearingResolution_BankStatus_NotInFile() throws Exception {
@@ -365,7 +360,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe estar en estado refund", ReconciliationStatusType.NEED_VERIFICATION, reconciliedMovement10.getReconciliationStatusType());
     Assert.assertEquals("Debe tener accion refund", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
-    //TODO: Research
     List<ResearchMovement10> researchMovs = getResearchMovement(prepaidMovement10.getId());
     Assert.assertNotNull("Debe haber una respuesta", researchMovs);
     Assert.assertEquals("Debe haber un solo movimiento a investigar", 1, researchMovs.size());
@@ -373,7 +367,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
     Assert.assertEquals("Debe venir de la resolucion", ReconciliationOriginType.CLEARING_RESOLUTION, researchMovement.getOriginType());
   }
 
-  //TODO: Corregir despues
   @Ignore
   @Test
   public void processClearingResolution_BankStatus_InvalidInformation() throws Exception {
@@ -448,7 +441,6 @@ public class Test_PrepaidMovementEJBBean10_processClearingResolution extends Tes
   }
 
   private List<ResearchMovement10> getResearchMovement(Long movId) throws Exception{
-    //TODO: Research
     return getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movId));
   }
 

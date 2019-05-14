@@ -173,14 +173,14 @@ public class PendingCard10 extends BaseProcessor10 {
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
           prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
           prepaidCard10.setStatus(PrepaidCardStatus.PENDING);
-          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar()); //TODO: verificar si se seguira guardando en claro
+          prepaidCard10.setExpiration(datosTarjetaDTO.getFeccadtar());
           prepaidCard10.setProducto(datosTarjetaDTO.getProducto());
           prepaidCard10.setNumeroUnico(datosTarjetaDTO.getIdentclitar());
 
           // se trunca el pan
           prepaidCard10.setPan(Utils.replacePan(datosTarjetaDTO.getPan()));
 
-          // se encripta el Pan TODO: verificar si se guardara junto al nombre y fecha expiracion
+          // se encripta el Pan FIXME: Encriptar el pan con el keyvault de azure "cuando este desplegado en los clusters", en test se debe usar el AES.
           prepaidCard10.setEncryptedPan(getRoute().getEncryptUtil().encrypt(datosTarjetaDTO.getPan()));
 
           // se guarda un hash del pan utilizando como secret el accountNumber (contrato)
@@ -258,6 +258,7 @@ public class PendingCard10 extends BaseProcessor10 {
         template = TemplateUtils.freshDeskTemplateColas2(template,"Error al dar de Alta a Cliente",String.format("%s %s",prepaidUser10.getName(),prepaidUser10.getLastName()),prepaidUser10.getDocumentNumber(),prepaidUser10.getId());
 
         NewTicket newTicket = createTicket("Error al dar de Alta a Cliente",template,prepaidUser10.getDocumentNumber(),data.getPrepaidTopup10().getMessageId(),QueuesNameType.PENDING_EMISSION,req.getReprocesQueue());
+        //FIXME: Implementar la generacion de ticket
         //TODO: Verificar que ID tiene que ir aca
         //TODO: Revisar como se generaran los Tickets
         Ticket ticket = null;//getRoute().getUserClient().createFreshdeskTicket(null,prepaidUser10.getId(),newTicket);
