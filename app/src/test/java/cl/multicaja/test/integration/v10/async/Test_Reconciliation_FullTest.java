@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.*;
@@ -334,8 +335,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO:withDraw
-  @Ignore
   @Test
   public void case2_withdraw_pos_BD_ok_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -356,8 +355,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO:withDraw
-  @Ignore
   @Test
   public void case2_withdraw_pos_BD_ok_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -902,8 +899,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber cambiado a estado reversado", BusinessStatusType.REVERSED, setupMovement.getEstadoNegocio());
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -925,8 +920,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_timeout_conexion_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -948,8 +941,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_timeout_response_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -971,8 +962,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -994,8 +983,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1017,8 +1004,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_CARGA, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Para que sea como Cashin Se debe corregir la reversa
-  @Ignore
   @Test
   public void case6_topup_pos_BD_error_timeout_response_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1196,9 +1181,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1225,8 +1207,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_timeout_conexion_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1253,8 +1233,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_timeout_response_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1281,8 +1259,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1309,8 +1285,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1337,8 +1311,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case6_withdraw_reverse_pos_BD_error_timeout_response_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.CORRECTORA, withdrawReverseReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1365,8 +1337,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertClearingMovement(clearingData.getId(), true, AccountingStatusType.INITIAL);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_tc_reintentable_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1388,8 +1358,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_timeout_conexion_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1411,9 +1379,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_timeout_response_SW_Expired_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1435,8 +1400,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_tc_reintentable_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1458,8 +1421,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_timeout_conexion_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1481,8 +1442,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertReconciled(testData.prepaidMovement.getId(), true, ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
   }
 
-  //TODO: Descomentar cuando se modifique CashOut
-  @Ignore
   @Test
   public void case7_withdraw_pos_BD_error_timeout_response_SW_WrongAmount_TC_ok() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1558,8 +1517,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertResearch(testData.prepaidMovement.getId(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.ERROR_STATUS_IN_DB);
   }
 
-  //TODO: Revisar y corregir despues
-  @Ignore
   @Test
   public void case9_topup_BD_error_tc_reintentable_SW_ok_TC_Expired() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1574,8 +1531,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     waitForExists(testData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, PrepaidMovementStatus.PROCESS_OK);
   }
 
-  //TODO: Revisar y corregir despues
-  @Ignore
   @Test
   public void case9_topup_BD_error_timeout_conexion_SW_ok_TC_Expired() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -1589,8 +1544,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
 
     waitForExists(testData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.NORMAL, PrepaidMovementStatus.PROCESS_OK);
   }
-  //TODO: Revisar y corregir despues
-  @Ignore
+
   @Test
   public void case9_topup_BD_error_timeout_response_SW_ok_TC_Expired() throws Exception {
     TestData testData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -2495,7 +2449,6 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     assertResearch(testData.tecnocomMovement.getIdForResearch(), true, ResearchMovementResponsibleStatusType.OTI_PREPAID, ResearchMovementDescriptionType.MOVEMENT_NOT_FOUND_IN_DB, researchMovementInformationFilesList);
   }
 
-  @Ignore
   @Test
   public void case18_topup_reverse_BD_no_SW_ok_TC_any() throws Exception {
     TestData setupData = prepareTestData(PrepaidMovementType.TOPUP, "871237987123897", IndicadorNormalCorrector.NORMAL, topupReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -2511,7 +2464,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     // Esperar a que exista el movimiento en la bd
     waitForExists(setupData.prepaidMovement.getIdTxExterno(), PrepaidMovementType.TOPUP, IndicadorNormalCorrector.CORRECTORA);
   }
-  @Ignore
+
   @Test
   public void case18_withdraw_reverse_BD_no_SW_ok_TC_any() throws Exception {
     TestData setupData = prepareTestData(PrepaidMovementType.WITHDRAW, "871237987123897", IndicadorNormalCorrector.NORMAL, withdrawReconciliationFile10.getId(), tecnocomReconciliationFile10.getId());
@@ -3465,6 +3418,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumRefFac(prepaidMovement10.getNumreffac());
     registroTecnocom.setOriginOpe(OriginOpeType.API_ORIGIN.getValue());
     registroTecnocom.setTipoLin(prepaidMovement10.getTipolin());
+    registroTecnocom.setTipoReg(TecnocomReconciliationRegisterType.OP);
     return registroTecnocom;
   }
 

@@ -1039,7 +1039,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
-      if (movimientoTecnocom10List != null && movimientoTecnocom10List.size() <= 0) {
+      if (movimientoTecnocom10List != null && !movimientoTecnocom10List.isEmpty()) {
         // Se registra la iformacion para poder encontrar el movimiento en el archivo
         MovimientoTecnocom10 movimientoTecnocom10 = movimientoTecnocom10List.get(0);
         researchMovementInformationFiles.setIdArchivo(movimientoTecnocom10.getIdArchivo());
@@ -1449,8 +1449,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.info(newPrepaidWithdraw10);
 
       getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
-
-      //TODO: que pasa con la reversa?
     }
     /**
      * ID 8 - Movimiento (Retiro)
@@ -1481,8 +1479,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // se actualiza informacion en accounting y clearing
         this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.RESEARCH, AccountingStatusType.RESEARCH);
       }
-
-      //TODO: que pasa con la reversa?
     }
     /**
      * ID 9 - Movimiento (Carga o Reversa)

@@ -872,7 +872,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       movimientoTecnocom10.setImpautcon(new NewAmountAndCurrency10(rs.getBigDecimal("impautcon")));
       movimientoTecnocom10.setOriginOpe(rs.getString("originope"));
       movimientoTecnocom10.setContrato(rs.getString("contrato"));
-      movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.valueOf(rs.getString("tiporeg")));
+      movimientoTecnocom10.setTipoReg(TecnocomReconciliationRegisterType.valueOfEnum(rs.getString("tiporeg")));
       return movimientoTecnocom10;
     };
   }
@@ -993,7 +993,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocom, movTc), keyHolder);
 
     String insertIntoMovimientosTecnocomHist = String.format(INSERT_MOVEMENT_SQL, getSchema(), "prp_movimientos_tecnocom_hist");
-    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocomHist, movTc), keyHolder);
+    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocomHist, movTc));
 
     return this.buscaMovimientoTecnocomById((long) keyHolder.getKey());
   }
@@ -1029,7 +1029,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
       ps.setString(26, movTc.getTipoLin());
       ps.setInt(27, movTc.getLinRef());
       ps.setTimestamp(28, movTc.getFecTrn());
-      ps.setBigDecimal(29, movTc.getImpautcon().getValue());
+      ps.setBigDecimal(29, movTc.getImpLiq() != null ? movTc.getImpLiq().getValue(): new BigDecimal(Types.NUMERIC));
       ps.setString(30, movTc.getOriginOpe());
       ps.setTimestamp(31, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
       ps.setTimestamp(32, Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
