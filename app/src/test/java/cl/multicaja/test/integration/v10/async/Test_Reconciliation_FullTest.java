@@ -11,6 +11,7 @@ import cl.multicaja.core.utils.db.DBUtils;
 import cl.multicaja.prepaid.helpers.freshdesk.model.v10.TicketType;
 import cl.multicaja.prepaid.helpers.mcRed.McRedReconciliationFileDetail;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomServiceHelper;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.*;
@@ -3417,6 +3418,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumRefFac(prepaidMovement10.getNumreffac());
     registroTecnocom.setOriginOpe(OriginOpeType.API_ORIGIN.getValue());
     registroTecnocom.setTipoLin(prepaidMovement10.getTipolin());
+    registroTecnocom.setTipoReg(TecnocomReconciliationRegisterType.OP);
     return registroTecnocom;
   }
 
