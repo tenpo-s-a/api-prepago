@@ -1449,8 +1449,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.info(newPrepaidWithdraw10);
 
       getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
-
-      //TODO: que pasa con la reversa?
     }
     /**
      * ID 8 - Movimiento (Retiro)
@@ -1481,8 +1479,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // se actualiza informacion en accounting y clearing
         this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.RESEARCH, AccountingStatusType.RESEARCH);
       }
-
-      //TODO: que pasa con la reversa?
     }
     /**
      * ID 9 - Movimiento (Carga o Reversa)
