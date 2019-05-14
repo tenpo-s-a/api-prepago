@@ -20,6 +20,8 @@ import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
+import cl.multicaja.prepaid.helpers.fees.FeeService;
+import cl.multicaja.prepaid.helpers.fees.model.Fee;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFileDetail;
@@ -27,6 +29,7 @@ import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegiste
 import cl.multicaja.prepaid.kafka.events.model.TransactionType;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -529,7 +532,10 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
           // Se buscan e insertan sus comisiones
-          
+          Fee fees = FeeService.getInstance().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
+          PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+          prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INTERNATIONAL_FEE);
+          fees.getCommission();
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
