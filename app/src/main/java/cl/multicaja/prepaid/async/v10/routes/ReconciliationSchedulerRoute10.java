@@ -17,7 +17,8 @@ public class ReconciliationSchedulerRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    //TODO: definir cada cuanto se ejecuta esta tarea
+    //FIXME: Este scheduler debe estar en el proyecto prepaid-batch-router.
+    // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
     //from("quartz2://myGroup/myfirstrigger?cron=0 0/5 * 1/1 * ? *")
     //  .process(new ReconciliationScheduler10(this).processReconciliation());
   }

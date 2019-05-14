@@ -166,7 +166,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertNull("No debe existir reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(notWithdraw.prepaidMovement10.getId());
       Assert.assertEquals("No debe estar en research", 0, researchMovement.size());
       researchMovement = getResearchMovement(notWithdraw.prepaidMovement10.getId());
@@ -193,7 +192,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertNull("Debe tener estado reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      //TODO: Research
       List<ResearchMovement10> reconciliedResearch = getResearchMovement(notWeb.prepaidMovement10.getId());
       Assert.assertEquals("No debe estar en research", 0, reconciliedResearch.size());
       reconciliedResearch = getResearchMovement(notWeb.prepaidMovement10.getId());
@@ -221,7 +219,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(notTecnocom.prepaidMovement10.getId());
       Assert.assertEquals("Debe estar en research", 1, researchMovement.size());
     }
@@ -245,7 +242,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertNull("No debe tener estado reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(pendingTecnocom.prepaidMovement10.getId());
       Assert.assertEquals("No debe estar en research", 0, researchMovement.size());
       researchMovement = getResearchMovement(pendingTecnocom.prepaidMovement10.getId());
@@ -272,7 +268,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertNotNull("Debe tener estado reconciled", reconciliedMovement10);
 
       // No debe estar en research
-      //TODO: Research
       List<ResearchMovement10> reconciliedResearch = getResearchMovement(alreadyReconciledMovement.prepaidMovement10.getId());
       Assert.assertEquals("No debe estar en research", 0, reconciliedResearch.size());
       reconciliedResearch = getResearchMovement(alreadyReconciledMovement.prepaidMovement10.getId());
@@ -299,7 +294,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(movementRejected.prepaidMovement10.getId());
       Assert.assertEquals("Debe estar en research", 1, researchMovement.size());
     }
@@ -324,7 +318,6 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(notInFile.prepaidMovement10.getId());
       Assert.assertEquals("Debe estar en research", 1, researchMovement.size());
     }
@@ -349,14 +342,12 @@ public class Test_PrepaidMovementEJBBean10_clearingResolution extends TestBaseUn
       Assert.assertEquals("Debe tener accion research", ReconciliationActionType.INVESTIGACION, reconciliedMovement10.getActionType());
 
       // Debe estar en research
-      //TODO: Research
       List<ResearchMovement10> researchMovement = getResearchMovement(invalidInformation.prepaidMovement10.getId());
       Assert.assertEquals("Debe estar en research", 1, researchMovement.size());
     }
   }
 
   private List<ResearchMovement10> getResearchMovement(Long movId) throws Exception{
-    //TODO: Research
     return getPrepaidMovementEJBBean10().getResearchMovementByMovRef(numberUtils.toBigDecimal(movId));
   }
 
