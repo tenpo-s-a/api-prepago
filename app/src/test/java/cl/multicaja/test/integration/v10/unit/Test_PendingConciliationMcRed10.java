@@ -321,8 +321,6 @@ public class Test_PendingConciliationMcRed10 extends TestBaseUnitAsync {
     Assert.assertEquals("Debe haber 0 no conciliados.", 0, notReconcilidedCount);
   }
 
-  //TODO: Corregir cuando se realice el retiro
-  @Ignore
   @Test
   public void rendicionRetirosReversadosNoConciliado() throws Exception {
     ArrayList<PrepaidMovement10> movimientos = createMovementAndFile(6, PrepaidMovementType.WITHDRAW, IndicadorNormalCorrector.CORRECTORA,true, wrongMovementInfos, 1);

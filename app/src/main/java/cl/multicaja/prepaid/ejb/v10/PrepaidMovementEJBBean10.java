@@ -1273,8 +1273,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       log.info(newPrepaidWithdraw10);
 
       getPrepaidEJBBean10().reverseWithdrawUserBalance(null,prepaidUser10.getUuid(), newPrepaidWithdraw10, false);
-
-      //FIXME: que pasa con la reversa? Revisar con Negocio
     }
     /**
      * ID 8 - Movimiento (Retiro)
@@ -1305,8 +1303,6 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
         // se actualiza informacion en accounting y clearing
         this.updateAccountingStatusReconciliationDateAndClearingStatus(mov.getId(), AccountingStatusType.RESEARCH, AccountingStatusType.RESEARCH);
       }
-
-      //FIXME: que pasa con la reversa? Revisar con Negocio
     }
     /**
      * ID 9 - Movimiento (Carga o Reversa)
@@ -1693,6 +1689,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     }
   }
 
+  // F3 de clearing
   public void processClearingResolution(ClearingData10 clearingData10) throws Exception {
     if (clearingData10 == null) {
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "clearingData10"));
@@ -1801,33 +1798,33 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
     switch (prepaidMovement10.getConTecnocom()) {
       case RECONCILED: // Tecnocom conciliado ok
         switch (clearingData10.getStatus()) {
-          // Linea 1: OK tecnocom, Banco OK
-          case OK: {
-            // Confirmar movimiento en cdt
-            CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB);
-            cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
-            cdtTransaction.setIndSimulacion(Boolean.FALSE);
-            cdtTransaction.setTransactionReference(cdtTransaction.getId());
-            getCdtEJB10().addCdtTransaction(null, cdtTransaction);
+          case OK: { // Linea 1: OK tecnocom, Banco OK
+              // Confirmar movimiento en cdt
+              CdtTransaction10 cdtTransaction = getCdtEJB10().buscaMovimientoByIdExternoAndTransactionType(null, prepaidMovement10.getIdTxExterno(), CdtTransactionType.RETIRO_WEB);
+              cdtTransaction.setTransactionType(cdtTransaction.getCdtTransactionTypeConfirm());
+              cdtTransaction.setIndSimulacion(Boolean.FALSE);
+              cdtTransaction.setTransactionReference(cdtTransaction.getId());
+              getCdtEJB10().addCdtTransaction(null, cdtTransaction);
 
-            // Actualizar el estado de negocio
-            updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.CONFIRMED);
-            prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
+              // Actualizar el estado de negocio
+              updatePrepaidBusinessStatus(null, prepaidMovement10.getId(), BusinessStatusType.CONFIRMED);
+              prepaidMovement10.setEstadoNegocio(BusinessStatusType.CONFIRMED);
 
-            // Actualiza estado accounting
-            log.info("Actualizando el accounting id: " + clearingData10.getAccountingId());
+              // Actualiza estado accounting
+              log.info("Actualizando el accounting id: " + clearingData10.getAccountingId());
 
-            this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.OK, clearingData10.getStatus());
+              this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.OK, clearingData10.getStatus());
 
-            // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
-            createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
+              // Se agrega a movimiento conciliado para que no vuelva a ser enviado.
+              createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.NONE, ReconciliationStatusType.RECONCILED);
 
+              //TODO: Verificar si es que hay que publicar evento de retiro confirmado
             }
             break;
           case REJECTED: // Linea 2: OK tecnocom, Banco RECHAZADO -> Reversar
-            // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
-          case REJECTED_FORMAT: {
+          case REJECTED_FORMAT: { // Linea 3: OK tecnocom, Banco RECHAZADO_FORMATO -> Reversar
               PrepaidUser10 prepaidUser10 = getPrepaidUserEJB10().findById(null, prepaidMovement10.getId());
+
               // Se crea movimiento de reversa
               NewPrepaidWithdraw10 newPrepaidWithdraw10 = new NewPrepaidWithdraw10();
               newPrepaidWithdraw10.setAmount(new NewAmountAndCurrency10(prepaidMovement10.getMonto()));
@@ -1844,7 +1841,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
               createMovementConciliate(null, prepaidMovement10.getId(), ReconciliationActionType.REVERSA_RETIRO, ReconciliationStatusType.COUNTER_MOVEMENT);
 
               this.updateAccountingStatusReconciliationDateAndClearingStatus(prepaidMovement10.getId(), AccountingStatusType.NOT_OK, clearingData10.getStatus());
-              //TODO: Verificar si es que hay que publicar evento? Revisar con Negocio
+              //TODO: Verificar si es que hay que publicar evento de retiro rechazado
             }
             break;
           // Nunca deberia llegar aqui

@@ -45,8 +45,6 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -824,9 +822,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     prepaidWithdraw.setTimestamps(new Timestamps());
 
     /*
-      Calcular comisiones
-     */
-    prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw);
+      Calcular monto a cargar y comisiones
+    */
+    List<PrepaidMovementFee10> feeList = this.calculateFeeList(prepaidWithdraw);
+    prepaidWithdraw = (PrepaidWithdraw10) this.calculateFeeAndTotal(prepaidWithdraw, feeList);
 
     CdtTransaction10 cdtTransaction = new CdtTransaction10();
     cdtTransaction.setAmount(withdrawRequest.getAmount().getValue().subtract(prepaidWithdraw.getFee().getValue()));
@@ -893,6 +892,14 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
 
     prepaidWithdraw.setId(prepaidMovement.getId());
 
+    /*
+      Registra las comisiones asociadas a este movimiento
+     */
+    for(PrepaidMovementFee10 fee : feeList) {
+      fee.setMovementId(prepaidMovement.getId()); // Asigna el idMovement a cada fee
+    }
+    getPrepaidMovementEJB11().addPrepaidMovementFeeList(feeList); // Se insertan en la BD
+
     String contrato = account.getAccountNumber();
     String pan = getEncryptUtil().decrypt(prepaidCard.getEncryptedPan());
 
@@ -936,12 +943,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction.setGloss(cdtTransaction.getTransactionType().getName() + " " + cdtTransaction.getExternalTransactionId());
         cdtTransaction = getCdtEJB10().addCdtTransaction(null, cdtTransaction);
         getPrepaidMovementEJB10().updatePrepaidBusinessStatus(headers, prepaidMovement.getId(), BusinessStatusType.CONFIRMED);
-        //EVENTO DE RETIRO
-        getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
-        log.info("Published event CASH_OUT_MULTICAJA");
       }
       // Se envia informacion a accounting/clearing
       this.getDelegate().sendMovementToAccounting(prepaidMovement, userAccount);
+
+      //EVENTO DE RETIRO autorizado
+      getPrepaidMovementEJB11().publishTransactionAuthorizedEvent(prepaidUser.getUuid(), account.getUuid(), prepaidCard.getUuid(), prepaidMovement, prepaidWithdraw.getFeeList(), TransactionType.CASH_OUT_MULTICAJA);
+      log.info("Published event CASH_OUT_MULTICAJA");
     }
     else if(CodigoRetorno._1020.equals(inclusionMovimientosDTO.getRetorno())) {
       log.info("Error Timeout Response");
@@ -1213,7 +1221,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return prepaidCard;
   }
 
-  private List<PrepaidMovementFee10> calculateFeeList(IPrepaidTransaction10 transaction) throws BaseException {
+  public List<PrepaidMovementFee10> calculateFeeList(IPrepaidTransaction10 transaction) throws BaseException {
     if(transaction == null || transaction.getAmount() == null){
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "amount"));
     }
@@ -1224,9 +1232,10 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "merchant_code"));
     }
 
+    // Calcular las comisiones segun el tipo de carga (WEB o POS)
     List<PrepaidMovementFee10> feeList = null;
     switch (transaction.getMovementType()) {
-      case TOPUP: // Calcula las comisiones segun el tipo de carga (WEB o POS)
+      case TOPUP:
         if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
           feeList = calculateFeeList(transaction.getAmount().getValue(),
                                      getPercentage().getTOPUP_WEB_FEE_AMOUNT(),
@@ -1242,7 +1251,19 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         }
         break;
       case WITHDRAW:
-        // TODO: que se calculen las comisiones de los retiros
+        if (TransactionOriginType.WEB.equals(transaction.getTransactionOriginType())) {
+          feeList = calculateFeeList(transaction.getAmount().getValue(),
+                                     getPercentage().getWITHDRAW_WEB_FEE_AMOUNT(),
+                                     getPercentage().getWITHDRAW_WEB_FEE_PERCENTAGE(),
+                                     getPercentage().getWITHDRAW_WEB_FEE_IVA_TYPE(),
+                                     PrepaidMovementFeeType.WITHDRAW_WEB_FEE);
+        } else {
+          feeList = calculateFeeList(transaction.getAmount().getValue(),
+                                     getPercentage().getWITHDRAW_POS_FEE_AMOUNT(),
+                                     getPercentage().getWITHDRAW_POS_FEE_PERCENTAGE(),
+                                     getPercentage().getWITHDRAW_POS_FEE_IVA_TYPE(),
+                                     PrepaidMovementFeeType.WITHDRAW_POS_FEE);
+        }
         break;
       default:
         feeList = new ArrayList<>();
@@ -1293,6 +1314,13 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     return feeList;
   }
 
+  /**
+   * Calcula la suma de fees y se las resta/suma al monto total de la transaccion
+   * @param transaction
+   * @param feeList
+   * @return
+   * @throws Exception
+   */
   @Override
   public IPrepaidTransaction10 calculateFeeAndTotal(IPrepaidTransaction10 transaction, List<PrepaidMovementFee10> feeList) throws Exception {
     if(transaction == null){

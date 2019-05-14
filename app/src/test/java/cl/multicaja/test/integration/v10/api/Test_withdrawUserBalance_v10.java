@@ -1,8 +1,11 @@
 package cl.multicaja.test.integration.v10.api;
 
+import cl.multicaja.accounting.model.v10.AccountingData10;
+import cl.multicaja.core.exceptions.BaseException;
 import cl.multicaja.core.utils.http.HttpResponse;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -12,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +50,12 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
 
   @Before
   @After
-  public void clearData() {
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.clearing CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.accounting CASCADE", getSchemaAccounting()));
-    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE %s.prp_movimiento CASCADE", getSchema()));
+  public void clearData() throws InterruptedException {
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.clearing CASCADE", getSchemaAccounting()));
+    getDbUtils().getJdbcTemplate().execute(String.format("TRUNCATE TABLE %s.accounting CASCADE", getSchemaAccounting()));
+
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento_comision", getSchema()));
+    getDbUtils().getJdbcTemplate().execute(String.format("DELETE FROM %s.prp_movimiento", getSchema()));
   }
 
   @Test
@@ -59,7 +65,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -100,20 +107,25 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
 
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    waitForAccountingToExist(topup.getId());
+    waitForAccountingToExist(dbPrepaidMovement.getId());
   }
 
   @Test
   public void shouldReturn201_OnPosWithdraw_merchantCode_5() throws Exception {
 
-
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     String merchantCode = getRandomNumericString(5);
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(merchantCode);
@@ -153,7 +165,12 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
     Assert.assertEquals("El merchant code debe estar completado con 0", "0000000000" + merchantCode, dbPrepaidMovement.getCodcom());
 
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    waitForAccountingToExist(topup.getId());
+    waitForAccountingToExist(dbPrepaidMovement.getId());
   }
+
 
   @Test
   public void shouldReturn201_OnPosWithdraw_merchantCode_18() throws Exception {
@@ -161,12 +178,13 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-
     // se hace una carga
-    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     String merchantCode = getRandomNumericString(15);
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2("000" + merchantCode);
@@ -206,6 +224,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
     Assert.assertEquals("Debe tener el merchantCode truncado con los ultimos 15 digitos", merchantCode, dbPrepaidMovement.getCodcom());
 
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    waitForAccountingToExist(topup.getId());
+    waitForAccountingToExist(dbPrepaidMovement.getId());
   }
 
   @Test
@@ -214,12 +236,13 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     PrepaidUser10 prepaidUser = buildPrepaidUserv2();
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
-
     // se hace una carga
-    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(NewPrepaidBaseTransaction10.WEB_MERCHANT_CODE);
 
@@ -257,6 +280,10 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.IN_PROCESS, BusinessStatusType.IN_PROCESS, dbPrepaidMovement.getEstadoNegocio());
 
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
+
+    waitForAccountingToExist(topup.getId());
+    waitForAccountingToExist(dbPrepaidMovement.getId());
   }
 
   @Test
@@ -767,9 +794,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       PrepaidUser10 prepaidUser = buildPrepaidUserv2();
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
-
       // se hace una carga
-      topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+      HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+      PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
       PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
       Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -797,6 +824,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
       Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
 
+      waitForAccountingToExist(withdraw.getId());
+      waitForAccountingToExist(topup.getId());
     }
 
     // WEB
@@ -805,7 +834,8 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       prepaidUser = createPrepaidUserV2(prepaidUser);
 
       // se hace una carga
-      topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+      HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+      PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
       PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
       Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
@@ -834,6 +864,9 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
       Assert.assertNotNull("Deberia tener error", errorObj1);
       Assert.assertEquals("Deberia tener error code = 108000", TRANSACCION_ERROR_GENERICO_$VALUE.getValue(), errorObj1.get("code"));
       Assert.assertTrue("Deberia tener error message = Transacción duplicada", errorObj1.get("message").toString().contains("Transacción duplicada"));
+
+      waitForAccountingToExist(withdraw.getId());
+      waitForAccountingToExist(topup.getId());
     }
   }
   //TODO: Verificarcuando se haga la reversa.
@@ -986,10 +1019,12 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     prepaidUser = createPrepaidUserV2(prepaidUser);
 
     // se hace una carga
-    topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    HttpResponse topupResp = topupUserBalance(prepaidUser.getUuid(), BigDecimal.valueOf(10000));
+    PrepaidTopup10 topup = topupResp.toObject(PrepaidTopup10.class);
 
     PrepaidCard10 prepaidCard = waitForLastPrepaidCardInStatus(prepaidUser, PrepaidCardStatus.ACTIVE);
     Assert.assertNotNull("Deberia tener una tarjeta", prepaidCard);
+    PrepaidMovement10 dbTopup = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
 
     NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
     prepaidWithdraw.setRut(Integer.parseInt(prepaidUser.getDocumentNumber()));
@@ -1028,7 +1063,38 @@ public class Test_withdrawUserBalance_v10 extends TestBaseUnitApi {
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
 
+    waitForAccountingToExist(topup.getId());
+    waitForAccountingToExist(dbPrepaidMovement.getId());
   }
 
+  private void verifyFees(Long movementId, String codcom) throws BaseException {
+    // Verificar que existan las fees almacenadas en BD
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(movementId);
+    Assert.assertEquals("Debe tener 2 fees", 2, prepaidMovementFee10List.size());
 
+    if (NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(codcom)) {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 84", new BigDecimal(84L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 16", new BigDecimal(16L), ivaFee.getAmount().stripTrailingZeros());
+    } else {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 200", new BigDecimal(200L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 38", new BigDecimal(38L), ivaFee.getAmount().stripTrailingZeros());
+    }
+  }
+
+  private void waitForAccountingToExist(Long movementId) throws Exception {
+    for (int i = 0; i < 20; i++) {
+      AccountingData10 accountingData10 = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null, movementId);
+      if (accountingData10 != null) {
+        return;
+      }
+      Thread.sleep(500);
+    }
+    Assert.fail("Debe encontrar un accountingData");
+  }
 }

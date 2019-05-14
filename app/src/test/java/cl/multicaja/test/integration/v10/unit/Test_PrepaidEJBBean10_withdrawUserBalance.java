@@ -4,8 +4,10 @@ import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.core.exceptions.NotFoundException;
 import cl.multicaja.core.exceptions.RunTimeValidationException;
 import cl.multicaja.core.exceptions.ValidationException;
+import cl.multicaja.core.exceptions.*;
 import cl.multicaja.prepaid.model.v10.*;
 import cl.multicaja.prepaid.model.v11.Account;
+import cl.multicaja.prepaid.model.v11.PrepaidMovementFeeType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.dto.InclusionMovimientosDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 import java.util.Map;
 
 import static cl.multicaja.core.model.Errors.*;
@@ -75,61 +79,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
-  }
 
-
-  @Test
-  public void PosWithdraw_EventCreated() throws Exception {
-
-    PrepaidUser10 prepaidUser = buildPrepaidUserv2();
-    prepaidUser = createPrepaidUserV2(prepaidUser);
-
-    Account account = buildAccountFromTecnocom(prepaidUser);
-    account = createAccount(account.getUserId(),account.getAccountNumber());
-
-    PrepaidCard10 prepaidCard10 = buildPrepaidCardWithTecnocomData(prepaidUser, account);
-    prepaidCard10 = createPrepaidCardV2(prepaidCard10);
-
-
-    InclusionMovimientosDTO mov =  topupInTecnocom(account.getAccountNumber(),prepaidCard10, BigDecimal.valueOf(10000));
-    Assert.assertEquals("Carga OK", "000", mov.getRetorno());
-
-    NewPrepaidWithdraw10 prepaidWithdraw = buildNewPrepaidWithdrawV2(getRandomNumericString(15));
-    PrepaidWithdraw10 withdraw = null;
-
-    try {
-      withdraw = getPrepaidEJBBean10().withdrawUserBalance(null,prepaidUser.getUuid(), prepaidWithdraw,true);
-
-    } catch(Exception vex) {
-      Assert.fail("No debe pasar por acá");
-    }
-
-    Assert.assertNotNull("Deberia ser un PrepaidWithdraw10",withdraw);
-    Assert.assertNotNull("Deberia tener timestamps", withdraw.getTimestamps());
-    Assert.assertNotNull("Deberia tener id", withdraw.getId());
-    Assert.assertNotNull("Deberia tener userId", withdraw.getUserId());
-    Assert.assertFalse("Deberia tener status", StringUtils.isBlank(withdraw.getStatus()));
-    Assert.assertEquals("Deberia tener status = exitoso", "exitoso", withdraw.getStatus());
-
-    Assert.assertNotNull("Deberia tener el tipo de voucher", withdraw.getMcVoucherType());
-    Assert.assertEquals("Deberia tener el tipo de voucher", "A", withdraw.getMcVoucherType());
-    Assert.assertNotNull("Deberia tener el data", withdraw.getMcVoucherData());
-    Assert.assertEquals("Deberia tener el data", 2, withdraw.getMcVoucherData().size());
-
-    Map<String, String> variableData = withdraw.getMcVoucherData().get(0);
-    Assert.assertNotNull("Deberia tener data", variableData);
-
-    Assert.assertTrue("Deberia tener el atributo name", variableData.containsKey("name"));
-    Assert.assertNotNull("Deberia tener el atributo", variableData.get("name"));
-    Assert.assertEquals("Deberia tener el atributo name = amount_paid","amount_paid", variableData.get("name"));
-    Assert.assertTrue("Deberia tener el atributo value", variableData.containsKey("value"));
-    Assert.assertNotNull("Deberia tener el atributo value", variableData.get("value"));
-
-    PrepaidMovement10 dbPrepaidMovement = getPrepaidMovementEJBBean10().getLastPrepaidMovementByIdPrepaidUserAndOneStatus(prepaidUser.getId(), PrepaidMovementStatus.PROCESS_OK);
-    Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
-    Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
-    Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.CONFIRMED, BusinessStatusType.CONFIRMED, dbPrepaidMovement.getEstadoNegocio());
-
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
   }
 
 
@@ -192,6 +143,8 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertNotNull("Deberia tener un movimiento", dbPrepaidMovement);
     Assert.assertEquals("Deberia estar en status " + PrepaidMovementStatus.PROCESS_OK, PrepaidMovementStatus.PROCESS_OK, dbPrepaidMovement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.IN_PROCESS, BusinessStatusType.IN_PROCESS, dbPrepaidMovement.getEstadoNegocio());
+
+    verifyFees(dbPrepaidMovement.getId(), dbPrepaidMovement.getCodcom());
   }
 
   @Test
@@ -643,6 +596,26 @@ public class Test_PrepaidEJBBean10_withdrawUserBalance extends TestBaseUnit {
     Assert.assertEquals("Debe tener el mismo idTxExterno", prepaidWithdraw.getTransactionId(), movement.getIdTxExterno());
     Assert.assertEquals("Debe estar en status " + PrepaidMovementStatus.REJECTED, PrepaidMovementStatus.REJECTED, movement.getEstado());
     Assert.assertEquals("Deberia estar en estado negocio " + BusinessStatusType.REJECTED, BusinessStatusType.REJECTED, movement.getEstadoNegocio());
+  }
+
+  private void verifyFees(Long movementId, String codcom) throws BaseException {
+    // Verificar que existan las fees almacenadas en BD
+    List<PrepaidMovementFee10> prepaidMovementFee10List = getPrepaidMovementEJBBean11().getPrepaidMovementFeesByMovementId(movementId);
+    Assert.assertEquals("Debe tener 2 fees", 2, prepaidMovementFee10List.size());
+
+    if (NewPrepaidWithdraw10.WEB_MERCHANT_CODE.equals(codcom)) {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_WEB_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 84", new BigDecimal(84L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 16", new BigDecimal(16L), ivaFee.getAmount().stripTrailingZeros());
+    } else {
+      PrepaidMovementFee10 withdrawFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.WITHDRAW_POS_FEE.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de withdraw con valor: 200", new BigDecimal(200L), withdrawFee.getAmount().setScale(0, RoundingMode.HALF_UP));
+
+      PrepaidMovementFee10 ivaFee = prepaidMovementFee10List.stream().filter(f -> PrepaidMovementFeeType.IVA.equals(f.getFeeType())).findAny().orElse(null);
+      Assert.assertEquals("Debe tener una fee de iva con valor: 38", new BigDecimal(38L), ivaFee.getAmount().stripTrailingZeros());
+    }
   }
 
 }

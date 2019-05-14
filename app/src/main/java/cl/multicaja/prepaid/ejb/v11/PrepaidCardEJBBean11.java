@@ -306,7 +306,6 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     card.setStatus(prepaidCard10.getStatus().toString());
 
     cl.multicaja.prepaid.kafka.events.model.Timestamps timestamps = new cl.multicaja.prepaid.kafka.events.model.Timestamps();
-
     timestamps.setCreatedAt(prepaidCard10.getTimestamps().getCreatedAt());
     timestamps.setUpdatedAt(prepaidCard10.getTimestamps().getUpdatedAt());
     card.setTimestamps(timestamps);
@@ -331,7 +330,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
   }
 
   @Override
-  public PrepaidCard10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
+  public PrepaidCardResponse10 upgradePrepaidCard(Map<String, Object> headers, String userUuid, String accountUuid) throws Exception {
 
     PrepaidUser10 prepaidUser = getPrepaidUserEJBBean10().findByExtId(null, userUuid);
     if(prepaidUser == null) {
@@ -344,10 +343,10 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     // Validar que la cuenta exista
     Account account = getAccountEJBBean10().findByUuid(accountUuid);
     if(account == null){
-      throw new ValidationException(CUENTA_NO_EXISTE);
+      throw new NotFoundException(CUENTA_NO_EXISTE);
     }
 
-    PrepaidCard10 prepaidCard = getLastPrepaidCardByUserIdAndStatus(headers, prepaidUser.getId(), PrepaidCardStatus.ACTIVE);
+    PrepaidCard10 prepaidCard = getByUserIdAndStatus(null, prepaidUser.getId(), PrepaidCardStatus.ACTIVE, PrepaidCardStatus.LOCKED);
     if(prepaidCard == null) {
       throw new NotFoundException(TARJETA_NO_EXISTE);
     }
@@ -358,9 +357,14 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     // Notificar que se ha creado una tarjeta nueva
     publishCardEvent(prepaidUser.getUuid(), accountUuid, prepaidCard.getId(), KafkaEventsRoute10.SEDA_CARD_CREATED_EVENT);
 
-    return prepaidCard;
+    PrepaidCardResponse10 prepaidCardResponse10 = new PrepaidCardResponse10();
+    prepaidCardResponse10.setId(prepaidCard.getUuid());
+    prepaidCardResponse10.setPan(prepaidCard.getPan());
+    prepaidCardResponse10.setNameOnCard(prepaidCard.getNameOnCard());
+    prepaidCardResponse10.setStatus(prepaidCard.getStatus().toString());
+    prepaidCardResponse10.setTimestamps(prepaidCard.getTimestamps());
+    return prepaidCardResponse10;
   }
-
 
   public PrepaidCard10 getByUserIdAndStatus(Map<String, Object> headers, Long userId,PrepaidCardStatus ... lstStatus)  throws Exception{
     try {
