@@ -14,13 +14,14 @@ import cl.multicaja.core.utils.KeyValue;
 import cl.multicaja.core.utils.NumberUtils;
 import cl.multicaja.core.utils.Utils;
 import cl.multicaja.core.utils.db.InParam;
-import cl.multicaja.core.utils.db.NullParam;
 import cl.multicaja.core.utils.db.OutParam;
 import cl.multicaja.core.utils.db.RowMapper;
 import cl.multicaja.prepaid.async.v10.PrepaidInvoiceDelegate10;
 import cl.multicaja.prepaid.ejb.v11.PrepaidCardEJBBean11;
 import cl.multicaja.prepaid.ejb.v11.PrepaidMovementEJBBean11;
 import cl.multicaja.prepaid.helpers.fees.FeeService;
+import cl.multicaja.prepaid.helpers.fees.model.Charge;
+import cl.multicaja.prepaid.helpers.fees.model.ChargeType;
 import cl.multicaja.prepaid.helpers.fees.model.Fee;
 import cl.multicaja.prepaid.helpers.tecnocom.TecnocomFileHelper;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationFile;
@@ -531,11 +532,8 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidMovement10.setConTecnocom(tecnocomStatus);
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
-          // Se buscan e insertan sus comisiones
-          Fee fees = FeeService.getInstance().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
-          PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-          prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INTERNATIONAL_FEE);
-          fees.getCommission();
+          // Se consulta al servicio de comisiones y se insertan las comisiones recibidas
+          insertMovementFees(prepaidMovement10);
 
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
@@ -581,7 +579,42 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     log.info("INSERT AUT OUT");
   }
 
+  private void insertMovementFees(PrepaidMovement10 prepaidMovement10) throws Exception {
+    // Pide la lista de comisiones al servicio
+    Fee fees = FeeService.getInstance().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
+    List<Charge> feeCharges = fees.getCharges();
 
+    // Por cada comision, almacenarla en la BD
+    for (Charge feeCharge : feeCharges) {
+      PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+      prepaidFee.setAmount(new BigDecimal(feeCharge.getAmount()));
+      prepaidFee.setMovementId(prepaidMovement10.getId());
+      prepaidFee.setIva(BigDecimal.ZERO);
+
+      // Convertir el ChargeType (del servicio) a nuestro FeeType
+      if (ChargeType.IVA.equals(feeCharge.getChargeType())) {
+        prepaidFee.setFeeType(PrepaidMovementFeeType.IVA);
+      } else {
+        switch (prepaidMovement10.getTipofac()) {
+          case COMPRA_INTERNACIONAL:
+          case ANULA_COMPRA_INTERNACIONAL:
+            prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INTERNATIONAL_FEE);
+            break;
+          case SUSCRIPCION_INTERNACIONAL:
+          case ANULA_SUSCRIPCION_INTERNACIONAL:
+            prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INTERNATIONAL_FEE);
+            break;
+          default:
+            prepaidFee.setFeeType(PrepaidMovementFeeType.GENERIC_FEE);
+            break;
+        }
+      }
+
+      // Insertar Fee en BD
+      getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidFee);
+    }
+  }
+  
   private void insertIntoAccoutingAndClearing(TecnocomReconciliationRegisterType tecnocomReconciliationRegisterType, PrepaidMovement10 prepaidMovement10) throws Exception {
     // Crear accounting
     PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
