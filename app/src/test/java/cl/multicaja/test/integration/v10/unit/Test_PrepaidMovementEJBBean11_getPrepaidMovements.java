@@ -1,6 +1,7 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.prepaid.model.v10.*;
+import cl.multicaja.prepaid.model.v11.Account;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
 import cl.multicaja.tecnocom.constants.TipoFactura;
@@ -23,9 +24,15 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     PrepaidUser10 prepaidUser10 = buildPrepaidUserv2();
     prepaidUser10 = createPrepaidUserV2(prepaidUser10);
 
+    Account account = buildAccountFromTecnocom(prepaidUser10);
+    account = createAccount(account.getUserId(),account.getAccountNumber());
+
+    PrepaidCard10 card = buildPrepaidCardWithTecnocomData(prepaidUser10,account);
+    card = createPrepaidCardV2(card);
+
     PrepaidTopup10 topup = buildPrepaidTopup10();
 
-    PrepaidMovement10 movement = buildPrepaidMovementV2(prepaidUser10, topup, null, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 movement = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP);
     movement.setCodcom(getRandomString(10));
     movement.setIdMovimientoRef(1L);
     movement.setIdTxExterno("uno");
@@ -39,9 +46,9 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement.setConTecnocom(ReconciliationStatusType.NEED_VERIFICATION);
     movement.setOriginType(MovementOriginType.OPE);
     movement.setPan("123");
-    movement = createPrepaidMovement10(movement);
+    movement = createPrepaidMovement11(movement);
 
-    PrepaidMovement10 movement2 = buildPrepaidMovementV2(prepaidUser10, topup, null, null, PrepaidMovementType.TOPUP);
+    PrepaidMovement10 movement2 = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.TOPUP);
     movement2.setCodcom(getRandomString(10));
     movement2.setIdMovimientoRef(2L);
     movement2.setIdTxExterno("dos");
@@ -55,9 +62,9 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement2.setConTecnocom(ReconciliationStatusType.COUNTER_MOVEMENT);
     movement2.setOriginType(MovementOriginType.SAT);
     movement2.setPan("1234");
-    movement2 = createPrepaidMovement10(movement2);
+    movement2 = createPrepaidMovement11(movement2);
 
-    PrepaidMovement10 movement3 = buildPrepaidMovementV2(prepaidUser10, topup, null, null, PrepaidMovementType.WITHDRAW);
+    PrepaidMovement10 movement3 = buildPrepaidMovementV2(prepaidUser10, topup, card, null, PrepaidMovementType.WITHDRAW);
     movement3.setCodcom(getRandomString(10));
     movement3.setIdMovimientoRef(3L);
     movement3.setIdTxExterno("tres");
@@ -71,7 +78,7 @@ public class Test_PrepaidMovementEJBBean11_getPrepaidMovements extends TestBaseU
     movement3.setConTecnocom(ReconciliationStatusType.RECONCILED);
     movement3.setOriginType(MovementOriginType.SAT);
     movement3.setPan("12345");
-    movement3 = createPrepaidMovement10(movement3);
+    movement3 = createPrepaidMovement11(movement3);
 
     List<PrepaidMovement10> getPrepaidMovement10List = getPrepaidMovementEJBBean11().getPrepaidMovements(null, null, null,
       null, null, null, null, null, null, null, null, null, null,
