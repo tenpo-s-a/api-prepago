@@ -3,35 +3,23 @@ package cl.multicaja.prepaid.helpers.fees.model;
 import cl.multicaja.core.model.BaseModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class Fee extends BaseModel {
-  @JsonProperty("fee")
-  private Long fee;
-  @JsonProperty("iva")
-  private Long iva;
-  @JsonProperty("commission")
-  private Long commission;
+  @JsonProperty("total")
+  private Long total;
+  @JsonProperty("charges")
+  private List<Charge> charges;
 
-  public Long getFee() {
-    return fee;
+  public Long getTotal() { return total; }
+
+  public void setTotal(Long total) { this.total = total; }
+
+  public List<Charge> getCharges() {
+    return charges;
   }
 
-  public void setFee(Long fee) {
-    this.fee = fee;
-  }
-
-  public Long getIva() {
-    return iva;
-  }
-
-  public void setIva(Long iva) {
-    this.iva = iva;
-  }
-
-  public Long getCommission() {
-    return commission;
-  }
-
-  public void setCommission(Long commission) {
-    this.commission = commission;
+  public void setCharges(List<Charge> charges) {
+    this.charges = charges;
   }
 }
