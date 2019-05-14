@@ -206,6 +206,7 @@ public class TestBaseUnit extends TestApiBase {
       prepaidMovementEJBBean10.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
       prepaidMovementEJBBean10.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
 
+
     }
     return prepaidMovementEJBBean10;
   }
@@ -214,6 +215,20 @@ public class TestBaseUnit extends TestApiBase {
     if (prepaidMovementEJBBean11 == null) {
       prepaidMovementEJBBean11 = new PrepaidMovementEJBBean11();
       prepaidMovementEJBBean11.setKafkaEventDelegate10(getKafkaEventDelegate10());
+      prepaidMovementEJBBean11.setDelegate(getPrepaidTopupDelegate10());
+      prepaidMovementEJBBean11.setPrepaidUserEJB10(getPrepaidUserEJBBean10());
+      prepaidMovementEJBBean11.setCdtEJB10(getCdtEJBBean10());
+      prepaidMovementEJBBean11.setPrepaidCardEJB11(getPrepaidCardEJBBean11());
+      prepaidMovementEJBBean11.setPrepaidEJBBean10(getPrepaidEJBBean10());
+      prepaidMovementEJBBean11.setPrepaidAccountingEJB10(getPrepaidAccountingEJBBean10());
+      prepaidMovementEJBBean11.setMailDelegate(getMailDelegate());
+      prepaidMovementEJBBean11.setPrepaidClearingEJB10(getPrepaidClearingEJBBean10());
+      prepaidMovementEJBBean11.setMailPrepaidEJBBean10(getMailPrepaidEJBBean10());
+      prepaidMovementEJBBean11.setTecnocomReconciliationEJBBean(getTecnocomReconciliationEJBBean10());
+      prepaidMovementEJBBean11.setMcRedReconciliationEJBBean(getMcRedReconciliationEJBBean10());
+      prepaidMovementEJBBean11.setReconciliationFilesEJBBean10(getReconciliationFilesEJBBean10());
+      prepaidMovementEJBBean11.setAccountEJBBean10(getAccountEJBBean10());
+      prepaidMovementEJBBean11.setPrepaidMovementEJBBean11(getPrepaidMovementEJBBean11());
     }
     return prepaidMovementEJBBean11;
   }
@@ -1113,6 +1128,7 @@ public class TestBaseUnit extends TestApiBase {
     prepaidMovement.setConSwitch(ReconciliationStatusType.PENDING);
     prepaidMovement.setOriginType(MovementOriginType.API);
     prepaidMovement.setEstadoNegocio(BusinessStatusType.IN_PROCESS);
+    prepaidMovement.setCardId(prepaidCard.getId());
     prepaidMovement.setNomcomred(prepaidTopup != null ? prepaidTopup.getMerchantName() != null ? prepaidTopup.getMerchantName() : getRandomString(10) : getRandomString(10));
 
     return prepaidMovement;
@@ -1278,6 +1294,16 @@ public class TestBaseUnit extends TestApiBase {
   public PrepaidMovement10 createPrepaidMovement10(PrepaidMovement10 prepaidMovement10) throws Exception {
 
     prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
+
+    Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
+    Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);
+
+    return prepaidMovement10;
+  }
+
+  public PrepaidMovement10 createPrepaidMovement11(PrepaidMovement10 prepaidMovement10) throws Exception {
+
+    prepaidMovement10 = getPrepaidMovementEJBBean11().addPrepaidMovement(null, prepaidMovement10);
 
     Assert.assertNotNull("Debe Existir prepaidMovement10",prepaidMovement10);
     Assert.assertTrue("Debe Contener el Id",prepaidMovement10.getId() > 0);

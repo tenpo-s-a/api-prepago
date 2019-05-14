@@ -1,6 +1,7 @@
 package cl.multicaja.test.integration.v10.unit;
 
 import cl.multicaja.core.exceptions.BadRequestException;
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.OriginOpeType;
 import cl.multicaja.tecnocom.constants.IndicadorNormalCorrector;
@@ -42,6 +43,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(0);
     movTec.setTipoFac(TipoFactura.CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("834738");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -51,6 +53,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_CARGA_EFECTIVO_COMERCIO_MULTICAJA);
     movTec.setNumAut("756345");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -60,6 +63,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_COMISION_APERTURA);
     movTec.setNumAut("235334");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
@@ -69,6 +73,7 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     movTec.setIndNorCor(1);
     movTec.setTipoFac(TipoFactura.ANULA_COMISION_APERTURA);
     movTec.setNumAut("457674");
+    movTec.setTipoReg(TecnocomReconciliationRegisterType.AU);
     movTec = Test_TecnocomReconciliationEJBBean10_insertaMovimientos.inserTcMov(movTec);
     Assert.assertNotEquals("Id debe ser != 0", 0, movTec.getId().intValue());
     movimientoTecnocom10s.add(movTec);
