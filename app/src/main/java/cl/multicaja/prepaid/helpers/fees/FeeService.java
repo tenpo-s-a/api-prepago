@@ -14,16 +14,14 @@ import cl.multicaja.prepaid.model.v10.PrepaidMovementType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 public class FeeService {
 
-  private static FeeService instance;
   private static final Log LOG = LogFactory.getLog(cl.multicaja.prepaid.helpers.tenpo.ApiCall.class);
-  private HttpUtils httpUtils = HttpUtils.getInstance();
+
+  private static FeeService instance;
+  private HttpUtils httpUtils;
   private JsonMapper jsonMapper;
   private ConfigUtils configUtils;
   private static final int TIMEOUT = 15000;
@@ -54,6 +52,17 @@ public class FeeService {
     return configUtils;
   }
 
+  public HttpUtils getHttpUtils() {
+    if (httpUtils == null) {
+      httpUtils = HttpUtils.getInstance();
+    }
+    return httpUtils;
+  }
+
+  public void setHttpUtils(HttpUtils httpUtils) {
+    this.httpUtils = httpUtils;
+  }
+
   private String getApiUrl() {
     return this.apiUrl;
   }
@@ -73,7 +82,7 @@ public class FeeService {
     LOG.info("request route: " + URL);
 
     // Hace la llamada al servicio
-    HttpResponse httpResponse = httpUtils.execute(HttpUtils.ACTIONS.GET, null, TIMEOUT, TIMEOUT, URL, null, DEFAULT_HTTP_HEADERS);
+    HttpResponse httpResponse = getHttpUtils().execute(HttpUtils.ACTIONS.GET, null, TIMEOUT, TIMEOUT, URL, null, DEFAULT_HTTP_HEADERS);
     httpResponse.setJsonParser(getJsonMapper());
     LOG.info("response: " + httpResponse.getResp());
 
@@ -110,7 +119,7 @@ public class FeeService {
     }
   }
 
-  private Integer getTransactionType(PrepaidMovementType prepaidMovementType) {
+  public Integer getTransactionType(PrepaidMovementType prepaidMovementType) {
     switch (prepaidMovementType) {
       case PURCHASE:
         return 1;
