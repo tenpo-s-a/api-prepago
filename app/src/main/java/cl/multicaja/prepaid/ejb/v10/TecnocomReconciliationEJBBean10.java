@@ -528,6 +528,9 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
           prepaidMovement10.setConTecnocom(tecnocomStatus);
           prepaidMovement10 = getPrepaidMovementEJBBean10().addPrepaidMovement(null, prepaidMovement10);
 
+          // Se buscan e insertan sus comisiones
+          
+
           // Dado que no esta en la BD, se crean tambien sus campos en las tablas de contabilidad
           insertIntoAccoutingAndClearing(trx.getTipoReg(), prepaidMovement10);
 
