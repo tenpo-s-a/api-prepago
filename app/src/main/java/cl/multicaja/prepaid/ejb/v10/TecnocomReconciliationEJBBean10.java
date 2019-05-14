@@ -993,7 +993,7 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocom, movTc), keyHolder);
 
     String insertIntoMovimientosTecnocomHist = String.format(INSERT_MOVEMENT_SQL, getSchema(), "prp_movimientos_tecnocom_hist");
-    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocomHist, movTc), keyHolder);
+    getDbUtils().getJdbcTemplate().update(getInsertMovementCreator(insertIntoMovimientosTecnocomHist, movTc));
 
     return this.buscaMovimientoTecnocomById((long) keyHolder.getKey());
   }
