@@ -21,9 +21,6 @@ public class ClearingFileRoute10 extends BaseRoute10 {
 
   @Override
   public void configure() throws Exception {
-    //Se ejecuta todos los dias a la 1am America/Santiago
-    //from("quartz2://prepaid/clearing_file?cron=0+0+1+*+*+?&trigger.timeZone=America/Santiago")
-    // .process(new AccountingScheduler10(this).generateClearingFile());
 
     //Ruta para la subida de archivos
     from(DIRECT_CLEARING_UPLOAD_ENDPOINT).id("prepaid/upload_clearing_file")
@@ -37,6 +34,8 @@ public class ClearingFileRoute10 extends BaseRoute10 {
       .to(getFtpUri()) // upload the CSV file
       .log("${date:now:yyyy-MM-dd'T'HH:mm:ssZ} - FTP upload complete. File: ${header.CamelFileName}");
 
+    //TODO: La escucha de la carpeta SFTP debe estar en el proyecto prepaid-batch-router.
+    // En este caso se debe escuchar una cola Activemq para procesar dicho archivo.
     //Se agrega ruta para procesar respuesta de Banco
     //from(getFtpUriResponse()).process(new PendingClearingFile10(this).processClearingBatch());
   }

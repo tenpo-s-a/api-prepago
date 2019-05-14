@@ -45,8 +45,6 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static cl.multicaja.core.model.Errors.*;
 
@@ -341,6 +339,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     Account account = getAccountEJBBean10().findByUserId(user.getId());
 
     //TODO: Verificar si el usuario no tiene cuenta es una primera carga.
+    // Verificar con Negocio
     if(account != null) {
       topupRequest.setFirstTopup(Boolean.FALSE);
     }
@@ -393,6 +392,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     //TODO: Revisar si esta decision esta correcta...
     // Si viene desde un endpoint, se debe verificar si ya se tiene una reversa con los mismos datos
     // Si viene internamente no se verifica, puesto que podria ser el movimiento contrario de una reversa
+    // Verificar con Negocio o Desarrollo
     if(fromEndPoint) {
       PrepaidMovement10 previousReverse = this.getPrepaidMovementEJB10().getPrepaidMovementForReverse(user.getId(),
         topupRequest.getTransactionId(), PrepaidMovementType.TOPUP,
@@ -405,7 +405,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         prepaidMovement.setEstado(PrepaidMovementStatus.PROCESS_OK);
         prepaidMovement.setEstadoNegocio(BusinessStatusType.REVERSED);
         prepaidMovement.setConTecnocom(ReconciliationStatusType.RECONCILED);
-        //TODO: deberia tambien ser conciliada con swtich asi se responda error?
+        //TODO: deberia tambien ser conciliada con swtich asi se responda error?.
+        // Verificar con Negocio
         prepaidMovement = getPrepaidMovementEJB10().addPrepaidMovement(headers, prepaidMovement);
 
         throw new RunTimeValidationException(REVERSA_MOVIMIENTO_REVERSADO);
@@ -573,6 +574,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     PrepaidUser10 prepaidUser10 = null;
     try {
 
+      //FIXME: Implementar integracion con servicio de usuarios.
       cl.multicaja.prepaid.helpers.tenpo.model.User userTenpo = getApiCall().getUserById(UUID.fromString(userId));
       if(userTenpo != null){
         prepaidUser10 = new PrepaidUser10();
@@ -923,10 +925,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         null,
         status);
 
-      //TODO: verificar al modificar el retiro.
-      
       // Expira cache del saldo de la cuenta
-      //getAccountEJBBean10().expireBalanceCache(account.getId());
+      getAccountEJBBean10().expireBalanceCache(account.getId());
 
       UserAccount userAccount = null;
       if(TransactionOriginType.WEB.equals(withdrawRequest.getTransactionOriginType())) {
@@ -1666,7 +1666,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
       balance.setPcaMain(amount);
       balance.setBalance(amount);
       balance.setPcaSecondary(amount);
-      //TODO: debe ser el valor de venta o el valor del día?.
       balance.setUsdValue(getCalculationsHelper().getUsdValue().intValue());
       balance.setUpdated(Boolean.FALSE);
     } else {
@@ -1989,6 +1988,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
   }
 
 
+  //TODO: Verificar si se mantiene este metodo.
+  @Deprecated
   private PrepaidTransactionExtend10 createConsultaMovimientoToList(String contrato,String numDoc,TipoDocumento tipoDoc,
       Date fechaDesde, Date fechaHasta) throws Exception {
 
@@ -2210,7 +2211,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
           transaction10.setAmountPrimary(new NewAmountAndCurrency10(montoPesos,CodigoMoneda.CHILE_CLP));
 
           transaction10.setAmountSecondary(new NewAmountAndCurrency10(movimientosDTO.getImpdiv().setScale(2,RoundingMode.HALF_DOWN),movimientosDTO.getClamondiv()));
-          //TODO: Verificar si se tiene que pintar solo en dolares o en otras monedas tb.
           BigDecimal bd = montoPesos.divide(movimientosDTO.getImpdiv(), 2, RoundingMode.HALF_UP);
           transaction10.setUsdValue(new NewAmountAndCurrency10(bd,CodigoMoneda.USA_USD));
           transaction10.setCountry(movimientosDTO.getNompais());
@@ -2577,7 +2577,7 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         cdtTransaction10.setTransactionReference(cdtTransaction10.getId());
         cdtTransaction10 = getCdtEJB10().addCdtTransaction(null, cdtTransaction10);
 
-        //TODO: Se comenta por que ya no se enviara mails
+        //TODO: Se comenta por que ya no se enviara mails. Quese hace? se publica un evento? Verificar con negocio
         //this.getMailDelegate().sendTopupRefundCompleteMail(getUserClient().getUserById(null, prepaidUserTest.getUserIdMc()), prepaidMovement);
       }
     }
@@ -2594,6 +2594,8 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
     }
   }
 
+  //Todo: esto esta en el servicio de notificaciones, revisar si se elimina de este proyecto
+  @Deprecated
   public NotificationTecnocom setNotificationCallback(Map<String, Object> headers, NotificationTecnocom notificationTecnocom) throws Exception {
 
     String committedFields = null;
@@ -2663,7 +2665,6 @@ public class PrepaidEJBBean10 extends PrepaidBaseEJBBean10 implements PrepaidEJB
         log.info(notificationTecnocom.toString());
         log.info("=== PROCESOR NOTIFICATION ===");
       }
-      //TODO: Cuando se procese el callback y se cree el movimiento se debera agregar la generacion de boleta.
       //prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,null));
     }
 

@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
+//TODO: Revisar si se seguira utilizando
+@Ignore
 public class Test_conciliaciones_v10 extends TestBaseUnitApi {
 
 

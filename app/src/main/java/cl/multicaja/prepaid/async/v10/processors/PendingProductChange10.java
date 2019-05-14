@@ -64,7 +64,7 @@ public class PendingProductChange10 extends BaseProcessor10 {
             log.info(String.format("LLamando cambio de producto %s", account.getAccountNumber()));
 
             // se hace el cambio de producto
-            //FixMe: debe usar getDocumentType en vez de tipoDocumento.RUT
+            //TODO: debe usar getDocumentType en vez de tipoDocumento.RUT
             CambioProductoDTO dto = getRoute().getTecnocomService().cambioProducto(account.getAccountNumber(), user.getDocumentNumber(), TipoDocumento.RUT, tipoAlta);
 
             log.info("Respuesta cambio de producto");

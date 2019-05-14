@@ -233,7 +233,8 @@ public class McRedReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implement
             PrepaidUser10 user = getPrepaidUserEJBBean10().findById(null,prepaidMovement10.getIdPrepaidUser());
             log.info("Conciliado");
             getPrepaidMovementEJBBean10().updateStatusMovementConSwitch(null, prepaidMovement10.getId(), ReconciliationStatusType.RECONCILED);
-            //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo
+            //Todo: Faltaria hacer cambio de usuario prepago a lo nuevo y verificar que va en cada campo.
+            // Se debe verificar si se enviaran eventos para generar boletas
             prepaidInvoiceDelegate10.sendInvoice(prepaidInvoiceDelegate10.buildInvoiceData(prepaidMovement10,user));
           }
         }
