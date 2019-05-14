@@ -1039,7 +1039,7 @@ public class PrepaidMovementEJBBean10 extends PrepaidBaseEJBBean10 implements Pr
       List<MovimientoTecnocom10> movimientoTecnocom10List = getTecnocomReconciliationEJBBean().buscaMovimientosTecnocomHist(null, null, prepaidCard10.getEncryptedPan(), prepaidMovement.getIndnorcor(), prepaidMovement.getTipofac(), new java.sql.Date(prepaidMovement.getFecfac().getTime()), prepaidMovement.getNumaut());
 
       ResearchMovementInformationFiles researchMovementInformationFiles = new ResearchMovementInformationFiles();
-      if (movimientoTecnocom10List != null && movimientoTecnocom10List.size() <= 0) {
+      if (movimientoTecnocom10List != null && !movimientoTecnocom10List.isEmpty()) {
         // Se registra la iformacion para poder encontrar el movimiento en el archivo
         MovimientoTecnocom10 movimientoTecnocom10 = movimientoTecnocom10List.get(0);
         researchMovementInformationFiles.setIdArchivo(movimientoTecnocom10.getIdArchivo());
