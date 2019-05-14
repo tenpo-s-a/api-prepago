@@ -7,8 +7,8 @@ public enum PrepaidMovementFeeType {
   TOPUP_WEB_FEE,
   WITHDRAW_POS_FEE,
   WITHDRAW_WEB_FEE,
-  PURCHASE_INTERNATIONAL_FEE,
-  SUSCRIPTION_INTERNATIONAL_FEE,
+  PURCHASE_INT_FEE, // Compras internacionales
+  SUSCRIPTION_INT_FEE, // Suscripciones internacionales
   IVA;
 
   public static PrepaidMovementFeeType valueOfEnum(String name) {

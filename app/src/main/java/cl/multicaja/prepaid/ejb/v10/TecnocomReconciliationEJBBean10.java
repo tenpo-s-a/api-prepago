@@ -584,37 +584,39 @@ public class TecnocomReconciliationEJBBean10 extends PrepaidBaseEJBBean10 implem
     Fee fees = FeeService.getInstance().calculateFees(prepaidMovement10.getTipoMovimiento(), prepaidMovement10.getClamon(), prepaidMovement10.getImpfac().longValue());
     List<Charge> feeCharges = fees.getCharges();
 
-    // Por cada comision, almacenarla en la BD
-    for (Charge feeCharge : feeCharges) {
-      PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
-      prepaidFee.setAmount(new BigDecimal(feeCharge.getAmount()));
-      prepaidFee.setMovementId(prepaidMovement10.getId());
-      prepaidFee.setIva(BigDecimal.ZERO);
+    if (feeCharges != null) {
+      // Por cada comision, almacenarla en la BD
+      for (Charge feeCharge : feeCharges) {
+        PrepaidMovementFee10 prepaidFee = new PrepaidMovementFee10();
+        prepaidFee.setAmount(new BigDecimal(feeCharge.getAmount()));
+        prepaidFee.setMovementId(prepaidMovement10.getId());
+        prepaidFee.setIva(BigDecimal.ZERO);
 
-      // Convertir el ChargeType (del servicio) a nuestro FeeType
-      if (ChargeType.IVA.equals(feeCharge.getChargeType())) {
-        prepaidFee.setFeeType(PrepaidMovementFeeType.IVA);
-      } else {
-        switch (prepaidMovement10.getTipofac()) {
-          case COMPRA_INTERNACIONAL:
-          case ANULA_COMPRA_INTERNACIONAL:
-            prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INTERNATIONAL_FEE);
-            break;
-          case SUSCRIPCION_INTERNACIONAL:
-          case ANULA_SUSCRIPCION_INTERNACIONAL:
-            prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INTERNATIONAL_FEE);
-            break;
-          default:
-            prepaidFee.setFeeType(PrepaidMovementFeeType.GENERIC_FEE);
-            break;
+        // Convertir el ChargeType (del servicio) a nuestro FeeType
+        if (ChargeType.IVA.equals(feeCharge.getChargeType())) {
+          prepaidFee.setFeeType(PrepaidMovementFeeType.IVA);
+        } else {
+          switch (prepaidMovement10.getTipofac()) {
+            case COMPRA_INTERNACIONAL:
+            case ANULA_COMPRA_INTERNACIONAL:
+              prepaidFee.setFeeType(PrepaidMovementFeeType.PURCHASE_INT_FEE);
+              break;
+            case SUSCRIPCION_INTERNACIONAL:
+            case ANULA_SUSCRIPCION_INTERNACIONAL:
+              prepaidFee.setFeeType(PrepaidMovementFeeType.SUSCRIPTION_INT_FEE);
+              break;
+            default:
+              prepaidFee.setFeeType(PrepaidMovementFeeType.GENERIC_FEE);
+              break;
+          }
         }
-      }
 
-      // Insertar Fee en BD
-      getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidFee);
+        // Insertar Fee en BD
+        getPrepaidMovementEJBBean11().addPrepaidMovementFee(prepaidFee);
+      }
     }
   }
-  
+
   private void insertIntoAccoutingAndClearing(TecnocomReconciliationRegisterType tecnocomReconciliationRegisterType, PrepaidMovement10 prepaidMovement10) throws Exception {
     // Crear accounting
     PrepaidAccountingMovement prepaidAccountingMovement = new PrepaidAccountingMovement();
