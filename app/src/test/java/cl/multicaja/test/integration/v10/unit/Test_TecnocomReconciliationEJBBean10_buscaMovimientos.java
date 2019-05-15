@@ -1,6 +1,5 @@
 package cl.multicaja.test.integration.v10.unit;
 
-import cl.multicaja.core.exceptions.BadRequestException;
 import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.prepaid.model.v10.MovimientoTecnocom10;
 import cl.multicaja.prepaid.model.v10.OriginOpeType;
@@ -11,8 +10,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.bind.SchemaOutputResolver;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -149,18 +146,4 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     Assert.assertEquals("Deben tener mismo impfac", insertedMov.getImpFac().getValue().stripTrailingZeros(), foundMov.getImpFac().getValue().stripTrailingZeros());
     return true;
   }
-
-
-  @Test(expected = BadRequestException.class)
-  public void testBuscaMovimientoNoOK_f1() throws BadRequestException {
-    try {
-      List<MovimientoTecnocom10> movTec2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, 23L, OriginOpeType.SAT_ORIGIN, null, null, null, null, null);
-    } catch (BadRequestException e) {
-      Assert.assertEquals("Debe ser: ", e.getData()[0].getValue(), "tableName");
-      throw new BadRequestException();
-    } catch (Exception e) {
-      Assert.fail("No debe caer aca");
-    }
-  }
-
 }

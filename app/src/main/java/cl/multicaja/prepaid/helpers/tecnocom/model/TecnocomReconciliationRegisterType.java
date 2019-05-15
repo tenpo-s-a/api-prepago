@@ -1,6 +1,5 @@
 package cl.multicaja.prepaid.helpers.tecnocom.model;
 
-import cl.multicaja.prepaid.model.v10.TecnocomOperationType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.util.Map;

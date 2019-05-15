@@ -312,22 +312,6 @@ public class MovimientoTecnocom10 implements Serializable{
     this.contrato = contrato;
   }
 
-  public TecnocomOperationType getOperationType() {
-    TecnocomOperationType operationType;
-    switch (tipoFac){
-      case COMPRA_INTERNACIONAL:
-      case SUSCRIPCION_INTERNACIONAL:
-      case ANULA_COMPRA_INTERNACIONAL:
-      case ANULA_SUSCRIPCION_INTERNACIONAL:
-        operationType = TecnocomOperationType.PURCHASES;
-        break;
-      default:
-        operationType = TecnocomOperationType.REGULAR;
-        break;
-    }
-    return operationType;
-  }
-
   public PrepaidMovementType getMovementType() {
     PrepaidMovementType type = null;
     switch (this.getTipoFac()) {
