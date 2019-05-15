@@ -17,6 +17,8 @@ public enum PrepaidMovementStatus {
   ERROR_TIMEOUT_CONEXION,
   ERROR_TIMEOUT_RESPONSE,
   ERROR_TECNOCOM_REINTENTABLE,
+  NOTIFIED, // Utilizado para transacciones internacionales que llegan por el callback
+  AUTHORIZED, // Utilizado para transacciones internacionales que llegan en el archivo de Operaciones Diarias
   EXPIRED,
   NOT_EXECUTED;
 

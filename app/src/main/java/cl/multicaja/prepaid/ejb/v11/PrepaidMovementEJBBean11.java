@@ -23,8 +23,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.ejb.*;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -145,6 +147,56 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
     }
   }
 
+  @Override
+  public List<PrepaidMovement10> getPrepaidMovements(Long id, Long idMovimientoRef, Long idPrepaidUser, String idTxExterno, PrepaidMovementType tipoMovimiento,
+                                                     PrepaidMovementStatus estado, String cuenta, CodigoMoneda clamon, IndicadorNormalCorrector indnorcor, TipoFactura tipofac, Date fecfac, String numaut,
+                                                     ReconciliationStatusType estadoConSwitch, ReconciliationStatusType estadoConTecnocom, MovementOriginType origen, String pan, String codcom) throws Exception {
+    StringBuilder query = new StringBuilder();
+    query.append(String.format("SELECT * FROM %s.prp_movimiento WHERE ", getSchema()));
+    query.append(id != null ? String.format("id = %d AND ", id) : "");
+    query.append(idMovimientoRef != null ? String.format("id_movimiento_ref = %d AND ", idMovimientoRef) : "");
+    query.append(idPrepaidUser != null ? String.format("id_usuario = %d AND ", idPrepaidUser) : "");
+    query.append(idTxExterno != null ? String.format("id_tx_externo = '%s' AND ", idTxExterno) : "");
+    query.append(tipoMovimiento != null ? String.format("tipo_movimiento = '%s' AND ", tipoMovimiento.toString()) : "");
+    query.append(estado != null ? String.format("estado = '%s' AND ", estado.toString()) : "");
+    query.append(cuenta != null ? String.format("cuenta = '%s' AND ", cuenta) : "");
+    query.append(clamon != null ? String.format("clamon = %d AND ", clamon.getValue()) : "");
+    query.append(indnorcor != null ? String.format("indnorcor = %d AND ", indnorcor.getValue()) : "");
+    query.append(tipofac != null ? String.format("tipofac = %d AND ", tipofac.getCode()) : "");
+    if (fecfac != null) {
+      SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
+      String fecfacString = sdf.format(fecfac);
+      query.append(String.format("fecfac = to_date('%s', 'YYYYMMDD') AND ", fecfacString));
+    }
+    query.append(numaut != null ? String.format("numaut = '%s' AND ", numaut) : "");
+    query.append(estadoConSwitch != null ? String.format("estado_con_switch = '%s' AND ", estadoConSwitch.getValue()) : "");
+    query.append(estadoConTecnocom != null ? String.format("estado_con_tecnocom = '%s' AND ", estadoConTecnocom.getValue()) : "");
+    query.append(origen != null ? String.format("origen_movimiento = '%s' AND ", origen.getValue()) : "");
+    query.append(pan != null ? String.format("pan = '%s' AND ", pan) : "");
+    query.append(codcom != null ? String.format("codcom = '%s' AND ", codcom) : "");
+    query.append("1 = 1");
+
+    log.info(String.format("[getPrepaidMovements] Buscando movimiento [id: %d]", id));
+
+    try {
+      return getDbUtils().getJdbcTemplate().query(query.toString(), this.getMovementMapper());
+    } catch (EmptyResultDataAccessException ex) {
+      log.error(String.format("[getPrepaidMovements] Movimiento con id [%d] no existe", id));
+      return null;
+    }
+  }
+
+  public PrepaidMovement10 getPrepaidMovementForAut(Long idPrepaidUser, TipoFactura tipoFactura, String numaut, String codcom) throws Exception {
+    if (idPrepaidUser == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "idPrepaidUser"));
+    }
+    if (numaut == null) {
+      throw new BadRequestException(PARAMETRO_FALTANTE_$VALUE).setData(new KeyValue("value", "numaut"));
+    }
+    List<PrepaidMovement10> lst = this.getPrepaidMovements(null, null, idPrepaidUser, null, null, null, null, null, null, tipoFactura, null, numaut, null, null, null, null, codcom);
+    return lst != null && !lst.isEmpty() ? lst.get(0) : null;
+  }
+
   private RowMapper<PrepaidMovement10> getMovementMapper() {
     return (ResultSet rs, int rowNum) -> {
       PrepaidMovement10 movement = new PrepaidMovement10();
@@ -166,7 +218,7 @@ public class PrepaidMovementEJBBean11 extends PrepaidMovementEJBBean10 {
       movement.setCuenta(rs.getString("cuenta"));
       movement.setClamon(CodigoMoneda.fromValue(rs.getInt("clamon")));
       movement.setIndnorcor(IndicadorNormalCorrector.fromValue(rs.getInt("indnorcor")));
-      movement.setTipofac(TipoFactura.valueOfEnum(rs.getString("tipofac")));
+      movement.setTipofac(TipoFactura.valueOfEnumByCodeAndCorrector(rs.getInt("tipofac"),rs.getInt("indnorcor")));
       movement.setFecfac(rs.getDate("fecfac"));
       movement.setNumreffac(rs.getString("numreffac"));
       movement.setPan(rs.getString("pan"));

@@ -1,11 +1,11 @@
 package cl.multicaja.prepaid.model.v10;
 
+import cl.multicaja.prepaid.helpers.tecnocom.model.TecnocomReconciliationRegisterType;
 import cl.multicaja.tecnocom.constants.CodigoMoneda;
 import cl.multicaja.tecnocom.constants.TipoFactura;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 
@@ -46,7 +46,7 @@ public class MovimientoTecnocom10 implements Serializable{
   private String errorDetails;
   private String originOpe;
 
-
+  private TecnocomReconciliationRegisterType tipoReg;
 
   public Long getId() {
     return id;
@@ -312,22 +312,6 @@ public class MovimientoTecnocom10 implements Serializable{
     this.contrato = contrato;
   }
 
-  public TecnocomOperationType getOperationType() {
-    TecnocomOperationType operationType;
-    switch (tipoFac){
-      case COMPRA_INTERNACIONAL:
-      case SUSCRIPCION_INTERNACIONAL:
-      case ANULA_COMPRA_INTERNACIONAL:
-      case ANULA_SUSCRIPCION_INTERNACIONAL:
-        operationType = TecnocomOperationType.AU;
-        break;
-      default:
-        operationType = TecnocomOperationType.OP;
-        break;
-    }
-    return operationType;
-  }
-
   public PrepaidMovementType getMovementType() {
     PrepaidMovementType type = null;
     switch (this.getTipoFac()) {
@@ -356,6 +340,14 @@ public class MovimientoTecnocom10 implements Serializable{
         break;
     }
     return type;
+  }
+
+  public TecnocomReconciliationRegisterType getTipoReg() {
+    return tipoReg;
+  }
+
+  public void setTipoReg(TecnocomReconciliationRegisterType tipoReg) {
+    this.tipoReg = tipoReg;
   }
 
   public String getIdForResearch() {
