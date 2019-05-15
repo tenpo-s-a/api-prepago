@@ -3394,7 +3394,7 @@ public class Test_Reconciliation_FullTest extends TestBaseUnitAsync {
     registroTecnocom.setNumAut(prepaidMovement10.getNumaut());
     registroTecnocom.setTipoFac(prepaidMovement10.getTipofac());
     registroTecnocom.setIndNorCor(prepaidMovement10.getIndnorcor().getValue());
-    registroTecnocom.setPan(prepaidCard.getEncryptedPan());
+    registroTecnocom.setPan(prepaidCard.getHashedPan()); // Movimiento tecnocom guarda el hash pan en su columna pan.
     registroTecnocom.setCentAlta(prepaidMovement10.getCentalta());
     registroTecnocom.setClamone(CodigoMoneda.fromValue(prepaidMovement10.getClamone()));
     registroTecnocom.setCmbApli(new BigDecimal(prepaidMovement10.getCmbapli()));
