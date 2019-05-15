@@ -196,6 +196,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,foundMovement.getId());
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado NOT_OK", AccountingStatusType.NOT_OK, acc.getAccountingStatus());
 
     ClearingData10 liq = getPrepaidClearingEJBBean10().searchClearingDataByAccountingId(null, acc.getId());
@@ -235,7 +236,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (INITIAL y PENDING)
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
-
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
 
@@ -289,7 +290,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
-
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
 
@@ -355,7 +356,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
-
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getAccountingStatus());
 
@@ -390,7 +391,7 @@ public class Test_AutoReconciliation_FullTest extends TestBaseUnitAsync {
 
     // Verificar que exista en la tablas de contabilidad (acc y liq) en sus estados (PENDING y OK + fecha de conciliacion tiene que ser "ahora")
     AccountingData10 acc = getPrepaidAccountingEJBBean10().searchAccountingByIdTrx(null,prepaidMovement10.getId());
-
+    Assert.assertNotNull("Debe existir en accounting", acc);
     Assert.assertEquals("Debe tener estado PENDING", AccountingStatusType.PENDING, acc.getStatus());
     Assert.assertEquals("Debe tener estado OK", AccountingStatusType.OK, acc.getAccountingStatus());
     Assert.assertTrue("Debe tener fecha conciliacion", isRecentLocalDateTime(acc.getConciliationDate().toLocalDateTime(),5));
