@@ -149,18 +149,4 @@ public class Test_TecnocomReconciliationEJBBean10_buscaMovimientos extends TestB
     Assert.assertEquals("Deben tener mismo impfac", insertedMov.getImpFac().getValue().stripTrailingZeros(), foundMov.getImpFac().getValue().stripTrailingZeros());
     return true;
   }
-
-
-  @Test(expected = BadRequestException.class)
-  public void testBuscaMovimientoNoOK_f1() throws BadRequestException {
-    try {
-      List<MovimientoTecnocom10> movTec2 = getTecnocomReconciliationEJBBean10().buscaMovimientosTecnocom(null, 23L, OriginOpeType.SAT_ORIGIN, null, null, null, null, null);
-    } catch (BadRequestException e) {
-      Assert.assertEquals("Debe ser: ", e.getData()[0].getValue(), "tableName");
-      throw new BadRequestException();
-    } catch (Exception e) {
-      Assert.fail("No debe caer aca");
-    }
-  }
-
 }
