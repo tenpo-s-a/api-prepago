@@ -218,6 +218,7 @@ public class PrepaidCardEJBBean11 extends PrepaidCardEJBBean10 {
     }
   }
 
+  //Todo: Falta hacer los test de esta funcion
   @Override
   public PrepaidCard10 getPrepaidCardByPanHashAndAccountNumber(Map<String, Object> headers, String panHash, String accountNumber) {
     log.info(String.format("[getPrepaidCardByPanHash] Buscando tarjeta [panHash: %s] [account: %s]", panHash, accountNumber));
