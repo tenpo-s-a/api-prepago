@@ -76,7 +76,6 @@ public class Test_FeeService_calculateFees {
 
   // Test ignorado debido a que requiere que el servicio de fees esté arriba
   // Sólo se usó para verificar que FeeService llame correctamente al servicio
-  @Ignore
   @Test
   public void calculateFees_respondsOk_Integration() throws TimeoutException, BaseException {
     Fee fee = FeeService.getInstance().calculateFees(PrepaidMovementType.PURCHASE, CodigoMoneda.CHILE_CLP, 1000L);
